@@ -90,6 +90,7 @@
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
+    <module>trainStatusManager</module>
   </modules>
 
 </project>
