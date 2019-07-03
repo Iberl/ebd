@@ -40,7 +40,7 @@ public class BackwardSpline extends Spline {
 	
 
 		
-	public BackwardSpline(String id, int degree) {
+	public BackwardSpline(int degree,String id) {
 		this.id = id;
 		setdegree(degree);
 	}

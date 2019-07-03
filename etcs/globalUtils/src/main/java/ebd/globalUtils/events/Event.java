@@ -6,8 +6,6 @@ import java.util.List;
  * Superclass for all Events send over an EventBus
  * This is done to provide an easy way to listen to all events.
  *
- *
- *
  * @author Lars Schulze-Falck, Christopher Bernjus
  */
 public class Event {

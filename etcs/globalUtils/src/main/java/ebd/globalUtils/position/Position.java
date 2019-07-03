@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class represents a position for a train. It consists out of an absolut reference point, a direction and an increment.
@@ -107,7 +108,7 @@ public class Position {
      *
      * @author Lars Schulze-Falck
      */
-    public Double totalDistanceToPreviousPosition(Position prevPosition) throws PositionReferenzException {
+    public Double totalDistanceToPreviousPosition(@NotNull Position prevPosition) throws PositionReferenzException {
     	return totalDistanceToPastLocation(prevPosition.getLocation().getId()) - prevPosition.getIncrement();
     }
     
