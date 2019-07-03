@@ -164,7 +164,7 @@ public class BreakingCurveCalculator {
      * @param staticSpeedProfil
      * 		{@link StaticSpeedProfil}
      * @param gradientProfil
-     * 		A profile that contains distances in [m] and acceleration in [m/s²]
+     * 		A profile that contains distances in [m] and acceleration in [m/s^2]
      * @param endOfMoveAuth
      * 		Distance to the EMA
      * @param speedAtEndOfMoveAut
