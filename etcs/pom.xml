@@ -90,6 +90,8 @@
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
+    <module>messageReceiver</module>
+    <module>messageSender</module>
   </modules>
 
 </project>
