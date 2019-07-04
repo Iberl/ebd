@@ -3,6 +3,7 @@ package ebd.trainData;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -15,32 +16,38 @@ public class TrainDataVolatile {
     /**
      * The current {@link Position}
      */
-    protected volatile Position currentPosition;
+    @Nullable
+    protected volatile Position currentPosition = null;
 
     /**
      * The current speed of the train in [m/s]
      */
-    protected volatile double currentSpeed;
+    @Nullable
+    protected volatile Double currentSpeed = null;
 
     /**
      * The current {@link ebd.messageLibrary.util.ETCSVariables#M_MODE}
      */
-    protected volatile int M_MODE;
+    @Nullable
+    protected volatile Integer M_MODE = null;
 
     /**
      * All locations that where crossed in order (last entry == last crossed location)
      */
-    protected volatile List<Location> previousLocations;
+    @Nullable
+    protected volatile List<Location> previousLocations = null;
 
     /**
      * The current breaking mode
      */
-    protected volatile String currentBreakingMode;
+    @Nullable
+    protected volatile String currentBreakingMode = null;
 
     /**
      * The current breaking power
      */
-    protected volatile ForwardSpline currentBreakingPower;
+    @Nullable
+    protected volatile ForwardSpline currentBreakingPower = null;
 
     //Getter and setter
 
