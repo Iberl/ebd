@@ -1,5 +1,8 @@
 package ebd.trainData.util.dataConstructs;
 
+/**
+ * This class represents a Breaking Method. Every breaking method has different break weights, break weight measures the abillity to break.
+ */
 public class Breakmethod {
 
     private String name;
@@ -10,6 +13,7 @@ public class Breakmethod {
     private int breakweight;
 
     /**
+     * Constructor to set the breaking method.
      *
      * @param name Name of the breakmethod
      *
@@ -26,7 +30,6 @@ public class Breakmethod {
     }
 
     /**
-     *
      * @return breakweight in [kg]
      */
     public int getBreakweight() {

@@ -150,9 +150,10 @@ public class Locomotive extends TrainCar {
 
 
     /**
+     * Sets the Locomotiv from an JSONobject.
      *
-     * @param jsonObject
-     * @throws TDBadDataException
+     * @param jsonObject containing one train car of the car type "Triebfahrzeug"
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
     public Locomotive(JSONObject jsonObject) throws TDBadDataException {
         super(jsonObject);
@@ -162,7 +163,12 @@ public class Locomotive extends TrainCar {
         else throw new TDBadDataException("The key 'Typ' was missing in the trainCar data send by the tool TrainConfigurator");
     }
 
-
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one JSONObject of the type "Typ"
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
 
         Set<String> jsonObjectKeySet = jsonObject.keySet();

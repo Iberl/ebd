@@ -16,12 +16,16 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * This class contains the permanent information of a train. These values can only be set once per train.
+ * The data for this class is loaded from the "Zugkonfigurator" tool, a web app. It can be reached by a REST interface.
  * @author Lars Schulze-Falck
+ *
+ * TODO Change Int/Long to Double where approbriate
  */
 public class TrainDataPerma {
 
     /**
-     * The internal id of the Train
+     * The internal ETCS-ID of the Train
      */
     @NotNull
     private String id = "";
@@ -109,12 +113,40 @@ public class TrainDataPerma {
     List<TrainCar> trainCarList = new ArrayList<>();
 
 
-
-
-    public TrainDataPerma(String trainConfiguraterIP, String trainID) throws IOException, ParseException, TDBadDataException {
-        setInstance(trainConfiguraterIP,trainID);
+    /**
+     * Sets the class from the data found in the tool "Zugkonfigurator", a web app.
+     *
+     *
+     * @param trainConfiguratorIP The IP to the "Zugkonfigurator" web app
+     *
+     * @param trainID The ETCS-ID of the Train, found in trainconfigurator
+     *
+     * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
+     *
+     * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
+     *
+     * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
+     *                              data in the response.
+     */
+    public TrainDataPerma(String trainConfiguratorIP, String trainID) throws IOException, ParseException, TDBadDataException {
+        setInstance(trainConfiguratorIP,trainID);
     }
 
+
+    /**
+     * Sets the instance by parsing the JSONObject that is returned from the app.
+     *
+     * @param trainConfiguratorIP The IP to the "Zugkonfigurator" web app
+     *
+     * @param trainID The ETCS-ID of the Train
+     *
+     * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
+     *
+     * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
+     *
+     * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
+     *                              data in the response.
+     */
     private void setInstance(String trainConfiguratorIP, String trainID) throws IOException, ParseException, TDBadDataException {
         /*
         Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
@@ -130,8 +162,11 @@ public class TrainDataPerma {
         connection.setRequestMethod("GET");
         int responseCode = connection.getResponseCode();
 
-        if (responseCode != 200){
-            throw new TDBadDataException("The train " + trainID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
+        if (responseCode == 400){
+            throw new TDBadDataException("The train " + trainID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
+        }
+        else if(responseCode != 200){
+            throw new IOException("The train " + trainID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
         }
 
         /*

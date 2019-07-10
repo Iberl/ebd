@@ -7,13 +7,20 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a force factor table, which shows the force of the engine while driving and breaking
+ */
 public class ForceFactorTable {
 
     private List<ForceFactorTableRow> forceFactorTableRowList;
 
     /**
+     * Constructor setting the List of {@link ForceFactorTableRow} from an JSONobject.
+     * Should the table be empty, the list is empty.
      *
-     * @param jsonObject The JSONObject containing the "Kraftfaktortabelle"
+     * @param jsonObject The JSONObject containing one force factor table
+     *
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
     public ForceFactorTable(JSONObject jsonObject) throws TDBadDataException {
         forceFactorTableRowList = new ArrayList<>();
@@ -24,6 +31,12 @@ public class ForceFactorTable {
         return forceFactorTableRowList;
     }
 
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one force factor table
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
         JSONArray jsonArray;
 

@@ -1,7 +1,8 @@
 package ebd.trainData.util.dataConstructs;
 
 /**
- * Represents a breaksystem. All speeds are in [km/h] / 5.
+ * Represents a break system. A breaking system has minimum and maximum speed at which it can be used.
+ * All speeds are in [km/h] / 5.
  */
 public class Breaksystem {
 
@@ -18,6 +19,7 @@ public class Breaksystem {
     private int maxSpeed;
 
     /**
+     * Constructor setting a break system.
      *
      * @param name The name of the breaksystem
      *

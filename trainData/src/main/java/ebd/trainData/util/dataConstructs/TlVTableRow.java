@@ -5,6 +5,9 @@ import org.json.simple.JSONObject;
 
 import java.util.Set;
 
+/**
+ * This class represents one row in a {@link TlVTable}
+ */
 public class TlVTableRow {
 
     /**
@@ -13,50 +16,47 @@ public class TlVTableRow {
     private double speed;
 
     /**
-     * minimum power //TODO units
+     * minimum power in [kW]
      */
     private double minPower;
 
     /**
-     * maxmum power //TODO units
+     * maxmum power in [kW]
      */
     private double maxPower;
 
     /**
-     * K1 factor
+     * K1 factor in [kN]
      */
     private double k1Factor;
 
     /**
-     * K2 factor
+     * K2 factor in [s/m]
      */
     private double k2Factor;
 
     /**
-     * K3 factor
+     * K3 factor in [s/m]
      */
     private double k3Factor;
 
     /**
+     * Constructor setting the TlVTableRow from an JSONObject
      *
-     * @param speed Speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
-     * @param minPower
-     * @param maxPower
-     * @param k1Factor
-     * @param k2Factor
-     * @param k3Factor
+     * @param jsonObject containing one tlv table row
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
-    public TlVTableRow(double speed, double minPower, double maxPower, double k1Factor, double k2Factor, double k3Factor) {
-        this.speed = speed;
-        this.minPower = minPower;
-        this.maxPower = maxPower;
-        this.k1Factor = k1Factor;
-        this.k2Factor = k2Factor;
-        this.k3Factor = k3Factor;
+    public TlVTableRow(JSONObject jsonObject) throws TDBadDataException {
+        fillFromJSON(jsonObject);
     }
 
-    public TlVTableRow(JSONObject jsonObject) throws TDBadDataException {
-
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one tlv table row
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
+    private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("Geschwindigkeit")){
@@ -95,29 +95,43 @@ public class TlVTableRow {
      */
 
     /**
-     *
      * @return Speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
      */
     public double getSpeed() {
         return speed;
     }
 
+    /**
+     * @return minimum power in [kW]
+     */
     public double getMinPower() {
         return minPower;
     }
 
+    /**
+     * @return maxmum power in [kW]
+     */
     public double getMaxPower() {
         return maxPower;
     }
 
+    /**
+     * @return K1 factor in [kN]
+     */
     public double getK1Factor() {
         return k1Factor;
     }
 
+    /**
+     * @return K2 factor in [s/m]
+     */
     public double getK2Factor() {
         return k2Factor;
     }
 
+    /**
+     * @return K3 factor in [s/m]
+     */
     public double getK3Factor() {
         return k3Factor;
     }

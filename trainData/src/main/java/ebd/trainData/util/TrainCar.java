@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * This class represents a TrainCar. It contains the information that is common to all train cars and functions as
+ * super class for these.
  * @author Lars Schulze-Falck
  */
 public class TrainCar {
@@ -129,12 +131,22 @@ public class TrainCar {
      */
     private int tunnelfactor;
 
-
+    /**
+     * Sets the TrainCar from an JSONobject.
+     *
+     * @param jsonObject containing one train car of any car type
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     public TrainCar(JSONObject jsonObject) throws TDBadDataException {
         setInstance(jsonObject);
     }
 
-
+    /**
+     * Parses the JSONObject.
+     *
+     * @param jsonObject containing one train car
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void setInstance(JSONObject jsonObject) throws TDBadDataException {
 
         Set<String> jsonObjectKeySet = jsonObject.keySet();

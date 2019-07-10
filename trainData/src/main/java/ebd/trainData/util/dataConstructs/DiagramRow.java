@@ -5,20 +5,24 @@ import org.json.simple.JSONObject;
 
 import java.util.Set;
 
+/**
+ * This class represents one row in a {@link Diagram}. It contains data describing the efficiency of a engine.
+ * Every row is valid between the minimum and maximum speed.
+ */
 public class DiagramRow {
 
     /**
-     * p0
+     * p0 factor
      */
     private double p0;
 
     /**
-     * p1
+     * p1 factor
      */
     private double p1;
 
     /**
-     * p2
+     * p2 factor
      */
     private double p2;
 
@@ -33,16 +37,26 @@ public class DiagramRow {
     private double maxSpeed;
 
     /**
-     * efficency
+     * efficency in percent [%]
      */
     private double efficency;
 
-
+    /**
+     * Constructor setting the diagram row
+     *
+     * @param jsonObject containing one diagram row
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     public DiagramRow(JSONObject jsonObject) throws TDBadDataException {
         fillFromJSON(jsonObject);
     }
 
-
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one diagram row
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
 
         Set<String> jsonObjectKeySet = jsonObject.keySet();

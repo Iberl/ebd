@@ -7,15 +7,33 @@ import org.json.simple.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a Diagram showing the efficiency of a engine.
+ * The data is saved in a List of {@link DiagramRow}
+ */
 public class Diagram {
 
     List<DiagramRow> diagramRows;
 
+    /**
+     * Constructor setting the Diagram out of a jsonObject. Should the Diagram be empty, this Diagram only contains a
+     * empty list.
+     *
+     * @param jsonObject {@link JSONObject} containing one full Diagram
+     *
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     public Diagram(JSONObject jsonObject) throws TDBadDataException {
         diagramRows = new ArrayList<>();
         fillFromJSON(jsonObject);
     }
 
+    /**
+     * Parses the jsonObject. The list of digramRows stays empty should the diagram be empty
+     *
+     * @param jsonObject containing one diagram
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
         JSONArray jsonArray;
 

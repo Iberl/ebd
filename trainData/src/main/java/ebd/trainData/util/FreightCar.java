@@ -5,6 +5,7 @@ import org.json.simple.JSONObject;
 
 import java.util.Set;
 
+
 public class FreightCar extends TrainCar {
 
     /**
@@ -79,9 +80,10 @@ public class FreightCar extends TrainCar {
 
 
     /**
+     * Sets the FreightCar from an JSONobject.
      *
-     * @param jsonObject
-     * @throws TDBadDataException
+     * @param jsonObject containing one train car of the car type "Güterwagen"
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
     public FreightCar(JSONObject jsonObject) throws TDBadDataException {
         super(jsonObject);
@@ -91,6 +93,12 @@ public class FreightCar extends TrainCar {
         else throw new TDBadDataException("The key 'Typ' was missing in the trainCar data send by the tool TrainConfigurator");
     }
 
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one JSONObject of the type "Typ"
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
 
         Set<String> jsonObjectKeySet = jsonObject.keySet();

@@ -1,6 +1,7 @@
 package ebd.trainData.tests;
 
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.location.Location;
 import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
@@ -27,11 +28,11 @@ class TrainDataTest {
 
         EventBus.getDefault().post(trainDataChangeEvent);
 
-        trainDataChangeEvent = new TrainDataChangeEvent("main", new ArrayList<>(), "currentSpeed", 10);
+        trainDataChangeEvent = new TrainDataChangeEvent("main", new ArrayList<>(), "currentSpeed", 10d);
 
         EventBus.getDefault().post(trainDataChangeEvent);
 
-        trainDataChangeEvent = new TrainDataChangeEvent("main", new ArrayList<>(), "currentSpeed", 15);
+        trainDataChangeEvent = new TrainDataChangeEvent("main", new ArrayList<>(), "previousLocations", new ArrayList<Location>());
 
         EventBus.getDefault().post(trainDataChangeEvent);
 

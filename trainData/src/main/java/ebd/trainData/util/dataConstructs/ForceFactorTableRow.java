@@ -8,22 +8,22 @@ import java.util.Set;
 public class ForceFactorTableRow {
 
     /**
-     * Electrical equipment //TODO units
+     * Double value representing a electrical equipment type
      */
     private double electricalEquipment;
 
     /**
-     * a0
+     * Rolling resistance a0 in [kN]
      */
     private double a0;
 
     /**
-     * a1
+     * Rolling resistance a1 in [kN*h/km]
      */
     private double a1;
 
     /**
-     * a2
+     * Rolling resistance a2 in [kN*(h/km)^2]
      */
     private double a2;
 
@@ -37,27 +37,11 @@ public class ForceFactorTableRow {
      */
     private double maxSpeed;
 
-    /**
-     *
-     * @param electricalEquipment
-     * @param a0
-     * @param a1
-     * @param a2
-     * @param minSpeed minimum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
-     * @param maxSpeed maximum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
-     */
-    public ForceFactorTableRow(double electricalEquipment, double a0, double a1, double a2, double minSpeed, double maxSpeed) {
-        this.electricalEquipment = electricalEquipment;
-        this.a0 = a0;
-        this.a1 = a1;
-        this.a2 = a2;
-        this.minSpeed = minSpeed;
-        this.maxSpeed = maxSpeed;
-    }
 
     /**
+     * Constructor setting the {@link ForceFactorTableRow} out of a JSONObject
      *
-     * @param jsonObject Containing one "Kraftfaktorzeile"
+     * @param jsonObject JSONObject containing one ForceFactorRow
      */
     public  ForceFactorTableRow(JSONObject jsonObject) throws TDBadDataException {
 
@@ -94,18 +78,30 @@ public class ForceFactorTableRow {
         else throw new TDBadDataException("The key 'bisGeschwindigkeit' was missing in the trainCar data send by the tool TrainConfigurator");
     }
 
+    /**
+     * @return Double value representing a electrical equipment type
+     */
     public double getElectricalEquipment() {
         return electricalEquipment;
     }
 
+    /**
+     * @return Rolling resistance a0 in [kN]
+     */
     public double getA0() {
         return a0;
     }
 
+    /**
+     * @return Rolling resistance a1 in [kN*h/km]
+     */
     public double getA1() {
         return a1;
     }
 
+    /**
+     * @return Rolling resistance a2 in [kN*(h/km)^2]
+     */
     public double getA2() {
         return a2;
     }

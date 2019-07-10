@@ -8,6 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
+ * This class contains the volatile train data.
+ * On initialisation of this class, this data is not known, so all values are set to {@code null}
+ *
  * @author Lars Schulze-Falck
  */
 public class TrainDataVolatile {
@@ -48,6 +51,9 @@ public class TrainDataVolatile {
      */
     @Nullable
     protected volatile ForwardSpline currentBreakingPower = null;
+
+    //Constructor
+    public TrainDataVolatile(){}
 
     //Getter and setter
 

@@ -11,27 +11,42 @@ import java.util.Set;
 public class TlVTable {
 
     /**
-     * limits TODO: units
+     * double value representing limits //TODO: units
      */
     private double limits;
 
     /**
-     * K2 factor
+     * K2 factor in [s/m]
      */
     private double k2Factor;
 
     private List<TlVTableRow> tlVTableRowList;
 
 
-
+    /**
+     * Constructor setting the TlVTable from a {@link JSONObject} containg one TlVTable.
+     *
+     * @param jsonObject containing one tlv table
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     public TlVTable(JSONObject jsonObject) throws TDBadDataException {
         this.tlVTableRowList = new ArrayList<>();
         fillFromJSON(jsonObject);
     }
 
+    /**
+     * Parses the jsonObject. The list of tlvTableRows stays empty should the tlv table be empty
+     *
+     * @param jsonObject containing one tlv table
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
 
         Set<String> jsonObjectKeySet = jsonObject.keySet();
+
+        if (jsonObjectKeySet.isEmpty()){
+            return;
+        }
 
         if (jsonObjectKeySet.contains("Einschraenkung")){
             this.limits = (Double)jsonObject.get("Einschraenkung");
@@ -53,11 +68,16 @@ public class TlVTable {
         else throw new TDBadDataException("The key 'Zeilen' was missing in the trainCar data send by the tool TrainConfigurator");
     }
 
-
+    /**
+     * @return double value representing limits //TODO: units
+     */
     public double getLimits() {
         return limits;
     }
 
+    /**
+     * @return K2 factor in [s/m]
+     */
     public double getK2Factor() {
         return k2Factor;
     }

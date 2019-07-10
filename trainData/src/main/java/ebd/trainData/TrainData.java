@@ -27,6 +27,15 @@ public class TrainData {
     private List<String> exceptionTargets = new ArrayList<>();
     private List<String> eventTargets = new ArrayList<>();
 
+    /**
+     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class
+     *
+     * @param eventBus The local {@link EventBus} of the train
+     *
+     * @param trainConfiguratorIP The ip to the trainconfigurator tool
+     *
+     * @param trainID the ETCS-ID of the train
+     */
     public TrainData(EventBus eventBus, String trainConfiguratorIP, String trainID){
         this.eventBus = eventBus;
         this.eventBus.register(this);
@@ -44,6 +53,12 @@ public class TrainData {
         this.eventBus.postSticky(trainDataPerma);
     }
 
+    /**
+     * This is the listener to the {@link TrainDataChangeEvent}.
+     * It takes the included data and feeds it to the {@link TrainDataVolatile}
+     *
+     * @param trainDataChangeEvent
+     */
     @Subscribe
     public void changeInTrainData(TrainDataChangeEvent trainDataChangeEvent){
 
