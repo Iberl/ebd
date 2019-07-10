@@ -1,5 +1,7 @@
 package ebd.globalUtils.events;
 
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+
 import java.util.List;
 
 /**
@@ -9,8 +11,12 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
+	/** The ExceptionEventTyp*/
+	public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
+
 	/** The Event causing an Exception */
 	public Event cause;
+
 	/** The thrown exception */
 	public Exception exception;
 
