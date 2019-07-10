@@ -1,6 +1,7 @@
 package ebd.globalUtils.events;
 
 import ebd.globalUtils.events.util.ExceptionEventTyp;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -11,13 +12,23 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
-	/** The ExceptionEventTyp*/
+	/**
+	 * The ExceptionEventTyp, defaults to CRITICAL
+	 */
+	@NotNull
 	public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
 
-	/** The Event causing an Exception */
+	/**
+	 * The Event causing an Exception. If there is not a Event causing the exception,
+	 * use a {@link ebd.globalUtils.events.util.NotCausedByAEvent}
+	 */
+	@NotNull
 	public Event cause;
 
-	/** The thrown exception */
+	/**
+	 * The exception that was thrown
+	 */
+	@NotNull
 	public Exception exception;
 
 	/**
