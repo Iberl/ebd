@@ -50,4 +50,26 @@ public class ExceptionEvent extends Event {
 		this.exception = exception;
 	}
 
+	/**
+	 *
+	 * @param source
+	 *          ID from the module the event was sent by
+	 *          TODO: Define Format for IDs
+	 * @param targets
+	 *          ID from all modules the event is adressed to
+	 *          TODO: Define Format for IDs
+	 * @param cause
+	 *          The Event causing an Exception
+	 * @param exception
+	 *          The thrown exception
+	 * @param exceptionEventTyp
+	 * 			The fitting {@link ExceptionEventTyp}
+	 */
+	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+		super(source, targets);
+		this.cause = cause;
+		this.exception = exception;
+		this.exceptionEventTyp = exceptionEventTyp;
+	}
+
 }
