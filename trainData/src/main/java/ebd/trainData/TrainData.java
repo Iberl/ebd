@@ -2,6 +2,8 @@ package ebd.trainData;
 
 
 import ebd.globalUtils.events.trainData.*;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -39,16 +41,16 @@ public class TrainData {
     public TrainData(EventBus eventBus, String trainConfiguratorIP, String trainID){
         this.eventBus = eventBus;
         this.eventBus.register(this);
-        this.exceptionTargets.add("tsm;");
+        this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma(trainConfiguratorIP, trainID);
         } catch (IOException e) {
-            e.printStackTrace();    //TODO Exceptionhandeling
+            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
         } catch (ParseException e) {
-            e.printStackTrace();
+            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
         } catch (TDBadDataException e) {
-            e.printStackTrace();
+            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e));
         }
         this.eventBus.postSticky(trainDataPerma);
     }
@@ -71,13 +73,13 @@ public class TrainData {
                     eventBus.postSticky(new NewTrainDataVolatileEvent("ttd;", eventTargets, trainDataVolatile));
 
                 } catch (IllegalAccessException e) {
-                    String msg = String.format("Field %s was not accessible. ", trainDataChangeEvent.fieldName);
+                    String msg = String.format("Field %s was not accessible. %n", trainDataChangeEvent.fieldName);
                     msg += " " + e.getMessage();
                     IllegalAccessException exception = new IllegalAccessException(msg);
                     exception.setStackTrace(e.getStackTrace());
                     eventBus.post(new TrainDataExceptionEvent("ttd;", exceptionTargets, trainDataChangeEvent, exception));
                 } catch (IllegalArgumentException e){
-                    String msg = String.format("Passed fieldValue with type %s did not match field %s with the type %s.", trainDataChangeEvent.fieldValue.getClass(), field.getName(), field.getType());
+                    String msg = String.format("Passed fieldValue with type %s did not match field %s with the type %s.%n", trainDataChangeEvent.fieldValue.getClass(), field.getName(), field.getType());
                     msg += " " + e.getMessage();
                     IllegalArgumentException iAE = new IllegalArgumentException(msg);
                     iAE.setStackTrace(e.getStackTrace());
