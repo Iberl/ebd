@@ -16,7 +16,7 @@ public class LocomotiveTrain extends TrainCar {
     /**
      * UIC ID
      */
-    private long uicID;
+    private int uicID;
 
     /**
      * Type of tilting technology
@@ -102,37 +102,37 @@ public class LocomotiveTrain extends TrainCar {
     /**
      * Cross-section in [m^2]
      */
-    private Double crossSection;
+    private double crossSection;
 
     /**
      * f-Value from wind tunnel experiments in [m^2]
      */
-    private Double fValue;
+    private double fValue;
 
     /**
      * b-Value
      */
-    private Double bValue;
+    private double bValue;
 
     /**
      * Resistance coefficient
      */
-    private Double resistanceCoefficient;
+    private double resistanceCoefficient;
 
     /**
      * Roll resistance coefficient
      */
-    private Double rollResistanceCoef;
+    private double rollResistanceCoef;
 
     /**
      * Damping resistance coefficient
      */
-    private Double dampingResistanceCoef;
+    private double dampingResistanceCoef;
 
     /**
      * Drag resistance coefficient
      */
-    private Double dragResistanceCoef;
+    private double dragResistanceCoef;
 
     /**
      * Efficiency of the drive
@@ -195,7 +195,7 @@ public class LocomotiveTrain extends TrainCar {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("UicBaureihenbezeichnung")){
-            this.uicID = (Long)jsonObject.get("UicBaureihenbezeichnung");
+            this.uicID = ((Long)jsonObject.get("UicBaureihenbezeichnung")).intValue();
         }
         else throw new TDBadDataException("The key 'UicBaureihenbezeichnung' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -380,7 +380,7 @@ public class LocomotiveTrain extends TrainCar {
     Getters
      */
 
-    public long getUicID() { return uicID; }
+    public int getUicID() { return uicID; }
 
     public String getTiltingTechnology() { return tiltingTechnology; }
 
@@ -444,31 +444,31 @@ public class LocomotiveTrain extends TrainCar {
         return driveWeelDiameter;
     }
 
-    public Double getCrossSection() {
+    public double getCrossSection() {
         return crossSection;
     }
 
-    public Double getfValue() {
+    public double getfValue() {
         return fValue;
     }
 
-    public Double getbValue() {
+    public double getbValue() {
         return bValue;
     }
 
-    public Double getResistanceCoefficient() {
+    public double getResistanceCoefficient() {
         return resistanceCoefficient;
     }
 
-    public Double getRollResistanceCoef() {
+    public double getRollResistanceCoef() {
         return rollResistanceCoef;
     }
 
-    public Double getDampingResistanceCoef() {
+    public double getDampingResistanceCoef() {
         return dampingResistanceCoef;
     }
 
-    public Double getDragResistanceCoef() {
+    public double getDragResistanceCoef() {
         return dragResistanceCoef;
     }
 

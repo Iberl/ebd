@@ -30,7 +30,7 @@ public class TrainCar {
     /**
      * The breaking weight resulting from the chosen break method. In [kg]
      */
-    private Long chosenBreakingWeight;
+    private int chosenBreakingWeight;
 
     /**
      * The chosen break method. (P, G, P+G, etc.)
@@ -44,7 +44,7 @@ public class TrainCar {
     /**
      * Type id
      */
-    private long typeID;
+    private int typeID;
 
     /**
      * Axle equation
@@ -112,7 +112,7 @@ public class TrainCar {
     private boolean epBreak;
 
     /**
-     * Highest allowed speed. In [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * Highest allowed speed. In [km/h]
      */
     private int maxSpeed;
 
@@ -168,7 +168,7 @@ public class TrainCar {
         else throw new TDBadDataException("The key 'gewaehlteBremsstellungName' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("gewaehlteBremsstellungGewicht")){
-            this.chosenBreakingWeight = (Long)jsonObject.get("gewaehlteBremsstellungGewicht");
+            this.chosenBreakingWeight = ((Long)jsonObject.get("gewaehlteBremsstellungGewicht")).intValue();
         }
         else throw new TDBadDataException("The key 'gewaehlteBremsstellungGewicht' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -185,7 +185,7 @@ public class TrainCar {
         Set<String> typeJSONObjectKeySet = typeJSONObject.keySet();
 
         if (typeJSONObjectKeySet.contains("Id")){
-            this.typeID = (Long)typeJSONObject.get("Id");
+            this.typeID = ((Long)typeJSONObject.get("Id")).intValue();
         }
         else throw new TDBadDataException("The key 'Id' was missing in the trainType data send by the tool TrainConfigurator");
 
@@ -263,7 +263,7 @@ public class TrainCar {
 
         if (typeJSONObjectKeySet.contains("Hoechstgeschwindigkeit")){
             Long tempLong = (Long) typeJSONObject.get("Hoechstgeschwindigkeit");
-            this.maxSpeed = tempLong.intValue() / 5;
+            this.maxSpeed = tempLong.intValue();
         }
         else throw new TDBadDataException("The key 'Hoechstgeschwindigkeit' was missing in the trainType data send by the tool TrainConfigurator");
 
@@ -320,7 +320,7 @@ public class TrainCar {
             }
             else throw new TDBadDataException("The key 'maxGeschwindigkeitsbereich' was missing in the trainType data send by the tool TrainConfigurator");
 
-            breaksystemList.add(new Breaksystem(name,minSpeed / 5,maxSpeed / 5)); //For consistent speed storage in [km/h] / 5
+            breaksystemList.add(new Breaksystem(name,minSpeed,maxSpeed));
         }
 
         return breaksystemList;
@@ -374,7 +374,7 @@ public class TrainCar {
      *
      * @return chosen breaking weight in [kg]
      */
-    public Long getChosenBreakingWeight() {
+    public int getChosenBreakingWeight() {
         return chosenBreakingWeight;
     }
 
@@ -382,7 +382,7 @@ public class TrainCar {
         return chosenBreakingMethod;
     }
 
-    public long getTypeID() {
+    public int getTypeID() {
         return typeID;
     }
 
@@ -456,7 +456,7 @@ public class TrainCar {
 
     /**
      *
-     * @return Highest allowed speed. In [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @return Highest allowed speed. In [km/h]
      */
     public int getMaxSpeed() {
         return maxSpeed;

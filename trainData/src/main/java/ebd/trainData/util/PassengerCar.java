@@ -13,7 +13,7 @@ public class PassengerCar extends TrainCar {
     /**
      * The UIC Car Number descriping the type of car
      */
-    private long uicCarNumber;
+    private int uicCarNumber;
 
     /**
      * The kind of the car
@@ -73,12 +73,12 @@ public class PassengerCar extends TrainCar {
     /**
      * f-Value from wind tunnel experiments in [m^2]
      */
-    private Double fValue;
+    private double fValue;
 
     /**
      * b-Value
      */
-    private Double bValue;
+    private double bValue;
 
     /**
      * Sets the PassengerCar from an JSONobject.
@@ -105,7 +105,7 @@ public class PassengerCar extends TrainCar {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("UicWagennummer")){
-            this.uicCarNumber = (Long)jsonObject.get("UicWagennummer");
+            this.uicCarNumber = ((Long)jsonObject.get("UicWagennummer")).intValue();
         }
         else throw new TDBadDataException("The key 'UicWagennummer' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -183,7 +183,7 @@ public class PassengerCar extends TrainCar {
     Getter
      */
 
-    public long getUicCarNumber() {
+    public int getUicCarNumber() {
         return uicCarNumber;
     }
 

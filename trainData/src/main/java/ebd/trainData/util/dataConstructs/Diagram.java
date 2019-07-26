@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Diagram {
 
-    List<DiagramRow> diagramRows;
+    private List<DiagramRow> diagramRows;
 
     /**
      * Constructor setting the Diagram out of a jsonObject. Should the Diagram be empty, this Diagram only contains a

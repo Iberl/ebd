@@ -27,12 +27,12 @@ public class DiagramRow {
     private double p2;
 
     /**
-     * minimum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * minimum speed in [km/h]
      */
     private double minSpeed;
 
     /**
-     * maximum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * maximum speed in [km/h]
      */
     private double maxSpeed;
 
@@ -77,12 +77,12 @@ public class DiagramRow {
         else throw new TDBadDataException("The key 'p2' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("abGeschwindigkeit")){
-            this.minSpeed = (Double)jsonObject.get("abGeschwindigkeit") / 5;
+            this.minSpeed = (Double)jsonObject.get("abGeschwindigkeit");
         }
         else throw new TDBadDataException("The key 'abGeschwindigkeit' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("bisGeschwindigkeit")){
-            this.maxSpeed = (Double)jsonObject.get("bisGeschwindigkeit") / 5;
+            this.maxSpeed = (Double)jsonObject.get("bisGeschwindigkeit");
         }
         else throw new TDBadDataException("The key 'bisGeschwindigkeit' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -109,7 +109,7 @@ public class DiagramRow {
     }
     /**
      *
-     * @return minimum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @return minimum speed in [km/h]
      */
     public double getMinSpeed() {
         return minSpeed;
@@ -117,7 +117,7 @@ public class DiagramRow {
 
     /**
      *
-     * @return maximum speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @return maximum speed in [km/h]
      */
     public double getMaxSpeed() {
         return maxSpeed;

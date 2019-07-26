@@ -9,12 +9,12 @@ public class Breaksystem {
     private String name;
 
     /*
-    Minimum speed in [km/h] / 5 see {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+    Minimum speed in [km/h]
      */
     private int minSpeed;
 
     /*
-    Maximum speed in [km/h] / 5 see {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+    Maximum speed in [km/h]
      */
     private int maxSpeed;
 
@@ -40,7 +40,7 @@ public class Breaksystem {
 
     /**
      *
-     * @return The minimum speed of the breaksystem in [km/h] / 5
+     * @return The minimum speed of the breaksystem in [km/h]
      */
     public int getMinSpeed() {
         return minSpeed;
@@ -48,7 +48,7 @@ public class Breaksystem {
 
     /**
      *
-     * @return The maximum speed of the breaksystem in [km/h] / 5
+     * @return The maximum speed of the breaksystem in [km/h]
      */
     public int getMaxSpeed() {
         return maxSpeed;

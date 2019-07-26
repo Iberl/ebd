@@ -34,17 +34,17 @@ public class TrainData {
      *
      * @param eventBus The local {@link EventBus} of the train
      *
-     * @param trainConfiguratorIP The ip to the trainconfigurator tool
+     * @param trainConfiguratorURL The ip to the trainconfigurator tool
      *
      * @param trainID the ETCS-ID of the train
      */
-    public TrainData(EventBus eventBus, String trainConfiguratorIP, String trainID){
+    public TrainData(EventBus eventBus, String trainConfiguratorURL, String trainID){
         this.eventBus = eventBus;
         this.eventBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
-            this.trainDataPerma = new TrainDataPerma(trainConfiguratorIP, trainID);
+            this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
         } catch (IOException e) {
             eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
         } catch (ParseException e) {

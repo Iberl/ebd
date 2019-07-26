@@ -11,7 +11,7 @@ public class FreightCar extends TrainCar {
     /**
      * The UIC Car Number descriping the type of car
      */
-    private long uicCarNumber;
+    private int uicCarNumber;
 
     /**
      * The kind of the car
@@ -76,7 +76,7 @@ public class FreightCar extends TrainCar {
     /**
      * Roll resistance coefficient
      */
-    private Double rollResistanceCoef;
+    private double rollResistanceCoef;
 
 
     /**
@@ -104,7 +104,7 @@ public class FreightCar extends TrainCar {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("UicWagennummer")){
-            this.uicCarNumber = (Long)jsonObject.get("UicWagennummer");
+            this.uicCarNumber = ((Long)jsonObject.get("UicWagennummer")).intValue();
         }
         else throw new TDBadDataException("The key 'UicWagennummer' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -185,7 +185,7 @@ public class FreightCar extends TrainCar {
     Getter
      */
 
-    public long getUicCarNumber() {
+    public int getUicCarNumber() {
         return uicCarNumber;
     }
 
@@ -250,5 +250,5 @@ public class FreightCar extends TrainCar {
      */
     public int getMaxLoadVolume() { return maxLoadVolume; }
 
-    public Double getRollResistanceCoef() { return rollResistanceCoef; }
+    public double getRollResistanceCoef() { return rollResistanceCoef; }
 }

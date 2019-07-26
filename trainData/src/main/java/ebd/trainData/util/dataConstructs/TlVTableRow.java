@@ -11,7 +11,7 @@ import java.util.Set;
 public class TlVTableRow {
 
     /**
-     * Speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * Speed in [km/h]
      */
     private double speed;
 
@@ -60,7 +60,7 @@ public class TlVTableRow {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("Geschwindigkeit")){
-            this.speed = (Double)jsonObject.get("Geschwindigkeit") / 5;
+            this.speed = (Double)jsonObject.get("Geschwindigkeit");
         }
         else throw new TDBadDataException("The key 'Geschwindigkeit' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -95,7 +95,7 @@ public class TlVTableRow {
      */
 
     /**
-     * @return Speed in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @return Speed in [km/h]
      */
     public double getSpeed() {
         return speed;

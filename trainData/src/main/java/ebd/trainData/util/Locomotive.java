@@ -16,7 +16,7 @@ public class Locomotive extends TrainCar {
     /**
      * UIC ID
      */
-    private long uicID;
+    private int uicID;
 
     /**
      * Pressure support (Druckertuechtigung) present?
@@ -91,32 +91,32 @@ public class Locomotive extends TrainCar {
     /**
      * Cross-section in [m^2]
      */
-    private Double crossSection;
+    private double crossSection;
 
     /**
      * Resistance coefficient
      */
-    private Double resistanceCoefficient;
+    private double resistanceCoefficient;
 
     /**
      * Roll resistance coefficient
      */
-    private Double rollResistanceCoef;
+    private double rollResistanceCoef;
 
     /**
      * Damping resistance coefficient
      */
-    private Double dampingResistanceCoef;
+    private double dampingResistanceCoef;
 
     /**
      * Drag resistance coefficient
      */
-    private Double dragResistanceCoef;
+    private double dragResistanceCoef;
 
     /**
      * Efficiency of the drive
      */
-    private Long efficiency;
+    private int efficiency;
 
     /**
      * Break force factor table
@@ -174,7 +174,7 @@ public class Locomotive extends TrainCar {
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.contains("UicBaureihenbezeichnung")){
-            this.uicID = (Long)jsonObject.get("UicBaureihenbezeichnung");
+            this.uicID = ((Long)jsonObject.get("UicBaureihenbezeichnung")).intValue();
         }
         else throw new TDBadDataException("The key 'UicBaureihenbezeichnung' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -291,7 +291,7 @@ public class Locomotive extends TrainCar {
         else throw new TDBadDataException("The key 'Luftwiderstandsbeiwert' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Wirkungsgrad")){
-            this.efficiency = (Long)jsonObject.get("Wirkungsgrad");
+            this.efficiency = ((Long)jsonObject.get("Wirkungsgrad")).intValue();
         }
         else throw new TDBadDataException("The key 'Wirkungsgrad' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -340,7 +340,7 @@ public class Locomotive extends TrainCar {
     Getters
      */
 
-    public long getUicID() {
+    public int getUicID() {
         return uicID;
     }
 
@@ -409,27 +409,27 @@ public class Locomotive extends TrainCar {
         return serviceWeight;
     }
 
-    public Double getCrossSection() {
+    public double getCrossSection() {
         return crossSection;
     }
 
-    public Double getResistanceCoefficient() {
+    public double getResistanceCoefficient() {
         return resistanceCoefficient;
     }
 
-    public Double getRollResistanceCoef() {
+    public double getRollResistanceCoef() {
         return rollResistanceCoef;
     }
 
-    public Double getDampingResistanceCoef() {
+    public double getDampingResistanceCoef() {
         return dampingResistanceCoef;
     }
 
-    public Double getDragResistanceCoef() {
+    public double getDragResistanceCoef() {
         return dragResistanceCoef;
     }
 
-    public Long getEfficiency() {
+    public int getEfficiency() {
         return efficiency;
     }
 

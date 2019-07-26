@@ -1,5 +1,6 @@
 package ebd.trainData;
 
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
@@ -20,7 +21,6 @@ import java.util.*;
  * The data for this class is loaded from the "Zugkonfigurator" tool, a web app. It can be reached by a REST interface.
  * @author Lars Schulze-Falck
  *
- * TODO Change Int/Long to Double where approbriate
  */
 public class TrainDataPerma {
 
@@ -37,19 +37,17 @@ public class TrainDataPerma {
     private String name = "";
 
     /**
-     * {@link ebd.messageLibrary.util.ETCSVariables#L_TRAIN}
      * Given in [m]
      */
-    private int L_TRAIN;
+    private double l_train;
 
     /**
-     * {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
-     * Given in [km/h]/5 with a resolution of 5 km/h
+     * Given in [km/h]
      */
-    private int V_MAXTRAIN;
+    private int v_maxtrain;
 
     /**
-     * Weight of Train in tonnes (1000 Kg)
+     * Weight of Train in [kg]
      */
     private int trainWeight;
 
@@ -117,7 +115,7 @@ public class TrainDataPerma {
      * Sets the class from the data found in the tool "Zugkonfigurator", a web app.
      *
      *
-     * @param trainConfiguratorIP The IP to the "Zugkonfigurator" web app
+     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
      *
      * @param trainID The ETCS-ID of the Train, found in trainconfigurator
      *
@@ -128,15 +126,15 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    public TrainDataPerma(String trainConfiguratorIP, String trainID) throws IOException, ParseException, TDBadDataException {
-        setInstance(trainConfiguratorIP,trainID);
+    public TrainDataPerma(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
+        setInstance(trainConfiguratorURL,trainID);
     }
 
 
     /**
      * Sets the instance by parsing the JSONObject that is returned from the app.
      *
-     * @param trainConfiguratorIP The IP to the "Zugkonfigurator" web app
+     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
      *
      * @param trainID The ETCS-ID of the Train
      *
@@ -147,7 +145,7 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    private void setInstance(String trainConfiguratorIP, String trainID) throws IOException, ParseException, TDBadDataException {
+    private void setInstance(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
         /*
         Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
          */
@@ -155,7 +153,7 @@ public class TrainDataPerma {
         JSONParser parser = new JSONParser();
         Object Object;
 
-        String urlName = trainConfiguratorIP + "/rest/zug/extended/" + trainID;
+        String urlName = trainConfiguratorURL + "/rest/zug/extended/" + trainID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -193,21 +191,18 @@ public class TrainDataPerma {
             else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
 
             if (jsonObjectKeySet.contains("GesamtlaengeUeberPuffer")){
-                Long tempLong = (Long)jsonObject.get("GesamtlaengeUeberPuffer") / 1000; //Resolution is given in [mm], we need [m]
-                tempLong += 1; //To always round up
-                this.L_TRAIN = tempLong.intValue();
+                this.l_train = ((Long)jsonObject.get("GesamtlaengeUeberPuffer") / 1000d); //Resolution is given in [mm], we need [m]
             }
             else throw new TDBadDataException("The key 'GesamtlaengeUeberPuffer' was missing in the train data send by the tool TrainConfigurator");
 
             if (jsonObjectKeySet.contains("Hoechstgeschwindigkeit")){
-                Long tempLong = (Long)jsonObject.get("Hoechstgeschwindigkeit");
-                this.V_MAXTRAIN = tempLong.intValue() / 5; //To get to [km/h]/5
+
+                this.v_maxtrain = ((Long)jsonObject.get("Hoechstgeschwindigkeit")).intValue();
             }
             else throw new TDBadDataException("The key 'Hoechstgeschwindigkeit' was missing in the train data send by the tool TrainConfigurator");
 
             if (jsonObjectKeySet.contains("Gesamtgewicht")){
-                Long tempLong = (Long)jsonObject.get("Gesamtgewicht");
-                this.trainWeight = tempLong.intValue() / 1000; //We get [kg] need [t]
+                this.trainWeight = ((Long)jsonObject.get("Gesamtgewicht")).intValue();
             }
             else throw new TDBadDataException("The key 'Gesamtgewicht' was missing in the train data send by the tool TrainConfigurator");
 
@@ -313,15 +308,15 @@ public class TrainDataPerma {
         return name;
     }
 
-    public int getL_TRAIN() {
-        return L_TRAIN;
+    public double getL_train() {
+        return l_train;
     }
 
-    public int getV_MAXTRAIN() {
-        return V_MAXTRAIN;
+    public int getV_maxtrain() {
+        return v_maxtrain;
     }
 
-    public int getTrainWeight() {
+    public double getTrainWeight() {
         return trainWeight;
     }
 
