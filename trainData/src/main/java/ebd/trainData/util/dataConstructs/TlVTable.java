@@ -12,14 +12,19 @@ public class TlVTable {
 
     /**
      * double value representing limits //TODO: units
+     * Can be NaN!
      */
     private double limits;
 
     /**
      * K2 factor in [s/m]
+     * Can be NaN!
      */
     private double k2Factor;
 
+    /**
+     * Can be empty!
+     */
     private List<TlVTableRow> tlVTableRowList;
 
 
@@ -30,7 +35,6 @@ public class TlVTable {
      * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
     public TlVTable(JSONObject jsonObject) throws TDBadDataException {
-        this.tlVTableRowList = new ArrayList<>();
         fillFromJSON(jsonObject);
     }
 
@@ -42,9 +46,13 @@ public class TlVTable {
      */
     private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
 
+        this.tlVTableRowList = new ArrayList<>();
+
         Set<String> jsonObjectKeySet = jsonObject.keySet();
 
         if (jsonObjectKeySet.isEmpty()){
+            this.limits = Double.NaN;
+            this.k2Factor = Double.NaN;
             return;
         }
 

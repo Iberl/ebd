@@ -1,7 +1,6 @@
 package ebd.trainData;
 
-import ebd.messageLibrary.util.ETCSVariables;
-import ebd.trainData.util.*;
+import ebd.trainData.util.dataConstructs.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

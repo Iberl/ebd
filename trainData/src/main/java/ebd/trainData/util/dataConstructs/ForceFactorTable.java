@@ -12,6 +12,9 @@ import java.util.List;
  */
 public class ForceFactorTable {
 
+    /**
+     * Can be empty!
+     */
     private List<ForceFactorTableRow> forceFactorTableRowList;
 
     /**

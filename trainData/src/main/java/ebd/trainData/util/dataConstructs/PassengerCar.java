@@ -1,12 +1,14 @@
-package ebd.trainData.util;
+package ebd.trainData.util.dataConstructs;
 
 import ebd.trainData.util.exceptions.TDBadDataException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-
-public class FreightCar extends TrainCar {
+public class PassengerCar extends TrainCar {
 
     /**
      * The UIC Car Number descriping the type of car
@@ -19,9 +21,9 @@ public class FreightCar extends TrainCar {
     private String carKind;
 
     /**
-     * freight car type
+     * Able to steer train
      */
-    private String freightCarType;
+    private boolean ableToSteer;
 
     /**
      * Plain bearings present
@@ -39,6 +41,21 @@ public class FreightCar extends TrainCar {
     private int maxWeight;
 
     /**
+     * Emergency break bypass present?
+     */
+    private boolean emergencyBreakBypass;
+
+    /**
+     * Pressure support (Druckertuechtigung) present?
+     */
+    private boolean pressureSupport;
+
+    /**
+     * Train control systems
+     */
+    private List<String > trainControlSystems;
+
+    /**
      * Single axle base (Einzelachsstand) in [m]
      */
     private double singleAxleBase;
@@ -54,38 +71,22 @@ public class FreightCar extends TrainCar {
     private double bogieBase;
 
     /**
-     * Break block
+     * f-Value from wind tunnel experiments in [m^2]
      */
-    private String breakBlock;
+    private double fValue;
 
     /**
-     * automatic load breaking present?
+     * b-Value
      */
-    private boolean automaticLoadBreaking;
+    private double bValue;
 
     /**
-     * Maximum load mass in [kg]
-     */
-    private int maxLoadMass;
-
-    /**
-     * Maximum load volume in [m^3]
-     */
-    private int maxLoadVolume;
-
-    /**
-     * Roll resistance coefficient
-     */
-    private double rollResistanceCoef;
-
-
-    /**
-     * Sets the FreightCar from an JSONobject.
+     * Sets the PassengerCar from an JSONobject.
      *
-     * @param jsonObject containing one train car of the car type "Güterwagen"
+     * @param jsonObject containing one train car of the car type "Reisezugwagen"
      * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
-    public FreightCar(JSONObject jsonObject) throws TDBadDataException {
+    public PassengerCar(JSONObject jsonObject) throws TDBadDataException {
         super(jsonObject);
         if (jsonObject.containsKey("Typ")){
             fillFromJSON((JSONObject)jsonObject.get("Typ"));
@@ -113,10 +114,10 @@ public class FreightCar extends TrainCar {
         }
         else throw new TDBadDataException("The key 'Gattung' was missing in the trainCar data send by the tool TrainConfigurator");
 
-        if (jsonObjectKeySet.contains("Typ")){
-            this.freightCarType = (String)jsonObject.get("Typ");
+        if (jsonObjectKeySet.contains("Steuerwagen")){
+            this.ableToSteer = (boolean)jsonObject.get("Steuerwagen");
         }
-        else throw new TDBadDataException("The key 'Typ' was missing in the trainCar data send by the tool TrainConfigurator");
+        else throw new TDBadDataException("The key 'Steuerwagen' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Gleitlager")){
             this.plainBearings = (boolean)jsonObject.get("Gleitlager");
@@ -135,8 +136,28 @@ public class FreightCar extends TrainCar {
         }
         else throw new TDBadDataException("The key 'Maximalgewicht' was missing in the trainCar data send by the tool TrainConfigurator");
 
+        if (jsonObjectKeySet.contains("Notbremsueberbrueckung")){
+            this.emergencyBreakBypass = (boolean) jsonObject.get("Notbremsueberbrueckung");
+        }
+        else throw new TDBadDataException("The key 'Notbremsueberbrueckung' was missing in the trainCar data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Druckertuechtigung")){
+            this.pressureSupport = (boolean) jsonObject.get("Druckertuechtigung");
+        }
+        else throw new TDBadDataException("The key 'Druckertuechtigung' was missing in the trainCar data send by the tool TrainConfigurator");
+
+
+        if (jsonObjectKeySet.contains("Zugbeeinflussungssysteme")){
+            JSONArray jsonArray = (JSONArray)jsonObject.get("Zugbeeinflussungssysteme");
+            this.trainControlSystems = new ArrayList<>();
+            for(Object item : jsonArray){
+                trainControlSystems.add((String)item);
+            }
+        }
+        else throw new TDBadDataException("The key 'Zugbeeinflussungssysteme' was missing in the trainCar data send by the tool TrainConfigurator");
+
         if (jsonObjectKeySet.contains("Einzelachsenachsstand")){
-            Long tempLong = (Long)jsonObject.get("Einzelachsenachsstand");
+            Long tempLong = (Long) jsonObject.get("Einzelachsenachsstand");
             this.singleAxleBase = tempLong / 1000d;
         }
         else throw new TDBadDataException("The key 'Einzelachsenachsstand' was missing in the trainType data send by the tool TrainConfigurator");
@@ -153,32 +174,15 @@ public class FreightCar extends TrainCar {
         }
         else throw new TDBadDataException("The key 'Drehgestellachsstand' was missing in the trainType data send by the tool TrainConfigurator");
 
-        if (jsonObjectKeySet.contains("Bremssohle")){
-            this.breakBlock = (String)jsonObject.get("Bremssohle");
+        if (jsonObjectKeySet.contains("fWert")){
+            this.fValue = (Double)jsonObject.get("fWert");
         }
-        else throw new TDBadDataException("The key 'Bremssohle' was missing in the trainCar data send by the tool TrainConfigurator");
+        else throw new TDBadDataException("The key 'fWert' was missing in the trainCar data send by the tool TrainConfigurator");
 
-        if (jsonObjectKeySet.contains("automatischeLastabbremsung")){
-            this.automaticLoadBreaking = (boolean)jsonObject.get("automatischeLastabbremsung");
+        if (jsonObjectKeySet.contains("bWert")){
+            this.bValue = (Double)jsonObject.get("bWert");
         }
-        else throw new TDBadDataException("The key 'automatischeLastabbremsung' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("MaximaleZuladungsmasse")){
-            Long tempLong = (Long)jsonObject.get("MaximaleZuladungsmasse");
-            this.maxLoadMass = tempLong.intValue();
-        }
-        else throw new TDBadDataException("The key 'MaximaleZuladungsmasse' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("MaximalesZuladungsvolumen")){
-            Long tempLong = (Long)jsonObject.get("MaximalesZuladungsvolumen");
-            this.maxLoadVolume = tempLong.intValue();
-        }
-        else throw new TDBadDataException("The key 'MaximalesZuladungsvolumen' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Rollwiderstandsbeiwert")){
-            this.rollResistanceCoef = (Double)jsonObject.get("Rollwiderstandsbeiwert");
-        }
-        else throw new TDBadDataException("The key 'Rollwiderstandsbeiwert' was missing in the trainCar data send by the tool TrainConfigurator");
+        else throw new TDBadDataException("The key 'bWert' was missing in the trainCar data send by the tool TrainConfigurator");
     }
 
     /*
@@ -193,8 +197,8 @@ public class FreightCar extends TrainCar {
         return carKind;
     }
 
-    public String isFreightCarType() {
-        return freightCarType;
+    public boolean isAbleToSteer() {
+        return ableToSteer;
     }
 
     public boolean isPlainBearings() {
@@ -204,15 +208,23 @@ public class FreightCar extends TrainCar {
     /**
      * @return Empty mass of the car in [kg]
      */
-    public int getEmptyMass() {
-        return emptyMass;
-    }
+    public int getEmptyMass() { return emptyMass; }
 
     /**
      * @return max weight of the car in [kg]
      */
     public int getMaxWeight() {
         return maxWeight;
+    }
+
+    public boolean isEmergencyBreakBypass() {
+        return emergencyBreakBypass;
+    }
+
+    public boolean isPressureSupport() { return pressureSupport; }
+
+    public List<String> getTrainControlSystems() {
+        return trainControlSystems;
     }
 
     /**
@@ -236,19 +248,11 @@ public class FreightCar extends TrainCar {
         return bogieBase;
     }
 
-    public String getBreakBlock() { return breakBlock; }
+    public Double getfValue() {
+        return fValue;
+    }
 
-    public boolean isAutomaticLoadBreaking() { return automaticLoadBreaking; }
-
-    /**
-     * @return max mass of load in [kg]
-     */
-    public int getMaxLoadMass() { return maxLoadMass; }
-
-    /**
-     * @return max load volume in [m^3]
-     */
-    public int getMaxLoadVolume() { return maxLoadVolume; }
-
-    public double getRollResistanceCoef() { return rollResistanceCoef; }
+    public Double getbValue() {
+        return bValue;
+    }
 }

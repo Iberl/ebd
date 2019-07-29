@@ -61,47 +61,24 @@ public class TrainDataVolatile {
         return currentPosition;
     }
 
-    protected void setCurrentPosition(Position currentPosition) {
-        this.currentPosition = currentPosition;
-    }
-
     public double getCurrentSpeed() {
         return currentSpeed;
-    }
-
-    protected void setCurrentSpeed(double currentSpeed) {
-        this.currentSpeed = currentSpeed;
     }
 
     public int getM_MODE() {
         return M_MODE;
     }
 
-    protected void setM_MODE(int m_MODE) {
-        M_MODE = m_MODE;
-    }
-
     public List<Location> getPreviousLocations() {
         return previousLocations;
-    }
-
-    protected void setPreviousLocations(List<Location> previousLocations) {
-        this.previousLocations = previousLocations;
     }
 
     public String getCurrentBreakingMode() {
         return currentBreakingMode;
     }
 
-    protected void setCurrentBreakingMode(String currentBreakingMode) {
-        this.currentBreakingMode = currentBreakingMode;
-    }
-
     public ForwardSpline getCurrentBreakingPower() {
         return currentBreakingPower;
     }
 
-    protected void setCurrentBreakingPower(ForwardSpline currentBreakingPower) {
-        this.currentBreakingPower = currentBreakingPower;
-    }
 }

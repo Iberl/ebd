@@ -1,7 +1,5 @@
-package ebd.trainData.util;
+package ebd.trainData.util.dataConstructs;
 
-import ebd.trainData.util.dataConstructs.Breakmethod;
-import ebd.trainData.util.dataConstructs.Breaksystem;
 import ebd.trainData.util.exceptions.TDBadDataException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -117,9 +115,9 @@ public class TrainCar {
     private int maxSpeed;
 
     /**
-     * Track gauge of the train
+     * Track gauge of the train in [m]
      */
-    private int trackGauge;
+    private double trackGauge;
 
     /**
      * Dimensionless massfactor
@@ -269,7 +267,7 @@ public class TrainCar {
 
         if (typeJSONObjectKeySet.contains("Spurweite")){
             Long tempLong = (Long)typeJSONObject.get("Spurweite");
-            this.trackGauge = tempLong.intValue();
+            this.trackGauge = tempLong.intValue() / 1000d;
         }
         else throw new TDBadDataException("The key 'Spurweite' was missing in the trainType data send by the tool TrainConfigurator");
 
@@ -284,6 +282,11 @@ public class TrainCar {
         }
         else throw new TDBadDataException("The key 'Massenfaktor' was missing in the trainType data send by the tool TrainConfigurator");
 
+        if (typeJSONObjectKeySet.contains("Tunnelfaktor")){
+            Long tempLong = (Long)typeJSONObject.get("Tunnelfaktor");
+            this.tunnelfactor =tempLong.intValue();
+        }
+        else throw new TDBadDataException("The key 'Tunnelfaktor' was missing in the trainType data send by the tool TrainConfigurator");
 
     }
 
@@ -462,7 +465,11 @@ public class TrainCar {
         return maxSpeed;
     }
 
-    public int getTrackGauge() {
+    /**
+     *
+     * @return trackGauge in [m]
+     */
+    public double getTrackGauge() {
         return trackGauge;
     }
 

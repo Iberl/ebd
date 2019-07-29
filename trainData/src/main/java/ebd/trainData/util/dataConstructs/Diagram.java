@@ -13,6 +13,9 @@ import java.util.List;
  */
 public class Diagram {
 
+    /**
+     * Can be empty!
+     */
     private List<DiagramRow> diagramRows;
 
     /**

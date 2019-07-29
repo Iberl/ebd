@@ -1,5 +1,7 @@
 package ebd.routeData;
 
+import ebd.globalUtils.location.Location;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
@@ -13,6 +15,17 @@ import java.util.List;
 public class RouteDataVolatile {
 
     /**
+     * Reference Location to which all packets are relative to.
+     */
+    @Nullable
+    protected volatile Location refLocation = null;
+    /**
+     * A {@link Packet_15} containing a movement authority
+     */
+    @Nullable
+    protected volatile Packet_15 packet_15 = null;
+
+    /**
      * A @{@link Packet_21} containing a gradient profile
      */
     @Nullable
@@ -22,7 +35,7 @@ public class RouteDataVolatile {
      * A {@link Packet_27} containing a static speed profile
      */
     @Nullable
-    protected volatile Packet_27 packet_15 = null;
+    protected volatile Packet_27 packet_27 = null;
 
     /**
      * A list of @{@link Packet_65} containing Tempory Speed Restrictions
@@ -32,6 +45,17 @@ public class RouteDataVolatile {
 
     public RouteDataVolatile(){}
 
+    /*
+    Getter
+     */
+    public Location getRefLocation() {
+        return refLocation;
+    }
+
+    public Packet_15 getPacket_15() {
+        return packet_15;
+    }
+
     public Packet_21 getPacket_21() {
         return packet_21;
     }
@@ -40,12 +64,12 @@ public class RouteDataVolatile {
         this.packet_21 = packet_21;
     }
 
-    public Packet_27 getPacket_15() {
-        return packet_15;
+    public Packet_27 getPacket_27() {
+        return packet_27;
     }
 
-    protected void setPacket_15(Packet_27 packet_15) {
-        this.packet_15 = packet_15;
+    protected void setPacket_27(Packet_27 packet_27) {
+        this.packet_27 = packet_27;
     }
 
     public List<Packet_65> getPacket_65() {

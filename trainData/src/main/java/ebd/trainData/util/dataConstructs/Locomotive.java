@@ -1,8 +1,5 @@
-package ebd.trainData.util;
+package ebd.trainData.util.dataConstructs;
 
-import ebd.trainData.util.dataConstructs.Diagram;
-import ebd.trainData.util.dataConstructs.ForceFactorTable;
-import ebd.trainData.util.dataConstructs.TlVTable;
 import ebd.trainData.util.exceptions.TDBadDataException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,42 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class LocomotiveTrain extends TrainCar {
+public class Locomotive extends TrainCar {
 
     /**
      * UIC ID
      */
     private int uicID;
-
-    /**
-     * Type of tilting technology
-     */
-    private String tiltingTechnology;
-
-    /**
-     * Plain bearing present?
-     */
-    private boolean plainBearing;
-
-    /**
-     * Empty mass in [kg]
-     */
-    private int emptyMass;
-
-    /**
-     * Maximum weight in [kg]
-     */
-    private int maxWeight;
-
-    /**
-     * Emergency break bypass present?
-     */
-    private boolean emergencyBreakBypass;
-
-    /**
-     * Doppledecker car present?
-     */
-    private boolean doppleDeckerCar;
 
     /**
      * Pressure support (Druckertuechtigung) present?
@@ -96,23 +63,32 @@ public class LocomotiveTrain extends TrainCar {
     /**
      * Drive weel diameter in [m]
      */
-    private int driveWeelDiameter;
+    private double driveWeelDiameter;
 
+    /**
+     * Single axle base (Einzelachsstand) in [m]
+     */
+    private double singleAxleBase;
+
+    /**
+     * Distance between pivots  (Drehzapfenabstand) in [m]
+     */
+    private double pivotDistance;
+
+    /**
+     * Bogie base in [m]
+     */
+    private double bogieBase;
+
+    /**
+     * Service weight in [kg]
+     */
+    private int serviceWeight;
 
     /**
      * Cross-section in [m^2]
      */
     private double crossSection;
-
-    /**
-     * f-Value from wind tunnel experiments in [m^2]
-     */
-    private double fValue;
-
-    /**
-     * b-Value
-     */
-    private double bValue;
 
     /**
      * Resistance coefficient
@@ -171,12 +147,12 @@ public class LocomotiveTrain extends TrainCar {
 
 
     /**
-     * Sets the LocomotivTrain from an JSONobject.
+     * Sets the Locomotiv from an JSONobject.
      *
-     * @param jsonObject containing one train car of the car type "Triebzug"
+     * @param jsonObject containing one train car of the car type "Triebfahrzeug"
      * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
      */
-    public LocomotiveTrain(JSONObject jsonObject) throws TDBadDataException {
+    public Locomotive(JSONObject jsonObject) throws TDBadDataException {
         super(jsonObject);
         if (jsonObject.containsKey("Typ")){
             fillFromJSON((JSONObject)jsonObject.get("Typ"));
@@ -198,38 +174,6 @@ public class LocomotiveTrain extends TrainCar {
             this.uicID = ((Long)jsonObject.get("UicBaureihenbezeichnung")).intValue();
         }
         else throw new TDBadDataException("The key 'UicBaureihenbezeichnung' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("NeigetechnikArt")){
-            this.tiltingTechnology = (String)jsonObject.get("NeigetechnikArt");
-        }
-        else throw new TDBadDataException("The key 'NeigetechnikArt' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Gleitlager")){
-            this.plainBearing = (Boolean)jsonObject.get("Gleitlager");
-        }
-        else throw new TDBadDataException("The key 'Gleitlager' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Leermasse")){
-            Long tempLong = (Long)jsonObject.get("Leermasse");
-            this.emptyMass = tempLong.intValue();
-        }
-        else throw new TDBadDataException("The key 'Leermasse' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Maximalgewicht")){
-            Long tempLong = (Long)jsonObject.get("Maximalgewicht");
-            this.maxWeight = tempLong.intValue();
-        }
-        else throw new TDBadDataException("The key 'Maximalgewicht' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Notbremsueberbrueckung")){
-            this.emergencyBreakBypass = (boolean) jsonObject.get("Notbremsueberbrueckung");
-        }
-        else throw new TDBadDataException("The key 'Notbremsueberbrueckung' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("Doppelstock")){
-            this.doppleDeckerCar = (boolean) jsonObject.get("Doppelstock");
-        }
-        else throw new TDBadDataException("The key 'Doppelstock' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Druckertuechtigung")){
             this.pressureSupport = (Boolean)jsonObject.get("Druckertuechtigung");
@@ -272,7 +216,7 @@ public class LocomotiveTrain extends TrainCar {
         else throw new TDBadDataException("The key 'Dauerleistung' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Leistungskennziffer")){
-            this.performanceIndicator = (Double)jsonObject.get("Leistungskennziffer");
+            this.performanceIndicator = (Double) jsonObject.get("Leistungskennziffer");
         }
         else throw new TDBadDataException("The key 'Leistungskennziffer' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -290,24 +234,38 @@ public class LocomotiveTrain extends TrainCar {
 
         if (jsonObjectKeySet.contains("Treibraddurchmesser")){
             Long tempLong = (Long)jsonObject.get("Treibraddurchmesser");
-            this.driveWeelDiameter = tempLong.intValue();
+            this.driveWeelDiameter = tempLong.intValue() / 1000d;
         }
         else throw new TDBadDataException("The key 'Treibraddurchmesser' was missing in the trainCar data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Einzelachsenachsstand")){
+            Long tempLong = (Long)jsonObject.get("Einzelachsenachsstand");
+            this.singleAxleBase = tempLong / 1000d;
+        }
+        else throw new TDBadDataException("The key 'Einzelachsenachsstand' was missing in the trainType data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Drehzapfenabstand")){
+            Long tempLong = (Long)jsonObject.get("Drehzapfenabstand");
+            this.pivotDistance = tempLong / 1000d;
+        }
+        else throw new TDBadDataException("The key 'Drehzapfenabstand' was missing in the trainType data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Drehgestellachsstand")){
+            Long tempLong = (Long)jsonObject.get("Drehgestellachsstand");
+            this.bogieBase = tempLong / 1000d;
+        }
+        else throw new TDBadDataException("The key 'Drehgestellachsstand' was missing in the trainType data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Dienstmasse")){
+            Long tempLong = (Long)jsonObject.get("Dienstmasse");
+            this.serviceWeight = tempLong.intValue();
+        }
+        else throw new TDBadDataException("The key 'Dienstmasse' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Querschnittsflaeche")){
             this.crossSection = (Double) jsonObject.get("Querschnittsflaeche");
         }
         else throw new TDBadDataException("The key 'Querschnittsflaeche' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("fWert")){
-            this.fValue = (Double)jsonObject.get("fWert");
-        }
-        else throw new TDBadDataException("The key 'fWert' was missing in the trainCar data send by the tool TrainConfigurator");
-
-        if (jsonObjectKeySet.contains("bWert")){
-            this.bValue = (Double)jsonObject.get("bWert");
-        }
-        else throw new TDBadDataException("The key 'bWert' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Widerstandsbeiwert")){
             this.resistanceCoefficient = (Double) jsonObject.get("Widerstandsbeiwert");
@@ -330,8 +288,7 @@ public class LocomotiveTrain extends TrainCar {
         else throw new TDBadDataException("The key 'Luftwiderstandsbeiwert' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("Wirkungsgrad")){
-            Long tempLong = (Long)jsonObject.get("Wirkungsgrad");
-            this.efficiency = tempLong.intValue();
+            this.efficiency = ((Long)jsonObject.get("Wirkungsgrad")).intValue();
         }
         else throw new TDBadDataException("The key 'Wirkungsgrad' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -380,37 +337,17 @@ public class LocomotiveTrain extends TrainCar {
     Getters
      */
 
-    public int getUicID() { return uicID; }
-
-    public String getTiltingTechnology() { return tiltingTechnology; }
-
-    public boolean isPlainBearing() { return plainBearing; }
-
-    /**
-     * @return Empty mass of the car in [kg]
-     */
-    public int getEmptyMass() {
-        return emptyMass;
+    public int getUicID() {
+        return uicID;
     }
-
-    /**
-     * @return max weight of the car in [kg]
-     */
-    public int getMaxWeight() {
-        return maxWeight;
-    }
-
-    public boolean isEmergencyBreakBypass() {
-        return emergencyBreakBypass;
-    }
-
-    public boolean isDoppleDeckerCar() { return doppleDeckerCar; }
 
     public boolean isPressureSupport() {
         return pressureSupport;
     }
 
-    public String getDrive() { return drive; }
+    public String getDrive() {
+        return drive;
+    }
 
     public List<String> getElectricalSystems() {
         return electricalSystems;
@@ -440,20 +377,37 @@ public class LocomotiveTrain extends TrainCar {
         return tractiveForceAtStart;
     }
 
-    public int getDriveWeelDiameter() {
+    public double getDriveWeelDiameter() {
         return driveWeelDiameter;
+    }
+
+    /**
+     * @return Single axle base in [m]
+     */
+    public double getSingleAxleBase() {
+        return singleAxleBase;
+    }
+
+    /**
+     * @return Distance between pivots  (Drehzapfenabstand) in [m]
+     */
+    public double getPivotDistance() {
+        return pivotDistance;
+    }
+
+    /**
+     * @return Bogie base in [m]
+     */
+    public double getBogieBase() {
+        return bogieBase;
+    }
+
+    public int getServiceWeight() {
+        return serviceWeight;
     }
 
     public double getCrossSection() {
         return crossSection;
-    }
-
-    public double getfValue() {
-        return fValue;
-    }
-
-    public double getbValue() {
-        return bValue;
     }
 
     public double getResistanceCoefficient() {

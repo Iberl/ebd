@@ -23,9 +23,9 @@ public class Breaksystem {
      *
      * @param name The name of the breaksystem
      *
-     * @param minSpeed The minimum speed of the breaksystem in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @param minSpeed The minimum speed of the breaksystem in [km/h]
      *
-     * @param maxSpeed The maximum speed of the breaksystem in [km/h] / 5. See {@link ebd.messageLibrary.util.ETCSVariables#V_MAXTRAIN}
+     * @param maxSpeed The maximum speed of the breaksystem in [km/h]
      */
     public Breaksystem(String name, int minSpeed, int maxSpeed){
         this.name = name;
