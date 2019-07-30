@@ -42,7 +42,7 @@ public class ExceptionEvent extends Event {
 	 * @param cause
 	 *          The Event causing an Exception
 	 * @param exception
-	 *          The thrown exception
+	 *          The thrown exception to be encapsulated
 	 */
 	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
 		super(source, targets);
