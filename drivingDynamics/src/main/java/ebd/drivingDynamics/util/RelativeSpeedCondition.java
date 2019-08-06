@@ -42,9 +42,6 @@ public class RelativeSpeedCondition extends Condition {
                 case "<=":
                     comparator = (Double speedRel,Double speedMax) -> (speedRel <= speedMax);
                     break;
-                case "==":
-                    comparator = (Double speedRel,Double speedMax) -> (speedRel == speedMax);
-                    break;
                 case ">=":
                     comparator = (Double speedRel,Double speedMax) -> (speedRel >= speedMax);
                     break;

@@ -1,22 +1,16 @@
 package ebd.drivingDynamics.util;
 
+import ebd.drivingDynamics.exceptions.DDBadDataException;
 import org.json.simple.JSONObject;
 
 import java.util.List;
 
-public class Action {
+public abstract class Action {
 
-    private OrBlock orBlock;
+    protected OrBlock orBlock;
 
-    /**
-     *
-     * @param jsonObject
-     */
-    public Action(JSONObject jsonObject){
-        fromJSON(jsonObject);
-    }
+    abstract protected void fromJSON(JSONObject jsonObject) throws DDBadDataException;
 
-    private void fromJSON(JSONObject jsonObject){
+    abstract public boolean eval();
 
-    }
 }

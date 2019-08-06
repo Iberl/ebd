@@ -1,4 +1,4 @@
-package ebd.drivingDynamics.util;
+package ebd.drivingDynamics;
 
 import org.json.simple.JSONObject;
 
