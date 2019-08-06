@@ -7,8 +7,6 @@ public class DrivingStrategyParser {
 
     private void jsonToProfile (JSONObject jsonObject){
 
-
-
     }
 
 }
