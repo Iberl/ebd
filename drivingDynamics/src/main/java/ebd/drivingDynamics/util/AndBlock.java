@@ -34,13 +34,15 @@ public class AndBlock extends ConditionBlock {
                 /*
                 New Conditions have to be added here!
                  */
+                JSONObject tempJSON = (JSONObject)object;
+
                 //TODO Add new conditions
-                if(jsonObject.containsKey("v_rel")) {
-                    JSONObject condJSON = (JSONObject)jsonObject.get("v_rel");
+                if(tempJSON.containsKey("v_rel")) {
+                    JSONObject condJSON = (JSONObject)tempJSON.get("v_rel");
                     conditions.add(new RelativeSpeedCondition(condJSON));
                 }
-                else if(jsonObject.containsKey("v")) {
-                    JSONObject condJSON = (JSONObject)jsonObject.get("v");
+                else if(tempJSON.containsKey("v")) {
+                    JSONObject condJSON = (JSONObject)tempJSON.get("v");
                     conditions.add(new TotalSpeedCondition(condJSON));
                 }
                 else {

@@ -4,6 +4,7 @@ import ebd.drivingDynamics.exceptions.DDBadDataException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class OrBlock extends ConditionBlock {
@@ -28,6 +29,7 @@ public class OrBlock extends ConditionBlock {
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
         if(jsonObject.keySet().contains("andBlocks")){
             JSONArray jsonArray = (JSONArray) jsonObject.get("andBlocks");
+            andBlocks = new ArrayList<>();
 
             for(Object object : jsonArray){
                 andBlocks.add(new AndBlock((JSONObject)object));

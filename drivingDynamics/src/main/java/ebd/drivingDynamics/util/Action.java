@@ -9,8 +9,12 @@ public abstract class Action {
 
     protected OrBlock orBlock;
 
+    public boolean eval(){
+        return this.orBlock.eval();
+    };
+
     abstract protected void fromJSON(JSONObject jsonObject) throws DDBadDataException;
 
-    abstract public boolean eval();
+
 
 }

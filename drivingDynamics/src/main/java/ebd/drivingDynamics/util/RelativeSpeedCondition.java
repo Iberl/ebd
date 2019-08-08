@@ -25,7 +25,15 @@ public class RelativeSpeedCondition extends Condition {
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
         if(jsonObject.keySet().contains("value")){
-            speedPercentage = (Double)jsonObject.get("value") / 100;
+            Object tempObject = jsonObject.get("value");
+            String tempObjectName = tempObject.getClass().getSimpleName();
+            if(tempObjectName.equals("Long")){
+                speedPercentage = (Long)tempObject / 100d;
+            }
+            else if(tempObjectName.equals("Double")){
+                speedPercentage = (Double)tempObject / 100;
+            }
+            else throw new DDBadDataException("RelativeSpeedCondition value was not a number");
 
             if(speedPercentage < 0 || speedPercentage > 1){
                 throw new DDBadDataException("RelativeSpeedCondition Value was not in the range [0, 100]");
@@ -34,23 +42,8 @@ public class RelativeSpeedCondition extends Condition {
         else throw new DDBadDataException("The key 'value' was missing for a RelativeSpeedCondition");
 
         if(jsonObject.keySet().contains("op")){
-            String temp = (String)jsonObject.get("op");
-            switch (temp){
-                case "<":
-                    comparator = (Double speedRel,Double speedMax) -> (speedRel < speedMax);
-                    break;
-                case "<=":
-                    comparator = (Double speedRel,Double speedMax) -> (speedRel <= speedMax);
-                    break;
-                case ">=":
-                    comparator = (Double speedRel,Double speedMax) -> (speedRel >= speedMax);
-                    break;
-                case ">":
-                    comparator = (Double speedRel,Double speedMax) -> (speedRel > speedMax);
-                    break;
-                default:
-                    throw new DDBadDataException("Unexpected op parameter for RelativeSpeedCondition: " + temp);
-            }
+            String opCode = (String)jsonObject.get("op");
+            this.comparator = ComparisonSelector.comparisonSelector(opCode);
         }
         else throw new DDBadDataException("The key 'op' was missing for a RelativeSpeedCondition");
     }
