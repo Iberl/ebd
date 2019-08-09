@@ -28,11 +28,11 @@ public class BreakAction extends Action {
         else throw new DDBadDataException("The key 'value' was missing for a BreakAction");
 
 
-        if(jsonObject.keySet().contains("orBlock")){
-            JSONObject tempJSON = (JSONObject)jsonObject.get("orBlock");
-            orBlock = new OrBlock(tempJSON);
+        if(jsonObject.keySet().contains("conditions")){
+            conditionsFromJSON((JSONObject)jsonObject.get("conditions"));
+
         }
-        else throw new DDBadDataException("The key 'orBlock' was missing for a BreakAction");
+        else throw new DDBadDataException("The key 'conditions' was missing for a AccelerationAction");
 
     }
 

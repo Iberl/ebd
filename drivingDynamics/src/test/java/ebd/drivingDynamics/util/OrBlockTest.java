@@ -11,11 +11,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrBlockTest {
 
     @Test
-    void eval() throws DDBadDataException, ParseException {
+    void evalSimple() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse("{ \"andBlocks\" : [{\"conditions\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}]}");
+        JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}");
         OrBlock orBlock = new OrBlock(jsonObject);
-        System.out.println(orBlock.eval());
+        //System.out.println(orBlock.eval());
+        assertFalse(orBlock.eval());
+    }
+
+    @Test
+    void eval() throws ParseException, DDBadDataException {
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"v\" : { \"op\" : \"<\", \"value\" : 25.0 }}]}");
+        OrBlock orBlock = new OrBlock(jsonObject);
+        //System.out.println(orBlock.eval());
+        assertFalse(orBlock.eval());
+    }
+
+    @Test
+    void evalComplex() throws ParseException, DDBadDataException {
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}]}");
+        OrBlock orBlock = new OrBlock(jsonObject);
+        //System.out.println(orBlock.eval());
         assertFalse(orBlock.eval());
     }
 }
