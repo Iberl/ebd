@@ -1,11 +1,16 @@
 package ebd.trainData;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -63,6 +68,20 @@ public class TrainDataVolatile {
 
     //Constructor
     public TrainDataVolatile(){}
+
+    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentMaxSpeed, @Nullable Integer m_MODE, @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower) {
+        NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
+        ExceptionEvent exceptionEvent = new ExceptionEvent("TD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
+        EventBus.getDefault().post(exceptionEvent);
+
+        this.currentPosition = currentPosition;
+        this.currentSpeed = currentSpeed;
+        this.currentMaxSpeed = currentMaxSpeed;
+        M_MODE = m_MODE;
+        this.previousLocations = previousLocations;
+        this.currentBreakingMode = currentBreakingMode;
+        this.currentBreakingPower = currentBreakingPower;
+    }
 
     //Getter and setter
 
