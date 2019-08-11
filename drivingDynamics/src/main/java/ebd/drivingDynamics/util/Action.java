@@ -1,15 +1,22 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
 public abstract class Action {
 
+    protected EventBus localEventBus;
+
     protected Condition condition;
+
+    public Action(EventBus eventBus){
+        this.localEventBus = eventBus;
+    }
 
     public boolean eval(){
         return this.condition.eval();
-    };
+    }
 
     abstract protected void fromJSON(JSONObject jsonObject) throws DDBadDataException;
 
@@ -17,13 +24,13 @@ public abstract class Action {
 
         try {
             if(jsonObject.containsKey("andBlock")){
-                condition = new AndBlock(jsonObject);
+                this.condition = new AndBlock(jsonObject, this.localEventBus);
             }
             else if (jsonObject.containsKey("orBlock")){
-                condition = new OrBlock(jsonObject);
+                this.condition = new OrBlock(jsonObject, this.localEventBus);
             }
             else {
-                condition = ConditionSelector.select(jsonObject);
+                this.condition = ConditionSelector.select(jsonObject, this.localEventBus);
             }
 
 

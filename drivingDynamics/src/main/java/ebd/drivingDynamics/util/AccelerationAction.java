@@ -1,6 +1,7 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
 public class AccelerationAction extends Action {
@@ -8,7 +9,8 @@ public class AccelerationAction extends Action {
 
     private double accelerationPercentage;
 
-    public AccelerationAction(JSONObject jsonObject) throws DDBadDataException {
+    public AccelerationAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+        super(eventBus);
         fromJSON(jsonObject);
     }
 

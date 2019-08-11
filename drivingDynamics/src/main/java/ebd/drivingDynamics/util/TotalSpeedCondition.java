@@ -1,6 +1,7 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
 import java.util.function.BiFunction;
@@ -10,7 +11,8 @@ public class TotalSpeedCondition extends Condition {
     private Double speedTotal;
     private BiFunction<Double,Double, Boolean> comparator;
 
-    public TotalSpeedCondition(JSONObject jsonObject) throws DDBadDataException {
+    public TotalSpeedCondition(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+        super(eventBus);
         fromJSON(jsonObject);
     }
 

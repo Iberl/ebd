@@ -1,6 +1,7 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -11,6 +12,11 @@ import java.util.Set;
 public abstract class ConditionBlock extends Condition {
 
     protected List<Condition> conditions;
+
+    public ConditionBlock(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+        super(eventBus);
+        fromJSON(jsonObject);
+    }
 
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
@@ -31,13 +37,13 @@ public abstract class ConditionBlock extends Condition {
             for (Object object : jsonArray){
                 JSONObject tempJSON = (JSONObject)object;
                 if(tempJSON.containsKey("andBlock")){
-                    conditions.add(new AndBlock(tempJSON));
+                    conditions.add(new AndBlock(tempJSON,this.localEventBus));
                 }
                 else if(tempJSON.containsKey("orBlock")){
-                    conditions.add(new OrBlock(tempJSON));
+                    conditions.add(new OrBlock(tempJSON,this.localEventBus));
                 }
                 else {
-                    conditions.add(ConditionSelector.select(tempJSON));
+                    conditions.add(ConditionSelector.select(tempJSON,this.localEventBus));
                 }
             }
 

@@ -1,9 +1,15 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
 public class BreakAction extends Action {
+
+    public BreakAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+        super(eventBus);
+        fromJSON(jsonObject);
+    }
 
     private double breakPercentage;
 
@@ -13,10 +19,10 @@ public class BreakAction extends Action {
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                breakPercentage = (Long)tempObject;
+                this.breakPercentage = (Long)tempObject;
             }
             else if(tempObjectName.equals("Double")){
-                breakPercentage = (Double)tempObject;
+                this.breakPercentage = (Double)tempObject;
             }
             else throw new DDBadDataException("BreakAction value was not a number");
 
@@ -37,6 +43,6 @@ public class BreakAction extends Action {
     }
 
     public double getBreakPercentage() {
-        return breakPercentage;
+        return this.breakPercentage;
     }
 }

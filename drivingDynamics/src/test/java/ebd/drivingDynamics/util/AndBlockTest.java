@@ -1,6 +1,7 @@
 package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -14,7 +15,7 @@ class AndBlockTest {
     void evalSimple() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}");
-        AndBlock andBlock = new AndBlock(jsonObject);
+        AndBlock andBlock = new AndBlock(jsonObject, EventBus.getDefault());
         //System.out.println(andBlock.eval());
         assertFalse(andBlock.eval());
     }
@@ -23,7 +24,7 @@ class AndBlockTest {
     void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"v\" : { \"op\" : \">\", \"value\" : 25.0 }}]}");
-        AndBlock andBlock = new AndBlock(jsonObject);
+        AndBlock andBlock = new AndBlock(jsonObject, EventBus.getDefault());
         //System.out.println(andBlock.eval());
         assertFalse(andBlock.eval());
     }
@@ -32,7 +33,7 @@ class AndBlockTest {
     void evalComplex() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"andBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}]}");
-        AndBlock andBlock = new AndBlock(jsonObject);
+        AndBlock andBlock = new AndBlock(jsonObject, EventBus.getDefault());
         //System.out.println(andBlock.eval());
         assertFalse(andBlock.eval());
     }

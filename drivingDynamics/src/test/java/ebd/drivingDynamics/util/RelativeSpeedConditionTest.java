@@ -2,6 +2,7 @@ package ebd.drivingDynamics.util;
 
 
 import ebd.drivingDynamics.exceptions.DDBadDataException;
+import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -15,7 +16,7 @@ class RelativeSpeedConditionTest {
     void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
-        RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject);
+        RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
         //System.out.println(relativeSpeedCondition.eval());
         assertFalse(relativeSpeedCondition.eval());
     }
