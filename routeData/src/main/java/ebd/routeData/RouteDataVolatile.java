@@ -1,12 +1,17 @@
 package ebd.routeData;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,9 +50,25 @@ public class RouteDataVolatile {
 
     public RouteDataVolatile(){}
 
-    /*
-    Getter
+    /**
+     * Only For Testing!
      */
+    @Deprecated
+    public RouteDataVolatile(@Nullable Location refLocation, @Nullable Packet_15 packet_15, @Nullable Packet_21 packet_21, @Nullable Packet_27 packet_27, @Nullable List<Packet_65> packet_65) {
+        NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
+        ExceptionEvent exceptionEvent = new ExceptionEvent("RD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
+        EventBus.getDefault().post(exceptionEvent);
+
+        this.refLocation = refLocation;
+        this.packet_15 = packet_15;
+        this.packet_21 = packet_21;
+        this.packet_27 = packet_27;
+        this.packet_65 = packet_65;
+    }
+
+    /*
+        Getter
+         */
     public Location getRefLocation() {
         return refLocation;
     }
