@@ -1,6 +1,6 @@
 package ebd.drivingDynamics.util;
 
-import ebd.drivingDynamics.exceptions.DDBadDataException;
+import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 
 import java.util.function.BiFunction;
 

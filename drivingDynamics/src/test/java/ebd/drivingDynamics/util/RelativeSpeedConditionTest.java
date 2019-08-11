@@ -1,23 +1,45 @@
 package ebd.drivingDynamics.util;
 
 
-import ebd.drivingDynamics.exceptions.DDBadDataException;
+import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.events.Event;
+import ebd.globalUtils.location.Location;
+import ebd.trainData.TrainData;
+import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RelativeSpeedConditionTest {
+    @BeforeAll
+    static void setTrainDataVolatile(){
+        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 20d, 100d, null, null, null, null);
+        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
+    }
 
     @Test
-    void eval() throws ParseException, DDBadDataException {
+    void evalFalse() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
         RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
         //System.out.println(relativeSpeedCondition.eval());
         assertFalse(relativeSpeedCondition.eval());
+    }
+
+    @Test
+    void evalTrue() throws ParseException, DDBadDataException {
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \"<\", \"value\" : 25.0 }");
+        RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
+        //System.out.println(relativeSpeedCondition.eval());
+        assertTrue(relativeSpeedCondition.eval());
     }
 }

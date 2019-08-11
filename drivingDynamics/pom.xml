@@ -11,5 +11,28 @@
 
     <artifactId>drivingDynamics</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>messageLibrary</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>globalUtils</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>trainData</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>routeData</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 
 </project>

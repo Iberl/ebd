@@ -1,6 +1,8 @@
 package ebd.drivingDynamics.util;
 
-import ebd.drivingDynamics.exceptions.DDBadDataException;
+import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
@@ -18,10 +20,10 @@ public class TotalSpeedCondition extends Condition {
 
     @Override
     public boolean eval() {
-        //TODO add connection to TRD
-        double tempCur = 20;
+        TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        double curSpeed = trainDataVolatile.getCurrentSpeed();
 
-        return comparator.apply(tempCur,speedTotal);
+        return comparator.apply(curSpeed,speedTotal);
     }
 
     @Override
