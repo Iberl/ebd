@@ -73,14 +73,14 @@ public class TrainDataVolatile {
     /**
      * @return current speed in [m/s]
      */
-    public double getCurrentSpeed() {
+    public Double getCurrentSpeed() {
         return currentSpeed;
     }
 
     /**
      * @return current maximum allowed speed in [m/s]
      */
-    public double getCurrentMaxSpeed() {
+    public Double getCurrentMaxSpeed() {
         return currentMaxSpeed;
     }
 
