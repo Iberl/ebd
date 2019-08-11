@@ -2,6 +2,7 @@ package ebd.trainData;
 
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +30,13 @@ public class TrainDataVolatile {
     protected volatile Double currentSpeed = null;
 
     /**
+     * The current maximum allowed speed of the train in [m/s]
+     */
+    @Nullable
+    protected volatile Double currentMaxSpeed = 0d;
+
+
+    /**
      * The current {@link ebd.messageLibrary.util.ETCSVariables#M_MODE}
      */
     @Nullable
@@ -52,6 +60,7 @@ public class TrainDataVolatile {
     @Nullable
     protected volatile ForwardSpline currentBreakingPower = null;
 
+
     //Constructor
     public TrainDataVolatile(){}
 
@@ -61,8 +70,18 @@ public class TrainDataVolatile {
         return currentPosition;
     }
 
+    /**
+     * @return current speed in [m/s]
+     */
     public double getCurrentSpeed() {
         return currentSpeed;
+    }
+
+    /**
+     * @return current maximum allowed speed in [m/s]
+     */
+    public double getCurrentMaxSpeed() {
+        return currentMaxSpeed;
     }
 
     public int getM_MODE() {
