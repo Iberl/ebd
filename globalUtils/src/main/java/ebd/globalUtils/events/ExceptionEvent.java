@@ -12,64 +12,64 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
-	/**
-	 * The ExceptionEventTyp, defaults to CRITICAL
-	 */
-	@NotNull
-	public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
+    /**
+     * The ExceptionEventTyp, defaults to CRITICAL
+     */
+    @NotNull
+    public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
 
-	/**
-	 * The Event causing an Exception. If there is not a Event causing the exception,
-	 * use a {@link ebd.globalUtils.events.util.NotCausedByAEvent}
-	 */
-	@NotNull
-	public Event cause;
+    /**
+     * The Event causing an Exception. If there is not a Event causing the exception,
+     * use a {@link ebd.globalUtils.events.util.NotCausedByAEvent}
+     */
+    @NotNull
+    public Event cause;
 
-	/**
-	 * The exception that was thrown
-	 */
-	@NotNull
-	public Exception exception;
+    /**
+     * The exception that was thrown
+     */
+    @NotNull
+    public Exception exception;
 
-	/**
-	 *
-	 * @param source
-	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
-	 * @param targets
-	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
-	 * @param cause
-	 *          The Event causing an Exception
-	 * @param exception
-	 *          The thrown exception to be encapsulated
-	 */
-	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-		super(source, targets);
-		this.cause = cause;
-		this.exception = exception;
-	}
+    /**
+     *
+     * @param source
+     *          ID from the module the event was sent by
+     *          TODO: Define Format for IDs
+     * @param targets
+     *          ID from all modules the event is adressed to
+     *          TODO: Define Format for IDs
+     * @param cause
+     *          The Event causing an Exception
+     * @param exception
+     *          The thrown exception to be encapsulated
+     */
+    public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
+        super(source, targets);
+        this.cause = cause;
+        this.exception = exception;
+    }
 
-	/**
-	 *
-	 * @param source
-	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
-	 * @param targets
-	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
-	 * @param cause
-	 *          The Event causing an Exception
-	 * @param exception
-	 *          The thrown exception
-	 * @param exceptionEventTyp
-	 * 			The fitting {@link ExceptionEventTyp}
-	 */
-	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
-		super(source, targets);
-		this.cause = cause;
-		this.exception = exception;
-		this.exceptionEventTyp = exceptionEventTyp;
-	}
+    /**
+     *
+     * @param source
+     *          ID from the module the event was sent by
+     *          TODO: Define Format for IDs
+     * @param targets
+     *          ID from all modules the event is adressed to
+     *          TODO: Define Format for IDs
+     * @param cause
+     *          The Event causing an Exception
+     * @param exception
+     *          The thrown exception
+     * @param exceptionEventTyp
+     * 			The fitting {@link ExceptionEventTyp}
+     */
+    public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+        super(source, targets);
+        this.cause = cause;
+        this.exception = exception;
+        this.exceptionEventTyp = exceptionEventTyp;
+    }
 
 }

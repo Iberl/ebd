@@ -1,0 +1,361 @@
+package ebd.trainData;
+
+import ebd.trainData.util.dataConstructs.*;
+import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import ebd.trainData.util.exceptions.TDBadDataException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.*;
+
+/**
+ * This class contains the permanent information of a train. These values can only be set once per train.
+ * The data for this class is loaded from the "Zugkonfigurator" tool, a web app. It can be reached by a REST interface.
+ * @author Lars Schulze-Falck
+ *
+ */
+public class TrainDataPerma {
+
+    /**
+     * The internal ETCS-ID of the Train
+     */
+    @NotNull
+    private String id = "";
+
+    /**
+     * The name the Train
+     */
+    @NotNull
+    private String name = "";
+
+    /**
+     * Given in [m]
+     */
+    private double l_train;
+
+    /**
+     * Given in [km/h]
+     */
+    private int v_maxtrain;
+
+    /**
+     * Weight of Train in [kg]
+     */
+    private int trainWeight;
+
+    /**
+     * UIC letters h z or ee present
+     */
+    private boolean uicLettersHZEE;
+
+    /**
+     * UIC letters n or y present
+     */
+    private boolean uicLettersNY;
+
+    /**
+     * UIC letter a present
+     */
+    private boolean uicLetterA;
+
+    /**
+     * Dimensionless massfactor
+     */
+    private double massfactor;
+
+
+
+
+   /*
+   Data for breaking ability calculations
+   */
+
+
+    /**
+     * Number of axis on the train
+     */
+    private int numberOfAxis;
+
+    /**
+     * Number of axis with breaks
+     */
+    private int numberOfBreakAxis;
+
+    /**
+     * Available breaking percentage
+     */
+    private double breakPercent;
+
+    /**
+     * ep break present
+     */
+    private boolean epBreak;
+
+    /**
+     * rigid coupling present
+     */
+    private boolean rigidCoupling;
+
+
+    /**
+     * List of train cars with more details about the train, including chosen breaking method and breaking weight
+     */
+    List<TrainCar> trainCarList = new ArrayList<>();
+
+
+    /**
+     * Sets the class from the data found in the tool "Zugkonfigurator", a web app.
+     *
+     *
+     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
+     *
+     * @param trainID The ETCS-ID of the Train, found in trainconfigurator
+     *
+     * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
+     *
+     * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
+     *
+     * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
+     *                              data in the response.
+     */
+    public TrainDataPerma(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
+        setInstance(trainConfiguratorURL,trainID);
+    }
+
+
+    /**
+     * Sets the instance by parsing the JSONObject that is returned from the app.
+     *
+     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
+     *
+     * @param trainID The ETCS-ID of the Train
+     *
+     * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
+     *
+     * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
+     *
+     * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
+     *                              data in the response.
+     */
+    private void setInstance(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
+        /*
+        Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
+         */
+        //TODO Give URL by config file
+        JSONParser parser = new JSONParser();
+        Object Object;
+
+        String urlName = trainConfiguratorURL + "/rest/zug/extended/" + trainID;
+        URL url = new URL(urlName);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod("GET");
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == 400){
+            throw new TDBadDataException("The train " + trainID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
+        }
+        else if(responseCode != 200){
+            throw new IOException("The train " + trainID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
+        }
+
+        /*
+        Reading the input data into the variables
+         */
+
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+
+            //System.out.println(input.readLine());
+            Object = parser.parse(input);
+            JSONObject jsonObject = (JSONObject) Object;
+            Set<Object> jsonObjectKeySet = jsonObject.keySet();
+
+
+
+            if (jsonObjectKeySet.contains("Name")){
+                this.name = (String)jsonObject.get("Name");
+            }
+            else throw new TDBadDataException("The key 'Name' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("EtcsEngineID")){
+                this.id = String.valueOf(jsonObject.get("EtcsEngineID"));
+            }
+            else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("GesamtlaengeUeberPuffer")){
+                this.l_train = ((Long)jsonObject.get("GesamtlaengeUeberPuffer") / 1000d); //Resolution is given in [mm], we need [m]
+            }
+            else throw new TDBadDataException("The key 'GesamtlaengeUeberPuffer' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("Hoechstgeschwindigkeit")){
+
+                this.v_maxtrain = ((Long)jsonObject.get("Hoechstgeschwindigkeit")).intValue();
+            }
+            else throw new TDBadDataException("The key 'Hoechstgeschwindigkeit' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("Gesamtgewicht")){
+                this.trainWeight = ((Long)jsonObject.get("Gesamtgewicht")).intValue();
+            }
+            else throw new TDBadDataException("The key 'Gesamtgewicht' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("KennbuchstabeHZEE")){
+                this.uicLettersHZEE = (boolean)jsonObject.get("KennbuchstabeHZEE");
+            }
+            else throw new TDBadDataException("The key 'KennbuchstabeHZEE' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("KennbuchstabeNY")){
+                this.uicLettersNY = (boolean)jsonObject.get("KennbuchstabeNY");
+            }
+            else throw new TDBadDataException("The key 'KennbuchstabeNY' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("KennbuchstabeA")){
+                this.uicLetterA = (boolean)jsonObject.get("KennbuchstabeA");
+            }
+            else throw new TDBadDataException("The key 'KennbuchstabeA' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("Massenfaktor")){
+                this.massfactor = (Double)jsonObject.get("Massenfaktor");
+            }
+            else throw new TDBadDataException("The key 'Massenfaktor' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("GesamtanzahlAchsen")){
+                Long tempLong = (Long)jsonObject.get("GesamtanzahlAchsen");
+                this.numberOfAxis = tempLong.intValue();
+            }
+            else throw new TDBadDataException("The key 'GesamtanzahlAchsen' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("AnzahlGebremsteAchsen")){
+                Long tempLong = (Long)jsonObject.get("AnzahlGebremsteAchsen");
+                this.numberOfBreakAxis = tempLong.intValue();
+            }
+            else throw new TDBadDataException("The key 'AnzahlGebremsteAchsen' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("vorhandeneBremshundertstel")){
+                this.breakPercent = (Double)jsonObject.get("vorhandeneBremshundertstel");
+                //TODO Check values from train configurator
+            }
+            else throw new TDBadDataException("The key 'vorhandeneBremshundertstel' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("epBremse")){
+                this.epBreak = (boolean)jsonObject.get("epBremse");
+            }
+            else throw new TDBadDataException("The key 'epBremse' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("straffGekoppelt")){
+                this.rigidCoupling = (boolean)jsonObject.get("straffGekoppelt");
+            }
+            else throw new TDBadDataException("The key 'straffGekoppelt' was missing in the train data send by the tool TrainConfigurator");
+
+            if (jsonObjectKeySet.contains("Fahrzeuge")){
+                this.trainCarList = getTrainCars((JSONArray)jsonObject.get("Fahrzeuge"));
+            }
+            else throw new TDBadDataException("The key 'Fahrzeuge' was missing in the train data send by the tool TrainConfigurator");
+        }
+
+
+    }
+
+
+    private List<TrainCar> getTrainCars(JSONArray jsonArray) throws TDBadDataException {
+        List<TrainCar> trainCarList = new ArrayList<>();
+
+        for (Object entry : jsonArray){
+            JSONObject jsonObject = (JSONObject) entry;
+            String carType;
+
+            if(jsonObject.containsKey("Fahrzeugart")){
+                carType = (String)jsonObject.get("Fahrzeugart");
+            }
+            else throw new TDBadDataException("The key 'Fahrzeugart' was missing in the train data send by the tool TrainConfigurator");
+
+            TrainCar trainCar;
+
+            if(carType.equals("Triebzug")){
+                this.trainCarList.add(new LocomotiveTrain(jsonObject));
+            }
+            else if(carType.equals("Triebfahrzeug")){
+                this.trainCarList.add(new Locomotive(jsonObject));
+            }
+            else if(carType.equals("Reisezugwagen")){
+                this.trainCarList.add(new PassengerCar(jsonObject));
+            }
+            else if(carType.equals("Gueterwagen")){
+                this.trainCarList.add(new FreightCar(jsonObject));
+            }
+            else throw new TDBadDataException("Unknown type of train car in the data send by the tool TrainConfigurator");
+        }
+
+        return trainCarList;
+    }
+
+    /*
+    Getter
+     */
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getL_train() {
+        return l_train;
+    }
+
+    public int getV_maxtrain() {
+        return v_maxtrain;
+    }
+
+    public double getTrainWeight() {
+        return trainWeight;
+    }
+
+    public boolean isUicLettersHZEE() {
+        return uicLettersHZEE;
+    }
+
+    public boolean isUicLettersNY() {
+        return uicLettersNY;
+    }
+
+    public boolean isUicLetterA() {
+        return uicLetterA;
+    }
+
+    public double getMassfactor() {
+        return massfactor;
+    }
+
+    public int getNumberOfAxis() {
+        return numberOfAxis;
+    }
+
+    public int getNumberOfBreakAxis() {
+        return numberOfBreakAxis;
+    }
+
+    public double getBreakPercent() {
+        return breakPercent;
+    }
+
+    public boolean isEpBreak() {
+        return epBreak;
+    }
+
+    public boolean isRigidCoupling() {
+        return rigidCoupling;
+    }
+
+    public List<TrainCar> getTrainCarList() {
+        return trainCarList;
+    }
+}

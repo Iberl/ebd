@@ -91,6 +91,8 @@
     <module>globalUtils</module>
     <module>messageLibrary</module>
     <module>drivingDynamics</module>
+    <module>trainData</module>
+    <module>routeData</module>
   </modules>
 
 </project>
