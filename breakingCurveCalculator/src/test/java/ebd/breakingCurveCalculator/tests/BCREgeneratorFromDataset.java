@@ -140,10 +140,10 @@ public class BCREgeneratorFromDataset{
 		int L_TRAIN = 300;
 		
 		//setting currentSpeedLimit
-		int currentSpeedLimit = 160 / 5;
+		double currentSpeedLimit = 160 / 3.6;
 		
 		//setting V_MAX
-		int V_MAXTRAIN = 200 / 5;
+		int V_MAXTRAIN = 200;
 		
 		return new BreakingCurveRequestEvent("devTests", targets,id,breakingPower, packet15, packet21, currentGradient, currentPosition, packet27, 
 				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);	

@@ -230,7 +230,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 		 * Then the first speed value is based on the current allowed speed of the train (see SRS 3.6.3.2.2).
 		 * 
 		 */
-		if (bcre.packet27.speedProfile.D_STATIC > 0) {addKnotToCurve(new Knot(0d, (double)bcre.currentSpeedLimit));}
+		if (bcre.packet27.speedProfile.D_STATIC > 0) {addKnotToCurve(new Knot(0d, bcre.currentSpeedLimit));}
 		
 		
 		/*

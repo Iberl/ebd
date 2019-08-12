@@ -61,7 +61,7 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 
 	 */
 	public BreakingCurveRequestEvent(String source, List<String> targets, String id, ForwardSpline breakingPower, Packet_15 packet15, Packet_21 packet21, int currentGradient, Position referencePosition, Packet_27 packet27,
-			int NC_CDTRAIN, int L_TRAIN, int currentSpeedLimit, int maxSpeedofTrain) {
+			int NC_CDTRAIN, int L_TRAIN, double currentSpeedLimit, int maxSpeedofTrain) {
 		super(source, targets);
 		this.id = id;
 		this.breakingPower = breakingPower;
@@ -115,7 +115,7 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 	 */
 	public BreakingCurveRequestEvent(String source, List<String> targets, String id,ForwardSpline breakingPower, Packet_15 packet15, Packet_21 packet21, int currentGradient,  Position referencePosition, Packet_27 packet27,
-			List<Packet_65> listPacket65, int NC_CDTRAIN, int NC_TRAIN, int L_TRAIN, int currentSpeedLimit, int maxSpeedofTrain) {
+			List<Packet_65> listPacket65, int NC_CDTRAIN, int NC_TRAIN, int L_TRAIN, double currentSpeedLimit, int maxSpeedofTrain) {
 		super(source,targets);
 		this.breakingPower = breakingPower;
 		this.id = id;
@@ -193,7 +193,7 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 	/**
 	 * Current allowed speed of the train in [m/s]
 	 */
-	public int currentSpeedLimit;
+	public double currentSpeedLimit;
 	
 	/**
 	 * {@link ETCSVariables#V_MAXTRAIN} from Train Data in [km/h] / 5.

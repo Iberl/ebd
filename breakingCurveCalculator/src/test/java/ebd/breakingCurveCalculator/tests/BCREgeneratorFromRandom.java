@@ -144,7 +144,7 @@ public class BCREgeneratorFromRandom{
 		int L_TRAIN = rng.nextInt(100) + 150;
 		
 		//setting currentSpeedLimit
-		int currentSpeedLimit = rng.nextInt(30) + 10;
+		double currentSpeedLimit = rng.nextInt(30) + 10;
 		
 		//setting V_MAX
 		int V_MAXTRAIN = rng.nextInt(101) + 20;
