@@ -14,8 +14,10 @@ import ebd.messageLibrary.util.ETCSVariables;
 
 /**
  * With this Event, the TSM can request BCC to calculate a new BreakingCurve. It is the responsibility of the thrower to check for the integrity of the provided Information.<br>
- * Special care has to be taken that the Movement Authority does not exceed the maximum defined distance of the Static Speed Profile, should the {@link Packet_27} contain the end marker {@link ETCSVariables#V_STATIC} = 127<br>
- * Special care has to be taken that the Movement Authority does not exceed the maximum defined distance of the Gradient Profile, should the {@link Packet_21} contain the end marker {@link ETCSVariables#G_A} = 255<br>
+ * Special care has to be taken that the Movement Authority does not exceed the maximum defined distance of the Static Speed Profile,
+ * should the {@link Packet_27} contain the end marker {@link ETCSVariables#V_STATIC} = 127<br>
+ * Special care has to be taken that the Movement Authority does not exceed the maximum defined distance of the Gradient Profile,
+ * should the {@link Packet_21} contain the end marker {@link ETCSVariables#G_A} = 255<br>
  * 
  * @author Lars Schulze-Falck
  *
@@ -50,16 +52,16 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 	 * 			{@link ETCSVariables#NC_CDTRAIN}
 	 * @param L_TRAIN
 	 * 			{@link ETCSVariables#L_TRAIN}
-	 * @param currentSpeedLimit 
+	 * @param currentSpeedLimit
 	 * 			Current allowed speed of the train. Either out of previous SSP or from current mode.<br>
-	 * 			NOTE: In [km/h * 1/5], so with the same resolution as an ETCS Variable!
-	 * 			
-	 * @param V_MAXTRAIN
-	 * 			{@link ETCSVariables#V_MAXTRAIN}
+	 * 			NOTE: In [m/s]
+	 * @param maxSpeedofTrain
+	 * 			The maximum Speed of the train in [km/h]. This value will be divided by 5 in the constructor,
+	 * 			so it the same unit as speed values provided by the ETCS Message System.
 
 	 */
 	public BreakingCurveRequestEvent(String source, List<String> targets, String id, ForwardSpline breakingPower, Packet_15 packet15, Packet_21 packet21, int currentGradient, Position referencePosition, Packet_27 packet27,
-			int NC_CDTRAIN, int L_TRAIN, int currentSpeedLimit, int V_MAXTRAIN) {
+			int NC_CDTRAIN, int L_TRAIN, int currentSpeedLimit, int maxSpeedofTrain) {
 		super(source, targets);
 		this.id = id;
 		this.breakingPower = breakingPower;
@@ -71,7 +73,7 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 		this.NC_CDTRAIN = NC_CDTRAIN;
 		this.L_TRAIN = L_TRAIN;
 		this.currentSpeedLimit = currentSpeedLimit;
-		this.V_MAXTRAIN = V_MAXTRAIN;
+		this.maxSpeedofTrain = maxSpeedofTrain / 5;
 		
 	}
 	
@@ -107,12 +109,13 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 	 * 			{@link ETCSVariables#L_TRAIN}
 	 * @param currentSpeedLimit 
 	 * 			Current allowed speed of the train. Either out of previous SSP or from current mode.<br>
-	 * 			NOTE: In [km/h * 1/5], so with the same resolution as an ETCS Variable!
-	 * @param V_MAXTRAIN
-	 * 			{@link ETCSVariables#V_MAXTRAIN}
+	 * 			NOTE: In [m/s]
+	 * @param maxSpeedofTrain
+	 * 			The maximum Speed of the train in [km/h]. This value will be divided by 5 in the constructor,
+	 * 			so it the same unit as speed values provided by the ETCS Message System.
 	 */
 	public BreakingCurveRequestEvent(String source, List<String> targets, String id,ForwardSpline breakingPower, Packet_15 packet15, Packet_21 packet21, int currentGradient,  Position referencePosition, Packet_27 packet27,
-			List<Packet_65> listPacket65, int NC_CDTRAIN, int NC_TRAIN, int L_TRAIN, int currentSpeedLimit, int V_MAXTRAIN) {
+			List<Packet_65> listPacket65, int NC_CDTRAIN, int NC_TRAIN, int L_TRAIN, int currentSpeedLimit, int maxSpeedofTrain) {
 		super(source,targets);
 		this.breakingPower = breakingPower;
 		this.id = id;
@@ -126,7 +129,7 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 		this.NC_TRAIN = NC_TRAIN;
 		this.L_TRAIN = L_TRAIN;
 		this.currentSpeedLimit = currentSpeedLimit;
-		this.V_MAXTRAIN = V_MAXTRAIN;
+		this.maxSpeedofTrain = maxSpeedofTrain / 5;
 	}
 	
 	/**
@@ -188,14 +191,14 @@ public class BreakingCurveRequestEvent extends NormalEvent{
 	public int L_TRAIN;
 	
 	/**
-	 * Current allowed speed of the train in [Km/h]
+	 * Current allowed speed of the train in [m/s]
 	 */
 	public int currentSpeedLimit;
 	
 	/**
-	 * {@link ETCSVariables#V_MAXTRAIN} from Train Data
+	 * {@link ETCSVariables#V_MAXTRAIN} from Train Data in [km/h] / 5.
 	 */
-	public int V_MAXTRAIN;
+	public int maxSpeedofTrain;
 	
 	
 	
