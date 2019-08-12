@@ -230,7 +230,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 		 * Then the first speed value is based on the current allowed speed of the train (see SRS 3.6.3.2.2).
 		 * 
 		 */
-		if (bcre.packet27.speedProfile.D_STATIC > 0) {addKnotToCurve(new Knot(0d, bcre.currentSpeedLimit * BreakingCurveCalculator.ETCS_VALUE_TO_MS));}
+		if (bcre.packet27.speedProfile.D_STATIC > 0) {addKnotToCurve(new Knot(0d, (double)bcre.currentSpeedLimit));}
 		
 		
 		/*
@@ -290,7 +290,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 			}
 			
 			allPossibleSpeeds.addAll(otherSpeeds);
-			allPossibleSpeeds.add(bcre.V_MAXTRAIN); //To be sure that we do not go over V_MAXTRAIN
+			allPossibleSpeeds.add(bcre.maxSpeedofTrain); //To be sure that we do not go over V_MAXTRAIN
 			Collections.sort(allPossibleSpeeds); //Sort all speeds so the lowest is at index 0
 			
 			/*

@@ -1,5 +1,7 @@
 package ebd.globalUtils.events;
 
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+
 import java.util.List;
 
 /**
@@ -9,9 +11,19 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
-	/** The Event causing an Exception */
+    /**
+     *
+     */
+    public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
+
+	/**
+     * The Event causing an Exception
+     */
 	public Event cause;
-	/** The thrown exception */
+
+	/**
+     * The thrown exception
+     */
 	public Exception exception;
 
 	/**
@@ -32,5 +44,27 @@ public class ExceptionEvent extends Event {
 		this.cause = cause;
 		this.exception = exception;
 	}
+
+    /**
+     *
+     * @param source
+     *          ID from the module the event was sent by
+     *          TODO: Define Format for IDs
+     * @param targets
+     *          ID from all modules the event is adressed to
+     *          TODO: Define Format for IDs
+     * @param cause
+     *          The Event causing an Exception
+     * @param exception
+     *          The thrown exception
+     * @param exceptionEventTyp
+     *          The ExceptionEventTyp of the Exception
+     */
+    public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+        super(source, targets);
+        this.cause = cause;
+        this.exception = exception;
+        this.exceptionEventTyp = exceptionEventTyp;
+    }
 
 }
