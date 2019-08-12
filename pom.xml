@@ -93,6 +93,7 @@
     <module>drivingDynamics</module>
     <module>trainData</module>
     <module>routeData</module>
+    <module>breakingCurveCalculator</module>
   </modules>
 
 </project>
