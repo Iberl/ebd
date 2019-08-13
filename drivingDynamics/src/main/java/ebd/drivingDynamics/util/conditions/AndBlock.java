@@ -1,4 +1,4 @@
-package ebd.drivingDynamics.util;
+package ebd.drivingDynamics.util.conditions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;

@@ -1,12 +1,12 @@
-package ebd.drivingDynamics.util;
+package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
-public class HoldSpeedAction extends Action {
+public class CruiseAction extends Action {
 
-    public HoldSpeedAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+    public CruiseAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
         super(eventBus);
         fromJSON(jsonObject);
     }
@@ -17,6 +17,6 @@ public class HoldSpeedAction extends Action {
             conditionsFromJSON((JSONObject)jsonObject.get("conditions"));
 
         }
-        else throw new DDBadDataException("The key 'conditions' was missing for a AccelerationAction");
+        else throw new DDBadDataException("The key 'conditions' was missing for a CruiseAction");
     }
 }

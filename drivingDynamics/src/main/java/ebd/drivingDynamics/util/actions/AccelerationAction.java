@@ -1,17 +1,18 @@
-package ebd.drivingDynamics.util;
+package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
-public class BreakAction extends Action {
+public class AccelerationAction extends Action {
 
-    public BreakAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+
+    private double accelerationPercentage;
+
+    public AccelerationAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
         super(eventBus);
         fromJSON(jsonObject);
     }
-
-    private double breakPercentage;
 
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
@@ -19,20 +20,19 @@ public class BreakAction extends Action {
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                this.breakPercentage = (Long)tempObject;
+                accelerationPercentage = (Long)tempObject;
             }
             else if(tempObjectName.equals("Double")){
-                this.breakPercentage = (Double)tempObject;
+                accelerationPercentage = (Double)tempObject;
             }
-            else throw new DDBadDataException("BreakAction value was not a number");
+            else throw new DDBadDataException("AccelerationAction value was not a number");
 
 
-            if(breakPercentage < 0 || breakPercentage > 100){
-                throw new DDBadDataException("BreakAction Value was not in the range [0, 100]");
+            if(accelerationPercentage < 0 || accelerationPercentage > 100){
+                throw new DDBadDataException("AccelerationAction Value was not in the range [0, 100]");
             }
         }
-        else throw new DDBadDataException("The key 'value' was missing for a BreakAction");
-
+        else throw new DDBadDataException("The key 'value' was missing for a AccelerationAction");
 
         if(jsonObject.keySet().contains("conditions")){
             conditionsFromJSON((JSONObject)jsonObject.get("conditions"));
@@ -42,7 +42,7 @@ public class BreakAction extends Action {
 
     }
 
-    public double getBreakPercentage() {
-        return this.breakPercentage;
+    public double getAccelerationPercentage() {
+        return accelerationPercentage;
     }
 }

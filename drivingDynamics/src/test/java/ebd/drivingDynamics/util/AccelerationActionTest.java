@@ -1,5 +1,6 @@
 package ebd.drivingDynamics.util;
 
+import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;

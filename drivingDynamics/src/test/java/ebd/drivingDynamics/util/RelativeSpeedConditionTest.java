@@ -1,10 +1,8 @@
 package ebd.drivingDynamics.util;
 
 
+import ebd.drivingDynamics.util.conditions.RelativeSpeedCondition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.globalUtils.events.Event;
-import ebd.globalUtils.location.Location;
-import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
