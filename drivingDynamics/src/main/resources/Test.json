@@ -1,0 +1,72 @@
+{ "actions" : [
+              {
+                "v_acc" : {
+                            "value" : 80,
+                            "conditions" : {  
+                                            "andBlock" : [
+                                                        {
+                                                            "v_rel" : {
+                                                                        "op" : "<",
+                                                                        "value" : 95
+                                                                    }
+                                                        },
+                                                        {
+                                                            "v" : {
+                                                                    "op" : "<",
+                                                                    "value" : 120
+                                                                }
+                                                        }
+                                                       ]
+                                         }
+                        }
+              },
+              {
+                "v_break" : {
+                            "value" : 100,
+                            "conditions" : {  
+                                            "orBlock" : [ 
+                                                        {
+                                                            "v_rel" : {
+                                                                        "op" : ">",
+                                                                        "value" : 100
+                                                                    }
+                                                        },
+                                                        {
+                                                            "v" : {
+                                                                    "op" : ">=",
+                                                                    "value" : 120
+                                                                }
+                                                        }
+                                                       ]
+                                         }
+                          }
+              },
+              {
+                "v_cruise" : {
+                            "conditions" : {  
+                                            "andBlock" : [ 
+                                                        {
+                                                            "v_rel" : {
+                                                                        "op" : ">=",
+                                                                        "value" : 95
+                                                                    }
+                                                        },
+                                                        {
+                                                            "v_rel" : {
+                                                                    "op" : "<=",
+                                                                    "value" : 100
+                                                                }
+                                                        },
+                                                        {
+                                                            "v" : {
+                                                                    "op" : "<",
+                                                                    "value" : 120
+                                                                }
+                                                        }
+                                                       ]
+                                         }
+                           }
+              }
+            ]
+
+}

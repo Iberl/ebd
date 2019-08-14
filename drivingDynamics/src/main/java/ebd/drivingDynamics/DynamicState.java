@@ -1,5 +1,7 @@
 package ebd.drivingDynamics;
 
+import ebd.drivingDynamics.util.AvailableAcceleration;
+import ebd.drivingDynamics.util.MovementState;
 import ebd.globalUtils.position.Position;
 
 public class DynamicState {
@@ -25,17 +27,32 @@ public class DynamicState {
     private double acceleration;
 
     /**
-     * Current movement state as defined in {@link ebd.drivingDynamics.util.MovementStates}
+     * Current movement state as defined in {@link MovementState}
      */
-    private Enum movementState;
+    private MovementState movementState;
 
-    public DynamicState(double time, Position position, double speed, double acceleration, Enum movementState) {
+
+    private AvailableAcceleration availableAcceleration;
+
+    public DynamicState(double time, Position position, double speed, double acceleration, MovementState movementState, AvailableAcceleration availableAcceleration) {
         this.time = time;
         this.position = position;
         this.speed = speed;
         this.acceleration = acceleration;
         this.movementState = movementState;
+        this.availableAcceleration = availableAcceleration;
     }
+
+    public void nextState(double deltaT){
+        this.time = time + deltaT;
+        this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
+        this.speed = this.acceleration * deltaT;
+        this.acceleration = availableAcceleration.getAcceleration(this.speed, this.movementState);
+    }
+
+    /*
+    Getters
+     */
 
     /**
      * Current mission time in [s]
@@ -66,9 +83,29 @@ public class DynamicState {
     }
 
     /**
-     * Current movement state as defined in {@link ebd.drivingDynamics.util.MovementStates}
+     * Current movement state as defined in {@link MovementState}
      */
     public Enum getMovementState() {
         return movementState;
+    }
+
+    /*
+    Setter
+     */
+
+    /**
+     * Sets the movementState, which decides what acceleration will be used for the next time step
+     * @param movementState see {@link MovementState}
+     */
+    public void setMovementState(MovementState movementState) {
+        this.movementState = movementState;
+    }
+
+    /**
+     * Sets the position
+     * @param position see {@link Position}
+     */
+    public void setPosition(Position position){
+        this.position = position;
     }
 }

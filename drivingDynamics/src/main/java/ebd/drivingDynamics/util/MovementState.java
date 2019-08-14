@@ -1,6 +1,6 @@
 package ebd.drivingDynamics.util;
 
-public enum MovementStates {
+public enum MovementState {
 
     /**
      * The train is stopped
@@ -25,5 +25,5 @@ public enum MovementStates {
     /**
      * The train is not applying any force and is rolling out
      */
-    Costing;
+    COASTING;
 }
