@@ -8,13 +8,13 @@ public class ActionSelector {
 
     public static Action select(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
 
-        if(jsonObject.containsKey("v_up")){
+        if(jsonObject.containsKey("v_acc")){
             return new AccelerationAction((JSONObject) jsonObject.get("v_acc"), eventBus);
         }
-        else if(jsonObject.containsKey("v_down")){
+        else if(jsonObject.containsKey("v_break")){
             return new BreakAction((JSONObject) jsonObject.get("v_break"), eventBus);
         }
-        else if(jsonObject.containsKey("v_hold")){
+        else if(jsonObject.containsKey("v_cruise")){
             return new CruiseAction((JSONObject) jsonObject.get("v_cruise"), eventBus);
         }
         else if(jsonObject.containsKey("v_halt")){

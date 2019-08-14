@@ -10,9 +10,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DrivingProfile {
@@ -20,7 +20,7 @@ public class DrivingProfile {
     private List<Action> actions;
     private EventBus eventBus;
 
-    public DrivingProfile(String pathToProfile, EventBus eventBus){
+    public DrivingProfile(String pathToProfile, EventBus eventBus) throws DDBadDataException, IOException, ParseException {
         this.eventBus = eventBus;
         loadProfileFromFile(pathToProfile);
 
@@ -36,27 +36,19 @@ public class DrivingProfile {
         return new NoAction(eventBus);
     }
 
-    private void loadProfileFromFile(String pathToProfile){
+    private void loadProfileFromFile(String pathToProfile) throws DDBadDataException, IOException, ParseException {
         try(FileReader fileReader = new FileReader(pathToProfile)){
             JSONParser jsonParser = new org.json.simple.parser.JSONParser();
             Object object = jsonParser.parse(fileReader);
 
             jsonToProfile((JSONObject)object);
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (DDBadDataException e) {
-            e.printStackTrace();
         }
     }
 
     private void jsonToProfile(JSONObject jsonObject) throws DDBadDataException {
 
         if(jsonObject.containsKey("actions")){
+            this.actions = new ArrayList<>();
             JSONArray jsonArray = (JSONArray)jsonObject.get("actions");
             for(Object object : jsonArray){
                 JSONObject tempJSON = (JSONObject)object;
