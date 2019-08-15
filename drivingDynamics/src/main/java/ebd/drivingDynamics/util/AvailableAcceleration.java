@@ -1,8 +1,19 @@
 package ebd.drivingDynamics.util;
 
+import ebd.drivingDynamics.util.curveCalculation.AccelerationPowerCurveCalculator;
+import ebd.drivingDynamics.util.curveCalculation.BreakingPowerCurveCalculator;
+import ebd.drivingDynamics.util.curveCalculation.ResistanceCurveCalculator;
+import ebd.globalUtils.events.Event;
 import ebd.globalUtils.spline.ForwardSpline;
+import org.greenrobot.eventbus.EventBus;
 
 public class AvailableAcceleration {
+
+    private double accelerationModification = 1d;
+
+    private double breakingModification = 1d;
+
+    private EventBus eventBus;
 
     private ForwardSpline speedUpCurve;
 
@@ -10,7 +21,14 @@ public class AvailableAcceleration {
 
     private ForwardSpline resistanceCurve;
 
-    public AvailableAcceleration(ForwardSpline speedUpCurve, ForwardSpline breakingPowerCurve, ForwardSpline resistanceCurve) {
+    public AvailableAcceleration(EventBus eventBus){
+        this.eventBus = eventBus;
+        calculateCurves();
+    }
+
+
+    public AvailableAcceleration(EventBus eventBus, ForwardSpline speedUpCurve, ForwardSpline breakingPowerCurve, ForwardSpline resistanceCurve) {
+        this.eventBus = eventBus;
         this.speedUpCurve = speedUpCurve;
         this.breakingPowerCurve = breakingPowerCurve;
         this.resistanceCurve = resistanceCurve;
@@ -27,9 +45,9 @@ public class AvailableAcceleration {
             case CRUISE:
                 return 0d;
             case ACCELERATING:
-                return speedUpCurve.getPointOnCurve(currentSpeed) + resistanceCurve.getPointOnCurve(currentSpeed);
+                return speedUpCurve.getPointOnCurve(currentSpeed) * accelerationModification + resistanceCurve.getPointOnCurve(currentSpeed);
             case BREAKING:
-                return - breakingPowerCurve.getPointOnCurve(currentSpeed) + resistanceCurve.getPointOnCurve(currentSpeed);
+                return - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification + resistanceCurve.getPointOnCurve(currentSpeed);
             case COASTING:
                 return resistanceCurve.getPointOnCurve(currentSpeed);
             default:
@@ -37,5 +55,34 @@ public class AvailableAcceleration {
         }
     }
 
+    private void calculateCurves() {
+        this.speedUpCurve = AccelerationPowerCurveCalculator.calculate(this.eventBus);
+        this.breakingPowerCurve = BreakingPowerCurveCalculator.calculate(this.eventBus);
+        this.resistanceCurve = ResistanceCurveCalculator.calculate(this.eventBus);
 
+    }
+
+    /*
+    Getter
+     */
+
+    public double getAccelerationModification() {
+        return accelerationModification;
+    }
+
+    public double getBreakingModification() {
+        return breakingModification;
+    }
+
+    /*
+    Setter
+     */
+
+    public void setAccelerationModification(double accelerationModification) {
+        this.accelerationModification = accelerationModification;
+    }
+
+    public void setBreakingModification(double breakingModification) {
+        this.breakingModification = breakingModification;
+    }
 }
