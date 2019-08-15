@@ -60,16 +60,31 @@ public class TrainDataVolatile {
     protected volatile String currentBreakingMode = null;
 
     /**
-     * The current breaking power
+     * The current breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
     @Nullable
     protected volatile ForwardSpline currentBreakingPower = null;
+
+    /**
+     * The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
+     */
+    @Nullable
+    protected volatile ForwardSpline currentAcceleratingPower = null;
+
+    /**
+     * The current resistance curve r(v), r in [m/(s^2)], v in [m/s]
+     */
+    @Nullable
+    protected volatile ForwardSpline currentResistanceCurve = null;
 
 
     //Constructor
     public TrainDataVolatile(){}
 
-    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentMaxSpeed, @Nullable Integer m_MODE, @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower) {
+    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentMaxSpeed, @Nullable Integer m_MODE,
+                             @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
+                             @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve) {
+
         NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
         ExceptionEvent exceptionEvent = new ExceptionEvent("TD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
         EventBus.getDefault().post(exceptionEvent);
@@ -81,6 +96,8 @@ public class TrainDataVolatile {
         this.previousLocations = previousLocations;
         this.currentBreakingMode = currentBreakingMode;
         this.currentBreakingPower = currentBreakingPower;
+        this.currentAcceleratingPower = currentAcceleratingPower;
+        this.currentResistanceCurve = currentResistanceCurve;
     }
 
     //Getter and setter
@@ -115,8 +132,24 @@ public class TrainDataVolatile {
         return currentBreakingMode;
     }
 
+    /**
+     * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
     public ForwardSpline getCurrentBreakingPower() {
         return currentBreakingPower;
     }
 
+    /**
+     * @return The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
+     */
+    public ForwardSpline getCurrentAcceleratingPower() {
+        return currentAcceleratingPower;
+    }
+
+    /**
+     * @return The current resistance curve r(v), r in [m/(s^2)], v in [m/s]
+     */
+    public ForwardSpline getCurrentResistanceCurve() {
+        return currentResistanceCurve;
+    }
 }
