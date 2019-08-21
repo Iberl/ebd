@@ -42,12 +42,12 @@ public class BackwardSpline extends Spline {
 		
 	public BackwardSpline(int degree,String id) {
 		this.id = id;
-		setdegree(degree);
+		setDegree(degree);
 	}
 	
 	public BackwardSpline(int degree) {
 		this.id = "noID";
-		setdegree(degree);
+		setDegree(degree);
 	}
 	
 	
@@ -136,17 +136,4 @@ public class BackwardSpline extends Spline {
 			return curve.higherKey(xValue);
 		}
 	}
-
-	public int getdegree() {
-		return degree;
-	}
-
-	private void setdegree(int degree) {
-		this.degree = degree;
-	}
-	
-
-
-	
-
 }
