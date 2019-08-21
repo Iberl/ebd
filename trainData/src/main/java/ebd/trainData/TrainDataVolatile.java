@@ -7,6 +7,7 @@ import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.trainData.util.curveCalculation.AvailableAcceleration;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,12 +79,30 @@ public class TrainDataVolatile {
     protected volatile ForwardSpline currentResistanceCurve = null;
 
 
+    @Nullable
+    protected volatile AvailableAcceleration availableAcceleration = null;
+
+
     //Constructor
     public TrainDataVolatile(){}
 
+    /**
+     * only for testing!
+     * @param currentPosition
+     * @param currentSpeed
+     * @param currentMaxSpeed
+     * @param m_MODE
+     * @param previousLocations
+     * @param currentBreakingMode
+     * @param currentBreakingPower
+     * @param currentAcceleratingPower
+     * @param currentResistanceCurve
+     * @param availableAcceleration
+     */
     public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentMaxSpeed, @Nullable Integer m_MODE,
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
-                             @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve) {
+                             @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
+                             @Nullable AvailableAcceleration availableAcceleration) {
 
         NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
         ExceptionEvent exceptionEvent = new ExceptionEvent("TD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
@@ -98,6 +117,7 @@ public class TrainDataVolatile {
         this.currentBreakingPower = currentBreakingPower;
         this.currentAcceleratingPower = currentAcceleratingPower;
         this.currentResistanceCurve = currentResistanceCurve;
+        this.availableAcceleration = availableAcceleration;
     }
 
     //Getter and setter
@@ -151,5 +171,9 @@ public class TrainDataVolatile {
      */
     public ForwardSpline getCurrentResistanceCurve() {
         return currentResistanceCurve;
+    }
+
+    public AvailableAcceleration getAvailableAcceleration() {
+        return availableAcceleration;
     }
 }
