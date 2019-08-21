@@ -4,6 +4,7 @@ package ebd.trainData;
 import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.trainData.util.curveCalculation.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -46,13 +47,15 @@ public class TrainData {
         try {
             this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
         } catch (IOException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
         } catch (ParseException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
         } catch (TDBadDataException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", exceptionTargets, new NotCausedByAEvent(), e));
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
-        this.eventBus.postSticky(trainDataPerma);
+        this.eventBus.postSticky(this.trainDataPerma);
+        this.trainDataVolatile.availableAcceleration = new AvailableAcceleration(eventBus);
+        eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
 
     /**
@@ -64,34 +67,34 @@ public class TrainData {
     @Subscribe
     public void changeInTrainData(TrainDataChangeEvent trainDataChangeEvent){
 
-        for (Field field : trainDataVolatile.getClass().getDeclaredFields()){
+        for (Field field : this.trainDataVolatile.getClass().getDeclaredFields()){
 
             if (field.getName().equals(trainDataChangeEvent.fieldName)) {
                 try {
 
-                    field.set(trainDataVolatile, trainDataChangeEvent.fieldValue);
-                    eventBus.postSticky(new NewTrainDataVolatileEvent("ttd;", eventTargets, trainDataVolatile));
+                    field.set(this.trainDataVolatile, trainDataChangeEvent.fieldValue);
+                    this.eventBus.postSticky(new NewTrainDataVolatileEvent("ttd;", this.eventTargets, this.trainDataVolatile));
 
                 } catch (IllegalAccessException e) {
                     String msg = String.format("Field %s was not accessible. %n", trainDataChangeEvent.fieldName);
                     msg += " " + e.getMessage();
                     IllegalAccessException exception = new IllegalAccessException(msg);
                     exception.setStackTrace(e.getStackTrace());
-                    eventBus.post(new TrainDataExceptionEvent("ttd;", exceptionTargets, trainDataChangeEvent, exception));
+                    this.eventBus.post(new TrainDataExceptionEvent("ttd;", this.exceptionTargets, trainDataChangeEvent, exception));
                 } catch (IllegalArgumentException e){
                     String msg = String.format("Passed fieldValue with type %s did not match field %s with the type %s.%n", trainDataChangeEvent.fieldValue.getClass(), field.getName(), field.getType());
                     msg += " " + e.getMessage();
                     IllegalArgumentException iAE = new IllegalArgumentException(msg);
                     iAE.setStackTrace(e.getStackTrace());
-                    eventBus.post(new TrainDataExceptionEvent("ttd;", exceptionTargets, trainDataChangeEvent, iAE));
+                    this.eventBus.post(new TrainDataExceptionEvent("ttd;", this.exceptionTargets, trainDataChangeEvent, iAE));
                 }
 
                 return;
             }
         }
-        String msg = String.format("fieldName %s was not found in fields of %s", trainDataChangeEvent.fieldName, trainDataVolatile.getClass());
+        String msg = String.format("fieldName %s was not found in fields of %s", trainDataChangeEvent.fieldName, this.trainDataVolatile.getClass());
         IllegalArgumentException iAE = new IllegalArgumentException(msg);
-        eventBus.post(new TrainDataExceptionEvent("ttd;", exceptionTargets, trainDataChangeEvent, iAE));
+        this.eventBus.post(new TrainDataExceptionEvent("ttd;", this.exceptionTargets, trainDataChangeEvent, iAE));
     }
 }
 
