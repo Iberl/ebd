@@ -1,5 +1,6 @@
 package ebd.trainData.util.curveCalculation;
 
+import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.spline.ForwardSpline;
 import org.greenrobot.eventbus.EventBus;
 
@@ -30,6 +31,8 @@ public class AvailableAcceleration {
      * Returns the available acceleration for a certain speed and {@link MovementState}
      * @param currentSpeed in [m/s]
      * @return acceleration in [m/(s^2)]
+     *
+     * TODO Add gradient profile into mix
      */
     public double getAcceleration(double currentSpeed, MovementState movementState){
         switch (movementState){
