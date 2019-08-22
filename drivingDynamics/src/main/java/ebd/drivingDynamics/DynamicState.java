@@ -1,8 +1,8 @@
 package ebd.drivingDynamics;
 
-import ebd.drivingDynamics.util.AvailableAcceleration;
-import ebd.drivingDynamics.util.MovementState;
+import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
+import ebd.trainData.util.curveCalculation.AvailableAcceleration;
 
 public class DynamicState {
 
