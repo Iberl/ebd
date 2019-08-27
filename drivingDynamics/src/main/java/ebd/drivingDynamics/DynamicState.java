@@ -45,9 +45,9 @@ public class DynamicState {
 
     public void nextState(double deltaT){
         this.time = time + deltaT;
-        this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
-        this.speed = this.acceleration * deltaT;
         this.acceleration = availableAcceleration.getAcceleration(this.speed, this.movementState);
+        this.speed = this.acceleration * deltaT;
+        this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
     }
 
     /*
@@ -94,7 +94,7 @@ public class DynamicState {
      */
 
     /**
-     * Sets the movementState, which decides what acceleration will be used for the next time step
+     * Sets the movementState, which decides what acceleration (speed up or breaking) will be used
      * @param movementState see {@link MovementState}
      */
     public void setMovementState(MovementState movementState) {
@@ -107,5 +107,19 @@ public class DynamicState {
      */
     public void setPosition(Position position){
         this.position = position;
+    }
+
+    /*
+    Sets the modifier for the available acceleration force
+     */
+    public void setAccelerationModification(double accelerationModification) {
+        this.availableAcceleration.setAccelerationModification(accelerationModification);
+    }
+
+    /*
+    Sets the modifier for the available breaking force
+     */
+    public void setBreakingModification(double breakingModification) {
+        this.availableAcceleration.setBreakingModification(breakingModification);
     }
 }

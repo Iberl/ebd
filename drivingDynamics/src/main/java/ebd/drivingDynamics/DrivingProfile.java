@@ -23,7 +23,6 @@ public class DrivingProfile {
     public DrivingProfile(String pathToProfile, EventBus eventBus) throws DDBadDataException, IOException, ParseException {
         this.eventBus = eventBus;
         loadProfileFromFile(pathToProfile);
-
     }
 
 

@@ -5,13 +5,17 @@ import ebd.drivingDynamics.util.conditions.Condition;
 import ebd.drivingDynamics.util.conditions.ConditionSelector;
 import ebd.drivingDynamics.util.conditions.OrBlock;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.movementState.MovementState;
 import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.simple.JSONObject;
 
 public abstract class Action {
-
+    @NotNull
     protected EventBus localEventBus;
 
+    @NotNull
     protected Condition condition;
 
     public Action(EventBus eventBus){
@@ -43,9 +47,5 @@ public abstract class Action {
             newE.setStackTrace(e.getStackTrace());
             throw newE;
         }
-
     }
-
-
-
 }

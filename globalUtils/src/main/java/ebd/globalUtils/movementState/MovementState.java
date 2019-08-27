@@ -31,5 +31,10 @@ public enum MovementState {
     /**
      * The train is not applying any force and is rolling out
      */
-    COASTING;
+    COASTING,
+
+    /**
+     * The train has the same movement state as before
+     */
+    UNCHANGED
 }
