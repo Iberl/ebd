@@ -48,6 +48,11 @@ public class RouteDataVolatile {
     @Nullable
     protected volatile List<Packet_65> packet_65 = null;
 
+    /**
+     * Current gradient from an existing gradient profile or default value. In [0/00] (also called per mille).
+     */
+    protected volatile double currentGradient = 0d;
+
     public RouteDataVolatile(){}
 
     /**
@@ -67,37 +72,43 @@ public class RouteDataVolatile {
     }
 
     /*
-        Getter
-         */
+    Getter
+     */
+
+    /**
+     * Reference Location to which all packets are relative to.
+     */
     public Location getRefLocation() {
         return refLocation;
     }
-
+    /**
+     * A {@link Packet_15} containing a movement authority
+     */
     public Packet_15 getPacket_15() {
         return packet_15;
     }
-
+    /**
+     * A @{@link Packet_21} containing a gradient profile
+     */
     public Packet_21 getPacket_21() {
         return packet_21;
     }
-
-    protected void setPacket_21(Packet_21 packet_21) {
-        this.packet_21 = packet_21;
-    }
-
+    /**
+     * A {@link Packet_27} containing a static speed profile
+     */
     public Packet_27 getPacket_27() {
         return packet_27;
     }
-
-    protected void setPacket_27(Packet_27 packet_27) {
-        this.packet_27 = packet_27;
-    }
-
+    /**
+     * A list of @{@link Packet_65} containing Tempory Speed Restrictions
+     */
     public List<Packet_65> getPacket_65() {
         return packet_65;
     }
-
-    protected void setPacket_65(List<Packet_65> packet_65) {
-        this.packet_65 = packet_65;
+    /**
+     * Current gradient from an existing gradient profile or default value. In [0/00] (also called per mille).
+     */
+    public double getCurrentGradient() {
+        return currentGradient;
     }
 }

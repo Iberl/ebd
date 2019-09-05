@@ -4,7 +4,7 @@ package ebd.trainData;
 import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.trainData.util.curveCalculation.AvailableAcceleration;
+import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
