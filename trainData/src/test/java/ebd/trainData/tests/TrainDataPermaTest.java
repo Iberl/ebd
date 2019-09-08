@@ -10,11 +10,16 @@ import java.io.IOException;
 class TrainDataPermaTest {
 
     @Test
-    public void constructorTest() throws IOException, ParseException, TDBadDataException {
+    public void urlTest() throws IOException, ParseException, TDBadDataException {
 
-        TrainDataPerma trainDataPerma = new TrainDataPerma("http://localhost:8080/trainConfigurator","190");
+        TrainDataPerma trainDataPerma = new TrainDataPerma("http://localhost:8080/trainConfigurator","192");
 
 
+    }
+
+    @Test
+    public void fileTest() throws IOException, ParseException, TDBadDataException {
+        TrainDataPerma trainDataPerma = new TrainDataPerma("test650.json");
     }
 
 }

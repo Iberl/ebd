@@ -306,6 +306,10 @@ public class Locomotive extends TrainCar {
             JSONArray tempJsonArray = (JSONArray) jsonObject.get("TlvTafelAntrieb");
             this.driveTlV = new ArrayList<>();
 
+            if(tempJsonArray.isEmpty()){
+                System.out.println("-TLVdrive list was empty-");
+            }
+
             for (Object item : tempJsonArray){
                 this.driveTlV.add(new TlVTable((JSONObject)item));
             }
@@ -315,6 +319,10 @@ public class Locomotive extends TrainCar {
         if (jsonObjectKeySet.contains("TlvTafelBremsen")){
             JSONArray tempJsonArray = (JSONArray) jsonObject.get("TlvTafelBremsen");
             this.breakTlV= new ArrayList<>();
+
+            if(tempJsonArray.isEmpty()){
+                System.out.println("-TLVbreak list was empty-");
+            }
 
             for (Object item : tempJsonArray){
                 this.breakTlV.add(new TlVTable((JSONObject)item));

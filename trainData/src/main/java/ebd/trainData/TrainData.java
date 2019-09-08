@@ -5,6 +5,7 @@ import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -53,7 +54,7 @@ public class TrainData {
         } catch (TDBadDataException e) {
             eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
-        this.eventBus.postSticky(this.trainDataPerma);
+        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
         this.trainDataVolatile.availableAcceleration = new AvailableAcceleration(eventBus);
         eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
@@ -62,7 +63,7 @@ public class TrainData {
      * This is the listener to the {@link TrainDataChangeEvent}.
      * It takes the included data and feeds it to the {@link TrainDataVolatile}
      *
-     * @param trainDataChangeEvent
+     * @param trainDataChangeEvent {@link TrainDataChangeEvent}
      */
     @Subscribe
     public void changeInTrainData(TrainDataChangeEvent trainDataChangeEvent){
