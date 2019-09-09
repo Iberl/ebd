@@ -4,7 +4,8 @@ package ebd.trainData;
 import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.trainData.util.curveCalculation.AvailableAcceleration;
+import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -31,7 +32,7 @@ public class TrainData {
     private List<String> eventTargets = new ArrayList<>();
 
     /**
-     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class
+     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
      *
      * @param eventBus The local {@link EventBus} of the train
      *
@@ -46,15 +47,37 @@ public class TrainData {
         this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
-        } catch (IOException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
             eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
-        this.eventBus.postSticky(this.trainDataPerma);
+        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
         this.trainDataVolatile.availableAcceleration = new AvailableAcceleration(eventBus);
+        eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
+    }
+
+    /**
+     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a file
+     * Used for testing
+     *
+     * @param eventBus The local {@link EventBus} of the train
+     *
+     * @param pathToTrainJSON The path to a .json file containing a train
+     */
+    public TrainData(EventBus eventBus, String pathToTrainJSON){
+        this.eventBus = eventBus;
+        this.eventBus.register(this);
+        this.exceptionTargets.add("tsm;"); //TODO check right recipient
+        this.eventTargets.add("all;");
+        try {
+            this.trainDataPerma = new TrainDataPerma(pathToTrainJSON);
+        } catch (IOException | ParseException e) {
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+        } catch (TDBadDataException e) {
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+        }
+        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
         eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
 
@@ -62,7 +85,7 @@ public class TrainData {
      * This is the listener to the {@link TrainDataChangeEvent}.
      * It takes the included data and feeds it to the {@link TrainDataVolatile}
      *
-     * @param trainDataChangeEvent
+     * @param trainDataChangeEvent {@link TrainDataChangeEvent}
      */
     @Subscribe
     public void changeInTrainData(TrainDataChangeEvent trainDataChangeEvent){

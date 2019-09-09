@@ -5,9 +5,8 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
-import ebd.trainData.util.curveCalculation.AvailableAcceleration;
+import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Nullable;
 

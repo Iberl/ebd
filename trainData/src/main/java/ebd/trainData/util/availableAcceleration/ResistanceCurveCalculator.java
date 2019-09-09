@@ -1,20 +1,21 @@
-package ebd.trainData.util.curveCalculation;
+package ebd.trainData.util.availableAcceleration;
 
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Knot;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 
-public class BreakingPowerCurveCalculator {
+public class ResistanceCurveCalculator {
 
     public static ForwardSpline calculate(EventBus eventBus){
-        ForwardSpline breakingPowerCurve = new ForwardSpline(2);
+        ForwardSpline resistanceCurve = new ForwardSpline(2);
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(TrainDataPerma.class);
         TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         //TODO fill with math
-
-        return breakingPowerCurve;
+        resistanceCurve.addKnotToCurve(new Knot(0d,0.05));
+        return resistanceCurve;
     }
 }

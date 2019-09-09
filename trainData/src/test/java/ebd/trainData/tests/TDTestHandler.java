@@ -2,6 +2,7 @@ package ebd.trainData.tests;
 
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainData.util.events.TrainDataExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -22,7 +23,8 @@ public class TDTestHandler {
     }
 
     @Subscribe
-    public void newTrainDataPerma(TrainDataPerma trainDataPerma){
+    public void newTrainDataPerma(NewTrainDataPermaEvent trainDataPermaEvent){
+        TrainDataPerma trainDataPerma = trainDataPermaEvent.trainDataPerma;
         System.out.println(String.format("Got new TrainDataPerma with ID %s", trainDataPerma.getId()));
     }
 

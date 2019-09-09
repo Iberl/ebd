@@ -8,9 +8,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import ebd.trainData.util.exceptions.TDBadDataException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -126,7 +124,22 @@ public class TrainDataPerma {
      *                              data in the response.
      */
     public TrainDataPerma(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
-        setInstance(trainConfiguratorURL,trainID);
+        setInstanceFromURL(trainConfiguratorURL,trainID);
+    }
+
+    /**
+     * Sets the instance by parsing the JSONObject that is extracted out of a file
+     *
+     * @param pathToTrainJSON The path to the *.json file
+     *
+     * @throws IOException Thrown if the file could not be read
+     *
+     * @throws ParseException Thrown if the file could non be parsed
+     *
+     * @throws TDBadDataException Thrown if there is missing data in the file.
+     */
+    public TrainDataPerma(String pathToTrainJSON) throws ParseException, TDBadDataException, IOException {
+        setInstanceFromFile(pathToTrainJSON);
     }
 
 
@@ -144,13 +157,12 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    private void setInstance(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
+    private void setInstanceFromURL(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
         /*
         Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
          */
         //TODO Give URL by config file
         JSONParser parser = new JSONParser();
-        Object Object;
 
         String urlName = trainConfiguratorURL + "/rest/zug/extended/" + trainID;
         URL url = new URL(urlName);
@@ -169,97 +181,125 @@ public class TrainDataPerma {
         /*
         Reading the input data into the variables
          */
-
         try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            Object object = parser.parse(input);
+            JSONObject jsonObject = (JSONObject) object;
 
-            //System.out.println(input.readLine());
-            Object = parser.parse(input);
-            JSONObject jsonObject = (JSONObject) Object;
-            Set<Object> jsonObjectKeySet = jsonObject.keySet();
-
-
-
-            if (jsonObjectKeySet.contains("Name")){
-                this.name = (String)jsonObject.get("Name");
-            }
-            else throw new TDBadDataException("The key 'Name' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("EtcsEngineID")){
-                this.id = String.valueOf(jsonObject.get("EtcsEngineID"));
-            }
-            else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("GesamtlaengeUeberPuffer")){
-                this.l_train = ((Long)jsonObject.get("GesamtlaengeUeberPuffer") / 1000d); //Resolution is given in [mm], we need [m]
-            }
-            else throw new TDBadDataException("The key 'GesamtlaengeUeberPuffer' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("Hoechstgeschwindigkeit")){
-
-                this.v_maxtrain = ((Long)jsonObject.get("Hoechstgeschwindigkeit")).intValue();
-            }
-            else throw new TDBadDataException("The key 'Hoechstgeschwindigkeit' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("Gesamtgewicht")){
-                this.trainWeight = ((Long)jsonObject.get("Gesamtgewicht")).intValue();
-            }
-            else throw new TDBadDataException("The key 'Gesamtgewicht' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("KennbuchstabeHZEE")){
-                this.uicLettersHZEE = (boolean)jsonObject.get("KennbuchstabeHZEE");
-            }
-            else throw new TDBadDataException("The key 'KennbuchstabeHZEE' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("KennbuchstabeNY")){
-                this.uicLettersNY = (boolean)jsonObject.get("KennbuchstabeNY");
-            }
-            else throw new TDBadDataException("The key 'KennbuchstabeNY' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("KennbuchstabeA")){
-                this.uicLetterA = (boolean)jsonObject.get("KennbuchstabeA");
-            }
-            else throw new TDBadDataException("The key 'KennbuchstabeA' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("Massenfaktor")){
-                this.massfactor = (Double)jsonObject.get("Massenfaktor");
-            }
-            else throw new TDBadDataException("The key 'Massenfaktor' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("GesamtanzahlAchsen")){
-                Long tempLong = (Long)jsonObject.get("GesamtanzahlAchsen");
-                this.numberOfAxis = tempLong.intValue();
-            }
-            else throw new TDBadDataException("The key 'GesamtanzahlAchsen' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("AnzahlGebremsteAchsen")){
-                Long tempLong = (Long)jsonObject.get("AnzahlGebremsteAchsen");
-                this.numberOfBreakAxis = tempLong.intValue();
-            }
-            else throw new TDBadDataException("The key 'AnzahlGebremsteAchsen' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("vorhandeneBremshundertstel")){
-                this.breakPercent = (Double)jsonObject.get("vorhandeneBremshundertstel");
-                //TODO Check values from train configurator
-            }
-            else throw new TDBadDataException("The key 'vorhandeneBremshundertstel' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("epBremse")){
-                this.epBreak = (boolean)jsonObject.get("epBremse");
-            }
-            else throw new TDBadDataException("The key 'epBremse' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("straffGekoppelt")){
-                this.rigidCoupling = (boolean)jsonObject.get("straffGekoppelt");
-            }
-            else throw new TDBadDataException("The key 'straffGekoppelt' was missing in the train data send by the tool TrainConfigurator");
-
-            if (jsonObjectKeySet.contains("Fahrzeuge")){
-                this.trainCarList = getTrainCars((JSONArray)jsonObject.get("Fahrzeuge"));
-            }
-            else throw new TDBadDataException("The key 'Fahrzeuge' was missing in the train data send by the tool TrainConfigurator");
+            fillFromJSON(jsonObject);
         }
+    }
 
+    /**
+     * Sets the instance by parsing the JSONObject that is extracted out of a file. Mostly for test cases
+     *
+     * @param pathToTrainJSON The path to the *.json file
+     *
+     * @throws IOException Thrown if the file could not be read
+     *
+     * @throws ParseException Thrown if the file could non be parsed
+     *
+     * @throws TDBadDataException Thrown if there is missing data in the file.
+     */
+    private void setInstanceFromFile(String pathToTrainJSON) throws IOException, TDBadDataException, ParseException {
+        try(BufferedReader input = new BufferedReader(new FileReader(pathToTrainJSON))){
 
+            /*
+            Reading the input data into the variables
+            */
+            JSONParser parser = new JSONParser();
+            Object object = parser.parse(input);
+            JSONObject jsonObject = (JSONObject) object;
+
+            fillFromJSON(jsonObject);
+        }
+    }
+
+    /**
+     * Parses the jsonObject.
+     *
+     * @param jsonObject containing one JSONObject of the type "Typ"
+     * @throws TDBadDataException Gets thrown if expected data is missing in the JSONobject
+     */
+    private void fillFromJSON(JSONObject jsonObject) throws TDBadDataException {
+        Set<Object> jsonObjectKeySet = jsonObject.keySet();
+        if (jsonObjectKeySet.contains("Name")){
+            this.name = (String)jsonObject.get("Name");
+        }
+        else throw new TDBadDataException("The key 'Name' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("EtcsEngineID")){
+            this.id = String.valueOf(jsonObject.get("EtcsEngineID"));
+        }
+        else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("GesamtlaengeUeberPuffer")){
+            this.l_train = ((Long)jsonObject.get("GesamtlaengeUeberPuffer") / 1000d); //Resolution is given in [mm], we need [m]
+        }
+        else throw new TDBadDataException("The key 'GesamtlaengeUeberPuffer' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Hoechstgeschwindigkeit")){
+
+            this.v_maxtrain = ((Long)jsonObject.get("Hoechstgeschwindigkeit")).intValue();
+        }
+        else throw new TDBadDataException("The key 'Hoechstgeschwindigkeit' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Gesamtgewicht")){
+            this.trainWeight = ((Long)jsonObject.get("Gesamtgewicht")).intValue();
+        }
+        else throw new TDBadDataException("The key 'Gesamtgewicht' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("KennbuchstabeHZEE")){
+            this.uicLettersHZEE = (boolean)jsonObject.get("KennbuchstabeHZEE");
+        }
+        else throw new TDBadDataException("The key 'KennbuchstabeHZEE' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("KennbuchstabeNY")){
+            this.uicLettersNY = (boolean)jsonObject.get("KennbuchstabeNY");
+        }
+        else throw new TDBadDataException("The key 'KennbuchstabeNY' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("KennbuchstabeA")){
+            this.uicLetterA = (boolean)jsonObject.get("KennbuchstabeA");
+        }
+        else throw new TDBadDataException("The key 'KennbuchstabeA' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Massenfaktor")){
+            this.massfactor = (Double)jsonObject.get("Massenfaktor");
+        }
+        else throw new TDBadDataException("The key 'Massenfaktor' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("GesamtanzahlAchsen")){
+            Long tempLong = (Long)jsonObject.get("GesamtanzahlAchsen");
+            this.numberOfAxis = tempLong.intValue();
+        }
+        else throw new TDBadDataException("The key 'GesamtanzahlAchsen' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("AnzahlGebremsteAchsen")){
+            Long tempLong = (Long)jsonObject.get("AnzahlGebremsteAchsen");
+            this.numberOfBreakAxis = tempLong.intValue();
+        }
+        else throw new TDBadDataException("The key 'AnzahlGebremsteAchsen' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("vorhandeneBremshundertstel")){
+            this.breakPercent = (Double)jsonObject.get("vorhandeneBremshundertstel");
+            //TODO Check values from train configurator
+        }
+        else throw new TDBadDataException("The key 'vorhandeneBremshundertstel' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("epBremse")){
+            this.epBreak = (boolean)jsonObject.get("epBremse");
+        }
+        else throw new TDBadDataException("The key 'epBremse' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("straffGekoppelt")){
+            this.rigidCoupling = (boolean)jsonObject.get("straffGekoppelt");
+        }
+        else throw new TDBadDataException("The key 'straffGekoppelt' was missing in the train data send by the tool TrainConfigurator");
+
+        if (jsonObjectKeySet.contains("Fahrzeuge")){
+            this.trainCarList = getTrainCars((JSONArray)jsonObject.get("Fahrzeuge"));
+        }
+        else throw new TDBadDataException("The key 'Fahrzeuge' was missing in the train data send by the tool TrainConfigurator");
     }
 
 
