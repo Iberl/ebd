@@ -304,7 +304,7 @@ public class TrainDataPerma {
 
 
     private List<TrainCar> getTrainCars(JSONArray jsonArray) throws TDBadDataException {
-        List<TrainCar> trainCarList = new ArrayList<>();
+        List<TrainCar> tCL = new ArrayList<>();
 
         for (Object entry : jsonArray){
             JSONObject jsonObject = (JSONObject) entry;
@@ -315,24 +315,23 @@ public class TrainDataPerma {
             }
             else throw new TDBadDataException("The key 'Fahrzeugart' was missing in the train data send by the tool TrainConfigurator");
 
-            TrainCar trainCar;
-
             if(carType.equals("Triebzug")){
-                this.trainCarList.add(new LocomotiveTrain(jsonObject));
+                System.out.println("War hier");
+                tCL.add(new LocomotiveTrain(jsonObject));
             }
             else if(carType.equals("Triebfahrzeug")){
-                this.trainCarList.add(new Locomotive(jsonObject));
+                tCL.add(new Locomotive(jsonObject));
             }
             else if(carType.equals("Reisezugwagen")){
-                this.trainCarList.add(new PassengerCar(jsonObject));
+                tCL.add(new PassengerCar(jsonObject));
             }
             else if(carType.equals("Gueterwagen")){
-                this.trainCarList.add(new FreightCar(jsonObject));
+                tCL.add(new FreightCar(jsonObject));
             }
             else throw new TDBadDataException("Unknown type of train car in the data send by the tool TrainConfigurator");
         }
 
-        return trainCarList;
+        return tCL;
     }
 
     /*
