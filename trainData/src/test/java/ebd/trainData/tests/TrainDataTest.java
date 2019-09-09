@@ -5,6 +5,7 @@ import ebd.globalUtils.location.Location;
 import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class TrainDataTest {
 
         TDTestHandler tdTestHandler = new TDTestHandler();
 
-        TrainData trainData = new TrainData(EventBus.getDefault(),"http://localhost:8080/trainConfigurator","191");
+        TrainData trainData = new TrainData(EventBus.getDefault(),"test650.json");
 
         Thread.sleep(100);
 
@@ -37,14 +38,12 @@ class TrainDataTest {
         EventBus.getDefault().post(trainDataChangeEvent);
 
 
-        TrainDataPerma trainDataPerma = EventBus.getDefault().getStickyEvent(TrainDataPerma.class);
+        TrainDataPerma trainDataPerma = EventBus.getDefault().getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         System.out.println("TrainID: " + trainDataPerma.getId());
 
 
         TrainDataVolatile trainDataVolatile = EventBus.getDefault().getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         System.out.println("currentSpeed: " + trainDataVolatile.getCurrentSpeed());
-
-
     }
 
 }

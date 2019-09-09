@@ -32,7 +32,7 @@ public class TrainData {
     private List<String> eventTargets = new ArrayList<>();
 
     /**
-     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class
+     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
      *
      * @param eventBus The local {@link EventBus} of the train
      *
@@ -47,15 +47,37 @@ public class TrainData {
         this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
-        } catch (IOException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
-        } catch (ParseException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FETAL));
+        } catch (IOException | ParseException e) {
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
             eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
         this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
         this.trainDataVolatile.availableAcceleration = new AvailableAcceleration(eventBus);
+        eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
+    }
+
+    /**
+     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a file
+     * Used for testing
+     *
+     * @param eventBus The local {@link EventBus} of the train
+     *
+     * @param pathToTrainJSON The path to a .json file containing a train
+     */
+    public TrainData(EventBus eventBus, String pathToTrainJSON){
+        this.eventBus = eventBus;
+        this.eventBus.register(this);
+        this.exceptionTargets.add("tsm;"); //TODO check right recipient
+        this.eventTargets.add("all;");
+        try {
+            this.trainDataPerma = new TrainDataPerma(pathToTrainJSON);
+        } catch (IOException | ParseException e) {
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+        } catch (TDBadDataException e) {
+            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+        }
+        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
         eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
 
