@@ -15,7 +15,7 @@ public class ResistanceCurveCalculator {
         TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         //TODO fill with math
-        resistanceCurve.addKnotToCurve(new Knot(0d, new double[]{0.05,0,0}));
+        resistanceCurve.addKnotToCurve(new Knot(0d, new double[]{-0.05,0,0}));
         return resistanceCurve;
     }
 }
