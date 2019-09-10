@@ -21,15 +21,15 @@ public class AccelerationAction extends Action {
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                accelerationPercentage = (Long)tempObject;
+                this.accelerationPercentage = (Long)tempObject / 100d;
             }
             else if(tempObjectName.equals("Double")){
-                accelerationPercentage = (Double)tempObject;
+                this.accelerationPercentage = (Double)tempObject / 100d;
             }
             else throw new DDBadDataException("AccelerationAction value was not a number");
 
 
-            if(accelerationPercentage < 0 || accelerationPercentage > 100){
+            if(accelerationPercentage < 0 || accelerationPercentage > 1){
                 throw new DDBadDataException("AccelerationAction Value was not in the range [0, 100]");
             }
         }

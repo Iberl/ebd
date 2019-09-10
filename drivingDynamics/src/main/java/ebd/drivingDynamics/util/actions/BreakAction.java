@@ -20,15 +20,15 @@ public class BreakAction extends Action {
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                this.breakPercentage = (Long)tempObject;
+                this.breakPercentage = (Long)tempObject / 100d;
             }
             else if(tempObjectName.equals("Double")){
-                this.breakPercentage = (Double)tempObject;
+                this.breakPercentage = (Double)tempObject / 100d;
             }
             else throw new DDBadDataException("BreakAction value was not a number");
 
 
-            if(breakPercentage < 0 || breakPercentage > 100){
+            if(breakPercentage < 0 || breakPercentage > 1){
                 throw new DDBadDataException("BreakAction Value was not in the range [0, 100]");
             }
         }

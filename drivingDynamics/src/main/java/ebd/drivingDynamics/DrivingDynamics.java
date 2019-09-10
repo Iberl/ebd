@@ -96,10 +96,7 @@ public class DrivingDynamics {
         /*
         Calculate the next dynamic state.
          */
-        System.out.println(this.dynamicState.getSpeed());
-        System.out.println(deltaT);
         this.dynamicState.nextState(deltaT);
-        System.out.println(this.dynamicState.getSpeed());
 
         /*
         Update TrainDataVolatile with the newly calculated values
