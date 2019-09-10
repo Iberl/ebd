@@ -15,7 +15,7 @@ public class Testhandler {
 
     @Subscribe
     public void except(ExceptionEvent ee){
-        ee.exception.getMessage();
+        System.out.println(ee.exceptionEventTyp + " " + ee.exception.getMessage());
         ee.exception.printStackTrace();
     }
 
@@ -29,5 +29,6 @@ public class Testhandler {
     @Subscribe
     public void ntdv(NewTrainDataVolatileEvent ntdv){
         System.out.println("NTDV: " + ntdv.getClass().getSimpleName());
+        System.out.println("     curSpeed:" + ntdv.trainDataVolatile.getCurrentSpeed());
     }
 }

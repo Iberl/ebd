@@ -57,6 +57,7 @@ public class DynamicState {
     public void nextState(double deltaT){
         this.time += deltaT;
         this.acceleration = this.availableAcceleration.getAcceleration(this.speed, tripDistance, this.movementState);
+        System.out.println("this.acc: " + this.acceleration);
         this.speed += this.acceleration * deltaT;
         if(this.speed < 0) this.speed = 0;
         this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);

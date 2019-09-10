@@ -7,6 +7,7 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
+import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -14,6 +15,7 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Spline;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -29,29 +31,27 @@ import java.util.List;
 public class DrivingDynamics {
 
     private EventBus eventBus;
-    private DrivingProfile drivingProfile;
     private TrainDataVolatile trainDataVolatile;
 
-    //TODO Add event to update tripStartPosition
-    //TODO Add event to update tripProfile
-    private ForwardSpline tripProfile;
+    private Spline tripProfile;
     private Position tripStartPosition;
 
     private DynamicState dynamicState;
-    private double time;
+    private DrivingProfile drivingProfile;
 
+    private double time;
     private boolean locked = true;
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
 
 
-    public DrivingDynamics(EventBus eventBus, String pathToProfile, ForwardSpline tripProfile){
+    public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile, Spline tripProfile){
         this.eventBus = eventBus;
         this.eventBus.register(this);
 
         try {
-            this.drivingProfile = new DrivingProfile(pathToProfile, this.eventBus);
+            this.drivingProfile = new DrivingProfile(pathToDrivingProfile, this.eventBus);
         } catch (IOException | ParseException e) {
             eventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
@@ -72,7 +72,7 @@ public class DrivingDynamics {
         Setting time to calculate the precise time between calculations
          */
         double currentTime = System.nanoTime();
-        double deltaT = this.time - currentTime;
+        double deltaT = (currentTime - this.time) / 1E9; //To get seconds
         this.time = currentTime;
 
         /*
@@ -96,7 +96,10 @@ public class DrivingDynamics {
         /*
         Calculate the next dynamic state.
          */
+        System.out.println(this.dynamicState.getSpeed());
+        System.out.println(deltaT);
         this.dynamicState.nextState(deltaT);
+        System.out.println(this.dynamicState.getSpeed());
 
         /*
         Update TrainDataVolatile with the newly calculated values
@@ -131,6 +134,15 @@ public class DrivingDynamics {
             return;
         }
         this.locked = true;
+    }
+
+    @Subscribe
+    public void updateTripProfil(DDUpdateTripProfileEvent utpe){
+        if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
+            return;
+        }
+        this.tripProfile = utpe.tripProfile;
+        this.tripStartPosition = this.trainDataVolatile.getCurrentPosition();
     }
 
     private void sendCurrentSpeed() {
