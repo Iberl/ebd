@@ -59,8 +59,8 @@ public class AvailableAcceleration {
                 return acceleration;
             case BREAKING:
                 double deceleration = - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification;
-                deceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                deceleration -= gradientProfile.getPointOnCurve(tripDistance);
+                deceleration -= resistanceCurve.getPointOnCurve(currentSpeed);
+                deceleration += gradientProfile.getPointOnCurve(tripDistance);
                 return  deceleration;
             case COASTING:
                 return resistanceCurve.getPointOnCurve(currentSpeed) - gradientProfile.getPointOnCurve(tripDistance);
