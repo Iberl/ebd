@@ -2,12 +2,12 @@ package ebd.drivingDynamics;
 
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
-import ebd.trainData.util.curveCalculation.AvailableAcceleration;
+import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 
 public class DynamicState {
 
     /**
-     * Current mission time in [s]
+     * Internal memory of current mission time in [s]
      */
     private double time;
 
@@ -15,6 +15,11 @@ public class DynamicState {
      * Current position
      */
     private Position position;
+
+    /**
+     * Internal memory of the length of the trip in [m]
+     */
+    private double tripDistance;
 
     /**
      * Current speed in [m/s]
@@ -34,20 +39,27 @@ public class DynamicState {
 
     private AvailableAcceleration availableAcceleration;
 
-    public DynamicState(double time, Position position, double speed, double acceleration, MovementState movementState, AvailableAcceleration availableAcceleration) {
-        this.time = time;
+    /**
+     * The Dynamic state. Has to be newly set at each journeys starts, which can only be done while standing still.
+     * @param position Current position
+     * @param availableAcceleration the {@link AvailableAcceleration} of the train
+     */
+    public DynamicState( Position position, AvailableAcceleration availableAcceleration) {
+        this.time = 0;
         this.position = position;
-        this.speed = speed;
-        this.acceleration = acceleration;
-        this.movementState = movementState;
+        this.tripDistance = 0;
+        this.speed = 0;
+        this.acceleration = 0;
+        this.movementState = MovementState.HALTING;
         this.availableAcceleration = availableAcceleration;
     }
 
     public void nextState(double deltaT){
-        this.time = time + deltaT;
-        this.acceleration = availableAcceleration.getAcceleration(this.speed, this.movementState);
-        this.speed = this.acceleration * deltaT;
+        this.time += deltaT;
+        this.acceleration = this.availableAcceleration.getAcceleration(this.speed, tripDistance, this.movementState);
+        this.speed += this.acceleration * deltaT;
         this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
+        this.tripDistance += this.speed * deltaT;
     }
 
     /*

@@ -5,6 +5,8 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
+import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -38,6 +40,7 @@ public class DrivingDynamics {
     private DynamicState dynamicState;
     private double time;
 
+    private boolean locked = true;
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
@@ -60,7 +63,6 @@ public class DrivingDynamics {
         this.tripProfile = tripProfile;
         this.tripStartPosition = this.trainDataVolatile.getCurrentPosition();
 
-        this.dynamicState = new DynamicState(0d, trainDataVolatile.getCurrentPosition(), trainDataVolatile.getCurrentSpeed(),0d, MovementState.HALTING, trainDataVolatile.getAvailableAcceleration());
         this.time = System.nanoTime();
     }
 
@@ -69,10 +71,16 @@ public class DrivingDynamics {
         /*
         Setting time to calculate the precise time between calculations
          */
-        //TODO ACTIONS!
         double currentTime = System.nanoTime();
         double deltaT = this.time - currentTime;
         this.time = currentTime;
+
+        /*
+        If driving dynamics is locked, nothing will be done.
+         */
+        if(locked){
+            return;
+        }
 
         /*
         Update TrainDataVolatile to set the current maximum allowed speed of the train
@@ -88,7 +96,7 @@ public class DrivingDynamics {
         /*
         Calculate the next dynamic state.
          */
-        this.dynamicState.nextState(this.time);
+        this.dynamicState.nextState(deltaT);
 
         /*
         Update TrainDataVolatile with the newly calculated values
@@ -106,6 +114,23 @@ public class DrivingDynamics {
         if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
             this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
         }
+    }
+
+    @Subscribe
+    public void unlock(DDUnlockEvent ue){
+        if(!(ue.targets.contains("dd") || ue.targets.contains("all"))){
+            return;
+        }
+        this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
+        this.locked = false;
+    }
+
+    @Subscribe
+    public void setLocked(DDLockEvent le){
+        if(!(le.targets.contains("dd") || le.targets.contains("all"))){
+            return;
+        }
+        this.locked = true;
     }
 
     private void sendCurrentSpeed() {

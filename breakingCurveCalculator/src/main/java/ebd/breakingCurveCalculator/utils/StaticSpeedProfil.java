@@ -114,8 +114,8 @@ public class StaticSpeedProfil extends ForwardSpline{
 	 * @author Lars Schulze-Falck
 	 */
 	public void addSplineToCurve(ForwardSpline inputSplineOfZerodegree) throws SSPInvalidInputException {
-		if (inputSplineOfZerodegree.getdegree() != 0) {//Checking if the degree of the spline to add is the same degree as SSP
-			throw new SSPInvalidInputException(String.format("The input spline needs to be of 0 degree, was %d instead",inputSplineOfZerodegree.getdegree()));
+		if (inputSplineOfZerodegree.getDegree() != 0) {//Checking if the degree of the spline to add is the same degree as SSP
+			throw new SSPInvalidInputException(String.format("The input spline needs to be of 0 degree, was %d instead",inputSplineOfZerodegree.getDegree()));
 		}
 		
 		/*
