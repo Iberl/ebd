@@ -6,6 +6,7 @@ import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainData.util.events.TrainDataExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -18,14 +19,14 @@ public class BreakingPowerCurveCalculator {
 
     public static ForwardSpline calculateBreakingPower(EventBus eventBus){
         ForwardSpline breakingPowerCurve = new ForwardSpline(3);
-        TrainDataPerma trainDataPerma = eventBus.getStickyEvent(TrainDataPerma.class);
+        TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
         String chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
-        chosenBreakingMethod.toLowerCase();
+        chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
         double deceleration = 0.35;
         if(chosenBreakingMethod.contains("g")){
             deceleration = 0.35;
@@ -55,14 +56,14 @@ public class BreakingPowerCurveCalculator {
     }
     public static ForwardSpline calculateEmergencyBreakingPower(EventBus eventBus){
         ForwardSpline breakingPowerCurve = new ForwardSpline(3);
-        TrainDataPerma trainDataPerma = eventBus.getStickyEvent(TrainDataPerma.class);
+        TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
         String chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod(); //Assumes all cars having same breaking method!
-        chosenBreakingMethod.toLowerCase();
+        chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
         double deceleration = 0.35;
         if(chosenBreakingMethod.contains("g")){
             deceleration = 0.35;

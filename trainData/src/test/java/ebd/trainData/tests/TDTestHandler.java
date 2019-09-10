@@ -1,5 +1,6 @@
 package ebd.trainData.tests;
 
+import ebd.globalUtils.events.ExceptionEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
@@ -29,7 +30,7 @@ public class TDTestHandler {
     }
 
     @Subscribe
-    public void exception(TrainDataExceptionEvent tdee){
+    public void exception(ExceptionEvent tdee){
         tdee.exception.printStackTrace();
     }
 }
