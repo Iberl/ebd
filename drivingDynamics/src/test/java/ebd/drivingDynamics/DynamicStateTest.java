@@ -63,6 +63,8 @@ class DynamicStateTest {
         dynamicState.setBreakingModification(1);
         dynamicState.nextState(0.1);
         System.out.println(dynamicState.getSpeed());
+        dynamicState.nextState(0.1);
+        System.out.println(dynamicState.getSpeed());
     }
 
     private Packet_21 getp21(){

@@ -33,10 +33,10 @@ public class TotalSpeedCondition extends Condition {
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                speedTotal = ((Long)tempObject).doubleValue();
+                speedTotal = ((Long)tempObject).doubleValue() / 3.6; //To [m/s]
             }
             else if(tempObjectName.equals("Double")){
-                speedTotal = (Double)tempObject / 100;
+                speedTotal = (Double)tempObject / 3.6; //To [m/s]
             }
             else throw new DDBadDataException("TotalSpeedCondition value was not a number");
 

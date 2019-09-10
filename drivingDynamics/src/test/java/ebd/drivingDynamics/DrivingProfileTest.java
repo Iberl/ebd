@@ -20,7 +20,7 @@ class DrivingProfileTest {
     @BeforeAll
     static void setTrainDataVolatile(){
         Testhandler testhandler = new Testhandler();
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 119d, 120d, null, null, null, null, null, null, null);
+        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 33d, 34d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
 
     }
@@ -30,6 +30,4 @@ class DrivingProfileTest {
         DrivingProfile drivingProfile = new DrivingProfile("C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\Test.json", EventBus.getDefault());
         assertEquals("CruiseAction", drivingProfile.actionToTake().getClass().getSimpleName());
     }
-
-
 }

@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TotalSpeedConditionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 20d, 100d, null, null, null, null, null, null, null);
+        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 6d, 28d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
     }
 
