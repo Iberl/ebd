@@ -1,6 +1,8 @@
 package ebd.trainData.tests;
 
+import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.location.Location;
 import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataPerma;
@@ -11,6 +13,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 class TrainDataTest {
 
@@ -43,6 +46,14 @@ class TrainDataTest {
 
 
         TrainDataVolatile trainDataVolatile = EventBus.getDefault().getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        System.out.println("currentSpeed: " + trainDataVolatile.getCurrentSpeed());
+
+        HashMap<String,Object> namesToValues = new HashMap<>();
+        namesToValues.put("currentSpeed",50d);
+        namesToValues.put("currentMaxSpeed", 100d);
+
+        EventBus.getDefault().post(new TrainDataMultiChangeEvent("main", new ArrayList<>(), namesToValues));
+        trainDataVolatile = EventBus.getDefault().getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         System.out.println("currentSpeed: " + trainDataVolatile.getCurrentSpeed());
     }
 
