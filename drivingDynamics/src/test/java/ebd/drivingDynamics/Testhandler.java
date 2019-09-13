@@ -30,6 +30,7 @@ public class Testhandler {
     @Subscribe
     public void ntdv(NewTrainDataVolatileEvent ntdv){
         System.out.println("NTDV: " + ntdv.getClass().getSimpleName());
+        System.out.println("     curMaxSpeed: " + ntdv.trainDataVolatile.getCurrentMaxSpeed());
         System.out.println("     curSpeed: " + ntdv.trainDataVolatile.getCurrentSpeed());
         Position tempPos = ntdv.trainDataVolatile.getCurrentPosition();
         if(tempPos != null){

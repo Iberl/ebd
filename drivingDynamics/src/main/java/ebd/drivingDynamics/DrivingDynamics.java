@@ -9,6 +9,7 @@ import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -26,6 +27,7 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class DrivingDynamics {
@@ -101,8 +103,7 @@ public class DrivingDynamics {
         /*
         Update TrainDataVolatile with the newly calculated values
          */
-        sendPosition();
-        sendCurrentSpeed();
+        sendCurrentSpeedAndPosition();
     }
 
     @Subscribe
@@ -142,12 +143,12 @@ public class DrivingDynamics {
         this.tripStartPosition = this.trainDataVolatile.getCurrentPosition();
     }
 
-    private void sendCurrentSpeed() {
-        this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentSpeed", this.dynamicState.getSpeed()));
-    }
 
-    private void sendPosition() {
-        this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentPosition", this.dynamicState.getPosition()));
+    private void sendCurrentSpeedAndPosition(){
+        HashMap<String,Object> nameToValue = new HashMap<>();
+        nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
+        nameToValue.put("currentPosition", this.dynamicState.getPosition());
+        this.eventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
     private void sendCurrentMaxSpeed() {
