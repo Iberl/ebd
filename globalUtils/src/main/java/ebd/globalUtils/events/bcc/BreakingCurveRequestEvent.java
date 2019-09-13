@@ -28,6 +28,13 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	/**
 	 * Constructor setting all required fields
 
+	 * @param source
+	 *          ID from the module the event was sent by
+	 *          TODO: Define Format for IDs
+	 * @param targets
+	 *          ID from all modules the event is adressed to
+	 *          TODO: Define Format for IDs
+	 *
 	 * @param id
 	 * 			String to identify the breaking curve
 	 * @param breakingPower
@@ -73,7 +80,12 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	
 	/**
 	 * Constructor setting all fields
-	 * 
+	 * @param source
+	 *          ID from the module the event was sent by
+	 *          TODO: Define Format for IDs
+	 * @param targets
+	 *          ID from all modules the event is adressed to
+	 *          TODO: Define Format for IDs
 	 * @param id
 	 * 			String to identify the breaking curve
 	 * @param breakingPower

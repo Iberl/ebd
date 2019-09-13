@@ -92,6 +92,7 @@
     <module>messageLibrary</module>
     <module>trainData</module>
     <module>routeData</module>
+    <module>breakingCurveCalculator</module>
   </modules>
 
 </project>
