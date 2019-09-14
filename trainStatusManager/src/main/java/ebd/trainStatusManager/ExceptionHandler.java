@@ -1,5 +1,6 @@
 package ebd.trainStatusManager;
 
+import ebd.globalUtils.events.ExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 

@@ -90,8 +90,8 @@
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
-      <module>messageReceiver</module>
-      <module>messageSender</module>
+    <module>messageReceiver</module>
+    <module>messageSender</module>
     <module>trainData</module>
     <module>routeData</module>
     <module>breakingCurveCalculator</module>
