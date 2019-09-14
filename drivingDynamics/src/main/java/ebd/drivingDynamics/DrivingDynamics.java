@@ -48,7 +48,7 @@ public class DrivingDynamics {
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
 
 
-    public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile, Spline tripProfile){
+    public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile){
         this.eventBus = eventBus;
         this.eventBus.register(this);
 
@@ -61,11 +61,6 @@ public class DrivingDynamics {
         }
 
         this.trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-
-        this.tripProfile = tripProfile;
-        this.tripStartPosition = this.trainDataVolatile.getCurrentPosition();
-
-        this.time = System.nanoTime();
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -123,6 +118,7 @@ public class DrivingDynamics {
             return;
         }
         this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
+        this.time = System.nanoTime();
         this.locked = false;
     }
 
