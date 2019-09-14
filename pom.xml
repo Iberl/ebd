@@ -93,11 +93,13 @@
     <module>logger</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
+    <module>drivingDynamics</module>
     <module>trainData</module>
     <module>routeData</module>
     <module>breakingCurveCalculator</module>
     <module>speedSupervisionModule</module>
     <module>trainStatusManager</module>
+    <module>breakingCurveCalculator</module>
   </modules>
 
 </project>

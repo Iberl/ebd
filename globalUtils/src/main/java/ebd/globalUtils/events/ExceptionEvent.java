@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
-	/**
-	 * The ExceptionEventTyp, defaults to CRITICAL
-	 */
-	@NotNull
-	public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
+    /**
+     * The ExceptionEventTyp, defaults to CRITICAL
+     */
+    @NotNull
+    public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
 
 	/**
 	 * The Event causing an Exception. If there is not a Event causing the exception,
