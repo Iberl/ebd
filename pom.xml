@@ -90,6 +90,7 @@
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
+    <module>logger</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
     <module>trainData</module>
