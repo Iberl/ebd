@@ -1,6 +1,5 @@
 package ebd.trainStatusManager;
 
-import ebd.globalUtils.events.ExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -15,15 +14,17 @@ public class ExceptionHandler {
 	// Exception Handler
 	// -----------------
 
-	public EventBus localBus;
+	public EventBus eventBus;
 
 
 	// Constructor
 
-	public ExceptionHandler(EventBus localBus) {
-		this.localBus = localBus;
-		localBus.register(this);
+	public ExceptionHandler(EventBus eventBus) {
+		this.eventBus = eventBus;
+		eventBus.register(this);
 	}
+
+
 
 
 	// Methods
@@ -43,6 +44,6 @@ public class ExceptionHandler {
 	}
 
 	public void unregister() {
-		localBus.unregister(this);
+		eventBus.unregister(this);
 	}
 }
