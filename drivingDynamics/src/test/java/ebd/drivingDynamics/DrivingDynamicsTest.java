@@ -2,6 +2,7 @@ package ebd.drivingDynamics;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
+import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
@@ -53,7 +54,9 @@ class DrivingDynamicsTest {
         BackwardSpline breakingCurve = new BackwardSpline(2);
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
-        DrivingDynamics drivingDynamics = new DrivingDynamics(eb,"C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\Test.json", breakingCurve);
+        DrivingDynamics drivingDynamics = new DrivingDynamics(eb,
+                "C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\Test.json");
+        eb.post(new DDUpdateTripProfileEvent("test", Arrays.asList("dd"),breakingCurve));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();
         Thread.sleep(5000);
