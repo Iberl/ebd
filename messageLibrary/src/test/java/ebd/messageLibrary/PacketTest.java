@@ -8,7 +8,7 @@ import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageLibrary.util.exception.*;
 
 public class PacketTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -76,6 +76,8 @@ public class PacketTest {
 		System.out.println(receivedPacket.toString());
 		System.out.println("was received");
 	}
+	*/
+
 
 
 }

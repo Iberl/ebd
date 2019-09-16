@@ -3,6 +3,7 @@ package ebd.trainStatusManager;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
@@ -62,8 +63,8 @@ public class TrainStatusManager {
         if(testing) this.trainData = new TrainData(this.localEventBus,"C:\\intellij-workspace\\etcs\\resources\\test650.json");
         else this.trainData = new TrainData(this.localEventBus,this.urlToTrainconfigurator,this.etcsTrainID);
 
-        this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"mr");
-        this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, this.rbcID, "ms");
+        this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"tsm");
+        this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, true);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus,this.pathToDrivingStrategy);
@@ -71,6 +72,7 @@ public class TrainStatusManager {
         this.clock = new Clock(this.localEventBus);
         this.clock.start();
     }
+
 
     @Subscribe
     public void disconnect(DisconnectEvent de){
@@ -82,6 +84,11 @@ public class TrainStatusManager {
 
     }
 
+    /**
+     * True if this Instance is a vaild target of the event
+     * @param targetList the target list a the event
+     * @return True if this instance is a vaild target of the event
+     */
     private boolean validTarget(List<String> targetList){
         boolean result = false;
 

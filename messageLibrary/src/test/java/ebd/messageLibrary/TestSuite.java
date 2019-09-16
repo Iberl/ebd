@@ -1,7 +1,7 @@
 package ebd.messageLibrary;
 
 public class TestSuite {
-
+	/*
 	public static void main(String[] args) {
 
 		System.out.println("Testing Packets:");
@@ -26,4 +26,5 @@ public class TestSuite {
 		TelegramTest.main(args);
 
 	}
+	 */
 }

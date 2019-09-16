@@ -65,7 +65,7 @@ public class BreakingCurve extends BackwardSpline {
 	/**
 	 * This function finds any point on the breaking curve
 	 * 
-	 * @param relativeLocation Any position inside the bounds of the breaking curve
+	 * @param relativeDistance Any position inside the bounds of the breaking curve
 	 * 
 	 * @return Returns an ArrayList<double>, the first entry being the given position and the second entry 
 	 * 			being speed at this position
@@ -74,17 +74,17 @@ public class BreakingCurve extends BackwardSpline {
 	 * 			the bounds of the breaking curve, either < 0 or greater than curve.lastKey()
 	 */
 	@Override
-	public Double getPointOnCurve(Double relativeLocation) throws BreakingCurveOutOfRangeException{
+	public Double getPointOnCurve(Double relativeDistance) throws BreakingCurveOutOfRangeException{
 		
-		if (relativeLocation < 0) {
+		if (relativeDistance < 0) {
 			throw new BreakingCurveOutOfRangeException("Given position was smaller then 0");
 		}
 				
-		Double knotPosition = curve.higherKey(relativeLocation);
+		Double knotPosition = curve.higherKey(relativeDistance);
 		
 		if (knotPosition == null) {
 			
-			if (relativeLocation.equals(curve.lastKey())) {
+			if (relativeDistance.equals(curve.lastKey())) {
 				knotPosition = curve.lastKey();
 			}
 			else throw new BreakingCurveOutOfRangeException("Given position was greater than the range of this breaking curve");
@@ -93,31 +93,31 @@ public class BreakingCurve extends BackwardSpline {
 		ArrayList<Double> knotValue = curve.get(knotPosition);
 			
 		
-		return (relativeLocation - knotPosition) * knotValue.get(1) + knotValue.get(0);
+		return (relativeDistance - knotPosition) * knotValue.get(1) + knotValue.get(0);
 	}
 	
 	/**
 	 * This function returns the interval boundary for a given position. In case the position is equal to a interval
 	 * boundary, it will become the higher boundary, because the interval is left open, right closed.
 	 * 
-	 * @param relativePosition Any position greater 0 inside the bounds of the breaking curve
+	 * @param relativeDistance Any position greater 0 inside the bounds of the breaking curve
 	 * @return Returns an ArrayList<Double>(2), first entry being the lower limit, second entry the higher limit
 	 * @throws BreakingCurveOutOfRangeException Is being thrown when the given position is outside
 	 * 			the bounds of the breaking curve, either <= 0 or greater than curve.lastKey()
 	 */
 	@Override
-	public ArrayList<Double> getIntervallBoundariesOfPoint(Double relativePosition) throws BreakingCurveOutOfRangeException {
+	public ArrayList<Double> getIntervallBoundariesOfPoint(Double relativeDistance) throws BreakingCurveOutOfRangeException {
 	
-		if (relativePosition <= 0) {
+		if (relativeDistance <= 0) {
 			throw new BreakingCurveOutOfRangeException("Given position was smaller or equal 0");
 		}
 			
-		Double lowerBoundary = curve.lowerKey(relativePosition);
+		Double lowerBoundary = curve.lowerKey(relativeDistance);
 		if (lowerBoundary == null) {
 			lowerBoundary = (double) 0;
 		}
 		
-		Double higherBoundary = curve.ceilingKey(relativePosition);
+		Double higherBoundary = curve.ceilingKey(relativeDistance);
 		if (higherBoundary == null) {
 			throw new BreakingCurveOutOfRangeException("Given position was greater than the range of this breaking curve"); 
 		}

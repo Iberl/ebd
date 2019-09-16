@@ -9,7 +9,7 @@ import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageLibrary.util.exception.*;
 
 public class MessageTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -80,6 +80,6 @@ public class MessageTest {
 		System.out.println(receivedMessage.toString());
 		System.out.println("was received");
 	}
-
+	*/
 
 }

@@ -8,7 +8,7 @@ import ebd.messageLibrary.serialization.Serializer;
 import ebd.messageLibrary.util.exception.*;
 
 public class TelegramTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -79,5 +79,5 @@ public class TelegramTest {
 		System.out.println(receivedTelegram.toString());
 		System.out.println("was received");
 	}
-
+	*/
 }

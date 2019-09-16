@@ -16,6 +16,7 @@ import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfile;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfileSection;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+import ebd.messageLibrary.util.ETCSVariables;
 
 /**
  * @author Lars Schulze-Falck
@@ -131,7 +132,7 @@ public class BCREgeneratorFromDataset{
 		ArrayList<Packet_65> listPacket65 = new ArrayList<>();
 		
 		//setting NC_CDTRAIN
-		int NC_CDTRAIN = 0;
+		int NC_CDTRAIN = ETCSVariables.NC_CDTRAIN;
 		
 		//setting otherInternationalTrainCategories
 		int NC_TRAIN = 0;

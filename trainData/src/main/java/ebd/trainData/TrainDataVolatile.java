@@ -8,6 +8,7 @@ import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class TrainDataVolatile {
     /**
      * The current maximum allowed speed of the train in [m/s]
      */
-    @Nullable
+    @NotNull
     protected volatile Double currentMaxSpeed = 0d;
 
 
