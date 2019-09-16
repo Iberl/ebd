@@ -1,8 +1,11 @@
 package ebd.messageReceiver;
 
-import ebd.globalUtils.events.messageLibrary.MessageEvent;
+import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.globalUtils.events.messageReceiver.ReceivedTelegramEvent;
+import ebd.globalUtils.events.SerializedBitstreamEvent;
 import ebd.globalUtils.events.messageReceiver.MessageReceiverExceptionEvent;
 import ebd.messageLibrary.message.Message;
+import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.Serializer;
 import ebd.messageLibrary.util.exception.BitLengthOutOfBoundsException;
@@ -17,6 +20,7 @@ import java.util.Arrays;
 /**
  * Class for receiving messages from RBC
  *
+ * @version 2.0
  * @author Christopher Bernjus
  */
 public class MessageReceiver {
@@ -28,28 +32,30 @@ public class MessageReceiver {
 	protected EventBus globalBus = EventBus.getDefault();
 	protected EventBus localBus;
 
-	/** ID of the train */
-	public String trainID;
 	/** ID of this message receiver module */
-	public String messageReceiverID;
+	private String mrID = "mr";
+	/** ID of the local entity (train|rbc) */
+	public String localID;
+	/** ID of the module to send received messages to (default "all") */
+	public String managerID = "all";
 
 
 	// Constructor
 
 	/**
-	 * Constructs an MessageSender Module
+	 * Constructs an MessageReceiver Module
 	 *
 	 * @param localBus
 	 *          The EventBus for in-train communication
-	 * @param trainID
-	 *          ID of the train
-	 * @param mrID
-	 *          ID of the new message receiver module
+	 * @param localID
+	 *          ID of the local entity (train|rbc)
+	 * @param managerID
+	 * 			ID of the module to send received messages to (default "all")
 	 */
-	public MessageReceiver(EventBus localBus, String trainID, String mrID) {
+	public MessageReceiver(EventBus localBus, String localID, String managerID) {
 		this.localBus = localBus;
-		this.trainID = trainID;
-		this.messageReceiverID = mrID;
+		this.localID = localID;
+		this.managerID = managerID;
 
 		this.globalBus.register(this);
 	}
@@ -58,35 +64,41 @@ public class MessageReceiver {
 	// Methods
 
 	/**
-	 * Receives an Message and sends it to the local Bus
+	 * Receives an Message or Telegram and sends it to the local Bus
 	 *
 	 * @param event
-	 *          Received {@link MessageEvent} over the globalBus
+	 *          Received {@link SerializedBitstreamEvent} over the globalBus
 	 */
 	@Subscribe
-	public void receive(MessageEvent event) {
-		if(!event.targets.contains(trainID)) return;
+	public void receive(SerializedBitstreamEvent event) {
+		if(!event.targets.contains(mrID + ';' + localID) || !event.targets.contains("all")) return;
 
 		try {
-			byte[] bits = (byte[]) event.content;
-			Message message = Serializer.deserialize(new BitStreamReader(bits, bits.length), false);
+			BitStreamReader bitstream = new BitStreamReader(event.bitstream, event.bitstream.length);
 
-			localBus.post(message);
+			if(event.isTelegram) {
+				Telegram telegram = Serializer.deserializeTelegram(bitstream);
+
+				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram));
+			} else {
+				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
+
+				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message));
+			}
 
 		} catch(ClassNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(messageReceiverID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(MissingInformationException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(messageReceiverID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(BitLengthOutOfBoundsException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(messageReceiverID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(ValueNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(messageReceiverID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		}
-
 	}
 
 	public void unregister() {

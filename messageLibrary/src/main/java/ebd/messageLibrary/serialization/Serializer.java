@@ -1,5 +1,6 @@
 package ebd.messageLibrary.serialization;
 
+import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.serialization.annotations.IfEqual;
 import javafx.util.Pair;
 import ebd.messageLibrary.serialization.annotations.*;
@@ -16,6 +17,7 @@ import java.util.*;
 /**
  * Class for handling the serialization of Packets
  *
+ * @version 2.0
  * @author Christopher Bernjus, Mario Welzig
  */
 public abstract class Serializer {
@@ -164,7 +166,7 @@ public abstract class Serializer {
 	}
 
 	/**
-	 * Creates an instance of an Message or Packet from a given buffer
+	 * Creates an instance of an Packet from a given buffer
 	 *
 	 * @param reader
 	 *              the bit stream to read from
@@ -182,8 +184,7 @@ public abstract class Serializer {
 	 *
 	 * @author Christopher Bernjus
 	 */
-	public static <T> T deserialize(BitStreamReader reader, boolean trainToTrack) throws ClassNotSupportedException, MissingInformationException, BitLengthOutOfBoundsException, ValueNotSupportedException {
-
+	public static <T> T deserializePacket(BitStreamReader reader, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
 		// Get ID from Packet or Message
 		int id = reader.readInt(8, false);
 
@@ -198,28 +199,91 @@ public abstract class Serializer {
 		} else {
 			if(trainToTrack) {
 				try {
-					clazz = Class.forName("ebd.messageLibrary.message.trainmessages.Message_" + id);
-				} catch (ClassNotFoundException e) {
-					try {
-						clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
-					} catch (ClassNotFoundException e1) {
-						throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
-					}
+					clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
 				}
 			} else {
 				try {
-					clazz = Class.forName("ebd.messageLibrary.message.trackmessages.Message_" + id);
-				} catch (ClassNotFoundException e) {
-					try {
-						clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
-					} catch (ClassNotFoundException e1) {
-						throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
-					}
+					clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
 				}
 			}
 		}
 
 		return (T) deserialize(reader, clazz, trainToTrack);
+	}
+
+	/**
+	 * Creates an instance of an Message from a given buffer
+	 *
+	 * @param reader
+	 *              the bit stream to read from
+	 * @param trainToTrack
+	 *              indicates whether the bit stream contains a track or train message/packet
+	 * @param <T>
+	 *              the Class Type of the returned instance
+	 *
+	 * @return The Class interpretation of the given bit stream
+	 *
+	 * @throws BitLengthOutOfBoundsException
+	 * @throws ClassNotSupportedException
+	 * @throws MissingInformationException
+	 * @throws ValueNotSupportedException
+	 *
+	 * @author Christopher Bernjus
+	 */
+	public static <T> T deserializeMessage(BitStreamReader reader, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+		// Get ID from Message
+		int id = reader.readInt(8, false);
+
+		// Find Class for Message ID
+		Class<?> clazz = null;
+		if(trainToTrack) {
+			try {
+				clazz = Class.forName("ebd.messageLibrary.message.trainmessages.Message_" + id);
+			} catch (ClassNotFoundException e) {
+				try {
+					clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
+				}
+			}
+		} else {
+			try {
+				clazz = Class.forName("ebd.messageLibrary.message.trackmessages.Message_" + id);
+			} catch (ClassNotFoundException e) {
+				try {
+					clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
+				}
+			}
+		}
+
+		return (T) deserialize(reader, clazz, trainToTrack);
+	}
+
+	/**
+	 * Creates an instance of an Telegram from a given buffer
+	 *
+	 * @param reader
+	 *              the bit stream to read from
+	 * @param <T>
+	 *              the Class Type of the returned instance
+	 *
+	 * @return The Class interpretation of the given bit stream
+	 *
+	 * @throws BitLengthOutOfBoundsException
+	 * @throws ClassNotSupportedException
+	 * @throws MissingInformationException
+	 * @throws ValueNotSupportedException
+	 *
+	 * @author Christopher Bernjus
+	 */
+	public static <T> T deserializeTelegram(BitStreamReader reader) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+		return (T) deserialize(reader, Telegram.class, false);
 	}
 
 	/**
@@ -242,7 +306,7 @@ public abstract class Serializer {
 	 * @throws ValueNotSupportedException
 	 *
 	 */
-	public static <T> T deserialize(BitStreamReader reader, Class<T> type, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+	private static <T> T deserialize(BitStreamReader reader, Class<T> type, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
 		// Get the default Constructor with no parameters
 		Constructor<?> constructor = null;
 		try {
@@ -330,7 +394,7 @@ public abstract class Serializer {
 
 					if(Modifier.isAbstract(itemType.getModifiers())) {
 						for(int i = 0; i < size; i++) {
-							list.add(deserialize(reader, trainToTrack));
+							list.add(deserializePacket(reader, trainToTrack));
 						}
 					} else {
 						for(int i = 0; i < size; i++) {
