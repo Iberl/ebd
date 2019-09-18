@@ -1,11 +1,9 @@
 package ebd.trainData;
 
 
-import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -26,9 +24,9 @@ import java.util.Map;
  * @version 0.1
  */
 public class TrainData {
-    private EventBus eventBus;
+    private EventBus localBus;
     private TrainDataPerma trainDataPerma;
-    private TrainDataVolatile trainDataVolatile = new TrainDataVolatile();
+    private TrainDataVolatile trainDataVolatile;
 
     private List<String> exceptionTargets = new ArrayList<>();
     private List<String> eventTargets = new ArrayList<>();
@@ -36,51 +34,52 @@ public class TrainData {
     /**
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
      *
-     * @param eventBus The local {@link EventBus} of the train
+     * @param localBus The local {@link EventBus} of the train
      *
      * @param trainConfiguratorURL The ip to the trainconfigurator tool
      *
      * @param trainID the ETCS-ID of the train
      */
-    public TrainData(EventBus eventBus, String trainConfiguratorURL, String trainID){
-        this.eventBus = eventBus;
-        this.eventBus.register(this);
+    public TrainData(EventBus localBus, String trainConfiguratorURL, String trainID){
+        this.localBus = localBus;
+        this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
         } catch (IOException | ParseException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
-        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
-        this.trainDataVolatile.availableAcceleration = new AvailableAcceleration(eventBus);
-        eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
+        this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
+        this.trainDataVolatile = new TrainDataVolatile(localBus);
+        localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
 
     /**
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a file
      * Used for testing
      *
-     * @param eventBus The local {@link EventBus} of the train
+     * @param localBus The local {@link EventBus} of the train
      *
      * @param pathToTrainJSON The path to a .json file containing a train
      */
-    public TrainData(EventBus eventBus, String pathToTrainJSON){
-        this.eventBus = eventBus;
-        this.eventBus.register(this);
+    public TrainData(EventBus localBus, String pathToTrainJSON){
+        this.localBus = localBus;
+        this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma(pathToTrainJSON);
         } catch (IOException | ParseException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
-            eventBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
-        this.eventBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
-        eventBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
+        this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
+        this.trainDataVolatile = new TrainDataVolatile(localBus);
+        localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
     }
 
     /**
@@ -94,9 +93,9 @@ public class TrainData {
 
         try {
             changeTrainDataVolatile(trainDataChangeEvent.fieldName,trainDataChangeEvent.fieldValue);
-            this.eventBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
+            this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         } catch (IllegalAccessException e) {
-           this.eventBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataChangeEvent,e));
+           this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataChangeEvent,e));
         }
     }
 
@@ -113,9 +112,9 @@ public class TrainData {
             for (String key : nameToValue.keySet()){
                 changeTrainDataVolatile(key,nameToValue.get(key));
             }
-            this.eventBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
+            this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         }catch (IllegalAccessException | IllegalArgumentException e){
-            this.eventBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataMultiChangeEvent,e));
+            this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataMultiChangeEvent,e));
         }
     }
 

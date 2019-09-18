@@ -61,7 +61,7 @@ public class BreakingCurveCalculator {
     public BreakingCurveCalculator(EventBus eventBus) {
     	this.eventBus = eventBus;
     	eventBus.register(this);
-    	eventTargets.add("tsm;");
+    	eventTargets.add("tsm");
     }
 
     /**
@@ -178,7 +178,6 @@ public class BreakingCurveCalculator {
      */
     private BreakingCurve calculate(ForwardSpline staticSpeedProfil, ForwardSpline gradientProfil, Position refPosition, double endOfMoveAuth,  double speedAtEndOfMoveAut,  String id)
     	throws IllegalArgumentException, IndexOutOfBoundsException {
-  	
 
     	BreakingCurve breakCurve = new BreakingCurve(refPosition.getLocation(), id);
     	double dis_EMA = endOfMoveAuth;

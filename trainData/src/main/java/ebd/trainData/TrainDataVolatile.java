@@ -6,7 +6,10 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.trainData.util.availableAcceleration.AccelerationPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
+import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
+import ebd.trainData.util.availableAcceleration.ResistanceCurveCalculator;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +35,8 @@ public class TrainDataVolatile {
     /**
      * The current speed of the train in [m/s]
      */
-    @Nullable
-    protected volatile Double currentSpeed = null;
+    @NotNull
+    protected volatile Double currentSpeed = 0d;
 
     /**
      * The current maximum allowed speed of the train in [m/s]
@@ -63,28 +66,35 @@ public class TrainDataVolatile {
     /**
      * The current breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
-    @Nullable
-    protected volatile ForwardSpline currentBreakingPower = null;
+    @NotNull
+    protected volatile ForwardSpline currentBreakingPower;
 
     /**
      * The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
      */
-    @Nullable
-    protected volatile ForwardSpline currentAcceleratingPower = null;
+    @NotNull
+    protected volatile ForwardSpline currentAcceleratingPower;
 
     /**
      * The current resistance curve r(v), r in [m/(s^2)], v in [m/s]
      */
-    @Nullable
-    protected volatile ForwardSpline currentResistanceCurve = null;
+    @NotNull
+    protected volatile ForwardSpline currentResistanceCurve;
 
-
+    /**
+     *
+     * Will be first set after a gradient profile exists.
+     */
     @Nullable
     protected volatile AvailableAcceleration availableAcceleration = null;
 
 
     //Constructor
-    public TrainDataVolatile(){}
+    public TrainDataVolatile(EventBus localBus){
+        this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
+        this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
+        this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
+    }
 
     /**
      * only for testing!

@@ -350,6 +350,9 @@ public class TrainDataPerma {
         return l_train;
     }
 
+    /**
+     * @return maximum speed of train in [km/h]
+     */
     public int getV_maxtrain() {
         return v_maxtrain;
     }

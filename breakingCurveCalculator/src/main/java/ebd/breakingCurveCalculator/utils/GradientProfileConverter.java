@@ -30,7 +30,7 @@ public class GradientProfileConverter {
 	 *
 	 * @author Lars Schulze-Falck
 	 */
-	public static ForwardSpline package21ToGP(Packet_21 p21, int currentGradient) {
+	public static ForwardSpline package21ToGP(Packet_21 p21, double currentGradient) {
 
 		double totalDistance = 0d;
 		double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);

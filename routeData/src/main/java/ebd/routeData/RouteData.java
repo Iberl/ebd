@@ -6,6 +6,7 @@ import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -25,13 +26,14 @@ public class RouteData {
         this.eventBus.register(this);
         this.exceptionTargets.add("tsm;");
         this.eventTargets.add("all;");
+        this.eventBus.postSticky(new NewRouteDataVolatileEvent("rd", this.eventTargets,this.routeDataVolatile));
     }
 
     /**
      * Updates {@link RouteDataVolatile}
      * @param routeDataChangeEvent {@link RouteDataChangeEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN_ORDERED)
     public void changeInRouteData(RouteDataChangeEvent routeDataChangeEvent){
         try {
             changingRoutDataVolatile(routeDataChangeEvent.fieldName,routeDataChangeEvent.fieldValue);

@@ -2,12 +2,13 @@ package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
+import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
-import ebd.messageLibrary.message.Message;
-import ebd.messageLibrary.message.trackmessages.Message_15;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.packet.Packet;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
@@ -19,16 +20,15 @@ import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MessageHandler {
 
@@ -42,7 +42,7 @@ public class MessageHandler {
         this.etcsTrainID = etcsTrainID;
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void msgCollector(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
 
@@ -56,6 +56,13 @@ public class MessageHandler {
         }
     }
 
+    /**
+     * The purpose of this handler is to take a {@link Message_3} and
+     * a) update {@link RouteDataVolatile}
+     * b) update AvailableAcceleration in {@link TrainDataVolatile},
+     * c) calculate a new breaking curve. The order of this is important!
+     * @param rme
+     */
     private void handleMsg3(ReceivedMessageEvent rme) {
         TrainDataPerma trainDataPerma = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
@@ -71,13 +78,14 @@ public class MessageHandler {
         Packet_27 packet27 = null;
         List<Packet_65> listOfPacket65s = new ArrayList<>();
 
+
         ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
         double currentGradient = routeDataVolatile.getCurrentGradient();
-        int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP
+        int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
         int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
         double l_train = trainDataPerma.getL_train();
         double currentMaxSpeed = trainDataVolatile.getCurrentMaxSpeed();
-        double maxTrainSpeed = trainDataPerma.getV_maxtrain();
+        int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
         Position refPosition;
 
@@ -99,22 +107,33 @@ public class MessageHandler {
                     break;
                 case "Packet_65":
                      listOfPacket65s.add((Packet_65)packet);
-                    break;
+                     break;
                 default:
-                    IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 contained an unused " + pName);
-                    localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.WARNING));
+                IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 contained an unused " + pName);
+                localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.WARNING));
             }
         }
 
+
         if(packet15 == null || packet21 == null || packet27 == null){
-            IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
-            localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.CRITICAL));
-            return;
+                IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
+                localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.CRITICAL));
+                return;
         }
+        Map<String, Object> changesForRouteData= new HashMap<>();
+        changesForRouteData.put("packet_15",packet15);
+        changesForRouteData.put("packet_21",packet21);
+        changesForRouteData.put("packet_27",packet27);
+        changesForRouteData.put("packet_65", listOfPacket65s);
+        localBus.post(new RouteDataMultiChangeEvent("rsm", Arrays.asList("rd"), changesForRouteData));
+
+        AvailableAcceleration availableAcceleration = new AvailableAcceleration(localBus);
+        localBus.post(new TrainDataChangeEvent("rsm", Arrays.asList("td"), "availableAcceleration", availableAcceleration));
 
         BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm", Arrays.asList("bcc"), id,breakingPower,
-                packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
-                l_train,currentMaxSpeed,maxTrainSpeed);
+        packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
+        l_train,currentMaxSpeed,maxTrainSpeed);
+        this.localBus.post(bcre);
     }
 
     /**

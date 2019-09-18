@@ -29,7 +29,7 @@ public class Clock implements Runnable {
     public void run() {
         while(this.running){
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
                 eventBus.post(new ClockTickEvent("clock", Arrays.asList(new String[]{"all"})));
             } catch (InterruptedException e) {
                 InterruptedException ie = new InterruptedException("Clock was interrupted: " + e.getMessage());

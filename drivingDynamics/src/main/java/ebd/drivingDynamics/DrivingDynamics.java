@@ -114,7 +114,7 @@ public class DrivingDynamics {
 
     @Subscribe
     public void unlock(DDUnlockEvent ue){
-        if(!(ue.targets.contains("dd") || ue.targets.contains("all"))){
+        if(!(ue.targets.contains("dd") || ue.targets.contains("all") || !this.locked)){
             return;
         }
         this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
@@ -124,7 +124,7 @@ public class DrivingDynamics {
 
     @Subscribe
     public void setLocked(DDLockEvent le){
-        if(!(le.targets.contains("dd") || le.targets.contains("all"))){
+        if(!(le.targets.contains("dd") || le.targets.contains("all")) || this.locked){
             return;
         }
         this.locked = true;

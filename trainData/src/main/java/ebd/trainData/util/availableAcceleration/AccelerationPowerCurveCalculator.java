@@ -14,7 +14,6 @@ public class AccelerationPowerCurveCalculator {
     public static ForwardSpline calculate(EventBus eventBus){
         ForwardSpline accelerationCurve = new ForwardSpline(2);
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
-        TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         boolean locomotiveTrain = false;
         TrainCar poweredCar = null;
