@@ -1,5 +1,6 @@
 package ebd.trainStatusManager;
 
+import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.packet.TrackPacket;
@@ -31,7 +32,9 @@ class TrainStatusManagerTest {
 
         eventBus.post(new ReceivedMessageEvent("test", Arrays.asList("tsm"),makeMsg3()));
 
-        Thread.sleep(3000);
+        //Thread.sleep(5000);
+        trainStatusManager.join();
+        eventBus.post(new DisconnectEvent("test", Arrays.asList("tsm")));
     }
 
     private Message_3 makeMsg3(){

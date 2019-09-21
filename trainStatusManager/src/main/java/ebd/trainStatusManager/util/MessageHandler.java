@@ -42,7 +42,7 @@ public class MessageHandler {
         this.etcsTrainID = etcsTrainID;
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void msgCollector(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
 

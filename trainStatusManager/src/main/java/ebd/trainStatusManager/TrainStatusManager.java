@@ -8,6 +8,8 @@ import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageReceiver.MessageReceiver;
@@ -18,6 +20,7 @@ import ebd.trainData.TrainData;
 import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.MessageHandler;
+import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -27,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TrainStatusManager {
+public class TrainStatusManager implements Runnable {
 
     private String etcsTrainID;
     private String rbcID;
@@ -36,6 +39,8 @@ public class TrainStatusManager {
 
     private EventBus localEventBus = new EventBus();
     private EventBus globalEventBus = EventBus.getDefault();
+
+    private Thread tsmThread = new Thread(this);
 
     /*
     Handlers
@@ -65,6 +70,7 @@ public class TrainStatusManager {
         this.urlToTrainconfigurator = urlToTrainconfigurator;
         this.pathToDrivingStrategy = pathToDrivingStrategy;
         setUpTrain(false);
+        this.tsmThread.start();
     }
 
     public TrainStatusManager(EventBus eventBus, String etcsTrainID, String rbcID, String urlToTrainconfigurator,
@@ -76,6 +82,61 @@ public class TrainStatusManager {
         this.urlToTrainconfigurator = urlToTrainconfigurator;
         this.pathToDrivingStrategy = pathToDrivingStrategy;
         setUpTrain(true);
+        this.tsmThread.start();
+    }
+
+    @Override
+    public void run() {
+        try {
+            synchronized (this) {
+                this.wait();
+            }
+        } catch (InterruptedException e) {
+            InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
+            ie.setStackTrace(e.getStackTrace());
+            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Arrays.asList("rsm;R=" + this.rbcID),
+                    new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void newBreakingCurve(NewBreakingCurveEvent nbce){
+        if(!validTarget(nbce.targets)){
+            System.out.println("dd");
+            return;
+        }
+        if(!this.tripInProgress){
+            this.tripInProgress = true;
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Arrays.asList("dd"),nbce.breakingCurve));
+            this.localEventBus.post(new DDUnlockEvent("tsm", Arrays.asList("dd")));
+        }
+    }
+
+    /**
+     * Reacts to a {@link DisconnectEvent} and stops the clock.
+     * @param de a {@link DisconnectEvent}
+     */
+    @Subscribe
+    public void disconnect(DisconnectEvent de){
+        //TODO -> connect this to global (GlobalHandler)
+        if(!validTarget(de.targets)){
+            return;
+        }
+        this.clock.stop();
+        this.globalEventBus.unregister(this);
+        this.notify();
+
+    }
+
+    public void join(){
+        try {
+            this.tsmThread.join();
+        } catch (InterruptedException e) {
+            InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
+            ie.setStackTrace(e.getStackTrace());
+            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Arrays.asList("rsm;R=" + this.rbcID),
+                    new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+        }
     }
 
     private void setUpTrain(boolean testing) {
@@ -110,33 +171,6 @@ public class TrainStatusManager {
         this.clock.start();
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void newBreakingCurve(NewBreakingCurveEvent nbce){
-        if(!validTarget(nbce.targets)){
-            System.out.println("dd");
-            return;
-        }
-        if(!this.tripInProgress){
-            this.tripInProgress = true;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Arrays.asList("dd"),nbce.breakingCurve));
-            this.localEventBus.post(new DDUnlockEvent("tsm", Arrays.asList("dd")));
-        }
-    }
-
-    /**
-     * Reacts to a {@link DisconnectEvent} and stops the clock.
-     * @param de a {@link DisconnectEvent}
-     */
-    @Subscribe
-    public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
-            return;
-        }
-        this.clock.stop();
-        this.globalEventBus.unregister(this);
-
-    }
-
     /**
      * True if this Instance is a vaild target of the event
      * @param targetList the target list a the event
@@ -159,6 +193,7 @@ public class TrainStatusManager {
         }
         return result;
     }
+
 
 
 }

@@ -316,7 +316,6 @@ public class TrainDataPerma {
             else throw new TDBadDataException("The key 'Fahrzeugart' was missing in the train data send by the tool TrainConfigurator");
 
             if(carType.equals("Triebzug")){
-                System.out.println("War hier");
                 tCL.add(new LocomotiveTrain(jsonObject));
             }
             else if(carType.equals("Triebfahrzeug")){
