@@ -2,16 +2,21 @@ package ebd.trainStatusManager;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.location.Location;
+import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +34,14 @@ class TrainStatusManagerTest {
 
 
         Thread.sleep(2000);
+        HashMap<String,Location> prevLocs = new HashMap<>();
+        Position prevPos = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile.getCurrentPosition();
+        prevLocs.put(prevPos.getLocation().getId(),prevPos.getLocation());
+        Location curLoc = new Location("2","unknown", 10d);
+        prevLocs.put(curLoc.getId(),curLoc);
+        Position curPos = new Position(0d,true,curLoc,prevLocs);
 
+        eventBus.post(new TrainDataChangeEvent("test", Arrays.asList("td"), "currentPosition", curPos));
         eventBus.post(new ReceivedMessageEvent("test", Arrays.asList("tsm"),makeMsg3()));
 
         //Thread.sleep(5000);

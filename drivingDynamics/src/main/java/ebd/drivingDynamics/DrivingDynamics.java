@@ -1,5 +1,6 @@
 package ebd.drivingDynamics;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
@@ -15,8 +16,10 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
+import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -46,6 +49,7 @@ public class DrivingDynamics {
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
+    private double maxTripDistance;
 
 
     public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile){
@@ -86,9 +90,16 @@ public class DrivingDynamics {
         sendCurrentMaxSpeed();
 
         /*
+        Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
         Getting next action that should be taken and parsing that action
          */
-        actionParser(this.drivingProfile.actionToTake());
+        if(!this.eventBus.getStickyEvent(SsmReportEvent.class).toFast){
+            actionParser(this.drivingProfile.actionToTake());
+        }
+        else {
+            this.dynamicState.setMovementState(MovementState.BREAKING);
+            this.dynamicState.setBreakingModification(1d);
+        }
 
         /*
         Calculate the next dynamic state.
@@ -136,7 +147,24 @@ public class DrivingDynamics {
             return;
         }
         this.tripProfile = utpe.tripProfile;
-        this.tripStartPosition = this.trainDataVolatile.getCurrentPosition();
+        try {
+            BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
+            this.maxTripDistance = backwardSpline.getHighestXValue();
+        }
+        catch (ClassCastException cce){
+            try {
+                ForwardSpline forwardSpline =(ForwardSpline)this.tripProfile;
+                this.maxTripDistance = Double.MAX_VALUE;
+            }
+            catch (ClassCastException ce){
+                IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
+                this.eventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
+            }
+        }
+
+
+        Position curPos = this.trainDataVolatile.getCurrentPosition();
+        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
     }
 
 
@@ -149,7 +177,11 @@ public class DrivingDynamics {
 
     private void sendCurrentMaxSpeed() {
         double tripDistance = dynamicState.getPosition().totalDistanceToPreviousPosition(this.tripStartPosition);
-        double curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
+        double curMaxSpeed;
+
+        if(tripDistance < this.maxTripDistance) curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
+        else curMaxSpeed = 0d;
+        
         this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", curMaxSpeed));
     }
 

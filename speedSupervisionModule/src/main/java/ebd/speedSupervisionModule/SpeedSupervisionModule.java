@@ -31,7 +31,7 @@ public class SpeedSupervisionModule {
             return;
         }
 
-        TrainDataVolatile trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        TrainDataVolatile trainDataVolatile = this.eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         double curSpeed;
         Position curPosition;
 
@@ -45,11 +45,11 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        double maxSpeed = breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+        double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
 
         boolean toFast = curSpeed > maxSpeed;
 
-        eventBus.post(new SsmReportEvent("ssm", Arrays.asList("tsm"), toFast));
+        this.eventBus.postSticky(new SsmReportEvent("ssm", Arrays.asList("tsm"), toFast));
 
     }
 
