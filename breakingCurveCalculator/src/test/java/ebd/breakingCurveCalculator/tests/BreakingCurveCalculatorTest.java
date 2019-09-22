@@ -1,6 +1,6 @@
 package ebd.breakingCurveCalculator.tests;
 
-import ebd.breakingCurveCalculator.utils.MovementAuthorityConverter;
+import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import org.greenrobot.eventbus.EventBus;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
@@ -72,7 +72,7 @@ public class BreakingCurveCalculatorTest {
 		
 		Thread.sleep(2000);
 		BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
-		System.out.printf("New distance to end of movement authority: %f%n",MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
+		System.out.printf("New distance to end of movement authority: %f%n", MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
 		eventBus.post(bclre);
 	}
 

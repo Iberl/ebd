@@ -4,12 +4,14 @@ import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageReceiver.MessageReceiver;
@@ -21,6 +23,7 @@ import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.MessageHandler;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
+import ebd.trainStatusManager.util.events.TsmTripEndEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -55,6 +58,7 @@ public class TrainStatusManager implements Runnable {
     private MessageReceiver messageReceiver;
     private MessageSender messageSender;
     private SpeedSupervisionModule speedSupervisionModule;
+    private TripSupervisor tripSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -99,10 +103,20 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
+    public void join(){
+        try {
+            this.tsmThread.join();
+        } catch (InterruptedException e) {
+            InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
+            ie.setStackTrace(e.getStackTrace());
+            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Arrays.asList("rsm;R=" + this.rbcID),
+                    new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+        }
+    }
+
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
         if(!validTarget(nbce.targets)){
-            System.out.println("dd");
             return;
         }
         if(!this.tripInProgress){
@@ -110,6 +124,17 @@ public class TrainStatusManager implements Runnable {
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Arrays.asList("dd"),nbce.breakingCurve));
             this.localEventBus.post(new DDUnlockEvent("tsm", Arrays.asList("dd")));
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void tripEnd(TsmTripEndEvent tee){
+        if(!validTarget(tee.targets)){
+            return;
+        }
+        this.localEventBus.post(new DDLockEvent("tsm", Arrays.asList("dd")));
+        this.tripInProgress = false;
+        //TODO until better TrainsManager exists:
+        disconnect(new DisconnectEvent("tsm", Arrays.asList("tsm")));
     }
 
     /**
@@ -124,18 +149,8 @@ public class TrainStatusManager implements Runnable {
         }
         this.clock.stop();
         this.globalEventBus.unregister(this);
-        this.notify();
-
-    }
-
-    public void join(){
-        try {
-            this.tsmThread.join();
-        } catch (InterruptedException e) {
-            InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
-            ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Arrays.asList("rsm;R=" + this.rbcID),
-                    new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+        synchronized (this){
+            this.notify();
         }
     }
 
@@ -157,11 +172,12 @@ public class TrainStatusManager implements Runnable {
         this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"tsm");
         this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, true);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
+        this.tripSupervisor = new TripSupervisor(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus,this.pathToDrivingStrategy);
 
-        Location curLoc = new Location("unknown", null, null);
-        Position curPos = new Position(0,true, curLoc);
+
+        Position curPos = new Position(0,true, new InitalLocation());
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("currentPosition",curPos);
         changesForTD.put("currentSpeed", 0d);

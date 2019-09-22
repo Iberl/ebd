@@ -1,6 +1,5 @@
 package ebd.drivingDynamics;
 
-import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
@@ -93,7 +92,8 @@ public class DrivingDynamics {
         Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
         Getting next action that should be taken and parsing that action
          */
-        if(!this.eventBus.getStickyEvent(SsmReportEvent.class).toFast){
+        SsmReportEvent speedSupervisionReport = this.eventBus.getStickyEvent(SsmReportEvent.class);
+        if(speedSupervisionReport == null || !speedSupervisionReport.toFast){
             actionParser(this.drivingProfile.actionToTake());
         }
         else {
@@ -109,7 +109,7 @@ public class DrivingDynamics {
         /*
         Update TrainDataVolatile with the newly calculated values
          */
-        sendCurrentSpeedAndPosition();
+        updateTrainDataVolatile();
     }
 
     @Subscribe
@@ -168,10 +168,11 @@ public class DrivingDynamics {
     }
 
 
-    private void sendCurrentSpeedAndPosition(){
+    private void updateTrainDataVolatile(){
         HashMap<String,Object> nameToValue = new HashMap<>();
         nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
         nameToValue.put("currentPosition", this.dynamicState.getPosition());
+        nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
         this.eventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 

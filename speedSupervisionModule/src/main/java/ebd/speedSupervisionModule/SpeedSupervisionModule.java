@@ -9,6 +9,7 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 
@@ -25,7 +26,7 @@ public class SpeedSupervisionModule {
         eventBus.register(this);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
         if (this.breakingCurve == null){
@@ -46,7 +47,7 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        Double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        Double tripDistance = trainDataVolatile.getCurTripDistance();
         boolean toFast;
         //TODO add Enum instead of boolean
         if(tripDistance < this.maxDistance){

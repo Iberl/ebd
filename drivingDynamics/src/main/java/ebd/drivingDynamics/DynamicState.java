@@ -82,6 +82,11 @@ public class DynamicState {
     }
 
     /**
+     * Distance already driven on the current trip in [m]
+     */
+    public double getTripDistance() { return tripDistance; }
+
+    /**
      * Current speed in [m/s]
      */
     public double getSpeed() {

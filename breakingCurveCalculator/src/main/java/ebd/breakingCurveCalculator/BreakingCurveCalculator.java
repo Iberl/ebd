@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
+import ebd.globalUtils.etcsPacketToSplineConverters.GradientProfileConverter;
+import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import ebd.breakingCurveCalculator.utils.GradientProfileConverter;
-import ebd.breakingCurveCalculator.utils.MovementAuthorityConverter;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveSetupException;
 import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;

@@ -68,7 +68,7 @@ class TrainStatusManagerTest {
         Packet_15 packet15 = new Packet_15();
 
         Packet_15.Packet_15_Section endsection = packet15.new Packet_15_Section();
-        endsection.L_SECTION = 1800; //m
+        endsection.L_SECTION = 100; //m
         ArrayList<Packet_15.Packet_15_Section> sections = new ArrayList<>();
 
         packet15.Q_SCALE = 1;
