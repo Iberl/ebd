@@ -17,7 +17,8 @@ public class SpeedSupervisionModule {
     private EventBus eventBus;
 
     private BreakingCurve breakingCurve = null;
-    
+    private Double maxDistance = 0d;
+
 
     public SpeedSupervisionModule(EventBus eventBus){
         this.eventBus = eventBus;
@@ -45,9 +46,18 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+        Double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        boolean toFast;
+        //TODO add Enum instead of boolean
+        if(tripDistance < this.maxDistance){
+            double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+            toFast = curSpeed > maxSpeed;
+        }
+        else {
+            toFast = true;
+        }
 
-        boolean toFast = curSpeed > maxSpeed;
+
 
         this.eventBus.postSticky(new SsmReportEvent("ssm", Arrays.asList("tsm"), toFast));
 
@@ -55,7 +65,9 @@ public class SpeedSupervisionModule {
 
     @Subscribe
     public void setBreakingCurve(NewBreakingCurveEvent nbce){
+
         this.breakingCurve = nbce.breakingCurve;
+        this.maxDistance = this.breakingCurve.getHighestXValue();
     }
 
 }
