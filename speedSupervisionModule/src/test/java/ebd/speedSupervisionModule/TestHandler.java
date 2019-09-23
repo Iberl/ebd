@@ -30,6 +30,6 @@ public class TestHandler {
 
     @Subscribe
     public void report(SsmReportEvent sre){
-        System.out.println("To Fast? " + sre.toFast);
+        System.out.println("Speed Intervention Level_ " + sre.interventionLevel);
     }
 }

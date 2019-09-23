@@ -138,20 +138,33 @@ public class BreakingCurve extends BackwardSpline {
 	 * In other  words, the asked position can not lay before the reference location in direction of travel.
 	 * 
 	 * @param position The asked for {@link Position}
-	 *
-	 *
 	 * @return Double The maximum allowed speed at the asked for Position in [m/s]
-	 *
 	 * @throws PositionReferenzException Thrown should the given position can not resolve the distance to the reference location
-	 *
-	 *
-	 * @author Lars Schulze-Falck
+	 * @throws BreakingCurveOutOfRangeException If the position lays outside the range of the breaking curve
+
 	 */
 	public Double getMaxSpeedAtRelativePosition(Position position) throws PositionReferenzException{
 		
 		Double distanceToReferenceLocation = position.totalDistanceToPastLocation(refLocation.getId());
 		
 		return getPointOnCurve(distanceToReferenceLocation);
+	}
+
+	/**
+	 * This function returns the maximum allowed Speed at a given Position. This position must either reference the same location
+	 * or have the location in its list of previous locations and must be at least at far in the direction of travel.
+	 * In other  words, the asked position can not lay before the reference location in direction of travel.
+	 *
+	 * @param position The asked for {@link Position}
+	 * @param offset offset of the position in [m]
+	 * @return The maximum allowed speed at the asked for Position in [m/s]
+	 * @throws PositionReferenzException Thrown should the given position can not resolve the distance to the reference location
+	 * @throws BreakingCurveOutOfRangeException If the position + offset lays outside the range of the breaking curve
+	 */
+	public Double getMaxSpeedAtRelativePositionAndOffset(Position position, double offset) throws PositionReferenzException{
+		Double distanceToReferenceLocation = position.totalDistanceToPastLocation(refLocation.getId());
+
+		return getPointOnCurve(distanceToReferenceLocation + offset);
 	}
 	
 	/**

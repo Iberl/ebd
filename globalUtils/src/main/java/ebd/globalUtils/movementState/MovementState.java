@@ -19,9 +19,14 @@ public enum MovementState {
     ACCELERATING,
 
     /**
-     * The train is breaking
+     * The train is breaking with the service breaks
      */
     BREAKING,
+
+    /**
+     * The train is breaking with the emergency breaks
+     */
+    EMERGENCY_BREAKING,
 
     /**
      * The train is keeping its speed constant
@@ -36,5 +41,5 @@ public enum MovementState {
     /**
      * The train has the same movement state as before
      */
-    UNCHANGED
+    UNCHANGED;
 }

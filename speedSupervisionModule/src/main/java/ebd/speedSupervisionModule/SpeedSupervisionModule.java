@@ -4,6 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -18,6 +19,8 @@ public class SpeedSupervisionModule {
     private EventBus eventBus;
 
     private BreakingCurve breakingCurve = null;
+
+    //TODO Correct maxDistance!
     private Double maxDistance = 0d;
 
 
@@ -47,20 +50,55 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        Double tripDistance = trainDataVolatile.getCurTripDistance();
-        boolean toFast;
-        //TODO add Enum instead of boolean
+        double tripDistance = trainDataVolatile.getCurTripDistance();
+        double tripDistanceWarning = tripDistance + curSpeed * 5;
+        double tripDistanceIndication = tripDistance + curSpeed * 10;
+        SpeedInterventionLevel speedInterventionLevel;
+
+        //TODO Make this less horrible!
         if(tripDistance < this.maxDistance){
             double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
-            toFast = curSpeed > maxSpeed;
+
+            if(curSpeed > maxSpeed + 27){
+                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+            }
+            else if (curSpeed > maxSpeed + 19.8){
+                speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+            }
+            else if(curSpeed > maxSpeed + 14.4){
+                speedInterventionLevel = SpeedInterventionLevel.WARNING;
+            }
+            else {
+                if(tripDistanceWarning < this.maxDistance){
+                    double maxSpeedWarning = this.breakingCurve.getMaxSpeedAtRelativePositionAndOffset(curPosition,curSpeed * 5);
+                    if(curSpeed > maxSpeedWarning){
+                        speedInterventionLevel = SpeedInterventionLevel.WARNING;
+                    }
+                    else {
+                        if(tripDistanceIndication < this.maxDistance){
+                            double maxSpeedIndication = this.breakingCurve.getMaxSpeedAtRelativePositionAndOffset(curPosition, curSpeed * 10);
+                            if(curSpeed > maxSpeedIndication){
+                                speedInterventionLevel = SpeedInterventionLevel.INDICATION;
+                            }
+                            else {
+                                speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+                            }
+                        }
+                        else {
+                            speedInterventionLevel = SpeedInterventionLevel.INDICATION;
+                        }
+                    }
+                }
+                else {
+                    speedInterventionLevel = SpeedInterventionLevel.WARNING;
+                }
+            }
         }
         else {
-            toFast = true;
+            speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
         }
 
-
-
-        this.eventBus.postSticky(new SsmReportEvent("ssm", Arrays.asList("tsm"), toFast));
+        this.eventBus.postSticky(new SsmReportEvent("ssm", Arrays.asList("tsm"), speedInterventionLevel));
 
     }
 

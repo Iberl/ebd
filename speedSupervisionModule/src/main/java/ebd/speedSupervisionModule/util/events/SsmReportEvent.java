@@ -1,13 +1,14 @@
 package ebd.speedSupervisionModule.util.events;
 
 import ebd.globalUtils.events.NormalEvent;
+import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 
 import java.io.Serializable;
 import java.util.List;
 
 public class SsmReportEvent extends NormalEvent {
 
-    public boolean toFast;
+    public SpeedInterventionLevel interventionLevel;
 
     /**
      * Constructs an Event
@@ -15,8 +16,8 @@ public class SsmReportEvent extends NormalEvent {
      * @param source  ID from the module the event was sent by
      * @param targets ID from all modules the event is addressed to
      */
-    public SsmReportEvent(String source, List<String> targets, boolean toFast) {
+    public SsmReportEvent(String source, List<String> targets, SpeedInterventionLevel interventionLevel) {
         super(source, targets);
-        this.toFast = toFast;
+        this.interventionLevel = interventionLevel;
     }
 }

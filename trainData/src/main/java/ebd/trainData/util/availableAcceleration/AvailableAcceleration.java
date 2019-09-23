@@ -46,9 +46,12 @@ public class AvailableAcceleration {
      * @param currentSpeed in [m/s]
      * @param tripDistance in [m], starting at the reference location of the gradient profile
      * @return acceleration in [m/(s^2)]
+     * @throws IllegalArgumentException Thrown if an unknown MovementState is applied.
      */
-    public double getAcceleration(double currentSpeed, double tripDistance, MovementState movementState){
+    public double getAcceleration(double currentSpeed, double tripDistance, MovementState movementState)
+                        throws IllegalArgumentException {
         switch (movementState){
+            case UNCHANGED:
             case HALTING:
             case CRUISE:
                 return 0d;
@@ -62,6 +65,11 @@ public class AvailableAcceleration {
                 deceleration -= resistanceCurve.getPointOnCurve(currentSpeed);
                 deceleration += gradientProfile.getPointOnCurve(tripDistance);
                 return  deceleration;
+            case EMERGENCY_BREAKING:
+                double emergencyDeceleration = - emergencyBreakingPowerCurve.getPointOnCurve(currentSpeed);
+                emergencyDeceleration -= resistanceCurve.getPointOnCurve(currentSpeed);
+                emergencyDeceleration += gradientProfile.getPointOnCurve(tripDistance);
+                return  emergencyDeceleration;
             case COASTING:
                 return resistanceCurve.getPointOnCurve(currentSpeed) - gradientProfile.getPointOnCurve(tripDistance);
             default:

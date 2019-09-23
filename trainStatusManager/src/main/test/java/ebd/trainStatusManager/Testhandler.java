@@ -21,19 +21,19 @@ public class Testhandler {
         ee.exception.printStackTrace();
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    /*@Subscribe(threadMode = ThreadMode.ASYNC)
     public void normalEvent(NormalEvent ne){
         System.out.println(ne.getClass().getSimpleName());
-    }
+    }*/
 
-    /*@Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void normalEvent(NormalEvent ne){
         if(!ne.getClass().getSimpleName().equals("NewTrainDataVolatileEvent")){
             System.out.println(ne.getClass().getSimpleName());
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void ntdv(NewTrainDataVolatileEvent ntdv){
         System.out.println("NTDV: " + ntdv.getClass().getSimpleName());
         System.out.println("     curMaxSpeed: " + ntdv.trainDataVolatile.getCurrentMaxSpeed());
@@ -43,5 +43,5 @@ public class Testhandler {
             System.out.println("     curPos Loc: " + tempPos.getLocation());
             System.out.println("     curPos Inc: " + tempPos.getIncrement());
         }
-    }*/
+    }
 }

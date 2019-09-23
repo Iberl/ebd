@@ -93,12 +93,24 @@ public class DrivingDynamics {
         Getting next action that should be taken and parsing that action
          */
         SsmReportEvent speedSupervisionReport = this.eventBus.getStickyEvent(SsmReportEvent.class);
-        if(speedSupervisionReport == null || !speedSupervisionReport.toFast){
+        if(speedSupervisionReport == null ){
             actionParser(this.drivingProfile.actionToTake());
         }
         else {
-            this.dynamicState.setMovementState(MovementState.BREAKING);
-            this.dynamicState.setBreakingModification(1d);
+            switch (speedSupervisionReport.interventionLevel){
+                case NO_INTERVENTION:
+                case INDICATION:
+                case WARNING:
+                    actionParser(this.drivingProfile.actionToTake());
+                    break;
+                case APPLY_SERVICE_BREAKS:
+                    this.dynamicState.setMovementState(MovementState.BREAKING);
+                    this.dynamicState.setBreakingModification(1d);
+                case APPLY_EMERGENCY_BREAKS:
+                default:
+                    this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
+                    this.dynamicState.setBreakingModification(1d);
+            }
         }
 
         /*
