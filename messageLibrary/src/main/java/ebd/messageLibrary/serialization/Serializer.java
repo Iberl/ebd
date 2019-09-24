@@ -61,7 +61,7 @@ public abstract class Serializer {
 		// check if object is serialisable
 		if(object == null || !isSerializable(object.getClass())) return;
 
-		int numberOfFields = object.getClass().getAnnotation(OrderLength.class).value();
+		int numberOfFields = object.getClass().getFields().length;
 
 		// list of fields to be serialized
 		Pair<Object, Integer>[] valuesToSerialize = new Pair[numberOfFields];
@@ -390,7 +390,7 @@ public abstract class Serializer {
 						throw new MissingInformationException("No @ItemType information was specified for field " + type.getSimpleName() + "." + field.getName());
 					}
 					int size = reader.readInt(5, false);
-					List<Object> list = new ArrayList<>();
+					List<Object> list = new ArrayList<>(size);
 
 					if(Modifier.isAbstract(itemType.getModifiers())) {
 						for(int i = 0; i < size; i++) {
