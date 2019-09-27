@@ -20,7 +20,8 @@ public class Logging{
     private EventBus eventBus;
     private String logPrefix;
     static String logDateTime;
-    
+    static Handler fileHandlerAll;
+
     static {
         //format of logs is defined in resources/logging.properties
         System.setProperty("java.util.logging.config.file", "resources/logging.properties");
@@ -30,9 +31,14 @@ public class Logging{
         }
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
         logDateTime = LocalDateTime.now().format(dateTimeFormatter);
+        try {
+            fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    Handler fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
+
 
     /**
      * initializes a logger and registers it on a given EventBus, output in files and on console
