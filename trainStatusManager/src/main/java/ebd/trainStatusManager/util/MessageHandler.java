@@ -44,13 +44,7 @@ public class MessageHandler {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void msgCollector(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
-        try{
-            TrackMessage tm = (TrackMessage)rme.message;
-        }
-        catch (ClassCastException cce){
-            this.localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"),rme,cce));
-            return;
-        }
+        if (!(rme.message instanceof TrackMessage))
 
         switch (rme.message.NID_MESSAGE){
             case 3:

@@ -154,24 +154,22 @@ public class DrivingDynamics {
     }
 
     @Subscribe
-    public void updateTripProfil(DDUpdateTripProfileEvent utpe){
+    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
         if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
             return;
         }
         this.tripProfile = utpe.tripProfile;
-        try {
+
+        if(this.tripProfile instanceof BackwardSpline){
             BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
             this.maxTripDistance = backwardSpline.getHighestXValue();
         }
-        catch (ClassCastException cce){
-            try {
-                ForwardSpline forwardSpline =(ForwardSpline)this.tripProfile;
-                this.maxTripDistance = Double.MAX_VALUE;
-            }
-            catch (ClassCastException ce){
-                IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-                this.eventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
-            }
+        else if(this.tripProfile instanceof ForwardSpline){
+            this.maxTripDistance = Double.MAX_VALUE;
+        }
+        else{
+            IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
+            this.eventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
         }
 
 
