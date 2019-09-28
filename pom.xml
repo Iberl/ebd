@@ -93,19 +93,12 @@
     <module>logger</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
-    <module>drivingDynamics</module>
-    <module>trainData</module>
-    <module>routeData</module>
-    <module>breakingCurveCalculator</module>
-    <module>speedSupervisionModule</module>
-    <module>trainStatusManager</module>
-    <module>breakingCurveCalculator</module>
-
     <module>messageReceiver</module>
 
-    <module>messageSender</module>
+    <module>trainSide</module>
+    <module>trackSide</module>
 
-    <module>baliseTelegramGenerator</module>
+    <!-- <module>baliseTelegramGenerator</module> -->
 
   </modules>
 

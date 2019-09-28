@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Class for receiving messages from RBC
@@ -79,24 +80,24 @@ public class MessageReceiver {
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
-				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram));
+				localBus.post(new ReceivedTelegramEvent(mrID, Collections.singletonList(managerID), telegram));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 
-				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message));
+				localBus.post(new ReceivedMessageEvent(mrID, Collections.singletonList(managerID), message));
 			}
 
 		} catch(ClassNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
 
 		} catch(MissingInformationException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
 
 		} catch(BitLengthOutOfBoundsException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
 
 		} catch(ValueNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
 
 		}
 	}

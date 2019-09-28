@@ -41,5 +41,5 @@ public enum MovementState {
     /**
      * The train has the same movement state as before
      */
-    UNCHANGED;
+    UNCHANGED
 }

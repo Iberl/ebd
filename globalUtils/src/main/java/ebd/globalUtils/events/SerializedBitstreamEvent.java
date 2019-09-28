@@ -1,8 +1,6 @@
 package ebd.globalUtils.events;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.messageLibrary.message.Message;
-import ebd.messageLibrary.serialization.BitStreamReader;
 
 import java.util.List;
 

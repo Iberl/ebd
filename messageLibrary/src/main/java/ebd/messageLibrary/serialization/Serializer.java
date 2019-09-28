@@ -1,7 +1,6 @@
 package ebd.messageLibrary.serialization;
 
 import ebd.messageLibrary.message.Telegram;
-import ebd.messageLibrary.serialization.annotations.IfEqual;
 import javafx.util.Pair;
 import ebd.messageLibrary.serialization.annotations.*;
 import ebd.messageLibrary.util.ETCSVariables;

@@ -1,7 +1,6 @@
 package ebd.globalUtils.events.drivingDynamics;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
 
 import java.util.List;

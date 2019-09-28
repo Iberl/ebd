@@ -1,7 +1,6 @@
 package ebd.globalUtils.events.messageSender;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.messageLibrary.message.Message;
 import ebd.messageLibrary.message.Telegram;
 
 import java.util.List;
