@@ -21,7 +21,9 @@ import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
 import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainStatusManager.util.Clock;
+import ebd.trainStatusManager.util.GlobalHandler;
 import ebd.trainStatusManager.util.MessageHandler;
+import ebd.trainStatusManager.util.TelegramHandler;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.trainStatusManager.util.events.TsmTripEndEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -48,7 +50,9 @@ public class TrainStatusManager implements Runnable {
     /*
     Handlers
      */
+    private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
+    private TelegramHandler telegramHandler;
 
     /*
     Internal modules
@@ -143,12 +147,10 @@ public class TrainStatusManager implements Runnable {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        //TODO -> connect this to global (GlobalHandler)
         if(!validTarget(de.targets)){
             return;
         }
         this.clock.stop();
-        this.globalEventBus.unregister(this);
         synchronized (this){
             this.notify();
         }
@@ -158,7 +160,9 @@ public class TrainStatusManager implements Runnable {
         /*
         Handlers
          */
+        this.globalHandler = new GlobalHandler(this.localEventBus,this.etcsTrainID);
         this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID);
+        this.telegramHandler = new TelegramHandler();
 
         /*
         Modules

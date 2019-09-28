@@ -18,7 +18,8 @@ import java.util.List;
  * @author Lars Schulze-Falck
  */
 public class RouteDataVolatile {
-
+    //TODO Respect SRS 3 A.3.6
+    //TODO Respect SRS 3 A.3.4
     /**
      * Reference Location to which all packets are relative to.
      */

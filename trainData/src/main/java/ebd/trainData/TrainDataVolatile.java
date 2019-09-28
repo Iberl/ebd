@@ -6,10 +6,12 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.util.availableAcceleration.AccelerationPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.ResistanceCurveCalculator;
+import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +39,12 @@ public class TrainDataVolatile {
      */
     @NotNull
     protected volatile double curTripDistance = 0d;
+
+    /**
+     * Time since the trip started in [s]
+     */
+    @NotNull
+    protected volatile double curTripTime = 0d;
 
     /**
      * The current speed of the train in [m/s]
@@ -88,11 +96,43 @@ public class TrainDataVolatile {
     protected volatile ForwardSpline currentResistanceCurve;
 
     /**
-     *
      * Will be first set after a gradient profile exists.
      */
     @Nullable
     protected volatile AvailableAcceleration availableAcceleration = null;
+
+    /*
+    Position Report Parameter
+     */
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#T_CYCLOC} in [s]
+     * Do not cycle with time if equal to {@link ETCSVariables#T_CYCLOC_INFINITY} or
+     * {@link ETCSVariables#INTEGER_NOVALUE}
+     *
+     */
+    @NotNull
+    protected volatile int T_CYCLOC = ETCSVariables.T_CYCLOC;
+
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#D_CYCLOC} in [m]
+     * Do not cycle with distance if equal to {@link Double#MAX_VALUE} or
+     * {@link ETCSVariables#INTEGER_NOVALUE}
+     */
+    @NotNull
+    protected volatile double distanceCycleLocation = ETCSVariables.D_CYCLOC;
+
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#M_LOC}
+     */
+    @NotNull
+    protected volatile int M_LOC = ETCSVariables.M_LOC;
+
+    /**
+     * {@link IncrementalPositionReportDistances}
+     */
+    @Nullable
+    protected volatile IncrementalPositionReportDistances incrementalPositionReportDistances = null;
+
 
 
     //Constructor
@@ -148,6 +188,11 @@ public class TrainDataVolatile {
     public double getCurTripDistance(){return curTripDistance; }
 
     /**
+     * @return time since the start of the trip in [s]
+     */
+    public double getCurTripTime(){return curTripTime;};
+
+    /**
      * @return current speed in [m/s]
      */
     public Double getCurrentSpeed() {
@@ -196,5 +241,33 @@ public class TrainDataVolatile {
 
     public AvailableAcceleration getAvailableAcceleration() {
         return availableAcceleration;
+    }
+
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#T_CYCLOC} in [s]
+     */
+    public int getT_CYCLOC() {
+        return T_CYCLOC;
+    }
+
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#D_CYCLOC} in [m]
+     */
+    public double getDistanceCycleLocation() {
+        return distanceCycleLocation;
+    }
+
+    /**
+     * {@link ebd.messageLibrary.util.ETCSVariables#M_LOC}
+     */
+    public int getM_LOC() {
+        return M_LOC;
+    }
+
+    /**
+     * {@link IncrementalPositionReportDistances}
+     */
+    public IncrementalPositionReportDistances getIncrementalPositionReportDistances() {
+        return incrementalPositionReportDistances;
     }
 }

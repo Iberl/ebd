@@ -185,6 +185,7 @@ public class DrivingDynamics {
         nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
         nameToValue.put("currentPosition", this.dynamicState.getPosition());
         nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
+        nameToValue.put("curTripTime", this.dynamicState.getTime());
         this.eventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 

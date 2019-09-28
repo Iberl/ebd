@@ -2,19 +2,17 @@ package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
-import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.messageLibrary.message.TrackMessage;
+import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
-import ebd.messageLibrary.packet.Packet;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
-import ebd.messageLibrary.packet.trackpackets.Packet_21;
-import ebd.messageLibrary.packet.trackpackets.Packet_27;
-import ebd.messageLibrary.packet.trackpackets.Packet_65;
+import ebd.messageLibrary.packet.TrackPacket;
+import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -31,6 +29,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.*;
 
 public class MessageHandler {
+    //TODO: Respect SRS 3 A.3.3
 
     private EventBus localBus;
     private String etcsTrainID;
@@ -42,13 +41,23 @@ public class MessageHandler {
         this.etcsTrainID = etcsTrainID;
     }
 
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void msgCollector(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
+        try{
+            TrackMessage tm = (TrackMessage)rme.message;
+        }
+        catch (ClassCastException cce){
+            this.localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"),rme,cce));
+            return;
+        }
 
         switch (rme.message.NID_MESSAGE){
             case 3:
                 handleMsg3(rme);
+                break;
+            case 24:
+                handleMsg24(rme);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("This message ID could not be handled: " + rme.message.NID_MESSAGE);
@@ -57,7 +66,19 @@ public class MessageHandler {
     }
 
     /**
-     * The purpose of this handler is to take a {@link Message_3} and
+     * The purpose of this handler function is to take {@link ebd.messageLibrary.message.trackmessages.Message_24} and
+     * react to the included packages.
+     * @param rme
+     */
+    private void handleMsg24(ReceivedMessageEvent rme) {
+        Message_24 message24 = (Message_24)rme.message;
+        for(TrackPacket tp : message24.packets){
+            handleOptionalTrackPackages(rme,tp);
+        }
+    }
+
+    /**
+     * The purpose of this handler function is to take a {@link Message_3} and
      * a) update {@link RouteDataVolatile}
      * b) update AvailableAcceleration in {@link TrainDataVolatile},
      * c) calculate a new breaking curve. The order of this is important!
@@ -96,7 +117,7 @@ public class MessageHandler {
 
         packet15 = msg3.Packet_15;
 
-        for (Packet packet : msg3.packets){
+        for (TrackPacket packet : msg3.packets){ //TODO Check LRBG reference consistency
             String pName = packet.getClass().getSimpleName();
             switch (pName){
                 case "Packet_21":
@@ -106,11 +127,11 @@ public class MessageHandler {
                     packet27 = (Packet_27)packet;
                     break;
                 case "Packet_65":
-                     listOfPacket65s.add((Packet_65)packet);
-                     break;
+                    listOfPacket65s.add((Packet_65)packet);
+                    break;
                 default:
-                IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 contained an unused " + pName);
-                localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.WARNING));
+                    handleOptionalTrackPackages(rme,packet);
+
             }
         }
 
@@ -137,6 +158,28 @@ public class MessageHandler {
     }
 
     /**
+     * The purpose of this handler function is to deal with optional {@link TrackPacket} that are not
+     * used for the original function of the message.<br>
+     * <p>
+     * Can currently handle following {@link TrackPacket}: <br>
+     * [58] <br>
+     * TODO: Add additional packages
+     * @param rme The {@link ReceivedMessageEvent} containing this package
+     * @param trackPacket see {@link TrackPacket}
+     */
+    private void handleOptionalTrackPackages(ReceivedMessageEvent rme, TrackPacket trackPacket) {
+
+        switch (trackPacket.NID_PACKET){
+            case 58:
+                PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+            default:
+                IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
+                localBus.post(new TsmExceptionEvent("tsm", Arrays.asList("tsm"), rme, iAE, ExceptionEventTyp.NONCRITICAL));
+        }
+
+    }
+
+    /**
      * True if this Instance is a vaild target of the event
      * @param targetList the target list a the event
      * @return True if this instance is a vaild target of the event
@@ -158,6 +201,5 @@ public class MessageHandler {
         }
         return result;
     }
-
 
 }

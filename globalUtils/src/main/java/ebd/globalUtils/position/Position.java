@@ -6,6 +6,7 @@ import java.util.HashMap;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class represents a position for a train. It consists out of an absolut reference point, a direction and an increment.
@@ -17,14 +18,13 @@ public class Position {
 	
 	/**
 	 * Current direction of travel of the train: Nominal (true) or reverse (false). Does not change the way the increment is counted.
-	 * 
-	 * @deprecated Should not be included in the Position class
 	 */
-	@Deprecated
-    private boolean direction;
-    /**
-     * Reference location
+	private boolean direction;
+
+	/**
+     * Reference location //TODO Change according to {@link ebd.messageLibrary.util.ETCSVariables#Q_DIR}
      */
+	@NotNull
     private Location location;
 
     /**
@@ -36,6 +36,7 @@ public class Position {
      * A HashMap of previous locations (s. SRS 3.6.2.2.2c) ). Should be 8 or more locations unless the train has crossed less than 8 balise groups total.
      * The Key of the HashMap is the location ID, the Value the {@link Location} itself
      */
+    @Nullable
     private HashMap<String,Location> previousLocations = new HashMap<String,Location>();
 
     /**
@@ -44,13 +45,13 @@ public class Position {
      * @param direction true == forward, false == backward
      * @param location location reference point
      */
-    public Position(double increment, boolean direction, Location location) {
+    public Position(double increment, boolean direction, @NotNull Location location) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
     }
     
-    public Position(double increment, boolean direction, Location location, HashMap<String, Location> previousLocations) {
+    public Position(double increment, boolean direction, @NotNull Location location, @Nullable HashMap<String, Location> previousLocations) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
