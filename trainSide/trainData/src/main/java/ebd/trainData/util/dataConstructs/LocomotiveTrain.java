@@ -348,6 +348,7 @@ public class LocomotiveTrain extends TrainCar {
 
             if(tempJsonArray.isEmpty()){
                 System.out.println("-TLVdrive list was empty-");
+
             }
 
             for (Object item : tempJsonArray){
@@ -362,6 +363,7 @@ public class LocomotiveTrain extends TrainCar {
 
             if(tempJsonArray.isEmpty()){
                 System.out.println("-TLVbreak list was empty-");
+
             }
 
             for (Object item : tempJsonArray){

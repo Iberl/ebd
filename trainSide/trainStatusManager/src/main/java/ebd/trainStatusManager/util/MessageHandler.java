@@ -1,7 +1,9 @@
 package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -11,6 +13,7 @@ import ebd.globalUtils.spline.ForwardSpline;
 import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
+import ebd.messageLibrary.message.trainmessages.Message_146;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -33,12 +36,14 @@ public class MessageHandler {
 
     private EventBus localBus;
     private List<String> exceptionTarget = Collections.singletonList("tsm");
+    private String rbcID;
     private String etcsTrainID;
 
 
-    public MessageHandler(EventBus localBus, String etcsTrainID) {
+    public MessageHandler(EventBus localBus, String etcsTrainID, String rbcID) {
         this.localBus = localBus;
         this.localBus.register(this);
+        this.rbcID = rbcID;
         this.etcsTrainID = etcsTrainID;
     }
 
@@ -130,7 +135,6 @@ public class MessageHandler {
                     break;
                 default:
                     handleOptionalTrackPackages(rme,packet);
-
             }
         }
 
@@ -154,6 +158,12 @@ public class MessageHandler {
         packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
         l_train,currentMaxSpeed,maxTrainSpeed);
         this.localBus.post(bcre);
+
+        if(msg3.M_ACK){
+            sendAck(msg3);
+        }
+
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + this.etcsTrainID + "got new MA"));
     }
 
     /**
@@ -161,7 +171,7 @@ public class MessageHandler {
      * used for the original function of the message.<br>
      * <p>
      * Can currently handle following {@link TrackPacket}: <br>
-     * [58] <br>
+     * [5,57,58] <br>
      * TODO: Add additional packages
      * @param rme The {@link ReceivedMessageEvent} containing this package
      * @param trackPacket see {@link TrackPacket}
@@ -169,6 +179,9 @@ public class MessageHandler {
     private void handleOptionalTrackPackages(ReceivedMessageEvent rme, TrackPacket trackPacket) {
 
         switch (trackPacket.NID_PACKET){
+            case 5:
+                PackageResolver.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
+                break;
             case 58:
                 PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
                 break;
@@ -180,6 +193,16 @@ public class MessageHandler {
                 localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.NONCRITICAL));
         }
 
+    }
+
+    private void sendAck(TrackMessage tm) {
+        Message_146 message146 = new Message_146();
+        message146.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
+        long curTime = System.currentTimeMillis() / 10L;
+        message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
+        message146.T_TRAIN_MSG = tm.T_TRAIN;
+        List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);
+        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message146, destination ));
     }
 
     /**

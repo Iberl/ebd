@@ -135,7 +135,7 @@ public class BreakingCurveCalculator {
     		}
 	    	double d_EMA = MovementAuthorityConverter.p15ToD_EMA(bclre.packet15) + bclre.referencePosition.totalDistanceToPreviousPosition(this.referencePosition);
 	    	double v_loa = bclre.packet15.V_LOA * ETCS_VALUE_TO_MS;
-	    	System.out.println(String.format("d_EMA: %f; v_loa: %f", d_EMA, v_loa));
+	    	//System.out.println(String.format("d_EMA: %f; v_loa: %f", d_EMA, v_loa));
 	    	this.breakingCurve = calculate(ssp, gradientProfile, this.referencePosition, d_EMA, v_loa, bclre.id);
 	    	eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets, breakingCurve));
 	    	isCalculating = false;

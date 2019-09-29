@@ -50,6 +50,7 @@ class TrainStatusManagerTest {
         lop.add(makeP27());
 
         Message_3 msg3 = new Message_3();
+        msg3.M_ACK = true;
         msg3.NID_LRBG = 2;
         msg3.Packet_15 = makeP15();
         msg3.packets = lop;

@@ -222,8 +222,8 @@ public class DrivingDynamics {
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("DD -> Log: Acceleration: %f m/s^-2 Speed: %f m/s, Position: %s + %f m%n",a,v,l,i);
-        String msg2 = String.format("DD -> Log: Trip Distance: %f m, Trip Time: %f s", td, tt);
+        String msg = String.format("DD -> Log: Acceleration: %.2f m/s^-2 Speed: %.2f m/s, Position: LRBG %s + %.2f m, ",a,v,l,i);
+        String msg2 = String.format("Trip Distance: %.2f m, Trip Time: %.2f s", td, tt);
         this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 
     }

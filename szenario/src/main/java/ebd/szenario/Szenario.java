@@ -87,7 +87,9 @@ public class Szenario implements Runnable {
 
     @Subscribe
     public void load1(LoadOneEvent loe){
-
+        this.rbc = new RadioBlockCenter("1", Collections.singletonList(192));
+        this.tsm = new TrainStatusManager("192", "1",
+                "blaa", "TestDrivingProfile.json", true);
     }
 
     private boolean validTarget(List<String> targetList) {

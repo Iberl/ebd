@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -54,6 +55,12 @@ public class RouteDataVolatile {
      */
     protected volatile double currentGradient = 0d;
 
+    /**
+     * Linking Information
+     */
+    @Nullable
+    protected volatile HashMap<String,Location> linkingInformation = null;
+
     public RouteDataVolatile(){}
 
     /**
@@ -72,16 +79,17 @@ public class RouteDataVolatile {
         this.packet_65 = packet_65;
     }
 
+
     /*
     Getter
      */
-
     /**
      * Reference Location to which all packets are relative to.
      */
     public Location getRefLocation() {
         return refLocation;
     }
+
     /**
      * A {@link Packet_15} containing a movement authority
      */
@@ -89,7 +97,7 @@ public class RouteDataVolatile {
         return packet_15;
     }
     /**
-     * A @{@link Packet_21} containing a gradient profile
+     * A {@link Packet_21} containing a gradient profile
      */
     public Packet_21 getPacket_21() {
         return packet_21;
@@ -101,7 +109,7 @@ public class RouteDataVolatile {
         return packet_27;
     }
     /**
-     * A list of @{@link Packet_65} containing Tempory Speed Restrictions
+     * A list of {@link Packet_65} containing Tempory Speed Restrictions
      */
     public List<Packet_65> getPacket_65() {
         return packet_65;
@@ -111,5 +119,11 @@ public class RouteDataVolatile {
      */
     public double getCurrentGradient() {
         return currentGradient;
+    }
+    /**
+     * Linking Information
+     */
+    public HashMap<String, Location> getLinkingInformation() {
+        return linkingInformation;
     }
 }

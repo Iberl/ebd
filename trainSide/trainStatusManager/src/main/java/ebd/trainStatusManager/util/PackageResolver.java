@@ -1,9 +1,12 @@
 package ebd.trainStatusManager.util;
 
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
+import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trackpackets.Packet_58;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -16,12 +19,47 @@ import java.util.*;
 
 public class PackageResolver {
 
+    public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
+        double scale = Math.pow(10, trackPacket.Q_DIR - 1);
+        HashMap<String, Location> linkingMap = new HashMap<>();
+        Location tempLoc = new Location(String.valueOf(trackPacket.link.NID_BG), String.valueOf(nid_lrbg), trackPacket.link.D_LINK * scale );
+        linkingMap.put(String.valueOf(trackPacket.link.NID_BG),tempLoc);
+        Integer prevLoc =trackPacket.link.NID_BG;
+        for(Packet_5.Packet_5_Link link : trackPacket.links){
+            tempLoc = new Location(String.valueOf(link.NID_BG),String.valueOf(prevLoc),link.D_LINK * scale);
+            linkingMap.put(String.valueOf(link.NID_BG), tempLoc);
+            prevLoc = link.NID_BG;
+        }
+        localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
+    }
+
+    public static void p57(EventBus localBus, Packet_57 p57){
+        TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        Position curPos = trainDataVolatile.getCurrentPosition();
+
+        if((curPos.isDirectedForward() && p57.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
+                || (!curPos.isDirectedForward() && p57.Q_DIR == 1)){
+            return;
+        }
+
+        int t_mar = p57.T_MAR;
+        int t_timeoutrqst = p57.T_TIMEOUTRQST;
+        int t_cycrqst = p57.T_CYCRQST;
+
+        Map<String,Object> changes = new HashMap<>();
+        changes.put("T_MAR", t_mar);
+        changes.put("T_CYCRQST", t_cycrqst);
+        changes.put("T_CYCRQST", t_timeoutrqst);
+        localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
+        localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
+    }
+
     public static void p58(EventBus localBus, int nid_lrbg, Packet_58 p58){
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
         if((curPos.isDirectedForward() && p58.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
-            || (!curPos.isDirectedForward() && p58.Q_DIR == 1)){
+                || (!curPos.isDirectedForward() && p58.Q_DIR == 1)){
             return;
         }
 
@@ -53,26 +91,5 @@ public class PackageResolver {
         changes.put("incremetalPositionReportDistances", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
-    }
-
-    public static void p57(EventBus localBus, Packet_57 p57){
-        TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        Position curPos = trainDataVolatile.getCurrentPosition();
-
-        if((curPos.isDirectedForward() && p57.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
-                || (!curPos.isDirectedForward() && p57.Q_DIR == 1)){
-            return;
-        }
-
-        int t_mar = p57.T_MAR;
-        int t_timeoutrqst = p57.T_TIMEOUTRQST;
-        int t_cycrqst = p57.T_CYCRQST;
-
-        Map<String,Object> changes = new HashMap<>();
-        changes.put("T_MAR", t_mar);
-        changes.put("T_CYCRQST", t_cycrqst);
-        changes.put("T_CYCRQST", t_timeoutrqst);
-        localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
-        localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
     }
 }

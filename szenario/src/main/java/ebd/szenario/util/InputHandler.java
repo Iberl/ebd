@@ -35,6 +35,7 @@ public class InputHandler implements Runnable {
         switch (next){
             case "quit":
                 this.globalEventBus.post(new DisconnectEvent("szenario", Collections.singletonList("all")));
+                System.exit(0);
                 break;
             case "load1":
                 this.globalEventBus.post(new LoadOneEvent("szenario", Collections.singletonList("szenario")));

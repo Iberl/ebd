@@ -2216,8 +2216,8 @@ public class ETCSVariables {
 	 * Max: 42949672.94 s <br>
 	 * Resolution: 10 ms
 	 */
-	public static final int T_TRAIN         = INTEGER_NOVALUE;
-	public static final int T_TRAIN_UNKNOWN = -1;
+	public static final long T_TRAIN         = INTEGER_NOVALUE;
+	public static final long T_TRAIN_UNKNOWN = 4294967295L;
 
 	/**
 	 * Name: T_VBC <br>

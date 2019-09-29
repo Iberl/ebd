@@ -7,6 +7,7 @@ import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -76,6 +77,17 @@ public class TrainStatusManager implements Runnable {
         this.urlToTrainconfigurator = urlToTrainconfigurator;
         this.pathToDrivingStrategy = pathToDrivingStrategy;
         setUpTrain(false);
+        this.tsmThread.start();
+    }
+
+    public TrainStatusManager(String etcsTrainID, String rbcID, String urlToTrainconfigurator,
+                              String pathToDrivingStrategy, boolean testing){
+        this.localEventBus.register(this);
+        this.etcsTrainID = etcsTrainID;
+        this.rbcID = rbcID;
+        this.urlToTrainconfigurator = urlToTrainconfigurator;
+        this.pathToDrivingStrategy = pathToDrivingStrategy;
+        setUpTrain(testing);
         this.tsmThread.start();
     }
 
@@ -159,13 +171,13 @@ public class TrainStatusManager implements Runnable {
         Handlers
          */
         try {
-            System.out.println(this.etcsTrainID);
+            //System.out.println(this.etcsTrainID);
             this.logger = new Logging(this.localEventBus,Integer.parseInt(this.etcsTrainID));
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.globalHandler = new GlobalHandler(this.localEventBus,this.etcsTrainID);
-        this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID);
+        this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID,this.rbcID);
         this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);
 
         /*
@@ -193,6 +205,8 @@ public class TrainStatusManager implements Runnable {
 
         this.clock = new Clock(this.localEventBus);
         this.clock.start();
+
+        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
     }
 
 
