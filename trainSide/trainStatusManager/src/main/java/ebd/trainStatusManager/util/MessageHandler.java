@@ -32,6 +32,7 @@ public class MessageHandler {
     //TODO: Respect SRS 3 A.3.3
 
     private EventBus localBus;
+    private List<String> exceptionTarget = Collections.singletonList("tsm");
     private String etcsTrainID;
 
 
@@ -44,7 +45,11 @@ public class MessageHandler {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void msgCollector(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
-        if (!(rme.message instanceof TrackMessage))
+        if (!(rme.message instanceof TrackMessage)) {
+            IllegalArgumentException iAE = new IllegalArgumentException("This Messages was not a TrackMessage");
+            this.localBus.post(new TsmExceptionEvent("tsm", exceptionTarget, rme, iAE, ExceptionEventTyp.WARNING));
+            return;
+        }
 
         switch (rme.message.NID_MESSAGE){
             case 3:
@@ -166,6 +171,10 @@ public class MessageHandler {
         switch (trackPacket.NID_PACKET){
             case 58:
                 PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                break;
+            case 57:
+                PackageResolver.p57(this.localBus,(Packet_57)trackPacket);
+                break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
                 localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.NONCRITICAL));

@@ -57,6 +57,11 @@
             <artifactId>speedSupervisionModule</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>logger</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 

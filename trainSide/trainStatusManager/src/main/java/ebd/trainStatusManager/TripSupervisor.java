@@ -44,11 +44,9 @@ public class TripSupervisor {
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         if(trainDataVolatile.getCurTripDistance() >= this.distanceToEMA && trainDataVolatile.getCurrentSpeed() == 0){
+            sendEndOfMission();
             this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
         }
-
-
-
     }
 
     @Subscribe
@@ -58,7 +56,10 @@ public class TripSupervisor {
         }
         Packet_15 p15 = rdve.routeDataVolatile.getPacket_15();
         this.distanceToEMA = MovementAuthorityConverter.p15ToD_EMA(p15) - 20;
+    }
 
+    private void sendEndOfMission() {
+        //TODO Send Message 150
     }
 
 

@@ -3,15 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>etcs</artifactId>
+        <artifactId>trackSide</artifactId>
         <groupId>ebd</groupId>
         <version>0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>messageReceiver</artifactId>
-
-    <name>Message Receiver</name>
+    <artifactId>radioBlockCenter</artifactId>
     <dependencies>
         <dependency>
             <groupId>ebd</groupId>
@@ -21,7 +19,19 @@
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
-            <artifactId>globalUtils</artifactId>
+            <artifactId>messageSender</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>messageReceiver</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>logger</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

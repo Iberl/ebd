@@ -102,6 +102,31 @@ public class TrainDataVolatile {
     protected volatile AvailableAcceleration availableAcceleration = null;
 
     /*
+    Movement Authority Request Parameter
+     */
+
+    /**
+     * {@link ETCSVariables#T_MAR} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_MAR_INFINITY}
+     */
+    @NotNull
+    protected volatile int T_MAR = ETCSVariables.T_MAR;
+
+    /**
+     * {@link ETCSVariables#T_TIMEOUTRQST} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_TIMEOUTRQST_INFINITY}
+     */
+    @NotNull
+    protected volatile int T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST;
+
+    /**
+     * {@link ETCSVariables#T_CYCRQST} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_CYCRQST_INFINITY}
+     */
+    @NotNull
+    protected volatile int T_CYCRQST = ETCSVariables.T_CYCRQST;
+
+    /*
     Position Report Parameter
      */
     /**
@@ -241,6 +266,30 @@ public class TrainDataVolatile {
 
     public AvailableAcceleration getAvailableAcceleration() {
         return availableAcceleration;
+    }
+
+    /**
+     * {@link ETCSVariables#T_MAR} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_MAR_INFINITY}
+     */
+    public int getT_MAR() {
+        return T_MAR;
+    }
+
+    /**
+     * {@link ETCSVariables#T_TIMEOUTRQST} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_TIMEOUTRQST_INFINITY}
+     */
+    public int getT_TIMEOUTRQST() {
+        return T_TIMEOUTRQST;
+    }
+
+    /**
+     * {@link ETCSVariables#T_CYCRQST} in [s]
+     * Do not trigger if equal to {@link ETCSVariables#T_CYCRQST_INFINITY}
+     */
+    public int getT_CYCRQST() {
+        return T_CYCRQST;
     }
 
     /**

@@ -1,8 +1,10 @@
 package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trackpackets.Packet_58;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataVolatile;
@@ -51,5 +53,26 @@ public class PackageResolver {
         changes.put("incremetalPositionReportDistances", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
+    }
+
+    public static void p57(EventBus localBus, Packet_57 p57){
+        TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        Position curPos = trainDataVolatile.getCurrentPosition();
+
+        if((curPos.isDirectedForward() && p57.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
+                || (!curPos.isDirectedForward() && p57.Q_DIR == 1)){
+            return;
+        }
+
+        int t_mar = p57.T_MAR;
+        int t_timeoutrqst = p57.T_TIMEOUTRQST;
+        int t_cycrqst = p57.T_CYCRQST;
+
+        Map<String,Object> changes = new HashMap<>();
+        changes.put("T_MAR", t_mar);
+        changes.put("T_CYCRQST", t_cycrqst);
+        changes.put("T_CYCRQST", t_timeoutrqst);
+        localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
+        localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
     }
 }

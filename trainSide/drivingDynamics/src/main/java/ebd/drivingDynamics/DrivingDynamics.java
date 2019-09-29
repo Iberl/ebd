@@ -8,9 +8,11 @@ import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.movementState.MovementState;
@@ -20,6 +22,7 @@ import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -27,15 +30,13 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class DrivingDynamics {
 
     private EventBus eventBus;
     private TrainDataVolatile trainDataVolatile;
+    private String etcsTrainID;
 
     private Spline tripProfile;
     private Position tripStartPosition;
@@ -49,6 +50,10 @@ public class DrivingDynamics {
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
     private double maxTripDistance;
+
+    private int cycleCount = 0;
+    //TODO Connect to Config
+    private int cylceCountMax = 20;
 
 
     public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile){
@@ -64,6 +69,8 @@ public class DrivingDynamics {
         }
 
         this.trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        this.etcsTrainID = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
+
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -119,9 +126,20 @@ public class DrivingDynamics {
         this.dynamicState.nextState(deltaT);
 
         /*
+        Sends global PositionEvent
+         */
+        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
+
+        /*
         Update TrainDataVolatile with the newly calculated values
          */
         updateTrainDataVolatile();
+
+        cycleCount++;
+        if(this.cycleCount >= this.cylceCountMax){
+            cycleCount = 0;
+            sendToLogEvent();
+        }
     }
 
     @Subscribe
@@ -193,8 +211,21 @@ public class DrivingDynamics {
 
         if(tripDistance < this.maxTripDistance) curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
         else curMaxSpeed = 0d;
-        
+
         this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", curMaxSpeed));
+    }
+
+    private void sendToLogEvent() {
+        double a = dynamicState.getAcceleration();
+        double v = dynamicState.getSpeed();
+        String l = dynamicState.getPosition().getLocation().getId();
+        double i = dynamicState.getPosition().getIncrement();
+        double td = dynamicState.getTripDistance();
+        double tt = dynamicState.getTime();
+        String msg = String.format("DD -> Log: Acceleration: %f m/s^-2 Speed: %f m/s, Position: %s + %f m%n",a,v,l,i);
+        String msg2 = String.format("DD -> Log: Trip Distance: %f m, Trip Time: %f s", td, tt);
+        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
+
     }
 
     private void actionParser(Action action) {

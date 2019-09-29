@@ -9,19 +9,29 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>messageReceiver</artifactId>
-
-    <name>Message Receiver</name>
+    <artifactId>szenario</artifactId>
     <dependencies>
         <dependency>
             <groupId>ebd</groupId>
-            <artifactId>messageLibrary</artifactId>
+            <artifactId>globalUtils</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
-            <artifactId>globalUtils</artifactId>
+            <artifactId>trainStatusManager</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>radioBlockCenter</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>logger</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

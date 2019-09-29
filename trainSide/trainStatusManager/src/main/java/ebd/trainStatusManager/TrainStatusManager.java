@@ -44,6 +44,7 @@ public class TrainStatusManager implements Runnable {
     /*
     Handlers
      */
+    //private Logging logger;
     private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
     private TelegramHandler telegramHandler;
@@ -154,9 +155,10 @@ public class TrainStatusManager implements Runnable {
         /*
         Handlers
          */
+        //this.logger = new Logging();
         this.globalHandler = new GlobalHandler(this.localEventBus,this.etcsTrainID);
         this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID);
-        this.telegramHandler = new TelegramHandler();
+        this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);
 
         /*
         Modules
@@ -185,27 +187,25 @@ public class TrainStatusManager implements Runnable {
         this.clock.start();
     }
 
+
     /**
      * True if this Instance is a vaild target of the event
      * @param targetList the target list a the event
      * @return True if this instance is a vaild target of the event
      */
     private boolean validTarget(List<String> targetList){
-        boolean result = false;
 
         for(String target : targetList){
             if(target.contains("tsm") || target.contains("all")){
                 if(!target.contains(";")){
-                    result = true;
-                    break;
+                    return true;
                 }
                 else if (target.contains(";T=" + this.etcsTrainID)){
-                    result = true;
-                    break;
+                    return true;
                 }
             }
         }
-        return result;
+        return false;
     }
 
 
