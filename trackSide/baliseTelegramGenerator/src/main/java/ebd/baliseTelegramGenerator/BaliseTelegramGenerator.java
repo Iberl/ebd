@@ -22,7 +22,7 @@ public class BaliseTelegramGenerator {
 	// x Sends Telegram if Balise (BaliseGroup) is driven over
 	// x Handles EventBus and MS
 
-	MessageSender ms = new MessageSender(new EventBus(), "btg1", false);
+	EventBus localbus;
 
 	ListOfBalises listOfBalises;
 
@@ -31,10 +31,9 @@ public class BaliseTelegramGenerator {
 
 	// Constructors
 
-
-	// TODO RBC ID
-	public BaliseTelegramGenerator(ListOfBalises listOfBalises) {
+	public BaliseTelegramGenerator(EventBus localbus, ListOfBalises listOfBalises) {
 		EventBus.getDefault().register(this);
+		this.localbus = localbus;
 		this.listOfBalises = listOfBalises;
 	}
 
@@ -50,7 +49,7 @@ public class BaliseTelegramGenerator {
 
 		assert(bgs.length <= 1);
 		if(bgs.length == 1) {
-			ms.send(new SendTelegramEvent("btg1", Collections.singletonList("ms"), ((BaliseGroup) bgs[0]).generateTelegramFor(0), Collections.singletonList(trainId)));
+			localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), ((BaliseGroup) bgs[0]).generateTelegramFor(0), Collections.singletonList(trainId)));
 			System.out.println("Send Telegram Event sent");
 		} else System.out.println("nothing to send");
 	}
