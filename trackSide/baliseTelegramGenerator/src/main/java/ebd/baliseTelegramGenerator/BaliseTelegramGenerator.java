@@ -3,6 +3,7 @@ package ebd.baliseTelegramGenerator;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendTelegramEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageReceiver.MessageReceiver;
@@ -59,10 +60,12 @@ public class BaliseTelegramGenerator {
 		System.out.println("Position Event received " + event);
 		String src = event.source;
 
-		Pair<Position, Integer> pair = positions.keySet().contains(src) ? positions.get(src) : new Pair(event.position, ETCSVariables.NID_BG);
-		positions.put(src, pair);
+		if(!(event.position.getLocation() instanceof InitalLocation)) {
+			Pair<Position, Integer> pair = positions.keySet().contains(src) ? positions.get(src) : new Pair(event.position, ETCSVariables.NID_BG);
+			positions.put(src, pair);
 
-		sendTelegram(src);
+			sendTelegram(src);
+		}
 	}
 
 	@Subscribe
