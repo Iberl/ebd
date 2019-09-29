@@ -4,6 +4,8 @@ import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.messageSender.SendTelegramEvent;
 import ebd.globalUtils.events.SerializedBitstreamEvent;
 import ebd.globalUtils.events.messageSender.MessageSenderExceptionEvent;
+import ebd.messageLibrary.serialization.BitStreamReader;
+import ebd.messageLibrary.serialization.BitStreamWriter;
 import ebd.messageLibrary.serialization.Serializer;
 import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
 import ebd.messageLibrary.util.exception.MissingInformationException;
@@ -67,7 +69,9 @@ public class MessageSender {
 		if(!event.targets.contains(msID)) return;
 
 		try {
-			byte[] bitstream = Serializer.serialize(event.message).data();
+			BitStreamWriter writer = Serializer.serialize(event.message);
+			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
+
 
 			globalBus.post(new SerializedBitstreamEvent(msID + ';' + localID, event.destinations, bitstream, trainToTrack, false));
 
@@ -90,7 +94,8 @@ public class MessageSender {
 		if(!event.targets.contains(msID)) return;
 
 		try {
-			byte[] bitstream = Serializer.serialize(event.telegram).data();
+			BitStreamWriter writer = Serializer.serialize(event.telegram);
+			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
 			globalBus.post(new SerializedBitstreamEvent(msID + ';' + localID, event.destinations, bitstream, trainToTrack, true));
 

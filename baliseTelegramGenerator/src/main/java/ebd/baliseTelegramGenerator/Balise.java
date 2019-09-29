@@ -2,39 +2,60 @@ package ebd.baliseTelegramGenerator;
 
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Balise {
 
-    private int baliseNumber;
+    // x Modell of a Eurobalise
+    // x Holds simple information contained in just one balise
 
-    private int numberOfBalises = 8;
+    private int M_DUP;
 
-    private int duplicate;
+    public int M_MCOUNT;
 
-    private int messageNumber;
+    @Nullable
+    public Packet_0 packet_0 = null;
 
-    private Packet_0 packet_0 = null;
+    public List<TrackPacket> packets = new ArrayList<TrackPacket>();
 
-    private List<TrackPacket> packets = new ArrayList<TrackPacket>();
 
-    // Balise Group
+    // Constructors
 
-    private boolean direction; // msl crc variable
+    public Balise() {}
 
+    public Balise(int M_DUP, int M_MCOUNT, @Nullable Packet_0 packet_0) {
+        this.M_DUP = M_DUP;
+        this.M_MCOUNT = M_MCOUNT;
+        this.packet_0 = packet_0;
+    }
 
     // methods
 
-    public int M_DUP() { return duplicate; }
+    public boolean isDuplicate() {
+        return M_DUP > 0 && M_DUP <= 3;
+    }
 
-    public int M_COUNT() { return messageNumber; }
+    public int getM_DUP() { return M_DUP; }
 
-    public boolean hasPacket_0() { return packet_0 != null; }
-
-    public Packet_0 Packet_0() { return packet_0; }
-
-    public List<TrackPacket> getPackets() { return packets; }
+    public boolean setM_DUP(int M_DUP) {
+        switch(M_DUP) {
+            case 0:
+                if(this.M_DUP == 0) { return false; }
+                this.M_DUP = M_DUP;
+                return true;
+            case 1:
+                if(this.M_DUP == 2) { return false; }
+                this.M_DUP = M_DUP;
+                return true;
+            case 2:
+                if(this.M_DUP == 1) { return false; }
+                this.M_DUP = M_DUP;
+                return true;
+            default: return false;
+        }
+    }
 
 }

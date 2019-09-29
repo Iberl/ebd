@@ -82,10 +82,14 @@ public class Packet_5 extends TrackPacketSCALE {
 		 *
 		 * @author Christopher Bernjus
 		 */
-		public Packet_5_Link(boolean Q_NEWCOUNTRY, int NID_C, int NID_BG) {
-			this.Q_NEWCOUNTRY = Q_NEWCOUNTRY;
-			this.NID_C        = NID_C;
-			this.NID_BG       = NID_BG;
+		public Packet_5_Link(boolean Q_NEWCOUNTRY, int NID_C, int NID_BG, boolean Q_LINKORIENTATION, int Q_LINKREACTION, int Q_LOCACC) {
+			this.Q_NEWCOUNTRY      = Q_NEWCOUNTRY;
+			this.NID_C             = NID_C;
+			this.NID_BG            = NID_BG;
+			this.Q_LINKORIENTATION = Q_LINKORIENTATION;
+			this.Q_LINKREACTION    = Q_LINKREACTION;
+			this.Q_LOCACC          = Q_LOCACC;
+
 		}
 	}
 

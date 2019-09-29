@@ -74,16 +74,16 @@ public class MessageReceiver {
 		if(!event.targets.contains(mrID + ';' + localID) || !event.targets.contains("all")) return;
 
 		try {
-			BitStreamReader bitstream = new BitStreamReader(event.bitstream, event.bitstream.length);
+			BitStreamReader bitstream = event.bitstream;
 
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
-				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram));
+				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram, event.source));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 
-				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message));
+				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message, event.source));
 			}
 
 		} catch(ClassNotSupportedException e) {

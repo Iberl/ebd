@@ -14,7 +14,7 @@ import java.util.List;
 public class SerializedBitstreamEvent extends NormalEvent {
 
 	/** The bitstream transferred by the event */
-	public byte[] bitstream;
+	public BitStreamReader bitstream;
 	/** Indicates the direction of the communication */
 	public boolean trainToTrack;
 	/** Indicates wether the transferred bitstream resembles a Telegram or a Message */
@@ -34,7 +34,7 @@ public class SerializedBitstreamEvent extends NormalEvent {
 	 * @param isTelegram
 	 * 			Indicates wether the transferred bitstream resembles a Telegram or a Message
 	 */
-	public SerializedBitstreamEvent(String source, List<String> targets, byte[] bitstream, boolean trainToTrack, boolean isTelegram) {
+	public SerializedBitstreamEvent(String source, List<String> targets, BitStreamReader bitstream, boolean trainToTrack, boolean isTelegram) {
 		super(source, targets);
 		this.bitstream = bitstream;
 		this.trainToTrack = trainToTrack;
