@@ -14,9 +14,9 @@ import ebd.messageLibrary.util.exception.MissingInformationException;
 import ebd.messageLibrary.util.exception.ValueNotSupportedException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Class for receiving messages from RBC
@@ -70,34 +70,36 @@ public class MessageReceiver {
 	 * @param event
 	 *          Received {@link SerializedBitstreamEvent} over the globalBus
 	 */
-	@Subscribe
+	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		if(!event.targets.contains(mrID + ';' + localID) || !event.targets.contains("all")) return;
+		System.out.println("Serialized Bitstream Event received " + event);
+		if(!event.targets.contains(mrID + ";T=" + localID) && !event.targets.contains("all")) return;
 
 		try {
-			BitStreamReader bitstream = new BitStreamReader(event.bitstream, event.bitstream.length);
+			BitStreamReader bitstream = event.bitstream;
 
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
-				localBus.post(new ReceivedTelegramEvent(mrID, Collections.singletonList(managerID), telegram));
+				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram, event.source));
+				System.out.println("Received Telegram Event sent");
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 
-				localBus.post(new ReceivedMessageEvent(mrID, Collections.singletonList(managerID), message));
+				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message, event.source));
 			}
 
 		} catch(ClassNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(MissingInformationException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(BitLengthOutOfBoundsException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		} catch(ValueNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Collections.singletonList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
 
 		}
 	}

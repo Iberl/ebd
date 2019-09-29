@@ -73,19 +73,31 @@ public class Packet_5 extends TrackPacketSCALE {
 		/**
 		 * Constructs A {@link Packet_5_Link}
 		 *
+		 * @param D_LINK
+		 *            {@link ETCSVariables#D_LINK}
 		 * @param Q_NEWCOUNTRY
 		 *            {@link ETCSVariables#Q_NEWCOUNTRY}
 		 * @param NID_C
 		 *            {@link ETCSVariables#NID_C}
 		 * @param NID_BG
 		 *            {@link ETCSVariables#NID_BG}
+		 * @param Q_LINKORIENTATION
+		 *            {@link ETCSVariables#Q_LINKORIENTATION}
+		 * @param Q_LINKREACTION
+		 *            {@link ETCSVariables#Q_LINKREACTION}
+		 * @param Q_LOCACC
+		 *            {@link ETCSVariables#Q_LOCACC}
 		 *
 		 * @author Christopher Bernjus
 		 */
-		public Packet_5_Link(boolean Q_NEWCOUNTRY, int NID_C, int NID_BG) {
-			this.Q_NEWCOUNTRY = Q_NEWCOUNTRY;
-			this.NID_C        = NID_C;
-			this.NID_BG       = NID_BG;
+		public Packet_5_Link(int D_LINK, boolean Q_NEWCOUNTRY, int NID_C, int NID_BG, boolean Q_LINKORIENTATION, int Q_LINKREACTION, int Q_LOCACC) {
+			this.D_LINK            = D_LINK;
+			this.Q_NEWCOUNTRY      = Q_NEWCOUNTRY;
+			this.NID_C             = NID_C;
+			this.NID_BG            = NID_BG;
+			this.Q_LINKORIENTATION = Q_LINKORIENTATION;
+			this.Q_LINKREACTION    = Q_LINKREACTION;
+			this.Q_LOCACC          = Q_LOCACC;
 		}
 	}
 

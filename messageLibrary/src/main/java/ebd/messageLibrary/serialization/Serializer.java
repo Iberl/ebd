@@ -21,7 +21,7 @@ import java.util.*;
  */
 public abstract class Serializer {
 
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	/**
 	 * Converts an instance to a bit stream and returns it in a new BitStreamWriter
@@ -91,6 +91,7 @@ public abstract class Serializer {
 
 				if(field.getName() == "L_PACKET") {
 					lengthIndex = index;
+					length += 13;
 					continue;
 				}
 
@@ -411,10 +412,10 @@ public abstract class Serializer {
 				}
 
 				if(debug && value != null) {
-					System.out.print("Value: " + value + " \t - Length: ");
+					if(debug) System.out.print("Value: " + value + " \t - Length: ");
 					BitLength bitLengthAnnotation = field.getAnnotation(BitLength.class);
-					if(bitLengthAnnotation != null) System.out.print(bitLengthAnnotation.value());
-					System.out.println();
+					if(bitLengthAnnotation != null && debug) System.out.print(bitLengthAnnotation.value());
+					if(debug) System.out.println();
 				}
 
 				// Set Value of Field

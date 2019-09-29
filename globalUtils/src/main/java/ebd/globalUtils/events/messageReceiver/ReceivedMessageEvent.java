@@ -12,8 +12,10 @@ import java.util.List;
  */
 public class ReceivedMessageEvent extends NormalEvent {
 
-	/** The received Message carried by the event*/
+	/** The received Message carried by the event */
 	public Message message;
+	/** Sender ID of the received Message */
+	public String sender;
 
 	/**
 	 * Constructs an ReceivedMessageEvent
@@ -24,10 +26,13 @@ public class ReceivedMessageEvent extends NormalEvent {
 	 *          ID from all modules the event is adressed to
 	 * @param message
 	 *          The Message received by Message Receiver
+	 * @param sender
+	 *          Sender ID of the received Message
 	 */
-	public ReceivedMessageEvent(String source, List<String> targets, Message message) {
+	public ReceivedMessageEvent(String source, List<String> targets, Message message, String sender) {
 		super(source, targets);
 		this.message = message;
+		this.sender = sender;
 	}
 
 }
