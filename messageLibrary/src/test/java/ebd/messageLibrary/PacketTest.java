@@ -1,14 +1,7 @@
 package ebd.messageLibrary;
 
-import ebd.messageLibrary.packet.trackpackets.Packet_57;
-import ebd.messageLibrary.serialization.BitStreamReader;
-import ebd.messageLibrary.serialization.BitStreamWriter;
-import ebd.messageLibrary.serialization.Serializer;
-import ebd.messageLibrary.util.ETCSVariables;
-import ebd.messageLibrary.util.exception.*;
-
 public class PacketTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -76,6 +69,8 @@ public class PacketTest {
 		System.out.println(receivedPacket.toString());
 		System.out.println("was received");
 	}
+	*/
+
 
 
 }

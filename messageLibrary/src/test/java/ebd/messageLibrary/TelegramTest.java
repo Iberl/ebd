@@ -1,14 +1,7 @@
 package ebd.messageLibrary;
 
-import ebd.messageLibrary.message.Telegram;
-import ebd.messageLibrary.packet.trackpackets.Packet_0;
-import ebd.messageLibrary.serialization.BitStreamReader;
-import ebd.messageLibrary.serialization.BitStreamWriter;
-import ebd.messageLibrary.serialization.Serializer;
-import ebd.messageLibrary.util.exception.*;
-
 public class TelegramTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -79,5 +72,5 @@ public class TelegramTest {
 		System.out.println(receivedTelegram.toString());
 		System.out.println("was received");
 	}
-
+	*/
 }

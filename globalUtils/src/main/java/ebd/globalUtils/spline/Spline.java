@@ -11,6 +11,7 @@ import ebd.globalUtils.spline.util.KnotCoefficientException;
  * The Spline class itself warps a {@link TreeMap}.
  * 
  * @author Lars Schulze-Falck
+ * @version 1.0
  *
  */
 public abstract class Spline {
@@ -58,5 +59,17 @@ public abstract class Spline {
 	protected void setID(String id) {
 		this.id = id;
 	}
-	
+
+
+
+	public int getDegree() {
+		return degree;
+	}
+
+
+	protected void setDegree(int degree) {
+		this.degree = degree;
+	}
+
+
 }

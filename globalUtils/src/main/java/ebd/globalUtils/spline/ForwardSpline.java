@@ -37,14 +37,14 @@ import ebd.globalUtils.spline.util.KnotCoefficientException;
 public class ForwardSpline extends Spline {
 	
 	
-	public ForwardSpline(String id, int degree) {
+	public ForwardSpline(int degree, String id) {
 		this.id = id;
-		setdegree(degree);
+		setDegree(degree);
 	}
 	
 	public ForwardSpline(int degree) {
 		this.id = "noID";
-		setdegree(degree);
+		setDegree(degree);
 	}
 	
 	
@@ -133,15 +133,4 @@ public class ForwardSpline extends Spline {
 			return curve.lowerKey(xValue);
 		}
 	}
-
-
-	public int getdegree() {
-		return degree;
-	}
-
-
-	private void setdegree(int degree) {
-		this.degree = degree;
-	}
-
 }

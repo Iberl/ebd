@@ -12,11 +12,11 @@ import java.util.List;
  */
 public class ExceptionEvent extends Event {
 
-	/**
-	 * The ExceptionEventTyp, defaults to CRITICAL
-	 */
-	@NotNull
-	public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
+    /**
+     * The ExceptionEventTyp, defaults to CRITICAL
+     */
+    @NotNull
+    public ExceptionEventTyp exceptionEventTyp = ExceptionEventTyp.CRITICAL;
 
 	/**
 	 * The Event causing an Exception. If there is not a Event causing the exception,
@@ -35,14 +35,12 @@ public class ExceptionEvent extends Event {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
 	 * @param targets
-	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
+	 *          ID from all modules the event is addressed to
 	 * @param cause
 	 *          The Event causing an Exception
 	 * @param exception
-	 *          The thrown exception
+	 *          The thrown exception to be encapsulated
 	 */
 	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
 		super(source, targets);
@@ -54,10 +52,8 @@ public class ExceptionEvent extends Event {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
 	 * @param targets
-	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
+	 *          ID from all modules the event is addressed to
 	 * @param cause
 	 *          The Event causing an Exception
 	 * @param exception
@@ -71,5 +67,4 @@ public class ExceptionEvent extends Event {
 		this.exception = exception;
 		this.exceptionEventTyp = exceptionEventTyp;
 	}
-
 }

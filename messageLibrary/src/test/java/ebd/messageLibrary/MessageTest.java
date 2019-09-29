@@ -1,15 +1,7 @@
 package ebd.messageLibrary;
 
-import ebd.messageLibrary.message.trackmessages.Message_2;
-import ebd.messageLibrary.packet.trainpackets.Packet_4;
-import ebd.messageLibrary.serialization.BitStreamReader;
-import ebd.messageLibrary.serialization.BitStreamWriter;
-import ebd.messageLibrary.serialization.Serializer;
-import ebd.messageLibrary.util.ETCSVariables;
-import ebd.messageLibrary.util.exception.*;
-
 public class MessageTest {
-
+	/*
 	public static void main(String[] args) {
 
 		// -----------
@@ -80,6 +72,6 @@ public class MessageTest {
 		System.out.println(receivedMessage.toString());
 		System.out.println("was received");
 	}
-
+	*/
 
 }
