@@ -3,6 +3,7 @@ import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.logger.Logging;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;

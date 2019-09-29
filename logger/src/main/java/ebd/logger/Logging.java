@@ -1,3 +1,5 @@
+package ebd.logger;
+
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;

@@ -1,4 +1,4 @@
-package ebd.trainStatusManager;
+package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;

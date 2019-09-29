@@ -2,6 +2,8 @@ package ebd.szenario;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.logger.Logging;
+import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadOneEvent;
@@ -9,6 +11,7 @@ import ebd.szenario.util.events.SzenarioExceptionEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -20,12 +23,12 @@ public class Szenario implements Runnable {
 
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
-    //private Logging logger;
+    private Logging logger;
 
     /*
     TrackSide
      */
-    //private RadioBlockCenter rbc = null;
+    private RadioBlockCenter rbc = null;
 
     /*
     TrainSide

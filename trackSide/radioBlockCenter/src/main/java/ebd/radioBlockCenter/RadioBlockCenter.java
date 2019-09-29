@@ -1,5 +1,8 @@
+package ebd.radioBlockCenter;
+
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.logger.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
@@ -40,7 +43,7 @@ public class RadioBlockCenter {
         if(!validTarget(rme.targets)) return;
         if(rme.message instanceof Message_24){
         //TODO: Use "sender" of RME instead of controlledTrainsByID
-        String msg = String.format("RBC -> Logging: RBC received position report from train %s", controlledTrainsByID.get(0));
+        String msg = String.format("RBC -> ebd.logger.Logging: RBC received position report from train %s", controlledTrainsByID.get(0));
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
         }
     }

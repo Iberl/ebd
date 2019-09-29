@@ -12,6 +12,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
+import ebd.logger.Logging;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
@@ -23,10 +24,12 @@ import ebd.trainStatusManager.util.MessageHandler;
 import ebd.trainStatusManager.util.TelegramHandler;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.trainStatusManager.util.events.TsmTripEndEvent;
+import ebd.trainStatusManager.util.supervisors.TripSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.util.*;
 
 public class TrainStatusManager implements Runnable {
@@ -44,7 +47,7 @@ public class TrainStatusManager implements Runnable {
     /*
     Handlers
      */
-    //private Logging logger;
+    private Logging logger;
     private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
     private TelegramHandler telegramHandler;
@@ -155,7 +158,12 @@ public class TrainStatusManager implements Runnable {
         /*
         Handlers
          */
-        //this.logger = new Logging();
+        try {
+            System.out.println(this.etcsTrainID);
+            this.logger = new Logging(this.localEventBus,Integer.parseInt(this.etcsTrainID));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.globalHandler = new GlobalHandler(this.localEventBus,this.etcsTrainID);
         this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID);
         this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);

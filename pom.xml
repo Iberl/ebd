@@ -93,7 +93,6 @@
     <module>logger</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
-    <module>messageReceiver</module>
 
     <module>trainSide</module>
     <module>trackSide</module>

@@ -1,4 +1,4 @@
-package ebd.trainStatusManager;
+package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -54,7 +54,7 @@ public class MessageAuthorityRequestSupervisor {
         Packet_15 p15 = routeDataVolatile.getPacket_15();
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
-        double t_cycrqst = trainDataVolatile.getT_TIMEOUTRQST();
+        double t_cycrqst = trainDataVolatile.getT_CYCRQST();
         //TODO Do the calculation of time to EOL correctly!
         double distanceToEOL = MovementAuthorityConverter.p15ToD_EMA(p15) - trainDataVolatile.getCurTripDistance();
         double curSpeed = trainDataVolatile.getCurrentSpeed();

@@ -1,4 +1,4 @@
-package ebd.trainStatusManager;
+package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
