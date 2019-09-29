@@ -37,7 +37,7 @@ public class BaliseGroup {
 
     private Location location;
 
-    private int distanceBetweenBalises = 10;
+    // private int distanceBetweenBalises = 10;
 
 
     @Nullable
@@ -89,9 +89,9 @@ public class BaliseGroup {
 
     public void setLocation(Location location) { this.location = location; }
 
-    public int getDistanceBetweenBalises() { return distanceBetweenBalises; }
+    /*public int getDistanceBetweenBalises() { return distanceBetweenBalises; }
 
-    public void setDistanceBetweenBalises(int distance) { this.distanceBetweenBalises = distance; }
+    public void setDistanceBetweenBalises(int distance) { this.distanceBetweenBalises = distance; }*/
 
 
     // Manage Balises
@@ -130,6 +130,7 @@ public class BaliseGroup {
         if(N_TOTAL >= 8) return false;
 
         Balise src = balises[N_TOTAL - 1];
+        // TODO
         if(!src.setM_DUP(M_DUP_NEXT_BALISE)) return false;
         Balise dup = new Balise(M_DUP_PREV_BALISE,src.M_MCOUNT, src.packet_0);
         dup.packets = src.packets;

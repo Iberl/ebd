@@ -11,6 +11,7 @@ import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
 import ebd.messageLibrary.util.exception.MissingInformationException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 /**
  * Class for sending messages from Train to RBC
@@ -64,7 +65,7 @@ public class MessageSender {
 	 * @param event
 	 *          Received {@link SendMessageEvent} over the localBus
 	 */
-	@Subscribe
+	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void send(SendMessageEvent event) {
 		if(!event.targets.contains(msID)) return;
 
@@ -89,7 +90,7 @@ public class MessageSender {
 	 * @param event
 	 *          Received {@link SendTelegramEvent} over the localBus
 	 */
-	@Subscribe
+	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void send(SendTelegramEvent event) {
 		if(!event.targets.contains(msID)) return;
 

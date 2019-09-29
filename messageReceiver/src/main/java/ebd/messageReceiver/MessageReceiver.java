@@ -14,6 +14,7 @@ import ebd.messageLibrary.util.exception.MissingInformationException;
 import ebd.messageLibrary.util.exception.ValueNotSupportedException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 
@@ -69,9 +70,10 @@ public class MessageReceiver {
 	 * @param event
 	 *          Received {@link SerializedBitstreamEvent} over the globalBus
 	 */
-	@Subscribe
+	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		if(!event.targets.contains(mrID + ';' + localID) || !event.targets.contains("all")) return;
+		System.out.println("Serialized Bitstream Event received " + event);
+		if(!event.targets.contains(mrID + ";T=" + localID) && !event.targets.contains("all")) return;
 
 		try {
 			BitStreamReader bitstream = event.bitstream;
@@ -80,6 +82,7 @@ public class MessageReceiver {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
 				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram, event.source));
+				System.out.println("Received Telegram Event sent");
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 

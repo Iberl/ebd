@@ -21,6 +21,7 @@ public class ListOfBalises {
 
 	private Map<Integer, BaliseGroup> baliseGroups = new HashMap<>();
 
+	// TODO Implement Pair
 	private Map<Integer, Pair<Integer, Integer>> connections = new HashMap<>();
 
 	// First, Second: Nominal Direction
@@ -91,13 +92,13 @@ public class ListOfBalises {
 
 
 
-	private boolean addLink(int NID_BG1, int NID_BG2, boolean Q_LINKORIENTATION, int Q_LINKREACTION) {
+	private boolean addLink(int NID_BG1, int NID_BG2, int D_LINK, boolean Q_LINKORIENTATION, int Q_LINKREACTION) {
 		assert(Q_DIR >= 0 && Q_DIR <= 2);
 		// Cannot Create an Link if the bgs dont exist
 		if(!baliseGroups.containsKey(NID_BG1) || !baliseGroups.containsKey(NID_BG2)) return false;
 
 		// Creating a new Link between BG1 and BG2
-		Packet_5.Packet_5_Link link = new Packet_5.Packet_5_Link(Q_NEWCOUNTRY_SAME, NID_C, NID_BG2, Q_LINKORIENTATION, Q_LINKREACTION, Q_LOCACC);
+		Packet_5.Packet_5_Link link = new Packet_5.Packet_5_Link(D_LINK, Q_NEWCOUNTRY_SAME, NID_C, NID_BG2, Q_LINKORIENTATION, Q_LINKREACTION, Q_LOCACC);
 
 		BaliseGroup bg = baliseGroups.get(NID_BG1);
 		Packet_5 li;

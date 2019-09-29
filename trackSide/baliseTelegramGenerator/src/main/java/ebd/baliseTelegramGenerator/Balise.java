@@ -2,6 +2,8 @@ package ebd.baliseTelegramGenerator;
 
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
+import ebd.messageLibrary.util.ETCSVariables;
+import static ebd.messageLibrary.util.ETCSVariables.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -11,6 +13,8 @@ public class Balise {
 
     // x Modell of a Eurobalise
     // x Holds simple information contained in just one balise
+
+	//TODO Q_UPDOWN
 
     private int M_DUP;
 
@@ -42,16 +46,15 @@ public class Balise {
 
     public boolean setM_DUP(int M_DUP) {
         switch(M_DUP) {
-            case 0:
-                if(this.M_DUP == 0) { return false; }
+            case M_DUP_NO_DUPLICATE:
+            	this.M_DUP = M_DUP;
+                return true;
+            case M_DUP_NEXT_BALISE:
+                if(this.M_DUP == ETCSVariables.M_DUP_PREV_BALISE) { return false; }
                 this.M_DUP = M_DUP;
                 return true;
-            case 1:
-                if(this.M_DUP == 2) { return false; }
-                this.M_DUP = M_DUP;
-                return true;
-            case 2:
-                if(this.M_DUP == 1) { return false; }
+            case M_DUP_PREV_BALISE:
+                if(this.M_DUP == ETCSVariables.M_DUP_NEXT_BALISE) { return false; }
                 this.M_DUP = M_DUP;
                 return true;
             default: return false;
