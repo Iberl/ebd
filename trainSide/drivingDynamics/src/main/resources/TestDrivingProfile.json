@@ -1,13 +1,13 @@
 { "actions" : [
               {
                 "v_acc" : {
-                            "value" : 80,
+                            "value" : 100,
                             "conditions" : {  
                                             "andBlock" : [
                                                         {
                                                             "v_rel" : {
                                                                         "op" : "<",
-                                                                        "value" : 95
+                                                                        "value" : 90
                                                                     }
                                                         },
                                                         {
@@ -28,7 +28,7 @@
                                                         {
                                                             "v_rel" : {
                                                                         "op" : ">",
-                                                                        "value" : 100
+                                                                        "value" : 95
                                                                     }
                                                         },
                                                         {
@@ -48,13 +48,13 @@
                                                         {
                                                             "v_rel" : {
                                                                         "op" : ">=",
-                                                                        "value" : 95
+                                                                        "value" : 90
                                                                     }
                                                         },
                                                         {
                                                             "v_rel" : {
                                                                     "op" : "<=",
-                                                                    "value" : 100
+                                                                    "value" : 95
                                                                 }
                                                         },
                                                         {

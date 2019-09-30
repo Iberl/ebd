@@ -1,6 +1,7 @@
 package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -21,6 +22,7 @@ public class TripSupervisor {
     //TODO Own module, Remember SRS 3 A.3.5
     private EventBus localBus;
     private double L_TRAIN;
+    private String etcsID;
 
 
 
@@ -34,6 +36,7 @@ public class TripSupervisor {
         this.localBus.register(this);
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
+        this.etcsID = trainDataPerma.getId();
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -60,6 +63,7 @@ public class TripSupervisor {
 
     private void sendEndOfMission() {
         //TODO Send Message 150
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + etcsID + " reached the target location"));
     }
 
 

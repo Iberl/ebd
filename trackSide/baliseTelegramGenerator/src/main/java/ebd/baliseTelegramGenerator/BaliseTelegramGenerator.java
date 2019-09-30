@@ -47,7 +47,7 @@ public class BaliseTelegramGenerator {
 		Integer lastSendingBalise = positions.get(trainId).getValue();
 		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
 
-		if(lastKnownPosition.getLocation().getDistanceToPrevious() >= nextBG.getLocation().getDistanceToPrevious()) {
+		if(lastKnownPosition.getIncrement() >= nextBG.getLocation().getDistanceToPrevious()) {
 			localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), nextBG.generateTelegramFor(0), Collections.singletonList(trainId)));
 			positions.put(trainId, new Pair<>(lastKnownPosition, nextBG.getNID_BG()));
 		}
