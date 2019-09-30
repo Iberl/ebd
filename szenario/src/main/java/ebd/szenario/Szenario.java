@@ -34,7 +34,7 @@ public class Szenario implements Runnable {
 
     static class btgGenerator {
 
-        public static BaliseTelegramGenerator createBTG() {
+        /*public static BaliseTelegramGenerator createBTG() {
             // Create Empty Instance of ListOfBalise
             ListOfBalises lob = new ListOfBalises(1, 12);
 
@@ -67,11 +67,12 @@ public class Szenario implements Runnable {
             lob.getBaliseGroup(11).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
 
             return new BaliseTelegramGenerator(lob);
-        }
+        }*/
 
         public static void sendLinkingInformation(MessageSender ms) {
             // Create Linking Information
-            Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(300, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 0, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 3, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(100, false, 0, 4, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));

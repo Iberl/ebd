@@ -43,12 +43,12 @@ public class BaliseGroup {
     @Nullable
     private Packet_5 linkingInformation;
 
-    private int linkingInformationBalise;
+    private int linkingInformationBalise = 1;
 
     @Nullable
     private Packet_79 geographicPosition;
 
-    private int geographicPositionBalise;
+    private int geographicPositionBalise = 1;
 
 
     // Constructors

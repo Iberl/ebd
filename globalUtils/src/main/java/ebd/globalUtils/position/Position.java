@@ -2,6 +2,7 @@ package ebd.globalUtils.position;
 
 
 import java.util.HashMap;
+import java.util.Map;
 
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
@@ -37,7 +38,7 @@ public class Position {
      * The Key of the HashMap is the location ID, the Value the {@link Location} itself
      */
     @Nullable
-    private HashMap<String,Location> previousLocations = new HashMap<String,Location>();
+    private Map<String,Location> previousLocations = new HashMap<String,Location>();
 
     /**
      * represents a position on the track
@@ -51,7 +52,7 @@ public class Position {
         this.location = location;
     }
     
-    public Position(double increment, boolean direction, @NotNull Location location, @Nullable HashMap<String, Location> previousLocations) {
+    public Position(double increment, boolean direction, @NotNull Location location, @Nullable Map<String, Location> previousLocations) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
@@ -154,7 +155,7 @@ public class Position {
         this.location = location;
     }
 
-	public HashMap<String, Location> getPreviousLocations() {
+	public Map<String, Location> getPreviousLocations() {
 		return previousLocations;
 	}
 

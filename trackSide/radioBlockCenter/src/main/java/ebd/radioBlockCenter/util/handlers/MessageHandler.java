@@ -55,9 +55,7 @@ public class MessageHandler {
     }
 
     private void sendMessage3(ReceivedMessageEvent rme) {
-        System.out.println(rme.sender);
         String trainID = rme.sender.split(";T=")[1];
-        System.out.println("TrainID: " + trainID);
         Route nextRoute = this.trainIDsToRoute.get(Integer.parseInt(trainID)).remove(0);
         double d_EOL = nextRoute.getDistance();
 

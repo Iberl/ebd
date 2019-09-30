@@ -4,7 +4,9 @@ import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendTelegramEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
 import ebd.globalUtils.location.InitalLocation;
+import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
@@ -43,22 +45,29 @@ public class BaliseTelegramGenerator {
 	private void sendTelegram(String trainId) {
 		Position lastKnownPosition = positions.get(trainId).getKey();
 		Integer lastSendingBalise = positions.get(trainId).getValue();
-		Object[] bgs = listOfBalises.getBaliseGroups().stream()
-				.filter(bg -> bg.getLocation().getIdOfPrevious().equals(lastKnownPosition.getLocation().getId()))
-				.filter(bg -> bg.getLocation().getDistanceToPrevious() >= lastKnownPosition.getIncrement()).toArray();
+		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
 
-		assert(bgs.length <= 1);
-		if(bgs.length == 1) ms.send(new SendTelegramEvent("btg1", Collections.singletonList("ms"), ((BaliseGroup) bgs[0]).generateTelegramFor(0), Collections.singletonList(trainId)));
+		if(lastKnownPosition.getLocation().getDistanceToPrevious() >= nextBG.getLocation().getDistanceToPrevious()) {
+			localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), nextBG.generateTelegramFor(0), Collections.singletonList(trainId)));
+			positions.put(trainId, new Pair<>(lastKnownPosition, nextBG.getNID_BG()));
+		}
+	}
+
+	private void sendInitialTelegram(String trainId) {
+		Telegram telegram = listOfBalises.getBaliseGroup(0).generateTelegramFor(0);
+		localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), telegram, Collections.singletonList(trainId)));
+		positions.put(trainId, new Pair<>(positions.get(trainId).getKey(), 0));
 	}
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receivePosition(PositionEvent event) {
-		String src = event.source;
+		String src = event.source.replace("dd", "mr");
 
-		if(!(event.position.getLocation() instanceof InitalLocation)) {
-			Pair<Position, Integer> pair = positions.keySet().contains(src) ? positions.get(src) : new Pair(event.position, ETCSVariables.NID_BG);
-			positions.put(src, pair);
-
+		if((event.position.getLocation() instanceof InitalLocation)) {
+			positions.put(src, new Pair<>(new Position(0, true, new Location("0", "0", 0d)), null));
+			sendInitialTelegram(src);
+		} else {
+			positions.put(src, new Pair<>(event.position, positions.get(src).getValue()));
 			sendTelegram(src);
 		}
 	}

@@ -12,14 +12,19 @@ import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.globalUtils.location.InitalLocation;
+import ebd.globalUtils.location.Location;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
+import ebd.routeData.RouteDataVolatile;
+import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
@@ -126,8 +131,14 @@ public class DrivingDynamics {
         this.dynamicState.nextState(deltaT);
 
         /*
+        Update Positions after a new location
+         */
+        updateDSPosition();
+
+        /*
         Sends global PositionEvent
          */
+
         EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
 
         /*
@@ -195,6 +206,48 @@ public class DrivingDynamics {
         this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
     }
 
+
+    private void updateDSPosition() {
+        NewRouteDataVolatileEvent nrdve = this.eventBus.getStickyEvent(NewRouteDataVolatileEvent.class);
+        NewLocationEvent nle = this.eventBus.getStickyEvent(NewLocationEvent.class);
+
+        if(nrdve == null || nle == null) return;
+
+        Location newLoc = nle.newLocation;
+
+        if(dynamicState.getPosition().getLocation().getId().equals(newLoc.getId())) {
+            this.eventBus.removeStickyEvent(nle);
+            return;
+        }
+
+        RouteDataVolatile routeDataVolatile = nrdve.routeDataVolatile;
+
+        if(routeDataVolatile.getLinkingInformation() == null) return;
+
+        Map<String, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
+
+        Position oldPos = dynamicState.getPosition();
+        Map<String,Location> prefLocs = oldPos.getPreviousLocations();
+        double overshoot;
+
+        if(prefLocs.size() > 0) {
+            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
+            prefLocs.put(newLoc.getId(),newLoc);}
+        else {
+            InitalLocation initLoc = new InitalLocation();
+            prefLocs.put(initLoc.getId(),initLoc);
+            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
+            overshoot = 0d; //First Location can not be overshoot?
+        }
+
+        Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
+
+        this.dynamicState.setPosition(newPos);
+        this.eventBus.removeStickyEvent(nle);
+
+        String msg = "New location with ID: " + newLoc.getId() + " was reached";
+        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+    }
 
     private void updateTrainDataVolatile(){
         HashMap<String,Object> nameToValue = new HashMap<>();

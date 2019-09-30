@@ -11,7 +11,6 @@ import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.util.Route;
 import ebd.radioBlockCenter.util.handlers.MessageHandler;
-import ebd.szenario.Szenario;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
@@ -61,12 +60,12 @@ public class RadioBlockCenter {
         this.messageSender = new MessageSender(this.localBus, this.rbcID,false);
         this.messageReceiver = new MessageReceiver(this.localBus, this.rbcID, "all", true);
 
-        this.bTG = createBTG();
+        this.bTG = createBTG(this.localBus);
 
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), "RBC initialized"));
     }
 
-    private BaliseTelegramGenerator createBTG() {
+    private BaliseTelegramGenerator createBTG(EventBus localBus) {
         // Create Empty Instance of ListOfBalise
         ListOfBalises lob = new ListOfBalises(1, 12);
 
@@ -98,7 +97,22 @@ public class RadioBlockCenter {
         lob.getBaliseGroup(10).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(11).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
 
-        return new BaliseTelegramGenerator(lob);
+        // Add Connections
+        lob.addConnection(0,1);
+        lob.addConnection(1,2);
+        lob.addConnection(2,3);
+        lob.addConnection(3,4);
+        lob.addConnection(4,5);
+        lob.addConnection(5,6);
+        lob.addConnection(6,7);
+        lob.addConnection(7,8);
+        lob.addConnection(8,9);
+        lob.addConnection(9,10);
+        lob.addConnection(10,11);
+
+
+
+        return new BaliseTelegramGenerator(localBus, lob);
     }
 
     private boolean validTarget(List<String> targetList){

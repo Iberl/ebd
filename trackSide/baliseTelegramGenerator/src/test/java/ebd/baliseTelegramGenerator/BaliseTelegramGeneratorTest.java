@@ -22,7 +22,7 @@ class BaliseTelegramGeneratorTest {
 		lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 0, 500, false, null));
 		lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 500, false, null));
 		lob.getBaliseGroup(2).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-		BaliseTelegramGenerator btg = new BaliseTelegramGenerator(lob);
+		BaliseTelegramGenerator btg = new BaliseTelegramGenerator(localBus, lob);
 
 		// TODO trainID
 		EventBus.getDefault().post(new PositionEvent("mr;T=test", Arrays.asList("btg"), new Position(500d, true, new Location("1", "0", 10d))));
