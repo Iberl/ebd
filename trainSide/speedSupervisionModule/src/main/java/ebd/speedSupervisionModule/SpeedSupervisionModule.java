@@ -3,6 +3,7 @@ package ebd.speedSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
@@ -50,6 +51,8 @@ public class SpeedSupervisionModule {
             curPosition = trainDataVolatile.getCurrentPosition();
         }
         else return;
+
+        if (curPosition.getLocation().getId().equals((new InitalLocation()).getId())) return;
 
         double tripDistance = trainDataVolatile.getCurTripDistance();
         double tripDistanceWarning = tripDistance + curSpeed * 5;

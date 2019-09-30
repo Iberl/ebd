@@ -9,10 +9,14 @@ import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logger.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
+import ebd.messageLibrary.message.trainmessages.Message_132;
+import ebd.messageLibrary.message.trainmessages.Message_155;
+import ebd.messageLibrary.message.trainmessages.Message_157;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
+import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadOneEvent;
@@ -22,16 +26,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 
 public class Szenario implements Runnable {
 
-    class btgGenerator {
+    static class btgGenerator {
 
-        public BaliseTelegramGenerator createBTG() {
+        public static BaliseTelegramGenerator createBTG() {
             // Create Empty Instance of ListOfBalise
             ListOfBalises lob = new ListOfBalises(1, 12);
 
@@ -66,7 +69,7 @@ public class Szenario implements Runnable {
             return new BaliseTelegramGenerator(lob);
         }
 
-        public void sendLinkingInformation(MessageSender ms) {
+        public static void sendLinkingInformation(MessageSender ms) {
             // Create Linking Information
             Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(300, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
@@ -82,7 +85,7 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((System.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms;R=1"), message_24, Collections.singletonList("mr;T=192")));
+            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=192")));
         }
     }
 
@@ -93,6 +96,8 @@ public class Szenario implements Runnable {
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
     private Logging logger;
+    private MessageSender messageSenderTrack;
+    private MessageSender messageSenderTrain;
 
     /*
     TrackSide
@@ -110,6 +115,8 @@ public class Szenario implements Runnable {
 
         this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
+        this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
+        this.messageSenderTrain = new MessageSender(new EventBus(), "192", true);
 
         szenarioThread.start();
     }
@@ -156,9 +163,18 @@ public class Szenario implements Runnable {
 
     @Subscribe
     public void load1(LoadOneEvent loe){
-        this.rbc = new RadioBlockCenter("1", Collections.singletonList(192));
+        Route a = new Route("A", 1000);
+        List<Route> listRoute = new ArrayList<>();
+        listRoute.add(a);
+        Map<Integer, List<Route>> mapRoute = new HashMap<>();
+        mapRoute.put(192, listRoute);
+        this.rbc = new RadioBlockCenter("1", Collections.singletonList(192), mapRoute);
         this.tsm = new TrainStatusManager("192", "1",
-                "blaa", "TestDrivingProfile.json", true);
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "TestDrivingProfile.json", true);
+
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        Message_155 msg155 = new Message_155();
+        this.messageSenderTrain.send(new SendMessageEvent("ms;T=192", Collections.singletonList("ms"), msg155 ,Collections.singletonList("mr;R=1") ));
     }
 
     private boolean validTarget(List<String> targetList) {

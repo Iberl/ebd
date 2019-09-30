@@ -62,11 +62,11 @@ public class BCREgeneratorFromRandom{
 		
 		Packet_15 packet15 = new Packet_15();
 		
-		Packet_15_Section endsection = packet15.new Packet_15_Section();
+		Packet_15_Section endsection = new Packet_15_Section();
 		endsection.L_SECTION = 100;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 		for (int i = 0; i < 8; i++) {
-			Packet_15_Section tempsection = packet15.new Packet_15_Section();
+			Packet_15_Section tempsection = new Packet_15_Section();
 			tempsection.L_SECTION = rng.nextInt(1500) + 1;
 			sections.add(tempsection);
 		}
@@ -104,11 +104,11 @@ public class BCREgeneratorFromRandom{
 		
 		for (int i = 0; i < rng.nextInt(12) + 4; i++) {
 			
-			Packet_27_StaticSpeedProfile p27SSP = packet27.new Packet_27_StaticSpeedProfile(rng.nextInt(1500) + 1, rng.nextInt(113) + 8, rng.nextBoolean());
+			Packet_27_StaticSpeedProfile p27SSP = new Packet_27_StaticSpeedProfile(rng.nextInt(1500) + 1, rng.nextInt(113) + 8, rng.nextBoolean());
 			ArrayList<Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 			
 			for (int ii = 0; ii < rng.nextInt(3); ii++) {
-				Packet_27_StaticSpeedProfileSection p27sec = packet27.new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
+				Packet_27_StaticSpeedProfileSection p27sec = new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
 				sectionList.add(p27sec);
 			}
 			
@@ -116,11 +116,11 @@ public class BCREgeneratorFromRandom{
 			profileList.add(p27SSP);
 		}
 		
-		Packet_27_StaticSpeedProfile p27SSP = packet27.new Packet_27_StaticSpeedProfile(rng.nextInt(1500) + 1, rng.nextInt(113) + 8, rng.nextBoolean());
+		Packet_27_StaticSpeedProfile p27SSP = new Packet_27_StaticSpeedProfile(rng.nextInt(1500) + 1, rng.nextInt(113) + 8, rng.nextBoolean());
 		ArrayList<Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 		
 		for (int ii = 0; ii < rng.nextInt(3); ii++) {
-			Packet_27_StaticSpeedProfileSection p27sec = packet27.new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
+			Packet_27_StaticSpeedProfileSection p27sec = new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
 			sectionList.add(p27sec);
 		}
 		

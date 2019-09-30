@@ -39,6 +39,8 @@ public class MessageReceiver {
 	public String localID;
 	/** ID of the module to send received messages to (default "all") */
 	public String managerID = "all";
+	/** Indicates the direction of Communication */
+	public boolean traintoTrack = false;
 
 
 	// Constructor
@@ -52,11 +54,16 @@ public class MessageReceiver {
 	 *          ID of the local entity (train|rbc)
 	 * @param managerID
 	 * 			ID of the module to send received messages to (default "all")
+	 * @param trainToTrack
+	 * 			Indicates the direction of communication
+	 *
+	 * @author Christopher Bernjus
 	 */
-	public MessageReceiver(EventBus localBus, String localID, String managerID) {
+	public MessageReceiver(EventBus localBus, String localID, String managerID, boolean trainToTrack) {
 		this.localBus = localBus;
 		this.localID = localID;
 		this.managerID = managerID;
+		this.traintoTrack = trainToTrack;
 
 		this.globalBus.register(this);
 	}
@@ -72,8 +79,7 @@ public class MessageReceiver {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		System.out.println("Serialized Bitstream Event received " + event);
-		if(!event.targets.contains(mrID + ";T=" + localID) && !event.targets.contains("all")) return;
+		if(!event.targets.contains(mrID + (traintoTrack ? ";R=" : ";T=") + localID) && !event.targets.contains("all")) return;
 
 		try {
 			BitStreamReader bitstream = event.bitstream;
@@ -82,7 +88,6 @@ public class MessageReceiver {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
 				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram, event.source));
-				System.out.println("Received Telegram Event sent");
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 

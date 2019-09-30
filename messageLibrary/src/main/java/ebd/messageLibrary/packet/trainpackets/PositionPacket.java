@@ -1,10 +1,7 @@
 package ebd.messageLibrary.packet.trainpackets;
 
 import ebd.messageLibrary.packet.TrainPacket;
-import ebd.messageLibrary.serialization.annotations.BitLength;
-import ebd.messageLibrary.serialization.annotations.IfEqual;
-import ebd.messageLibrary.serialization.annotations.IfOneOf;
-import ebd.messageLibrary.serialization.annotations.OrderIndex;
+import ebd.messageLibrary.serialization.annotations.*;
 import ebd.messageLibrary.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.M_LEVEL_NTC;
@@ -18,6 +15,8 @@ import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITO
  *
  * @author Christopher Bernjus
  */
+//TODO REMOVE ORDER LENGTH
+@OrderLength(16)
 public abstract class PositionPacket extends TrainPacket {
 
 	// ---------------------------------

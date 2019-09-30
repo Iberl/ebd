@@ -39,11 +39,11 @@ public class BCLREgeneratorFromRandom{
 		
 		Packet_15 packet15 = new Packet_15();
 		
-		Packet_15_Section endsection = packet15.new Packet_15_Section();
+		Packet_15_Section endsection = new Packet_15_Section();
 		endsection.L_SECTION = 100;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 		for (int i = 0; i < 8; i++) {
-			Packet_15_Section tempsection = packet15.new Packet_15_Section();
+			Packet_15_Section tempsection = new Packet_15_Section();
 			tempsection.L_SECTION = rng.nextInt(1500) + 1;
 			sections.add(tempsection);
 		}

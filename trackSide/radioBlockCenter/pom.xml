@@ -14,6 +14,18 @@
     <dependencies>
         <dependency>
             <groupId>ebd</groupId>
+            <artifactId>baliseTelegramGenerator</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>szenario</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
             <artifactId>messageLibrary</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>

@@ -48,15 +48,11 @@ public class BaliseTelegramGenerator {
 				.filter(bg -> bg.getLocation().getDistanceToPrevious() >= lastKnownPosition.getIncrement()).toArray();
 
 		assert(bgs.length <= 1);
-		if(bgs.length == 1) {
-			ms.send(new SendTelegramEvent("btg1", Collections.singletonList("ms"), ((BaliseGroup) bgs[0]).generateTelegramFor(0), Collections.singletonList(trainId)));
-			System.out.println("Send Telegram Event sent");
-		} else System.out.println("nothing to send");
+		if(bgs.length == 1) ms.send(new SendTelegramEvent("btg1", Collections.singletonList("ms"), ((BaliseGroup) bgs[0]).generateTelegramFor(0), Collections.singletonList(trainId)));
 	}
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receivePosition(PositionEvent event) {
-		System.out.println("Position Event received " + event);
 		String src = event.source;
 
 		Pair<Position, Integer> pair = positions.keySet().contains(src) ? positions.get(src) : new Pair(event.position, ETCSVariables.NID_BG);

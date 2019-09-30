@@ -189,7 +189,7 @@ public class TrainStatusManager implements Runnable {
         if(testing) this.trainData = new TrainData(this.localEventBus,"testTrain650.json");
         else this.trainData = new TrainData(this.localEventBus,this.urlToTrainconfigurator,this.etcsTrainID);
 
-        this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"tsm");
+        this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"tsm", false);
         this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, true);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
         this.tripSupervisor = new TripSupervisor(this.localEventBus);

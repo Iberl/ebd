@@ -74,7 +74,7 @@ public class MessageSender {
 			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
 
-			globalBus.post(new SerializedBitstreamEvent(msID + ';' + localID, event.destinations, bitstream, trainToTrack, false));
+			globalBus.post(new SerializedBitstreamEvent(msID + (trainToTrack ? ";T=" : ";R=") + localID, event.destinations, bitstream, trainToTrack, false));
 
 		} catch(FieldTypeNotSupportedException e) {
 			localBus.post(new MessageSenderExceptionEvent(msID, event.targets, event, e));

@@ -138,7 +138,7 @@ public class Packet_5 extends TrackPacketSCALE {
 	 * @author Christopher Bernjus
 	 */
 	public Packet_5(int Q_DIR, int Q_SCALE, Packet_5_Link link) {
-		super(21, Q_DIR, Q_SCALE);
+		super(5, Q_DIR, Q_SCALE);
 		this.link = link;
 	}
 }

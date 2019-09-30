@@ -60,7 +60,7 @@ public class BCREgeneratorFromDataset{
 		
 		Packet_15 packet15 = new Packet_15();
 		
-		Packet_15_Section endsection = packet15.new Packet_15_Section();
+		Packet_15_Section endsection = new Packet_15_Section();
 		endsection.L_SECTION = 1800;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 		
@@ -96,7 +96,7 @@ public class BCREgeneratorFromDataset{
 		
 		Packet_27 packet27 = new Packet_27();
 		
-		Packet_27_StaticSpeedProfile p27SSP = packet27.new Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
+		Packet_27_StaticSpeedProfile p27SSP = new Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
 		totalDistance = tsp[0];
 		ArrayList<Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 		/*
@@ -113,7 +113,7 @@ public class BCREgeneratorFromDataset{
 		
 		for (int i = 2; i < tsp.length; i+=2) {
 			
-			p27SSP = packet27.new Packet_27_StaticSpeedProfile(tsp[i] - totalDistance,tsp[i+1] / 5,true);
+			p27SSP = new Packet_27_StaticSpeedProfile(tsp[i] - totalDistance,tsp[i+1] / 5,true);
 			totalDistance = tsp[i];
 			sectionList = new ArrayList<>();
 			/*

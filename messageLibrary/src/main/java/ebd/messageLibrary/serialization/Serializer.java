@@ -1,6 +1,7 @@
 package ebd.messageLibrary.serialization;
 
 import ebd.messageLibrary.message.Telegram;
+import ebd.messageLibrary.packet.Packet;
 import javafx.util.Pair;
 import ebd.messageLibrary.serialization.annotations.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -79,7 +80,7 @@ public abstract class Serializer {
 
 			// check conditions
 			if(!allConditionsStatisfied(annotations, serializedValues)) {
-				System.err.println(field.getName() + " was skipped");
+				if(debug) System.err.println(field.getName() + " was skipped");
 				continue;
 			}
 
@@ -119,7 +120,7 @@ public abstract class Serializer {
 
 			}
 			catch (IllegalArgumentException | IllegalAccessException e) {
-				System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
+				if(debug) System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 		}
@@ -145,10 +146,13 @@ public abstract class Serializer {
 			}
 			// serialize list
 			else if(List.class.isAssignableFrom(value.getClass())) {
-				if(((List) value).size() <= 0) continue;
+				if(((List) value).size() <= 0) {
+					writer.writeInt(0, 5);
+					continue;
+				}
 
 				// write N_ITER value
-				writer.writeInt(((List<?>) value).size(), 8);
+				writer.writeInt(((List<?>) value).size(), 5);
 				for(Object item : (List<?>) value) {
 					serialize(item, writer);
 				}
@@ -312,7 +316,7 @@ public abstract class Serializer {
 		try {
 			constructor = type.getConstructor();
 		} catch (NoSuchMethodException e) {
-			System.err.println("The class type " + type + " doesn't support a default Constructor.");
+			if(debug) System.err.println("The class type " + type + " doesn't support a default Constructor.");
 			e.printStackTrace();
 		}
 
@@ -321,7 +325,7 @@ public abstract class Serializer {
 		try {
 			instance = constructor.newInstance();
 		} catch (NullPointerException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-			System.err.println("Cannot create an instance of given type: " + type);
+			if(debug) System.err.println("Cannot create an instance of given type: " + type);
 			e.printStackTrace();
 		}
 
@@ -405,6 +409,7 @@ public abstract class Serializer {
 					value = list;
 
 				} else if(isSerializable(field.getType())) {
+					if(Packet.class.isAssignableFrom(field.getType())) reader.readInt(8, false);
 					value = deserialize(reader, field.getType(), trainToTrack);
 
 				} else {
@@ -426,7 +431,7 @@ public abstract class Serializer {
 
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
+				if(debug) System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 

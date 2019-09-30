@@ -37,7 +37,7 @@ class TrainStatusManagerTest {
         Position curPos = new Position(0d,true,curLoc,prevLocs);
 
         eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"), "currentPosition", curPos));
-        eventBus.post(new ReceivedMessageEvent("test", Collections.singletonList("tsm"),makeMsg3()));
+        eventBus.post(new ReceivedMessageEvent("test", Collections.singletonList("tsm"), makeMsg3(), "test"));
 
         //Thread.sleep(5000);
         trainStatusManager.join();
@@ -63,7 +63,7 @@ class TrainStatusManagerTest {
     private Packet_15 makeP15(){
         Packet_15 packet15 = new Packet_15();
 
-        Packet_15.Packet_15_Section endsection = packet15.new Packet_15_Section();
+        Packet_15.Packet_15_Section endsection = new Packet_15.Packet_15_Section();
         endsection.L_SECTION = 100; //m
         ArrayList<Packet_15.Packet_15_Section> sections = new ArrayList<>();
 
@@ -96,7 +96,7 @@ class TrainStatusManagerTest {
 
         Packet_27 packet27 = new Packet_27();
 
-        Packet_27.Packet_27_StaticSpeedProfile p27SSP = packet27.new Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
+        Packet_27.Packet_27_StaticSpeedProfile p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
 
         ArrayList<Packet_27.Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 
@@ -108,7 +108,7 @@ class TrainStatusManagerTest {
 
         for (int i = 2; i < tsp.length; i+=2) {
 
-            p27SSP = packet27.new Packet_27_StaticSpeedProfile(tsp[i],tsp[i+1] / 5,true);
+            p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[i],tsp[i+1] / 5,true);
             sectionList = new ArrayList<>();
             p27SSP.sections = sectionList;
             profileList.add(p27SSP);

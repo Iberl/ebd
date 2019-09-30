@@ -15,7 +15,7 @@ public class TestHandler {
 
 		this.localBus = localBus;
 		this.localBus.register(this);
-		mr = new MessageReceiver(this.localBus, "test", "test2");
+		mr = new MessageReceiver(this.localBus, "test", "test2", true);
 	}
 
 	@Subscribe

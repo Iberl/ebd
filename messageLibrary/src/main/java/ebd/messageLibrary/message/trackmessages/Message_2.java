@@ -2,6 +2,7 @@ package ebd.messageLibrary.message.trackmessages;
 
 import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.packet.Packet;
+import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.TrainPacket;
 import ebd.messageLibrary.serialization.annotations.BitLength;
 import ebd.messageLibrary.serialization.annotations.ItemType;
@@ -37,10 +38,10 @@ public class Message_2 extends TrackMessage {
 	@OrderIndex(6)
 	public int D_SR = ETCSVariables.D_SR;
 
-	/** List Of Optional {@link TrainPacket}s */
+	/** List Of Optional {@link TrackPacket}s */
 	@OrderIndex(7)
 	@ItemType(Packet.class)
-	public List<TrainPacket> packets = new ArrayList<>();
+	public List<TrackPacket> packets = new ArrayList<>();
 
 
 	// Constructors
