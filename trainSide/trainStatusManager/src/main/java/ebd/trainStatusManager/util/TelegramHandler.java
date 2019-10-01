@@ -30,7 +30,7 @@ public class TelegramHandler {
         Map<String, Location> linkingInformation = routeDataVolatile.getLinkingInformation();
         //TODO Remember NID_C
         Location newLoc = linkingInformation.get(String.valueOf(rte.telegram.NID_BG));
-        this.localBus.postSticky(new NewLocationEvent("tsm", Collections.singletonList("dd"), newLoc));
+        this.localBus.postSticky(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
     }
 
 

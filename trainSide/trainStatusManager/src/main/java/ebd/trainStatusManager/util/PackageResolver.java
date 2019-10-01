@@ -86,9 +86,9 @@ public class PackageResolver {
 
         Map<String,Object> changes = new HashMap<>();
         changes.put("T_CYCLOC", t_cycle);
-        changes.put("D_CYCLOC", d_cycle);
+        changes.put("distanceCycleLocation", d_cycle);
         changes.put("M_LOC", m_loc);
-        changes.put("incremetalPositionReportDistances", iprd);
+        changes.put("incrementalPositionReportDistances", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
     }
