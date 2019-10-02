@@ -33,7 +33,7 @@ public class LoggingTest{
      */
     public static void main(String[] args) throws IOException {
         EventBus localBus = new EventBus();
-        new Logging(localBus, 4711);
+        new Logging(localBus, 4711, "TRN");
         new Logging();
         localBus.post(generateExceptionEvent());
         localBus.post(generateNormalEvent());
