@@ -1,0 +1,30 @@
+{ "actions" : [
+              {
+                "v_acc" : {
+                            "value" : 100,
+                            "conditions" :
+                                            {
+                                                "v" : {
+                                                        "op" : "<",
+                                                        "value" : 119
+                                                    }
+                                            }
+
+
+                        }
+              },
+              {
+                "v_break" : {
+                            "value" : 90,
+                            "conditions" :
+                                            {
+                                                "v" : {
+                                                        "op" : ">",
+                                                        "value" : 121
+                                                    }
+                                            }
+
+                          }
+              }
+            ]
+}

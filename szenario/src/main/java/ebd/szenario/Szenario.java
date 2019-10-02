@@ -1,18 +1,11 @@
 package ebd.szenario;
 
-import ebd.baliseTelegramGenerator.Balise;
-import ebd.baliseTelegramGenerator.BaliseGroup;
-import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
-import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logger.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
-import ebd.messageLibrary.message.trainmessages.Message_132;
 import ebd.messageLibrary.message.trainmessages.Message_155;
-import ebd.messageLibrary.message.trainmessages.Message_157;
-import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
@@ -171,7 +164,7 @@ public class Szenario implements Runnable {
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", Collections.singletonList(192), mapRoute);
         this.tsm = new TrainStatusManager("192", "1",
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "TestDrivingProfile.json", true);
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         Message_155 msg155 = new Message_155();

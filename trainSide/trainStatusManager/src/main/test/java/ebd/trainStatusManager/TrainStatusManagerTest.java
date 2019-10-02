@@ -25,7 +25,7 @@ class TrainStatusManagerTest {
         Testhandler testhandler = new Testhandler(eventBus);
         TrainStatusManager trainStatusManager = new TrainStatusManager(eventBus, "192",
                 "1", "u",
-                "TestDrivingProfile.json");
+                "StrictDrivingStrategy.json");
 
 
         Thread.sleep(2000);

@@ -56,7 +56,7 @@ class DrivingDynamicsTest {
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
         DrivingDynamics drivingDynamics = new DrivingDynamics(eb,
-                "C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\TestDrivingProfile.json");
+                "C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\StrictDrivingStrategy.json");
         eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();

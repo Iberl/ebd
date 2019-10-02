@@ -25,7 +25,7 @@ class DrivingProfileTest {
 
     @Test
     void actionToTake() throws ParseException, DDBadDataException, IOException {
-        DrivingProfile drivingProfile = new DrivingProfile("C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\TestDrivingProfile.json", EventBus.getDefault());
+        DrivingProfile drivingProfile = new DrivingProfile("C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\StrictDrivingStrategy.json", EventBus.getDefault());
         assertEquals("CruiseAction", drivingProfile.actionToTake().getClass().getSimpleName());
     }
 }
