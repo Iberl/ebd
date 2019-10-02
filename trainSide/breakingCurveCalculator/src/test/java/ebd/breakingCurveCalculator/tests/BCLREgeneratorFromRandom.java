@@ -10,6 +10,7 @@ import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_15.Packet_15_Section;
+import ebd.messageLibrary.util.ETCSVariables;
 
 
 /**
@@ -55,9 +56,9 @@ public class BCLREgeneratorFromRandom{
 		packet15.V_LOA = rng.nextInt(9);
 			
 		//setting currentPosition
-		Position currentPosition = new Position(0, true, new Location("L2", "L1", 20d));
-		HashMap<String,Location> preLocs = new HashMap<>();
-		preLocs.put("L1",new Location("L1",null,null));
+		Position currentPosition = new Position(0, true, new Location(2, 1, 20d));
+		HashMap<Integer,Location> preLocs = new HashMap<>();
+		preLocs.put(1,new Location(1, ETCSVariables.NID_LRBG,null));
 		currentPosition.setPreviousLocations(preLocs);
 		
 		

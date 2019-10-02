@@ -25,7 +25,7 @@ class BaliseTelegramGeneratorTest {
 		BaliseTelegramGenerator btg = new BaliseTelegramGenerator(localBus, lob);
 
 		// TODO trainID
-		EventBus.getDefault().post(new PositionEvent("mr;T=test", Arrays.asList("btg"), new Position(500d, true, new Location("1", "0", 10d))));
+		EventBus.getDefault().post(new PositionEvent("mr;T=test", Arrays.asList("btg"), new Position(500d, true, new Location(1, 0, 10d))));
 		System.out.println("Position Event sent");
 		Thread.sleep(5000);
 	}

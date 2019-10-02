@@ -6,6 +6,7 @@ import java.util.List;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
 import ebd.globalUtils.etcsPacketToSplineConverters.GradientProfileConverter;
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
+import ebd.globalUtils.location.InitalLocation;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -101,7 +102,7 @@ public class BreakingCurveCalculator {
     	}
     	catch(Exception e) {
     		eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, bcre, e));
-    		breakingCurve = new BreakingCurve(new Location("Unknown",null,null),"ERROR");
+    		breakingCurve = new BreakingCurve(new InitalLocation(),"ERROR");
     		breakingCurve.addKnotToCurve(new Knot(0d, new double[]{0d,0d}));
     		breakingCurve.addKnotToCurve(new Knot(Double.MAX_VALUE, new double[]{0d,0d}));
     		eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets, breakingCurve));
@@ -145,7 +146,7 @@ public class BreakingCurveCalculator {
     	}
     	catch(Exception e) {
     		eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, bclre, e));
-    		breakingCurve = new BreakingCurve(new Location("Unknown",null,null),"ERROR");
+    		breakingCurve = new BreakingCurve(new InitalLocation(),"ERROR");
     		breakingCurve.addKnotToCurve(new Knot(0d, new double[]{0d,0d}));
 			breakingCurve.addKnotToCurve(new Knot(Double.MAX_VALUE, new double[]{0d,0d}));
     		eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets,breakingCurve));

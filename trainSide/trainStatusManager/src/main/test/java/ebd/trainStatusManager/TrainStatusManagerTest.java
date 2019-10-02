@@ -10,6 +10,7 @@ import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
@@ -29,10 +30,10 @@ class TrainStatusManagerTest {
 
 
         Thread.sleep(2000);
-        HashMap<String,Location> prevLocs = new HashMap<>();
+        HashMap<Integer,Location> prevLocs = new HashMap<>();
         Position prevPos = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile.getCurrentPosition();
         prevLocs.put(prevPos.getLocation().getId(),prevPos.getLocation());
-        Location curLoc = new Location("2","unknown", 10d);
+        Location curLoc = new Location(2, ETCSVariables.NID_LRBG, 10d);
         prevLocs.put(curLoc.getId(),curLoc);
         Position curPos = new Position(0d,true,curLoc,prevLocs);
 

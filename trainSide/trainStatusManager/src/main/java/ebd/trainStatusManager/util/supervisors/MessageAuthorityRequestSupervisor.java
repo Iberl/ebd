@@ -102,7 +102,7 @@ public class MessageAuthorityRequestSupervisor {
         Position curPos = trainDataVolatile.getCurrentPosition();
 
         Packet_0 packet0 = new Packet_0();
-        packet0.NID_LRBG = curPos.getLocation() != null ? Integer.parseInt(curPos.getLocation().getId()) : 0;
+        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
         packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
         packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!

@@ -7,6 +7,7 @@ import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainData;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class SpeedSupervisionModuleTest {
 
         TrainData trainData = new TrainData(eventBus, "resources/testTrain650.json");
         eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"),"currentSpeed", 51d));
-        Location startLoc = new Location("0", null, 0d);
+        Location startLoc = new Location(0, ETCSVariables.NID_LRBG, 0d);
         Position startPos = new Position(0d,true,startLoc);
         Position curPos = new Position(10d,true,startLoc);
         eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"),"currentPosition", curPos));

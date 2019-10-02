@@ -64,7 +64,7 @@ public class BaliseTelegramGenerator {
 		String src = event.source.replace("dd", "mr");
 
 		if((event.position.getLocation() instanceof InitalLocation)) {
-			positions.put(src, new Pair<>(new Position(0, true, new Location("0", "0", 0d)), null));
+			positions.put(src, new Pair<>(new Position(0, true, new Location(0, 0, 0d)), null));
 			sendInitialTelegram(src);
 		} else {
 			positions.put(src, new Pair<>(event.position, positions.get(src).getValue()));

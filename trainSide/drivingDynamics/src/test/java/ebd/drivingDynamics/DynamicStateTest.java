@@ -6,6 +6,7 @@ import ebd.globalUtils.location.Location;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteData;
 import ebd.trainData.TrainData;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
@@ -36,7 +37,7 @@ class DynamicStateTest {
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
 
         AvailableAcceleration aa = new AvailableAcceleration(eb);
-        Location curLoc = new Location("unknown", "unkown", 0d);
+        Location curLoc = new Location(ETCSVariables.NID_LRBG_UNKNOWN, ETCSVariables.NID_LRBG_UNKNOWN, 0d);
         List<Location> prevLoc = eb.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile.getPreviousLocations();
         if(prevLoc == null){
             prevLoc = new ArrayList<>();

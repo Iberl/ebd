@@ -32,7 +32,7 @@ public class PositionReportSupervisor {
     private EventBus localBus;
     private String etcsTrainID;
     private double lengthTrain;
-    private String lastLocationID;
+    private int lastLocationID;
 
     //private int t_cycle = ETCSVariables.T_CYCLOC;
     private double tripTimeAtCycleStart = 0d;
@@ -115,10 +115,9 @@ public class PositionReportSupervisor {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newLocation(NewLocationEvent nle){
-        System.out.println("PR was here very first");
         if(!validTarget(nle.targets)) return;
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        if(lastLocationID.equals(nle.newLocation.getId())) return;
+        if(lastLocationID == nle.newLocation.getId()) return;
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
             sendPositionReport();;
         }
@@ -135,7 +134,7 @@ public class PositionReportSupervisor {
         message136.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
 
         Packet_0 packet0 = new Packet_0();
-        packet0.NID_LRBG = curPos.getLocation() != null ? Integer.parseInt(curPos.getLocation().getId()) : 0;
+        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
         packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
         packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
@@ -150,8 +149,7 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-        System.out.println("PR was send");
-        localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"),message136, this.messageDestination));
+        //localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"),message136, this.messageDestination)); //TODO Message136 has to work
     }
 
     /**

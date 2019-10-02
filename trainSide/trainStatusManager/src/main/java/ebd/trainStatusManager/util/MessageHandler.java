@@ -118,7 +118,7 @@ public class MessageHandler {
 
 
         Message_3 msg3 = (Message_3)rme.message;
-        Location refLocation = new Location(String.valueOf(msg3.NID_LRBG),null,null); //TODO check if viable
+        Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null); //TODO check if viable
         refPosition = new Position(0,true, refLocation);
 
         packet15 = msg3.Packet_15;

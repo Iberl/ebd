@@ -58,7 +58,7 @@ public class BaliseGroup {
         this.country = NID_C;
         this.NID_BG = NID_BG;
         this.linked = Q_LINK;
-        this.location = new Location(String.valueOf(NID_BG), String.valueOf(NID_LRBG), D_LRBG);
+        this.location = new Location(NID_BG, NID_LRBG, D_LRBG);
         this.linkingInformation = linkingInformation;
     }
 

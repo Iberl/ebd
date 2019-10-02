@@ -59,7 +59,7 @@ public class RouteDataVolatile {
      * Linking Information
      */
     @Nullable
-    protected volatile HashMap<String,Location> linkingInformation = null;
+    protected volatile HashMap<Integer,Location> linkingInformation = null;
 
     public RouteDataVolatile(){}
 
@@ -123,7 +123,7 @@ public class RouteDataVolatile {
     /**
      * Linking Information
      */
-    public HashMap<String, Location> getLinkingInformation() {
+    public HashMap<Integer, Location> getLinkingInformation() {
         return linkingInformation;
     }
 }

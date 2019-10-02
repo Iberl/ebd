@@ -223,7 +223,7 @@ public class DrivingDynamics {
 
         Location newLoc = nle.newLocation;
 
-        if(dynamicState.getPosition().getLocation().getId().equals(newLoc.getId())) {
+        if(dynamicState.getPosition().getLocation().getId() == newLoc.getId()) {
             this.eventBus.removeStickyEvent(nle);
             return;
         }
@@ -232,10 +232,10 @@ public class DrivingDynamics {
 
         if(routeDataVolatile.getLinkingInformation() == null) return;
 
-        Map<String, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
+        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
 
         Position oldPos = dynamicState.getPosition();
-        Map<String,Location> prefLocs = oldPos.getPreviousLocations();
+        Map<Integer,Location> prefLocs = oldPos.getPreviousLocations();
         double overshoot;
 
         if(prefLocs.size() > 0) {
@@ -279,11 +279,11 @@ public class DrivingDynamics {
     private void sendToLogEventDynamicState() {
         double a = dynamicState.getAcceleration();
         double v = dynamicState.getSpeed();
-        String l = dynamicState.getPosition().getLocation().getId();
+        int l = dynamicState.getPosition().getLocation().getId();
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("Acceleration: %2.2f m/s^2 Speed: %2.2f m/s, Position: LRBG %3s + %4.2f m, ",a,v,l,i);
+        String msg = String.format("Acceleration: %2.2f m/s^2 Speed: %2.2f m/s, Position: LRBG %3d + %4.2f m, ",a,v,l,i);
         String msg2 = String.format("Trip Distance: %6.2f m, Trip Time: %5.1f s", td, tt);
         this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 

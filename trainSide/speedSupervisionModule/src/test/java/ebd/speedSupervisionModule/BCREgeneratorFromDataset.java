@@ -13,6 +13,7 @@ import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfile;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfileSection;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+import ebd.messageLibrary.util.ETCSVariables;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +90,7 @@ public class BCREgeneratorFromDataset {
 		int currentGradient = gp[gp.length-1];
 		
 		//setting currentPosition
-		Position currentPosition = new Position(0, true, new Location("L1", null, null));
+		Position currentPosition = new Position(0, true, new Location(1, ETCSVariables.NID_LRBG, null));
 		
 		//generating packet27
 		

@@ -52,7 +52,7 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        if (curPosition.getLocation().getId().equals((new InitalLocation()).getId())) return;
+        if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
 
         double tripDistance = trainDataVolatile.getCurTripDistance();
         double tripDistanceWarning = tripDistance + curSpeed * 5;

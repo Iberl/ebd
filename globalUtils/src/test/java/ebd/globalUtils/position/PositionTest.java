@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 
+import ebd.messageLibrary.util.ETCSVariables;
 import org.junit.jupiter.api.Test;
 
 import ebd.globalUtils.location.Location;
@@ -21,19 +22,19 @@ class PositionTest {
 	 */
 	@Test
 	void testPosition() {
-		HashMap<String,Location> previousLocations = new HashMap<>();
-		previousLocations.put("L1",new Location("L1", null, null));
-		previousLocations.put("L2",new Location("L2", "L1", 100d));
-		previousLocations.put("L3",new Location("L3", "L2", 100d));
-		previousLocations.put("L4",new Location("L4", "L3", 100d));
-		previousLocations.put("L5",new Location("L5", "L4", 100d));
-		previousLocations.put("L6",new Location("L6", "L0", 100d)); //This induces a break in the chain of locations
-		previousLocations.put("L7",new Location("L7", "L6", 100d));
+		HashMap<Integer,Location> previousLocations = new HashMap<>();
+		previousLocations.put(1, new Location(1, ETCSVariables.NID_LRBG, null));
+		previousLocations.put(2,new Location(2, 1, 100d));
+		previousLocations.put(3,new Location(3, 2, 100d));
+		previousLocations.put(4,new Location(4, 3, 100d));
+		previousLocations.put(5,new Location(5, 4, 100d));
+		previousLocations.put(6,new Location(6, 0, 100d)); //This induces a break in the chain of locations
+		previousLocations.put(7,new Location(7, 6, 100d));
 		
-		Position posOne = new Position(20d, false, new Location("L4", "L3", 100d));
-		Position posTwo = new Position(15d, true, new Location("L5", "L4", 100d),previousLocations);
-		Position posThree = new Position(0d,true,new Location("L2", "L1", 100d));
-		posThree.setLocation(new Location("L7", "L6", 100d));
+		Position posOne = new Position(20d, false, new Location(4, 3, 100d));
+		Position posTwo = new Position(15d, true, new Location(5, 4, 100d),previousLocations);
+		Position posThree = new Position(0d,true,new Location(2, 1, 100d));
+		posThree.setLocation(new Location(7, 6, 100d));
 		posThree.setDirection(false);
 		posThree.setIncrement(20d);
 		posThree.setPreviousLocations(previousLocations);
@@ -42,9 +43,9 @@ class PositionTest {
 		assertFalse(posOne.getIncrement() == posTwo.getIncrement());
 		assertFalse(posOne.isDirectedForward() == posTwo.isDirectedForward());
 		
-		assertThrows(PositionReferenzException.class, () -> posOne.totalDistanceToPastLocation("L0")); //Tests unfound locations
-		assertEquals(415d,posTwo.totalDistanceToPastLocation("L1"),0.001);
-		assertThrows(PositionReferenzException.class, () -> posThree.totalDistanceToPastLocation("L1")); //Tests breaks in the chain of locations
+		assertThrows(PositionReferenzException.class, () -> posOne.totalDistanceToPastLocation(0)); //Tests unfound locations
+		assertEquals(415d,posTwo.totalDistanceToPastLocation(1),0.001);
+		assertThrows(PositionReferenzException.class, () -> posThree.totalDistanceToPastLocation(1)); //Tests breaks in the chain of locations
 	}
 
 }

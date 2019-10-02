@@ -17,6 +17,7 @@ import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfile;
 import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfileSection;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+import ebd.messageLibrary.util.ETCSVariables;
 
 /**
  * @author Lars Schulze-Falck
@@ -95,7 +96,7 @@ public class BCREgeneratorFromRandom{
 		int currentGradient = rng.nextInt(10);
 		
 		//setting currentPosition
-		Position currentPosition = new Position(0, true, new Location("L1", null, null));
+		Position currentPosition = new Position(0, true, new Location(1, ETCSVariables.NID_LRBG, null));
 		
 		//generating packet27
 		
