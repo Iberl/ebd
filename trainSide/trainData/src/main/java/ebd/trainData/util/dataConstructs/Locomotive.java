@@ -307,7 +307,7 @@ public class Locomotive extends TrainCar {
             this.driveTlV = new ArrayList<>();
 
             if(tempJsonArray.isEmpty()){
-                System.out.println("-TLVdrive list was empty-");
+                //System.out.println("-TLVdrive list was empty-");
             }
 
             for (Object item : tempJsonArray){
@@ -321,7 +321,7 @@ public class Locomotive extends TrainCar {
             this.breakTlV= new ArrayList<>();
 
             if(tempJsonArray.isEmpty()){
-                System.out.println("-TLVbreak list was empty-");
+                //System.out.println("-TLVbreak list was empty-");
             }
 
             for (Object item : tempJsonArray){

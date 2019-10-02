@@ -175,7 +175,7 @@ public class Szenario implements Runnable {
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", Collections.singletonList(192), mapRoute);
         this.tsm = new TrainStatusManager("192", "1",
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "TestDrivingProfile.json", true);
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "RiskyDrivingStrategy.json", true);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         Message_155 msg155 = new Message_155();

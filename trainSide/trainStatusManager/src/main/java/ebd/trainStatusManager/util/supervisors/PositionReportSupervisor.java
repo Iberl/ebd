@@ -6,6 +6,7 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.CrossedBaliseGroupEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_136;
 import ebd.messageLibrary.packet.trainpackets.Packet_0;
@@ -31,6 +32,7 @@ public class PositionReportSupervisor {
     private EventBus localBus;
     private String etcsTrainID;
     private double lengthTrain;
+    private String lastLocationID;
 
     //private int t_cycle = ETCSVariables.T_CYCLOC;
     private double tripTimeAtCycleStart = 0d;
@@ -44,6 +46,7 @@ public class PositionReportSupervisor {
 
     private IncrementalPositionReportDistances positionReportDistances = null;
 
+
     public PositionReportSupervisor(EventBus localBus, String etcsTrainID, String rbcID){
         this.localBus = localBus;
         this.localBus.register(this);
@@ -51,6 +54,7 @@ public class PositionReportSupervisor {
 
         TrainDataPerma trainDataPerma = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.lengthTrain = trainDataPerma.getL_train();
+        this.lastLocationID = (new InitalLocation()).getId();
 
         this.messageDestination = Collections.singletonList("mr;R=" + rbcID);
     }
@@ -109,13 +113,16 @@ public class PositionReportSupervisor {
         this.t_cycleNumber = 1;
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newLocation(NewLocationEvent nle){
+        System.out.println("PR was here very first");
+        if(!validTarget(nle.targets)) return;
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        if(trainDataVolatile.getCurrentPosition().getLocation().getId().equals(nle.newLocation.getId())) return;
+        if(lastLocationID.equals(nle.newLocation.getId())) return;
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
-            sendPositionReport();
+            sendPositionReport();;
         }
+        this.lastLocationID = nle.newLocation.getId();
     }
 
     private void sendPositionReport() {
@@ -143,7 +150,7 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-
+        System.out.println("PR was send");
         localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"),message136, this.messageDestination));
     }
 

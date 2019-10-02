@@ -42,7 +42,7 @@ public class Diagram {
 
         //TODO Better solution for empty Diagrams
         if (jsonObject.keySet().isEmpty()){
-            System.out.println("-Diagram was empty-");
+            //System.out.println("-Diagram was empty-");
             return;
         }
 

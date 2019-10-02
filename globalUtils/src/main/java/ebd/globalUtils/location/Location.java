@@ -13,13 +13,13 @@ public class Location {
 	/**
 	 * ID if this location, normally the balise ID
 	 */
-	private String id;
+	private int id;
 	
 	/**
 	 * Id of the last previous crossed Location, is null if there is no previous location!
 	 */
 	@Nullable
-	private String idOfPrevious;
+	private int idOfPrevious;
 	
 	/**
 	 * Distance to the last previous crossed Location in [m], is null if there is no previous location!
@@ -28,19 +28,19 @@ public class Location {
 	private Double distanceToPrevious;
 	
 	
-	public Location(String id, String idOfPrevious, Double distanceToPrevious) {
+	public Location(int id, int idOfPrevious, Double distanceToPrevious) {
 		this.id = id;
 		this.idOfPrevious = idOfPrevious;
 		this.distanceToPrevious = distanceToPrevious;
 	}
 
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
 
-	public String getIdOfPrevious() {
+	public int getIdOfPrevious() {
 		return idOfPrevious;
 	}
 

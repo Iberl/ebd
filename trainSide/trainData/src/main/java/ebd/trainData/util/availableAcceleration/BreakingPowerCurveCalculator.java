@@ -61,19 +61,19 @@ public class BreakingPowerCurveCalculator {
         chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
         double deceleration = 0.35;
         if(chosenBreakingMethod.contains("g")){
-            deceleration = 0.35;
+            deceleration = 0.45;
         }
         else if(chosenBreakingMethod.contains("p")){
-            deceleration = 0.8;
+            deceleration = 0.9;
         }
         else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
-            deceleration = 1;
+            deceleration = 1.1;
         }
         else if(chosenBreakingMethod.contains("r+mg")){
-            deceleration = 1.2;
+            deceleration = 1.3;
         }
         else if(chosenBreakingMethod.contains("bremsrechner")){
-            deceleration = 1.3;
+            deceleration = 1.4;
         }
         else {
             List<String> targets = Arrays.asList(new String[]{"all"});

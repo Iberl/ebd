@@ -25,6 +25,8 @@ import ebd.trainStatusManager.util.MessageHandler;
 import ebd.trainStatusManager.util.TelegramHandler;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.trainStatusManager.util.events.TsmTripEndEvent;
+import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
+import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.trainStatusManager.util.supervisors.TripSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -62,6 +64,8 @@ public class TrainStatusManager implements Runnable {
     private MessageSender messageSender;
     private SpeedSupervisionModule speedSupervisionModule;
     private TripSupervisor tripSupervisor;
+    private MessageAuthorityRequestSupervisor messageAuthorityRequestSupervisor;
+    private PositionReportSupervisor positionReportSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -194,6 +198,8 @@ public class TrainStatusManager implements Runnable {
         this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, true);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
         this.tripSupervisor = new TripSupervisor(this.localEventBus);
+        this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, this.etcsTrainID, this.rbcID);
+        this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,this.etcsTrainID, this.rbcID);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus,this.pathToDrivingStrategy);
 

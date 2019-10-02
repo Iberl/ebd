@@ -20,6 +20,7 @@ import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
@@ -56,9 +57,9 @@ public class DrivingDynamics {
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
     private double maxTripDistance;
 
-    private int cycleCount = 0;
+    private int cycleCount = 20;
     //TODO Connect to Config
-    private int cylceCountMax = 20;
+    private int cylceCountMax = 1;
 
 
     public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile){
@@ -109,17 +110,24 @@ public class DrivingDynamics {
             actionParser(this.drivingProfile.actionToTake());
         }
         else {
+
             switch (speedSupervisionReport.interventionLevel){
                 case NO_INTERVENTION:
                 case INDICATION:
+                    actionParser(this.drivingProfile.actionToTake());
+                    break;
                 case WARNING:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case APPLY_SERVICE_BREAKS:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
                     this.dynamicState.setMovementState(MovementState.BREAKING);
                     this.dynamicState.setBreakingModification(1d);
+                    break;
                 case APPLY_EMERGENCY_BREAKS:
                 default:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
@@ -149,7 +157,7 @@ public class DrivingDynamics {
         cycleCount++;
         if(this.cycleCount >= this.cylceCountMax){
             cycleCount = 0;
-            sendToLogEvent();
+            sendToLogEventDynamicState();
         }
     }
 
@@ -237,7 +245,7 @@ public class DrivingDynamics {
             InitalLocation initLoc = new InitalLocation();
             prefLocs.put(initLoc.getId(),initLoc);
             prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
-            overshoot = 0d; //First Location can not be overshoot?
+            overshoot = 0d; //First Location can not be overshoot? //TODO Test this assumption
         }
 
         Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
@@ -268,7 +276,7 @@ public class DrivingDynamics {
         this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", curMaxSpeed));
     }
 
-    private void sendToLogEvent() {
+    private void sendToLogEventDynamicState() {
         double a = dynamicState.getAcceleration();
         double v = dynamicState.getSpeed();
         String l = dynamicState.getPosition().getLocation().getId();
@@ -278,6 +286,12 @@ public class DrivingDynamics {
         String msg = String.format("Acceleration: %2.2f m/s^2 Speed: %2.2f m/s, Position: LRBG %3s + %4.2f m, ",a,v,l,i);
         String msg2 = String.format("Trip Distance: %6.2f m, Trip Time: %5.1f s", td, tt);
         this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
+
+    }
+
+    private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil) {
+        String msg = String.format("InterventionLevel: %s ", sil);
+        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
     }
 

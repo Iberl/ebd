@@ -45,7 +45,7 @@ public class ForceFactorTable {
 
         //TODO Better solution for empty ForceFactorTables
         if(jsonObject.keySet().isEmpty()){
-            System.out.println("-ForceFactorTable was empty-");
+            //System.out.println("-ForceFactorTable was empty-");
             return;
         }
 

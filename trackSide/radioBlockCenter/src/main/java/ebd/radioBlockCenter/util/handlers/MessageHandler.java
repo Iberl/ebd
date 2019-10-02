@@ -12,6 +12,7 @@ import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.radioBlockCenter.util.Route;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -38,6 +39,7 @@ public class MessageHandler {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receivedMessage(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
+        //TODO Rewrite
         if(rme.message instanceof Message_24){
             //TODO: Use "sender" of RME instead of controlledTrainsByID
             String msg = String.format("RBC -> ebd.logger.Logging: RBC received position report from train %s", controlledTrainsByID.get(0));
@@ -64,7 +66,7 @@ public class MessageHandler {
         lop.add(makeP27());
 
         Message_3 msg3 = new Message_3();
-        msg3.M_ACK = true;
+        msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;
         msg3.NID_LRBG = 0;
         msg3.Packet_15 = makeP15(d_EOL);
         msg3.packets = lop;
@@ -79,7 +81,7 @@ public class MessageHandler {
         endsection.L_SECTION = (int)d_EOA; //m
         ArrayList<Packet_15.Packet_15_Section> sections = new ArrayList<>();
 
-        packet15.Q_SCALE = 1;
+        packet15.Q_SCALE = ETCSVariables.Q_SCALE_1M;
         packet15.endsection = endsection;
         packet15.sections = sections;
         packet15.V_LOA = 0;
@@ -96,7 +98,7 @@ public class MessageHandler {
             gradients.add(tempgrad);
         }
         Packet_21 packet21 = new Packet_21();
-        packet21.Q_SCALE = 1;
+        packet21.Q_SCALE = ETCSVariables.Q_SCALE_1M;
         packet21.gradient = gradient;
         packet21.gradients = gradients;
 
@@ -113,7 +115,7 @@ public class MessageHandler {
         ArrayList<Packet_27.Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 
         p27SSP.sections = sectionList;
-        packet27.Q_SCALE = 1;
+        packet27.Q_SCALE = ETCSVariables.Q_SCALE_1M;
         packet27.speedProfile = p27SSP;
 
         ArrayList<Packet_27.Packet_27_StaticSpeedProfile> profileList = new ArrayList<>();
