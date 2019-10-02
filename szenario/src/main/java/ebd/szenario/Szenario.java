@@ -1,12 +1,23 @@
 package ebd.szenario;
 
+import ebd.baliseTelegramGenerator.Balise;
+import ebd.baliseTelegramGenerator.BaliseGroup;
+import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
+import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logger.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
+import ebd.messageLibrary.message.trainmessages.Message_132;
 import ebd.messageLibrary.message.trainmessages.Message_155;
+import ebd.messageLibrary.message.trainmessages.Message_157;
+import ebd.messageLibrary.packet.Packet;
+import ebd.messageLibrary.packet.TrackPacket;
+import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
+import ebd.messageLibrary.packet.trackpackets.Packet_58;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
@@ -164,11 +175,28 @@ public class Szenario implements Runnable {
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", Collections.singletonList(192), mapRoute);
         this.tsm = new TrainStatusManager("192", "1",
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "TestDrivingProfile.json", true);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         Message_155 msg155 = new Message_155();
         this.messageSenderTrain.send(new SendMessageEvent("ms;T=192", Collections.singletonList("ms"), msg155 ,Collections.singletonList("mr;R=1") ));
+        this.messageSenderTrack.send(new SendMessageEvent("ms;R=1", Collections.singletonList("ms"), makeMessage(makePackage58()), Collections.singletonList("mr;T=192")));
+    }
+
+    private Message_24 makeMessage(TrackPacket packet){
+        Message_24 m24 = new Message_24();
+        m24.NID_LRBG = 0;
+        m24.packets.add(packet);
+        return m24;
+    }
+
+    private Packet_58 makePackage58(){
+
+        Packet_58 packet58 = new Packet_58();
+        packet58.Q_DIR = Q_DIR_NOMINAL;
+        packet58.M_LOC = M_LOC_AT_BALISE_GROUP;
+
+        return packet58;
     }
 
     private boolean validTarget(List<String> targetList) {

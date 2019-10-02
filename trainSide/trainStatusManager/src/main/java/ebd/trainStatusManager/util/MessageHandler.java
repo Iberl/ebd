@@ -82,10 +82,12 @@ public class MessageHandler {
     }
 
     /**
-     * The purpose of this handler function is to take a {@link Message_3} and
-     * a) update {@link RouteDataVolatile}
-     * b) update AvailableAcceleration in {@link TrainDataVolatile},
-     * c) calculate a new breaking curve. The order of this is important!
+     * The purpose of this handler function is to take a {@link Message_3} and<br>
+     * a) update {@link RouteDataVolatile},<br>
+     * b) update AvailableAcceleration in {@link TrainDataVolatile},<br>
+     * c) calculate a new breaking curve,<br>
+     * d) send Acknowledge if necessary,<br>
+     * The order of this is important!
      * @param rme
      */
     private void handleMsg3(ReceivedMessageEvent rme) {

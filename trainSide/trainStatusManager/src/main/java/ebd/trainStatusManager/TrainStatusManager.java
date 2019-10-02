@@ -134,6 +134,7 @@ public class TrainStatusManager implements Runnable {
             return;
         }
         if(!this.tripInProgress){
+            //TODO Multi nbce's ?
             this.tripInProgress = true;
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));

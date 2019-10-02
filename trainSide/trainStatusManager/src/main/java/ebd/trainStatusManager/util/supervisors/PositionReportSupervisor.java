@@ -4,6 +4,7 @@ import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.CrossedBaliseGroupEvent;
+import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_136;
@@ -106,6 +107,15 @@ public class PositionReportSupervisor {
         this.d_cycleNumber = 1;
         this.tripTimeAtCycleStart = trainDataVolatile.getCurTripTime();
         this.t_cycleNumber = 1;
+    }
+
+    @Subscribe
+    public void newLocation(NewLocationEvent nle){
+        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        if(trainDataVolatile.getCurrentPosition().getLocation().getId().equals(nle.newLocation.getId())) return;
+        if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
+            sendPositionReport();
+        }
     }
 
     private void sendPositionReport() {
