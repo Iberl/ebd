@@ -283,8 +283,8 @@ public class DrivingDynamics {
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("Acceleration: %2.2f m/s^2 Speed: %2.2f m/s, Position: LRBG %3d + %4.2f m, ",a,v,l,i);
-        String msg2 = String.format("Trip Distance: %6.2f m, Trip Time: %5.1f s", td, tt);
+        String msg = String.format("Acceleration: %4.2f m/s^2 Speed: %5.2f m/s, Position: LRBG %3d + %7.2f m, ",a,v,l,i);
+        String msg2 = String.format("Trip Distance: %8.2f m, Trip Time: %6.1f s", td, tt);
         this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 
     }

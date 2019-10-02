@@ -21,13 +21,13 @@ public class PackageResolver {
 
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
-        HashMap<String, Location> linkingMap = new HashMap<>();
+        HashMap<Integer, Location> linkingMap = new HashMap<>();
         Location tempLoc = new Location(trackPacket.link.NID_BG, nid_lrbg, trackPacket.link.D_LINK * scale );
-        linkingMap.put(String.valueOf(trackPacket.link.NID_BG),tempLoc);
-        Integer prevLoc =trackPacket.link.NID_BG;
+        linkingMap.put(trackPacket.link.NID_BG,tempLoc);
+        int prevLoc = trackPacket.link.NID_BG;
         for(Packet_5.Packet_5_Link link : trackPacket.links){
             tempLoc = new Location(link.NID_BG,prevLoc,link.D_LINK * scale);
-            linkingMap.put(String.valueOf(link.NID_BG), tempLoc);
+            linkingMap.put(link.NID_BG, tempLoc);
             prevLoc = link.NID_BG;
         }
         localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
@@ -49,7 +49,7 @@ public class PackageResolver {
         Map<String,Object> changes = new HashMap<>();
         changes.put("T_MAR", t_mar);
         changes.put("T_CYCRQST", t_cycrqst);
-        changes.put("T_CYCRQST", t_timeoutrqst);
+        changes.put("T_T_TIMEOUTRQST", t_timeoutrqst);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
     }
