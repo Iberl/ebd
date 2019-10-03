@@ -13,7 +13,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
-import ebd.logger.Logging;
+import ebd.logging.Logging;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
@@ -177,7 +177,7 @@ public class TrainStatusManager implements Runnable {
          */
         try {
             //System.out.println(this.etcsTrainID);
-            this.logger = new Logging(this.localEventBus,Integer.parseInt(this.etcsTrainID));
+            this.logger = new Logging(this.localEventBus,Integer.parseInt(this.etcsTrainID), "TRN ");
         } catch (IOException e) {
             e.printStackTrace();
         }

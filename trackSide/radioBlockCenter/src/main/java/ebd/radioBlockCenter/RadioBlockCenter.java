@@ -5,7 +5,7 @@ import ebd.baliseTelegramGenerator.BaliseGroup;
 import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.logger.Logging;
+import ebd.logging.Logging;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
@@ -51,7 +51,7 @@ public class RadioBlockCenter {
         this.controlledTrainsByID = controlledTrainsByID;
 
         try {
-            this.logger = new Logging(this.localBus,Integer.parseInt(this.rbcID));
+            this.logger = new Logging(this.localBus,Integer.parseInt(this.rbcID),"RBC ");
         } catch (IOException e) {
             e.printStackTrace();
         }

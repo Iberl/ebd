@@ -7,7 +7,7 @@ import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.logger.Logging;
+import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trainmessages.Message_132;
 import ebd.messageLibrary.message.trainmessages.Message_155;

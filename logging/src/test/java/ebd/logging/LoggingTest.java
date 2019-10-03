@@ -1,9 +1,11 @@
+package ebd.logging;
+
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.logger.Logging;
+import ebd.logging.Logging;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class LoggingTest{
      */
     public static void main(String[] args) throws IOException {
         EventBus localBus = new EventBus();
-        new Logging(localBus, 4711);
+        new Logging(localBus, 4711, "TRN");
         new Logging();
         localBus.post(generateExceptionEvent());
         localBus.post(generateNormalEvent());

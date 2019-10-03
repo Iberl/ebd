@@ -1,4 +1,4 @@
-package ebd.logger;
+package ebd.logging;
 
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
@@ -48,9 +48,9 @@ public class Logging{
      * @param trainID with up to five digits
      * @throws IOException
      */
-    public Logging(EventBus eventBus, int trainID) throws IOException {
+    public Logging(EventBus eventBus, int trainID, String prefix) throws IOException {
         String trainIDwlZeros = String.format("%05d", trainID);
-        logPrefix = "LB" + trainIDwlZeros;
+        logPrefix = prefix + trainIDwlZeros;
         logger = Logger.getLogger(logPrefix);
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");

@@ -90,7 +90,7 @@
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
-    <module>logger</module>
+    <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
 
