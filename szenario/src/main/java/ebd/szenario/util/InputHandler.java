@@ -24,9 +24,9 @@ public class InputHandler implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("This is the virtual environment for the ETCS@EBD project");
         Scanner scanner = new Scanner(System.in);
         while(shouldRun){
-            System.out.println("Test");
             selectNext(scanner.next());
         }
     }

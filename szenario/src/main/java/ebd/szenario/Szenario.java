@@ -115,6 +115,7 @@ public class Szenario implements Runnable {
     private TrainStatusManager tsm = null;
 
     public Szenario(){
+
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
 
@@ -168,6 +169,7 @@ public class Szenario implements Runnable {
 
     @Subscribe
     public void load1(LoadOneEvent loe){
+        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B");
         Route a = new Route("A", 1000);
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
