@@ -6,6 +6,7 @@ import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_132;
+import ebd.messageLibrary.message.trainmessages.Message_136;
 import ebd.messageLibrary.message.trainmessages.Message_146;
 import ebd.messageLibrary.message.trainmessages.Message_155;
 import ebd.messageLibrary.packet.TrackPacket;
@@ -39,19 +40,18 @@ public class MessageHandler {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receivedMessage(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
-        //TODO Rewrite
-        if(rme.message instanceof Message_24){
-            //TODO: Use "sender" of RME instead of controlledTrainsByID
-            String msg = String.format("RBC -> ebd.logger.ebd.logging.Logging: RBC received position report from train %s", controlledTrainsByID.get(0));
+        //TODO Rewrite with correct sender handeling and valid target
+        if(rme.message instanceof Message_136){
+            String msg = String.format("Received position report from train %s", rme.sender);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
         }
         else if(rme.message instanceof Message_155){//TODO: Actual MA RequestMessage
-            String msg = String.format("RBC -> ebd.logger.ebd.logging.Logging: RBC received 'MA request' from train %s", controlledTrainsByID.get(0));
+            String msg = String.format("Received 'MA request' from train %s", rme.sender);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
             sendMessage3(rme);
         }
         else if(rme.message instanceof Message_146){
-            String msg = String.format("RBC -> ebd.logger.ebd.logging.Logging: RBC received Acknowledge from train %s", controlledTrainsByID.get(0));
+            String msg = String.format("Received Acknowledge from train %s", rme.sender);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
         }
     }

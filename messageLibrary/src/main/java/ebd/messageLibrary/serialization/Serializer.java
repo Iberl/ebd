@@ -330,7 +330,7 @@ public abstract class Serializer {
 		}
 
 		// create Order of Fields to Deserialize
-		int numberOfFields = type.getAnnotation(OrderLength.class).value();
+		int numberOfFields = type.getFields().length;
 
 		Field[] fieldsInOrder = new Field[numberOfFields];
 
@@ -409,8 +409,11 @@ public abstract class Serializer {
 					value = list;
 
 				} else if(isSerializable(field.getType())) {
-					if(Packet.class.isAssignableFrom(field.getType())) reader.readInt(8, false);
-					value = deserialize(reader, field.getType(), trainToTrack);
+					if(Packet.class.isAssignableFrom(field.getType())) {
+						value = deserializePacket(reader, trainToTrack);
+					} else {
+						value = deserialize(reader, field.getType(), trainToTrack);
+					}
 
 				} else {
 					throw new ValueNotSupportedException("The field " + type.getSimpleName() + "." + field.getName() + " does not match any supported type");
