@@ -56,6 +56,7 @@ public class MessageAuthorityRequestSupervisor {
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
         //TODO Do the calculation of time to EOL correctly!
+        //TODO Package15 can be null, if null then distanceToEOL = 0? or double.infinity
         double distanceToEOL = MovementAuthorityConverter.p15ToD_EMA(p15) - trainDataVolatile.getCurTripDistance();
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;

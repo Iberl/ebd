@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
-            <artifactId>logger</artifactId>
+            <artifactId>logging</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
