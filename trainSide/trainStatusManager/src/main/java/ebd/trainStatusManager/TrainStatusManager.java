@@ -142,6 +142,8 @@ public class TrainStatusManager implements Runnable {
             this.tripInProgress = true;
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
+            this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+                    "Calculated a new breaking curve"));
         }
     }
 

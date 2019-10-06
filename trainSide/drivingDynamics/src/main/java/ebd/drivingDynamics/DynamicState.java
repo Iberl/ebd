@@ -36,6 +36,10 @@ public class DynamicState {
      */
     private MovementState movementState;
 
+    /**
+     * Previous movement state as defined in {@link MovementState} for logging
+     */
+    private MovementState prevMovementState = null;
 
     private AvailableAcceleration availableAcceleration;
 
@@ -103,7 +107,7 @@ public class DynamicState {
     /**
      * Current movement state as defined in {@link MovementState}
      */
-    public Enum getMovementState() {
+    public MovementState getMovementState() {
         return movementState;
     }
 

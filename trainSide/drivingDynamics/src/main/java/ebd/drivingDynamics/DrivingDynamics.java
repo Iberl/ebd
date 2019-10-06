@@ -40,7 +40,7 @@ import java.util.*;
 
 public class DrivingDynamics {
 
-    private EventBus eventBus;
+    private EventBus localBus;
     private TrainDataVolatile trainDataVolatile;
     private String etcsTrainID;
 
@@ -57,25 +57,27 @@ public class DrivingDynamics {
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
     private double maxTripDistance;
 
+    private double curMaxSpeed = 0d;
+
     private int cycleCount = 20;
-    //TODO Connect to Config
-    private int cylceCountMax = 1;
+    private int cylceCountMax = 1; //TODO Connect to Config
+    private MovementState prevMovementState = null;
 
 
-    public DrivingDynamics(EventBus eventBus, String pathToDrivingProfile){
-        this.eventBus = eventBus;
-        this.eventBus.register(this);
+    public DrivingDynamics(EventBus localBus, String pathToDrivingProfile){
+        this.localBus = localBus;
+        this.localBus.register(this);
 
         try {
-            this.drivingProfile = new DrivingProfile(pathToDrivingProfile, this.eventBus);
+            this.drivingProfile = new DrivingProfile(pathToDrivingProfile, this.localBus);
         } catch (IOException | ParseException e) {
-            eventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
-            eventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
 
-        this.trainDataVolatile = eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        this.etcsTrainID = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
+        this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
 
     }
 
@@ -105,7 +107,7 @@ public class DrivingDynamics {
         Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
         Getting next action that should be taken and parsing that action
          */
-        SsmReportEvent speedSupervisionReport = this.eventBus.getStickyEvent(SsmReportEvent.class);
+        SsmReportEvent speedSupervisionReport = this.localBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
             actionParser(this.drivingProfile.actionToTake());
         }
@@ -131,6 +133,14 @@ public class DrivingDynamics {
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
+        }
+
+        /*
+         * Log movement state changes
+         */
+        if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
+            sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
+            this.prevMovementState = this.dynamicState.getMovementState();
         }
 
         /*
@@ -180,6 +190,8 @@ public class DrivingDynamics {
         this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
         this.time = System.nanoTime();
         this.locked = false;
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+                "Starts its mission"));
     }
 
     @Subscribe
@@ -206,7 +218,7 @@ public class DrivingDynamics {
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.eventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
+            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
         }
 
 
@@ -216,15 +228,15 @@ public class DrivingDynamics {
 
 
     private void updateDSPosition() {
-        NewRouteDataVolatileEvent nrdve = this.eventBus.getStickyEvent(NewRouteDataVolatileEvent.class);
-        NewLocationEvent nle = this.eventBus.getStickyEvent(NewLocationEvent.class);
+        NewRouteDataVolatileEvent nrdve = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class);
+        NewLocationEvent nle = this.localBus.getStickyEvent(NewLocationEvent.class);
 
         if(nrdve == null || nle == null) return;
 
         Location newLoc = nle.newLocation;
 
         if(dynamicState.getPosition().getLocation().getId() == newLoc.getId()) {
-            this.eventBus.removeStickyEvent(nle);
+            this.localBus.removeStickyEvent(nle);
             return;
         }
 
@@ -251,10 +263,10 @@ public class DrivingDynamics {
         Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
 
         this.dynamicState.setPosition(newPos);
-        this.eventBus.removeStickyEvent(nle);
+        this.localBus.removeStickyEvent(nle);
 
         String msg = "New location with ID: " + newLoc.getId() + " was reached";
-        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
     }
 
     private void updateTrainDataVolatile(){
@@ -263,35 +275,41 @@ public class DrivingDynamics {
         nameToValue.put("currentPosition", this.dynamicState.getPosition());
         nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
-        this.eventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
+        this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
     private void sendCurrentMaxSpeed() {
-        double tripDistance = dynamicState.getPosition().totalDistanceToPreviousPosition(this.tripStartPosition);
-        double curMaxSpeed;
+        double tripDistance = this.dynamicState.getTripDistance();
 
-        if(tripDistance < this.maxTripDistance) curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
-        else curMaxSpeed = 0d;
+        if(tripDistance < this.maxTripDistance) this.curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
+        else this.curMaxSpeed = 0d;
 
-        this.eventBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", curMaxSpeed));
+        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", this.curMaxSpeed));
     }
 
     private void sendToLogEventDynamicState() {
         double a = dynamicState.getAcceleration();
         double v = dynamicState.getSpeed();
+        double vm = this.curMaxSpeed;
         int l = dynamicState.getPosition().getLocation().getId();
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("Acceleration: %4.2f m/s^2 Speed: %5.2f m/s, Position: LRBG %3d + %7.2f m, ",a,v,l,i);
-        String msg2 = String.format("Trip Distance: %8.2f m, Trip Time: %6.1f s", td, tt);
-        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
+        String msg = String.format("Acceleration: %4.2f m/s^2 Speed: %5.2f m/s, MaxSpeed: %5.2f m/s, ",a,v,vm);
+        String msg2 = String.format("Position: LRBG %3d + %7.2f m, Trip Distance: %8.2f m, Trip Time: %6.1f s",l,i,td,tt);
+        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 
     }
 
     private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil) {
-        String msg = String.format("InterventionLevel: %s ", sil);
-        this.eventBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        String msg = String.format("Current speed supervision intervention level: %s ", sil);
+        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+
+    }
+
+    private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
+        String msg = String.format("Set movement state to: %s ", ms);
+        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
     }
 
@@ -315,7 +333,7 @@ public class DrivingDynamics {
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
-                eventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
+                localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
     }
 

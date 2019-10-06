@@ -18,6 +18,8 @@ import java.util.Collections;
 
 public class SpeedSupervisionModule {
 
+    //TODO: SRS 3.13 in total!
+
     private EventBus eventBus;
 
     private BreakingCurve breakingCurve = null;

@@ -165,7 +165,8 @@ public class MessageHandler {
             sendAck(msg3);
         }
 
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + this.etcsTrainID + " got new MA"));
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+                "Got a new MA and calculates a new breaking curve"));
     }
 
     /**
