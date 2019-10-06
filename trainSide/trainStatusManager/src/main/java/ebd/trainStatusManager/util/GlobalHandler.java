@@ -9,9 +9,9 @@ import java.util.List;
 public class GlobalHandler {
 
     EventBus localBus;
-    String etcsTrainID;
+    int etcsTrainID;
 
-    public GlobalHandler(EventBus localBus, String etcsTrainID){
+    public GlobalHandler(EventBus localBus, int etcsTrainID){
 
         this.localBus = localBus;
         this.etcsTrainID = etcsTrainID;

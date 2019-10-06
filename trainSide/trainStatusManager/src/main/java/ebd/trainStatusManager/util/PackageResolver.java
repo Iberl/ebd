@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util;
 
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
@@ -49,9 +50,11 @@ public class PackageResolver {
         Map<String,Object> changes = new HashMap<>();
         changes.put("T_MAR", t_mar);
         changes.put("T_CYCRQST", t_cycrqst);
-        changes.put("T_T_TIMEOUTRQST", t_timeoutrqst);
+        changes.put("T_TIMEOUTRQST", t_timeoutrqst);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new MA Request Parameters"));
+
     }
 
     public static void p58(EventBus localBus, int nid_lrbg, Packet_58 p58){
@@ -91,5 +94,6 @@ public class PackageResolver {
         changes.put("incrementalPositionReportDistances", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Position Report Parameters"));
     }
 }

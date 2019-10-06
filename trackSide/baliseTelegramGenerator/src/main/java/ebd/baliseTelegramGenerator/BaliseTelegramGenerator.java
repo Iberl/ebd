@@ -61,7 +61,8 @@ public class BaliseTelegramGenerator {
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receivePosition(PositionEvent event) {
-		String src = event.source.replace("dd", "mr");
+		String trainID = event.source.split(";T=")[1];
+		String src = "mr;T=" + trainID;
 
 		if((event.position.getLocation() instanceof InitalLocation)) {
 			positions.put(src, new Pair<>(new Position(0, true, new Location(0, 0, 0d)), null));

@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util;
 
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedTelegramEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
 import ebd.globalUtils.location.Location;
@@ -18,9 +19,9 @@ public class TelegramHandler {
 
     //TODO: Respect SRS 3 A.3.3
     private EventBus localBus;
-    private String etcsTrainID;
+    private int etcsTrainID;
 
-    public TelegramHandler(EventBus localBus, String etcsTrainID){
+    public TelegramHandler(EventBus localBus, int etcsTrainID){
         this.localBus = localBus;
         this.localBus.register(this);
         this.etcsTrainID = etcsTrainID;
@@ -34,6 +35,8 @@ public class TelegramHandler {
         Location newLoc = linkingInformation.get(rte.telegram.NID_BG);
         //this.localBus.post(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
         this.localBus.postSticky(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
+        String msg = "Received a Balise Telegram with location information";
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
     }
 
 

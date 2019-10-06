@@ -22,7 +22,7 @@ public class TripSupervisor {
     //TODO Own module, Remember SRS 3 A.3.5
     private EventBus localBus;
     private double L_TRAIN;
-    private String etcsID;
+    private int etcsID;
 
 
 

@@ -42,7 +42,7 @@ public class DrivingDynamics {
 
     private EventBus localBus;
     private TrainDataVolatile trainDataVolatile;
-    private String etcsTrainID;
+    private int etcsTrainID;
 
     private Spline tripProfile;
     private Position tripStartPosition;
@@ -157,7 +157,7 @@ public class DrivingDynamics {
         Sends global PositionEvent
          */
 
-        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
+        //EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
 
         /*
         Update TrainDataVolatile with the newly calculated values
@@ -191,7 +191,7 @@ public class DrivingDynamics {
         this.time = System.nanoTime();
         this.locked = false;
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
-                "Starts its mission"));
+                "Starting mission"));
     }
 
     @Subscribe
@@ -257,7 +257,7 @@ public class DrivingDynamics {
             InitalLocation initLoc = new InitalLocation();
             prefLocs.put(initLoc.getId(),initLoc);
             prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
-            overshoot = 0d; //First Location can not be overshoot? //TODO Test this assumption
+            overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
         }
 
         Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
@@ -265,7 +265,7 @@ public class DrivingDynamics {
         this.dynamicState.setPosition(newPos);
         this.localBus.removeStickyEvent(nle);
 
-        String msg = "New location with ID: " + newLoc.getId() + " was reached";
+        String msg = "New location with ID " + newLoc.getId() + " was reached";
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
     }
 

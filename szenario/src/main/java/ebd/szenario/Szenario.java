@@ -175,30 +175,11 @@ public class Szenario implements Runnable {
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
-        this.rbc = new RadioBlockCenter("1", Collections.singletonList(192), mapRoute);
-        this.tsm = new TrainStatusManager("192", "1",
+        this.rbc = new RadioBlockCenter("1", mapRoute);
+        this.tsm = new TrainStatusManager(192, 1,
                 "bbblaaaa127.0.0.1:8080/Trainconfigurator", "RiskyDrivingStrategy.json", true);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        Message_155 msg155 = new Message_155();
-        this.messageSenderTrain.send(new SendMessageEvent("ms;T=192", Collections.singletonList("ms"), msg155 ,Collections.singletonList("mr;R=1") ));
-        this.messageSenderTrack.send(new SendMessageEvent("ms;R=1", Collections.singletonList("ms"), makeMessage(makePackage58()), Collections.singletonList("mr;T=192")));
-    }
-
-    private Message_24 makeMessage(TrackPacket packet){
-        Message_24 m24 = new Message_24();
-        m24.NID_LRBG = 0;
-        m24.packets.add(packet);
-        return m24;
-    }
-
-    private Packet_58 makePackage58(){
-
-        Packet_58 packet58 = new Packet_58();
-        packet58.Q_DIR = Q_DIR_NOMINAL;
-        packet58.M_LOC = M_LOC_AT_BALISE_GROUP;
-
-        return packet58;
     }
 
     private boolean validTarget(List<String> targetList) {

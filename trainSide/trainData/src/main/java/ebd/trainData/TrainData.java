@@ -40,13 +40,13 @@ public class TrainData {
      *
      * @param trainID the ETCS-ID of the train
      */
-    public TrainData(EventBus localBus, String trainConfiguratorURL, String trainID){
+    public TrainData(EventBus localBus, String trainConfiguratorURL, int trainID){
         this.localBus = localBus;
         this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
-            this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, trainID);
+            this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, String.valueOf(trainID));
         } catch (IOException | ParseException e) {
             localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {

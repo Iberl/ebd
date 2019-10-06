@@ -19,7 +19,7 @@ class TrainDataPermaTest {
 
     @Test
     public void fileTest() throws IOException, ParseException, TDBadDataException {
-        TrainDataPerma trainDataPerma = new TrainDataPerma("resources/testTrain650.json");
+        TrainDataPerma trainDataPerma = new TrainDataPerma("testTrain650.json");
     }
 
 }

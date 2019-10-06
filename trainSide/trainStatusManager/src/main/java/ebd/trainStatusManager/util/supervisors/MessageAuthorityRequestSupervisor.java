@@ -1,6 +1,7 @@
 package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaMessage;
@@ -19,6 +20,7 @@ import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +30,7 @@ public class MessageAuthorityRequestSupervisor {
     private EventBus localBus;
     private String etcsTrainID;
     private String rbcID;
-    double lengthTrain;
+    private double lengthTrain;
 
     /**
      * In [s]
@@ -45,19 +47,19 @@ public class MessageAuthorityRequestSupervisor {
         this.lengthTrain = trainDataPerma.getL_train();
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         RouteDataVolatile routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
 
         Packet_15 p15 = routeDataVolatile.getPacket_15();
+
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
         //TODO Do the calculation of time to EOL correctly!
-        //TODO Package15 can be null, if null then distanceToEOL = 0? or double.infinity
-        double distanceToEOL = MovementAuthorityConverter.p15ToD_EMA(p15) - trainDataVolatile.getCurTripDistance();
+        double distanceToEOL = (p15 != null) ? MovementAuthorityConverter.p15ToD_EMA(p15) - trainDataVolatile.getCurTripDistance() : 0d;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;
 
@@ -69,9 +71,11 @@ public class MessageAuthorityRequestSupervisor {
             }
         }
 
+/*
         if(t_timeoutrqst != ETCSVariables.T_TIMEOUTRQST && t_timeoutrqst < ETCSVariables.T_TIMEOUTRQST_INFINITY){
             //TODO Implement
         }
+*/
 
         double deltaT = (System.currentTimeMillis() / 1000d) - this.timeAtRequest;
         if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_TIMEOUTRQST_INFINITY && t_cycrqst < deltaT){
@@ -101,6 +105,7 @@ public class MessageAuthorityRequestSupervisor {
 
 
         Position curPos = trainDataVolatile.getCurrentPosition();
+        if(curPos == null) return;
 
         Packet_0 packet0 = new Packet_0();
         packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
@@ -126,5 +131,6 @@ public class MessageAuthorityRequestSupervisor {
 
         List<String> destinations = Collections.singletonList("mr;R=" + this.rbcID);
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message132, destinations));
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending a MA Request"));
     }
 }

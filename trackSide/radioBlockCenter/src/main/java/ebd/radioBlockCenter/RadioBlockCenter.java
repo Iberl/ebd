@@ -26,7 +26,6 @@ public class RadioBlockCenter {
 
     private EventBus localBus;
     private String rbcID;
-    private List<Integer> controlledTrainsByID;
     private Map<Integer,List<Route>> trainIdsToRouts;
 
     private MessageSender messageSender;
@@ -43,19 +42,18 @@ public class RadioBlockCenter {
      */
     private BaliseTelegramGenerator bTG;
 
-    public RadioBlockCenter(String rbcID, List<Integer> controlledTrainsByID, Map<Integer,List<Route>> trainIdsToRouts){
+    public RadioBlockCenter(String rbcID, Map<Integer,List<Route>> trainIdsToRouts){
         this.trainIdsToRouts = trainIdsToRouts;
         this.localBus = new EventBus();
         //this.localBus.register(this);
         this.rbcID = rbcID;
-        this.controlledTrainsByID = controlledTrainsByID;
 
         try {
             this.logger = new Logging(this.localBus,Integer.parseInt(this.rbcID),"RBC ");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.messageHandler = new MessageHandler(this.localBus, this.controlledTrainsByID, this.rbcID, this.trainIdsToRouts);
+        this.messageHandler = new MessageHandler(this.localBus, this.rbcID, this.trainIdsToRouts);
 
         this.messageSender = new MessageSender(this.localBus, this.rbcID,false);
         this.messageReceiver = new MessageReceiver(this.localBus, this.rbcID, "all", true);

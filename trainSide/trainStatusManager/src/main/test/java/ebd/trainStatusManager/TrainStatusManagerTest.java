@@ -24,8 +24,8 @@ class TrainStatusManagerTest {
 
         EventBus eventBus = new EventBus();
         Testhandler testhandler = new Testhandler(eventBus);
-        TrainStatusManager trainStatusManager = new TrainStatusManager(eventBus, "192",
-                "1", "u",
+        TrainStatusManager trainStatusManager = new TrainStatusManager(eventBus, 192,
+                1, "u",
                 "StrictDrivingStrategy.json");
 
 

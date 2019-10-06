@@ -36,11 +36,11 @@ public class MessageHandler {
 
     private EventBus localBus;
     private List<String> exceptionTarget = Collections.singletonList("tsm");
-    private String rbcID;
-    private String etcsTrainID;
+    private int rbcID;
+    private int etcsTrainID;
 
 
-    public MessageHandler(EventBus localBus, String etcsTrainID, String rbcID) {
+    public MessageHandler(EventBus localBus, int etcsTrainID, int rbcID) {
         this.localBus = localBus;
         this.localBus.register(this);
         this.rbcID = rbcID;
@@ -166,7 +166,7 @@ public class MessageHandler {
         }
 
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
-                "Got a new MA and calculates a new breaking curve"));
+                "Got a new MA Message and started calculating a new breaking curve"));
     }
 
     /**
@@ -200,12 +200,13 @@ public class MessageHandler {
 
     private void sendAck(TrackMessage tm) {
         Message_146 message146 = new Message_146();
-        message146.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
+        message146.NID_ENGINE = this.etcsTrainID;
         long curTime = System.currentTimeMillis() / 10L;
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message146, destination ));
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Acknowledgment"));
     }
 
     /**

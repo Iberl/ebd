@@ -10,9 +10,7 @@ import ebd.messageLibrary.message.trainmessages.Message_136;
 import ebd.messageLibrary.message.trainmessages.Message_146;
 import ebd.messageLibrary.message.trainmessages.Message_155;
 import ebd.messageLibrary.packet.TrackPacket;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
-import ebd.messageLibrary.packet.trackpackets.Packet_21;
-import ebd.messageLibrary.packet.trackpackets.Packet_27;
+import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.radioBlockCenter.util.Route;
 import org.greenrobot.eventbus.EventBus;
@@ -21,38 +19,47 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.*;
 
+import static ebd.messageLibrary.util.ETCSVariables.M_LOC_AT_BALISE_GROUP;
+import static ebd.messageLibrary.util.ETCSVariables.Q_DIR_NOMINAL;
+
 public class MessageHandler {
 
+    private ArrayList<Integer> controlledTrainsByID;
     EventBus localBus;
     String rbcID;
-
-    List<Integer> controlledTrainsByID;
     Map<Integer, List<Route>> trainIDsToRoute;
 
-    public MessageHandler(EventBus localBus, List<Integer> controlledTrainIDs, String rbcID, Map<Integer, List<Route>> trainIDsToRoute) {
+    public MessageHandler(EventBus localBus, String rbcID, Map<Integer, List<Route>> trainIDsToRoute) {
         this.localBus = localBus;
         this.trainIDsToRoute = trainIDsToRoute;
         this.localBus.register(this);
-        this.controlledTrainsByID = controlledTrainIDs;
+        this.controlledTrainsByID = new ArrayList<>();
         this.rbcID = rbcID;
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receivedMessage(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
-        //TODO Rewrite with correct sender handeling and valid target
-        if(rme.message instanceof Message_136){
-            String msg = String.format("Received position report from train %s", rme.sender);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-        }
-        else if(rme.message instanceof Message_155){//TODO: Actual MA RequestMessage
-            String msg = String.format("Received 'MA request' from train %s", rme.sender);
+        String trainID = (rme.sender.split(";T="))[1];
+        if(rme.message instanceof Message_132){//TODO: Actual MA RequestMessage
+            String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
             sendMessage3(rme);
         }
-        else if(rme.message instanceof Message_146){
-            String msg = String.format("Received Acknowledge from train %s", rme.sender);
+        else if(rme.message instanceof Message_136){
+            String msg = String.format("Received position report from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+        }
+        else if(rme.message instanceof Message_146){
+            String msg = String.format("Received Acknowledge from train %s", trainID);
+            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+        }
+        else if(rme.message instanceof Message_155){
+            this.controlledTrainsByID.add(((Message_155) rme.message).NID_ENGINE);
+            String msg = String.format("Received communication initiation from train %s", trainID);
+            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            sendMessage24withPackets57MARZEROAnd58(rme);
+
         }
     }
 
@@ -64,6 +71,7 @@ public class MessageHandler {
         List<TrackPacket> lop = new ArrayList<>();
         lop.add(makeP21());
         lop.add(makeP27());
+        lop.add(makeP57());
 
         Message_3 msg3 = new Message_3();
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;
@@ -72,6 +80,24 @@ public class MessageHandler {
         msg3.packets = lop;
 
         this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg3, Collections.singletonList("mr;T=" + trainID)));
+        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), "Sending MA Message"));
+    }
+
+    private void sendMessage24withPackets57MARZEROAnd58(ReceivedMessageEvent rme){
+        String trainID = rme.sender.split(";T=")[1];
+        List<TrackPacket> trackPackets = new ArrayList<>();
+        trackPackets.add(makeP57TMARZero());
+        trackPackets.add(makeP58());
+        Message_24 msg24 = makeMessage24(trackPackets);
+        this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg24, Collections.singletonList("mr;T=" + trainID)));
+        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters and Position Report Parameters"));
+    }
+
+    private Message_24 makeMessage24(List<TrackPacket> trackPackets){
+        Message_24 m24 = new Message_24();
+        m24.NID_LRBG = 0;
+        m24.packets.addAll(trackPackets);
+        return m24;
     }
 
     private Packet_15 makeP15(double d_EOA){
@@ -130,6 +156,31 @@ public class MessageHandler {
         packet27.speedProfiles = profileList;
 
         return packet27;
+    }
+
+    private Packet_57 makeP57(){
+        Packet_57 packet57 = new Packet_57();
+        packet57.T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
+        packet57.T_MAR = ETCSVariables.T_MAR_INFINITY;
+        packet57.T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST_INFINITY;
+        return packet57;
+    }
+
+    private Packet_57 makeP57TMARZero(){
+        Packet_57 packet57 = new Packet_57();
+        packet57.T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
+        packet57.T_MAR = 0;
+        packet57.T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST_INFINITY;
+        return packet57;
+    }
+
+    private Packet_58 makeP58(){
+
+        Packet_58 packet58 = new Packet_58();
+        packet58.Q_DIR = Q_DIR_NOMINAL;
+        packet58.M_LOC = M_LOC_AT_BALISE_GROUP;
+
+        return packet58;
     }
 
     private boolean validTarget(List<String> targetList){

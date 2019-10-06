@@ -8,12 +8,16 @@ import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.logging.Logging;
+import ebd.messageLibrary.message.trainmessages.Message_155;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
@@ -37,8 +41,8 @@ import java.util.*;
 
 public class TrainStatusManager implements Runnable {
 
-    private String etcsTrainID;
-    private String rbcID;
+    private int etcsTrainID;
+    private int rbcID;
     private String urlToTrainconfigurator;
     private String pathToDrivingStrategy;
 
@@ -73,7 +77,7 @@ public class TrainStatusManager implements Runnable {
     private boolean tripInProgress;
 
 
-    public TrainStatusManager(String etcsTrainID, String rbcID, String urlToTrainconfigurator,
+    public TrainStatusManager(int etcsTrainID, int rbcID, String urlToTrainconfigurator,
                               String pathToDrivingStrategy){
         this.localEventBus.register(this);
         this.etcsTrainID = etcsTrainID;
@@ -84,7 +88,7 @@ public class TrainStatusManager implements Runnable {
         this.tsmThread.start();
     }
 
-    public TrainStatusManager(String etcsTrainID, String rbcID, String urlToTrainconfigurator,
+    public TrainStatusManager(int etcsTrainID, int rbcID, String urlToTrainconfigurator,
                               String pathToDrivingStrategy, boolean testing){
         this.localEventBus.register(this);
         this.etcsTrainID = etcsTrainID;
@@ -93,9 +97,10 @@ public class TrainStatusManager implements Runnable {
         this.pathToDrivingStrategy = pathToDrivingStrategy;
         setUpTrain(testing);
         this.tsmThread.start();
+        connectToRBC();
     }
 
-    public TrainStatusManager(EventBus eventBus, String etcsTrainID, String rbcID, String urlToTrainconfigurator,
+    public TrainStatusManager(EventBus eventBus, int etcsTrainID, int rbcID, String urlToTrainconfigurator,
                               String pathToDrivingStrategy){
         this.localEventBus = eventBus;
         localEventBus.register(this);
@@ -179,7 +184,7 @@ public class TrainStatusManager implements Runnable {
          */
         try {
             //System.out.println(this.etcsTrainID);
-            this.logger = new Logging(this.localEventBus,Integer.parseInt(this.etcsTrainID), "TRN ");
+            this.logger = new Logging(this.localEventBus,this.etcsTrainID, "TRN ");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -196,12 +201,12 @@ public class TrainStatusManager implements Runnable {
         if(testing) this.trainData = new TrainData(this.localEventBus,"testTrain650.json");
         else this.trainData = new TrainData(this.localEventBus,this.urlToTrainconfigurator,this.etcsTrainID);
 
-        this.messageReceiver = new MessageReceiver(this.localEventBus,this.etcsTrainID,"tsm", false);
-        this.messageSender = new MessageSender(this.localEventBus,this.etcsTrainID, true);
+        this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
+        this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
         this.tripSupervisor = new TripSupervisor(this.localEventBus);
-        this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, this.etcsTrainID, this.rbcID);
-        this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,this.etcsTrainID, this.rbcID);
+        this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
+        this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus,this.pathToDrivingStrategy);
 
@@ -218,6 +223,16 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
     }
 
+    private void connectToRBC() {
+        Position curPos = new Position(0,true, new InitalLocation());
+        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("all"),curPos));
+        Message_155 msg155 = new Message_155();
+        long curTime = System.currentTimeMillis();
+        msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
+        msg155.NID_ENGINE = this.etcsTrainID;
+        this.localEventBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), msg155, Collections.singletonList("mr;R=" + this.rbcID)));
+        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Send communication initiation to RBC " + this.rbcID));
+    }
 
     /**
      * True if this Instance is a vaild target of the event

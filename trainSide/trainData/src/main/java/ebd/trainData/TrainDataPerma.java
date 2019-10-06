@@ -25,7 +25,7 @@ public class TrainDataPerma {
      * The internal ETCS-ID of the Train
      */
     @NotNull
-    private String id = "";
+    private int id = 0;
 
     /**
      * The name the Train
@@ -237,7 +237,7 @@ public class TrainDataPerma {
         else throw new TDBadDataException("The key 'Name' was missing in the train data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("EtcsEngineID")){
-            this.id = String.valueOf(jsonObject.get("EtcsEngineID"));
+            this.id = ((Long)jsonObject.get("EtcsEngineID")).intValue();
         }
         else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
 
@@ -349,7 +349,7 @@ public class TrainDataPerma {
     Getter
      */
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
