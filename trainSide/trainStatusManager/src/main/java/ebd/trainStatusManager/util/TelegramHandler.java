@@ -21,6 +21,8 @@ public class TelegramHandler {
     private EventBus localBus;
     private int etcsTrainID;
 
+    private ReceivedTelegramEvent savedRTE = null;
+
     public TelegramHandler(EventBus localBus, int etcsTrainID){
         this.localBus = localBus;
         this.localBus.register(this);
@@ -31,6 +33,10 @@ public class TelegramHandler {
     public void receivedTelegram(ReceivedTelegramEvent rte){
         RouteDataVolatile routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         Map<Integer, Location> linkingInformation = routeDataVolatile.getLinkingInformation();
+        if (linkingInformation == null || linkingInformation.size() < 1) {
+            this.savedRTE = rte;
+            return;
+        }
         //TODO Remember NID_C
         Location newLoc = linkingInformation.get(rte.telegram.NID_BG);
         //this.localBus.post(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
@@ -39,6 +45,14 @@ public class TelegramHandler {
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
     }
 
-
-
+    @Subscribe
+    public void newRDV(NewRouteDataVolatileEvent rdve){
+        RouteDataVolatile routeDataVolatile = rdve.routeDataVolatile;
+        Map<Integer, Location> linkingInformation = routeDataVolatile.getLinkingInformation();
+        if (this.savedRTE == null || linkingInformation == null || linkingInformation.size() < 1) {
+            return;
+        }
+        receivedTelegram(this.savedRTE);
+        this.savedRTE = null;
+    }
 }

@@ -23,6 +23,7 @@ public class TripSupervisor {
     private EventBus localBus;
     private double L_TRAIN;
     private int etcsID;
+    private boolean missionEnded = true;
 
 
 
@@ -57,13 +58,17 @@ public class TripSupervisor {
         if(rdve.routeDataVolatile.getPacket_15() == null){
             return;
         }
+        this.missionEnded = false;
         Packet_15 p15 = rdve.routeDataVolatile.getPacket_15();
         this.distanceToEMA = MovementAuthorityConverter.p15ToD_EMA(p15) - 20;
     }
 
     private void sendEndOfMission() {
         //TODO Send Message 150
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + etcsID + " reached the target location"));
+        if(!this.missionEnded){
+            this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + etcsID + " reached the target location"));
+            this.missionEnded = true;
+        }
     }
 
 

@@ -159,6 +159,11 @@ public class TrainDataVolatile {
     protected volatile IncrementalPositionReportDistances incrementalPositionReportDistances = null;
 
 
+    /**
+     * Wait time at stations in [s]
+     */
+    protected volatile int waitTimeAtStation = 0;
+
 
     //Constructor
     public TrainDataVolatile(EventBus localBus){
@@ -318,5 +323,12 @@ public class TrainDataVolatile {
      */
     public IncrementalPositionReportDistances getIncrementalPositionReportDistances() {
         return incrementalPositionReportDistances;
+    }
+
+    /**
+     * @return wait time at stations in [s]
+     */
+    public int getWaitTimeAtStation(){
+        return waitTimeAtStation;
     }
 }

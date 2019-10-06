@@ -1,9 +1,13 @@
 package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.Collections;
 import java.util.List;
 
 public class GlobalHandler {
@@ -24,6 +28,14 @@ public class GlobalHandler {
             return;
         }
         this.localBus.post(de);
+    }
+
+    @Subscribe
+    public void waitTime(NewWaitTimeAtStationEvent wtse){
+        if(!validTarget(wtse.targets)){
+            return;
+        }
+        this.localBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "waitTimeAtStation", wtse.waitTime));
     }
 
     /**

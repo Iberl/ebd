@@ -64,7 +64,7 @@ public class MessageAuthorityRequestSupervisor {
         double timeToEOL = distanceToEOL / curSpeed;
 
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
-            if (t_mar <= timeToEOL){
+            if (t_mar >= timeToEOL){
                 this.timeAtRequest = System.currentTimeMillis() / 1000d;
                 this.lastQ_MARQSTREASON = 2;
                 sendMaRequest();

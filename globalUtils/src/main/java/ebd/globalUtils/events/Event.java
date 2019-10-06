@@ -12,7 +12,7 @@ public class Event {
 
 	/** ID from the module the event was sent by */
 	public String source;
-	/** ID from all modules the event is adressed to */
+	/** ID from all modules the event is addressed to */
 	public List<String> targets;
 
 	/**
@@ -20,10 +20,8 @@ public class Event {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
 	 * @param targets
-	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
+	 *          ID from all modules the event is addressed to
 	 */
 	public Event(String source, List<String> targets) {
 		this.source = source;

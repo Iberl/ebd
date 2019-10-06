@@ -42,7 +42,7 @@ public class RadioBlockCenter {
      */
     private BaliseTelegramGenerator bTG;
 
-    public RadioBlockCenter(String rbcID, Map<Integer,List<Route>> trainIdsToRouts){
+    public RadioBlockCenter(String rbcID, Map<Integer,List<Route>> trainIdsToRouts, int scenario){
         this.trainIdsToRouts = trainIdsToRouts;
         this.localBus = new EventBus();
         //this.localBus.register(this);
@@ -53,7 +53,7 @@ public class RadioBlockCenter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.messageHandler = new MessageHandler(this.localBus, this.rbcID, this.trainIdsToRouts);
+        this.messageHandler = new MessageHandler(this.localBus, this.rbcID, this.trainIdsToRouts, scenario);
 
         this.messageSender = new MessageSender(this.localBus, this.rbcID,false);
         this.messageReceiver = new MessageReceiver(this.localBus, this.rbcID, "all", true);

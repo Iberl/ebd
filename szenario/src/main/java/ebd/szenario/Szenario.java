@@ -6,6 +6,7 @@ import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
@@ -24,6 +25,8 @@ import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadThreeEvent;
+import ebd.szenario.util.events.LoadTwoEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
@@ -102,7 +105,6 @@ public class Szenario implements Runnable {
     private InputHandler inputHandler;
     private Logging logger;
     private MessageSender messageSenderTrack;
-    private MessageSender messageSenderTrain;
 
     /*
     TrackSide
@@ -122,7 +124,6 @@ public class Szenario implements Runnable {
         this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
-        this.messageSenderTrain = new MessageSender(new EventBus(), "192", true);
 
         szenarioThread.start();
     }
@@ -170,16 +171,49 @@ public class Szenario implements Runnable {
     @Subscribe
     public void load1(LoadOneEvent loe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B");
-        Route a = new Route("A", 1000);
+        Route a = new Route("AB", 1000);
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute);
+        this.rbc = new RadioBlockCenter("1", mapRoute, 1);
+        this.tsm = new TrainStatusManager(192, 1,
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+    }
+
+    @Subscribe
+    public void load2(LoadTwoEvent lte){
+        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a speeding driver from A to B");
+        Route a = new Route("AB", 1000);
+        List<Route> listRoute = new ArrayList<>();
+        listRoute.add(a);
+        Map<Integer, List<Route>> mapRoute = new HashMap<>();
+        mapRoute.put(192, listRoute);
+        this.rbc = new RadioBlockCenter("1", mapRoute, 2);
         this.tsm = new TrainStatusManager(192, 1,
                 "bbblaaaa127.0.0.1:8080/Trainconfigurator", "RiskyDrivingStrategy.json", true);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+    }
+
+    @Subscribe
+    public void load3(LoadThreeEvent lte){
+        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B, then from B to A");
+        Route a = new Route("AB", 1000);
+        Route b = new Route("BC", 2000);
+        List<Route> listRoute = new ArrayList<>();
+        listRoute.add(a);
+        listRoute.add(b);
+        Map<Integer, List<Route>> mapRoute = new HashMap<>();
+        mapRoute.put(192, listRoute);
+        this.rbc = new RadioBlockCenter("1", mapRoute, 3);
+        this.tsm = new TrainStatusManager(192, 1,
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
     }
 
     private boolean validTarget(List<String> targetList) {

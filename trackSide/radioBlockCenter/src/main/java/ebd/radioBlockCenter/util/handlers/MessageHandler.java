@@ -3,6 +3,8 @@ package ebd.radioBlockCenter.util.handlers;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.location.Location;
+import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_132;
@@ -23,30 +25,39 @@ import static ebd.messageLibrary.util.ETCSVariables.M_LOC_AT_BALISE_GROUP;
 import static ebd.messageLibrary.util.ETCSVariables.Q_DIR_NOMINAL;
 
 public class MessageHandler {
-
     private ArrayList<Integer> controlledTrainsByID;
-    EventBus localBus;
-    String rbcID;
-    Map<Integer, List<Route>> trainIDsToRoute;
+    private EventBus localBus;
+    private String rbcID;
+    private Map<Integer, List<Route>> trainIDsToRoute;
+    private Map<Integer, Integer> trainToLRBGMap;
 
-    public MessageHandler(EventBus localBus, String rbcID, Map<Integer, List<Route>> trainIDsToRoute) {
+    private int scenario;
+
+    public MessageHandler(EventBus localBus, String rbcID, Map<Integer, List<Route>> trainIDsToRoute, int scenario) {
         this.localBus = localBus;
         this.trainIDsToRoute = trainIDsToRoute;
+        this.scenario = scenario;
         this.localBus.register(this);
         this.controlledTrainsByID = new ArrayList<>();
         this.rbcID = rbcID;
+        this.trainToLRBGMap = new HashMap<>();
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receivedMessage(ReceivedMessageEvent rme){
         if(!validTarget(rme.targets)) return;
         String trainID = (rme.sender.split(";T="))[1];
-        if(rme.message instanceof Message_132){//TODO: Actual MA RequestMessage
+
+        if(rme.message instanceof Message_132){ //MA Request
+            Message_132 msg132 = (Message_132)rme.message;
+            this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
             sendMessage3(rme);
         }
-        else if(rme.message instanceof Message_136){
+        else if(rme.message instanceof Message_136){ //Position Report
+            Message_136 msg136 = (Message_136)rme.message;
+            this.trainToLRBGMap.put(Integer.parseInt(trainID), msg136.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received position report from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
         }
@@ -71,11 +82,21 @@ public class MessageHandler {
         List<TrackPacket> lop = new ArrayList<>();
         lop.add(makeP21());
         lop.add(makeP27());
-        lop.add(makeP57());
+        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0) {
+            lop.add(makeP57());
+        }
+        else {
+            lop.add(makeP57TMAR10());
+        }
 
         Message_3 msg3 = new Message_3();
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;
-        msg3.NID_LRBG = 0;
+        if(this.trainToLRBGMap.get(Integer.parseInt(trainID)) == null){
+            msg3.NID_LRBG = 0;
+        }
+        else{
+            msg3.NID_LRBG = this.trainToLRBGMap.get(Integer.parseInt(trainID));
+        }
         msg3.Packet_15 = makeP15(d_EOL);
         msg3.packets = lop;
 
@@ -170,6 +191,14 @@ public class MessageHandler {
         Packet_57 packet57 = new Packet_57();
         packet57.T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
         packet57.T_MAR = 0;
+        packet57.T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST_INFINITY;
+        return packet57;
+    }
+
+    private Packet_57 makeP57TMAR10() {
+        Packet_57 packet57 = new Packet_57();
+        packet57.T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
+        packet57.T_MAR = 10;
         packet57.T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST_INFINITY;
         return packet57;
     }

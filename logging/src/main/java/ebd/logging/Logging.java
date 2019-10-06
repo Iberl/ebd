@@ -90,6 +90,7 @@ public class Logging{
     @Subscribe
     public void onNormalEvent(NormalEvent normalEvent){
         if(!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
+            String padSrc = String.format("%3s", normalEvent.source);
             logger.fine(logPrefix + ": " + normalEvent.source + ": " + normalEvent.getClass().getSimpleName() + " occurred");
         }
     }

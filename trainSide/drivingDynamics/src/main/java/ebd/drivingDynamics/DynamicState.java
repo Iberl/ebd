@@ -144,4 +144,8 @@ public class DynamicState {
     public void setBreakingModification(double breakingModification) {
         this.availableAcceleration.setBreakingModification(breakingModification);
     }
+
+    public void setTripDistance(double tripDistance){
+        this.tripDistance = tripDistance;
+    }
 }

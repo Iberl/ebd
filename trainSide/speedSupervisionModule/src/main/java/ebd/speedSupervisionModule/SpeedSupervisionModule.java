@@ -56,7 +56,7 @@ public class SpeedSupervisionModule {
 
         if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
 
-        double tripDistance = trainDataVolatile.getCurTripDistance();
+        double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
         double tripDistanceWarning = tripDistance + curSpeed * 5;
         double tripDistanceIndication = tripDistance + curSpeed * 10;
         SpeedInterventionLevel speedInterventionLevel;
@@ -65,19 +65,22 @@ public class SpeedSupervisionModule {
         if(tripDistance < this.maxDistance){
             double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
 
-            if(curSpeed > maxSpeed + 27){
+            if(curSpeed > maxSpeed + 2){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
-            else if (curSpeed > maxSpeed + 19.8){
+            else if (curSpeed > maxSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
-            }
-            else if(curSpeed > maxSpeed + 14.4){
-                speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
             else {
                 if(tripDistanceWarning < this.maxDistance){
                     double maxSpeedWarning = this.breakingCurve.getMaxSpeedAtRelativePositionAndOffset(curPosition,curSpeed * 5);
-                    if(curSpeed > maxSpeedWarning){
+                    if(curSpeed > maxSpeedWarning + 2){
+                        speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                    }
+                    else if (curSpeed > maxSpeedWarning + 1.5){
+                        speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+                    }
+                    else if(curSpeed > maxSpeedWarning + 1.1){
                         speedInterventionLevel = SpeedInterventionLevel.WARNING;
                     }
                     else {

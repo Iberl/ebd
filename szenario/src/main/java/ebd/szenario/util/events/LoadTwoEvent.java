@@ -4,14 +4,14 @@ import ebd.globalUtils.events.NormalEvent;
 
 import java.util.List;
 
-public class LoadOneEvent extends NormalEvent {
+public class LoadTwoEvent extends NormalEvent {
     /**
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is adressed to
+     * @param targets ID from all modules the event is addressed to
      */
-    public LoadOneEvent(String source, List<String> targets) {
+    public LoadTwoEvent(String source, List<String> targets) {
         super(source, targets);
     }
 }

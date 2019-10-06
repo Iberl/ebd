@@ -60,8 +60,9 @@ public class DrivingDynamics {
     private double curMaxSpeed = 0d;
 
     private int cycleCount = 20;
-    private int cylceCountMax = 1; //TODO Connect to Config
+    private int cylceCountMax = 20; //TODO Connect to Config
     private MovementState prevMovementState = null;
+    private SpeedInterventionLevel prevSil = null;
 
 
     public DrivingDynamics(EventBus localBus, String pathToDrivingProfile){
@@ -157,7 +158,7 @@ public class DrivingDynamics {
         Sends global PositionEvent
          */
 
-        //EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
+        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
 
         /*
         Update TrainDataVolatile with the newly calculated values
@@ -224,6 +225,9 @@ public class DrivingDynamics {
 
         Position curPos = this.trainDataVolatile.getCurrentPosition();
         this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
+        if(this.dynamicState != null){
+            this.dynamicState.setTripDistance(0d);
+        }
     }
 
 
@@ -302,6 +306,8 @@ public class DrivingDynamics {
     }
 
     private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil) {
+        if(this.prevSil == sil) return;
+        this.prevSil = sil;
         String msg = String.format("Current speed supervision intervention level: %s ", sil);
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 

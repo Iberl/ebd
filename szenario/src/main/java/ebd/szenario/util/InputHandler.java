@@ -1,7 +1,10 @@
 package ebd.szenario.util;
 
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.szenario.util.events.LoadFourEvent;
 import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadThreeEvent;
+import ebd.szenario.util.events.LoadTwoEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -39,6 +42,15 @@ public class InputHandler implements Runnable {
                 break;
             case "load1":
                 this.globalEventBus.post(new LoadOneEvent("szenario", Collections.singletonList("szenario")));
+                break;
+            case "load2":
+                this.globalEventBus.post(new LoadTwoEvent("szenario", Collections.singletonList("szenario")));
+                break;
+            case "load3":
+                this.globalEventBus.post(new LoadThreeEvent("szenario", Collections.singletonList("szenario")));
+                break;
+            case "load4":
+                this.globalEventBus.post(new LoadFourEvent("szenario", Collections.singletonList("szenario")));
                 break;
             default:
                 System.out.println("Could not understand input");

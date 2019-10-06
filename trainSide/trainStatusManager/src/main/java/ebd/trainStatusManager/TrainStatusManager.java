@@ -23,6 +23,8 @@ import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
+import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.GlobalHandler;
 import ebd.trainStatusManager.util.MessageHandler;
@@ -143,8 +145,19 @@ public class TrainStatusManager implements Runnable {
             return;
         }
         if(!this.tripInProgress){
-            //TODO Multi nbce's ?
             this.tripInProgress = true;
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
+            this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
+            this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+                    "Calculated a new breaking curve"));
+        }
+        else {
+            TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+            try {
+                Thread.sleep(trainDataVolatile.getWaitTimeAtStation() * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
@@ -158,9 +171,8 @@ public class TrainStatusManager implements Runnable {
             return;
         }
         this.localEventBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
-        this.tripInProgress = false;
         //TODO until better TrainsManager exists:
-        disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
+        //disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
     }
 
     /**

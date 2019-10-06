@@ -32,6 +32,7 @@ public class PackageResolver {
             prevLoc = link.NID_BG;
         }
         localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Linking Information"));
     }
 
     public static void p57(EventBus localBus, Packet_57 p57){
