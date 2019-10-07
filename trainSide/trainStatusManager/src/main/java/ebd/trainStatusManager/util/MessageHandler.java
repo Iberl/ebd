@@ -58,6 +58,7 @@ public class MessageHandler {
 
         switch (rme.message.NID_MESSAGE){
             case 3:
+                this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received MA Message"));
                 handleMsg3(rme);
                 break;
             case 24:

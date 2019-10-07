@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.supervisors;
 
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
@@ -149,7 +150,8 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-        localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, this.messageDestination)); //TODO Message136 has to work
+        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, this.messageDestination)); //TODO Message136 has to work
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Position Report"));
     }
 
     /**
