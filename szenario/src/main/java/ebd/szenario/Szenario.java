@@ -24,10 +24,7 @@ import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
-import ebd.szenario.util.events.LoadOneEvent;
-import ebd.szenario.util.events.LoadThreeEvent;
-import ebd.szenario.util.events.LoadTwoEvent;
-import ebd.szenario.util.events.SzenarioExceptionEvent;
+import ebd.szenario.util.events.*;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -171,7 +168,7 @@ public class Szenario implements Runnable {
     @Subscribe
     public void load1(LoadOneEvent loe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B");
-        Route a = new Route("AB", 1000);
+        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
@@ -186,7 +183,7 @@ public class Szenario implements Runnable {
     @Subscribe
     public void load2(LoadTwoEvent lte){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a speeding driver from A to B");
-        Route a = new Route("AB", 1000);
+        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
@@ -200,9 +197,30 @@ public class Szenario implements Runnable {
 
     @Subscribe
     public void load3(LoadThreeEvent lte){
+        System.out.println("Scenario 3: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to 1, then from 1 to 2 and from 2 to C");
+        Route a = new Route("A1", 600,new int[]{0,100},new int[]{0,1});
+        Route b = new Route("12", 1900,new int[]{0,100,900,80,700,120},new int[]{0,1,750,0,450,-2});
+        Route c = new Route("2C", 1700,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
+
+        List<Route> listRoute = new ArrayList<>();
+        listRoute.add(a);
+        listRoute.add(b);
+        listRoute.add(c);
+        Map<Integer, List<Route>> mapRoute = new HashMap<>();
+        mapRoute.put(192, listRoute);
+        this.rbc = new RadioBlockCenter("1", mapRoute, 3);
+        this.tsm = new TrainStatusManager(192, 1,
+                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
+    }
+
+    @Subscribe
+    public void load4(LoadFourEvent lfe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B, then from B to A");
-        Route a = new Route("AB", 1000);
-        Route b = new Route("BC", 2000);
+        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
+        Route b = new Route("BC", 2000,new int[]{0,80,600,120},new int[]{0,0,300,-2});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         listRoute.add(b);

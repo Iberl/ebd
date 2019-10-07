@@ -56,6 +56,8 @@ public class SpeedSupervisionModule {
 
         if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
 
+        //System.out.println(this.breakingCurve.getRefLocation().getId());
+
         double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
         double tripDistanceWarning = tripDistance + curSpeed * 5;
         double tripDistanceIndication = tripDistance + curSpeed * 10;
@@ -64,7 +66,7 @@ public class SpeedSupervisionModule {
         //TODO Make this less horrible!
         if(tripDistance < this.maxDistance){
             double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
-
+            //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
             if(curSpeed > maxSpeed + 2){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }

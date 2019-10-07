@@ -45,6 +45,8 @@ public class BaliseTelegramGenerator {
 	private void sendTelegram(String trainId) {
 		Position lastKnownPosition = positions.get(trainId).getKey();
 		Integer lastSendingBalise = positions.get(trainId).getValue();
+
+		if(lastSendingBalise == 11) return; //TODO Get better handeling of reaching last balise! LSF
 		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
 
 		if(lastKnownPosition.getIncrement() >= nextBG.getLocation().getDistanceToPrevious()) {

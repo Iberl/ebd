@@ -17,15 +17,19 @@ public class DynamicState {
     private Position position;
 
     /**
-     * Internal memory of the length of the trip in [m]
+     * Memory of the total length of the trip in [m]
      */
     private double tripDistance;
+
+    /**
+     * Distance to the start of the current trip profile
+     */
+    private double distanceToStartOfProfile;
 
     /**
      * Current speed in [m/s]
      */
     private double speed;
-
     /**
      * Current acceleration in [m/(s^2)]
      */
@@ -52,6 +56,7 @@ public class DynamicState {
         this.time = 0;
         this.position = position;
         this.tripDistance = 0;
+        this.distanceToStartOfProfile = 0;
         this.speed = 0;
         this.acceleration = 0;
         this.movementState = MovementState.HALTING;
@@ -60,17 +65,18 @@ public class DynamicState {
 
     public void nextState(double deltaT){
         this.time += deltaT;
-        this.acceleration = this.availableAcceleration.getAcceleration(this.speed, tripDistance, this.movementState);
+        this.acceleration = this.availableAcceleration.getAcceleration(this.speed, this.distanceToStartOfProfile, this.movementState);
         this.speed += this.acceleration * deltaT;
         if(this.speed < 0) this.speed = 0;
         this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
         this.tripDistance += this.speed * deltaT;
+        this.distanceToStartOfProfile += this.speed * deltaT;
     }
+
 
     /*
     Getters
      */
-
     /**
      * Current mission time in [s]
      */
@@ -89,6 +95,14 @@ public class DynamicState {
      * Distance already driven on the current trip in [m]
      */
     public double getTripDistance() { return tripDistance; }
+
+    /**
+     *
+     * @return Distance to the start of the current trip profile in [m]
+     */
+    public double getDistanceToStartOfProfile() {
+        return distanceToStartOfProfile;
+    }
 
     /**
      * Current speed in [m/s]
@@ -145,7 +159,7 @@ public class DynamicState {
         this.availableAcceleration.setBreakingModification(breakingModification);
     }
 
-    public void setTripDistance(double tripDistance){
-        this.tripDistance = tripDistance;
+    public void setDistanceToStartOfProfile(double distance){
+        this.distanceToStartOfProfile = distance;
     }
 }

@@ -47,6 +47,13 @@ public class TrainDataVolatile {
     protected volatile double curTripTime = 0d;
 
     /**
+     * The distance already driven on the current trip section in [m]
+     */
+    protected volatile double curTripSectionDistance = 0d;
+
+
+
+    /**
      * The current speed of the train in [m/s]
      */
     @NotNull
@@ -221,6 +228,13 @@ public class TrainDataVolatile {
      * @return time since the start of the trip in [s]
      */
     public double getCurTripTime(){return curTripTime;}
+
+    /**
+     * @return The distance already driven on the current trip section in [m]
+     */
+    public double getCurTripSectionDistance() {
+        return curTripSectionDistance;
+    }
 
     /**
      * @return current speed in [m/s]

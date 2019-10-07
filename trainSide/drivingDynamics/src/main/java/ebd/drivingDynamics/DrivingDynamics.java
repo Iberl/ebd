@@ -55,7 +55,7 @@ public class DrivingDynamics {
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
-    private double maxTripDistance;
+    private double maxTripSectionDistance;
 
     private double curMaxSpeed = 0d;
 
@@ -188,7 +188,9 @@ public class DrivingDynamics {
         if(!(ue.targets.contains("dd") || ue.targets.contains("all") || !this.locked)){
             return;
         }
-        this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
+        if(this.dynamicState == null){
+            this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
+        }
         this.time = System.nanoTime();
         this.locked = false;
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
@@ -212,10 +214,10 @@ public class DrivingDynamics {
 
         if(this.tripProfile instanceof BackwardSpline){
             BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
-            this.maxTripDistance = backwardSpline.getHighestXValue();
+            this.maxTripSectionDistance = backwardSpline.getHighestXValue();
         }
         else if(this.tripProfile instanceof ForwardSpline){
-            this.maxTripDistance = Double.MAX_VALUE;
+            this.maxTripSectionDistance = Double.MAX_VALUE;
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
@@ -226,7 +228,7 @@ public class DrivingDynamics {
         Position curPos = this.trainDataVolatile.getCurrentPosition();
         this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
         if(this.dynamicState != null){
-            this.dynamicState.setTripDistance(0d);
+            this.dynamicState.setDistanceToStartOfProfile(0d);
         }
     }
 
@@ -278,14 +280,15 @@ public class DrivingDynamics {
         nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
         nameToValue.put("currentPosition", this.dynamicState.getPosition());
         nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
+        nameToValue.put("curTripSectionDistance", this.dynamicState.getDistanceToStartOfProfile());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
         this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
     private void sendCurrentMaxSpeed() {
-        double tripDistance = this.dynamicState.getTripDistance();
+        double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
-        if(tripDistance < this.maxTripDistance) this.curMaxSpeed = tripProfile.getPointOnCurve(tripDistance);
+        if(tripSectionDistance < this.maxTripSectionDistance) this.curMaxSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
         else this.curMaxSpeed = 0d;
 
         this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", this.curMaxSpeed));
@@ -299,7 +302,7 @@ public class DrivingDynamics {
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("Acceleration: %4.2f m/s^2 Speed: %5.2f m/s, MaxSpeed: %5.2f m/s, ",a,v,vm);
+        String msg = String.format("Acceleration: %5.2f m/s^2 Speed: %5.2f m/s, MaxSpeed: %5.2f m/s, ",a,v,vm);
         String msg2 = String.format("Position: LRBG %3d + %7.2f m, Trip Distance: %8.2f m, Trip Time: %6.1f s",l,i,td,tt);
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 
@@ -309,13 +312,13 @@ public class DrivingDynamics {
         if(this.prevSil == sil) return;
         this.prevSil = sil;
         String msg = String.format("Current speed supervision intervention level: %s ", sil);
-        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        //this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
     }
 
     private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
-        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        //this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
     }
 

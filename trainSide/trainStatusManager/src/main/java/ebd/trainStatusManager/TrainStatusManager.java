@@ -159,7 +159,7 @@ public class TrainStatusManager implements Runnable {
                 e.printStackTrace();
             }
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
-            this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
+            //this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
         }
@@ -172,7 +172,7 @@ public class TrainStatusManager implements Runnable {
         }
         this.localEventBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
         //TODO until better TrainsManager exists:
-        //disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
+        disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
     }
 
     /**

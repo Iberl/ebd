@@ -1,8 +1,11 @@
 package ebd.trainStatusManager.util.supervisors;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
@@ -27,10 +30,7 @@ public class TripSupervisor {
 
 
 
-    /**
-     * Distance to end of movement authority in [m], reduced by 20 m to account for imprecision.
-     */
-    private double distanceToEMA = Double.NaN;
+    private BreakingCurve breakingCurve = null;
 
     public TripSupervisor(EventBus localBus){
         this.localBus = localBus;
@@ -42,25 +42,25 @@ public class TripSupervisor {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cTE){
-        if(Double.isNaN(distanceToEMA)){
-            return;
-        }
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        if(this.breakingCurve == null) return;
 
-        if(trainDataVolatile.getCurTripDistance() >= this.distanceToEMA && trainDataVolatile.getCurrentSpeed() == 0){
+        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        Position curPos = trainDataVolatile.getCurrentPosition();
+        if(curPos == null) return;
+
+        double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        //distanceToEMA -= 20; // Catch trains that are close to a target
+
+        if(distanceToEMA <= 5 && trainDataVolatile.getCurrentSpeed() == 0){
             sendEndOfMission();
             this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
         }
     }
 
     @Subscribe
-    public void updateEMA(NewRouteDataVolatileEvent rdve){
-        if(rdve.routeDataVolatile.getPacket_15() == null){
-            return;
-        }
+    public void updateBC(NewBreakingCurveEvent bce){
+        this.breakingCurve = bce.breakingCurve;
         this.missionEnded = false;
-        Packet_15 p15 = rdve.routeDataVolatile.getPacket_15();
-        this.distanceToEMA = MovementAuthorityConverter.p15ToD_EMA(p15) - 20;
     }
 
     private void sendEndOfMission() {

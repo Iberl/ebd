@@ -1,5 +1,7 @@
 package ebd.trainStatusManager.util.supervisors;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -37,6 +39,7 @@ public class MessageAuthorityRequestSupervisor {
      */
     private double timeAtRequest = -1;
     private int lastQ_MARQSTREASON;
+    private BreakingCurve breakingCurve = null;
 
     public MessageAuthorityRequestSupervisor(EventBus localBus, String etcsTrainID, String rbcID){
         this.localBus = localBus;
@@ -51,15 +54,17 @@ public class MessageAuthorityRequestSupervisor {
     public void clockTick(ClockTickEvent cte){
 
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        RouteDataVolatile routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
-
-        Packet_15 p15 = routeDataVolatile.getPacket_15();
 
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
         //TODO Do the calculation of time to EOL correctly!
-        double distanceToEOL = (p15 != null) ? MovementAuthorityConverter.p15ToD_EMA(p15) - trainDataVolatile.getCurTripDistance() : 0d;
+        double distanceToEOL = 0;
+        if(this.breakingCurve != null){
+            distanceToEOL = this.breakingCurve.getHighestXValue();
+            distanceToEOL -= trainDataVolatile.getCurrentPosition().totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        }
+
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;
 
@@ -82,6 +87,11 @@ public class MessageAuthorityRequestSupervisor {
             this.timeAtRequest = System.currentTimeMillis() / 1000d;
             sendMaRequest();
         }
+    }
+
+    @Subscribe
+    public void newBC(NewBreakingCurveEvent bce){
+        this.breakingCurve = bce.breakingCurve;
     }
 
     @Subscribe
