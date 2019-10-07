@@ -101,6 +101,7 @@ public class Logging{
      */
     @Subscribe
     public void onToLogEvent(ToLogEvent toLogEvent){
-        logger.info(logPrefix + ": " + toLogEvent.source + ": " + toLogEvent.msg);
+        String padSrc = String.format("%3s", toLogEvent.source); //Inserted by LSF
+        logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
     }
 }

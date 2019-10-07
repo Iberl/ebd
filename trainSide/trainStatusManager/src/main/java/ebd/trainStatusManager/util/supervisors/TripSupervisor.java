@@ -66,7 +66,8 @@ public class TripSupervisor {
     private void sendEndOfMission() {
         //TODO Send Message 150
         if(!this.missionEnded){
-            this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Train " + etcsID + " reached the target location"));
+            String msg = "Train " + etcsID + " reached the target location";
+            this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
             this.missionEnded = true;
         }
     }

@@ -5,10 +5,7 @@ import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
-import ebd.messageLibrary.message.trainmessages.Message_132;
-import ebd.messageLibrary.message.trainmessages.Message_136;
-import ebd.messageLibrary.message.trainmessages.Message_146;
-import ebd.messageLibrary.message.trainmessages.Message_155;
+import ebd.messageLibrary.message.trainmessages.*;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -66,6 +63,10 @@ public class MessageHandler {
             String msg = String.format("Received Acknowledge from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
         }
+        else if(rme.message instanceof Message_150){
+            String msg = String.format("Received Mission End message from train %s", trainID);
+            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+        }
         else if(rme.message instanceof Message_155){
             this.controlledTrainsByID.add(((Message_155) rme.message).NID_ENGINE);
             String msg = String.format("Received communication initiation from train %s", trainID);
@@ -109,7 +110,7 @@ public class MessageHandler {
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;
         msg3.NID_LRBG = this.trainToLRBGMap.get(Integer.parseInt(trainID));
 
-        System.out.println("msg 3 LRBG: " + msg3.NID_LRBG);
+        //System.out.println("msg 3 LRBG: " + msg3.NID_LRBG);
         msg3.Packet_15 = makeP15(d_EOL);
         msg3.packets = lop;
         return msg3;

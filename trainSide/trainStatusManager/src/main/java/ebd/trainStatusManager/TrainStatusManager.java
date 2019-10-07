@@ -16,7 +16,9 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.logging.Logging;
+import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;
+import ebd.messageLibrary.packet.trainpackets.Packet_0;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
@@ -172,6 +174,12 @@ public class TrainStatusManager implements Runnable {
         }
         this.localEventBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
         //TODO until better TrainsManager exists:
+        Message_150 msg150 = new Message_150();
+        msg150.NID_ENGINE = this.etcsTrainID;
+        Packet_0 p0 = new Packet_0();
+        msg150.PACKET_POSITION = p0;
+        SendMessageEvent sme = new SendMessageEvent("tsm", Collections.singletonList("ms"), msg150, Collections.singletonList("mr;R=" + this.etcsTrainID));
+        this.messageSender.send(sme);
         disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
     }
 
@@ -184,6 +192,9 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(de.targets)){
             return;
         }
+
+
+
         this.clock.stop();
         synchronized (this){
             this.notify();

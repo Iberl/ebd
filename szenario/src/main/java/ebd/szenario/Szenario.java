@@ -216,7 +216,7 @@ public class Szenario implements Runnable {
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
     }
 
-    @Subscribe
+/*    @Subscribe
     public void load4(LoadFourEvent lfe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B, then from B to A");
         Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
@@ -232,7 +232,7 @@ public class Szenario implements Runnable {
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
-    }
+    }*/
 
     private boolean validTarget(List<String> targetList) {
         for(String target : targetList){
