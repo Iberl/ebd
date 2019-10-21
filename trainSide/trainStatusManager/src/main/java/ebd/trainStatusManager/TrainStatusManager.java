@@ -32,7 +32,7 @@ import ebd.trainStatusManager.util.GlobalHandler;
 import ebd.trainStatusManager.util.MessageHandler;
 import ebd.trainStatusManager.util.TelegramHandler;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
-import ebd.trainStatusManager.util.events.TsmTripEndEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
 import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.trainStatusManager.util.supervisors.TripSupervisor;
@@ -141,14 +141,16 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
         if(!validTarget(nbce.targets)){
             return;
         }
+        int refLocID = nbce.breakingCurve.getRefLocation().getId();
+
         if(!this.tripInProgress){
             this.tripInProgress = true;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve, refLocID));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
@@ -189,8 +191,18 @@ public class TrainStatusManager implements Runnable {
         }
 
 
-
         this.clock.stop();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), "ETCS shut down"));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         synchronized (this){
             this.notify();
         }

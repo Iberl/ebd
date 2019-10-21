@@ -65,7 +65,7 @@ public class Logging{
      * @throws IOException
      */
     public Logging() throws IOException {
-        logPrefix = "     GB";
+        logPrefix = String.format("%-9s", "GB");
         logger = Logger.getLogger("GlobalEventBus");
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");

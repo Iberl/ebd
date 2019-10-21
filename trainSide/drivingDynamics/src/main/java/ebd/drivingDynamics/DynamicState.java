@@ -130,6 +130,14 @@ public class DynamicState {
      */
 
     /**
+     *
+     * @param acceleration acceleration in [m/s^2]
+     */
+    public void  setAcceleration(double acceleration){
+        this.acceleration = acceleration;
+    }
+
+    /**
      * Sets the movementState, which decides what acceleration (speed up or breaking) will be used
      * @param movementState see {@link MovementState}
      */

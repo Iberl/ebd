@@ -58,7 +58,7 @@ class DrivingDynamicsTest {
 
         DrivingDynamics drivingDynamics = new DrivingDynamics(eb,
                 "C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\StrictDrivingStrategy.json");
-        eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve));
+        eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve, 0));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();
         Thread.sleep(5000);

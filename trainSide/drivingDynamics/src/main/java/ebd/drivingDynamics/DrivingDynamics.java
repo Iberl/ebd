@@ -14,6 +14,7 @@ import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -120,17 +121,17 @@ public class DrivingDynamics {
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case WARNING:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case APPLY_SERVICE_BREAKS:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.BREAKING);
                     this.dynamicState.setMovementState(MovementState.BREAKING);
                     this.dynamicState.setBreakingModification(1d);
                     break;
                 case APPLY_EMERGENCY_BREAKS:
                 default:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel);
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
@@ -139,10 +140,10 @@ public class DrivingDynamics {
         /*
          * Log movement state changes
          */
-        if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
+        /*if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
             sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
             this.prevMovementState = this.dynamicState.getMovementState();
-        }
+        }*/
 
         /*
         Calculate the next dynamic state.
@@ -166,7 +167,7 @@ public class DrivingDynamics {
         updateTrainDataVolatile();
 
         cycleCount++;
-        if(this.cycleCount >= this.cylceCountMax){
+        if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
             cycleCount = 0;
             sendToLogEventDynamicState();
         }
@@ -228,8 +229,15 @@ public class DrivingDynamics {
         Position curPos = this.trainDataVolatile.getCurrentPosition();
         this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
         if(this.dynamicState != null){
-            this.dynamicState.setDistanceToStartOfProfile(0d);
+            this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
         }
+    }
+
+    @Subscribe
+    public void atTripEnd(TsmTripEndEvent ttee){
+        dynamicState.setMovementState(MovementState.HALTING);
+        dynamicState.setAcceleration(0d);
+        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
     }
 
 
@@ -302,24 +310,32 @@ public class DrivingDynamics {
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();
         double tt = dynamicState.getTime();
-        String msg = String.format("Acceleration: %5.2f m/s^2 Speed: %5.2f m/s, MaxSpeed: %5.2f m/s, ",a,v,vm);
-        String msg2 = String.format("Position: LRBG %3d + %7.2f m, Trip Distance: %8.2f m, Trip Time: %6.1f s",l,i,td,tt);
+        String msg = String.format("Acc: %5.2f m/s^2 V: %5.2f m/s, V_max: %5.2f m/s, ",a,v,vm);
+        String msg2 = String.format("Pos: LRBG %3d + %7.2f m, TripDist: %8.2f m, TripTime: %6.1f s",l,i,td,tt);
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
 
     }
 
-    private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil) {
+    private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil, MovementState movementState) {
         if(this.prevSil == sil) return;
         this.prevSil = sil;
         String msg = String.format("Current speed supervision intervention level: %s ", sil);
-        //this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
+        if(movementState != MovementState.UNCHANGED) sendToLogEventSpeedSupervisionMovementState(movementState);
 
     }
 
     private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
-        //this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
+    }
+
+    private void sendMovementState(MovementState ms){
+        if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
+            sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
+            this.prevMovementState = this.dynamicState.getMovementState();
+        }
     }
 
     private void actionParser(Action action) {
@@ -329,16 +345,20 @@ public class DrivingDynamics {
             case "AccelerationAction":
                 this.dynamicState.setMovementState(MovementState.ACCELERATING);
                 this.dynamicState.setAccelerationModification(((AccelerationAction)action).getAccelerationPercentage());
+                sendMovementState(MovementState.ACCELERATING);
                 break;
             case "BreakAction":
                 this.dynamicState.setMovementState(MovementState.BREAKING);
                 this.dynamicState.setBreakingModification(((BreakAction)action).getBreakPercentage());
+                sendMovementState(MovementState.BREAKING);
                 break;
             case "CruiseAction":
                 this.dynamicState.setMovementState(MovementState.CRUISE);
+                sendMovementState(MovementState.CRUISE);
                 break;
             case "HaltAction":
                 this.dynamicState.setMovementState(MovementState.HALTING);
+                sendMovementState(MovementState.HALTING);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());

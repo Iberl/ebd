@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util.events;
+package ebd.globalUtils.events.trainStatusMananger;
 
 import ebd.globalUtils.events.NormalEvent;
 

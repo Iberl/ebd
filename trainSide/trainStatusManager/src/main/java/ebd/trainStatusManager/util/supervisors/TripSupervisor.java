@@ -2,22 +2,18 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.position.Position;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
-import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
-import ebd.trainStatusManager.util.events.TsmTripEndEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class TripSupervisor {
@@ -49,11 +45,9 @@ public class TripSupervisor {
         if(curPos == null) return;
 
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
-        //distanceToEMA -= 20; // Catch trains that are close to a target
 
         if(distanceToEMA <= 5 && trainDataVolatile.getCurrentSpeed() == 0){
             sendEndOfMission();
-            this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
         }
     }
 
@@ -66,6 +60,7 @@ public class TripSupervisor {
     private void sendEndOfMission() {
         //TODO Send Message 150
         if(!this.missionEnded){
+            this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
             String msg = "Train " + etcsID + " reached the target location";
             this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
             this.missionEnded = true;

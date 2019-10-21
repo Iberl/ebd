@@ -5,6 +5,7 @@ import ebd.baliseTelegramGenerator.BaliseGroup;
 import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -28,8 +29,10 @@ import ebd.szenario.util.events.*;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 
+import java.io.IOException;
 import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
@@ -114,9 +117,14 @@ public class Szenario implements Runnable {
     private TrainStatusManager tsm = null;
 
     public Szenario(){
-
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
+        try {
+            this.logger = new Logging();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("This is the virtual environment for the ETCS@EBD project");
 
         this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
@@ -165,9 +173,11 @@ public class Szenario implements Runnable {
         globalEventBus.unregister(this);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load1(LoadOneEvent loe){
-        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B");
+        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to B");
+        String msg = "ETCS start up";
+        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
         Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
@@ -180,9 +190,16 @@ public class Szenario implements Runnable {
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load2(LoadTwoEvent lte){
-        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a speeding driver from A to B");
+        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a speeding driver from A to B");
+        String msg = "ETCS start up";
+        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
@@ -195,9 +212,16 @@ public class Szenario implements Runnable {
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load3(LoadThreeEvent lte){
-        System.out.println("Scenario 3: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to 1, then from 1 to 2 and from 2 to C");
+        System.out.println("Scenario 3: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to 1, then from 1 to 2 and from 2 to C");
+        String msg = "ETCS start up";
+        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Route a = new Route("A1", 600,new int[]{0,100},new int[]{0,1});
         Route b = new Route("12", 1900,new int[]{0,100,900,80,700,120},new int[]{0,1,750,0,450,-2});
         Route c = new Route("2C", 1700,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
