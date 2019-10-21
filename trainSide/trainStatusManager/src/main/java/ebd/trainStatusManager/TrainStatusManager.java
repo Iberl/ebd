@@ -157,7 +157,7 @@ public class TrainStatusManager implements Runnable {
         }
         else {
             TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve, refLocID));
             //this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
