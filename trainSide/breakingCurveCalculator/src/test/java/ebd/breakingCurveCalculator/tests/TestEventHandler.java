@@ -14,10 +14,11 @@ import org.greenrobot.eventbus.Subscribe;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import org.greenrobot.eventbus.ThreadMode;
 
 /**
  *
- * Monitors the event resulting out of {@link ebd.breakingCurveCalculator.tests.BreakingCurveCalculatorTest}
+ * Monitors the event resulting out of {@link BreakingCurveCalculatorTest2}
  * @author Lars Schulze-Falck
  *
  */
@@ -43,7 +44,8 @@ public class TestEventHandler{
 		System.out.printf("A Event of type %s was posted%n", e.getClass());
 	}
 	
-	@Subscribe public void NewBreakingCurve(NewBreakingCurveEvent e) {
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void NewBreakingCurve(NewBreakingCurveEvent e) {
 		
 		BreakingCurve bCurve = e.breakingCurve;
 
@@ -57,7 +59,7 @@ public class TestEventHandler{
 			searchKey2 = bCurve.curve.lowerKey(searchKey2);
 		}
 		*/
-		double xPosition = 0d;
+		/*double xPosition = 0d;
 		double step = bCurve.getHighestXValue() / 100000d;
 		FileWriter fW;
 		try {
@@ -79,7 +81,7 @@ public class TestEventHandler{
 			List<String> eventTargets = new ArrayList<>();
 			eventTargets.add("tsm;");
 			eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, e, e1));
-		}
+		}*/
 		
 		System.out.println("Done");
 	}

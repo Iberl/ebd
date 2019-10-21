@@ -78,6 +78,7 @@ public class BreakingCurveCalculator {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void calculateBreakingCurve(BreakingCurveRequestEvent bcre) {
     	try {
+
     		if(isCalculating) {
     			throw new BreakingCurveCalculatorBusyException("BCC is already calculating a curve. Do only post new BreakingCurveRequestEvents "
     					+ "after a NewBreakingCurveEvent was postet. This request will be ignored");
@@ -91,7 +92,6 @@ public class BreakingCurveCalculator {
 	    	
 	    	double d_EMA = MovementAuthorityConverter.p15ToD_EMA(bcre.packet15);
 	    	double v_loa = bcre.packet15.V_LOA * ETCS_VALUE_TO_MS;
-	    	
 	    	breakingCurve = calculate(ssp, gradientProfile, this.referencePosition, d_EMA, v_loa , bcre.id);
 	    	eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets, breakingCurve));
 	    	bclreCan = true; //bclre can only be calculated after the first full request is done.

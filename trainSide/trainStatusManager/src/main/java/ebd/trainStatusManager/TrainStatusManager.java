@@ -141,7 +141,7 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
         if(!validTarget(nbce.targets)){
             return;
@@ -155,11 +155,6 @@ public class TrainStatusManager implements Runnable {
         }
         else {
             TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-            try {
-                Thread.sleep(trainDataVolatile.getWaitTimeAtStation() * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve));
             //this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
