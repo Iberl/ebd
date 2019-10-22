@@ -11,7 +11,7 @@ import ebd.trainData.util.availableAcceleration.AccelerationPowerCurveCalculator
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.ResistanceCurveCalculator;
-import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
+import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -116,21 +116,18 @@ public class TrainDataVolatile {
      * {@link ETCSVariables#T_MAR} in [s]
      * Do not trigger if equal to {@link ETCSVariables#T_MAR_INFINITY}
      */
-    @NotNull
     protected volatile int T_MAR = ETCSVariables.T_MAR;
 
     /**
      * {@link ETCSVariables#T_TIMEOUTRQST} in [s]
      * Do not trigger if equal to {@link ETCSVariables#T_TIMEOUTRQST_INFINITY}
      */
-    @NotNull
     protected volatile int T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST;
 
     /**
      * {@link ETCSVariables#T_CYCRQST} in [s]
      * Do not trigger if equal to {@link ETCSVariables#T_CYCRQST_INFINITY}
      */
-    @NotNull
     protected volatile int T_CYCRQST = ETCSVariables.T_CYCRQST;
 
     /*
@@ -142,7 +139,6 @@ public class TrainDataVolatile {
      * {@link ETCSVariables#INTEGER_NOVALUE}
      *
      */
-    @NotNull
     protected volatile int T_CYCLOC = ETCSVariables.T_CYCLOC;
 
     /**
@@ -150,20 +146,19 @@ public class TrainDataVolatile {
      * Do not cycle with distance if equal to {@link Double#MAX_VALUE} or
      * {@link ETCSVariables#INTEGER_NOVALUE}
      */
-    @NotNull
     protected volatile double distanceCycleLocation = ETCSVariables.D_CYCLOC;
 
     /**
      * {@link ebd.messageLibrary.util.ETCSVariables#M_LOC}
      */
-    @NotNull
+
     protected volatile int M_LOC = ETCSVariables.M_LOC;
 
     /**
-     * {@link IncrementalPositionReportDistances}
+     * {@link IncrPosRprtDist}
      */
     @Nullable
-    protected volatile IncrementalPositionReportDistances incrementalPositionReportDistances = null;
+    protected volatile IncrPosRprtDist incrPosRprtDist = null;
 
 
     /**
@@ -333,10 +328,10 @@ public class TrainDataVolatile {
     }
 
     /**
-     * {@link IncrementalPositionReportDistances}
+     * {@link IncrPosRprtDist}
      */
-    public IncrementalPositionReportDistances getIncrementalPositionReportDistances() {
-        return incrementalPositionReportDistances;
+    public IncrPosRprtDist getIncrPosRprtDist() {
+        return incrPosRprtDist;
     }
 
     /**

@@ -12,7 +12,7 @@ import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trackpackets.Packet_58;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
+import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 
@@ -86,7 +86,7 @@ public class PackageResolver {
         }
         m_loc = p58.M_LOC;
 
-        IncrementalPositionReportDistances iprd = new IncrementalPositionReportDistances(String.valueOf(nid_lrbg), p58.intervals);
+        IncrPosRprtDist iprd = new IncrPosRprtDist(String.valueOf(nid_lrbg), p58.intervals);
 
         Map<String,Object> changes = new HashMap<>();
         changes.put("T_CYCLOC", t_cycle);

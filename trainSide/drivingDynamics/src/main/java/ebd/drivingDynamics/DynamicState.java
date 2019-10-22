@@ -63,6 +63,10 @@ public class DynamicState {
         this.availableAcceleration = availableAcceleration;
     }
 
+    /**
+     * Calculates the next state based on the passed time
+     * @param deltaT
+     */
     public void nextState(double deltaT){
         this.time += deltaT;
         this.acceleration = this.availableAcceleration.getAcceleration(this.speed, this.distanceToStartOfProfile, this.movementState);
