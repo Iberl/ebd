@@ -1,5 +1,6 @@
 package ebd.drivingDynamics.util;
 
+import ebd.drivingDynamics.Testhandler;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.trainData.TrainDataVolatile;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AccelerationActionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
+        Testhandler testhandler = new Testhandler();
         TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 6d, 28d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
     }
@@ -28,7 +30,7 @@ class AccelerationActionTest {
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"value\" : 10 , \"conditions\" : {\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}}");
         AccelerationAction accelerationAction = new AccelerationAction(jsonObject, EventBus.getDefault());
         assertFalse(accelerationAction.eval());
-        assertEquals(10d, accelerationAction.getAccelerationPercentage());
+        assertEquals(0.1, accelerationAction.getAccelerationPercentage());
     }
 
 }

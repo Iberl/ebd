@@ -2,13 +2,20 @@ package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.conditions.AndBlock;
 import ebd.drivingDynamics.util.conditions.Condition;
-import ebd.drivingDynamics.util.conditions.ConditionSelector;
+import ebd.drivingDynamics.util.conditions.ConditionParser;
 import ebd.drivingDynamics.util.conditions.OrBlock;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 
+/**
+ * This class represents an abstract action. An action represents one of the possible movement states
+ * (s. {@link ebd.globalUtils.movementState.MovementState}). Every actions contains one or more {@link Condition}.
+ * By checking if these conditions evaluate to true, one can decided if the specific action should be taken.<br>
+ * <b>When implementing a new action, this action has to be included in {@link ActionParser} so it can be read
+ * out of a json file. It also has to be included in the {@link ebd.drivingDynamics.DrivingDynamics#actionParser(Action)}</b>
+ */
 public abstract class Action {
     @NotNull
     protected EventBus localEventBus;
@@ -16,16 +23,34 @@ public abstract class Action {
     @NotNull
     protected Condition condition;
 
-    public Action(EventBus eventBus){
-        this.localEventBus = eventBus;
+    /**
+     *
+     * @param localEventBus The local {@link EventBus} of the train
+     */
+    public Action(EventBus localEventBus){
+        this.localEventBus = localEventBus;
     }
 
+    /**
+     * Determines if this action should be taken.
+     * @return true if all conditions (respecting 'and' and 'or' blocks) evaluate to true, else false.
+     */
     public boolean eval(){
         return this.condition.eval();
     }
 
+    /**
+     * Build an action from an {@link JSONObject}
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
     abstract protected void fromJSON(JSONObject jsonObject) throws DDBadDataException;
 
+    /**
+     * Parsed conditions out of a {@link JSONObject}
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
     protected void conditionsFromJSON(JSONObject jsonObject) throws DDBadDataException{
 
         try {
@@ -36,7 +61,7 @@ public abstract class Action {
                 this.condition = new OrBlock(jsonObject, this.localEventBus);
             }
             else {
-                this.condition = ConditionSelector.select(jsonObject, this.localEventBus);
+                this.condition = ConditionParser.parse(jsonObject, this.localEventBus);
             }
 
 

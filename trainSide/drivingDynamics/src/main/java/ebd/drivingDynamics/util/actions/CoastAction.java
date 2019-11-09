@@ -5,20 +5,20 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
 /**
- * This action sets the train into cruise state. In this state, the train does apply just enough power to either
- * acceleration or deceleration to keep the speed constant.
+ * This action sets the train into coasting state. In this state, the train does not apply any power to either
+ * acceleration or deceleration. This means that the train slows down through resistances like wind resistance.
  */
-public class CruiseAction extends Action {
+public class CoastAction extends Action {
 
     /**
-     * This action sets the train into cruise state. In this state, the train does apply just enough power to either
-     * acceleration or deceleration to keep the speed constant.
+     * This action sets the train into coasting state. In this state, the train does not apply any power to either
+     * acceleration or deceleration. This means that the train slows down through resistances like wind resistance.
      *
      * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
      * @param localEventBus the local {@link EventBus}
      * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
      */
-    public CruiseAction(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+    public CoastAction(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
         super(localEventBus);
         fromJSON(jsonObject);
     }
@@ -29,6 +29,6 @@ public class CruiseAction extends Action {
             conditionsFromJSON((JSONObject)jsonObject.get("conditions"));
 
         }
-        else throw new DDBadDataException("The key 'conditions' was missing for a CruiseAction");
+        else throw new DDBadDataException("The key 'conditions' was missing for a CoastAction");
     }
 }

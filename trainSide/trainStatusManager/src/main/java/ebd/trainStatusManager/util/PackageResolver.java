@@ -92,7 +92,7 @@ public class PackageResolver {
         changes.put("T_CYCLOC", t_cycle);
         changes.put("distanceCycleLocation", d_cycle);
         changes.put("M_LOC", m_loc);
-        changes.put("incrementalPositionReportDistances", iprd);
+        changes.put("incrPosRprtDist", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
         localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters"));

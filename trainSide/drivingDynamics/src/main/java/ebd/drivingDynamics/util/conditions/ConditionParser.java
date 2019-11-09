@@ -4,9 +4,9 @@ import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
-public class ConditionSelector {
+public class ConditionParser {
 
-    public static Condition select(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
+    public static Condition parse(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
 
         if(jsonObject.containsKey("v_rel")){
             return new RelativeSpeedCondition((JSONObject) jsonObject.get("v_rel"), eventBus);

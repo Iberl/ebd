@@ -9,12 +9,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A condition block contains a group of conditions that are depended in some way.
+ * The way they are connected is determined by the implementation.<br>
+ * There are AndBlocks and OrBlocks. In AndBlocks conditions are connected by "and", in
+ * OrBlocks by "or".<br>
+ * Blocks can be nested.
+ */
 public abstract class ConditionBlock extends Condition {
 
     protected List<Condition> conditions;
 
-    public ConditionBlock(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
-        super(eventBus);
+    /**
+     * A condition block contains a group of conditions that are depended in some way.
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @param localEventBus the local {@link EventBus}
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
+    public ConditionBlock(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+        super(localEventBus);
         fromJSON(jsonObject);
     }
 
@@ -43,7 +56,7 @@ public abstract class ConditionBlock extends Condition {
                     conditions.add(new OrBlock(tempJSON,this.localEventBus));
                 }
                 else {
-                    conditions.add(ConditionSelector.select(tempJSON,this.localEventBus));
+                    conditions.add(ConditionParser.parse(tempJSON,this.localEventBus));
                 }
             }
 

@@ -48,7 +48,7 @@ public class TotalSpeedCondition extends Condition {
 
         if(jsonObject.keySet().contains("op")){
             String opCode = (String)jsonObject.get("op");
-            this.comparator = ComparisonSelector.comparisonSelector(opCode);
+            this.comparator = ComparisonParser.parse(opCode);
         }
         else throw new DDBadDataException("The key 'op' was missing for a TotalSpeedCondition");
     }

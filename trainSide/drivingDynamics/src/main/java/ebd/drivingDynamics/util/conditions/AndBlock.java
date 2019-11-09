@@ -4,11 +4,20 @@ import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
+/**
+ * An and block contains a group of conditions that are connected by "and". All conditions in the block have to
+ * evaluate to true so this block evaluates to true
+ */
 public class AndBlock extends ConditionBlock {
 
-
-    public AndBlock(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
-        super(jsonObject,eventBus);
+    /**
+     * An and block contains a group of conditions that are connected by "and".
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @param localEventBus the local {@link EventBus}
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
+    public AndBlock(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+        super(jsonObject,localEventBus);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package ebd.drivingDynamics;
 
 import ebd.drivingDynamics.util.actions.Action;
-import ebd.drivingDynamics.util.actions.ActionSelector;
+import ebd.drivingDynamics.util.actions.ActionParser;
 import ebd.drivingDynamics.util.actions.NoAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -92,7 +92,7 @@ public class DrivingProfile {
             JSONArray jsonArray = (JSONArray)jsonObject.get("actions");
             for(Object object : jsonArray){
                 JSONObject tempJSON = (JSONObject)object;
-                this.actions.add(ActionSelector.select(tempJSON, this.localBus));
+                this.actions.add(ActionParser.parse(tempJSON, this.localBus));
             }
         }
         else throw new DDBadDataException("The key 'actions' was missing from a DrivingProfile.");

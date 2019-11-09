@@ -424,6 +424,10 @@ public class DrivingDynamics {
                 this.dynamicState.setMovementState(MovementState.CRUISE);
                 sendMovementState(MovementState.CRUISE);
                 break;
+            case "CoastAction":
+                this.dynamicState.setMovementState(MovementState.COASTING);
+                sendMovementState(MovementState.COASTING);
+                break;
             case "HaltAction":
                 this.dynamicState.setMovementState(MovementState.HALTING);
                 sendMovementState(MovementState.HALTING);
