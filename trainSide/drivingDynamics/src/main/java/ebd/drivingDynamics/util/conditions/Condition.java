@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 /**
  * Base class for all conditions and condition blocks. Access to the local {@link EventBus} is necessary, so conditions
  * can check the state of the train and evaluate them self.
+ * <b>Newly implemented conditions have to be registered in {@link SingleConditionParser}</b>
  */
 abstract public class Condition {
 

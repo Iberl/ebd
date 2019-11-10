@@ -5,13 +5,13 @@
                             "conditions" : {  
                                             "andBlock" : [
                                                         {
-                                                            "v_rel" : {
+                                                            "type" : "v_rel", "condition" : {
                                                                         "op" : "<",
                                                                         "value" : 90
                                                                     }
                                                         },
                                                         {
-                                                            "v" : {
+                                                            "type" : "v", "condition" : {
                                                                     "op" : "<",
                                                                     "value" : 120
                                                                 }
@@ -26,13 +26,13 @@
                             "conditions" : {  
                                             "orBlock" : [ 
                                                         {
-                                                            "v_rel" : {
+                                                            "type" : "v_rel", "condition" : {
                                                                         "op" : ">",
                                                                         "value" : 95
                                                                     }
                                                         },
                                                         {
-                                                            "v" : {
+                                                            "type" : "v", "condition" : {
                                                                     "op" : ">=",
                                                                     "value" : 120
                                                                 }
@@ -46,19 +46,19 @@
                             "conditions" : {  
                                             "andBlock" : [ 
                                                         {
-                                                            "v_rel" : {
+                                                            "type" : "v_rel", "condition" : {
                                                                         "op" : ">=",
                                                                         "value" : 90
                                                                     }
                                                         },
                                                         {
-                                                            "v_rel" : {
+                                                            "type" : "v_rel", "condition" : {
                                                                     "op" : "<=",
                                                                     "value" : 95
                                                                 }
                                                         },
                                                         {
-                                                            "v" : {
+                                                            "type" : "v", "condition" : {
                                                                     "op" : "<",
                                                                     "value" : 120
                                                                 }

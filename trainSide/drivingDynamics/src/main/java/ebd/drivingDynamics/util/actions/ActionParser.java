@@ -7,7 +7,8 @@ import org.json.simple.JSONObject;
 public class ActionParser {
 
     /**
-     * Builds an action out of a {@link JSONObject}. The action built is chosen by the type value.
+     * Builds an action out of a {@link JSONObject}. The action built is chosen by the type value.<br>
+     * <b>All implemented conditions have to be registered in this function by including them into the switch statement</b>
      *
      * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
      * @param localEventBus the local {@link EventBus}

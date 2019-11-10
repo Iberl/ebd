@@ -6,7 +6,8 @@ import org.json.simple.JSONObject;
 
 /**
  * An or block contains a group of conditions that are connected by "or". One condition in the block has to
- * evaluate to true so this block evaluates to true
+ * evaluate to true so this block evaluates to true<br>
+ * <p>The JSON string:<br> {"orblock" : [*]} with * being a list of {@link Condition} including {@link ConditionBlock}</p>
  */
 public class OrBlock extends ConditionBlock {
 

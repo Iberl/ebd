@@ -56,7 +56,7 @@ public abstract class ConditionBlock extends Condition {
                     conditions.add(new OrBlock(tempJSON,this.localEventBus));
                 }
                 else {
-                    conditions.add(ConditionParser.parse(tempJSON,this.localEventBus));
+                    conditions.add(SingleConditionParser.parse(tempJSON,this.localEventBus));
                 }
             }
 

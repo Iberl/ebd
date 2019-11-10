@@ -4,7 +4,7 @@
                             "value" : 100,
                             "conditions" :
                                             {
-                                                "v" : {
+                                                "type" : "v", "condition" : {
                                                         "op" : "<",
                                                         "value" : 119
                                                     }
@@ -18,7 +18,7 @@
                             "value" : 90,
                             "conditions" :
                                             {
-                                                "v" : {
+                                                "type" : "v", "condition" : {
                                                         "op" : ">",
                                                         "value" : 121
                                                     }

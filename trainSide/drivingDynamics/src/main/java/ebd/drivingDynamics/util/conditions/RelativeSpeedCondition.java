@@ -8,13 +8,29 @@ import org.json.simple.JSONObject;
 
 import java.util.function.BiFunction;
 
+/**
+ * A relative speed condition compares the current speed to the current maximum allowed speed.<br>
+ * The way it compares the the values are defined in the {@link JSONObject}<br>
+ * <p>The <b>type</b> of this condition is "v_rel"</p>
+ * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
+ * <p>The <b>value</b> key contains a percentage in the range of [0, 100] that modifies the maximum allowed speed before comparison</p>
+ * <p>Example: The condition should evaluate to true if the train is slower than 50% of the current maximum speed.
+ * The JSON string would look like this:<br>
+ *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50 }}</p>
+ */
 public class RelativeSpeedCondition extends Condition {
 
     private Double speedPercentage;
     private BiFunction<Double,Double, Boolean> comparator;
 
-    public RelativeSpeedCondition(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
-        super(eventBus);
+    /**
+     * Builds an Instance out of a {@link JSONObject}
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @param localEventBus The local {@link EventBus} of the train.
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
+    public RelativeSpeedCondition(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+        super(localEventBus);
         fromJSON(jsonObject);
     }
 
@@ -33,7 +49,7 @@ public class RelativeSpeedCondition extends Condition {
 
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
-        if(jsonObject.keySet().contains("value")){
+        if(jsonObject.containsKey("value")){
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
@@ -50,7 +66,7 @@ public class RelativeSpeedCondition extends Condition {
         }
         else throw new DDBadDataException("The key 'value' was missing for a RelativeSpeedCondition");
 
-        if(jsonObject.keySet().contains("op")){
+        if(jsonObject.containsKey("op")){
             String opCode = (String)jsonObject.get("op");
             this.comparator = ComparisonParser.parse(opCode);
         }
