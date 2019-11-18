@@ -18,6 +18,12 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.*;
 
+/**
+ * This class deals with optional packages that come up in {@link MessageHandler}
+ *
+ *
+ * @author Lars Schulze-Falck
+ */
 public class PackageResolver {
 
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {

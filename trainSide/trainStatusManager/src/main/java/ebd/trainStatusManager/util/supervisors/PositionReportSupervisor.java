@@ -24,6 +24,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class supervises the issuing of position reports from the train to the rbc.
+ *
+ * @author Lars Schulze-Falck
+ */
 public class PositionReportSupervisor {
 
     //TODO Respect IncrementalPositionReportDistances
@@ -42,11 +47,16 @@ public class PositionReportSupervisor {
     private double tripDistanceAtCycleStart = 0d;
     private int d_cycleNumber = 1;
 
-    private List<String> messageDestination;
+    private String rbcID;
 
     private IncrPosRprtDist positionReportDistances = null;
 
-
+    /**
+     * Constructor
+     * @param localBus the local {@link EventBus}
+     * @param etcsTrainID the ETCS ID of the train
+     * @param rbcID the current RBC ID
+     */
     public PositionReportSupervisor(EventBus localBus, String etcsTrainID, String rbcID){
         this.localBus = localBus;
         this.localBus.register(this);
@@ -56,9 +66,14 @@ public class PositionReportSupervisor {
         this.lengthTrain = trainDataPerma.getL_train();
         this.lastLocationID = (new InitalLocation()).getId();
 
-        this.messageDestination = Collections.singletonList("mr;R=" + rbcID);
+        this.rbcID = rbcID; //TODO: Make updateable
     }
 
+    /**
+     * This method listens to clock tick events and checks on every tick if the requisites for sending a position
+     * report are fulfilled and, should this be true, issues such a report.
+     * @param cte A {@link ClockTickEvent}
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
@@ -89,6 +104,11 @@ public class PositionReportSupervisor {
         }
     }
 
+    /**
+     * This method listens to crossed balise group events, checks if this should result in sending a position report and
+     * sends it if true.
+     * @param cbge A {@link CrossedBaliseGroupEvent}
+     */
     @Subscribe
     public void crossedBaliseGroup(CrossedBaliseGroupEvent cbge){
         if(!validTarget(cbge.targets)){
@@ -101,6 +121,26 @@ public class PositionReportSupervisor {
         }
     }
 
+    /**
+     * This method listens to new location events, checks if this should result in sending a position report and
+     * sends it if true.
+     * @param nle A {@link NewLocationEvent}
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void newLocation(NewLocationEvent nle){
+        if(!validTarget(nle.targets)) return;
+        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        if(lastLocationID == nle.newLocation.getId()) return;
+        if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
+            sendPositionReport();;
+        }
+        this.lastLocationID = nle.newLocation.getId();
+    }
+
+    /**
+     * Listens to new position report parameter events and updates the parameters from {@link TrainDataVolatile}
+     * @param nprpe A {@link NewPositionReportParametersEvent}
+     */
     @Subscribe
     public void newPositionReportParameters(NewPositionReportParametersEvent nprpe){
         if(!validTarget(nprpe.targets)){
@@ -113,17 +153,10 @@ public class PositionReportSupervisor {
         this.t_cycleNumber = 1;
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void newLocation(NewLocationEvent nle){
-        if(!validTarget(nle.targets)) return;
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        if(lastLocationID == nle.newLocation.getId()) return;
-        if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
-            sendPositionReport();;
-        }
-        this.lastLocationID = nle.newLocation.getId();
-    }
-
+    /**
+     * Builds a position report message ({@link Message_136}) and places it on the local {@link EventBus}
+     * in a {@link SendMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
+     */
     private void sendPositionReport() {
         TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
@@ -149,7 +182,7 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, this.messageDestination)); //TODO Message136 has to work
+        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, Collections.singletonList("mr;R=" + this.rbcID))); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Position Report"));
     }
 

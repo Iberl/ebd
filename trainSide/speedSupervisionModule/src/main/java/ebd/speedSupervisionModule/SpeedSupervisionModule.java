@@ -16,9 +16,19 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Arrays;
 import java.util.Collections;
 
+/**
+ * This class supervises the speed of the train and to some extend the distance traveled.
+ * It checks if the speed or the distance becomes to great and signals such occurrences.
+ * It is the responsibility of the Train Status Manager and the Driving Dynamic Modules to react to these signals
+ * correctly.
+ *
+ * //TODO: Respect SRS 3.13 in total!
+ *
+ * @author Lars Schulze-Falck
+ */
 public class SpeedSupervisionModule {
 
-    //TODO: SRS 3.13 in total!
+
 
     private EventBus eventBus;
 
@@ -27,12 +37,23 @@ public class SpeedSupervisionModule {
     //TODO Correct maxDistance!
     private Double maxDistance = 0d;
 
-
-    public SpeedSupervisionModule(EventBus eventBus){
-        this.eventBus = eventBus;
-        eventBus.register(this);
+    /**
+     * Constructor
+     * @param localEventBus The local {@link EventBus} of the train
+     */
+    public SpeedSupervisionModule(EventBus localEventBus){
+        this.eventBus = localEventBus;
+        localEventBus.register(this);
     }
 
+    /**
+     * This method listens to clock tick events and checks if the speed becomes to great.
+     * There are multiple {@link SpeedInterventionLevel}, that are reached at different times.<br>
+     * Currently, the different points of intervention are aproximated, this will be overhauled in the next
+     * revision of this module.
+     *
+     * @param cte A {@link ClockTickEvent}
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
@@ -112,7 +133,10 @@ public class SpeedSupervisionModule {
         this.eventBus.postSticky(new SsmReportEvent("ssm", Collections.singletonList("tsm"), speedInterventionLevel));
 
     }
-
+    /**
+     * This method updates the breaking curve.
+     * @param nbce A {@link NewBreakingCurveEvent}
+     */
     @Subscribe
     public void setBreakingCurve(NewBreakingCurveEvent nbce){
 

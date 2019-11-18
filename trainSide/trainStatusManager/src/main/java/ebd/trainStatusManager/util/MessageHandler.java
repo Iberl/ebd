@@ -31,8 +31,20 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.*;
 
+/**
+ * This class handles ETCS Messages for the {@link ebd.trainStatusManager.TrainStatusManager}.
+ * Every messages has expected packages, without these the messages will be rejected. Many messages can also have
+ * optional packages. These get forwarded to the {@link PackageResolver}.
+ *<p>
+ * Currently implemented messages per id: 3, 24<br>
+ * Currently implemented optional packages per id: 5, 57, 58<br>
+ *</p>
+ *
+ * @author Lars Schulze-Falck
+ */
 public class MessageHandler {
     //TODO: Respect SRS 3 A.3.3
+    //TODO: Make rbcID updatetable, make RBC Event
 
     private EventBus localBus;
     private List<String> exceptionTarget = Collections.singletonList("tsm");
@@ -186,11 +198,11 @@ public class MessageHandler {
             case 5:
                 PackageResolver.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
-            case 58:
-                PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
-                break;
             case 57:
                 PackageResolver.p57(this.localBus,(Packet_57)trackPacket);
+                break;
+            case 58:
+                PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
