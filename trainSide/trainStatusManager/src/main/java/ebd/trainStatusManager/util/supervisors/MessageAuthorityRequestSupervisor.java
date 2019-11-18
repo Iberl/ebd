@@ -27,11 +27,21 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class supervises the movement authority requests. It takes the movement request parameter
+ * received from rbc and stored in {@link TrainDataVolatile} and issues movement requests accordingly.<br>
+ * It gets
+ *
+ * @author Lars Schulze-Falck
+ */
 public class MessageAuthorityRequestSupervisor {
-
     private EventBus localBus;
     private String etcsTrainID;
-    private String rbcID;
+    private String rbcID; //TODO: make updateable
+
+    /**
+     * In [m]
+     */
     private double lengthTrain;
 
     /**
@@ -41,6 +51,12 @@ public class MessageAuthorityRequestSupervisor {
     private int lastQ_MARQSTREASON;
     private BreakingCurve breakingCurve = null;
 
+    /**
+     * Constructor
+     * @param localBus the local {@link EventBus}
+     * @param etcsTrainID the ETCS ID of the train
+     * @param rbcID the current RBC ID
+     */
     public MessageAuthorityRequestSupervisor(EventBus localBus, String etcsTrainID, String rbcID){
         this.localBus = localBus;
         this.etcsTrainID = etcsTrainID;
@@ -50,6 +66,10 @@ public class MessageAuthorityRequestSupervisor {
         this.lengthTrain = trainDataPerma.getL_train();
     }
 
+    /**
+     * On every clock tick, this methods checks if the prerequisites for a movement request are fulfilled and sends out
+     * these requests accordingly
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 

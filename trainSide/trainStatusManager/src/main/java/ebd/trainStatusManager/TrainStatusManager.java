@@ -27,10 +27,7 @@ import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
-import ebd.trainStatusManager.util.Clock;
-import ebd.trainStatusManager.util.GlobalHandler;
-import ebd.trainStatusManager.util.MessageHandler;
-import ebd.trainStatusManager.util.TelegramHandler;
+import ebd.trainStatusManager.util.*;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
@@ -59,6 +56,7 @@ public class TrainStatusManager implements Runnable {
     Handlers
      */
     private Logging logger;
+    private ExceptionHandler exceptionHandler;
     private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
     private TelegramHandler telegramHandler;
@@ -218,6 +216,7 @@ public class TrainStatusManager implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.exceptionHandler = new ExceptionHandler(this.localEventBus);
         this.globalHandler = new GlobalHandler(this.localEventBus,this.etcsTrainID);
         this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID,this.rbcID);
         this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);
