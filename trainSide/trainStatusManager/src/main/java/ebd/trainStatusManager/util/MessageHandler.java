@@ -124,7 +124,7 @@ public class MessageHandler {
         int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
         int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
         double l_train = trainDataPerma.getL_train();
-        double currentMaxSpeed = trainDataVolatile.getCurrentMaxSpeed();
+        double currentMaxSpeed = trainDataVolatile.getCurrentTargetSpeed();
         int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
         Position refPosition;

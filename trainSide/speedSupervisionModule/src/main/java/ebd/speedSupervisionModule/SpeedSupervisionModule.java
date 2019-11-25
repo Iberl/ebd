@@ -2,6 +2,7 @@ package ebd.speedSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
@@ -13,8 +14,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * This class supervises the speed of the train and to some extend the distance traveled.
@@ -30,7 +31,9 @@ public class SpeedSupervisionModule {
 
 
 
-    private EventBus eventBus;
+    private EventBus localEventBus;
+    private List<String> tdTargets = Collections.singletonList("td");
+    private List<String> allTargets = Collections.singletonList("all");
 
     private BreakingCurve breakingCurve = null;
 
@@ -42,7 +45,7 @@ public class SpeedSupervisionModule {
      * @param localEventBus The local {@link EventBus} of the train
      */
     public SpeedSupervisionModule(EventBus localEventBus){
-        this.eventBus = localEventBus;
+        this.localEventBus = localEventBus;
         localEventBus.register(this);
     }
 
@@ -61,7 +64,7 @@ public class SpeedSupervisionModule {
             return;
         }
 
-        TrainDataVolatile trainDataVolatile = this.eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         double curSpeed;
         Position curPosition;
 
@@ -84,9 +87,11 @@ public class SpeedSupervisionModule {
         double tripDistanceIndication = tripDistance + curSpeed * 10;
         SpeedInterventionLevel speedInterventionLevel;
 
+        double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+        sendCurrentMaxSpeed(maxSpeed);
         //TODO Make this less horrible!
         if(tripDistance < this.maxDistance){
-            double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+
             //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
             if(curSpeed > maxSpeed + 2){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
@@ -130,7 +135,7 @@ public class SpeedSupervisionModule {
             speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
         }
 
-        this.eventBus.postSticky(new SsmReportEvent("ssm", Collections.singletonList("tsm"), speedInterventionLevel));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel));
 
     }
     /**
@@ -142,6 +147,10 @@ public class SpeedSupervisionModule {
 
         this.breakingCurve = nbce.breakingCurve;
         this.maxDistance = this.breakingCurve.getHighestXValue();
+    }
+
+    private void sendCurrentMaxSpeed(double curMaxSpeed) {
+        this.localEventBus.post(new TrainDataChangeEvent("ssm", this.tdTargets, "currentMaximumSpeed", curMaxSpeed));
     }
 
 }

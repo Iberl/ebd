@@ -1,5 +1,6 @@
 package ebd.drivingDynamics;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -35,7 +36,8 @@ class DrivingDynamicsTest {
         EventBus eb = EventBus.getDefault();
         List<String> targetList = Arrays.asList(new String[]{"all"});
         RouteData routeData = new RouteData(eb);
-        TrainData trainData = new TrainData(eb, "resources/testTrain650.json");
+        ConfigHandler.getInstance().testing = true;
+        TrainData trainData = new TrainData(eb, 192);
 
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
 
@@ -56,8 +58,7 @@ class DrivingDynamicsTest {
         BackwardSpline breakingCurve = new BackwardSpline(2);
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
-        DrivingDynamics drivingDynamics = new DrivingDynamics(eb,
-                "C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\StrictDrivingStrategy.json");
+        DrivingDynamics drivingDynamics = new DrivingDynamics(eb);
         eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve, 0));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();

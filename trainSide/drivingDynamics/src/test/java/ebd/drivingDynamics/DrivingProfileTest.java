@@ -1,6 +1,7 @@
 package ebd.drivingDynamics;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -18,6 +19,7 @@ class DrivingProfileTest {
     @BeforeAll
     static void setTrainDataVolatile(){
         Testhandler testhandler = new Testhandler();
+        ConfigHandler.getInstance().testing = true;
         TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 33d, 34d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
 
@@ -25,7 +27,7 @@ class DrivingProfileTest {
 
     @Test
     void actionToTake() throws ParseException, DDBadDataException, IOException {
-        DrivingProfile drivingProfile = new DrivingProfile("C:\\intellij-workspace\\etcs\\drivingDynamics\\src\\main\\resources\\StrictDrivingStrategy.json", EventBus.getDefault());
-        assertEquals("CruiseAction", drivingProfile.actionToTake().getClass().getSimpleName());
+        DrivingProfile drivingProfile = new DrivingProfile(EventBus.getDefault());
+        assertEquals("BreakAction", drivingProfile.actionToTake().getClass().getSimpleName());
     }
 }
