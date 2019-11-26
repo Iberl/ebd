@@ -1,8 +1,6 @@
 package ebd.trainData;
 
-import ebd.globalUtils.events.ExceptionEvent;
-import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -60,10 +58,16 @@ public class TrainDataVolatile {
     protected volatile Double currentSpeed = 0d;
 
     /**
-     * The current maximum allowed speed of the train in [m/s]
+     * The current max speed of the train in [m/s] based on the breaking curve
+     */
+    protected volatile Double currentMaximumSpeed = 0d;
+
+    /**
+     * The target speed of the train in [m/s] based on the trip profile.
+     * Updated trough driving dynamics
      */
     @NotNull
-    protected volatile Double currentMaxSpeed = 0d;
+    protected volatile Double currentTargetSpeed = 0d;
 
 
     /**
@@ -151,7 +155,6 @@ public class TrainDataVolatile {
     /**
      * {@link ebd.messageLibrary.util.ETCSVariables#M_LOC}
      */
-
     protected volatile int M_LOC = ETCSVariables.M_LOC;
 
     /**
@@ -178,7 +181,7 @@ public class TrainDataVolatile {
      * only for testing!
      * @param currentPosition
      * @param currentSpeed
-     * @param currentMaxSpeed
+     * @param currentTargetSpeed
      * @param m_MODE
      * @param previousLocations
      * @param currentBreakingMode
@@ -187,18 +190,18 @@ public class TrainDataVolatile {
      * @param currentResistanceCurve
      * @param availableAcceleration
      */
-    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentMaxSpeed, @Nullable Integer m_MODE,
+    @SuppressWarnings({"JavaDoc", "ConstantConditions"})
+    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentTargetSpeed, @Nullable Integer m_MODE,
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
-
-        NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
-        ExceptionEvent exceptionEvent = new ExceptionEvent("TD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
-        EventBus.getDefault().post(exceptionEvent);
+        if(!ConfigHandler.getInstance().testing){
+            throw new RuntimeException("This Constructor is only for use in tests");
+        }
 
         this.currentPosition = currentPosition;
         this.currentSpeed = currentSpeed;
-        this.currentMaxSpeed = currentMaxSpeed;
+        this.currentTargetSpeed = currentTargetSpeed;
         M_MODE = m_MODE;
         this.previousLocations = previousLocations;
         this.currentBreakingMode = currentBreakingMode;
@@ -210,6 +213,7 @@ public class TrainDataVolatile {
 
     //Getter and setter
 
+    @Nullable
     public Position getCurrentPosition() {
         return currentPosition;
     }
@@ -234,25 +238,37 @@ public class TrainDataVolatile {
     /**
      * @return current speed in [m/s]
      */
+    @NotNull
     public Double getCurrentSpeed() {
         return currentSpeed;
     }
 
     /**
-     * @return current maximum allowed speed in [m/s]
+     * The current max speed of the train in [m/s] based on the breaking curve
      */
-    public Double getCurrentMaxSpeed() {
-        return currentMaxSpeed;
+    public Double getCurrentMaximumSpeed() {
+        return currentMaximumSpeed;
     }
 
-    public int getM_MODE() {
+    /**
+     * @return current maximum allowed speed in [m/s]
+     */
+    @NotNull
+    public Double getCurrentTargetSpeed() {
+        return currentTargetSpeed;
+    }
+
+    @Nullable
+    public Integer getM_MODE() {
         return M_MODE;
     }
 
+    @Nullable
     public List<Location> getPreviousLocations() {
         return previousLocations;
     }
 
+    @Nullable
     public String getCurrentBreakingMode() {
         return currentBreakingMode;
     }
@@ -260,6 +276,7 @@ public class TrainDataVolatile {
     /**
      * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
+    @NotNull
     public ForwardSpline getCurrentBreakingPower() {
         return currentBreakingPower;
     }
@@ -267,6 +284,7 @@ public class TrainDataVolatile {
     /**
      * @return The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
      */
+    @NotNull
     public ForwardSpline getCurrentAcceleratingPower() {
         return currentAcceleratingPower;
     }
@@ -274,10 +292,12 @@ public class TrainDataVolatile {
     /**
      * @return The current resistance curve r(v), r in [m/(s^2)], v in [m/s]
      */
+    @NotNull
     public ForwardSpline getCurrentResistanceCurve() {
         return currentResistanceCurve;
     }
 
+    @Nullable
     public AvailableAcceleration getAvailableAcceleration() {
         return availableAcceleration;
     }
@@ -330,6 +350,7 @@ public class TrainDataVolatile {
     /**
      * {@link IncrPosRprtDist}
      */
+    @Nullable
     public IncrPosRprtDist getIncrPosRprtDist() {
         return incrPosRprtDist;
     }

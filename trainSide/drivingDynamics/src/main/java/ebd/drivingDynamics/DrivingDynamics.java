@@ -65,7 +65,7 @@ public class DrivingDynamics {
     private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
     private double maxTripSectionDistance;
 
-    private double curMaxSpeed = 0d;
+    private double targetSpeed = 0d;
 
     private int cycleCount = 20;
     private int cylceCountMax = 20; //TODO Connect to Config
@@ -83,7 +83,7 @@ public class DrivingDynamics {
         this.localBus.register(this);
 
         try {
-            this.drivingProfile = new DrivingProfile(pathToDrivingProfile, this.localBus);
+            this.drivingProfile = new DrivingProfile(this.localBus);
         } catch (IOException | ParseException e) {
             localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
@@ -123,7 +123,7 @@ public class DrivingDynamics {
         Update TrainDataVolatile to set the current maximum allowed speed of the train
         based on the tripProfile
          */
-        updateCurrentMaxSpeed();
+        sendCurrentTargetSpeed();
 
         /*
         Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
@@ -184,7 +184,7 @@ public class DrivingDynamics {
         /*
         Update TrainDataVolatile with the newly calculated values
          */
-        sendTrainDataVolatile();
+        updateTrainDataVolatile();
 
         cycleCount++;
         if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
@@ -342,16 +342,17 @@ public class DrivingDynamics {
         this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
+    private void sendCurrentTargetSpeed() {
     /**
      * This method calculates the new MaxSpeed for the current location. Also sends these to {@link TrainDataVolatile}
      */
     private void updateCurrentMaxSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
-        if(tripSectionDistance < this.maxTripSectionDistance) this.curMaxSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
-        else this.curMaxSpeed = 0d;
+        if(tripSectionDistance < this.maxTripSectionDistance) this.targetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
+        else this.targetSpeed = 0d;
 
-        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentMaxSpeed", this.curMaxSpeed));
+        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentTargetSpeed", this.targetSpeed));
     }
 
     /**
@@ -360,7 +361,7 @@ public class DrivingDynamics {
     private void sendToLogEventDynamicState() {
         double a = dynamicState.getAcceleration();
         double v = dynamicState.getSpeed();
-        double vm = this.curMaxSpeed;
+        double vm = this.targetSpeed;
         int l = dynamicState.getPosition().getLocation().getId();
         double i = dynamicState.getPosition().getIncrement();
         double td = dynamicState.getTripDistance();

@@ -37,11 +37,11 @@ public class RelativeSpeedCondition extends Condition {
     @Override
     public boolean eval() {
         TrainDataVolatile trainDataVolatile = localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        if(trainDataVolatile.getCurrentMaxSpeed() == null || trainDataVolatile.getCurrentSpeed() == null){
+        if(trainDataVolatile.getCurrentTargetSpeed() == null || trainDataVolatile.getCurrentSpeed() == null){
             return false;
         }
 
-        double maxSpeed = trainDataVolatile.getCurrentMaxSpeed() * speedPercentage;
+        double maxSpeed = trainDataVolatile.getCurrentTargetSpeed() * speedPercentage;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
 
         return comparator.apply(curSpeed,maxSpeed);

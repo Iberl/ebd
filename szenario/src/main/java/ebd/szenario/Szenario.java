@@ -184,8 +184,7 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
-        this.tsm = new TrainStatusManager(192, 1,
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+        this.tsm = new TrainStatusManager(192, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
@@ -206,8 +205,7 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 2);
-        this.tsm = new TrainStatusManager(192, 1,
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "RiskyDrivingStrategy.json", true);
+        this.tsm = new TrainStatusManager(192, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
@@ -233,8 +231,7 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(192, 1,
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+        this.tsm = new TrainStatusManager(192, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
@@ -251,8 +248,7 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(192, 1,
-                "bbblaaaa127.0.0.1:8080/Trainconfigurator", "StrictDrivingStrategy.json", true);
+        this.tsm = new TrainStatusManager(192, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));

@@ -21,7 +21,7 @@ class TrainDataTest {
 
         TDTestHandler tdTestHandler = new TDTestHandler();
 
-        TrainData trainData = new TrainData(EventBus.getDefault(),"resources/testTrain650.json");
+        TrainData trainData = new TrainData(EventBus.getDefault(),192);
 
         Thread.sleep(100);
 
@@ -49,7 +49,7 @@ class TrainDataTest {
 
         HashMap<String,Object> namesToValues = new HashMap<>();
         namesToValues.put("currentSpeed",50d);
-        namesToValues.put("currentMaxSpeed", 100d);
+        namesToValues.put("currentMaximumSpeed", 100d);
 
         EventBus.getDefault().post(new TrainDataMultiChangeEvent("main", new ArrayList<>(), namesToValues));
         trainDataVolatile = EventBus.getDefault().getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;

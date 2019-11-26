@@ -3,6 +3,7 @@ package ebd.trainStatusManager;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
@@ -44,8 +45,6 @@ public class TrainStatusManager implements Runnable {
 
     private int etcsTrainID;
     private int rbcID;
-    private String urlToTrainconfigurator;
-    private String pathToDrivingStrategy;
 
     private EventBus localEventBus = new EventBus();
     private EventBus globalEventBus = EventBus.getDefault();
@@ -79,39 +78,26 @@ public class TrainStatusManager implements Runnable {
     private boolean tripInProgress;
 
 
-    public TrainStatusManager(int etcsTrainID, int rbcID, String urlToTrainconfigurator,
-                              String pathToDrivingStrategy){
+    public TrainStatusManager(int etcsTrainID, int rbcID){
         this.localEventBus.register(this);
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
-        this.urlToTrainconfigurator = urlToTrainconfigurator;
-        this.pathToDrivingStrategy = pathToDrivingStrategy;
-        setUpTrain(false);
+        setUpTrain();
         this.tsmThread.start();
+        if(ConfigHandler.getInstance().testing){
+            connectToRBC();
+        }
     }
 
-    public TrainStatusManager(int etcsTrainID, int rbcID, String urlToTrainconfigurator,
-                              String pathToDrivingStrategy, boolean testing){
-        this.localEventBus.register(this);
-        this.etcsTrainID = etcsTrainID;
-        this.rbcID = rbcID;
-        this.urlToTrainconfigurator = urlToTrainconfigurator;
-        this.pathToDrivingStrategy = pathToDrivingStrategy;
-        setUpTrain(testing);
-        this.tsmThread.start();
-        connectToRBC();
-    }
-
-    public TrainStatusManager(EventBus eventBus, int etcsTrainID, int rbcID, String urlToTrainconfigurator,
-                              String pathToDrivingStrategy){
+    public TrainStatusManager(EventBus eventBus, int etcsTrainID, int rbcID){
         this.localEventBus = eventBus;
-        localEventBus.register(this);
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
-        this.urlToTrainconfigurator = urlToTrainconfigurator;
-        this.pathToDrivingStrategy = pathToDrivingStrategy;
-        setUpTrain(true);
+        setUpTrain();
         this.tsmThread.start();
+        if(ConfigHandler.getInstance().testing){
+            connectToRBC();
+        }
     }
 
     @Override
@@ -206,7 +192,7 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
-    private void setUpTrain(boolean testing) {
+    private void setUpTrain() {
         /*
         Handlers
          */
@@ -227,8 +213,7 @@ public class TrainStatusManager implements Runnable {
 
         this.routeData = new RouteData(this.localEventBus);
 
-        if(testing) this.trainData = new TrainData(this.localEventBus,"testTrain650.json");
-        else this.trainData = new TrainData(this.localEventBus,this.urlToTrainconfigurator,this.etcsTrainID);
+        this.trainData = new TrainData(this.localEventBus,this.etcsTrainID);
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
         this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
@@ -237,7 +222,7 @@ public class TrainStatusManager implements Runnable {
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
-        this.drivingDynamics = new DrivingDynamics(this.localEventBus,this.pathToDrivingStrategy);
+        this.drivingDynamics = new DrivingDynamics(this.localEventBus);
 
 
         Position curPos = new Position(0,true, new InitalLocation());

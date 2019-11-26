@@ -4,6 +4,7 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.ActionParser;
 import ebd.drivingDynamics.util.actions.NoAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.trainData.util.events.TrainDataExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -25,19 +26,11 @@ import java.util.List;
 public class DrivingProfile {
 
     private List<Action> actions;
-    private EventBus localBus;
+    private EventBus localEventBusBus;
 
-    /**
-     *
-     * @param pathToProfile path to a json file containing a driving profile
-     * @param localBus local {@link EventBus} of the train
-     * @throws DDBadDataException Missing data in the file.
-     * @throws IOException If the file can not be found or read
-     * @throws ParseException If the file can not parsed, indicating faulty json formatting.
-     */
-    public DrivingProfile(String pathToProfile, EventBus localBus) throws DDBadDataException, IOException, ParseException {
-        this.localBus = localBus;
-        loadProfileFromFile(pathToProfile);
+    public DrivingProfile(EventBus localEventBus) throws DDBadDataException, IOException, ParseException {
+        this.localEventBusBus = localEventBus;
+        loadProfileFromFile();
     }
 
     /**
@@ -51,9 +44,8 @@ public class DrivingProfile {
                 return action;
             }
         }
-        return new NoAction(localBus);
+        return new NoAction(localEventBusBus);
     }
-
     /**
      * Opens json file and parses the contends
      * @param pathToProfile A path to the json file
@@ -61,23 +53,23 @@ public class DrivingProfile {
      * @throws IOException If the file can not be found or read
      * @throws ParseException If the file can not parsed, indicating faulty json formatting.
      */
-    private void loadProfileFromFile(String pathToProfile) throws DDBadDataException, IOException, ParseException {
-        InputStream inputStream;
-        try{
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToProfile);
+    private void loadProfileFromFile() throws DDBadDataException, IOException, ParseException {
+        String pathToProfile = ConfigHandler.getInstance().pathToDriverProfileJson;
+        try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToProfile)){
+            try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
+                JSONParser jsonParser = new org.json.simple.parser.JSONParser();
+                Object object = jsonParser.parse(bufferedReader);
+
+                jsonToProfile((JSONObject)object);
+            }
         }
         catch (NullPointerException npe){
             IllegalArgumentException iAE = new IllegalArgumentException("This file could not be found: " + pathToProfile);
-            this.localBus.post(new TrainDataExceptionEvent("td", Collections.singletonList("tsm"), new NotCausedByAEvent(), iAE));
+            this.localEventBusBus.post(new TrainDataExceptionEvent("td", Collections.singletonList("tsm"), new NotCausedByAEvent(), iAE));
             return;
         }
 
-        try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
-            JSONParser jsonParser = new org.json.simple.parser.JSONParser();
-            Object object = jsonParser.parse(bufferedReader);
 
-            jsonToProfile((JSONObject)object);
-        }
     }
 
     /**
@@ -92,7 +84,7 @@ public class DrivingProfile {
             JSONArray jsonArray = (JSONArray)jsonObject.get("actions");
             for(Object object : jsonArray){
                 JSONObject tempJSON = (JSONObject)object;
-                this.actions.add(ActionParser.parse(tempJSON, this.localBus));
+                this.actions.add(ActionParser.parse(tempJSON, this.localEventBus));
             }
         }
         else throw new DDBadDataException("The key 'actions' was missing from a DrivingProfile.");

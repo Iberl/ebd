@@ -28,6 +28,7 @@ public class Logging{
         //format of logs is defined in resources/logging.properties
         System.setProperty("java.util.logging.config.file", "resources/logging.properties");
         File logDirectory = new File("log/");
+        System.out.println(logDirectory.getAbsolutePath());
         if(!logDirectory.exists()){
             logDirectory.mkdir();
         }

@@ -36,42 +36,15 @@ public class TrainData {
      *
      * @param localBus The local {@link EventBus} of the train
      *
-     * @param trainConfiguratorURL The ip to the trainconfigurator tool
-     *
      * @param trainID the ETCS-ID of the train
      */
-    public TrainData(EventBus localBus, String trainConfiguratorURL, int trainID){
+    public TrainData(EventBus localBus, int trainID){
         this.localBus = localBus;
         this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
-            this.trainDataPerma = new TrainDataPerma(trainConfiguratorURL, String.valueOf(trainID));
-        } catch (IOException | ParseException e) {
-            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
-        } catch (TDBadDataException e) {
-            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
-        }
-        this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
-        this.trainDataVolatile = new TrainDataVolatile(localBus);
-        localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
-    }
-
-    /**
-     * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a file
-     * Used for testing
-     *
-     * @param localBus The local {@link EventBus} of the train
-     *
-     * @param pathToTrainJSON The path to a .json file containing a train
-     */
-    public TrainData(EventBus localBus, String pathToTrainJSON){
-        this.localBus = localBus;
-        this.localBus.register(this);
-        this.exceptionTargets.add("tsm;"); //TODO check right recipient
-        this.eventTargets.add("all;");
-        try {
-            this.trainDataPerma = new TrainDataPerma(pathToTrainJSON);
+            this.trainDataPerma = new TrainDataPerma(trainID);
         } catch (IOException | ParseException e) {
             localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {

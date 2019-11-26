@@ -1,5 +1,6 @@
 package ebd.drivingDynamics;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
@@ -32,7 +33,8 @@ class DynamicStateTest {
         EventBus eb = EventBus.getDefault();
         List<String> targetList = Arrays.asList(new String[]{"all"});
         RouteData routeData = new RouteData(eb);
-        TrainData trainData = new TrainData(eb, "/resources/testTrain650.json");
+        ConfigHandler.getInstance().testing = true;
+        TrainData trainData = new TrainData(eb, 192);
 
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
 
