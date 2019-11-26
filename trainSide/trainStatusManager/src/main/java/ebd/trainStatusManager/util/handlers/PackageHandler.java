@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util;
+package ebd.trainStatusManager.util.handlers;
 
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
@@ -24,7 +24,7 @@ import java.util.*;
  *
  * @author Lars Schulze-Falck
  */
-public class PackageResolver {
+public class PackageHandler {
 
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);

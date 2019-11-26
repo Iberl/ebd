@@ -76,9 +76,8 @@ public class DrivingDynamics {
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
      *
      * @param localBus The local {@link EventBus} of the train
-     * @param pathToDrivingProfile A path to a json file that can be parsed by {@link DrivingProfile}
      */
-    public DrivingDynamics(EventBus localBus, String pathToDrivingProfile){
+    public DrivingDynamics(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
 
@@ -123,7 +122,7 @@ public class DrivingDynamics {
         Update TrainDataVolatile to set the current maximum allowed speed of the train
         based on the tripProfile
          */
-        sendCurrentTargetSpeed();
+        updateCurrentTargetSpeed();
 
         /*
         Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
@@ -332,7 +331,7 @@ public class DrivingDynamics {
     /**
      * This method gathers the new information from dynamic state and send these to {@link TrainDataVolatile}
      */
-    private void sendTrainDataVolatile(){
+    private void updateTrainDataVolatile(){
         HashMap<String,Object> nameToValue = new HashMap<>();
         nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
         nameToValue.put("currentPosition", this.dynamicState.getPosition());
@@ -342,11 +341,10 @@ public class DrivingDynamics {
         this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
-    private void sendCurrentTargetSpeed() {
     /**
      * This method calculates the new MaxSpeed for the current location. Also sends these to {@link TrainDataVolatile}
      */
-    private void updateCurrentMaxSpeed() {
+    private void updateCurrentTargetSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
         if(tripSectionDistance < this.maxTripSectionDistance) this.targetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);

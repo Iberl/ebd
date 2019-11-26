@@ -39,6 +39,10 @@ public class ConfigHandler {
     ints
      */
     public int trainClockTickInMS = 100;
+    /**
+     * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
+     */
+    public int infrastructureUpdateMultiplier = 10;
 
     /*
     doubles

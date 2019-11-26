@@ -26,10 +26,10 @@ import java.util.List;
 public class DrivingProfile {
 
     private List<Action> actions;
-    private EventBus localEventBusBus;
+    private EventBus localEventBus;
 
     public DrivingProfile(EventBus localEventBus) throws DDBadDataException, IOException, ParseException {
-        this.localEventBusBus = localEventBus;
+        this.localEventBus = localEventBus;
         loadProfileFromFile();
     }
 
@@ -44,11 +44,10 @@ public class DrivingProfile {
                 return action;
             }
         }
-        return new NoAction(localEventBusBus);
+        return new NoAction(localEventBus);
     }
     /**
      * Opens json file and parses the contends
-     * @param pathToProfile A path to the json file
      * @throws DDBadDataException Missing data in the file.
      * @throws IOException If the file can not be found or read
      * @throws ParseException If the file can not parsed, indicating faulty json formatting.
@@ -65,7 +64,7 @@ public class DrivingProfile {
         }
         catch (NullPointerException npe){
             IllegalArgumentException iAE = new IllegalArgumentException("This file could not be found: " + pathToProfile);
-            this.localEventBusBus.post(new TrainDataExceptionEvent("td", Collections.singletonList("tsm"), new NotCausedByAEvent(), iAE));
+            this.localEventBus.post(new TrainDataExceptionEvent("td", Collections.singletonList("tsm"), new NotCausedByAEvent(), iAE));
             return;
         }
 

@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util;
+package ebd.trainStatusManager.util.handlers;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -34,7 +34,7 @@ import java.util.*;
 /**
  * This class handles ETCS Messages for the {@link ebd.trainStatusManager.TrainStatusManager}.
  * Every messages has expected packages, without these the messages will be rejected. Many messages can also have
- * optional packages. These get forwarded to the {@link PackageResolver}.
+ * optional packages. These get forwarded to the {@link PackageHandler}.
  *<p>
  * Currently implemented messages per id: 3, 24<br>
  * Currently implemented optional packages per id: 5, 57, 58<br>
@@ -196,13 +196,13 @@ public class MessageHandler {
 
         switch (trackPacket.NID_PACKET){
             case 5:
-                PackageResolver.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
+                PackageHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
             case 57:
-                PackageResolver.p57(this.localBus,(Packet_57)trackPacket);
+                PackageHandler.p57(this.localBus,(Packet_57)trackPacket);
                 break;
             case 58:
-                PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
