@@ -16,7 +16,7 @@ portOfInfrastructureServer = 25555
 #Main tick rate of the train calculations in milliseconds (default: 100)
 trainClockTickInMS = 100
 #Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
-infrastructureUpdateMultiplier = 10;
+infrastructureUpdateMultiplier = 10
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######

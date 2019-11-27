@@ -35,6 +35,7 @@ import ebd.trainStatusManager.util.handlers.ExceptionHandler;
 import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
 import ebd.trainStatusManager.util.handlers.TelegramHandler;
+import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
 import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
 import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.trainStatusManager.util.supervisors.TripSupervisor;
@@ -63,6 +64,11 @@ public class TrainStatusManager implements Runnable {
     private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
     private TelegramHandler telegramHandler;
+
+    /*
+    ClientConnectors
+     */
+    private InfrastructureClientConnector infrastructureClientConnector;
 
     /*
     Internal modules
@@ -211,6 +217,10 @@ public class TrainStatusManager implements Runnable {
         this.messageHandler = new MessageHandler(this.localEventBus,this.etcsTrainID,this.rbcID);
         this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);
 
+        /*
+        SocketClientConnectors
+         */
+        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus,this.etcsTrainID);
         /*
         Modules
          */
