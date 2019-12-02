@@ -2,6 +2,7 @@ package ebd.speedSupervisionModule;
 
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -21,6 +22,7 @@ class SpeedSupervisionModuleTest {
     public void ssmTest() throws InterruptedException {
         EventBus eventBus = new EventBus();
         TestHandler th = new TestHandler(eventBus);
+        ConfigHandler.getInstance().testing = true;
         Thread thread = new Thread(new Clock(eventBus));
         thread.start();
 

@@ -10,13 +10,13 @@ import java.io.IOException;
 
 class TrainDataPermaTest {
 
-    @Test
+    /*@Test
     public void urlTest() throws IOException, ParseException, TDBadDataException {
         ConfigHandler.getInstance().testing = false;
         TrainDataPerma trainDataPerma = new TrainDataPerma(192);
 
 
-    }
+    }*/
 
     @Test
     public void fileTest() throws IOException, ParseException, TDBadDataException {

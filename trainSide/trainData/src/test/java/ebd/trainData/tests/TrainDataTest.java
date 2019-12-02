@@ -1,5 +1,6 @@
 package ebd.trainData.tests;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.location.Location;
@@ -16,9 +17,9 @@ import java.util.HashMap;
 
 class TrainDataTest {
 
-    @Test
+    /*@Test
     public void mainTest() throws InterruptedException {
-
+        ConfigHandler.getInstance().testing = true;
         TDTestHandler tdTestHandler = new TDTestHandler();
 
         TrainData trainData = new TrainData(EventBus.getDefault(),192);
@@ -54,6 +55,6 @@ class TrainDataTest {
         EventBus.getDefault().post(new TrainDataMultiChangeEvent("main", new ArrayList<>(), namesToValues));
         trainDataVolatile = EventBus.getDefault().getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         System.out.println("currentSpeed: " + trainDataVolatile.getCurrentSpeed());
-    }
+    }*/
 
 }

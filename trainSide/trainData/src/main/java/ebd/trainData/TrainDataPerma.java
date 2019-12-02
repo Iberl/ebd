@@ -148,7 +148,7 @@ public class TrainDataPerma {
 
         String trainConfiguratorIP = ConfigHandler.getInstance().ipToInfrastructureServer;
         String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
-        String urlName = trainConfiguratorIP + ":" + trainConfiguratorPort + "/rest/zug/extended/" + trainID;
+        String urlName = "https://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/rest/zug/extended/" + trainID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
