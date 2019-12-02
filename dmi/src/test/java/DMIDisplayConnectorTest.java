@@ -14,14 +14,14 @@ public class DMIDisplayConnectorTest {
     public static void main(String[] args) throws InterruptedException {
         new DMIDisplayConnector(EventBus.getDefault());
         for (int currentSpeed = 0; currentSpeed <= 180; currentSpeed += 10) {
-            EventBus.getDefault().post(generateDMIUpdateEvent(currentSpeed, 100));
-            Thread.sleep(2000);
+            EventBus.getDefault().post(generateDMIUpdateEvent(currentSpeed, 100, 200 - currentSpeed));
+            Thread.sleep(1000);
         }
     }
 
-    public static DMIUpdateEvent generateDMIUpdateEvent(double currentSpeed, double currentTargetSpeed) throws InterruptedException {
+    public static DMIUpdateEvent generateDMIUpdateEvent(double currentSpeed, double currentTargetSpeed, int targetDistance) throws InterruptedException {
         dmiUpdateEventTargets = Arrays.asList("a", "b");
-        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTargets, "message", currentSpeed, currentTargetSpeed);
+        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTargets, currentSpeed, currentTargetSpeed, targetDistance);
         return dmiUpdateEvent;
     }
 

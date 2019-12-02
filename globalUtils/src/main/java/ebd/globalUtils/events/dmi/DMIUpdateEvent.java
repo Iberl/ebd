@@ -7,11 +7,9 @@ import java.util.List;
 
 public class DMIUpdateEvent extends NormalEvent {
 
-    public String msg;
-
     private double currentSpeed;
     private double currentTargetSpeed;
-    private Position pos;
+    private int targetDistance;
 
 
     /**
@@ -21,11 +19,11 @@ public class DMIUpdateEvent extends NormalEvent {
      *                TODO: Define Format for IDs
      * @param targets ID from all modules the event is adressed to
      */
-    public DMIUpdateEvent(String source, List<String> targets, String msg, double currentSpeed, double targetSpeed) {
+    public DMIUpdateEvent(String source, List<String> targets, double currentSpeed, double targetSpeed, int targetDistance) {
         super(source, targets);
-        this.msg = msg;
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
+        this.targetDistance = targetDistance;
     }
 
 
@@ -36,4 +34,6 @@ public class DMIUpdateEvent extends NormalEvent {
     public double getCurrentTargetSpeed() {
         return this.currentTargetSpeed;
     }
+
+    public int getTargetDistance() {return this.targetDistance;}
 }

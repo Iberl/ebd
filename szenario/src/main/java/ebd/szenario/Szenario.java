@@ -4,6 +4,7 @@ import ebd.baliseTelegramGenerator.Balise;
 import ebd.baliseTelegramGenerator.BaliseGroup;
 import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
+import ebd.dmi.ui.DMIDisplayConnector;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -124,6 +125,7 @@ public class Szenario implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        new DMIDisplayConnector(globalEventBus);
         System.out.println("This is the virtual environment for the ETCS@EBD project");
 
         this.szenarioEventHandler = new SzenarioEventHandler();

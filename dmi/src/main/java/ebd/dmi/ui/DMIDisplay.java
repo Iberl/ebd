@@ -3,7 +3,6 @@ package ebd.dmi.ui;
 import ebd.dmi.ui.panels.*;
 import ebd.dmi.ui.utility.DMIUtility;
 import ebd.dmi.ui.utility.DMIColor;
-import ebd.globalUtils.position.Position;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,8 +91,7 @@ public class DMIDisplay extends JFrame {
         this.panelB.getSpeedometer().setCurrentTargetSpeed((int) currentTargetSpeed);
     }
 
-    //TODO: Position bzw. Distance übergeben
-    public void setPosition() {
-        this.panelA.setTargetDistance(1000);
+    public void setTargetDistance(int targetDistance) {
+        this.panelA.setTargetDistance(targetDistance);
     }
 }

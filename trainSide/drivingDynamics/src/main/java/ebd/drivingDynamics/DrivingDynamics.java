@@ -5,6 +5,7 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -313,6 +314,9 @@ public class DrivingDynamics {
         String msg = String.format("Acc: %5.2f m/s^2 V: %5.2f m/s, V_max: %5.2f m/s, ",a,v,vm);
         String msg2 = String.format("Pos: LRBG %3d + %7.2f m, TripDist: %8.2f m, TripTime: %6.1f s",l,i,td,tt);
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
+        //TODO: post DMIUpdateEvent on correct EventBus
+        //TODO: read targetDistance from DMIUpdateEvent
+        EventBus.getDefault().post(new DMIUpdateEvent("dd", Collections.singletonList("dmi"), v, vm, 800));
 
     }
 
