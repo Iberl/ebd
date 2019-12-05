@@ -135,7 +135,7 @@ public class Speedometer extends MyPanel {
 //		}
 
 
-		if (this.currentSpeed <= this.currentTargetSpeed) {
+		if (this.currentSpeed <= this.currentTargetSpeed + 5) {
 			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.MEDIUM_GRAY);
 			this.colorForArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
 			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
@@ -152,7 +152,7 @@ public class Speedometer extends MyPanel {
 //				}
 				this.speedingOccured = false;
 			}
-		} else if (this.currentSpeed > this.currentTargetSpeed) {
+		} else if (this.currentSpeed > this.currentTargetSpeed + 5) {
 			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.RED);
 			this.colorForArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
 			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.WHITE);

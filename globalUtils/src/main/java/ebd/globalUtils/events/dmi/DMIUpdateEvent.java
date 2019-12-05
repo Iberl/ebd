@@ -28,11 +28,11 @@ public class DMIUpdateEvent extends NormalEvent {
 
 
     public double getCurrentSpeed() {
-        return this.currentSpeed;
+        return this.currentSpeed*3.6;
     }
 
     public double getCurrentTargetSpeed() {
-        return this.currentTargetSpeed;
+        return this.currentTargetSpeed*3.6;
     }
 
     public int getTargetDistance() {return this.targetDistance;}
