@@ -22,6 +22,10 @@ public class Logging{
     static String logDateTime;
     static Handler fileHandlerAll;
 
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
     static {
         //format of logs is defined in resources/logging.properties
         System.setProperty("java.util.logging.config.file", "resources/logging.properties");
@@ -78,7 +82,12 @@ public class Logging{
      */
     @Subscribe
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
-        logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
+        if(logPrefix == "     GB") {
+            logger.log(Level.SEVERE, ANSI_BLUE + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
+        }
+        else {
+            logger.log(Level.SEVERE, ANSI_RED + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
+        }
     }
 
     /**
@@ -86,9 +95,13 @@ public class Logging{
      * @param normalEvent
      */
     @Subscribe
-    public void onNormalEvent(NormalEvent normalEvent){
-        if(!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
-            logger.fine(logPrefix + ": " + normalEvent.source + ": " + normalEvent.getClass().getSimpleName() + " occurred");
+    public void onNormalEvent(NormalEvent normalEvent) {
+        if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
+            if (logPrefix == "     GB") {
+                logger.fine(ANSI_BLUE + logPrefix + ": " + normalEvent.source + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
+            } else {
+                logger.fine(ANSI_RED + logPrefix + ": " + normalEvent.source + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
+            }
         }
     }
 
@@ -98,6 +111,11 @@ public class Logging{
      */
     @Subscribe
     public void onToLogEvent(ToLogEvent toLogEvent){
-        logger.info(logPrefix + ": " + toLogEvent.source + ": " + toLogEvent.msg);
+        if (logPrefix == "     GB") {
+            logger.info(ANSI_BLUE + logPrefix + ": " + toLogEvent.source + ": " + toLogEvent.msg + ANSI_RESET);
+        }
+        else {
+            logger.info(ANSI_RED + logPrefix + ": " + toLogEvent.source + ": " + toLogEvent.msg + ANSI_RESET);
+        }
     }
 }
