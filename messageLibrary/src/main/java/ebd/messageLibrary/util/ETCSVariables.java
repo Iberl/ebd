@@ -5,7 +5,8 @@ import ebd.messageLibrary.serialization.annotations.Signed;
 public class ETCSVariables {
 
 	// Identifier if no Value is available
-	public static final int INTEGER_NOVALUE     = -255;
+	public static final int INTEGER_NOVALUE     = -1;
+	public static final long LONG_NOVALUE 		= -1;
 	public static final boolean BOOLEAN_NOVALUE = false;
 
 	// If Min and/or Max is Set = Numbers
@@ -154,6 +155,16 @@ public class ETCSVariables {
 	public static final int D_GRADIENT = INTEGER_NOVALUE;
 
 	/**
+	 * Name: D_INFILL <br>
+	 * Description: Distance To Location Where To (Dis)Connect To A Radio Infill Unit <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.670 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int D_INFILL = INTEGER_NOVALUE;
+
+	/**
 	 * Name: D_LEVELTR <br>
 	 * Description: Distance To Level Transition <br>
 	 * Length: 15 <br>
@@ -183,6 +194,17 @@ public class ETCSVariables {
 	 * Resolution: Depends on Q_SCALE
 	 */
 	public static final int D_LOC = INTEGER_NOVALUE;
+
+	/**
+	 * Name: D_LOOP <br>
+	 * Description: Distance Between EOLM Ans Start Of Loop <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.660 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int D_LOOP		   = INTEGER_NOVALUE;
+	public static final int D_LOOP_UNKNOWN = 32767;
 
 	/**
 	 * Name: D_LRBG <br>
@@ -288,6 +310,26 @@ public class ETCSVariables {
 	public static final int D_PBDSR = INTEGER_NOVALUE;
 
 	/**
+	 * Name: D_POSOFF <br>
+	 * Description: Offset From Location Reference Of Geographical Position Balise Group To The Related Track km Reference <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.670 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int D_POSOFF = INTEGER_NOVALUE;
+
+	/**
+	 * Name: D_RBCTR <br>
+	 * Description: Distance To RBC Transition <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.670 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int D_RBCTR = INTEGER_NOVALUE;
+
+	/**
 	 * Name: D_PBDSR <br>
 	 * Description: Reference distance <br>
 	 * Length: 16 <br>
@@ -380,6 +422,17 @@ public class ETCSVariables {
 	 * Resolution: Depends on Q_SCALE
 	 */
 	public static final int D_TAFDISPLAY = INTEGER_NOVALUE;
+
+	/**
+	 * Name: D_TEXTDISPLAY <br>
+	 * Description: Distance From Where On A Text Shall Be Displayed <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.660 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int D_TEXTDISPLAY 					   = INTEGER_NOVALUE;
+	public static final int D_TEXTDISPLAY_NOT_DISTANCE_LIMITED = 32767;
 
 	/**
 	 * Name: D_TRACKCOND <br>
@@ -546,6 +599,17 @@ public class ETCSVariables {
 	public static final int L_ENDSECTION = INTEGER_NOVALUE;
 
 	/**
+	 * Name: L_LOOP <br>
+	 * Description: Length Of Loop<br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.660 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int L_LOOP		   = INTEGER_NOVALUE;
+	public static final int L_LOOP_UNKNOWN = 32767;
+
+	/**
 	 * Name: L_LX <br>
 	 * Description: Length Of LX Area <br>
 	 * Length: 15 <br>
@@ -676,6 +740,26 @@ public class ETCSVariables {
 	 * Resolution: Depends on Q_SCALE
 	 */
 	public static final int L_TAFDISPLAY = INTEGER_NOVALUE;
+
+	/**
+	 * Name: L_TEXT <br>
+	 * Description: Length Of Text String <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.670 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int L_TEXT = INTEGER_NOVALUE;
+
+	/**
+	 * Name: L_TEXTDISPLAY <br>
+	 * Description: Length On Which A Text Shall Be Displayed <br>
+	 * Length: 15 <br>
+	 * Min: 0 <br>
+	 * Max: 327.670 km <br>
+	 * Resolution: Depends on Q_SCALE
+	 */
+	public static final int L_TEXTDISPLAY = INTEGER_NOVALUE;
 
 	/**
 	 * Name: L_TRACKCOND <br>
@@ -820,6 +904,18 @@ public class ETCSVariables {
 	public static final int M_LEVEL_3   = 4;
 
 	/**
+	 * Name: M_LEVELTEXTDISPLAY <br>
+	 * Description: Onboard Operating Level For Text Display <br>
+	 * Length: 3
+	 */
+	public static final int M_LEVELTEXTDISPLAY     = INTEGER_NOVALUE;
+	public static final int M_LEVELTEXTDISPLAY_0   = 0;
+	public static final int M_LEVELTEXTDISPLAY_NTC = 1;
+	public static final int M_LEVELTEXTDISPLAY_1   = 2;
+	public static final int M_LEVELTEXTDISPLAY_2   = 3;
+	public static final int M_LEVELTEXTDISPLAY_3   = 4;
+
+	/**
 	 * Name: M_LEVELTR <br>
 	 * Description: Required Level <br>
 	 * Length: 3
@@ -909,6 +1005,29 @@ public class ETCSVariables {
 	public static final int M_MODE_NATIONAL_SYSTEM     = 13;
 	public static final int M_MODE_REVERSING           = 14;
 	public static final int M_MODE_PASSIVE_SHUNTING    = 15;
+
+	/**
+	 * Name: M_MODETEXTDISPLAY <br>
+	 * Description: Onboard Operating Mode For Text Display <br>
+	 * Length: 4
+	 */
+	public static final int M_MODETEXTDISPLAY                     = INTEGER_NOVALUE;
+	public static final int M_MODETEXTDISPLAY_FULL_SUPERVISION    = 0;
+	public static final int M_MODETEXTDISPLAY_ON_SIGHT            = 1;
+	public static final int M_MODETEXTDISPLAY_STAFF_RESPONSIBLE   = 2;
+	public static final int M_MODETEXTDISPLAY_SHUNTING            = 3;
+	public static final int M_MODETEXTDISPLAY_UNFITTED            = 4;
+	public static final int M_MODETEXTDISPLAY_SLEEPING            = 5;
+	public static final int M_MODETEXTDISPLAY_STAND_BY            = 6;
+	public static final int M_MODETEXTDISPLAY_TRIP                = 7;
+	public static final int M_MODETEXTDISPLAY_POST_TRIP           = 8;
+	public static final int M_MODETEXTDISPLAY_SYSTEM_FAILURE      = 9;
+	public static final int M_MODETEXTDISPLAY_ISOLATION           = 10;
+	public static final int M_MODETEXTDISPLAY_NON_LEADING         = 11;
+	public static final int M_MODETEXTDISPLAY_LIMITED_SUPERVISION = 12;
+	public static final int M_MODETEXTDISPLAY_NATIONAL_SYSTEM     = 13;
+	public static final int M_MODETEXTDISPLAY_REVERSING           = 14;
+	public static final int M_MODETEXTDISPLAY_NOT_MODE_LIMITED    = 15;
 
 	/**
 	 * Name: M_NVAVADH <br>
@@ -1009,6 +1128,18 @@ public class ETCSVariables {
 	public static final int M_PLATFORM_920     = 11;
 	public static final int M_PLATFORM_960     = 12;
 	public static final int M_PLATFORM_1100    = 13;
+
+	/**
+	 * Name: M_POSITION <br>
+	 * Description: Track Kilometre Reference Value <br>
+	 * Length: 24 <br>
+	 * Min: 0 <br>
+	 * Max: 9999999 m <br>
+	 * Resolution: 1 m <br>
+	 * 10000000 - 16777214: Spare
+	 */
+	public static final int M_POSITION 							 = INTEGER_NOVALUE;
+	public static final int M_POSITION_NO_CALCULATION_AFTER_THIS = 16777215;
 
 	/**
 	 * Name: M_TRACKCOND <br>
@@ -1218,6 +1349,15 @@ public class ETCSVariables {
 	public static final int NID_ENGINE = INTEGER_NOVALUE;
 
 	/**
+	 * Name: NID_ENGINE <br>
+	 * Description: Identity Number Of Loop <br>
+	 * Length: 14 <br>
+	 * Min: 0 <br>
+	 * Max: 16383
+	 */
+	public static final int NID_LOOP = INTEGER_NOVALUE;
+
+	/**
 	 * Name: NID_LRBG <br>
 	 * Description: Identity Of Last Relevant Balise Group <br>
 	 * Length: 10 + 14
@@ -1251,6 +1391,18 @@ public class ETCSVariables {
 	public static final int NID_MESSAGE = INTEGER_NOVALUE;
 
 	/**
+	 * Name: NID_MN <br>
+	 * Description: Identity Of Radio Network <br>
+	 * Length: 24 <br>
+	 * Min: 0 <br>
+	 * Max: 999999 <br>
+	 * Resolution: Binary Coded Decimal <br>
+	 * A-E (for each digit): Not Used <br>
+	 * F (for each digit): Indicates No Digit
+	 */
+	public static final int NID_MN = INTEGER_NOVALUE;
+
+	/**
 	 * Name: NID_NTC <br>
 	 * Description: National System Identity <br>
 	 * Length: 8 <br>
@@ -1262,8 +1414,13 @@ public class ETCSVariables {
 	/**
 	 * Name: NID_OPERATIONAL <br>
 	 * Description: Train Running Number <br>
-	 * Length: 32 <br>
-	 * Resolution: Binary Coded Decimal
+	 * Length: 24 <br>
+	 * Min: 0 <br>
+	 * Max: 999999 <br>
+	 * Resolution: Binary Coded Decimal <br>
+	 * A-E (for each digit): Spare <br>
+	 * F (for each digit): Indicates No Digit <br>
+	 * FFFF FFFF: Spare
 	 */
 	public static final int NID_OPERATIONAL = INTEGER_NOVALUE;
 
@@ -1281,6 +1438,37 @@ public class ETCSVariables {
 	 */
 	public static final int NID_PRVLRBG         = INTEGER_NOVALUE;
 	public static final int NID_PRVLRBG_UNKNOWN = 16777215;
+
+	/**
+	 * Name: NID_RADIO <br>
+	 * Description: Radio Subscriber Number <br>
+	 * Length: 64 <br>
+	 * Resolution: Binary Coded Decimal <br>
+	 * A-E (for each digit): Not Used <br>
+	 * F (for each digit): Indicates No Digit <br>
+	 * FFFF FFFF FFFF FFFF: Use Short Number, Stored Onboard
+	 */
+	public static final long NID_RADIO			    = LONG_NOVALUE;
+	public static final long NID_RADIO_SHORT_NUMBER = -1;
+
+	/**
+	 * Name: NID_RBC <br>
+	 * Description: RBC ETCS identity number <br>
+	 * Length: 14 <br>
+	 * Min: 0 <br>
+	 * Max: 16 382
+	 */
+	public static final int NID_RBC 		   = INTEGER_NOVALUE;
+	public static final int NID_RBC_LAST_KNOWN = 16383;
+
+	/**
+	 * Name: NID_RIU <br>
+	 * Description: Identity Of Radio Infill Unit <br>
+	 * Length: 14 <br>
+	 * Min: 0 <br>
+	 * Max: 16383
+	 */
+	public static final int NID_RIU = INTEGER_NOVALUE;
 
 	/**
 	 * Name: NID_TEXTMESSAGE <br>
@@ -1312,6 +1500,15 @@ public class ETCSVariables {
 	 */
 	public static final int NID_VBCMK = INTEGER_NOVALUE;
 
+	/**
+	 * Name: NID_XUSER <br>
+	 * Description: Identity Of User System <br>
+	 * Length: 9 <br>
+	 * Min: 0 <br>
+	 * Max: 511
+	 */
+	public static final int NID_XUSER = INTEGER_NOVALUE;
+
 
 
 	// ---------
@@ -1326,6 +1523,15 @@ public class ETCSVariables {
 	public static final boolean Q_ASPECT               = BOOLEAN_NOVALUE;
 	public static final boolean Q_ASPECT_STOP_IF_IN_SH = false;
 	public static final boolean Q_ASPECT_GO_IF_IN_SH   = true;
+
+	/**
+	 * Name: Q_CONFTEXTDISPLAY <br>
+	 * Description: Qualifier For Text Confirmation Versus End Of Text Display <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_CONFTEXTDISPLAY 				  = BOOLEAN_NOVALUE;
+	public static final boolean Q_CONFTEXTDISPLAY_CONFIRMATION	  = false;
+	public static final boolean Q_CONFTEXTDISPLAY_OTHER_CONDITION = true;
 
 	/**
 	 * Name: Q_DANGERPOINT <br>
@@ -1493,6 +1699,24 @@ public class ETCSVariables {
 	public static final int Q_LINKREACTION_SPARE               = 3;
 
 	/**
+	 * Name: Q_LOOPDIR <br>
+	 * Description: Qualifier To Indicate The Direction Of The Loop <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_LOOPDIR		   = BOOLEAN_NOVALUE;
+	public static final boolean Q_LOOPDIR_OPPOSITE = false;
+	public static final boolean Q_LOOPDIR_SAME	   = true;
+
+	/**
+	 * Name: Q_LSSMA <br>
+	 * Description: Qualifier For The LSSMA Display <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_LSSMA		= BOOLEAN_NOVALUE;
+	public static final boolean Q_LSSMA_OFF = false;
+	public static final boolean Q_LSSMA_ON  = true;
+
+	/**
 	 * Name: Q_LXSTATUS <br>
 	 * Description: Indicates Whether LX Is Protected Or Not <br>
 	 * Length: 1
@@ -1531,6 +1755,15 @@ public class ETCSVariables {
 	public static final boolean Q_MEDIA        = BOOLEAN_NOVALUE;
 	public static final boolean Q_MEDIA_BALISE = false;
 	public static final boolean Q_MEDIA_LOOP   = true;
+
+	/**
+	 * Name: Q_MPOSITION <br>
+	 * Description: Qualifier For Track Kilometre Direction <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_MPOSITION			 = BOOLEAN_NOVALUE;
+	public static final boolean Q_MPOSITION_OPPOSITE = BOOLEAN_NOVALUE;
+	public static final boolean Q_MPOSITION_SAME	 = BOOLEAN_NOVALUE;
 
 	/**
 	 * Name: Q_NEWCOUNTRY <br>
@@ -1670,6 +1903,24 @@ public class ETCSVariables {
 	public static final int Q_PLATFORM_BOTH  = 2;
 
 	/**
+	 * Name: Q_RBC <br>
+	 * Description: Qualifier For Communication Session Order <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_RBC 			= BOOLEAN_NOVALUE;
+	public static final boolean Q_RBC_TERMINATE = false;
+	public static final boolean Q_RBC_ESTABLISH = true;
+
+	/**
+	 * Name: Q_RIU <br>
+	 * Description: Qualifier For Communication Session Order <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_RIU 			= BOOLEAN_NOVALUE;
+	public static final boolean Q_RIU_TERMINATE = false;
+	public static final boolean Q_RIU_ESTABLISH = true;
+
+	/**
 	 * Name: Q_SCALE <br>
 	 * Description: Distance Scale Qualifier <br>
 	 * Length: 2
@@ -1689,6 +1940,15 @@ public class ETCSVariables {
 	public static final boolean Q_SECTIONTIMER_INFO    = true;
 
 	/**
+	 * Name: Q_SLEEPSESSION <br>
+	 * Description: Session Management For Sleeping Equipment <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_SLEEPSESSION 			= BOOLEAN_NOVALUE;
+	public static final boolean Q_SLEEPSESSION_IGNORE   = false;
+	public static final boolean Q_SLEEPSESSION_EXECUTE  = true;
+
+	/**
 	 * Name: Q_SRSTOP <br>
 	 * Description: "STOP IF IN STAFF RESPONSIBLE" INFORMATION <br>
 	 * Length: 1
@@ -1696,6 +1956,16 @@ public class ETCSVariables {
 	public static final boolean Q_SRSTOP               = BOOLEAN_NOVALUE;
 	public static final boolean Q_SRSTOP_STOP_IF_IN_SR = false;
 	public static final boolean Q_SRSTOP_GO_IF_IN_SR   = true;
+
+	/**
+	 * Name: Q_SSCODE <br>
+	 * Description: Spread Spectrum Code For Euroloop <br>
+	 * Length: 4 <br>
+	 * Min: 0 <br>
+	 * Max: 14
+	 */
+	public static final int Q_SSCODE 			  = INTEGER_NOVALUE;
+	public static final int Q_SSCODE_TEST_PURPOSE = 15;
 
 	/**
 	 * Name: Q_STATUS <br>
@@ -1728,6 +1998,54 @@ public class ETCSVariables {
 	public static final int Q_SUITABILITY_TRACTION_SYSTEM = 2;
 
 	/**
+	 * Name: Q_TEXT <br>
+	 * Description: Fixed Message To Be Displayed <br>
+	 * Length: 8 <br>
+	 * 2 - 255: Spare
+	 */
+	public static final int Q_TEXT                 				  = INTEGER_NOVALUE;
+	public static final int Q_TEXT_LEVEL_CROSSING_NOT_PROTECTED   = 0;
+	public static final int Q_TEXT_ACKNOWLEDGEMENT				  = 1;
+
+	/**
+	 * Name: Q_TEXTCLASS <br>
+	 * Description: Class Of Message To Be Displayed <br>
+	 * Length: 2
+	 */
+	public static final int Q_TEXTCLASS                = INTEGER_NOVALUE;
+	public static final int Q_TEXTCLASS_AUXILIARY_INFO = 0;
+	public static final int Q_TEXTCLASS_IMPORTANT_INFO = 1;
+
+	/**
+	 * Name: Q_TEXTCONFIRM <br>
+	 * Description: Qualifier For Text Confirmation <br>
+	 * Length: 2
+	 */
+	public static final int Q_TEXTCONFIRM				  = INTEGER_NOVALUE;
+	public static final int Q_TEXTCONFIRM_NO_CONF		  = 0;
+	public static final int Q_TEXTCONFIRM_CONF			  = 1;
+	public static final int Q_TEXTCONFIRM_SERVICE_BREAK   = 2;
+	public static final int Q_TEXTCONFIRM_EMERGENCY_BREAK = 3;
+
+	/**
+	 * Name: Q_TEXTDISPLAY <br>
+	 * Description: Qualifier For The Combination Of Text Message Events <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_TEXTDISPLAY               	= BOOLEAN_NOVALUE;
+	public static final boolean Q_TEXTDISPLAY_NO_ONE_FULFILLED  = false;
+	public static final boolean Q_TEXTDISPLAY_YES_ALL_FULFILLED = true;
+
+	/**
+	 * Name: Q_TEXTREPORT <br>
+	 * Description: Qualifier For Reporting Acknowledgement Of Text By Driver <br>
+	 * Length: 1
+	 */
+	public static final boolean Q_TEXTREPORT		= BOOLEAN_NOVALUE;
+	public static final boolean Q_TEXTREPORT_NO_ACK = false;
+	public static final boolean Q_TEXTREPORT_ACK	= true;
+
+	/**
 	 * Name: Q_TRACKINIT <br>
 	 * Description: Qualifier For Resuming Initial States Of Related Track Description <br>
 	 * Length: 1
@@ -1744,6 +2062,15 @@ public class ETCSVariables {
 	public static final boolean Q_UPDOWN           = BOOLEAN_NOVALUE;
 	public static final boolean Q_UPDOWN_DOWN_LINK = false;
 	public static final boolean Q_UPDOWN_UP_LINK   = true;
+
+	/**
+	 * Name: Q_VBCO <br>
+	 * Description: Qualifier For Virtual Balise Cover Order <br>
+	 * Length 1
+	 */
+	public static final boolean Q_VBCO		  = BOOLEAN_NOVALUE;
+	public static final boolean Q_VBCO_REMOVE = false;
+	public static final boolean Q_VBCO_SET	  = true;
 
 
 
@@ -1794,6 +2121,16 @@ public class ETCSVariables {
 	 */
 	public static final int T_LOA          = INTEGER_NOVALUE;
 	public static final int T_LOA_INFINITY = 1023;
+
+	/**
+	 * Name: T_LSSMA <br>
+	 * Description: Delay To Toggle On The LSSMA Display <br>
+	 * Length: 8 <br>
+	 * Min: 0 <br>
+	 * Max: 255 s <br>
+	 * Resolution: 1 s
+	 */
+	public static final int T_LSSMA = INTEGER_NOVALUE;
 
 	/**
 	 * Name: T_MAR <br>
@@ -1850,6 +2187,17 @@ public class ETCSVariables {
 	public static final int T_SECTIONTIMER_INFINITY = 1023;
 
 	/**
+	 * Name: T_TEXTDISPLAY <br>
+	 * Description: Duration For Which A Text Shall Be Displayed <br>
+	 * Length: 10 <br>
+	 * Min: 0 <br>
+	 * Max: 1022 s <br>
+	 * Resolution: 1 s
+	 */
+	public static final int T_TEXTDISPLAY				   = INTEGER_NOVALUE;
+	public static final int T_TEXTDISPLAY_NOT_TIME_LIMITED = 1023;
+
+	/**
 	 * Name: T_TIMEOUTRQST <br>
 	 * Description: Time Before Any Section Timer Expires Or The LOA Speed Timer Expires <br>
 	 * Length: 10 <br>
@@ -1870,6 +2218,16 @@ public class ETCSVariables {
 	 */
 	public static final long T_TRAIN         = INTEGER_NOVALUE;
 	public static final long T_TRAIN_UNKNOWN = 4294967295L;
+
+	/**
+	 * Name: T_VBC <br>
+	 * Description: VBC Validity Period <br>
+	 * Length: 8 <br>
+	 * Min: 0 <br>
+	 * Max: 255 days <br>
+	 * Resolution: 1 days
+	 */
+	public static final int T_VBC = INTEGER_NOVALUE;
 
 
 
@@ -2113,5 +2471,19 @@ public class ETCSVariables {
 	 * Resolution: 5 km/h
 	 */
 	public static final int V_TSR = INTEGER_NOVALUE;
+
+
+
+	// ----
+	// Text
+	// ----
+
+	/**
+	 * Name: X_TEXT <br>
+	 * Description: Text String Element <br>
+	 * Length: 8 <br>
+	 * Resolution: Character encoded as ISO 8859-1
+	 */
+	public static final int X_TEXT = INTEGER_NOVALUE;
 
 }

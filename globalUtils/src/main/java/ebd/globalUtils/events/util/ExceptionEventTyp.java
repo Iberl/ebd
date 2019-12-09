@@ -20,5 +20,5 @@ public enum ExceptionEventTyp {
     /**
      *The exception can not be handled inside the program.
      */
-    FETAL
+    FATAL
 }

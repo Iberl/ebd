@@ -64,6 +64,15 @@
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <classpathPrefix>lib/</classpathPrefix>
+                <mainClass></mainClass>
+              </manifest>
+            </archive>
+          </configuration>
           <version>3.0.2</version>
         </plugin>
         <plugin>
@@ -85,12 +94,27 @@
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <resources>
+      <resource>
+        <directory>etcs/resources</directory>
+      </resource>
+    </resources>
   </build>
 
   <modules>
     <module>globalUtils</module>
     <module>messageLibrary</module>
-    <module>logger</module>
+    <module>logging</module>
+    <module>messageReceiver</module>
+    <module>messageSender</module>
+
+    <module>trainSide</module>
+    <module>trackSide</module>
+    <module>szenario</module>
+
+    <!-- <module>baliseTelegramGenerator</module> -->
+
   </modules>
 
 </project>

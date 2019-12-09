@@ -1,6 +1,7 @@
 package ebd.messageLibrary.serialization;
 
-import ebd.messageLibrary.serialization.annotations.IfEqual;
+import ebd.messageLibrary.message.Telegram;
+import ebd.messageLibrary.packet.Packet;
 import javafx.util.Pair;
 import ebd.messageLibrary.serialization.annotations.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -16,11 +17,12 @@ import java.util.*;
 /**
  * Class for handling the serialization of Packets
  *
+ * @version 2.0
  * @author Christopher Bernjus, Mario Welzig
  */
 public abstract class Serializer {
 
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	/**
 	 * Converts an instance to a bit stream and returns it in a new BitStreamWriter
@@ -59,7 +61,7 @@ public abstract class Serializer {
 		// check if object is serialisable
 		if(object == null || !isSerializable(object.getClass())) return;
 
-		int numberOfFields = object.getClass().getAnnotation(OrderLength.class).value();
+		int numberOfFields = object.getClass().getFields().length;
 
 		// list of fields to be serialized
 		Pair<Object, Integer>[] valuesToSerialize = new Pair[numberOfFields];
@@ -78,7 +80,7 @@ public abstract class Serializer {
 
 			// check conditions
 			if(!allConditionsStatisfied(annotations, serializedValues)) {
-				System.err.println(field.getName() + " was skipped");
+				if(debug) System.err.println(field.getName() + " was skipped");
 				continue;
 			}
 
@@ -90,6 +92,7 @@ public abstract class Serializer {
 
 				if(field.getName() == "L_PACKET") {
 					lengthIndex = index;
+					length += 13;
 					continue;
 				}
 
@@ -117,7 +120,7 @@ public abstract class Serializer {
 
 			}
 			catch (IllegalArgumentException | IllegalAccessException e) {
-				System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
+				if(debug) System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 		}
@@ -143,10 +146,13 @@ public abstract class Serializer {
 			}
 			// serialize list
 			else if(List.class.isAssignableFrom(value.getClass())) {
-				if(((List) value).size() <= 0) continue;
+				if(((List) value).size() <= 0) {
+					writer.writeInt(0, 5);
+					continue;
+				}
 
 				// write N_ITER value
-				writer.writeInt(((List<?>) value).size(), 8);
+				writer.writeInt(((List<?>) value).size(), 5);
 				for(Object item : (List<?>) value) {
 					serialize(item, writer);
 				}
@@ -164,7 +170,7 @@ public abstract class Serializer {
 	}
 
 	/**
-	 * Creates an instance of an Message or Packet from a given buffer
+	 * Creates an instance of an Packet from a given buffer
 	 *
 	 * @param reader
 	 *              the bit stream to read from
@@ -182,8 +188,7 @@ public abstract class Serializer {
 	 *
 	 * @author Christopher Bernjus
 	 */
-	public static <T> T deserialize(BitStreamReader reader, boolean trainToTrack) throws ClassNotSupportedException, MissingInformationException, BitLengthOutOfBoundsException, ValueNotSupportedException {
-
+	public static <T> T deserializePacket(BitStreamReader reader, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
 		// Get ID from Packet or Message
 		int id = reader.readInt(8, false);
 
@@ -198,28 +203,91 @@ public abstract class Serializer {
 		} else {
 			if(trainToTrack) {
 				try {
-					clazz = Class.forName("ebd.messageLibrary.message.trainmessages.Message_" + id);
-				} catch (ClassNotFoundException e) {
-					try {
-						clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
-					} catch (ClassNotFoundException e1) {
-						throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
-					}
+					clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
 				}
 			} else {
 				try {
-					clazz = Class.forName("ebd.messageLibrary.message.trackmessages.Message_" + id);
-				} catch (ClassNotFoundException e) {
-					try {
-						clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
-					} catch (ClassNotFoundException e1) {
-						throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
-					}
+					clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
 				}
 			}
 		}
 
 		return (T) deserialize(reader, clazz, trainToTrack);
+	}
+
+	/**
+	 * Creates an instance of an Message from a given buffer
+	 *
+	 * @param reader
+	 *              the bit stream to read from
+	 * @param trainToTrack
+	 *              indicates whether the bit stream contains a track or train message/packet
+	 * @param <T>
+	 *              the Class Type of the returned instance
+	 *
+	 * @return The Class interpretation of the given bit stream
+	 *
+	 * @throws BitLengthOutOfBoundsException
+	 * @throws ClassNotSupportedException
+	 * @throws MissingInformationException
+	 * @throws ValueNotSupportedException
+	 *
+	 * @author Christopher Bernjus
+	 */
+	public static <T> T deserializeMessage(BitStreamReader reader, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+		// Get ID from Message
+		int id = reader.readInt(8, false);
+
+		// Find Class for Message ID
+		Class<?> clazz = null;
+		if(trainToTrack) {
+			try {
+				clazz = Class.forName("ebd.messageLibrary.message.trainmessages.Message_" + id);
+			} catch (ClassNotFoundException e) {
+				try {
+					clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
+				}
+			}
+		} else {
+			try {
+				clazz = Class.forName("ebd.messageLibrary.message.trackmessages.Message_" + id);
+			} catch (ClassNotFoundException e) {
+				try {
+					clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
+				} catch (ClassNotFoundException e1) {
+					throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
+				}
+			}
+		}
+
+		return (T) deserialize(reader, clazz, trainToTrack);
+	}
+
+	/**
+	 * Creates an instance of an Telegram from a given buffer
+	 *
+	 * @param reader
+	 *              the bit stream to read from
+	 * @param <T>
+	 *              the Class Type of the returned instance
+	 *
+	 * @return The Class interpretation of the given bit stream
+	 *
+	 * @throws BitLengthOutOfBoundsException
+	 * @throws ClassNotSupportedException
+	 * @throws MissingInformationException
+	 * @throws ValueNotSupportedException
+	 *
+	 * @author Christopher Bernjus
+	 */
+	public static <T> T deserializeTelegram(BitStreamReader reader) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+		return (T) deserialize(reader, Telegram.class, false);
 	}
 
 	/**
@@ -242,13 +310,13 @@ public abstract class Serializer {
 	 * @throws ValueNotSupportedException
 	 *
 	 */
-	public static <T> T deserialize(BitStreamReader reader, Class<T> type, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
+	private static <T> T deserialize(BitStreamReader reader, Class<T> type, boolean trainToTrack) throws BitLengthOutOfBoundsException, MissingInformationException, ClassNotSupportedException, ValueNotSupportedException {
 		// Get the default Constructor with no parameters
 		Constructor<?> constructor = null;
 		try {
 			constructor = type.getConstructor();
 		} catch (NoSuchMethodException e) {
-			System.err.println("The class type " + type + " doesn't support a default Constructor.");
+			if(debug) System.err.println("The class type " + type + " doesn't support a default Constructor.");
 			e.printStackTrace();
 		}
 
@@ -257,12 +325,12 @@ public abstract class Serializer {
 		try {
 			instance = constructor.newInstance();
 		} catch (NullPointerException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-			System.err.println("Cannot create an instance of given type: " + type);
+			if(debug) System.err.println("Cannot create an instance of given type: " + type);
 			e.printStackTrace();
 		}
 
 		// create Order of Fields to Deserialize
-		int numberOfFields = type.getAnnotation(OrderLength.class).value();
+		int numberOfFields = type.getFields().length;
 
 		Field[] fieldsInOrder = new Field[numberOfFields];
 
@@ -326,11 +394,11 @@ public abstract class Serializer {
 						throw new MissingInformationException("No @ItemType information was specified for field " + type.getSimpleName() + "." + field.getName());
 					}
 					int size = reader.readInt(5, false);
-					List<Object> list = new ArrayList<>();
+					List<Object> list = new ArrayList<>(size);
 
 					if(Modifier.isAbstract(itemType.getModifiers())) {
 						for(int i = 0; i < size; i++) {
-							list.add(deserialize(reader, trainToTrack));
+							list.add(deserializePacket(reader, trainToTrack));
 						}
 					} else {
 						for(int i = 0; i < size; i++) {
@@ -341,17 +409,21 @@ public abstract class Serializer {
 					value = list;
 
 				} else if(isSerializable(field.getType())) {
-					value = deserialize(reader, field.getType(), trainToTrack);
+					if(Packet.class.isAssignableFrom(field.getType())) {
+						value = deserializePacket(reader, trainToTrack);
+					} else {
+						value = deserialize(reader, field.getType(), trainToTrack);
+					}
 
 				} else {
 					throw new ValueNotSupportedException("The field " + type.getSimpleName() + "." + field.getName() + " does not match any supported type");
 				}
 
 				if(debug && value != null) {
-					System.out.print("Value: " + value + " \t - Length: ");
+					if(debug) System.out.print("Value: " + value + " \t - Length: ");
 					BitLength bitLengthAnnotation = field.getAnnotation(BitLength.class);
-					if(bitLengthAnnotation != null) System.out.print(bitLengthAnnotation.value());
-					System.out.println();
+					if(bitLengthAnnotation != null && debug) System.out.print(bitLengthAnnotation.value());
+					if(debug) System.out.println();
 				}
 
 				// Set Value of Field
@@ -362,7 +434,7 @@ public abstract class Serializer {
 
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
+				if(debug) System.err.println("Unable to read value of field " + field.getName() + ": " + e.getLocalizedMessage());
 				e.printStackTrace();
 			}
 

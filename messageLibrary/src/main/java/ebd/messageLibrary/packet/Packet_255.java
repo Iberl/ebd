@@ -17,7 +17,6 @@ public class Packet_255 extends Packet {
 	// End of Information
 	// ------------------
 
-
 	// Constructor
 
 	/**

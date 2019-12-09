@@ -61,7 +61,7 @@ public class TelegramTest {
 
 		try {
 			// Deserialize the recieved BitStream into an JAVA objet
-			receivedTelegram = Serializer.deserialize(reader, Telegram.class, false);
+			receivedTelegram = Serializer.deserializeTelegram(reader);
 
 			// Handle all occurring Exceptions
 		} catch (ClassNotSupportedException e) {
@@ -79,5 +79,4 @@ public class TelegramTest {
 		System.out.println(receivedTelegram.toString());
 		System.out.println("was received");
 	}
-
 }

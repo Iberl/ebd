@@ -21,8 +21,9 @@ import java.util.List;
 public class Packet_15 extends TrackPacketSCALE {
 
 	/** Subclass For Handling Iterated Sections */
+	//TODO CHECK STATIC INNER CLASSES
 	@OrderLength(4)
-	public class Packet_15_Section {
+	public static class Packet_15_Section {
 
 		/** {@link ETCSVariables#L_SECTION} */
 		@BitLength(15)

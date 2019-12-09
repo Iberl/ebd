@@ -2,9 +2,13 @@ package ebd.globalUtils.position;
 
 
 import java.util.HashMap;
+import java.util.Map;
 
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
+import ebd.messageLibrary.util.ETCSVariables;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class represents a position for a train. It consists out of an absolut reference point, a direction and an increment.
@@ -16,14 +20,13 @@ public class Position {
 	
 	/**
 	 * Current direction of travel of the train: Nominal (true) or reverse (false). Does not change the way the increment is counted.
-	 * 
-	 * @deprecated Should not be included in the Position class
 	 */
-	@Deprecated
-    private boolean direction;
-    /**
-     * Reference location
+	private boolean direction;
+
+	/**
+     * Reference location //TODO Change according to {@link ebd.messageLibrary.util.ETCSVariables#Q_DIR}
      */
+	@NotNull
     private Location location;
 
     /**
@@ -35,7 +38,8 @@ public class Position {
      * A HashMap of previous locations (s. SRS 3.6.2.2.2c) ). Should be 8 or more locations unless the train has crossed less than 8 balise groups total.
      * The Key of the HashMap is the location ID, the Value the {@link Location} itself
      */
-    private HashMap<String,Location> previousLocations = new HashMap<String,Location>();
+    @Nullable
+    private Map<Integer,Location> previousLocations = new HashMap<>();
 
     /**
      * represents a position on the track
@@ -43,13 +47,13 @@ public class Position {
      * @param direction true == forward, false == backward
      * @param location location reference point
      */
-    public Position(double increment, boolean direction, Location location) {
+    public Position(double increment, boolean direction, @NotNull Location location) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
     }
     
-    public Position(double increment, boolean direction, Location location, HashMap<String, Location> previousLocations) {
+    public Position(double increment, boolean direction, @NotNull Location location, @Nullable Map<Integer, Location> previousLocations) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
@@ -70,21 +74,21 @@ public class Position {
      *
      * @author Lars Schulze-Falck
      */
-    public Double totalDistanceToPastLocation(String pastLocID) throws PositionReferenzException{
+    public Double totalDistanceToPastLocation(int pastLocID) throws PositionReferenzException{
     	Double totalDistance = 0d;
     	
-    	if (pastLocID.equals(location.getId())) {
+    	if ((pastLocID == location.getId())) {
     		return getIncrement();
     	}
     	else if (!previousLocations.containsKey(pastLocID)) {
     		throw new PositionReferenzException(String.format("Previous Location ID (%s) was not found in the map of previous locations", pastLocID));
         }
     	
-    	String backSteppingLocationId = this.location.getIdOfPrevious();
+    	int backSteppingLocationId = this.location.getIdOfPrevious();
     	totalDistance += this.location.getDistanceToPrevious();
-    	while(!backSteppingLocationId.equals(pastLocID)) {
+    	while(!(backSteppingLocationId == pastLocID)) {
     		Location tempLocation = previousLocations.get(backSteppingLocationId);
-    		if(tempLocation == null  || tempLocation.getIdOfPrevious() == null) {
+    		if(tempLocation == null  || tempLocation.getIdOfPrevious() == ETCSVariables.NID_LRBG) {
     			throw new PositionReferenzException(String.format("There was no unbroken chain between Location ID (%s) and the past location (%s)", this.location.getId(), pastLocID));
     		}
     		totalDistance += tempLocation.getDistanceToPrevious();
@@ -107,7 +111,7 @@ public class Position {
      *
      * @author Lars Schulze-Falck
      */
-    public Double totalDistanceToPreviousPosition(Position prevPosition) throws PositionReferenzException {
+    public Double totalDistanceToPreviousPosition(@NotNull Position prevPosition) throws PositionReferenzException {
     	return totalDistanceToPastLocation(prevPosition.getLocation().getId()) - prevPosition.getIncrement();
     }
     
@@ -152,11 +156,11 @@ public class Position {
         this.location = location;
     }
 
-	public HashMap<String, Location> getPreviousLocations() {
+	public Map<Integer, Location> getPreviousLocations() {
 		return previousLocations;
 	}
 
-	public void setPreviousLocations(HashMap<String, Location> previousLocations) {
+	public void setPreviousLocations(HashMap<Integer, Location> previousLocations) {
 		this.previousLocations = previousLocations;
 	}
     

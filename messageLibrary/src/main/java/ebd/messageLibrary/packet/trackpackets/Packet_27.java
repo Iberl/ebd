@@ -27,7 +27,7 @@ public class Packet_27 extends TrackPacketSCALE {
 
 	/** Subclass For Handling Iterated Profile Sections */
 	@OrderLength(4)
-	public class Packet_27_StaticSpeedProfileSection {
+	public static class Packet_27_StaticSpeedProfileSection {
 
 		/** {@link ETCSVariables#Q_DIFF} */
 		@BitLength(2)
@@ -89,7 +89,7 @@ public class Packet_27 extends TrackPacketSCALE {
 	 * Lists: sections
 	 */
 	@OrderLength(4)
-	public class Packet_27_StaticSpeedProfile {
+	public static class Packet_27_StaticSpeedProfile {
 
 		/** {@link ETCSVariables#D_STATIC} */
 		@BitLength(15)

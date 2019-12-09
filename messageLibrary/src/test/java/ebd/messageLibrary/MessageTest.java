@@ -1,6 +1,8 @@
 package ebd.messageLibrary;
 
 import ebd.messageLibrary.message.trackmessages.Message_2;
+import ebd.messageLibrary.packet.trackpackets.Packet_0;
+import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trainpackets.Packet_4;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.BitStreamWriter;
@@ -21,7 +23,7 @@ public class MessageTest {
 		Message_2 message = new Message_2(1, true, 3, 4, 5);
 
 		// Adding an optional Packet_4
-		message.packets.add(new Packet_4(ETCSVariables.M_ERROR_SAFE_CONNECTION));
+		message.packets.add(new Packet_57());
 
 		System.out.println("The Message:");
 		System.out.println(message.toString());
@@ -62,7 +64,7 @@ public class MessageTest {
 
 		try {
 			// Deserialize the recieved BitStream into an JAVA objet
-			receivedMessage = Serializer.deserialize(reader, false);
+			receivedMessage = Serializer.deserializeMessage(reader, false);
 
 			// Handle all occurring Exceptions
 		} catch (ClassNotSupportedException e) {
@@ -80,6 +82,5 @@ public class MessageTest {
 		System.out.println(receivedMessage.toString());
 		System.out.println("was received");
 	}
-
 
 }

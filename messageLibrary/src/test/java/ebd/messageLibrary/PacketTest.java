@@ -58,7 +58,7 @@ public class PacketTest {
 
 		try {
 			// Deserialize the received BitStream into an JAVA objet
-			receivedPacket = Serializer.deserialize(reader, false);
+			receivedPacket = Serializer.deserializePacket(reader, false);
 
 			// Handle all occurring Exceptions
 		} catch (ClassNotSupportedException e) {
@@ -76,6 +76,7 @@ public class PacketTest {
 		System.out.println(receivedPacket.toString());
 		System.out.println("was received");
 	}
+
 
 
 }

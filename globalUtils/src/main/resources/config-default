@@ -1,0 +1,23 @@
+#Config file for ETCS at EBD
+#Lines that start with # are comments
+#To expand this file, set variables in globalUtils/configHandler/ConfigHandler and include variable names here
+######
+###### Strings
+######
+pathToDriverProfileJson = StrictDrivingStrategy.json
+pathToTestTrainJson = testTrain650.json
+ipToTrainConfigurator = 127.0.0.1
+portOfTrainConfigurator = 8080
+ipToInfrastructureServer = 127.0.0.1
+portOfInfrastructureServer = 25555
+######
+###### Integers
+######
+trainClockTickInMS = 100
+######
+###### Doubles with a dot, not a comma (1.2 instead of 1,2).
+######
+######
+###### Booleans (either " = true" or " = false")
+######
+testing = false
