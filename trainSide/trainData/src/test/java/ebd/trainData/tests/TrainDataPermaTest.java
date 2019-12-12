@@ -2,9 +2,11 @@ package ebd.trainData.tests;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import org.json.simple.parser.ParseException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.util.exceptions.TDBadDataException;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.io.IOException;
 
@@ -14,8 +16,6 @@ class TrainDataPermaTest {
     public void urlTest() throws IOException, ParseException, TDBadDataException {
         ConfigHandler.getInstance().testing = false;
         TrainDataPerma trainDataPerma = new TrainDataPerma(192);
-
-
     }
 
     @Test

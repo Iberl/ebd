@@ -27,6 +27,12 @@ public class InfrastructureClient {
     private PrintWriter out;
 
     private List<Integer> registeredTrains = new ArrayList();
+    private int trainNumber;
+
+    /**
+     * If simulated, do not connect to any servers
+     */
+    private boolean simulated;
 
 
     public InfrastructureClient() throws IOException {
@@ -35,8 +41,10 @@ public class InfrastructureClient {
         ConfigHandler ch = ConfigHandler.getInstance();
         this.ip = ch.ipToInfrastructureServer;
         this.port = Integer.parseInt(ch.portOfInfrastructureServer);
+        this.simulated = ch.simulated;
+        this.trainNumber = ch.trainNumber;
 
-        connect();
+        if(!this.simulated) connect();
     }
 
     public void close() throws IOException {
@@ -149,7 +157,7 @@ public class InfrastructureClient {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void updateEvent(UpdatingInfrastructureEvent uie){
-        if(!validTarget(uie.targets)){
+        if(this.simulated || !validTarget(uie.targets)){
             return;
         }
         int trainID = getTrainIDFromSource(uie.source);
@@ -168,11 +176,13 @@ public class InfrastructureClient {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void terminateTrain(TerminateTrainEvent tte){
-        this.globalEventBus.unregister(this);
 
-        if(!validTarget(tte.targets)){
+        if(this.simulated || !validTarget(tte.targets)){
             return;
         }
+
+        this.globalEventBus.unregister(this);
+
         int trainID = getTrainIDFromSource(tte.source);
 
         if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
@@ -184,27 +194,14 @@ public class InfrastructureClient {
     @Subscribe
     public void disconnect(DisconnectEvent de){
 
-
     }
 
 
 
     private int getTrainIDFromSource(String source){
         int etcsID = -1;
-        if(!source.contains("T=")){
-           return -1;
-        }
-
-        String[] split = source.split(";");
-        String numbers;
-        for(String part : split){
-
-            if(part.contains("T=")) {
-                numbers = part.replaceAll("[^0-9]", "");
-                etcsID = Integer.parseInt(numbers);
-            }
-
-        }
+        //TODO: set train number by questioning the DBD database or by initialisation
+        etcsID = trainNumber;
         return etcsID;
     }
 

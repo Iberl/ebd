@@ -38,7 +38,7 @@ public class PackageHandler {
             prevLoc = link.NID_BG;
         }
         localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Linking Information"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Linking Information [Packet 5]"));
     }
 
     public static void p57(EventBus localBus, Packet_57 p57){
@@ -60,7 +60,7 @@ public class PackageHandler {
         changes.put("T_TIMEOUTRQST", t_timeoutrqst);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new MA Request Parameters"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new MA Request Parameters [Packet 57]"));
 
     }
 
@@ -101,6 +101,6 @@ public class PackageHandler {
         changes.put("incrPosRprtDist", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters [Packet 58]"));
     }
 }

@@ -39,6 +39,7 @@ public class ConfigHandler {
     ints
      */
     public int trainClockTickInMS = 100;
+    public int trainNumber = 0;
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
      */
@@ -52,7 +53,7 @@ public class ConfigHandler {
     boolean
      */
     public boolean testing = false;
-
+    public boolean simulated = true;
     /*
     other
      */
