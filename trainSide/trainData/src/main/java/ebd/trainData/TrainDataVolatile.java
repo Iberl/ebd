@@ -4,6 +4,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Spline;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.util.availableAcceleration.AccelerationPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
@@ -35,13 +36,11 @@ public class TrainDataVolatile {
     /**
      * The distance already driven on the current trip in [m]
      */
-    @NotNull
     protected volatile double curTripDistance = 0d;
 
     /**
      * Time since the trip started in [s]
      */
-    @NotNull
     protected volatile double curTripTime = 0d;
 
     /**
@@ -49,6 +48,11 @@ public class TrainDataVolatile {
      */
     protected volatile double curTripSectionDistance = 0d;
 
+    /**
+     * The current trip profile provided to the train
+     */
+    @Nullable
+    protected volatile Spline currentTripProfile = null;
 
 
     /**
@@ -233,6 +237,13 @@ public class TrainDataVolatile {
      */
     public double getCurTripSectionDistance() {
         return curTripSectionDistance;
+    }
+
+    /**
+     * The current trip profile provided to the train
+     */
+    public Spline getCurrentTripProfile() {
+        return currentTripProfile;
     }
 
     /**

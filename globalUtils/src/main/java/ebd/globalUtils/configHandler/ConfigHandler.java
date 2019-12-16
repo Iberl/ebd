@@ -73,7 +73,7 @@ public class ConfigHandler {
          */
         File fileConfig = new File("configuration/config.txt");
 
-        if (!fileConfig.exists()) {
+        if (fileConfig.length() == 0) {
             boolean createdDir = fileConfig.getParentFile().mkdir();
             boolean createdFile = fileConfig.createNewFile();
             if(!(createdFile)){

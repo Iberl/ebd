@@ -11,12 +11,13 @@ import java.util.function.BiFunction;
 /**
  * A relative speed condition compares the current speed to the current maximum allowed speed.<br>
  * The way it compares the the values are defined in the {@link JSONObject}<br>
- * <p>The <b>type</b> of this condition is "v_rel"</p>
+ * <p>The <b>type</b> of this condition is "v_trel"</p>
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
- * <p>The <b>value</b> key contains a percentage in the range of [0, 100] that modifies the maximum allowed speed before comparison</p>
+ * <p>The <b>value</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison</p>
  * <p>Example: The condition should evaluate to true if the train is slower than 50% of the current maximum speed.
  * The JSON string would look like this:<br>
  *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50 }}</p>
+ *
  */
 public class RelativeSpeedCondition extends Condition {
 
@@ -37,9 +38,6 @@ public class RelativeSpeedCondition extends Condition {
     @Override
     public boolean eval() {
         TrainDataVolatile trainDataVolatile = localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        if(trainDataVolatile.getCurrentTargetSpeed() == null || trainDataVolatile.getCurrentSpeed() == null){
-            return false;
-        }
 
         double maxSpeed = trainDataVolatile.getCurrentTargetSpeed() * speedPercentage;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
@@ -60,8 +58,8 @@ public class RelativeSpeedCondition extends Condition {
             }
             else throw new DDBadDataException("RelativeSpeedCondition value was not a number");
 
-            if(speedPercentage < 0 || speedPercentage > 1){
-                throw new DDBadDataException("RelativeSpeedCondition Value was not in the range [0, 100]");
+            if(speedPercentage < 0 || speedPercentage > 2){
+                throw new DDBadDataException("RelativeSpeedCondition Value was not in the range [0, 200]");
             }
         }
         else throw new DDBadDataException("The key 'value' was missing for a RelativeSpeedCondition");
