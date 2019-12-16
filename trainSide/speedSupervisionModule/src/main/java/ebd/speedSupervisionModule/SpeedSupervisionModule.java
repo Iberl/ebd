@@ -2,6 +2,7 @@ package ebd.speedSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
@@ -13,26 +14,49 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+/**
+ * This class supervises the speed of the train and to some extend the distance traveled.
+ * It checks if the speed or the distance becomes to great and signals such occurrences.
+ * It is the responsibility of the Train Status Manager and the Driving Dynamic Modules to react to these signals
+ * correctly.
+ *
+ * //TODO: Respect SRS 3.13 in total!
+ *
+ * @author Lars Schulze-Falck
+ */
 public class SpeedSupervisionModule {
 
-    //TODO: SRS 3.13 in total!
 
-    private EventBus eventBus;
+
+    private EventBus localEventBus;
+    private List<String> tdTargets = Collections.singletonList("td");
+    private List<String> allTargets = Collections.singletonList("all");
 
     private BreakingCurve breakingCurve = null;
 
     //TODO Correct maxDistance!
     private Double maxDistance = 0d;
 
-
-    public SpeedSupervisionModule(EventBus eventBus){
-        this.eventBus = eventBus;
-        eventBus.register(this);
+    /**
+     * Constructor
+     * @param localEventBus The local {@link EventBus} of the train
+     */
+    public SpeedSupervisionModule(EventBus localEventBus){
+        this.localEventBus = localEventBus;
+        localEventBus.register(this);
     }
 
+    /**
+     * This method listens to clock tick events and checks if the speed becomes to great.
+     * There are multiple {@link SpeedInterventionLevel}, that are reached at different times.<br>
+     * Currently, the different points of intervention are aproximated, this will be overhauled in the next
+     * revision of this module.
+     *
+     * @param cte A {@link ClockTickEvent}
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
@@ -40,7 +64,7 @@ public class SpeedSupervisionModule {
             return;
         }
 
-        TrainDataVolatile trainDataVolatile = this.eventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         double curSpeed;
         Position curPosition;
 
@@ -63,9 +87,11 @@ public class SpeedSupervisionModule {
         double tripDistanceIndication = tripDistance + curSpeed * 10;
         SpeedInterventionLevel speedInterventionLevel;
 
+        double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+        sendCurrentMaxSpeed(maxSpeed);
         //TODO Make this less horrible!
         if(tripDistance < this.maxDistance){
-            double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+
             //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
             if(curSpeed > maxSpeed + 2){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
@@ -109,15 +135,22 @@ public class SpeedSupervisionModule {
             speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
         }
 
-        this.eventBus.postSticky(new SsmReportEvent("ssm", Collections.singletonList("tsm"), speedInterventionLevel));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel));
 
     }
-
+    /**
+     * This method updates the breaking curve.
+     * @param nbce A {@link NewBreakingCurveEvent}
+     */
     @Subscribe
     public void setBreakingCurve(NewBreakingCurveEvent nbce){
 
         this.breakingCurve = nbce.breakingCurve;
         this.maxDistance = this.breakingCurve.getHighestXValue();
+    }
+
+    private void sendCurrentMaxSpeed(double curMaxSpeed) {
+        this.localEventBus.post(new TrainDataChangeEvent("ssm", this.tdTargets, "currentMaximumSpeed", curMaxSpeed));
     }
 
 }

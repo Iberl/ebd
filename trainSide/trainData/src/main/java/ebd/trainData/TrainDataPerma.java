@@ -1,5 +1,6 @@
 package ebd.trainData;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.trainData.util.dataConstructs.*;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
@@ -111,9 +112,6 @@ public class TrainDataPerma {
     /**
      * Sets the class from the data found in the tool "Zugkonfigurator", a web app.
      *
-     *
-     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
-     *
      * @param trainID The ETCS-ID of the Train, found in trainconfigurator
      *
      * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
@@ -123,30 +121,14 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    public TrainDataPerma(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
-        setInstanceFromURL(trainConfiguratorURL,trainID);
-    }
-
-    /**
-     * Sets the instance by parsing the JSONObject that is extracted out of a file
-     *
-     * @param pathToTrainJSON The path to the *.json file
-     *
-     * @throws IOException Thrown if the file could not be read
-     *
-     * @throws ParseException Thrown if the file could non be parsed
-     *
-     * @throws TDBadDataException Thrown if there is missing data in the file.
-     */
-    public TrainDataPerma(String pathToTrainJSON) throws ParseException, TDBadDataException, IOException {
-        setInstanceFromFile(pathToTrainJSON);
+    public TrainDataPerma(int trainID) throws IOException, ParseException, TDBadDataException {
+        if(ConfigHandler.getInstance().testing) setInstanceFromFile();
+        else setInstanceFromURL(trainID);
     }
 
 
     /**
      * Sets the instance by parsing the JSONObject that is returned from the app.
-     *
-     * @param trainConfiguratorURL The URL to the "Zugkonfigurator" web app
      *
      * @param trainID The ETCS-ID of the Train
      *
@@ -157,14 +139,16 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    private void setInstanceFromURL(String trainConfiguratorURL, String trainID) throws IOException, ParseException, TDBadDataException {
+    private void setInstanceFromURL(int trainID) throws IOException, ParseException, TDBadDataException {
         /*
         Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
          */
-        //TODO Give URL by config file
+
         JSONParser parser = new JSONParser();
 
-        String urlName = trainConfiguratorURL + "/rest/zug/extended/" + trainID;
+        String trainConfiguratorIP = ConfigHandler.getInstance().ipToInfrastructureServer;
+        String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
+        String urlName = "https://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/rest/zug/extended/" + trainID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -190,9 +174,7 @@ public class TrainDataPerma {
     }
 
     /**
-     * Sets the instance by parsing the JSONObject that is extracted out of a file. Mostly for test cases
-     *
-     * @param pathToTrainJSON The path to the *.json file
+     * Sets the instance by parsing the JSONObject that is extracted out of a file. For test cases
      *
      * @throws IOException Thrown if the file could not be read
      *
@@ -200,27 +182,27 @@ public class TrainDataPerma {
      *
      * @throws TDBadDataException Thrown if there is missing data in the file.
      */
-    private void setInstanceFromFile(String pathToTrainJSON) throws IOException, TDBadDataException, ParseException {
-        InputStream inputStream;
-        try{
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON);
+    private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
+        String pathToTrainJSON = ConfigHandler.getInstance().pathToTestTrainJson;
+        try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON)){
+            try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
+
+            /*
+            Reading the input data into the variables
+            */
+                JSONParser parser = new JSONParser();
+                Object object = parser.parse(input);
+                JSONObject jsonObject = (JSONObject) object;
+
+                fillFromJSON(jsonObject);
+            }
         }
         catch (NullPointerException npe){
             npe.printStackTrace();
             throw npe;
         }
 
-        try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
 
-            /*
-            Reading the input data into the variables
-            */
-            JSONParser parser = new JSONParser();
-            Object object = parser.parse(input);
-            JSONObject jsonObject = (JSONObject) object;
-
-            fillFromJSON(jsonObject);
-        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package ebd.trainData.tests;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
 import ebd.trainData.TrainDataPerma;
@@ -9,17 +10,18 @@ import java.io.IOException;
 
 class TrainDataPermaTest {
 
-    @Test
+    /*@Test
     public void urlTest() throws IOException, ParseException, TDBadDataException {
+        ConfigHandler.getInstance().testing = false;
+        TrainDataPerma trainDataPerma = new TrainDataPerma(192);
 
-        TrainDataPerma trainDataPerma = new TrainDataPerma("http://localhost:8080/trainConfigurator","192");
 
-
-    }
+    }*/
 
     @Test
     public void fileTest() throws IOException, ParseException, TDBadDataException {
-        TrainDataPerma trainDataPerma = new TrainDataPerma("testTrain650.json");
+        ConfigHandler.getInstance().testing = true;
+        TrainDataPerma trainDataPerma = new TrainDataPerma(192);
     }
 
 }

@@ -1,5 +1,6 @@
 package ebd.trainData.util.availableAcceleration;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.movementState.MovementState;
@@ -11,6 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +27,12 @@ class AvailableAccelerationTest {
     }
 
     @Test
-    void aaTest() {
+    void aaTest() throws IOException {
         EventBus eb = EventBus.getDefault();
         List<String> targetList = Arrays.asList(new String[]{"all"});
         RouteData routeData = new RouteData(eb);
-        TrainData trainData = new TrainData(eb, "resources/testTrain650.json");
+        ConfigHandler.getInstance().testing = true;
+        TrainData trainData = new TrainData(eb, 192);
 
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
         AvailableAcceleration aa = new AvailableAcceleration(eb);

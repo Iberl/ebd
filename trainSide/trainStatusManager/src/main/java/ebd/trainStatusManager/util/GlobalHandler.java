@@ -10,11 +10,22 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class handles the communication with the global {@link EventBus}
+ * for the {@link ebd.trainStatusManager.TrainStatusManager}.
+ *
+ * @author Lars Schulze-Falck
+ */
 public class GlobalHandler {
 
     EventBus localBus;
     int etcsTrainID;
 
+    /**
+     * Constructor
+     * @param localBus the local {@link EventBus} of the train
+     * @param etcsTrainID the ETCS ID of the train
+     */
     public GlobalHandler(EventBus localBus, int etcsTrainID){
 
         this.localBus = localBus;
@@ -28,14 +39,6 @@ public class GlobalHandler {
             return;
         }
         this.localBus.post(de);
-    }
-
-    @Subscribe
-    public void waitTime(NewWaitTimeAtStationEvent wtse){
-        if(!validTarget(wtse.targets)){
-            return;
-        }
-        this.localBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "waitTimeAtStation", wtse.waitTime));
     }
 
     /**
