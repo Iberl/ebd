@@ -40,16 +40,20 @@ public class DMIDisplay extends JFrame {
         this.contentPane.setLayout(null);
         this.contentPane.setPreferredSize(new Dimension((int) (640 * skalierungsFaktor), (int) (480 * skalierungsFaktor)));
 
+        /*
         this.panelA = new PanelA();
         this.contentPane.add(this.panelA);
         this.scaleableObjects.add(this.panelA);
         this.panelA.addChildren(this);
+        */
+
 
         this.panelB = new PanelB();
         this.contentPane.add(this.panelB);
         this.scaleableObjects.add(this.panelB);
         this.panelB.addChildren(this);
 
+        /*
         this.panelC = new PanelC();
         this.contentPane.add(this.panelC);
         this.scaleableObjects.add(this.panelC);
@@ -64,6 +68,7 @@ public class DMIDisplay extends JFrame {
         this.contentPane.add(this.panelE);
         this.scaleableObjects.add(this.panelE);
         this.panelE.addChildren(this);
+        */
 
         this.panelG = new PanelG();
         this.contentPane.add(this.panelG);
@@ -91,7 +96,10 @@ public class DMIDisplay extends JFrame {
         this.panelB.getSpeedometer().setCurrentTargetSpeed((int) currentTargetSpeed);
     }
 
+    /*
     public void setTargetDistance(int targetDistance) {
         this.panelA.setTargetDistance(targetDistance);
     }
+    */
+
 }
