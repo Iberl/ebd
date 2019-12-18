@@ -24,8 +24,14 @@ public class SingleConditionParser {
             switch (conType) {
                 case "v_rel":
                     return new RelativeSpeedCondition(conObj, localEventBus);
+                case "v_t_rel":
+                    return new RelativeFutureSpeedCondition(conObj,localEventBus);
                 case "v":
                     return new TotalSpeedCondition(conObj, localEventBus);
+                case "v_m":
+                    return new MaxSpeedCondition(conObj,localEventBus);
+                case "v_t_m":
+                    return new MaxFutureSpeedCondition(conObj,localEventBus);
                 default:
                     throw new DDBadDataException("A condition was not formatted correctly: " + jsonObject.toString());
             }

@@ -48,7 +48,7 @@ public class ConfigHandler {
     /*
     doubles
      */
-
+    public double targetReachedDistance = 20;
     /*
     boolean
      */

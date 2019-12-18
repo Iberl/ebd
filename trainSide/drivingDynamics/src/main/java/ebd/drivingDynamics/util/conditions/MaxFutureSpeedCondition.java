@@ -3,7 +3,6 @@ package ebd.drivingDynamics.util.conditions;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
-import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
@@ -18,43 +17,46 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 /**
- * A future relative speed condition compares the current speed to a maximum allowed speed in the future.<br>
+ * A max future speed condition compares the a maximum allowed speed in the future to a given speed.<br>
  * <b>This condition ignores possible accelerations and decelerations</b><br>
  * The way it compares the the values are defined in the {@link JSONObject}<br>
- * <p>The <b>type</b> of this condition is "v_rel"</p>
+ * <p>The <b>type</b> of this condition is "v_t_m"</p>
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
- * <p>The <b>value</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison</p>
+ * <p>The <b>value</b> key contains a speed in [k/m] in the range of [0, 600]</p>
  * <p>The <b>value_t</b> key contains a time in seconds a which the maximum allowed speed is compared</p>
  * <p>
- *      Example: The condition should evaluate to true if the train is currently slower than 50% of maximum speed in 120 seconds.
+ *      Example: The condition should evaluate to true if the trains max speed in 120 seconds is slower than 50 km/h
  *      The JSON string would look like this:<br>
- *           {"type" : "v_t_rel", "condition" : {"op" : "<", "value" : 50, "value_t" = 120 }}<br>
- *       The value of "condition" is passed to this function<br>
+ *           {"type" : "v_t_m", "condition" : {"op" : "<", "value" : 50, "value_t" = 120 }}<br>
+ *       The value of "condition" is passed to this class<br>
  * </p>
  *
  * @author Lars Schulze-Falck
  */
-public class RelativeFutureSpeedCondition extends Condition{
-
-    private double speedPercentage;
-    private BiFunction<Double,Double, Boolean> comparator;
-    /*
-    Time in [s]
+public class MaxFutureSpeedCondition extends Condition {
+    /**
+     * In [m/s]
      */
-    private double time;
+    private double totalSpeed;
+    private BiFunction<Double,Double, Boolean> comparator;
+
+    /**
+     * in [s]
+     */
+    double time;
 
     private Spline tripProfile;
+    /**
+     * in [m]
+     */
     private double maxTripSectionDistance;
 
     private List<String> exceptionTargets = Collections.singletonList("all");
 
     /**
-     * Builds an Instance out of a {@link JSONObject}
-     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
      * @param localEventBus The local {@link EventBus} of the train.
-     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
      */
-    public RelativeFutureSpeedCondition(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+    public MaxFutureSpeedCondition(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
         super(localEventBus);
         this.localEventBus.register(this);
         fromJSON(jsonObject);
@@ -77,7 +79,7 @@ public class RelativeFutureSpeedCondition extends Condition{
             maxSpeed = tripProfile.getPointOnCurve((curSecDis + curSpeed * this.time));
         }
 
-        return this.comparator.apply(curSpeed,maxSpeed);
+        return this.comparator.apply(maxSpeed,this.totalSpeed);
     }
 
     /**
@@ -111,24 +113,24 @@ public class RelativeFutureSpeedCondition extends Condition{
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
-                this.speedPercentage = (Long)tempObject / 100d;
+                this.totalSpeed = (Long)tempObject / 3.6;
             }
             else if(tempObjectName.equals("Double")){
-                this.speedPercentage = (Double)tempObject / 100;
+                this.totalSpeed = (Double)tempObject / 3.6;
             }
-            else throw new DDBadDataException("RelativeFutureSpeedCondition value was not a number");
+            else throw new DDBadDataException("MaxFutureSpeedCondition value was not a number");
 
-            if(speedPercentage < 0 || speedPercentage > 2){
-                throw new DDBadDataException("RelativeFutureSpeedCondition Value was not in the range [0, 200]");
+            if(this.totalSpeed < 0 || this.totalSpeed > 167){
+                throw new DDBadDataException("MaxFutureSpeedCondition Value was not in the range [0, 600] km/h");
             }
         }
-        else throw new DDBadDataException("The key 'value' was missing for a RelativeFutureSpeedCondition");
+        else throw new DDBadDataException("The key 'value' was missing for a MaxFutureSpeedCondition");
 
         if(jsonObject.containsKey("op")){
             String opCode = (String)jsonObject.get("op");
             this.comparator = ComparisonParser.parse(opCode);
         }
-        else throw new DDBadDataException("The key 'op' was missing for a RelativeFutureSpeedCondition");
+        else throw new DDBadDataException("The key 'op' was missing for a MaxFutureSpeedCondition");
 
         if(jsonObject.containsKey("value_t")){
             Object tempObject = jsonObject.get("value_t");
@@ -139,9 +141,9 @@ public class RelativeFutureSpeedCondition extends Condition{
             else if(tempObjectName.equals("Double")){
                 this.time = (Double)tempObject;
             }
-            else throw new DDBadDataException("RelativeFutureSpeedCondition value was not a number");
+            else throw new DDBadDataException("MaxFutureSpeedCondition value was not a number");
         }
-        else throw new DDBadDataException("The key 'value_t' was missing for a RelativeFutureSpeedCondition");
+        else throw new DDBadDataException("The key 'value_t' was missing for a MaxFutureSpeedCondition");
 
     }
 }

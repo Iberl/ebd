@@ -2,6 +2,7 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.position.Position;
@@ -31,8 +32,10 @@ public class TripSupervisor {
     private double L_TRAIN;
     private int etcsID;
     private boolean missionEnded = true;
-
-
+    /**
+     * In [m]
+     */
+    private double targetReachedDistance;
 
     private BreakingCurve breakingCurve = null;
 
@@ -46,6 +49,7 @@ public class TripSupervisor {
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
         this.etcsID = trainDataPerma.getId();
+        this.targetReachedDistance = ConfigHandler.getInstance().targetReachedDistance;
     }
 
     /**
@@ -63,7 +67,7 @@ public class TripSupervisor {
 
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
 
-        if(distanceToEMA <= 5 && trainDataVolatile.getCurrentSpeed() == 0){
+        if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
             sendEndOfMission();
         }
     }

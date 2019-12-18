@@ -184,7 +184,6 @@ public class TrainDataPerma {
      */
     private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
         String pathToTrainJSON = ConfigHandler.getInstance().pathToTestTrainJson;
-        System.out.println(pathToTrainJSON);
         try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON)){
             try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
 

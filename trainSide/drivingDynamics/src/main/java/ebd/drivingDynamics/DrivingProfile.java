@@ -29,8 +29,8 @@ public class DrivingProfile {
     private List<Action> actions;
     private EventBus localEventBus;
 
-    class SortByPriority implements Comparator<Action>{
-
+    static class SortByPriority implements Comparator<Action>{
+        //Note: this comparator imposes orderings that are inconsistent with equals.
         @Override
         public int compare(Action o1, Action o2) {
             return o1.getPriority() - o2.getPriority();

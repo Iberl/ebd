@@ -22,6 +22,8 @@ trainNumber = 0
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
+#Distance before end of movement authority that is seen as "target reached" in [m]
+targetReachedDistance = 20
 ######
 ###### Booleans (either " = true" or " = false")
 ######
