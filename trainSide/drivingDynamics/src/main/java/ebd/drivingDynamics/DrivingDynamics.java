@@ -5,6 +5,7 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -39,6 +40,13 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Driving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
+ * Internally, the actual state is represented by a {@link DynamicState} that holds all relevant values.
+ *
+ * @author LSF
+ * @version 0.1
+ */
 public class DrivingDynamics {
 
     private EventBus localBus;
@@ -52,6 +60,8 @@ public class DrivingDynamics {
     private DrivingProfile drivingProfile;
 
     private double time;
+    private double timeOfLastAction = -1;
+    private double timeBetweenActions;
     private boolean locked = true;
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
@@ -65,7 +75,11 @@ public class DrivingDynamics {
     private MovementState prevMovementState = null;
     private SpeedInterventionLevel prevSil = null;
 
-
+    /**
+     * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
+     *
+     * @param localBus The local {@link EventBus} of the train
+     */
     public DrivingDynamics(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
@@ -81,15 +95,24 @@ public class DrivingDynamics {
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
 
+        this.timeBetweenActions = ConfigHandler.getInstance().timeBetweenActions;
     }
 
+    /**
+     * Every clock tick event this method runs all code necessary to calculate the next dynamic state from the previous
+     * one. It takes into account {@link SpeedInterventionLevel} decided by the {@link ebd.speedSupervisionModule.SpeedSupervisionModule}
+     * and the {@link Action} decided by the {@link DrivingProfile}.
+     * This method also updates {@link TrainDataVolatile} with the new values.
+     *
+     * @param cte A {@link ClockTickEvent}
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
         /*
         Setting time to calculate the precise time between calculations
          */
         double currentTime = System.nanoTime();
-        double deltaT = (currentTime - this.time) / 1E9; //To get seconds
+        double deltaT = (currentTime - this.time)/ 1E9; //To get seconds;
         this.time = currentTime;
 
         /*
@@ -103,7 +126,7 @@ public class DrivingDynamics {
         Update TrainDataVolatile to set the current maximum allowed speed of the train
         based on the tripProfile
          */
-        sendCurrentTargetSpeed();
+        updateCurrentTargetSpeed();
 
         /*
         Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
@@ -173,6 +196,11 @@ public class DrivingDynamics {
         }
     }
 
+    /**
+     * Updates the Position in dynamic State should it change outside of driving dynamics.
+     * This can happen when a new balise is reached, which results in a new position with new location and increment.
+     * @param ntdve A {@link NewTrainDataVolatileEvent}
+     */
     @Subscribe
     public void newTrainData(NewTrainDataVolatileEvent ntdve){
         if(!(ntdve.targets.contains("all") || ntdve.targets.contains("dd"))){
@@ -184,6 +212,10 @@ public class DrivingDynamics {
         }
     }
 
+    /**
+     * This method unlocks Drvining Dynamics, which signals the start of movement of the train
+     * @param ue A {@link DDUnlockEvent}
+     */
     @Subscribe
     public void unlock(DDUnlockEvent ue){
         if(!(ue.targets.contains("dd") || ue.targets.contains("all") || !this.locked)){
@@ -198,6 +230,11 @@ public class DrivingDynamics {
                 "Starting mission"));
     }
 
+    /**
+     * This method locks Driving Dynamics, signaling the end of movement of the train
+     * //TODO Only allow lock at standstill
+     * @param le A {@link DDLockEvent}
+     */
     @Subscribe
     public void setLocked(DDLockEvent le){
         if(!(le.targets.contains("dd") || le.targets.contains("all")) || this.locked){
@@ -206,6 +243,11 @@ public class DrivingDynamics {
         this.locked = true;
     }
 
+    /**
+     * This method updates the trip profile. This can become necessary should a new one become available. This does
+     * <b>not</b> require the train to be at standstill.
+     * @param utpe {@link DDUpdateTripProfileEvent}
+     */
     @Subscribe
     public void updateTripProfile(DDUpdateTripProfileEvent utpe){
         if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
@@ -233,6 +275,10 @@ public class DrivingDynamics {
         }
     }
 
+    /**
+     * Performance some clean up tasks at the end of a trip.
+     * @param ttee A {@link TsmTripEndEvent}
+     */
     @Subscribe
     public void atTripEnd(TsmTripEndEvent ttee){
         dynamicState.setMovementState(MovementState.HALTING);
@@ -240,7 +286,10 @@ public class DrivingDynamics {
         sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
     }
 
-
+    /**
+     * This function checks if a new location was reached and if so, updates the position inside of dynamic state to
+     * reflect this.
+     */
     private void updateDSPosition() {
         NewRouteDataVolatileEvent nrdve = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class);
         NewLocationEvent nle = this.localBus.getStickyEvent(NewLocationEvent.class);
@@ -283,6 +332,9 @@ public class DrivingDynamics {
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
     }
 
+    /**
+     * This method gathers the new information from dynamic state and send these to {@link TrainDataVolatile}
+     */
     private void updateTrainDataVolatile(){
         HashMap<String,Object> nameToValue = new HashMap<>();
         nameToValue.put("currentSpeed", this.dynamicState.getSpeed());
@@ -293,7 +345,10 @@ public class DrivingDynamics {
         this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
     }
 
-    private void sendCurrentTargetSpeed() {
+    /**
+     * This method calculates the new MaxSpeed for the current location. Also sends these to {@link TrainDataVolatile}
+     */
+    private void updateCurrentTargetSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
         if(tripSectionDistance < this.maxTripSectionDistance) this.targetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
@@ -302,6 +357,9 @@ public class DrivingDynamics {
         this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentTargetSpeed", this.targetSpeed));
     }
 
+    /**
+     * Sends logging information from dynamic state
+     */
     private void sendToLogEventDynamicState() {
         double a = dynamicState.getAcceleration();
         double v = dynamicState.getSpeed();
@@ -316,6 +374,9 @@ public class DrivingDynamics {
 
     }
 
+    /**
+     * Sends logging information regarding the current {@link SpeedInterventionLevel}
+     */
     private void sendToLogEventSpeedSupervision(SpeedInterventionLevel sil, MovementState movementState) {
         if(this.prevSil == sil) return;
         this.prevSil = sil;
@@ -325,12 +386,18 @@ public class DrivingDynamics {
 
     }
 
+    /**
+     * Sends logging information regarding the current {@link MovementState} resulting from the {@link SpeedInterventionLevel}
+     */
     private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
         this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
 
     }
 
+    /**
+     * Sends logging information regarding the current {@link MovementState}
+     */
     private void sendMovementState(MovementState ms){
         if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
             sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
@@ -338,7 +405,17 @@ public class DrivingDynamics {
         }
     }
 
+    /**
+     * This Method takes an Action and applies the resulting behaviour.
+     * @param action Any {@link Action}
+     */
     private void actionParser(Action action) {
+        if(this.timeOfLastAction > -1 && (this.time - this.timeOfLastAction) / 1E9 < this.timeBetweenActions){
+            return;
+        }
+
+        this.timeOfLastAction = this.time;
+
         switch(action.getClass().getSimpleName()){
             case "NoAction":
                 break;
@@ -355,6 +432,10 @@ public class DrivingDynamics {
             case "CruiseAction":
                 this.dynamicState.setMovementState(MovementState.CRUISE);
                 sendMovementState(MovementState.CRUISE);
+                break;
+            case "CoastAction":
+                this.dynamicState.setMovementState(MovementState.COASTING);
+                sendMovementState(MovementState.COASTING);
                 break;
             case "HaltAction":
                 this.dynamicState.setMovementState(MovementState.HALTING);

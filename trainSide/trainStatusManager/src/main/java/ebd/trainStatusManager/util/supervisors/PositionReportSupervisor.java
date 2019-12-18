@@ -14,14 +14,13 @@ import ebd.messageLibrary.packet.trainpackets.Packet_0;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
+import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,7 +49,7 @@ public class PositionReportSupervisor {
 
     private String rbcID;
 
-    private IncrementalPositionReportDistances positionReportDistances = null;
+    private IncrPosRprtDist positionReportDistances = null;
 
     /**
      * Constructor

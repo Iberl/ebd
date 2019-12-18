@@ -87,11 +87,11 @@ public class SpeedSupervisionModule {
         double tripDistanceIndication = tripDistance + curSpeed * 10;
         SpeedInterventionLevel speedInterventionLevel;
 
-        double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
-        sendCurrentMaxSpeed(maxSpeed);
+
         //TODO Make this less horrible!
         if(tripDistance < this.maxDistance){
-
+            double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
+            sendCurrentMaxSpeed(maxSpeed);
             //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
             if(curSpeed > maxSpeed + 2){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;

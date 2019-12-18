@@ -6,7 +6,6 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,6 +20,7 @@ public class Clock implements Runnable {
     private EventBus eventBus;
     private Thread clockThread;
 
+    private int tickTime;
     private boolean running = true;
 
     private List<String> exceptionTargets = Collections.singletonList("tsm");
@@ -33,12 +33,11 @@ public class Clock implements Runnable {
     }
 
     @Override
-    //TODO connect to Configurator
     public void run() {
         while(this.running){
             try {
-                eventBus.post(new ClockTickEvent("clock", eventTargets));
-                Thread.sleep(100);
+                this.eventBus.post(new ClockTickEvent("clock", this.eventTargets));
+                Thread.sleep(this.tickTime);
             } catch (InterruptedException e) {
                 InterruptedException ie = new InterruptedException("Clock was interrupted: " + e.getMessage());
                 ie.setStackTrace(e.getStackTrace());
@@ -49,8 +48,10 @@ public class Clock implements Runnable {
 
     /**
      * This method starts the encapsulated clock thread.
+     * @param tickTime Time between two clock ticks
      */
-    public void start(){
+    public void start(int tickTime){
+        this.tickTime = tickTime;
         this.clockThread.start();
     }
 

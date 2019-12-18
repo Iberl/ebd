@@ -23,6 +23,8 @@ import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
+import ebd.szenario.util.InfrastructureClient;
+import ebd.szenario.util.InfrastructureDummyServer;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
 import ebd.szenario.util.events.*;
@@ -107,6 +109,12 @@ public class Szenario implements Runnable {
     private MessageSender messageSenderTrack;
 
     /*
+    Sockets
+     */
+    private InfrastructureClient infrastructureClient;
+    private InfrastructureDummyServer infrastructureDummyServer;
+
+    /*
     TrackSide
      */
     private RadioBlockCenter rbc = null;
@@ -121,14 +129,19 @@ public class Szenario implements Runnable {
         this.globalEventBus.register(this);
         try {
             this.logger = new Logging();
+            //this.infrastructureDummyServer = new InfrastructureDummyServer(25555);
+            this.infrastructureClient = new InfrastructureClient();
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("This is the virtual environment for the ETCS@EBD project");
 
+
         this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
+
+
 
         szenarioThread.start();
     }

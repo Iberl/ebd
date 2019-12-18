@@ -39,16 +39,28 @@ public class ConfigHandler {
     ints
      */
     public int trainClockTickInMS = 100;
+    public int trainNumber = 0;
+    /**
+     * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
+     */
+    public int infrastructureUpdateMultiplier = 10;
 
     /*
     doubles
      */
-
+    /**
+     * Distance before end of movement authority that is seen as "target reached" in [m]
+     */
+    public double targetReachedDistance = 20;
+    /**
+     * Minimum time between actions
+     */
+    public double timeBetweenActions = 2;
     /*
     boolean
      */
     public boolean testing = false;
-
+    public boolean simulated = true;
     /*
     other
      */
@@ -68,7 +80,7 @@ public class ConfigHandler {
          */
         File fileConfig = new File("configuration/config.txt");
 
-        if (!fileConfig.exists()) {
+        if (fileConfig.length() == 0) {
             boolean createdDir = fileConfig.getParentFile().mkdir();
             boolean createdFile = fileConfig.createNewFile();
             if(!(createdFile)){

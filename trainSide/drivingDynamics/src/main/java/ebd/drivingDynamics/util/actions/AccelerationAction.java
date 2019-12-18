@@ -4,19 +4,30 @@ import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
+/**
+ * This action accelerates the train. The power by which the train should be accelerated can be modified by the
+ * acceleration percentage.
+ */
 public class AccelerationAction extends Action {
 
 
     private double accelerationPercentage;
 
-    public AccelerationAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
-        super(eventBus);
+    /**
+     * This action breaks the train.
+     *
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @param localEventBus the local {@link EventBus}
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
+    public AccelerationAction(JSONObject jsonObject, EventBus localEventBus, int priority) throws DDBadDataException {
+        super(localEventBus, priority);
         fromJSON(jsonObject);
     }
 
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
-        if(jsonObject.keySet().contains("value")){
+        if(jsonObject.containsKey("value")){
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
@@ -34,7 +45,7 @@ public class AccelerationAction extends Action {
         }
         else throw new DDBadDataException("The key 'value' was missing for a AccelerationAction");
 
-        if(jsonObject.keySet().contains("conditions")){
+        if(jsonObject.containsKey("conditions")){
             conditionsFromJSON((JSONObject)jsonObject.get("conditions"));
 
         }
@@ -42,6 +53,10 @@ public class AccelerationAction extends Action {
 
     }
 
+    /**
+     * @return The acceleration percentage in the range of [0,1] to be used as modifier for the applied
+     * acceleration power
+     */
     public double getAccelerationPercentage() {
         return accelerationPercentage;
     }

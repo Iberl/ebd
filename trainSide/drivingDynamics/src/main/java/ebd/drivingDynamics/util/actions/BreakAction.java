@@ -4,18 +4,30 @@ import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
+/**
+ * This action breaks the train. The power by which the train should be decelerated can be modified by the breaking
+ * percentage.
+ */
 public class BreakAction extends Action {
-
-    public BreakAction(JSONObject jsonObject, EventBus eventBus) throws DDBadDataException {
-        super(eventBus);
-        fromJSON(jsonObject);
-    }
 
     private double breakPercentage;
 
+    /**
+     * This action breaks the train.
+     *
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @param localEventBus the local {@link EventBus}
+     * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
+     */
+    public BreakAction(JSONObject jsonObject, EventBus localEventBus, int priority) throws DDBadDataException {
+        super(localEventBus, priority);
+        fromJSON(jsonObject);
+    }
+
+
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
-        if(jsonObject.keySet().contains("value")){
+        if(jsonObject.containsKey("value")){
             Object tempObject = jsonObject.get("value");
             String tempObjectName = tempObject.getClass().getSimpleName();
             if(tempObjectName.equals("Long")){
@@ -42,6 +54,9 @@ public class BreakAction extends Action {
 
     }
 
+    /**
+     * @return The breaking percentage in the range of [0,1] to be used as modifier for the applied breaking power
+     */
     public double getBreakPercentage() {
         return this.breakPercentage;
     }

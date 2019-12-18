@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util;
+package ebd.trainStatusManager.util.handlers;
 
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
@@ -12,7 +12,7 @@ import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trackpackets.Packet_58;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
+import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 
@@ -24,7 +24,7 @@ import java.util.*;
  *
  * @author Lars Schulze-Falck
  */
-public class PackageResolver {
+public class PackageHandler {
 
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
@@ -38,7 +38,7 @@ public class PackageResolver {
             prevLoc = link.NID_BG;
         }
         localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Linking Information"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Linking Information [Packet 5]"));
     }
 
     public static void p57(EventBus localBus, Packet_57 p57){
@@ -60,7 +60,7 @@ public class PackageResolver {
         changes.put("T_TIMEOUTRQST", t_timeoutrqst);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new MA Request Parameters"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new MA Request Parameters [Packet 57]"));
 
     }
 
@@ -92,15 +92,15 @@ public class PackageResolver {
         }
         m_loc = p58.M_LOC;
 
-        IncrementalPositionReportDistances iprd = new IncrementalPositionReportDistances(String.valueOf(nid_lrbg), p58.intervals);
+        IncrPosRprtDist iprd = new IncrPosRprtDist(String.valueOf(nid_lrbg), p58.intervals);
 
         Map<String,Object> changes = new HashMap<>();
         changes.put("T_CYCLOC", t_cycle);
         changes.put("distanceCycleLocation", d_cycle);
         changes.put("M_LOC", m_loc);
-        changes.put("incrementalPositionReportDistances", iprd);
+        changes.put("incrPosRprtDist", iprd);
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters"));
+        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters [Packet 58]"));
     }
 }

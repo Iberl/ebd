@@ -8,7 +8,7 @@ import java.util.List;
  * Data construct to contain both the incremental distances and the associated reference location id,
  * see {@link ebd.messageLibrary.util.ETCSVariables#NID_LRBG}.
  */
-public class IncrementalPositionReportDistances {
+public class IncrPosRprtDist {
 
     private String refLocID;
 
@@ -24,7 +24,7 @@ public class IncrementalPositionReportDistances {
      * @param refLocID reference location ID
      * @param incrementalDistances A list of the distances
      */
-    public IncrementalPositionReportDistances(String refLocID, List<Packet_58.Packet_58_Interval> incrementalDistances) {
+    public IncrPosRprtDist(String refLocID, List<Packet_58.Packet_58_Interval> incrementalDistances) {
         this.refLocID = refLocID;
         this.incrementalDistances = incrementalDistances;
     }

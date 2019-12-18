@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util;
+package ebd.trainStatusManager.util.handlers;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -14,6 +14,7 @@ import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
+import ebd.messageLibrary.packet.Packet;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -34,7 +35,7 @@ import java.util.*;
 /**
  * This class handles ETCS Messages for the {@link ebd.trainStatusManager.TrainStatusManager}.
  * Every messages has expected packages, without these the messages will be rejected. Many messages can also have
- * optional packages. These get forwarded to the {@link PackageResolver}.
+ * optional packages. These get forwarded to the {@link PackageHandler}.
  *<p>
  * Currently implemented messages per id: 3, 24<br>
  * Currently implemented optional packages per id: 5, 57, 58<br>
@@ -70,7 +71,6 @@ public class MessageHandler {
 
         switch (rme.message.NID_MESSAGE){
             case 3:
-                this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received MA Message"));
                 handleMsg3(rme);
                 break;
             case 24:
@@ -89,6 +89,25 @@ public class MessageHandler {
      */
     private void handleMsg24(ReceivedMessageEvent rme) {
         Message_24 message24 = (Message_24)rme.message;
+
+        /*
+        Logging
+         */
+        String ids = " [Msg ID: 24 | Packets: ";
+        for(TrackPacket tp : message24.packets){
+            ids += " " + tp.NID_PACKET + ",";
+        }
+        if(ids.endsWith(",")){
+            ids = ids.subSequence(0,ids.lastIndexOf(",")).toString();
+        }
+        ids += "]";
+        /*
+        /logging
+         */
+
+
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received universal Message" + ids));
+
         for(TrackPacket tp : message24.packets){
             handleOptionalTrackPackages(rme,tp);
         }
@@ -131,6 +150,23 @@ public class MessageHandler {
 
 
         Message_3 msg3 = (Message_3)rme.message;
+
+        /*
+        Logging
+         */
+        String ids = " [Msg ID: 3 | Packets: ";
+        for(TrackPacket tp : msg3.packets){
+            ids += " " + tp.NID_PACKET + ",";
+        }
+        if(ids.endsWith(",")){
+            ids = ids.subSequence(0,ids.lastIndexOf(",")).toString();
+        }
+        ids += "]";
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received MA Message" + ids));
+        /*
+        /logging
+         */
+
         Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null); //TODO check if viable
         refPosition = new Position(0,true, refLocation);
 
@@ -196,13 +232,13 @@ public class MessageHandler {
 
         switch (trackPacket.NID_PACKET){
             case 5:
-                PackageResolver.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
+                PackageHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
             case 57:
-                PackageResolver.p57(this.localBus,(Packet_57)trackPacket);
+                PackageHandler.p57(this.localBus,(Packet_57)trackPacket);
                 break;
             case 58:
-                PackageResolver.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
@@ -219,7 +255,7 @@ public class MessageHandler {
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message146, destination ));
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Acknowledgment"));
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Acknowledgment [Msg ID: 146]"));
     }
 
     /**

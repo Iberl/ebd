@@ -31,6 +31,11 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainStatusManager.util.*;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
+import ebd.trainStatusManager.util.handlers.ExceptionHandler;
+import ebd.trainStatusManager.util.handlers.GlobalHandler;
+import ebd.trainStatusManager.util.handlers.MessageHandler;
+import ebd.trainStatusManager.util.handlers.TelegramHandler;
+import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
 import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
 import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.trainStatusManager.util.supervisors.TripSupervisor;
@@ -59,6 +64,11 @@ public class TrainStatusManager implements Runnable {
     private GlobalHandler globalHandler;
     private MessageHandler messageHandler;
     private TelegramHandler telegramHandler;
+
+    /*
+    ClientConnectors
+     */
+    private InfrastructureClientConnector infrastructureClientConnector;
 
     /*
     Internal modules
@@ -208,6 +218,10 @@ public class TrainStatusManager implements Runnable {
         this.telegramHandler = new TelegramHandler(this.localEventBus, this.etcsTrainID);
 
         /*
+        SocketClientConnectors
+         */
+        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus,this.etcsTrainID);
+        /*
         Modules
          */
 
@@ -232,7 +246,7 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"),changesForTD));
 
         this.clock = new Clock(this.localEventBus);
-        this.clock.start();
+        this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
 
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
     }

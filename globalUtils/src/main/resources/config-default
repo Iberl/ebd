@@ -13,11 +13,21 @@ portOfInfrastructureServer = 25555
 ######
 ###### Integers
 ######
+#Main tick rate of the train calculations in milliseconds (default: 100)
 trainClockTickInMS = 100
+#Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
+infrastructureUpdateMultiplier = 10
+#Train number that is used on the infrastructure server to id the train
+trainNumber = 0
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
+#Distance before end of movement authority that is seen as "target reached" in [m]
+targetReachedDistance = 20
+#Minimum time between actions
+timeBetweenActions = 0.1
 ######
 ###### Booleans (either " = true" or " = false")
 ######
 testing = false
+simulated = true

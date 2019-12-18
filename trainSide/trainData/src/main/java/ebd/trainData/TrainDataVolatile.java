@@ -4,12 +4,13 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Spline;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.util.availableAcceleration.AccelerationPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.availableAcceleration.BreakingPowerCurveCalculator;
 import ebd.trainData.util.availableAcceleration.ResistanceCurveCalculator;
-import ebd.trainData.util.dataConstructs.IncrementalPositionReportDistances;
+import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,13 +36,11 @@ public class TrainDataVolatile {
     /**
      * The distance already driven on the current trip in [m]
      */
-    @NotNull
     protected volatile double curTripDistance = 0d;
 
     /**
      * Time since the trip started in [s]
      */
-    @NotNull
     protected volatile double curTripTime = 0d;
 
     /**
@@ -49,6 +48,11 @@ public class TrainDataVolatile {
      */
     protected volatile double curTripSectionDistance = 0d;
 
+    /**
+     * The current trip profile provided to the train
+     */
+    @Nullable
+    protected volatile Spline currentTripProfile = null;
 
 
     /**
@@ -56,7 +60,6 @@ public class TrainDataVolatile {
      */
     @NotNull
     protected volatile Double currentSpeed = 0d;
-
 
     /**
      * The current max speed of the train in [m/s] based on the breaking curve
@@ -159,10 +162,10 @@ public class TrainDataVolatile {
     protected volatile int M_LOC = ETCSVariables.M_LOC;
 
     /**
-     * {@link IncrementalPositionReportDistances}
+     * {@link IncrPosRprtDist}
      */
     @Nullable
-    protected volatile IncrementalPositionReportDistances incrementalPositionReportDistances = null;
+    protected volatile IncrPosRprtDist incrPosRprtDist = null;
 
 
     /**
@@ -234,6 +237,13 @@ public class TrainDataVolatile {
      */
     public double getCurTripSectionDistance() {
         return curTripSectionDistance;
+    }
+
+    /**
+     * The current trip profile provided to the train
+     */
+    public Spline getCurrentTripProfile() {
+        return currentTripProfile;
     }
 
     /**
@@ -349,11 +359,11 @@ public class TrainDataVolatile {
     }
 
     /**
-     * {@link IncrementalPositionReportDistances}
+     * {@link IncrPosRprtDist}
      */
     @Nullable
-    public IncrementalPositionReportDistances getIncrementalPositionReportDistances() {
-        return incrementalPositionReportDistances;
+    public IncrPosRprtDist getIncrPosRprtDist() {
+        return incrPosRprtDist;
     }
 
     /**

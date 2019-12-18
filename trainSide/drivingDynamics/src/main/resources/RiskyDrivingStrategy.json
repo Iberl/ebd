@@ -1,10 +1,10 @@
 { "actions" : [
               {
-                "v_acc" : {
+                "type" : "v_acc", "action" : {
                             "value" : 100,
                             "conditions" :
                                             {
-                                                "v" : {
+                                                "type" : "v", "condition" : {
                                                         "op" : "<",
                                                         "value" : 119
                                                     }
@@ -14,11 +14,11 @@
                         }
               },
               {
-                "v_break" : {
+                "type" : "v_break", "action" : {
                             "value" : 90,
                             "conditions" :
                                             {
-                                                "v" : {
+                                                "type" : "v", "condition" : {
                                                         "op" : ">",
                                                         "value" : 121
                                                     }
