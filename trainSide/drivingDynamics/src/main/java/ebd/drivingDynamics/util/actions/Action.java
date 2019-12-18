@@ -14,7 +14,7 @@ import org.json.simple.JSONObject;
  * (s. {@link ebd.globalUtils.movementState.MovementState}). Every actions contains one or more {@link Condition}.
  * By checking if these conditions evaluate to true, one can decided if the specific action should be taken.<br>
  * <b>When implementing a new action, this action has to be included in {@link ActionParser} so it can be read
- * out of a json file. It also has to be included in the {@link ebd.drivingDynamics.DrivingDynamics#actionParser(Action)}</b>
+ * out of a json file. It also has to be included in the {@link ebd.drivingDynamics.DrivingDynamics} actionParser method</b>
  */
 public abstract class Action {
     @NotNull
@@ -24,11 +24,18 @@ public abstract class Action {
     protected Condition condition;
 
     /**
+     * the priority of the action. The action or actions with the lowest
+     * priority value will be evaluated first.
+     */
+    protected int priority;
+
+    /**
      *
      * @param localEventBus The local {@link EventBus} of the train
      */
-    public Action(EventBus localEventBus){
+    public Action(@NotNull EventBus localEventBus, int priority){
         this.localEventBus = localEventBus;
+        this.priority = priority;
     }
 
     /**
@@ -70,5 +77,18 @@ public abstract class Action {
             newE.setStackTrace(e.getStackTrace());
             throw newE;
         }
+    }
+
+    /*
+    Getter
+     */
+
+    /**
+     * Returns the priority of the action. The action or actions with the lowest
+     * priority value will be tested first
+     * @return the priority value
+     */
+    public int getPriority(){
+        return this.priority;
     }
 }

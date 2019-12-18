@@ -13,7 +13,7 @@ public class NoAction extends Action {
      * Placeholder action to prevent the usage of null.
      */
     public NoAction(EventBus eventBus) {
-        super(eventBus);
+        super(eventBus, Integer.MAX_VALUE);
     }
 
     @Override

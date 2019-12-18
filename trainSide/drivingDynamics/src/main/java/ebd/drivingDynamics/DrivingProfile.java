@@ -16,6 +16,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,6 +28,14 @@ public class DrivingProfile {
 
     private List<Action> actions;
     private EventBus localEventBus;
+
+    class SortByPriority implements Comparator<Action>{
+
+        @Override
+        public int compare(Action o1, Action o2) {
+            return o1.getPriority() - o2.getPriority();
+        }
+    }
 
     public DrivingProfile(EventBus localEventBus) throws DDBadDataException, IOException, ParseException {
         this.localEventBus = localEventBus;
@@ -87,6 +96,8 @@ public class DrivingProfile {
             }
         }
         else throw new DDBadDataException("The key 'actions' was missing from a DrivingProfile.");
+
+        actions.sort(new SortByPriority());
     }
 
 }

@@ -19,8 +19,8 @@ public class BreakAction extends Action {
      * @param localEventBus the local {@link EventBus}
      * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
      */
-    public BreakAction(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
-        super(localEventBus);
+    public BreakAction(JSONObject jsonObject, EventBus localEventBus, int priority) throws DDBadDataException {
+        super(localEventBus, priority);
         fromJSON(jsonObject);
     }
 

@@ -17,8 +17,8 @@ public class HaltAction extends Action {
      * @param localEventBus the local {@link EventBus}
      * @throws DDBadDataException If the {@link JSONObject} was not formatted correctly.
      */
-    public HaltAction(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
-        super(localEventBus);
+    public HaltAction(JSONObject jsonObject, EventBus localEventBus, int priority) throws DDBadDataException {
+        super(localEventBus, priority);
         fromJSON(jsonObject);
     }
 

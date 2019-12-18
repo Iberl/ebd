@@ -17,21 +17,34 @@ public class ActionParser {
      */
     public static Action parse(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
 
-        if(jsonObject.containsKey("type") && jsonObject.containsKey("action")) {
+        if(jsonObject.containsKey("type") && jsonObject.containsKey("action") && jsonObject.containsKey("priority")) {
             String actionType = (String)jsonObject.get("type");
             JSONObject actionObject = (JSONObject)jsonObject.get("action");
 
+            double priorityValue;
+            Object tempObject = jsonObject.get("priority");
+            String tempObjectName = tempObject.getClass().getSimpleName();
+            if(tempObjectName.equals("Long")){
+                priorityValue = ((Long)tempObject).doubleValue(); //To [m/s]
+            }
+            else if(tempObjectName.equals("Double")){
+                priorityValue = (Double)tempObject; //To [m/s]
+            }
+            else throw new DDBadDataException("Action priority was not a number");
+
+            int priority = (int)priorityValue;
+
             switch (actionType) {
                 case "v_acc":
-                    return new AccelerationAction(actionObject, localEventBus);
+                    return new AccelerationAction(actionObject, localEventBus, priority);
                 case "v_break":
-                    return new BreakAction(actionObject, localEventBus);
+                    return new BreakAction(actionObject, localEventBus, priority);
                 case "v_cruise":
-                    return new CruiseAction(actionObject, localEventBus);
+                    return new CruiseAction(actionObject, localEventBus, priority);
                 case "v_coast":
-                    return new CoastAction(actionObject, localEventBus);
+                    return new CoastAction(actionObject, localEventBus, priority);
                 case "v_halt":
-                    return new HaltAction(actionObject, localEventBus);
+                    return new HaltAction(actionObject, localEventBus, priority);
                 default:
                     throw new DDBadDataException("A action was not formatted correctly: " + jsonObject.toString());
             }

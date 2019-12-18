@@ -1,6 +1,6 @@
 { "actions" : [
               {
-                "type" : "v_acc", "action" : {
+                "type" : "v_acc", "priority" :  3, "action" : {
                             "value" : 100,
                             "conditions" : {  
                                             "andBlock" : [
@@ -21,7 +21,7 @@
                         }
               },
               {
-                "type" : "v_break", "action" : {
+                "type" : "v_break", "priority" :  1, "action" : {
                             "value" : 100,
                             "conditions" : {  
                                             "orBlock" : [ 
@@ -42,7 +42,7 @@
                           }
               },
               {
-                "type" : "v_cruise", "action" : {
+                "type" : "v_cruise", "priority" :  2, "action" : {
                             "conditions" : {  
                                             "andBlock" : [ 
                                                         {

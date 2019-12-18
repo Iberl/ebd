@@ -28,7 +28,7 @@ class AccelerationActionTest {
     void test() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"value\" : 10 , \"conditions\" : {\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}}");
-        AccelerationAction accelerationAction = new AccelerationAction(jsonObject, EventBus.getDefault());
+        AccelerationAction accelerationAction = new AccelerationAction(jsonObject, EventBus.getDefault(), 2);
         assertFalse(accelerationAction.eval());
         assertEquals(0.1, accelerationAction.getAccelerationPercentage());
     }
