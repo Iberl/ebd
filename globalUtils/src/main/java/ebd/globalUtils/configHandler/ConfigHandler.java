@@ -48,7 +48,14 @@ public class ConfigHandler {
     /*
     doubles
      */
+    /**
+     * Distance before end of movement authority that is seen as "target reached" in [m]
+     */
     public double targetReachedDistance = 20;
+    /**
+     * Minimum time between actions
+     */
+    public double timeBetweenActions = 2;
     /*
     boolean
      */

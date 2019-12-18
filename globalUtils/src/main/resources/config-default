@@ -24,6 +24,8 @@ trainNumber = 0
 ######
 #Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 20
+#Minimum time between actions
+timeBetweenActions = 0.1
 ######
 ###### Booleans (either " = true" or " = false")
 ######

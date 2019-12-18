@@ -5,6 +5,7 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -59,6 +60,8 @@ public class DrivingDynamics {
     private DrivingProfile drivingProfile;
 
     private double time;
+    private double timeOfLastAction = -1;
+    private double timeBetweenActions;
     private boolean locked = true;
 
     private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
@@ -92,6 +95,7 @@ public class DrivingDynamics {
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
 
+        this.timeBetweenActions = ConfigHandler.getInstance().timeBetweenActions;
     }
 
     /**
@@ -108,7 +112,7 @@ public class DrivingDynamics {
         Setting time to calculate the precise time between calculations
          */
         double currentTime = System.nanoTime();
-        double deltaT = (currentTime - this.time) / 1E9; //To get seconds
+        double deltaT = (currentTime - this.time)/ 1E9; //To get seconds;
         this.time = currentTime;
 
         /*
@@ -406,6 +410,12 @@ public class DrivingDynamics {
      * @param action Any {@link Action}
      */
     private void actionParser(Action action) {
+        if(this.timeOfLastAction > -1 && (this.time - this.timeOfLastAction) / 1E9 < this.timeBetweenActions){
+            return;
+        }
+
+        this.timeOfLastAction = this.time;
+
         switch(action.getClass().getSimpleName()){
             case "NoAction":
                 break;
