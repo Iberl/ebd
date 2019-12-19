@@ -4,6 +4,7 @@ import ebd.baliseTelegramGenerator.Balise;
 import ebd.baliseTelegramGenerator.BaliseGroup;
 import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
+import ebd.dmi.ui.DMIDisplayConnector;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -134,6 +135,7 @@ public class Szenario implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        new DMIDisplayConnector(globalEventBus);
         System.out.println("This is the virtual environment for the ETCS@EBD project");
 
 
@@ -204,7 +206,7 @@ public class Szenario implements Runnable {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load2(LoadTwoEvent lte){
-        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a speeding driver from A to B");
+        System.out.println("Scenario 2: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a speeding driver from A to B");
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
         try {

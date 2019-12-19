@@ -24,6 +24,11 @@ public class Logging{
     static String logDateTime;
     static Handler fileHandlerAll;
 
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_BLACK = "\u001b[30m";
+    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_RESET = "\u001B[0m";
+
     static {
         //format of logs is defined in resources/logging.properties
         System.setProperty("java.util.logging.config.file", "resources/logging.properties");
@@ -81,7 +86,18 @@ public class Logging{
      */
     @Subscribe
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
-        logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
+        if (logPrefix.equals(String.format("%-9s", "GB"))) {
+            logger.log(Level.SEVERE, ANSI_BLUE + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
+        }
+        else if (logPrefix.equals("RBC 00001")) {
+            logger.log(Level.SEVERE, ANSI_BLACK + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
+        }
+        else if (logPrefix.equals("TRN 00192")){
+            logger.log(Level.SEVERE, ANSI_RED + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
+        }
+        else {
+            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
+        }
     }
 
     /**
@@ -89,10 +105,21 @@ public class Logging{
      * @param normalEvent
      */
     @Subscribe
-    public void onNormalEvent(NormalEvent normalEvent){
-        if(!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
+    public void onNormalEvent(NormalEvent normalEvent) {
+        if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
             String padSrc = String.format("%4s", normalEvent.source); //Inserted by LSF
-            logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
+            if (logPrefix.equals(String.format("%-9s", "GB"))) {
+                logger.fine(ANSI_BLUE + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
+            }
+            else if (logPrefix.equals("RBC 00001")) {
+                logger.fine(ANSI_BLACK + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
+            }
+            else if (logPrefix.equals("TRN 00192")){
+                logger.fine(ANSI_RED + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
+            }
+            else {
+                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
+            }
         }
     }
 
@@ -103,6 +130,17 @@ public class Logging{
     @Subscribe
     public void onToLogEvent(ToLogEvent toLogEvent){
         String padSrc = String.format("%3s", toLogEvent.source); //Inserted by LSF
-        logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
+        if (logPrefix.equals(String.format("%-9s", "GB"))) {
+            logger.info(ANSI_BLUE + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
+        }
+        else if (logPrefix.equals("RBC 00001")) {
+            logger.info(ANSI_BLACK + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
+        }
+        else if (logPrefix.equals("TRN 00192")){
+            logger.info(ANSI_RED + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
+        }
+        else {
+            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
+        }
     }
 }

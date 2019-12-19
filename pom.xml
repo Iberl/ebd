@@ -113,6 +113,8 @@
     <module>trackSide</module>
     <module>szenario</module>
 
+    <module>dmi</module>
+
     <!-- <module>baliseTelegramGenerator</module> -->
 
   </modules>
