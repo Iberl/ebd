@@ -2,7 +2,7 @@ package ebd.baliseTelegramGenerator;
 
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageLibrary.util.ETCSVariables;
-import javafx.util.Pair;
+import ebd.messageLibrary.util.Pair;
 
 import java.util.*;
 

@@ -6,6 +6,7 @@ import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -189,6 +190,11 @@ public class DrivingDynamics {
          */
         updateTrainDataVolatile();
 
+        /*
+        Update DMI
+         */
+        updateDMI();
+
         cycleCount++;
         if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
             cycleCount = 0;
@@ -343,6 +349,18 @@ public class DrivingDynamics {
         nameToValue.put("curTripSectionDistance", this.dynamicState.getDistanceToStartOfProfile());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
         this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
+    }
+
+    /**
+     * This method gathers the new information from dynamic state and send these to the DMI
+     */
+    private void updateDMI(){
+        double speed = this.dynamicState.getSpeed();
+        double targetSpeed = this.targetSpeed;
+        double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
+        String source = "dd;T=" + etcsTrainID;
+        List<String> targets = Collections.singletonList("dmi");
+        EventBus.getDefault().post(new DMIUpdateEvent(source,targets,speed,targetSpeed,(int)distanceToDrive));
     }
 
     /**

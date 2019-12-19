@@ -83,7 +83,7 @@ public class ConfigHandler {
         if (fileConfig.length() == 0) {
             boolean createdDir = fileConfig.getParentFile().mkdir();
             boolean createdFile = fileConfig.createNewFile();
-            if(!(createdFile)){
+            if(!createdFile && !fileConfig.exists()){
                 throw new IOException("Config.txt could not be created");
             }
 
@@ -103,6 +103,7 @@ public class ConfigHandler {
                     throw new IOException("Configuration file could not be created. " + ioe.getMessage());
                 }
             }catch (IOException ioe){
+                ioe.printStackTrace();
                 try(FileInputStream inputStream = new FileInputStream("config-default")) {
 
                     try (FileOutputStream outputStream = new FileOutputStream("configuration/config.txt")) {
@@ -307,6 +308,7 @@ public class ConfigHandler {
             if (single_instance == null) single_instance = new ConfigHandler();
             return single_instance;
         }catch (IOException ioe){
+            ioe.printStackTrace();
             ExceptionEvent ev = new ExceptionEvent("cfg", Collections.singletonList("all"), new NotCausedByAEvent(),
                     ioe, ExceptionEventTyp.FATAL);
             EventBus.getDefault().post(ev);

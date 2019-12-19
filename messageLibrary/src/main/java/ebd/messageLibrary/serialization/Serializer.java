@@ -2,10 +2,10 @@ package ebd.messageLibrary.serialization;
 
 import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.packet.Packet;
-import javafx.util.Pair;
 import ebd.messageLibrary.serialization.annotations.*;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageLibrary.util.exception.*;
+import ebd.messageLibrary.util.Pair;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;

@@ -7,15 +7,14 @@ import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.Telegram;
-import ebd.messageLibrary.util.ETCSVariables;
-import ebd.messageReceiver.MessageReceiver;
-import ebd.messageSender.MessageSender;
-import javafx.util.Pair;
+import ebd.messageLibrary.util.Pair;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaliseTelegramGenerator {
 

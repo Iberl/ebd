@@ -1,9 +1,5 @@
 package ebd.szenario;
 
-import ebd.baliseTelegramGenerator.Balise;
-import ebd.baliseTelegramGenerator.BaliseGroup;
-import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
-import ebd.baliseTelegramGenerator.ListOfBalises;
 import ebd.dmi.ui.DMIDisplayConnector;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -12,15 +8,7 @@ import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
-import ebd.messageLibrary.message.trainmessages.Message_132;
-import ebd.messageLibrary.message.trainmessages.Message_155;
-import ebd.messageLibrary.message.trainmessages.Message_157;
-import ebd.messageLibrary.packet.Packet;
-import ebd.messageLibrary.packet.TrackPacket;
-import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
-import ebd.messageLibrary.packet.trackpackets.Packet_58;
-import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
@@ -28,12 +16,14 @@ import ebd.szenario.util.InfrastructureClient;
 import ebd.szenario.util.InfrastructureDummyServer;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
-import ebd.szenario.util.events.*;
+import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadThreeEvent;
+import ebd.szenario.util.events.LoadTwoEvent;
+import ebd.szenario.util.events.SzenarioExceptionEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
 
 import java.io.IOException;
 import java.util.*;
@@ -193,6 +183,7 @@ public class Szenario implements Runnable {
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to B");
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
+
         Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
@@ -202,6 +193,7 @@ public class Szenario implements Runnable {
         this.tsm = new TrainStatusManager(192, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        System.out.println(msg);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
