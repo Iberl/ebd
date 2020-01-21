@@ -30,7 +30,7 @@ import java.util.List;
 public class SpeedSupervisionModule {
 
 
-
+    private TrainDataVolatile trainDataVolatile;
     private EventBus localEventBus;
     private List<String> tdTargets = Collections.singletonList("td");
     private List<String> allTargets = Collections.singletonList("all");
@@ -47,6 +47,7 @@ public class SpeedSupervisionModule {
     public SpeedSupervisionModule(EventBus localEventBus){
         this.localEventBus = localEventBus;
         localEventBus.register(this);
+        this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
     }
 
     /**
@@ -63,8 +64,6 @@ public class SpeedSupervisionModule {
         if (this.breakingCurve == null){
             return;
         }
-
-        TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         double curSpeed;
         Position curPosition;
 

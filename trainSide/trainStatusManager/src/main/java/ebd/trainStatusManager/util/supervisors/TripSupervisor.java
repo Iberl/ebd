@@ -29,6 +29,7 @@ public class TripSupervisor {
     //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Own module, Remember SRS 3 A.3.5
     private EventBus localBus;
+    private TrainDataVolatile trainDataVolatile;
     private double L_TRAIN;
     private int etcsID;
     private boolean missionEnded = true;
@@ -46,6 +47,7 @@ public class TripSupervisor {
     public TripSupervisor(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
+        this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
         this.etcsID = trainDataPerma.getId();
@@ -61,7 +63,6 @@ public class TripSupervisor {
     public void clockTick(ClockTickEvent cTE){
         if(this.breakingCurve == null) return;
 
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null) return;
 

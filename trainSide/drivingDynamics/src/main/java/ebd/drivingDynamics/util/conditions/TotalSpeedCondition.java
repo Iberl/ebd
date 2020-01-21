@@ -31,7 +31,6 @@ public class TotalSpeedCondition extends Condition {
 
     @Override
     public boolean eval() {
-        TrainDataVolatile trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
 
         return comparator.apply(curSpeed,speedTotal);

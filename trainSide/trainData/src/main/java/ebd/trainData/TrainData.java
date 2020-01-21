@@ -66,7 +66,7 @@ public class TrainData {
 
         try {
             changeTrainDataVolatile(trainDataChangeEvent.fieldName,trainDataChangeEvent.fieldValue);
-            this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
+            //this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         } catch (IllegalAccessException e) {
            this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataChangeEvent,e));
         }
@@ -85,7 +85,7 @@ public class TrainData {
             for (String key : nameToValue.keySet()){
                 changeTrainDataVolatile(key,nameToValue.get(key));
             }
-            this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
+            //this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         }catch (IllegalAccessException | IllegalArgumentException e){
             this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataMultiChangeEvent,e));
         }

@@ -35,6 +35,7 @@ public class PositionReportSupervisor {
     //TODO Fully Respect SRS 3.6.5
 
     private EventBus localBus;
+    private TrainDataVolatile trainDataVolatile;
     private String etcsTrainID;
     private double lengthTrain;
     private int lastLocationID;
@@ -62,6 +63,7 @@ public class PositionReportSupervisor {
         this.localBus.register(this);
         this.etcsTrainID = etcsTrainID;
 
+        this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.lengthTrain = trainDataPerma.getL_train();
         this.lastLocationID = (new InitalLocation()).getId();
@@ -76,7 +78,6 @@ public class PositionReportSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         int t_cycle = trainDataVolatile.getT_CYCLOC();
         if(t_cycle != ETCSVariables.T_CYCLOC && t_cycle < ETCSVariables.T_CYCLOC_INFINITY){
@@ -114,7 +115,6 @@ public class PositionReportSupervisor {
         if(!validTarget(cbge.targets)){
             return;
         }
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
             sendPositionReport();
@@ -129,7 +129,7 @@ public class PositionReportSupervisor {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newLocation(NewLocationEvent nle){
         if(!validTarget(nle.targets)) return;
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+
         if(lastLocationID == nle.newLocation.getId()) return;
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
             sendPositionReport();;
@@ -146,7 +146,7 @@ public class PositionReportSupervisor {
         if(!validTarget(nprpe.targets)){
             return;
         }
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+
         this.tripDistanceAtCycleStart = trainDataVolatile.getCurTripDistance();
         this.d_cycleNumber = 1;
         this.tripTimeAtCycleStart = trainDataVolatile.getCurTripTime();
@@ -158,7 +158,6 @@ public class PositionReportSupervisor {
      * in a {@link SendMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
      */
     private void sendPositionReport() {
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
         Message_136 message136 = new Message_136();
