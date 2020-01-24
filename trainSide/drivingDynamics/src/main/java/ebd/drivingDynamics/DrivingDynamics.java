@@ -360,7 +360,8 @@ public class DrivingDynamics {
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
         String source = "dd;T=" + etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
-        EventBus.getDefault().post(new DMIUpdateEvent(source,targets,speed,targetSpeed,(int)distanceToDrive));
+        //TODO read currentIndSpeed, currentWarnSpeed and currentIntervSpeed from curves
+        EventBus.getDefault().post(new DMIUpdateEvent(source,targets,speed,targetSpeed,(int)distanceToDrive, prevSil, 1000, 1000, 1000));
     }
 
     /**
