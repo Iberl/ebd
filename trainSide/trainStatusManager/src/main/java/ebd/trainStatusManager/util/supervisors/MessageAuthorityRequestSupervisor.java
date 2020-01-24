@@ -36,6 +36,7 @@ import java.util.List;
  */
 public class MessageAuthorityRequestSupervisor {
     private EventBus localBus;
+    private TrainDataVolatile trainDataVolatile;
     private String etcsTrainID;
     private String rbcID; //TODO: make updateable
 
@@ -62,6 +63,7 @@ public class MessageAuthorityRequestSupervisor {
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
         this.localBus.register(this);
+        this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.lengthTrain = trainDataPerma.getL_train();
     }
@@ -72,8 +74,6 @@ public class MessageAuthorityRequestSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
@@ -131,7 +131,6 @@ public class MessageAuthorityRequestSupervisor {
     }
 
     private void sendMaRequest(){
-        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
 
         Position curPos = trainDataVolatile.getCurrentPosition();

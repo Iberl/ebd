@@ -62,7 +62,6 @@ public class RelativeFutureSpeedCondition extends Condition{
 
     @Override
     public boolean eval() {
-        TrainDataVolatile trainDataVolatile = localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         if(this.tripProfile == null){
             return false;
         }

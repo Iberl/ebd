@@ -207,7 +207,7 @@ public class DrivingDynamics {
      * This can happen when a new balise is reached, which results in a new position with new location and increment.
      * @param ntdve A {@link NewTrainDataVolatileEvent}
      */
-    @Subscribe
+/*    @Subscribe
     public void newTrainData(NewTrainDataVolatileEvent ntdve){
         if(!(ntdve.targets.contains("all") || ntdve.targets.contains("dd"))){
             return;
@@ -216,7 +216,7 @@ public class DrivingDynamics {
         if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
             this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
         }
-    }
+    }*/
 
     /**
      * This method unlocks Drvining Dynamics, which signals the start of movement of the train

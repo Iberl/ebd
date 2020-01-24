@@ -1,6 +1,8 @@
 package ebd.drivingDynamics.util.conditions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
@@ -12,6 +14,7 @@ import org.json.simple.JSONObject;
 abstract public class Condition {
 
     protected EventBus localEventBus;
+    protected TrainDataVolatile trainDataVolatile;
 
     /**
      *
@@ -19,6 +22,7 @@ abstract public class Condition {
      */
     public Condition(EventBus localEventBus){
         this.localEventBus = localEventBus;
+        this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
     }
 
     /**
