@@ -73,8 +73,8 @@ public class DrivingDynamics {
 
     private int cycleCount = 20;
     private int cylceCountMax = 20; //TODO Connect to Config
-    private MovementState prevMovementState = null;
-    private SpeedInterventionLevel prevSil = null;
+    private MovementState prevMovementState = MovementState.UNCHANGED;
+    private SpeedInterventionLevel prevSil = SpeedInterventionLevel.NO_INTERVENTION;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
@@ -418,7 +418,7 @@ public class DrivingDynamics {
      * Sends logging information regarding the current {@link MovementState}
      */
     private void sendMovementState(MovementState ms){
-        if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
+        if(!this.prevMovementState.equals(this.dynamicState.getMovementState())){
             sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
             this.prevMovementState = this.dynamicState.getMovementState();
         }
