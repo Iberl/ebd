@@ -47,7 +47,7 @@ public class TestEventHandler{
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void NewBreakingCurve(NewBreakingCurveEvent e) {
 		
-		BreakingCurve bCurve = e.breakingCurve;
+		BreakingCurve bCurve = e.breakingCurveGroup.getServiceDecelerationCurve();
 
 		/*
 		Double searchKey2 = bCurve.getHighestXValue();

@@ -30,15 +30,15 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 
 	 * @param source
 	 *          ID from the module the event was sent by
-	 *          TODO: Define Format for IDs
 	 * @param targets
 	 *          ID from all modules the event is adressed to
-	 *          TODO: Define Format for IDs
 	 *
 	 * @param id
 	 * 			String to identify the breaking curve
 	 * @param breakingPower
 	 * 			Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * @param emergencyBreakingPower
+	 * 			Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param packet15
 	 * 			{@link Packet_15}
 	 * @param packet21
@@ -62,12 +62,14 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 
 	 */
 	public BreakingCurveRequestEvent(String source, List<String> targets, String id, ForwardSpline breakingPower,
-									 Packet_15 packet15, Packet_21 packet21, double currentGradient,
-									 Position referencePosition, Packet_27 packet27, int NC_CDTRAIN, double L_TRAIN,
+									 ForwardSpline emergencyBreakingPower, Packet_15 packet15, Packet_21 packet21,
+									 double currentGradient, Position referencePosition, Packet_27 packet27,
+									 int NC_CDTRAIN, double L_TRAIN,
 									 double currentSpeedLimit, int maxSpeedofTrain) {
 		super(source, targets);
 		this.id = id;
 		this.breakingPower = breakingPower;
+		this.emergencyBreakingPower = emergencyBreakingPower;
 		this.packet15 = packet15;
 		this.packet21 = packet21;
 		this.currentGradient = currentGradient;
@@ -90,6 +92,8 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			String to identify the breaking curve
 	 * @param breakingPower
 	 * 			Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * @param emergencyBreakingPower
+	 * 			Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param packet15
 	 * 			{@link Packet_15}
 	 * @param packet21
@@ -115,13 +119,14 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			The maximum Speed of the train in [km/h]. This value will be divided by 5 in the constructor,
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 	 */
-	public BreakingCurveRequestEvent(String source, List<String> targets, String id,ForwardSpline breakingPower,
+	public BreakingCurveRequestEvent(String source, List<String> targets, String id,ForwardSpline breakingPower, ForwardSpline emergencyBreakingPower,
 									 Packet_15 packet15, Packet_21 packet21, double currentGradient,
 									 Position referencePosition, Packet_27 packet27, List<Packet_65> listPacket65,
 									 int NC_CDTRAIN, int NC_TRAIN, double L_TRAIN, double currentSpeedLimit, int maxSpeedofTrain) {
 		super(source,targets);
-		this.breakingPower = breakingPower;
 		this.id = id;
+		this.breakingPower = breakingPower;
+		this.emergencyBreakingPower = emergencyBreakingPower;
 		this.packet15 = packet15;
 		this.packet21 = packet21;
 		this.currentGradient = currentGradient;
@@ -136,7 +141,7 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	}
 	
 	/**
-	 * ID of the resulting breaking curve
+	 * ID of the resulting breaking curve group
 	 */
 	public String id;																		
 	
@@ -145,7 +150,12 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 */
 	public ForwardSpline breakingPower;
-	
+
+	/**
+	 * Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 */
+	public ForwardSpline emergencyBreakingPower;
+
 	/**
 	 * Movement Authority Packet {@link Packet_15}
 	 */

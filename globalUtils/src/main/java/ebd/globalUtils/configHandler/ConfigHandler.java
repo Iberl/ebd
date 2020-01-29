@@ -59,6 +59,27 @@ public class ConfigHandler {
      * Minimum time between actions
      */
     public double timeBetweenActions = 2;
+
+    /**
+     * Emergency break intervention curve offset in [s]
+     */
+    public double emergencyInterventionOffset = 2;
+
+    /**
+     * Service break intervention curve offset in [s]
+     */
+    public double serviceInterventionOffset = 1;
+
+    /**
+     * Service break warning curve offset in [s]
+     */
+    public double serviceWarningOffset = 3;
+
+    /**
+     * Service break permitted speed curve offset in [s]
+     */
+    public double servicePermittedOffset = 7;
+
     /*
     boolean
      */
@@ -67,7 +88,6 @@ public class ConfigHandler {
     /*
     other
      */
-
 
     private static ConfigHandler single_instance = null;
 

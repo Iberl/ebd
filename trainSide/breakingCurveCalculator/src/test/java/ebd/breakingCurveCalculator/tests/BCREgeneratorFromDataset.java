@@ -55,6 +55,12 @@ public class BCREgeneratorFromDataset{
 		for (int i = 0; i < bp.length; i+=2) {
 			breakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
 		}
+
+		//emergency breaking Power
+		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0);
+		for (int i = 0; i < bp.length; i+=2) {
+			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.1));
+		}
 		
 		//generating packet15
 		
@@ -146,7 +152,7 @@ public class BCREgeneratorFromDataset{
 		//setting V_MAX
 		int V_MAXTRAIN = 200;
 		
-		return new BreakingCurveRequestEvent("devTests", targets,id,breakingPower, packet15, packet21, currentGradient, currentPosition, packet27, 
+		return new BreakingCurveRequestEvent("devTests", targets,id,breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
 				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);	
 	}
 
