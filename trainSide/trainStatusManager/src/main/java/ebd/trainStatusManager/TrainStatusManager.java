@@ -26,8 +26,6 @@ import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
-import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import ebd.trainStatusManager.util.*;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
@@ -94,7 +92,7 @@ public class TrainStatusManager implements Runnable {
         this.rbcID = rbcID;
         setUpTrain();
         this.tsmThread.start();
-        if(ConfigHandler.getInstance().testing){
+        if(ConfigHandler.getInstance().useTrainConfiguratorTool){
             connectToRBC();
         }
     }
@@ -105,7 +103,7 @@ public class TrainStatusManager implements Runnable {
         this.rbcID = rbcID;
         setUpTrain();
         this.tsmThread.start();
-        if(ConfigHandler.getInstance().testing){
+        if(ConfigHandler.getInstance().useTrainConfiguratorTool){
             connectToRBC();
         }
     }

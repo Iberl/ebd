@@ -13,7 +13,6 @@ import ebd.trainData.TrainData;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 class SpeedSupervisionModuleTest {
@@ -22,7 +21,7 @@ class SpeedSupervisionModuleTest {
     public void ssmTest() throws InterruptedException {
         EventBus eventBus = new EventBus();
         TestHandler th = new TestHandler(eventBus);
-        ConfigHandler.getInstance().testing = true;
+        ConfigHandler.getInstance().useTrainConfiguratorTool = true;
         Thread thread = new Thread(new Clock(eventBus));
         thread.start();
 
