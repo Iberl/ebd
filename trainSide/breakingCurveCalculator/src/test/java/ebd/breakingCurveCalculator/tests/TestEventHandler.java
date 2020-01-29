@@ -59,7 +59,7 @@ public class TestEventHandler{
 			searchKey2 = bCurve.curve.lowerKey(searchKey2);
 		}
 		*/
-		/*double xPosition = 0d;
+		double xPosition = 0d;
 		double step = bCurve.getHighestXValue() / 100000d;
 		FileWriter fW;
 		try {
@@ -81,7 +81,7 @@ public class TestEventHandler{
 			List<String> eventTargets = new ArrayList<>();
 			eventTargets.add("tsm;");
 			eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, e, e1));
-		}*/
+		}
 		
 		System.out.println("Done");
 	}

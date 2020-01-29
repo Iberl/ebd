@@ -17,7 +17,6 @@ import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
@@ -66,8 +65,11 @@ public class BreakingCurveCalculator {
     }
 
     /**
-     * This function listens to a {@link BreakingCurveRequestEvent}. If such an event occurs, this method prepares the calculation of the breaking curve and 
-     * calls {@link BreakingCurveCalculator#calculate(ForwardSpline, ForwardSpline, Position, double, double, String)}<br>
+     * This function listens to a {@link BreakingCurveRequestEvent}. If such an event occurs, this method prepares
+	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(ForwardSpline, ForwardSpline, double, double)}
+	 * and then calls {@link BreakingCurveCalculator#getCurveFromList(List, Position, String)}<br>
+	 * It then calculates additional breaking curves from this {@code List<Knot>} by shifting the knots with speed and time.
+	 * This results in the permitted speed, warning speed, overspeed and intervention speed curves. <br>//TODO check which curves to use
      * It also provides a weak protection against multiple concurrent calls to this function. This function should only be called again 
      * after a {@link NewBreakingCurveEvent} occures<br>
      * After finishing the calculation, this methods posts a {@link NewBreakingCurveEvent}
@@ -92,7 +94,8 @@ public class BreakingCurveCalculator {
 	    	
 	    	double d_EMA = MovementAuthorityConverter.p15ToD_EMA(bcre.packet15);
 	    	double v_loa = bcre.packet15.V_LOA * ETCS_VALUE_TO_MS;
-	    	breakingCurve = calculate(ssp, gradientProfile, this.referencePosition, d_EMA, v_loa , bcre.id);
+	    	List<Knot> knotList = calculateKnotList(ssp, gradientProfile, d_EMA, v_loa);
+	    	this.breakingCurve = getCurveFromList(knotList,this.referencePosition, bcre.id);
 	    	eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets, breakingCurve));
 	    	bclreCan = true; //bclre can only be calculated after the first full request is done.
 	    	isCalculating = false;
@@ -111,8 +114,11 @@ public class BreakingCurveCalculator {
     }
     
     /**
-     * This function listens to a {@link BreakingCurveLimitedRequestEvent}. If such an event occurs, this method prepares the calculation of the breaking curve and 
-     * calls {@link BreakingCurveCalculator#calculate(ForwardSpline, ForwardSpline, Position, double, double, String)}<br>
+     * This function listens to a {@link BreakingCurveLimitedRequestEvent}. method prepares
+	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(ForwardSpline, ForwardSpline, double, double)}
+	 * and then calls {@link BreakingCurveCalculator#getCurveFromList(List, Position, String)}<br>
+	 * It then calculates additional breaking curves from this {@code List<Knot>} by shifting the knots with speed and time.
+	 * This results in the permitted speed, warning speed, overspeed and intervention speed curves. <br>//TODO check which curves to use
      * This function can only be called after at least one {@link BreakingCurveRequestEvent} occurred.<br>
      * It its only valid in respect to the last {@link BreakingCurveRequestEvent} event that occured.<br>
      * It also provides a weak protection against multiple concurrent calls to this function. This function should only be called again 
@@ -137,7 +143,8 @@ public class BreakingCurveCalculator {
 	    	double d_EMA = MovementAuthorityConverter.p15ToD_EMA(bclre.packet15) + bclre.referencePosition.totalDistanceToPreviousPosition(this.referencePosition);
 	    	double v_loa = bclre.packet15.V_LOA * ETCS_VALUE_TO_MS;
 	    	//System.out.println(String.format("d_EMA: %f; v_loa: %f", d_EMA, v_loa));
-	    	this.breakingCurve = calculate(ssp, gradientProfile, this.referencePosition, d_EMA, v_loa, bclre.id);
+			List<Knot> knotList = calculateKnotList(ssp, gradientProfile, d_EMA, v_loa);
+			this.breakingCurve = getCurveFromList(knotList,this.referencePosition, bclre.id);
 	    	eventBus.post(new NewBreakingCurveEvent("bcc", eventTargets, breakingCurve));
 	    	isCalculating = false;
     	}
@@ -161,15 +168,7 @@ public class BreakingCurveCalculator {
      * 
      * Shorthands:
      * EMA End of movement authority
-     * 
-     * @param staticSpeedProfil
-     * 		{@link StaticSpeedProfil}
-     * @param gradientProfil
-     * 		A profile that contains distances in [m] and acceleration in [m/s^2]
-     * @param endOfMoveAuth
-     * 		Distance to the EMA
-     * @param speedAtEndOfMoveAut
-     * 		Maximal allowed speed at the EMA
+     *
      * @param refPosition
      * 		Reference Position
      * @param id
@@ -177,127 +176,157 @@ public class BreakingCurveCalculator {
      * @return
      * 		{@link BreakingCurve}
      */
-    private BreakingCurve calculate(ForwardSpline staticSpeedProfil, ForwardSpline gradientProfil, Position refPosition, double endOfMoveAuth,  double speedAtEndOfMoveAut,  String id)
+    private BreakingCurve getCurveFromList( List<Knot> knotList, Position refPosition, String id )
     	throws IllegalArgumentException, IndexOutOfBoundsException {
 
     	BreakingCurve breakCurve = new BreakingCurve(refPosition.getLocation(), id);
-    	double dis_EMA = endOfMoveAuth;
-    	
-    	
-    	double deltaspeed_init = 0.36;
-    	double deltaSpeed_init_min = deltaspeed_init * 0.1;
-    	
-    	double speed_EMA = speedAtEndOfMoveAut;
-
-    	if (speed_EMA > staticSpeedProfil.getPointOnCurve(dis_EMA)) {
-    		speed_EMA = staticSpeedProfil.getPointOnCurve(dis_EMA);
-    	}
-    	//s_EAP (see description of algorithm by Boltz) is in this calculation always 0, because we work relative to the current position
-    	
-    	double speedNow = speed_EMA;
-    	double disNow = dis_EMA;
-    	double disNext = disNow;
-    	double disStar = 0d;
-    	double speedNext;
-    	ArrayList<Double> coefList;
-    	
-    	while (disNow > 0) {
-    		double deltaSpeed = deltaspeed_init;
-    		
-    		while (speedNow < staticSpeedProfil.getPointOnCurve(disNow) && disNow > disStar) {
-    			speedNext = speedNow + deltaSpeed;
-    			
-    			if (speedNext > staticSpeedProfil.getPointOnCurve(disNow)) {
-    				speedNext = staticSpeedProfil.getPointOnCurve(disNow);
-    				deltaSpeed = speedNext - speedNow;    				
-    			}
-    			
-    			disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disNow); //This is "finding the next step s*" (see description of algorithm by Boltz)
-    			
-    			
-    			double speedMidpoint = 0.5 * (speedNext + speedNow);
-    			double breakPowerMidpoint = breakingPower.getPointOnCurve(speedMidpoint);
-
-    			double deltaTime = - (deltaSpeed / breakPowerMidpoint);
-    			double deltaDis = speedMidpoint * deltaTime;
-    			
-    			
-    			
-    			if (disNow + deltaDis < disStar) {
-    				deltaDis = disStar - disNow;
-    				deltaSpeed = -breakPowerMidpoint * deltaDis / speedMidpoint;
-    				speedMidpoint = speedNow + (0.5 * deltaSpeed);
-    				breakPowerMidpoint = breakingPower.getPointOnCurve(speedMidpoint);
-    				
-    			}
-    			
-    			double disMidpoint = disNow + (0.5 * deltaDis);
-    			breakPowerMidpoint += gradientProfil.getPointOnCurve(disMidpoint);
-    			
-    			if (breakPowerMidpoint <= 0) {
-    				if (gradientProfil.getPointOnCurve(disMidpoint).equals(-Double.MAX_VALUE)) {
-    					throw new IllegalArgumentException("The Movement Authority exceeded the maxium defined distance of the Gradient Profile");
-    				}
-    				else if (breakPowerMidpoint - gradientProfil.getPointOnCurve(disMidpoint) > 0){
-    					throw new IllegalArgumentException("The downhill slope surpassed the breaking ability of the train");
-    				}
-    				else {
-    					throw new IllegalArgumentException("Breaking force was smaller than 0 for unknown reason");
-    				}
-    			}
-    			
-    			if (deltaSpeed < deltaSpeed_init_min) {
-    				deltaSpeed = deltaSpeed_init_min;
-    			}
-    			
-    			deltaTime = - deltaSpeed/breakPowerMidpoint;
-    			
-    			deltaDis = deltaTime * speedMidpoint;
-    			
-    			
-    			if (disNow + deltaDis < disStar) {
-    				deltaDis = disStar - disNow;
-    				deltaTime = deltaDis / speedMidpoint;
-    				deltaSpeed = -breakPowerMidpoint * deltaTime;
-    			}
-    			
-    			disNext = disNow + deltaDis;
-    			speedNext = speedNow + deltaSpeed;
-    			
-    			if(speedNext > staticSpeedProfil.getPointOnCurve(disNext)) {
-    				deltaSpeed = staticSpeedProfil.getPointOnCurve(disNext) - speedNow;
-    				speedNext = staticSpeedProfil.getPointOnCurve(disNext);
-    			}
-    			
-    			coefList = new ArrayList<>();
-    			coefList.add(speedNow);
-    			coefList.add(deltaSpeed / deltaDis);
-    			breakCurve.addKnotToCurve(new Knot(disNow,coefList));
-    		
-    			disNow = disNext;
-    			speedNow = speedNext;
-    			deltaSpeed = deltaspeed_init;    		
-    		}
-    		
-    		if (disNow == 0) {break;}
-    		
-    		if (disStar < disNow) {
-    			coefList = new ArrayList<>();
-    			coefList.add(speedNow);
-    			coefList.add(0d);
-    			breakCurve.addKnotToCurve(new Knot(disNow,coefList));
-    		}
-    		
-    		disNow = disStar;
-    		speedNow = Math.min(staticSpeedProfil.getPointOnCurve(disStar),speedNow);
-    		disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disStar);
-    	}
-    	
-    	coefList = new ArrayList<>();
-		coefList.add(Math.min(staticSpeedProfil.getPointOnCurve(0d),speedNow));
-		coefList.add(0d);
-		breakCurve.addKnotToCurve(new Knot(disNow,coefList));
+    	for (Knot knot : knotList){
+    		breakCurve.addKnotToCurve(knot);
+		}
     	
     	return breakCurve;
     }
+
+	/**
+	 *
+	 * @param staticSpeedProfil
+	 * 		{@link StaticSpeedProfil}
+	 * @param gradientProfil
+	 * 		A profile that contains distances in [m] and acceleration in [m/s^2]
+	 * @param endOfMoveAuth
+	 * 		Distance to the EMA
+	 * @param speedAtEndOfMoveAut
+	 * 		Maximal allowed speed at the EMA
+	 * @return
+	 * 		{@link BreakingCurve}
+	 */
+	private List<Knot> calculateKnotList(
+			ForwardSpline staticSpeedProfil, ForwardSpline gradientProfil,
+			double endOfMoveAuth, double speedAtEndOfMoveAut
+	)
+			throws IllegalArgumentException, IndexOutOfBoundsException {
+		//BreakingCurve(refPosition.getLocation(), id)
+		List<Knot> knotList = new ArrayList<>();
+		double dis_EMA = endOfMoveAuth;
+
+
+		double deltaspeed_init = 0.36;
+		double deltaSpeed_init_min = deltaspeed_init * 0.1;
+
+		double speed_EMA = speedAtEndOfMoveAut;
+
+		if (speed_EMA > staticSpeedProfil.getPointOnCurve(dis_EMA)) {
+			speed_EMA = staticSpeedProfil.getPointOnCurve(dis_EMA);
+		}
+		//s_EAP (see description of algorithm by Boltz) is in this calculation always 0, because we work relative to the current position
+
+		double speedNow = speed_EMA;
+		double disNow = dis_EMA;
+		double disNext = disNow;
+		double disStar = 0d;
+		double speedNext;
+		ArrayList<Double> coefList;
+
+		//Begin of logic
+		while (disNow > 0) {
+			double deltaSpeed = deltaspeed_init;
+
+			while (speedNow < staticSpeedProfil.getPointOnCurve(disNow) && disNow > disStar) {
+				speedNext = speedNow + deltaSpeed;
+
+				if (speedNext > staticSpeedProfil.getPointOnCurve(disNow)) {
+					speedNext = staticSpeedProfil.getPointOnCurve(disNow);
+					deltaSpeed = speedNext - speedNow;
+				}
+
+				disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disNow); //This is "finding the next step s*" (see description of algorithm by Boltz)
+
+
+				double speedMidpoint = 0.5 * (speedNext + speedNow);
+				double breakPowerMidpoint = breakingPower.getPointOnCurve(speedMidpoint);
+
+				double deltaTime = - (deltaSpeed / breakPowerMidpoint);
+				double deltaDis = speedMidpoint * deltaTime;
+
+
+
+				if (disNow + deltaDis < disStar) {
+					deltaDis = disStar - disNow;
+					deltaSpeed = -breakPowerMidpoint * deltaDis / speedMidpoint;
+					speedMidpoint = speedNow + (0.5 * deltaSpeed);
+					breakPowerMidpoint = breakingPower.getPointOnCurve(speedMidpoint);
+
+				}
+
+				double disMidpoint = disNow + (0.5 * deltaDis);
+				breakPowerMidpoint += gradientProfil.getPointOnCurve(disMidpoint);
+
+				if (breakPowerMidpoint <= 0) {
+					if (gradientProfil.getPointOnCurve(disMidpoint).equals(-Double.MAX_VALUE)) {
+						throw new IllegalArgumentException("The Movement Authority exceeded the maxium defined distance of the Gradient Profile");
+					}
+					else if (breakPowerMidpoint - gradientProfil.getPointOnCurve(disMidpoint) > 0){
+						throw new IllegalArgumentException("The downhill slope surpassed the breaking ability of the train");
+					}
+					else {
+						throw new IllegalArgumentException("Breaking force was smaller than 0 for unknown reason");
+					}
+				}
+
+				if (deltaSpeed < deltaSpeed_init_min) {
+					deltaSpeed = deltaSpeed_init_min;
+				}
+
+				deltaTime = - deltaSpeed/breakPowerMidpoint;
+
+				deltaDis = deltaTime * speedMidpoint;
+
+
+				if (disNow + deltaDis < disStar) {
+					deltaDis = disStar - disNow;
+					deltaTime = deltaDis / speedMidpoint;
+					deltaSpeed = -breakPowerMidpoint * deltaTime;
+				}
+
+				disNext = disNow + deltaDis;
+				speedNext = speedNow + deltaSpeed;
+
+				if(speedNext > staticSpeedProfil.getPointOnCurve(disNext)) {
+					deltaSpeed = staticSpeedProfil.getPointOnCurve(disNext) - speedNow;
+					speedNext = staticSpeedProfil.getPointOnCurve(disNext);
+				}
+
+				coefList = new ArrayList<>();
+				coefList.add(speedNow);
+				coefList.add(deltaSpeed / deltaDis);
+				knotList.add(0, new Knot(disNow,coefList));
+
+				disNow = disNext;
+				speedNow = speedNext;
+				deltaSpeed = deltaspeed_init;
+			}
+
+			if (disNow == 0) {break;}
+
+			if (disStar < disNow) {
+				coefList = new ArrayList<>();
+				coefList.add(speedNow);
+				coefList.add(0d);
+				knotList.add(0, new Knot(disNow,coefList));
+			}
+
+			disNow = disStar;
+			speedNow = Math.min(staticSpeedProfil.getPointOnCurve(disStar),speedNow);
+			disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disStar);
+		}
+
+		coefList = new ArrayList<>();
+		coefList.add(Math.min(staticSpeedProfil.getPointOnCurve(0d),speedNow));
+		coefList.add(0d);
+		knotList.add(0, new Knot(disNow,coefList));
+
+		return knotList;
+	}
+
+
 }
