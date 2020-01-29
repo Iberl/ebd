@@ -29,7 +29,7 @@ public class InfrastructureClient {
     /**
      * If simulated, do not connect to any servers
      */
-    private boolean simulated;
+    private boolean useInfrastructureServer;
 
 
     public InfrastructureClient() throws IOException {
@@ -38,10 +38,10 @@ public class InfrastructureClient {
         ConfigHandler ch = ConfigHandler.getInstance();
         this.ip = ch.ipToInfrastructureServer;
         this.port = Integer.parseInt(ch.portOfInfrastructureServer);
-        this.simulated = ch.simulated;
+        this.useInfrastructureServer = ch.useInfrastructureServer;
         this.trainNumber = ch.trainNumber;
 
-        if(!this.simulated) connect();
+        if(this.useInfrastructureServer) connect();
     }
 
     public void close() throws IOException {
@@ -154,7 +154,7 @@ public class InfrastructureClient {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void updateEvent(UpdatingInfrastructureEvent uie){
-        if(this.simulated || !validTarget(uie.targets)){
+        if(!this.useInfrastructureServer || !validTarget(uie.targets)){
             return;
         }
         int trainID = getTrainIDFromSource(uie.source);
@@ -174,7 +174,7 @@ public class InfrastructureClient {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void terminateTrain(TerminateTrainEvent tte){
 
-        if(this.simulated || !validTarget(tte.targets)){
+        if(!this.useInfrastructureServer || !validTarget(tte.targets)){
             return;
         }
 
