@@ -22,6 +22,8 @@ trainNumber = 0
 #The ETCS Engine ID of the train that should be fetched from the train configurator tool.
 #This has to change once additional trains are controlled
 etcsEngineID = 192
+#Default Dangerpoint Distance
+defaultDangerPoint = 200
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######

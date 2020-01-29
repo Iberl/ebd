@@ -41,6 +41,8 @@ public class ConfigHandler {
     public int trainClockTickInMS = 100;
     public int trainNumber = 0;
     public int etcsID = 192;
+
+    public int defaultDangerPoint = 200;
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
      */
