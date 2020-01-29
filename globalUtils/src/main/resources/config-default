@@ -19,6 +19,11 @@ trainClockTickInMS = 100
 infrastructureUpdateMultiplier = 10
 #Train number that is used on the infrastructure server to id the train
 trainNumber = 0
+#The ETCS Engine ID of the train that should be fetched from the train configurator tool.
+#This has to change once additional trains are controlled
+etcsEngineID = 192
+#Default Dangerpoint Distance
+defaultDangerPoint = 200
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
@@ -29,5 +34,5 @@ timeBetweenActions = 0.1
 ######
 ###### Booleans (either " = true" or " = false")
 ######
-testing = false
-simulated = true
+useTrainConfiguratorTool = false
+useInfrastructureServer = false

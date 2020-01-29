@@ -15,7 +15,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -199,7 +198,7 @@ public class TrainDataVolatile {
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
-        if(!ConfigHandler.getInstance().testing){
+        if(!ConfigHandler.getInstance().useTrainConfiguratorTool){
             throw new RuntimeException("This Constructor is only for use in tests");
         }
 

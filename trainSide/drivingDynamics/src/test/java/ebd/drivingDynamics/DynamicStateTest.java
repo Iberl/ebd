@@ -33,7 +33,7 @@ class DynamicStateTest {
         EventBus eb = EventBus.getDefault();
         List<String> targetList = Arrays.asList(new String[]{"all"});
         RouteData routeData = new RouteData(eb);
-        ConfigHandler.getInstance().testing = true;
+        ConfigHandler.getInstance().useTrainConfiguratorTool = true;
         TrainData trainData = new TrainData(eb, 192);
 
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));

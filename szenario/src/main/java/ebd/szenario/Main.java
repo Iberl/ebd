@@ -9,7 +9,7 @@ public class Main {
             System.out.println("Config Handler could not be opened");
             System.exit(0);
         }
-        ConfigHandler.getInstance().testing = true;
+        ConfigHandler.getInstance().useTrainConfiguratorTool = true;
         Szenario szenario = new Szenario();
     }
 }
