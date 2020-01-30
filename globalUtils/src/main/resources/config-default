@@ -4,7 +4,7 @@
 ######
 ###### Strings
 ######
-pathToDriverProfileJson = StrictDrivingStrategy.json
+pathToDriverProfileJson = RiskyDrivingStrategy.json
 pathToTestTrainJson = testTrain650.json
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080

@@ -144,6 +144,10 @@ public class DrivingDynamics {
                 case INDICATION:
                     actionParser(this.drivingProfile.actionToTake());
                     break;
+                case PERMITTED_SPEED:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
+                    actionParser(this.drivingProfile.actionToTake());
+                    break;
                 case WARNING:
                     sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
