@@ -80,6 +80,11 @@ public class ConfigHandler {
      */
     public double servicePermittedOffset = 7;
 
+    /**
+     * Service break indication curve offset in [s]
+     */
+    public double serviceIndicationOffset = 12;
+
     /*
     boolean
      */

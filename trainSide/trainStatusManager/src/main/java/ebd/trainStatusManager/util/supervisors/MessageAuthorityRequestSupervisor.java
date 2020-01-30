@@ -111,7 +111,7 @@ public class MessageAuthorityRequestSupervisor {
 
     @Subscribe
     public void newBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurve;
+        this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
     }
 
     @Subscribe

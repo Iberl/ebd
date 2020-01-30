@@ -14,6 +14,7 @@ public class BreakingCurveGroup {
     private BreakingCurve serviceInterventionCurve;
     private BreakingCurve serviceWarningCurve;
     private BreakingCurve servicePermittedSpeedCurve; //Check Name
+    private BreakingCurve serviceIndicationCurve;
 
     public BreakingCurveGroup() {
         this.id = "null curve";
@@ -43,6 +44,7 @@ public class BreakingCurveGroup {
         this.serviceInterventionCurve = this.nullCurve;
         this.serviceWarningCurve = this.nullCurve;
         this.servicePermittedSpeedCurve = this.nullCurve;
+        this.serviceIndicationCurve = this.nullCurve;
     }
 
     /*
@@ -73,6 +75,10 @@ public class BreakingCurveGroup {
         return servicePermittedSpeedCurve;
     }
 
+    public BreakingCurve getServiceIndicationCurve() {
+        return serviceIndicationCurve;
+    }
+
     /*
     setter
      */
@@ -99,5 +105,9 @@ public class BreakingCurveGroup {
 
     void setServicePermittedSpeedCurve(BreakingCurve servicePermittedSpeedCurve) {
         this.servicePermittedSpeedCurve = servicePermittedSpeedCurve;
+    }
+
+    void setServiceIndicationCurve(BreakingCurve serviceIndicationCurve) {
+        this.serviceIndicationCurve = serviceIndicationCurve;
     }
 }

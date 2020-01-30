@@ -7,22 +7,27 @@ public enum SpeedInterventionLevel {
     NO_INTERVENTION,
 
     /**
-     * Speed will become to high in 9s
+     * Speed may become to high
      */
     INDICATION,
 
     /**
-     * Speed will become to high
+     * Speed will become to high soon
+     */
+    PERMITTED_SPEED,
+
+    /**
+     * Speed will become to high very soon
      */
     WARNING,
 
     /**
-     * Speed is to high, apply service breaks
+     * Speed will become to high, service breaks will be applied automatically
      */
     APPLY_SERVICE_BREAKS,
 
     /**
-     * Speed is far to high, apply emergency breaks
+     * Speed is to high, danger point is passed, etc., emergency breaks will be applied automatically
       */
     APPLY_EMERGENCY_BREAKS
 }

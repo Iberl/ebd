@@ -42,17 +42,18 @@ public class BreakingCurveCalculator {
 	 */
 	public static final double ETCS_VALUE_TO_MS = 5d * (10d / 36d);
 
+	private EventBus eventBus;
 	private List<String> eventTargets = new ArrayList<>();
-	
+
 	private boolean bclreCan = false;
 	private boolean isCalculating = false;
 
-    private ForwardSpline breakingPower;
+	private ForwardSpline breakingPower;
 	private ForwardSpline emergencyBreakingPower;
 	private ForwardSpline ssp;
 	private ForwardSpline gradientProfile;
 	private Position referencePosition;
-	private EventBus eventBus;
+	private double dangerPointOffset;
 
 	private BreakingCurveGroup breakingCurveGroup;
 
@@ -95,6 +96,7 @@ public class BreakingCurveCalculator {
     		this.referencePosition = bcre.referencePosition;
 	    	this.ssp = new StaticSpeedProfil(bcre);
 	    	this.gradientProfile = GradientProfileConverter.package21ToGP(bcre.packet21, bcre.currentGradient);
+	    	this.dangerPointOffset = MovementAuthorityConverter.p15ToDangerPointDistance(bcre.packet15);
 
 	    	this.breakingCurveGroup = calculateBreakingCurve(bcre.packet15, bcre.id);
 
@@ -175,12 +177,14 @@ public class BreakingCurveCalculator {
 				this.referencePosition, "EmergencyInterventionCurve"));
 
 		breakingCurveGroup.setServiceDecelerationCurve(getCurveFromList(knotListService,this.referencePosition,"ServiceDecelerationCurve"));
-		breakingCurveGroup.setEmergencyInterventionCurve(getCurveFromListAndOffset(knotListService, ch.serviceInterventionOffset,
+		breakingCurveGroup.setServiceInterventionCurve(getCurveFromListAndOffset(knotListService, ch.serviceInterventionOffset,
 				this.referencePosition,"ServiceInterventionCurve"));
 		breakingCurveGroup.setServiceWarningCurve(getCurveFromListAndOffset(knotListService, ch.serviceWarningOffset,
 				this.referencePosition,"ServiceWarningCurve"));
 		breakingCurveGroup.setServicePermittedSpeedCurve(getCurveFromListAndOffset(knotListService, ch.servicePermittedOffset,
 				this.referencePosition,"ServicePermittedSpeedCurve"));
+		breakingCurveGroup.setServiceIndicationCurve(getCurveFromListAndOffset(knotListService, ch.serviceIndicationOffset,
+				this.referencePosition,"ServiceIndicationCurve"));
 
 		return breakingCurveGroup;
 	}
@@ -219,21 +223,22 @@ public class BreakingCurveCalculator {
 	 * 		A breaking curve made from the shifted knots
 	 */
     private BreakingCurve getCurveFromListAndOffset(List<Knot> knotList, double offset, Position referencePosition, String id){
-
+		List<Knot> knotListCopy = new ArrayList<>();
+		knotListCopy.addAll(knotList);
     	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
-		Knot lastKnot = knotList.remove(0);
-
+		Knot lastKnot = knotListCopy.remove(0);
 		breakingCurve.addKnotToCurve(lastKnot);
-		for (Knot knot : knotList){
+		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
-			double newSlope = (lastKnot.xValue - newX) / (lastKnot.coefficients.get(0) - knot.coefficients.get(0));
+			double newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
 
 			double[] newCoefficents = {knot.coefficients.get(0), newSlope};
 
-			breakingCurve.addKnotToCurve(new Knot(newX, newCoefficents));
+			Knot newKnot = new Knot(newX, newCoefficents);
+			breakingCurve.addKnotToCurve(newKnot);
 
-			lastKnot = knot;
+			lastKnot = newKnot;
 		}
 
 
@@ -250,7 +255,7 @@ public class BreakingCurveCalculator {
 	 * 		{@link StaticSpeedProfil}
 	 * @param gradientProfil
 	 * 		A profile that contains distances in [m] and acceleration in [m/s^2]
-	 * @param dis_EMA
+	 * @param distanceToEMA
 	 * 		Distance to the EMA
 	 * @param speedAtEndOfMoveAut
 	 * 		Maximal allowed speed at the EMA
@@ -259,16 +264,19 @@ public class BreakingCurveCalculator {
 	 */
 	private List<Knot> calculateKnotList(
 			ForwardSpline staticSpeedProfil, ForwardSpline gradientProfil,
-			double dis_EMA, double speedAtEndOfMoveAut, boolean emergencyCurve
+			double distanceToEMA, double speedAtEndOfMoveAut, boolean emergencyCurve
 	)
 			throws IllegalArgumentException, IndexOutOfBoundsException {
 		List<Knot> knotList = new ArrayList<>();
 		ForwardSpline breakingPower;
+		double dis_EMA;
 		if(emergencyCurve){
 			breakingPower = this.emergencyBreakingPower;
+			dis_EMA = distanceToEMA + this.dangerPointOffset;
 		}
 		else {
 			breakingPower = this.breakingPower;
+			dis_EMA = distanceToEMA;
 		}
 
 		double deltaspeed_init = 0.36;

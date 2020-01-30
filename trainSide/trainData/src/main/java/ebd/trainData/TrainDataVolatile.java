@@ -98,6 +98,12 @@ public class TrainDataVolatile {
     protected volatile ForwardSpline currentBreakingPower;
 
     /**
+     * The current emergency breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    protected volatile ForwardSpline currentEmergencyBreakingPower;
+
+    /**
      * The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
      */
     @NotNull
@@ -176,6 +182,7 @@ public class TrainDataVolatile {
     //Constructor
     public TrainDataVolatile(EventBus localBus){
         this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
+        this.currentEmergencyBreakingPower = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(localBus);
         this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
         this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
     }
@@ -289,6 +296,13 @@ public class TrainDataVolatile {
     @NotNull
     public ForwardSpline getCurrentBreakingPower() {
         return currentBreakingPower;
+    }
+
+    /**
+     * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    public ForwardSpline getCurrentEmergencyBreakingPower() {
+        return currentEmergencyBreakingPower;
     }
 
     /**

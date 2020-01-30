@@ -38,12 +38,10 @@ public class BreakingCurveCalculatorTest {
 		double[] bp = {0,0.5 , 40,1 , 80,1.5 , 140,2 , 300,1 , 600,1};
 		int[] gp = {0,0 , 500,10 , 1400,0 , 2000,0};*/
 
-		/*
-		int[] tsp = {0,150, 250,120, 400,160, 650,140, 1075,120, 1250,80, 1800,80};
+/*		int[] tsp = {0,150, 250,120, 400,160, 650,140, 1075,120, 1250,80, 1800,80};
 		double[] bp = {0,0.5, 40,1.0, 60,1.5, 80,2.0, 140,2.0, 300,1.0};
-		int[] gp = {0,-10, 500,0, 1400,5};
-		*/
-		
+		int[] gp = {0,-10, 500,0, 1400,5};*/
+
 			
 		//Configuration
 		boolean random = false;
@@ -68,10 +66,10 @@ public class BreakingCurveCalculatorTest {
 		eventBus.post(bcre);
 		
 		
-		Thread.sleep(2000);
+/*		Thread.sleep(2000);
 		BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
 		System.out.printf("New distance to end of movement authority: %f%n", MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
-		eventBus.post(bclre);
+		eventBus.post(bclre);*/
 	}
 
 }

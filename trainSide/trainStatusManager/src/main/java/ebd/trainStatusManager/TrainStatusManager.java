@@ -1,5 +1,6 @@
 package ebd.trainStatusManager;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
@@ -16,6 +17,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.spline.Spline;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;
@@ -138,17 +140,18 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(nbce.targets)){
             return;
         }
-        int refLocID = nbce.breakingCurve.getRefLocation().getId();
+        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getServiceDecelerationCurve();
+        int refLocID = breakingCurve.getRefLocation().getId();
 
         if(!this.tripInProgress){
             this.tripInProgress = true;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve, refLocID));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),breakingCurve, refLocID));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
         }
         else {
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),nbce.breakingCurve, refLocID));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),breakingCurve, refLocID));
             //this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));

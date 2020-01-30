@@ -1,7 +1,9 @@
 package ebd.globalUtils.etcsPacketToSplineConverters;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
+import ebd.messageLibrary.util.ETCSVariables;
 
 /**
  * Converts a {@link Packet_15} into a double value representing the total distance to the End of Authority.<br>
@@ -78,5 +80,12 @@ public class MovementAuthorityConverter {
          * Return the distance to the end of the movement Authority modified by Q_SCALE
          */
         return offset + (d_ema * Math.pow(10, p15.Q_SCALE - 1));
+    }
+
+    public static double p15ToDangerPointDistance(Packet_15 p15){
+        if(p15.D_DP == ETCSVariables.INTEGER_NOVALUE || p15.D_DP < ConfigHandler.getInstance().defaultDangerPoint){
+            return ConfigHandler.getInstance().defaultDangerPoint;
+        }
+        return p15.D_DP * Math.pow(10, p15.Q_SCALE - 1);
     }
 }

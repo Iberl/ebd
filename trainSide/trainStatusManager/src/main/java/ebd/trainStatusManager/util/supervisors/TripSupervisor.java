@@ -79,7 +79,7 @@ public class TripSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurve;
+        this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
         this.missionEnded = false;
     }
 
