@@ -144,6 +144,10 @@ public class DrivingDynamics {
                 case INDICATION:
                     actionParser(this.drivingProfile.actionToTake());
                     break;
+                case PERMITTED_SPEED:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
+                    actionParser(this.drivingProfile.actionToTake());
+                    break;
                 case WARNING:
                     sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
@@ -358,10 +362,14 @@ public class DrivingDynamics {
         double speed = this.dynamicState.getSpeed();
         double targetSpeed = this.targetSpeed;
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
+        double currentIndSpeed = this.trainDataVolatile.getCurrentServiceIndicationSpeed();
+        double currentWarnSpeed = this.trainDataVolatile.getCurrentServiceWarningSpeed();
+        double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
         String source = "dd;T=" + etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
-        //TODO read currentIndSpeed, currentWarnSpeed and currentIntervSpeed from curves
-        EventBus.getDefault().post(new DMIUpdateEvent(source,targets,speed,targetSpeed,(int)distanceToDrive, prevSil, 1000, 1000, 1000));
+
+        EventBus.getDefault().post(new DMIUpdateEvent(source,targets,speed,targetSpeed,(int)distanceToDrive,
+                prevSil, currentIndSpeed, currentWarnSpeed, currentIntervSpeed));
     }
 
     /**

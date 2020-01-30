@@ -49,13 +49,13 @@ public class BCREgeneratorFromRandom{
 		//breaking Power
 		double[] forceList = {0.5,1d,1.5,2d,2.5};
 		ForwardSpline breakingPower  = new ForwardSpline(0);
+		ForwardSpline emergencyBreakingPower = new ForwardSpline(0);
 		for (int speed = 0; speed < 120;) {
 			double force = forceList[rng.nextInt(forceList.length)];
 			double speedInMS = speed * (50d/36d);
 			breakingPower.addKnotToCurve(new Knot(speedInMS, force));
-			
+			emergencyBreakingPower.addKnotToCurve(new Knot(speedInMS, force + 0.1));
 			speed += rng.nextInt(20) + 10;
-			
 		}
 		
 		
@@ -150,7 +150,7 @@ public class BCREgeneratorFromRandom{
 		//setting V_MAX
 		int V_MAXTRAIN = rng.nextInt(101) + 20;
 		
-		return new BreakingCurveRequestEvent("devTests", targets,id, breakingPower, packet15, packet21, currentGradient, currentPosition, packet27, 
+		return new BreakingCurveRequestEvent("devTests", targets,id, breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
 				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);	
 	}
 

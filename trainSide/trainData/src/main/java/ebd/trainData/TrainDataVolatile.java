@@ -15,7 +15,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -58,20 +57,64 @@ public class TrainDataVolatile {
     /**
      * The current speed of the train in [m/s]
      */
-    @NotNull
-    protected volatile Double currentSpeed = 0d;
+    protected volatile double currentSpeed = 0d;
 
     /**
-     * The current max speed of the train in [m/s] based on the breaking curve
+     * The current max speed of the train in [m/s] based on
+     * the service deceleration curve
+     * Updated from the speed supervision module
      */
-    protected volatile Double currentMaximumSpeed = 0d;
+    protected volatile double currentMaximumSpeed = 0d;
+
+    /**
+     * The current emergency max speed of the train in [m/s] based on the
+     * emergency deceleration curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentEmergencySpeed = 0d;
+
+    /**
+     * The current emergency intervention speed of the train in [m/s] based on
+     * the service intervention curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentEmergencyInterventionSpeed = 0d;
+
+    /**
+     * The current service intervention speed of the train in [m/s] based on
+     * the service intervention curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServiceInterventionSpeed = 0d;
+
+    /**
+     * The current service warning speed of the train in [m/s] based on
+     * the service warning curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServiceWarningSpeed = 0d;
+
+    /**
+     * The current service permitted speed speed of the train in [m/s] based on
+     * the service permitted speed curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServicePermittedSpeed = 0d;
+
+    /**
+     * The current service indication speed of the train in [m/s] based on
+     * the service indication curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServiceIndicationSpeed = 0d;
+
+
 
     /**
      * The target speed of the train in [m/s] based on the trip profile.
      * Updated trough driving dynamics
      */
-    @NotNull
-    protected volatile Double currentTargetSpeed = 0d;
+    protected volatile double currentTargetSpeed = 0d;
 
 
     /**
@@ -97,6 +140,12 @@ public class TrainDataVolatile {
      */
     @NotNull
     protected volatile ForwardSpline currentBreakingPower;
+
+    /**
+     * The current emergency breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    protected volatile ForwardSpline currentEmergencyBreakingPower;
 
     /**
      * The current accelerating power curve a(v), a in [m/(s^2)], v in [m/s]
@@ -177,6 +226,7 @@ public class TrainDataVolatile {
     //Constructor
     public TrainDataVolatile(EventBus localBus){
         this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
+        this.currentEmergencyBreakingPower = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(localBus);
         this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
         this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
     }
@@ -199,7 +249,7 @@ public class TrainDataVolatile {
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
-        if(!ConfigHandler.getInstance().testing){
+        if(!ConfigHandler.getInstance().useTrainConfiguratorTool){
             throw new RuntimeException("This Constructor is only for use in tests");
         }
 
@@ -262,6 +312,60 @@ public class TrainDataVolatile {
     }
 
     /**
+     * The current emergency max speed of the train in [m/s] based on the
+     * emergency deceleration curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentEmergencySpeed() {
+        return currentEmergencySpeed;
+    }
+
+    /**
+     * The current emergency intervention speed of the train in [m/s] based on
+     * the service intervention curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentEmergencyInterventionSpeed() {
+        return currentEmergencyInterventionSpeed;
+    }
+
+    /**
+     * The current service intervention speed of the train in [m/s] based on
+     * the service intervention curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServiceInterventionSpeed() {
+        return currentServiceInterventionSpeed;
+    }
+
+    /**
+     * The current service warning speed of the train in [m/s] based on
+     * the service warning curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServiceWarningSpeed() {
+        return currentServiceWarningSpeed;
+    }
+
+    /**
+     * The current service permitted speed speed of the train in [m/s] based on
+     * the service permitted speed curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServicePermittedSpeed() {
+        return currentServicePermittedSpeed;
+    }
+
+    /**
+     * The current service indication speed of the train in [m/s] based on
+     * the service indication curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServiceIndicationSpeed() {
+        return currentServiceIndicationSpeed;
+    }
+
+    /**
      * @return current maximum allowed speed in [m/s]
      */
     @NotNull
@@ -290,6 +394,13 @@ public class TrainDataVolatile {
     @NotNull
     public ForwardSpline getCurrentBreakingPower() {
         return currentBreakingPower;
+    }
+
+    /**
+     * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    public ForwardSpline getCurrentEmergencyBreakingPower() {
+        return currentEmergencyBreakingPower;
     }
 
     /**

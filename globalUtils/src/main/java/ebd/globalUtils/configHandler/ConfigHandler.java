@@ -40,6 +40,9 @@ public class ConfigHandler {
      */
     public int trainClockTickInMS = 100;
     public int trainNumber = 0;
+    public int etcsID = 192;
+
+    public int defaultDangerPoint = 200;
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
      */
@@ -56,15 +59,40 @@ public class ConfigHandler {
      * Minimum time between actions
      */
     public double timeBetweenActions = 2;
+
+    /**
+     * Emergency break intervention curve offset in [s]
+     */
+    public double emergencyInterventionOffset = 2;
+
+    /**
+     * Service break intervention curve offset in [s]
+     */
+    public double serviceInterventionOffset = 1;
+
+    /**
+     * Service break warning curve offset in [s]
+     */
+    public double serviceWarningOffset = 3;
+
+    /**
+     * Service break permitted speed curve offset in [s]
+     */
+    public double servicePermittedOffset = 7;
+
+    /**
+     * Service break indication curve offset in [s]
+     */
+    public double serviceIndicationOffset = 12;
+
     /*
     boolean
      */
-    public boolean testing = false;
-    public boolean simulated = true;
+    public boolean useTrainConfiguratorTool = false;
+    public boolean useInfrastructureServer = false;
     /*
     other
      */
-
 
     private static ConfigHandler single_instance = null;
 

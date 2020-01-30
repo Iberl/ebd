@@ -1,6 +1,7 @@
 package ebd.szenario;
 
 import ebd.dmi.ui.DMIDisplayConnector;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -114,6 +115,7 @@ public class Szenario implements Runnable {
     TrainSide
      */
     private TrainStatusManager tsm = null;
+    private int etcsID = 0;
 
     public Szenario(){
         this.globalEventBus = EventBus.getDefault();
@@ -133,7 +135,7 @@ public class Szenario implements Runnable {
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
-
+        this.etcsID = ConfigHandler.getInstance().etcsID;
 
         szenarioThread.start();
     }
@@ -190,7 +192,7 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(192, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
-        this.tsm = new TrainStatusManager(192, 1);
+        this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         System.out.println(msg);
@@ -210,9 +212,9 @@ public class Szenario implements Runnable {
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(192, listRoute);
+        mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 2);
-        this.tsm = new TrainStatusManager(192, 1);
+        this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
@@ -236,9 +238,9 @@ public class Szenario implements Runnable {
         listRoute.add(b);
         listRoute.add(c);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(192, listRoute);
+        mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(192, 1);
+        this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
@@ -253,9 +255,9 @@ public class Szenario implements Runnable {
         listRoute.add(a);
         listRoute.add(b);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(192, listRoute);
+        mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(192, 1);
+        this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));

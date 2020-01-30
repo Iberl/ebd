@@ -46,8 +46,14 @@ public class TestEventHandler{
 	
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void NewBreakingCurve(NewBreakingCurveEvent e) {
-		
-		BreakingCurve bCurve = e.breakingCurve;
+		List<BreakingCurve> lobc = new ArrayList<>();
+		lobc.add(e.breakingCurveGroup.getEmergencyDecelerationCurve());
+		lobc.add(e.breakingCurveGroup.getEmergencyInterventionCurve());
+		lobc.add(e.breakingCurveGroup.getServiceDecelerationCurve());
+		lobc.add(e.breakingCurveGroup.getServiceInterventionCurve());
+		lobc.add(e.breakingCurveGroup.getServiceWarningCurve());
+		lobc.add(e.breakingCurveGroup.getServicePermittedSpeedCurve());
+		lobc.add(e.breakingCurveGroup.getServiceIndicationCurve());
 
 		/*
 		Double searchKey2 = bCurve.getHighestXValue();
@@ -59,30 +65,31 @@ public class TestEventHandler{
 			searchKey2 = bCurve.curve.lowerKey(searchKey2);
 		}
 		*/
-		/*double xPosition = 0d;
-		double step = bCurve.getHighestXValue() / 100000d;
-		FileWriter fW;
-		try {
-			
-			fW = new FileWriter(bCurve.getID()+".txt");
-			BufferedWriter writer = new BufferedWriter(fW);
-			writer.write("");
-			
-			while (xPosition <= bCurve.getHighestXValue()){
-			
-				Double yValue = bCurve.getPointOnCurve(xPosition);
-				writer.append(String.format("%f:%f%n", xPosition, yValue));
-				xPosition += step;
+		for(BreakingCurve bCurve : lobc) {
+			double xPosition = 0d;
+			double step = bCurve.getHighestXValue() / 100000d;
+			FileWriter fW;
+			try {
+
+				fW = new FileWriter(bCurve.getID() + ".txt");
+				BufferedWriter writer = new BufferedWriter(fW);
+				writer.write("");
+
+				while (xPosition <= bCurve.getHighestXValue()) {
+
+					Double yValue = bCurve.getPointOnCurve(xPosition);
+					writer.append(String.format("%f:%f%n", xPosition, yValue));
+					xPosition += step;
+				}
+
+				writer.close();
+
+			} catch (IOException e1) {
+				List<String> eventTargets = new ArrayList<>();
+				eventTargets.add("tsm;");
+				eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, e, e1));
 			}
-			
-			writer.close();
-		
-		} catch (IOException e1) {
-			List<String> eventTargets = new ArrayList<>();
-			eventTargets.add("tsm;");
-			eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, e, e1));
-		}*/
-		
+		}
 		System.out.println("Done");
 	}
 

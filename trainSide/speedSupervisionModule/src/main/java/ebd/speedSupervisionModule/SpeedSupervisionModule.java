@@ -1,8 +1,9 @@
 package ebd.speedSupervisionModule;
 
-import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.BreakingCurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
@@ -15,6 +16,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,10 +37,11 @@ public class SpeedSupervisionModule {
     private List<String> tdTargets = Collections.singletonList("td");
     private List<String> allTargets = Collections.singletonList("all");
 
-    private BreakingCurve breakingCurve = null;
+    private BreakingCurveGroup breakingCurveGroup = null;
 
     //TODO Correct maxDistance!
-    private Double maxDistance = 0d;
+    private Double maxServiceDistance = 0d;
+    private Double maxEmergencyDistance = 0d;
 
     /**
      * Constructor
@@ -61,16 +64,13 @@ public class SpeedSupervisionModule {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
-        if (this.breakingCurve == null){
+        if (this.breakingCurveGroup == null){
             return;
         }
         double curSpeed;
         Position curPosition;
 
-        if(trainDataVolatile.getCurrentSpeed() != null){
-            curSpeed = trainDataVolatile.getCurrentSpeed();
-        }
-        else return;
+        curSpeed = trainDataVolatile.getCurrentSpeed();
 
         if(trainDataVolatile.getCurrentPosition() != null){
             curPosition = trainDataVolatile.getCurrentPosition();
@@ -81,75 +81,87 @@ public class SpeedSupervisionModule {
 
         //System.out.println(this.breakingCurve.getRefLocation().getId());
 
-        double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
-        double tripDistanceWarning = tripDistance + curSpeed * 5;
-        double tripDistanceIndication = tripDistance + curSpeed * 10;
+        double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurveGroup.getServiceDecelerationCurve().getRefLocation().getId());
         SpeedInterventionLevel speedInterventionLevel;
 
-
-        //TODO Make this less horrible!
-        if(tripDistance < this.maxDistance){
-            double maxSpeed = this.breakingCurve.getMaxSpeedAtRelativePosition(curPosition);
-            sendCurrentMaxSpeed(maxSpeed);
+        if(tripDistance < this.maxServiceDistance){
             //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
-            if(curSpeed > maxSpeed + 2){
+            if(curSpeed > this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance)){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
-            else if (curSpeed > maxSpeed){
+            else if (curSpeed > this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(tripDistance)){
+                speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+            }
+            else if (curSpeed > this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(tripDistance)){
+                speedInterventionLevel = SpeedInterventionLevel.WARNING;
+            }
+            else if (curSpeed > this.breakingCurveGroup.getServicePermittedSpeedCurve().getPointOnCurve(tripDistance)){
+                speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
+            }
+            else if (curSpeed > this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(tripDistance)){
+                speedInterventionLevel = SpeedInterventionLevel.INDICATION;
+            }
+            else speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+
+        }
+        else {
+            if (tripDistance < maxEmergencyDistance && curSpeed < this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance)){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
             }
             else {
-                if(tripDistanceWarning < this.maxDistance){
-                    double maxSpeedWarning = this.breakingCurve.getMaxSpeedAtRelativePositionAndOffset(curPosition,curSpeed * 5);
-                    if(curSpeed > maxSpeedWarning + 2){
-                        speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
-                    }
-                    else if (curSpeed > maxSpeedWarning + 1.5){
-                        speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
-                    }
-                    else if(curSpeed > maxSpeedWarning + 1.1){
-                        speedInterventionLevel = SpeedInterventionLevel.WARNING;
-                    }
-                    else {
-                        if(tripDistanceIndication < this.maxDistance){
-                            double maxSpeedIndication = this.breakingCurve.getMaxSpeedAtRelativePositionAndOffset(curPosition, curSpeed * 10);
-                            if(curSpeed > maxSpeedIndication){
-                                speedInterventionLevel = SpeedInterventionLevel.INDICATION;
-                            }
-                            else {
-                                speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
-                            }
-                        }
-                        else {
-                            speedInterventionLevel = SpeedInterventionLevel.INDICATION;
-                        }
-                    }
-                }
-                else {
-                    speedInterventionLevel = SpeedInterventionLevel.WARNING;
-                }
+                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
-        }
-        else {
-            speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
         }
 
         this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel));
-
+        sendCurrentMaxSpeed(tripDistance);
     }
     /**
      * This method updates the breaking curve.
      * @param nbce A {@link NewBreakingCurveEvent}
      */
     @Subscribe
-    public void setBreakingCurve(NewBreakingCurveEvent nbce){
+    public void setBreakingCurveGroup(NewBreakingCurveEvent nbce){
 
-        this.breakingCurve = nbce.breakingCurve;
-        this.maxDistance = this.breakingCurve.getHighestXValue();
+        this.breakingCurveGroup = nbce.breakingCurveGroup;
+        this.maxServiceDistance = this.breakingCurveGroup.getServiceDecelerationCurve().getHighestXValue();
+        this.maxEmergencyDistance = this.breakingCurveGroup.getEmergencyDecelerationCurve().getHighestXValue();
     }
 
-    private void sendCurrentMaxSpeed(double curMaxSpeed) {
-        this.localEventBus.post(new TrainDataChangeEvent("ssm", this.tdTargets, "currentMaximumSpeed", curMaxSpeed));
+    private void sendCurrentMaxSpeed(double curTripDistance) {
+        double maxEmergencySpeed = 0;
+        double maxEmergencyInterventionSpeed = 0;
+        double maxServiceSpeed = 0;
+        double maxServiceInterventionSpeed = 0;
+        double maxServiceWarningSpeed = 0;
+        double maxServicePermittedSpeed = 0;
+        double maxServiceIndicationSpeed = 0;
+
+        if(curTripDistance < this.maxServiceDistance){
+            maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(curTripDistance);
+
+            maxServiceSpeed = this.breakingCurveGroup.getServiceDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxServiceInterventionSpeed = this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(curTripDistance);
+            maxServiceWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(curTripDistance);
+            maxServicePermittedSpeed = this.breakingCurveGroup.getServicePermittedSpeedCurve().getPointOnCurve(curTripDistance);
+            maxServiceIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(curTripDistance);
+
+        }
+        else if (curTripDistance < maxEmergencyDistance){
+            maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(curTripDistance);
+        }
+        HashMap<String, Object> updateMap = new HashMap<>();
+        updateMap.put("currentMaximumSpeed", maxServiceSpeed);
+        updateMap.put("currentEmergencySpeed", maxEmergencySpeed);
+        updateMap.put("currentEmergencyInterventionSpeed", maxEmergencyInterventionSpeed);
+        updateMap.put("currentServiceInterventionSpeed", maxServiceInterventionSpeed);
+        updateMap.put("currentServiceWarningSpeed", maxServiceWarningSpeed);
+        updateMap.put("currentServicePermittedSpeed", maxServicePermittedSpeed);
+        updateMap.put("currentServiceIndicationSpeed", maxServiceIndicationSpeed);
+
+        this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }
 
 }

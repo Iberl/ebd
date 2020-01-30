@@ -122,7 +122,7 @@ public class TrainDataPerma {
      *                              data in the response.
      */
     public TrainDataPerma(int trainID) throws IOException, ParseException, TDBadDataException {
-        if(ConfigHandler.getInstance().testing) setInstanceFromFile();
+        if(ConfigHandler.getInstance().useTrainConfiguratorTool) setInstanceFromFile();
         else setInstanceFromURL(trainID);
     }
 

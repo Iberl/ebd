@@ -4,7 +4,7 @@
 ######
 ###### Strings
 ######
-pathToDriverProfileJson = StrictDrivingStrategy.json
+pathToDriverProfileJson = RiskyDrivingStrategy.json
 pathToTestTrainJson = testTrain650.json
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080
@@ -13,21 +13,37 @@ portOfInfrastructureServer = 25555
 ######
 ###### Integers
 ######
-#Main tick rate of the train calculations in milliseconds (default: 100)
+# Main tick rate of the train calculations in milliseconds (default: 100)
 trainClockTickInMS = 100
-#Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
+# Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
 infrastructureUpdateMultiplier = 10
-#Train number that is used on the infrastructure server to id the train
+# Train number that is used on the infrastructure server to id the train
 trainNumber = 0
+# The ETCS Engine ID of the train that should be fetched from the train configurator tool.
+# This has to change once additional trains are controlled
+etcsEngineID = 192
+# Default Dangerpoint Distance
+defaultDangerPoint = 200
+
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
-#Distance before end of movement authority that is seen as "target reached" in [m]
+# Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 20
-#Minimum time between actions
+# Minimum time between actions
 timeBetweenActions = 0.1
+# Emergency break intervention curve offset in [s]
+emergencyInterventionOffset = 2
+# Service break intervention curve offset in [s]
+serviceInterventionOffset = 1
+# Service break warning curve offset in [s]
+serviceWarningOffset = 3
+# Service break permitted speed curve offset in [s]
+servicePermittedOffset = 7
+# Service break indication curve offset in [s]
+serviceIndicationOffset = 12
 ######
 ###### Booleans (either " = true" or " = false")
 ######
-testing = false
-simulated = true
+useTrainConfiguratorTool = false
+useInfrastructureServer = false
