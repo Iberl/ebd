@@ -3,6 +3,7 @@ package ebd.speedSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
@@ -15,6 +16,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -83,8 +85,6 @@ public class SpeedSupervisionModule {
         SpeedInterventionLevel speedInterventionLevel;
 
         if(tripDistance < this.maxServiceDistance){
-            double maxServiceSpeed = this.breakingCurveGroup.getServiceDecelerationCurve().getMaxSpeedAtRelativePosition(curPosition);
-            sendCurrentMaxSpeed(maxServiceSpeed);
             //System.out.println("V_MAX: " + maxSpeed + " TripD: " + tripDistance);
             if(curSpeed > this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance)){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
@@ -114,7 +114,7 @@ public class SpeedSupervisionModule {
         }
 
         this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel));
-
+        sendCurrentMaxSpeed(tripDistance);
     }
     /**
      * This method updates the breaking curve.
@@ -128,8 +128,40 @@ public class SpeedSupervisionModule {
         this.maxEmergencyDistance = this.breakingCurveGroup.getEmergencyDecelerationCurve().getHighestXValue();
     }
 
-    private void sendCurrentMaxSpeed(double curMaxSpeed) {
-        this.localEventBus.post(new TrainDataChangeEvent("ssm", this.tdTargets, "currentMaximumSpeed", curMaxSpeed));
+    private void sendCurrentMaxSpeed(double curTripDistance) {
+        double maxEmergencySpeed = 0;
+        double maxEmergencyInterventionSpeed = 0;
+        double maxServiceSpeed = 0;
+        double maxServiceInterventionSpeed = 0;
+        double maxServiceWarningSpeed = 0;
+        double maxServicePermittedSpeed = 0;
+        double maxServiceIndicationSpeed = 0;
+
+        if(curTripDistance < this.maxServiceDistance){
+            maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(curTripDistance);
+
+            maxServiceSpeed = this.breakingCurveGroup.getServiceDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxServiceInterventionSpeed = this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(curTripDistance);
+            maxServiceWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(curTripDistance);
+            maxServicePermittedSpeed = this.breakingCurveGroup.getServicePermittedSpeedCurve().getPointOnCurve(curTripDistance);
+            maxServiceIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(curTripDistance);
+
+        }
+        else if (curTripDistance < maxEmergencyDistance){
+            maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(curTripDistance);
+            maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(curTripDistance);
+        }
+        HashMap<String, Object> updateMap = new HashMap<>();
+        updateMap.put("currentMaximumSpeed", maxServiceSpeed);
+        updateMap.put("currentEmergencySpeed", maxEmergencySpeed);
+        updateMap.put("currentEmergencyInterventionSpeed", maxEmergencyInterventionSpeed);
+        updateMap.put("currentServiceInterventionSpeed", maxServiceInterventionSpeed);
+        updateMap.put("currentServiceWarningSpeed", maxServiceWarningSpeed);
+        updateMap.put("currentServicePermittedSpeed", maxServicePermittedSpeed);
+        updateMap.put("currentServiceIndicationSpeed", maxServiceIndicationSpeed);
+
+        this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }
 
 }
