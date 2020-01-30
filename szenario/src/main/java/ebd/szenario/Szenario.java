@@ -184,7 +184,7 @@ public class Szenario implements Runnable {
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
-        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
+        Route a = new Route("AB", 1000, new int[]{0,100,900,80}, new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();

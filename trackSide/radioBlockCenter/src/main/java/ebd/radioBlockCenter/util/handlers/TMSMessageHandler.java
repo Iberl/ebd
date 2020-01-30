@@ -13,27 +13,31 @@ import ebd.radioBlockCenter.util.Route;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.M_LOC_AT_BALISE_GROUP;
 import static ebd.messageLibrary.util.ETCSVariables.Q_DIR_NOMINAL;
 
-public class MessageHandler {
+public class TMSMessageHandler {
 
     private ArrayList<Integer> controlledTrainsByID;
     private EventBus localBus;
     private String rbcID;
-    private Map<Integer, List<Route>> trainIDsToRoute;
+    private List<JSONObject> maInfos;
     private Map<Integer, Integer> trainToLRBGMap;
     private List<Message_3> msg3List = new ArrayList<>();
 
     private int scenario;
-    private int msg3counter = 0;
+    private int nextMaInfo = 0;
+    private double maDistance = 0;
 
-    public MessageHandler(EventBus localBus, String rbcID, Map<Integer, List<Route>> trainIDsToRoute, int scenario) {
+    public TMSMessageHandler(EventBus localBus, String rbcID, List<JSONObject> maInfos, int scenario) {
         this.localBus = localBus;
-        this.trainIDsToRoute = trainIDsToRoute;
+        this.maInfos = maInfos;
         this.scenario = scenario;
         this.localBus.register(this);
         this.controlledTrainsByID = new ArrayList<>();
@@ -46,12 +50,13 @@ public class MessageHandler {
         if(!validTarget(rme.targets)) return;
         String trainID = (rme.sender.split(";T="))[1];
 
+
         if(rme.message instanceof Message_132){ //MA Request
-            Message_132 msg132 = (Message_132) rme.message;
+            Message_132 msg132 = (Message_132)rme.message;
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-            sendMessage3(makeM3(rme),trainID);
+            sendMessage3(makeM3(rme.sender.split(";T=")[1]), trainID);
         }
         else if(rme.message instanceof Message_136){ //Position Report
             Message_136 msg136 = (Message_136)rme.message;
@@ -91,19 +96,70 @@ public class MessageHandler {
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters and Position Report Parameters"));
     }
 
-    private Message_3 makeM3(ReceivedMessageEvent rme) {
-        String trainID = rme.sender.split(";T=")[1];
-        Route nextRoute = this.trainIDsToRoute.get(Integer.parseInt(trainID)).remove(0);
-        double d_EOL = nextRoute.getDistance();
+    private Message_3 makeM3(String trainID) {
+        //Route nextRoute = this.maInfos.get(Integer.parseInt(trainID)).remove(0);
+        double nextMaDistance = 0;
+        double d_eoa = 0;
 
-        List<TrackPacket> lop = new ArrayList<>();
-        lop.add(makeP21(nextRoute.getGp()));
-        lop.add(makeP27(nextRoute.getTsp()));
-        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0) {
-            lop.add(makeP57(ETCSVariables.T_MAR_INFINITY));
+        List<TrackPacket> packets = new ArrayList<>();
+
+        List<Integer> gpList = new ArrayList<>();
+        List<Integer> tspList = new ArrayList<>();
+
+        for(; nextMaInfo < maInfos.size(); nextMaInfo++) {
+            JSONObject maInfo = maInfos.get(nextMaInfo);
+            JSONObject eoa = (JSONObject) maInfo.get("endOfAuthority");
+
+            int beginPosition = 0;
+            JSONObject sp = ((JSONObject) maInfo.get("speedProfile"));
+
+            // Speed Profile
+
+            if(gpList.size() == 0 && !(boolean) eoa.get("shunting")) {
+                JSONObject tspJSON = (JSONObject) ((JSONArray) sp.get("speedSegments")).get(0);
+                beginPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("begin")).get("chainage")).get("iMeters")).intValue();
+
+                int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue();
+                tspList.add(beginPosition);
+                tspList.add(v_static);
+
+                JSONObject chainage = (JSONObject) eoa.get("chainage");
+                long iMeters = (Long) chainage.get("iMeters");
+                d_eoa = (double) iMeters;
+                //d_eoa = 100;
+
+                gpList.add(beginPosition);
+                gpList.add(0);
+
+                if(d_eoa - maDistance > 900) {
+                    nextMaInfo += 1;
+                    break;
+                }
+            } else if(nextMaInfo == maInfos.size()) {
+                tspList.add(beginPosition);
+                tspList.add(0);
+                gpList.add(beginPosition);
+                gpList.add(0);
+                break;
+            }
+
+        }
+
+        nextMaDistance = (int) d_eoa;
+
+        int[] gp = new int[gpList.size()];
+        int[] tsp = new int[tspList.size()];
+
+        for(int i = 0; i < gpList.size(); i++) { gp[i] = gpList.get(i); }
+        for(int i = 0; i < tspList.size(); i++) { tsp[i] = tspList.get(i); }
+
+        packets.add(makeP21(gp));
+        packets.add(makeP27(tsp));
+        if(nextMaInfo == maInfos.size()) {
+            packets.add(makeP57(ETCSVariables.T_MAR_INFINITY));
         }
         else {
-            lop.add(makeP57(20));
+            packets.add(makeP57(20));
         }
 
         Message_3 msg3 = new Message_3();
@@ -111,8 +167,8 @@ public class MessageHandler {
         msg3.NID_LRBG = this.trainToLRBGMap.get(Integer.parseInt(trainID));
 
         //System.out.println("msg 3 LRBG: " + msg3.NID_LRBG);
-        msg3.Packet_15 = makeP15(d_EOL);
-        msg3.packets = lop;
+        msg3.Packet_15 = makeP15(nextMaDistance);
+        msg3.packets = packets;
         return msg3;
     }
 
@@ -126,14 +182,10 @@ public class MessageHandler {
     private Packet_15 makeP15(double d_EOA){
         Packet_15 packet15 = new Packet_15();
 
-        Packet_15.Packet_15_Section endsection = new Packet_15.Packet_15_Section();
-        endsection.L_SECTION = (int)d_EOA; //m
-        ArrayList<Packet_15.Packet_15_Section> sections = new ArrayList<>();
-
         packet15.Q_SCALE = ETCSVariables.Q_SCALE_1M;
-        packet15.endsection = endsection;
-        packet15.sections = sections;
+        packet15.endsection.L_SECTION = (int) d_EOA;
         packet15.V_LOA = 0;
+
         return packet15;
     }
 
