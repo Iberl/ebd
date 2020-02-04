@@ -185,6 +185,9 @@ public class BreakingCurveCalculator {
 				this.referencePosition,"ServicePermittedSpeedCurve"));
 		breakingCurveGroup.setServiceIndicationCurve(getCurveFromListAndOffset(knotListService, ch.serviceIndicationOffset,
 				this.referencePosition,"ServiceIndicationCurve"));
+		breakingCurveGroup.setServiceCoastingPhaseCurve(getCurveFromListAndOffset(knotListService, ch.serviceCoastingPhaseOffset,
+				this.referencePosition,"ServiceIndicationCurve"));
+				//TODO Check if BCLRE still works
 
 		return breakingCurveGroup;
 	}

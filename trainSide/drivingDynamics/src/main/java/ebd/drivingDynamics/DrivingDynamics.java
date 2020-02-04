@@ -152,6 +152,10 @@ public class DrivingDynamics {
                     sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
+                case CUT_OFF_TRACTION:
+                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.COASTING);
+                    this.dynamicState.setMovementState(MovementState.COASTING);
+                    break;
                 case APPLY_SERVICE_BREAKS:
                     sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.BREAKING);
                     this.dynamicState.setMovementState(MovementState.BREAKING);

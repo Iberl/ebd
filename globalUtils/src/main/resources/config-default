@@ -42,6 +42,8 @@ serviceWarningOffset = 3
 servicePermittedOffset = 7
 # Service break indication curve offset in [s]
 serviceIndicationOffset = 12
+# Service break coasting phase offset in [s]
+serviceCoastingPhaseOffset = 37
 ######
 ###### Booleans (either " = true" or " = false")
 ######

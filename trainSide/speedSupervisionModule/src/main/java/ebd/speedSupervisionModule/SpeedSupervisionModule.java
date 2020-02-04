@@ -136,6 +136,7 @@ public class SpeedSupervisionModule {
         double maxServiceWarningSpeed = 0;
         double maxServicePermittedSpeed = 0;
         double maxServiceIndicationSpeed = 0;
+        double maxServiceCoastingPhaseSpeed = 0;
 
         if(curTripDistance < this.maxServiceDistance){
             maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(curTripDistance);
@@ -146,6 +147,7 @@ public class SpeedSupervisionModule {
             maxServiceWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(curTripDistance);
             maxServicePermittedSpeed = this.breakingCurveGroup.getServicePermittedSpeedCurve().getPointOnCurve(curTripDistance);
             maxServiceIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(curTripDistance);
+            maxServiceCoastingPhaseSpeed = this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(curTripDistance);
 
         }
         else if (curTripDistance < maxEmergencyDistance){
@@ -160,6 +162,7 @@ public class SpeedSupervisionModule {
         updateMap.put("currentServiceWarningSpeed", maxServiceWarningSpeed);
         updateMap.put("currentServicePermittedSpeed", maxServicePermittedSpeed);
         updateMap.put("currentServiceIndicationSpeed", maxServiceIndicationSpeed);
+        updateMap.put("currentServiceCoastingPhaseSpeed", maxServiceCoastingPhaseSpeed);
 
         this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }
