@@ -7,7 +7,8 @@ pathList = [r"C:\intellij-workspace\etcs\EmergencyDecelerationCurve.txt",
             r"C:\intellij-workspace\etcs\ServiceInterventionCurve.txt",
             r"C:\intellij-workspace\etcs\ServiceWarningCurve.txt",
             r"C:\intellij-workspace\etcs\ServicePermittedSpeedCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceIndicationCurve.txt"]
+            r"C:\intellij-workspace\etcs\ServiceIndicationCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceCoastingPhaseCurve.txt"]
             
 for path in pathList:
     

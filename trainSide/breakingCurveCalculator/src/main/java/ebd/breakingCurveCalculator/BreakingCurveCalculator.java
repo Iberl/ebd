@@ -186,7 +186,7 @@ public class BreakingCurveCalculator {
 		breakingCurveGroup.setServiceIndicationCurve(getCurveFromListAndOffset(knotListService, ch.serviceIndicationOffset,
 				this.referencePosition,"ServiceIndicationCurve"));
 		breakingCurveGroup.setServiceCoastingPhaseCurve(getCurveFromListAndOffset(knotListService, ch.serviceCoastingPhaseOffset,
-				this.referencePosition,"ServiceIndicationCurve"));
+				this.referencePosition,"ServiceCoastingPhaseCurve"));
 				//TODO Check if BCLRE still works
 
 		return breakingCurveGroup;
@@ -234,7 +234,10 @@ public class BreakingCurveCalculator {
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
-			double newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
+			double newSlope = 0;
+			if(knot.coefficients.get(1) != 0){
+				newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
+			}
 
 			double[] newCoefficents = {knot.coefficients.get(0), newSlope};
 
