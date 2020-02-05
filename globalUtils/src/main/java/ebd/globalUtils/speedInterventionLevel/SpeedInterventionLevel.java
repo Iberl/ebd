@@ -22,6 +22,12 @@ public enum SpeedInterventionLevel {
     WARNING,
 
     /**
+     * As required by SRS 3.13
+     * Signals the need to cut of traction.
+     */
+    CUT_OFF_TRACTION,
+
+    /**
      * Speed will become to high, service breaks will be applied automatically
      */
     APPLY_SERVICE_BREAKS,

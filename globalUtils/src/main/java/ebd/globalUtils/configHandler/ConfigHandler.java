@@ -85,6 +85,11 @@ public class ConfigHandler {
      */
     public double serviceIndicationOffset = 12;
 
+    /**
+     * Service coasting curve that allows for a coasting phase before breaking is needed
+     */
+    public double serviceCoastingPhaseOffset = 37;
+
     /*
     boolean
      */

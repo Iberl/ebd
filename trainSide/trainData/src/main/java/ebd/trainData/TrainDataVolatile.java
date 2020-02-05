@@ -108,7 +108,12 @@ public class TrainDataVolatile {
      */
     protected volatile double currentServiceIndicationSpeed = 0d;
 
-
+    /**
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServiceCoastingPhaseSpeed = 0d;
 
     /**
      * The target speed of the train in [m/s] based on the trip profile.
@@ -363,6 +368,15 @@ public class TrainDataVolatile {
      */
     public double getCurrentServiceIndicationSpeed() {
         return currentServiceIndicationSpeed;
+    }
+
+    /**
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServiceCoastingPhaseSpeed() {
+        return currentServiceCoastingPhaseSpeed;
     }
 
     /**

@@ -52,12 +52,8 @@ public class Speedometer extends MyPanel {
 	protected int currentWarnSpeed;
 	protected int currentIntervSpeed;
 
-//	protected PanelMessages pm;
+	//	protected PanelMessages pm;
 	protected boolean speedingOccured = false;
-
-	protected static final Stroke stroke1 = new BasicStroke(1.0f);
-	protected static final Stroke stroke9 = new BasicStroke(9.0f);
-	protected static final Stroke stroke20 = new BasicStroke(20.0f);
 
 
 	public Speedometer(int[] array) {
@@ -87,26 +83,23 @@ public class Speedometer extends MyPanel {
 
 		MyPanel panelB1 = new MyPanel(115, 125, 50, 50);
 		panelB1.setOpaque(false);
-		this.lblB11 = new MyLabel(10, 12, 10, 30, "0");
+		this.lblB11 = new MyLabel(0, 0, 16, 50, "");
 		this.lblB11.setAlignmentY(RIGHT_ALIGNMENT);
-		this.lblB11.setBackground(this.colorForNeedle);
 		this.lblB11.setForeground(this.colorForSpeed);
 		this.lblB11.setBorder(null);
-		this.lblB11.setOpaque(true);
+		this.lblB11.setOpaque(false);
 		panelB1.add(this.lblB11);
-		this.lblB12 = new MyLabel(20, 12, 10, 30, "0");
+		this.lblB12 = new MyLabel(17, 0, 17, 50, "");
 		this.lblB12.setAlignmentY(RIGHT_ALIGNMENT);
-		this.lblB12.setBackground(this.colorForNeedle);
 		this.lblB12.setForeground(this.colorForSpeed);
 		this.lblB12.setBorder(null);
-		this.lblB12.setOpaque(true);
+		this.lblB12.setOpaque(false);
 		panelB1.add(this.lblB12);
-		this.lblB13 = new MyLabel(30, 12, 10, 30, "0");
+		this.lblB13 = new MyLabel(33, 0, 17, 50, "");
 		this.lblB13.setAlignmentY(RIGHT_ALIGNMENT);
-		this.lblB13.setBackground(this.colorForNeedle);
 		this.lblB13.setForeground(this.colorForSpeed);
 		this.lblB13.setBorder(null);
-		this.lblB13.setOpaque(true);
+		this.lblB13.setOpaque(false);
 		panelB1.add(this.lblB13);
 		panelB1.setBorder(null);
 		this.add(panelB1);
@@ -116,35 +109,6 @@ public class Speedometer extends MyPanel {
 
 
 	private void chooseColor() {
-		//TODO: Abhängigkeiten von MainFrame entfernen
-//		MainFrame mf = MainFrame.getHauptFrame();
-//		this.pm = mf != null ? mf.getPanelMessages() : null;
-		//TODO: fehlende Warnabstufungen implementieren
-//		if (this.currentSpeed > Warnungsgeschwindigkeit && this.currentSpeed < Schnellbremsgeschwindigkeit) {
-//			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
-//			this.colorForArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
-//			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-//			this.lblB11.setBackground(this.colorForNeedle);
-//			this.lblB11.setForeground(this.colorForSpeed);
-//			this.lblB12.setBackground(this.colorForNeedle);
-//			this.lblB12.setForeground(this.colorForSpeed);
-//			this.lblB13.setBackground(this.colorForNeedle);
-//			this.lblB13.setForeground(this.colorForSpeed);
-//			}
-//
-//		if (this.currentSpeed > ) {
-//			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.YELLOW);
-//			this.colorForArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-//			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-//			this.lblB11.setBackground(this.colorForNeedle);
-//			this.lblB11.setForeground(this.colorForSpeed);
-//			this.lblB12.setBackground(this.colorForNeedle);
-//			this.lblB12.setForeground(this.colorForSpeed);
-//			this.lblB13.setBackground(this.colorForNeedle);
-//			this.lblB13.setForeground(this.colorForSpeed);
-//		}
-
-
 		if (speedInterventionLevel.equals(SpeedInterventionLevel.NO_INTERVENTION)) {
 			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.MEDIUM_GRAY);
 			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
@@ -164,8 +128,7 @@ public class Speedometer extends MyPanel {
 				this.speedingOccured = false;
 			}
 		} else if (speedInterventionLevel.equals(SpeedInterventionLevel.INDICATION)) {
-			//TODO: ändern
-			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.MEDIUM_GRAY);
+			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.YELLOW);
 			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
 			this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
 			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
@@ -230,8 +193,15 @@ public class Speedometer extends MyPanel {
 		int zehner = rest / 10;
 		int einer = rest % 10;
 
-		this.lblB11.setText(String.valueOf(hunderter));
-		this.lblB12.setText(String.valueOf(zehner));
+		lblB11.setFont(new Font("Chicago", Font.BOLD, 24));
+		if(hunderter != 0) {
+			this.lblB11.setText(String.valueOf(hunderter));
+		}
+		lblB12.setFont(new Font("Chicago", Font.BOLD, 24));
+		if(hunderter != 0 || zehner != 0) {
+			this.lblB12.setText(String.valueOf(zehner));
+		}
+		lblB13.setFont(new Font("Chicago", Font.BOLD, 24));
 		this.lblB13.setText(String.valueOf(einer));
 	}
 
@@ -248,7 +218,7 @@ public class Speedometer extends MyPanel {
 		g2d.fillRect(0, 0, WIDTH, HEIGHT);
 
 		paintSpeedDial(g2d, this.array);
-		paintCircularSpeedGauge(g2d, 125, centerX, centerY);
+		paintCircularSpeedGauge(g2d, 125);
 
 		g2d.setColor(this.colorForNeedle);
 		double angle = getAngle(this.currentSpeed, this.maxVal);
@@ -264,66 +234,61 @@ public class Speedometer extends MyPanel {
 	}
 
 
-	private void paintCircularSpeedGauge(Graphics2D g, int r, double x, double y) {
+	private void paintCircularSpeedGauge(Graphics2D g, int radius) {
 		// Ellipse2D.Double kreisB0 = new Ellipse2D.Double(x - r, y - r, 2 * r,
 		// 2 * r); g.draw(kreisB0);
 
-		int startingAngle = 235;
+		int startingAngle = 239;
 		// Vsoll -> extend umwandeln = Vsoll * (288/400)
-		double lowerArcExtend = -(this.currentIndSpeed * 0.72);
+		double lowerArcExtend = -(this.currentIndSpeed * 0.72 + 4);
 		double upperArcExtend = -((this.currentTargetSpeed - this.currentIndSpeed) * 0.72);
 
 		if (this.currentSpeed > this.currentTargetSpeed) {
-			drawUeberhang(g, startingAngle + lowerArcExtend + upperArcExtend, r);
+			drawUeberhang(g, startingAngle + lowerArcExtend + upperArcExtend, radius);
 		}
 
-		drawLowerArc(g, startingAngle, lowerArcExtend, r);
-		drawUpperArc(g, startingAngle + lowerArcExtend, upperArcExtend, r);
-
+		drawLowerArc(g, startingAngle, lowerArcExtend);
+		drawUpperArc(g, startingAngle + lowerArcExtend, upperArcExtend);
+		drawSpeedRectangle(g,startingAngle + lowerArcExtend + upperArcExtend);
 
 	}
 
 
-	private void drawLowerArc(Graphics2D g, double startingAngle, double extend, int r) {
-		Stroke oldStroke = g.getStroke();
-		Arc2D arc = new Arc2D.Double(6, 16, 2 * r + 17, 2 * r + 17, startingAngle - 1, extend, Arc2D.OPEN);
+	private void drawLowerArc(Graphics2D g, double startingAngle, double extend) { ;
 		g.setColor(this.colorForLowerArc);
-		g.setStroke(stroke9);
-		g.draw(arc);
-		g.setStroke(oldStroke);
+		Area area = drawArc(137, 128, startingAngle, extend);
+		g.fill(area);
+
 	}
 
 
-	private void drawUpperArc(Graphics2D g, double startingAngle, double extend, int r) {
-		Stroke oldStroke = g.getStroke();
-		//extend + 1 because the arc is longer as expected because of the linewidth
-		Arc2D arc = new Arc2D.Double(6, 16, 2 * r + 17, 2 * r + 17, startingAngle - 4, extend + 5, Arc2D.OPEN);
+	private void drawUpperArc(Graphics2D g, double startingAngle, double extend) {
 		g.setColor(this.colorForUpperArc);
-		g.setStroke(stroke9);
-		g.draw(arc);
+		Area area = drawArc(137, 128, startingAngle, extend);
+		g.fill(area);
 
-		// double angle = Math.toRadians(startwinkel - extend - 20);
-		// 20 ist fest,stehenbleiben
-		double angle = Math.toRadians(-(startingAngle + extend - 90));
-		double mx = arc.getEndPoint().getX();
-		double my = arc.getEndPoint().getY();
-		Shape rect = new Rectangle2D.Double(mx - 2, my - 3, 6, 20);
-		rect = rotateShape(rect, angle, mx, my);
-		g.setStroke(stroke1);
-		g.fill(rect);
-		g.draw(rect);
-		g.setStroke(oldStroke);
+//		double angle = Math.toRadians(-(startingAngle + extend - 90));
+//		double mx = arc.getEndPoint().getX();
+//		double my = arc.getEndPoint().getY();
+//		Shape rect = new Rectangle2D.Double(mx - 2, my - 3, 6, 20);
+//		rect = rotateShape(rect, angle, mx, my);
+//		g.fill(rect);
+//		g.draw(rect);
 	}
 
+	private void drawSpeedRectangle(Graphics2D g, double angle) {
+        //double angle = Math.toRadians(-(startingAngle + extend - 90));
+        Shape rect = new Rectangle2D.Double(140 + 117, 144, 20, 6);
+        rect = rotateShape(rect, -Math.toRadians(angle), 140, 150);
+        g.fill(rect);
+    }
 
-	private void drawUeberhang(Graphics2D g, double start, int radius) {
-		Stroke oldStroke = g.getStroke();
-		g.setStroke(stroke20);
+
+	private void drawUeberhang(Graphics2D g, double startingAngle, int radius) {
 		g.setColor(colorForNeedle);
 		double extend = -(this.currentSpeed - this.currentTargetSpeed) * 0.72;
-		Arc2D arc = new Arc2D.Double(13, 23, 2 * radius + 4, 2 * radius + 4, start - 5, extend + 4, Arc2D.OPEN);
-		g.draw(arc);
-		g.setStroke(oldStroke);
+		Area area = drawArc(137, 117, startingAngle, extend);
+		g.fill(area);
 	}
 
 
@@ -446,6 +411,19 @@ public class Speedometer extends MyPanel {
 		return p0;
 	}
 
+
+	private Area drawArc(int outerRadius, int innerRadius, double startingAngle, double extent) {
+		int centerX = 140;
+		int centerY = 150;
+		Shape outerArc = new Arc2D.Double(centerX - outerRadius, centerY - outerRadius, 2 * outerRadius, 2 * outerRadius, startingAngle, extent, Arc2D.PIE);
+		Shape innerArc = new Arc2D.Double(centerX - innerRadius, centerY - innerRadius, 2 * innerRadius, 2 * innerRadius, startingAngle, extent, Arc2D.PIE);
+
+		Area outerArcArea = new Area(outerArc);
+		Area innerArcArea = new Area(innerArc);
+		outerArcArea.subtract(innerArcArea);
+
+		return outerArcArea;
+	}
 
 	/**
 	 * @return currentSpeed
