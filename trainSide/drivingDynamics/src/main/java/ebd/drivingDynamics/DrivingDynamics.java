@@ -53,6 +53,7 @@ public class DrivingDynamics {
     private EventBus localBus;
     private TrainDataVolatile trainDataVolatile;
     private int etcsTrainID;
+    private ConfigHandler ch;
 
     private Spline tripProfile;
     private Position tripStartPosition;
@@ -84,7 +85,7 @@ public class DrivingDynamics {
     public DrivingDynamics(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
-
+        this.ch = ConfigHandler.getInstance();
         try {
             this.drivingProfile = new DrivingProfile(this.localBus);
         } catch (IOException | ParseException e) {
@@ -96,7 +97,7 @@ public class DrivingDynamics {
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
 
-        this.timeBetweenActions = ConfigHandler.getInstance().timeBetweenActions;
+        this.timeBetweenActions = this.ch.timeBetweenActions;
     }
 
     /**
@@ -113,7 +114,7 @@ public class DrivingDynamics {
         Setting time to calculate the precise time between calculations
          */
         double currentTime = System.nanoTime();
-        double deltaT = (currentTime - this.time)/ 1E9; //To get seconds;
+        double deltaT = (currentTime - this.time)/ 1E9 * this.ch.physicAccFactor; //To get seconds;
         this.time = currentTime;
 
         /*

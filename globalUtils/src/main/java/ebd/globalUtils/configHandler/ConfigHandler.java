@@ -53,6 +53,10 @@ public class ConfigHandler {
     doubles
      */
     /**
+     * Physics acceleration factor
+     */
+    public double physicAccFactor = 0.5;
+    /**
      * Distance before end of movement authority that is seen as "target reached" in [m]
      */
     public double targetReachedDistance = 20;
