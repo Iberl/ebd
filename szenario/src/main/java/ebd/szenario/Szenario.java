@@ -196,7 +196,6 @@ public class Szenario implements Runnable {
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        System.out.println(msg);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

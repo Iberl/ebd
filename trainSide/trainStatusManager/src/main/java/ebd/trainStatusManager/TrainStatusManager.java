@@ -12,6 +12,8 @@ import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
+import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -94,9 +96,7 @@ public class TrainStatusManager implements Runnable {
         this.rbcID = rbcID;
         setUpTrain();
         this.tsmThread.start();
-        if(ConfigHandler.getInstance().useTrainConfiguratorTool){
-            connectToRBC();
-        }
+        connectToRBC();
     }
 
     public TrainStatusManager(EventBus eventBus, int etcsTrainID, int rbcID){
@@ -105,9 +105,7 @@ public class TrainStatusManager implements Runnable {
         this.rbcID = rbcID;
         setUpTrain();
         this.tsmThread.start();
-        if(ConfigHandler.getInstance().useTrainConfiguratorTool){
-            connectToRBC();
-        }
+        connectToRBC();
     }
 
     @Override
@@ -156,6 +154,20 @@ public class TrainStatusManager implements Runnable {
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
         }
+    }
+
+    @Subscribe
+    public void pauseClock(PauseClockEvent pce){
+        if(!validTarget(pce.targets)) return;
+
+        this.clock.stop();
+    }
+
+    @Subscribe
+    public void continueClock(ContinueClockEvent cce){
+        if(!validTarget(cce.targets)) return;
+
+        this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
