@@ -22,7 +22,7 @@ public class Clock implements Runnable {
         while(run){
             try {
                 Thread.sleep(2000);
-                eventBus.post(new ClockTickEvent("clock", Arrays.asList(new String[]{"all"})));
+                eventBus.post(new ClockTickEvent("clock", Arrays.asList(new String[]{"all"}), 2));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

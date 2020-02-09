@@ -31,11 +31,11 @@ defaultDangerPoint = 200
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
 # Physics acceleration factor
-physicAccFactor = 1
+timeAccFactor = 1
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 20
 # Minimum time between actions
-timeBetweenActions = 0.1
+timeBetweenActions = 2
 # Emergency break intervention curve offset in [s]
 emergencyInterventionOffset = 2
 # Service break intervention curve offset in [s]

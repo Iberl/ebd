@@ -111,11 +111,10 @@ public class DrivingDynamics {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
         /*
-        Setting time to calculate the precise time between calculations
+        Getting the modified time between two clock ticks, which is the time between clock ticks modified by the
+        time acceleration factor.
          */
-        double currentTime = System.nanoTime();
-        double deltaT = (currentTime - this.time)/ 1E9 * this.ch.physicAccFactor; //To get seconds;
-        this.time = currentTime;
+        double deltaT = cte.modifiedDeltaT;
 
         /*
         If driving dynamics is locked, nothing will be done.

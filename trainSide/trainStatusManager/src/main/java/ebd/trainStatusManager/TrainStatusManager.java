@@ -159,15 +159,13 @@ public class TrainStatusManager implements Runnable {
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
         if(!validTarget(pce.targets)) return;
-
-        this.clock.stop();
+        this.clock.setPaused(true);
     }
 
     @Subscribe
     public void continueClock(ContinueClockEvent cce){
         if(!validTarget(cce.targets)) return;
-
-        this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
+        this.clock.setPaused(false);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

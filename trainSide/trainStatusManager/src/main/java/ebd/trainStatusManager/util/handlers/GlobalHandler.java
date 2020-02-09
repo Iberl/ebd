@@ -1,8 +1,11 @@
 package ebd.trainStatusManager.util.handlers;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
+import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -31,6 +34,18 @@ public class GlobalHandler {
         this.localBus = localBus;
         this.etcsTrainID = etcsTrainID;
         EventBus.getDefault().register(this);
+    }
+
+    @Subscribe
+    public void pauseClock(PauseClockEvent pce){
+        if(!validTarget(pce.targets)) return;
+        this.localBus.post(pce);
+    }
+
+    @Subscribe
+    public void continueClock(ContinueClockEvent cce){
+        if(!validTarget(cce.targets)) return;
+        this.localBus.post(cce);
     }
 
     @Subscribe

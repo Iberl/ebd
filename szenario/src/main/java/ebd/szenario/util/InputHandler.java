@@ -1,6 +1,8 @@
 package ebd.szenario.util;
 
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
+import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.szenario.util.events.LoadFourEvent;
 import ebd.szenario.util.events.LoadOneEvent;
 import ebd.szenario.util.events.LoadThreeEvent;
@@ -50,6 +52,12 @@ public class InputHandler implements Runnable {
                 break;
             case "load4":
                 this.globalEventBus.post(new LoadFourEvent("szenario", Collections.singletonList("szenario")));
+                break;
+            case "pause":
+                this.globalEventBus.post(new PauseClockEvent("szenario", Collections.singletonList("all")));
+                break;
+            case "continue":
+                this.globalEventBus.post(new ContinueClockEvent("szenario", Collections.singletonList("all")));
                 break;
             default:
                 System.out.println("Could not understand input");
