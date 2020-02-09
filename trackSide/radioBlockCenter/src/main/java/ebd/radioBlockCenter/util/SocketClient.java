@@ -1,82 +1,32 @@
 package ebd.radioBlockCenter.util;
 
 
+import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.logger.ToLogEvent;
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.*;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * class in SmartLogic/TMS sending Ma
- */
 public class SocketClient<T, Resp> {
 
-    public String ip = "127.0.0.1"; //localhost
-    public int port = 22223;
-
-    public LinkedBlockingQueue<Resp> outputQueue = new LinkedBlockingQueue<Resp>();
-
-    public SocketClient() {
-    }
-
-    public void request(T message) throws Exception {
-
-        System.out.println("worker:" + Thread.currentThread());
-
-        ClientHandler ch = new ClientHandler();
-        ch.set(message);
-
-        //call-Methode 'ch' von ClientHandler wird mit 'FutureTask' asynchron abgearbeitet, das Ergebnis kann dann von der 'FutureTask' abgeholt werden.
-
-        FutureTask<String> task = new FutureTask<>(ch);
-        Thread thread = new Thread(task);
-        thread.start();
-
-        while(!task.isDone());
-
-        System.out.println(task.get());
-
-    }
-
-    void writeMessage(Socket socket, String message) throws IOException {
-        PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-        printWriter.print(message);
-        printWriter.flush();
-    }
-
-    public static void main(String[] args) {
-        SocketClient<String, String> client = new SocketClient<String, String>();
-        if(args.length == 2) {
-            client.ip = args[0];
-            client.port = Integer.getInteger(args[1]);
-        }
-
-        try {
-            client.request("ICE 12");
-            while(true) {
-                // Christopher hier kannst du den MA RBC abgreiffen
-                System.out.println(client.outputQueue.take());
-                // take blockiert die while schleife solange keine Elemente in der Queue sind
-            }
-
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class ClientHandler implements Callable<String> {
+    private class SocketClientHandler implements Callable<String> {
         T message = null;
 
         public void set(T message) {
             this.message = message;
         }
 
-        public ClientHandler() {
+        public SocketClientHandler() {
         }
 
         public String call() {
-            System.out.println("ClientHandler:" + Thread.currentThread());
+
+            if(configHandler.debug) log("ClientHandler: " + Thread.currentThread());
             try {
                 Socket socket = new Socket(SocketClient.this.ip, SocketClient.this.port);
                 send(socket, message);
@@ -85,7 +35,7 @@ public class SocketClient<T, Resp> {
             } catch(IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            return "Request done";
+            return "Request done"; // TODO: Logger possible?
         }
 
         private void receive(Socket socket) throws IOException, ClassNotFoundException {
@@ -98,6 +48,43 @@ public class SocketClient<T, Resp> {
             outputStream.writeObject(message);
             outputStream.flush();
         }
+    }
+
+    private ConfigHandler configHandler = ConfigHandler.getInstance();
+    private EventBus globalbus = EventBus.getDefault();
+
+    private String moduleID;
+
+    public String ip = configHandler.ipToTMSServer;
+    public int port = Integer.parseInt(configHandler.portOfTMSServer);
+
+    public LinkedBlockingQueue<Resp> outputQueue = new LinkedBlockingQueue<Resp>();
+
+    public SocketClient(String moduleID) {
+        this.moduleID = moduleID;
+    }
+
+    public void request(T message) throws Exception {
+
+        if(configHandler.debug) log("worker:" + Thread.currentThread());
+
+        SocketClientHandler clientHandler = new SocketClientHandler();
+        clientHandler.set(message);
+
+        //call-Methode 'ch' von ClientHandler wird mit 'FutureTask' asynchron abgearbeitet, das Ergebnis kann dann von der 'FutureTask' abgeholt werden.
+
+        FutureTask<String> task = new FutureTask<>(clientHandler);
+        Thread thread = new Thread(task);
+        thread.start();
+
+        while(!task.isDone()); // TODO: Potential endless loop
+
+        if(configHandler.debug) log(task.get());
+
+    }
+
+    private void log(String msg) {
+        globalbus.post(new ToLogEvent(moduleID, Collections.singletonList("log"), msg));
     }
 }
 

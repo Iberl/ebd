@@ -119,7 +119,7 @@ public class TMSMessageHandler {
                 JSONObject tspJSON = (JSONObject) ((JSONArray) sp.get("speedSegments")).get(0);
                 beginPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("begin")).get("chainage")).get("iMeters")).intValue();
 
-                int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue();
+                int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue() * 5;
                 tspList.add(beginPosition);
                 tspList.add(v_static);
 

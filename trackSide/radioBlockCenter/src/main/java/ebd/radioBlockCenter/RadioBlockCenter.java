@@ -146,7 +146,6 @@ public class RadioBlockCenter {
     }
 
     private boolean validTarget(List<String> targetList) {
-
         for(String target : targetList) {
             if(target.contains("tsm") || target.contains("all")) {
                 if(!target.contains(";")) {

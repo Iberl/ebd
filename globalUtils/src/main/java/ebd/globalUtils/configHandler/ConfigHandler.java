@@ -22,9 +22,12 @@ import java.util.Collections;
 public class ConfigHandler {
 
 
-    /*
-        Strings
-         */
+    // -------
+    // Strings
+    // -------
+
+    public String ipOfLocalhost = "127.0.0.1";
+
     public String pathToDriverProfileJson = "";
     public String pathToTestTrainJson = "";
 
@@ -34,27 +37,35 @@ public class ConfigHandler {
     public String ipToInfrastructureServer = "";
     public String portOfInfrastructureServer = "";
 
+    public String ipToTMSServer = ipOfLocalhost;
+    public String portOfTMSServer = "";
 
-    /*
-    ints
-     */
+
+    // ----
+    // Ints
+    // ----
+
     public int trainClockTickInMS = 100;
     public int trainNumber = 0;
     public int etcsID = 192;
 
     public int defaultDangerPoint = 200;
+
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
      */
     public int infrastructureUpdateMultiplier = 10;
 
-    /*
-    doubles
-     */
+
+    // -------
+    // Doubles
+    // -------
+
     /**
      * Distance before end of movement authority that is seen as "target reached" in [m]
      */
     public double targetReachedDistance = 20;
+
     /**
      * Minimum time between actions
      */
@@ -85,14 +96,19 @@ public class ConfigHandler {
      */
     public double serviceIndicationOffset = 12;
 
-    /*
-    boolean
-     */
+
+    // --------
+    // Booleans
+    // --------
+
     public boolean useTrainConfiguratorTool = false;
     public boolean useInfrastructureServer = false;
-    /*
-    other
-     */
+    public boolean debug = false;
+
+
+    // ------
+    // Others
+    // ------
 
     private static ConfigHandler single_instance = null;
 
