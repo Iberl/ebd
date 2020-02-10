@@ -196,10 +196,16 @@ public class Speedometer extends MyPanel {
 		lblB11.setFont(new Font("Chicago", Font.BOLD, 24));
 		if(hunderter != 0) {
 			this.lblB11.setText(String.valueOf(hunderter));
+		} else {
+			this.lblB11.setText("");
+
 		}
 		lblB12.setFont(new Font("Chicago", Font.BOLD, 24));
 		if(hunderter != 0 || zehner != 0) {
 			this.lblB12.setText(String.valueOf(zehner));
+		} else {
+			this.lblB12.setText("");
+
 		}
 		lblB13.setFont(new Font("Chicago", Font.BOLD, 24));
 		this.lblB13.setText(String.valueOf(einer));
