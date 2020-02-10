@@ -138,19 +138,18 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(nbce.targets)){
             return;
         }
-        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getServiceDecelerationCurve();
+        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getServicePermittedSpeedCurve();
         int refLocID = breakingCurve.getRefLocation().getId();
 
         if(!this.tripInProgress){
             this.tripInProgress = true;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),breakingCurve, refLocID));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
             this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
         }
         else {
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"),breakingCurve, refLocID));
-            //this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
+            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
             this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                     "Calculated a new breaking curve"));
         }
