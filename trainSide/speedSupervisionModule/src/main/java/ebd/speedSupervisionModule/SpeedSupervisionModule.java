@@ -97,7 +97,7 @@ public class SpeedSupervisionModule {
 
         SpeedInterventionLevel speedInterventionLevel;
 
-        if(this.maxServicePermittedSpeed == this.maxServiceSpeed) { //Ceiling supervision regime
+        if(this.maxServiceIndicationSpeed == this.maxServiceSpeed) { //Ceiling supervision regime //TODO make more robust
             if(curSpeed > this.maxEmergencyInterventionSpeed + emergencyInterventionCeiling()){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
