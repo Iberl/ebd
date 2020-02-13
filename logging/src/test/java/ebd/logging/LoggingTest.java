@@ -3,6 +3,7 @@ package ebd.logging;
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.logging.Logging;
@@ -29,6 +30,9 @@ public class LoggingTest{
     private static List<String> clockTickTargets;
     private static ClockTickEvent clockTickEvent;
 
+    private static List<String> toLogDebugTargets;
+    private static ToLogDebugEvent toLogDebugEvent;
+
     /**
      * logs an ExceptionEvent, a general NormalEvent, a ToLogEvent and a ClockTickEvent which are posted on
      * a local EventBus and a global EventBus
@@ -42,10 +46,12 @@ public class LoggingTest{
         localBus.post(generateNormalEvent());
         localBus.post(generateToLogEvent());
         localBus.post(generateClockTickEvent());
+        localBus.post(generateToLogDebugEvent());
         EventBus.getDefault().post(generateExceptionEvent());
         EventBus.getDefault().post(generateNormalEvent());
         EventBus.getDefault().post(generateToLogEvent());
         EventBus.getDefault().post(generateClockTickEvent());
+        EventBus.getDefault().post(generateToLogDebugEvent());
     }
 
     /**
@@ -89,5 +95,11 @@ public class LoggingTest{
         clockTickTargets = Arrays.asList("clockTickTarget1", "clockTickTarget2");
         clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTargets, 0);
         return clockTickEvent;
+    }
+
+    private static ToLogDebugEvent generateToLogDebugEvent() {
+         toLogDebugTargets = Arrays.asList("logDebugTarget1", "logDebugTarget2");
+        toLogDebugEvent = new ToLogDebugEvent("source of ToLogDebugEvent", toLogDebugTargets, "debugmessage");
+        return toLogDebugEvent;
     }
 }

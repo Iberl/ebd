@@ -2,6 +2,7 @@ package ebd.logging;
 
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -142,5 +143,15 @@ public class Logging{
         else {
             logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
         }
+    }
+
+    /**
+     * log when ToLogDebugEvent occurred
+     * @param toLogDebugEvent
+     */
+    @Subscribe
+    public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
+        String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
+        logger.fine(toLogDebugEvent.msg);
     }
 }
