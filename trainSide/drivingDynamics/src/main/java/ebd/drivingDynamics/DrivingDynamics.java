@@ -366,7 +366,7 @@ public class DrivingDynamics {
      */
     private void updateDMI(){
         double speed = this.dynamicState.getSpeed();
-        double targetSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
+        double targetSpeed = this.trainDataVolatile.getCurrentServicePermittedSpeed();
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
         double currentIndSpeed = this.trainDataVolatile.getCurrentServiceIndicationSpeed();
         double currentWarnSpeed = this.trainDataVolatile.getCurrentServiceWarningSpeed();
