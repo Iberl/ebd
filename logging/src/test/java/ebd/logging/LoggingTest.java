@@ -93,7 +93,7 @@ public class LoggingTest{
      */
     private static ClockTickEvent generateClockTickEvent(){
         clockTickTargets = Arrays.asList("clockTickTarget1", "clockTickTarget2");
-        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTargets);
+        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTargets, 0);
         return clockTickEvent;
     }
 

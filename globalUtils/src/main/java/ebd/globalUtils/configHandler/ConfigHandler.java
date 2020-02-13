@@ -21,10 +21,11 @@ import java.util.Collections;
  */
 public class ConfigHandler {
 
+    private static ConfigHandler single_instance = null;
 
     /*
-        Strings
-         */
+    Strings
+    */
     public String pathToDriverProfileJson = "";
     public String pathToTestTrainJson = "";
 
@@ -51,6 +52,10 @@ public class ConfigHandler {
     /*
     doubles
      */
+    /**
+     * Physics acceleration factor
+     */
+    public double timeAccFactor = 0.5;
     /**
      * Distance before end of movement authority that is seen as "target reached" in [m]
      */
@@ -85,16 +90,102 @@ public class ConfigHandler {
      */
     public double serviceIndicationOffset = 12;
 
+    /**
+     * Service coasting curve that allows for a coasting phase before breaking is needed
+     */
+    public double serviceCoastingPhaseOffset = 37;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Emergency Brake Intervention supervision limits, minimum value
+     * in [m/s]
+     */
+    public double dV_ebi_min = 2.08;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Emergency Brake Intervention supervision limits, maximum value
+     * in [m/s]
+     */
+    public double dV_ebi_max = 4.17;
+
+    /**
+     * Speed of MRSP where dV_ebi starts to increase to dV_ebi_max
+     * in [m/s]
+     */
+    public double V_ebi_min = 30.5;
+
+    /**
+     * Value of  MRSP where dV_ebi stops to increase to dV_ebi_max
+     * in [m/s]
+     */
+    public double V_ebi_max = 58.33;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Service Brake Intervention supervision limits, minimum value
+     * in [m/s]
+     */
+    public double dV_sbi_min = 1.53;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Service Brake Intervention supervision limits, maximum value
+     * in [m/s]
+     */
+    public double dV_sbi_max = 2.78;
+
+    /**
+     * Speed of MRSP where dV_sbi starts to increase to dV_sbi_max
+     * in [m/s]
+     */
+    public double V_sbi_min = 30.5;
+
+    /**
+     * Value of  MRSP where dV_sbi stops to increase to dV_sbi_max
+     * in [m/s]
+     */
+    public double V_sbi_max = 58.33;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Warning supervision limits, minimum value
+     * in [m/s]
+     */
+    public double dV_warning_min = 1.11;
+
+    /**
+     * Speed difference between Permitted speed
+     * and Warning supervision limits, maximum value
+     * in [m/s]
+     */
+    public double dV_warning_max = 1.39;
+
+    /**
+     * Speed of MRSP where dV_warning starts to increase to dV_warning_max
+     * in [m/s]
+     */
+    public double V_warning_min = 38.89;
+
+    /**
+     * Value of  MRSP where dV_warning stops to increase to dV_warning_max
+     * in [m/s]
+     */
+    public double V_warning_max = 58.33;
+
     /*
     boolean
      */
     public boolean useTrainConfiguratorTool = false;
     public boolean useInfrastructureServer = false;
+
     /*
     other
      */
 
-    private static ConfigHandler single_instance = null;
+
+
+
 
     /**
      * Set private to stop instantiation

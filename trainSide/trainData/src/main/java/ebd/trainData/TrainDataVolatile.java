@@ -108,13 +108,18 @@ public class TrainDataVolatile {
      */
     protected volatile double currentServiceIndicationSpeed = 0d;
 
-
+    /**
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentServiceCoastingPhaseSpeed = 0d;
 
     /**
      * The target speed of the train in [m/s] based on the trip profile.
      * Updated trough driving dynamics
      */
-    protected volatile double currentTargetSpeed = 0d;
+    protected volatile double currentProfileTargetSpeed = 0d;
 
 
     /**
@@ -235,7 +240,7 @@ public class TrainDataVolatile {
      * only for testing!
      * @param currentPosition
      * @param currentSpeed
-     * @param currentTargetSpeed
+     * @param currentProfileTargetSpeed
      * @param m_MODE
      * @param previousLocations
      * @param currentBreakingMode
@@ -245,7 +250,7 @@ public class TrainDataVolatile {
      * @param availableAcceleration
      */
     @SuppressWarnings({"JavaDoc", "ConstantConditions"})
-    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentTargetSpeed, @Nullable Integer m_MODE,
+    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentProfileTargetSpeed, @Nullable Integer m_MODE,
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
@@ -255,7 +260,7 @@ public class TrainDataVolatile {
 
         this.currentPosition = currentPosition;
         this.currentSpeed = currentSpeed;
-        this.currentTargetSpeed = currentTargetSpeed;
+        this.currentProfileTargetSpeed = currentProfileTargetSpeed;
         M_MODE = m_MODE;
         this.previousLocations = previousLocations;
         this.currentBreakingMode = currentBreakingMode;
@@ -366,11 +371,20 @@ public class TrainDataVolatile {
     }
 
     /**
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
+     */
+    public double getCurrentServiceCoastingPhaseSpeed() {
+        return currentServiceCoastingPhaseSpeed;
+    }
+
+    /**
      * @return current maximum allowed speed in [m/s]
      */
     @NotNull
-    public Double getCurrentTargetSpeed() {
-        return currentTargetSpeed;
+    public Double getCurrentProfileTargetSpeed() {
+        return currentProfileTargetSpeed;
     }
 
     @Nullable

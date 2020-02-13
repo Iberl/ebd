@@ -54,6 +54,7 @@ public class TestEventHandler{
 		lobc.add(e.breakingCurveGroup.getServiceWarningCurve());
 		lobc.add(e.breakingCurveGroup.getServicePermittedSpeedCurve());
 		lobc.add(e.breakingCurveGroup.getServiceIndicationCurve());
+		lobc.add(e.breakingCurveGroup.getServiceCoastingPhaseCurve());
 
 		/*
 		Double searchKey2 = bCurve.getHighestXValue();

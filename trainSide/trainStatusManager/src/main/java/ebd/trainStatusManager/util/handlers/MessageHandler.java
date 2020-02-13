@@ -14,7 +14,6 @@ import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
-import ebd.messageLibrary.packet.Packet;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -144,7 +143,7 @@ public class MessageHandler {
         int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
         int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
         double l_train = trainDataPerma.getL_train();
-        double currentMaxSpeed = trainDataVolatile.getCurrentTargetSpeed();
+        double currentMaxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
         int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
         Position refPosition;

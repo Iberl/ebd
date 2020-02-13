@@ -13,8 +13,12 @@ public class BreakingCurveGroup {
     private BreakingCurve serviceDecelerationCurve;
     private BreakingCurve serviceInterventionCurve;
     private BreakingCurve serviceWarningCurve;
-    private BreakingCurve servicePermittedSpeedCurve; //Check Name
+    private BreakingCurve servicePermittedSpeedCurve;
     private BreakingCurve serviceIndicationCurve;
+    /**
+     * As required by DB convention to allow a coasting phase before breaking
+     */
+    private BreakingCurve serviceCoastingPhaseCurve;
 
     public BreakingCurveGroup() {
         this.id = "null curve";
@@ -29,6 +33,8 @@ public class BreakingCurveGroup {
         this.serviceInterventionCurve = this.nullCurve;
         this.serviceWarningCurve = this.nullCurve;
         this.servicePermittedSpeedCurve = this.nullCurve;
+        this.serviceIndicationCurve = this.nullCurve;
+        this.serviceCoastingPhaseCurve = this.nullCurve;
     }
 
     public BreakingCurveGroup(String id) {
@@ -45,6 +51,7 @@ public class BreakingCurveGroup {
         this.serviceWarningCurve = this.nullCurve;
         this.servicePermittedSpeedCurve = this.nullCurve;
         this.serviceIndicationCurve = this.nullCurve;
+        this.serviceCoastingPhaseCurve = this.nullCurve;
     }
 
     /*
@@ -79,6 +86,8 @@ public class BreakingCurveGroup {
         return serviceIndicationCurve;
     }
 
+    public BreakingCurve getServiceCoastingPhaseCurve() {return serviceCoastingPhaseCurve; }
+
     /*
     setter
      */
@@ -109,5 +118,9 @@ public class BreakingCurveGroup {
 
     void setServiceIndicationCurve(BreakingCurve serviceIndicationCurve) {
         this.serviceIndicationCurve = serviceIndicationCurve;
+    }
+
+    void setServiceCoastingPhaseCurve(BreakingCurve serviceCoastingPhaseCurve){
+        this.serviceCoastingPhaseCurve = serviceCoastingPhaseCurve;
     }
 }

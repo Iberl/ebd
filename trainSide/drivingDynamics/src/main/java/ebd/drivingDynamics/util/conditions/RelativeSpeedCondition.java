@@ -1,8 +1,6 @@
 package ebd.drivingDynamics.util.conditions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
@@ -38,7 +36,7 @@ public class RelativeSpeedCondition extends Condition {
     @Override
     public boolean eval() {
 
-        double maxSpeed = trainDataVolatile.getCurrentTargetSpeed() * speedPercentage;
+        double maxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed() * speedPercentage;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
 
         return comparator.apply(curSpeed,maxSpeed);

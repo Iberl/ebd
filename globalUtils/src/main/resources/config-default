@@ -1,15 +1,17 @@
 #Config file for ETCS at EBD
 #Lines that start with # are comments
 #To expand this file, set variables in globalUtils/configHandler/ConfigHandler and include variable names here
+
 ######
 ###### Strings
 ######
-pathToDriverProfileJson = RiskyDrivingStrategy.json
+pathToDriverProfileJson = StrictDrivingStrategy.json
 pathToTestTrainJson = testTrain650.json
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080
 ipToInfrastructureServer = 127.0.0.1
 portOfInfrastructureServer = 25555
+
 ######
 ###### Integers
 ######
@@ -28,10 +30,12 @@ defaultDangerPoint = 200
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
+# Physics acceleration factor
+timeAccFactor = 1
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 20
 # Minimum time between actions
-timeBetweenActions = 0.1
+timeBetweenActions = 2
 # Emergency break intervention curve offset in [s]
 emergencyInterventionOffset = 2
 # Service break intervention curve offset in [s]
@@ -42,6 +46,33 @@ serviceWarningOffset = 3
 servicePermittedOffset = 7
 # Service break indication curve offset in [s]
 serviceIndicationOffset = 12
+# Service break coasting phase offset in [s]
+serviceCoastingPhaseOffset = 37
+# Speed difference between Permitted speed and Emergency Brake Intervention supervision limits, minimum value in [m/s]
+dV_ebi_min = 2.08
+# Speed difference between Permitted speed and Emergency Brake Intervention supervision limits, maximum value in [m/s]
+dV_ebi_max = 4.17
+# Speed of MRSP where dV_ebi starts to increase to dV_ebi_max in [m/s]
+V_ebi_min = 30.5
+# Value of  MRSP where dV_ebi stops to increase to dV_ebi_max in [m/s]
+V_ebi_max = 58.33
+# Speed difference between Permitted speed and Service Brake Intervention supervision limits, minimum value in [m/s]
+dV_sbi_min = 1.53
+# Speed difference between Permitted speed and Service Brake Intervention supervision limits, maximum value in [m/s]
+dV_sbi_max = 2.78
+# Speed of MRSP where dV_sbi starts to increase to dV_sbi_max in [m/s]
+V_sbi_min = 30.5
+# Value of  MRSP where dV_sbi stops to increase to dV_sbi_max in [m/s]
+V_sbi_max = 58.33
+# Speed difference between Permitted speed and Warning supervision limits, minimum value in [m/s]
+dV_warning_min = 1.11
+# Speed difference between Permitted speed and Warning supervision limits, maximum value in [m/s[
+dV_warning_max = 1.39
+# Speed of MRSP where dV_warning starts to increase to dV_warning_max in [m/s]
+V_warning_min = 38.89
+# Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
+V_warning_max = 58.33
+
 ######
 ###### Booleans (either " = true" or " = false")
 ######

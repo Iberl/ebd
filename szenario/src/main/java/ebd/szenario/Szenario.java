@@ -183,6 +183,7 @@ public class Szenario implements Runnable {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load1(LoadOneEvent loe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to B");
+        System.out.println(ConfigHandler.getInstance().pathToDriverProfileJson);
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
@@ -195,7 +196,6 @@ public class Szenario implements Runnable {
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        System.out.println(msg);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
