@@ -19,7 +19,6 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.spline.Spline;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;
@@ -138,7 +137,7 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(nbce.targets)){
             return;
         }
-        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getServicePermittedSpeedCurve();
+        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getPermittedSpeedCurve();
         int refLocID = breakingCurve.getRefLocation().getId();
 
         if(!this.tripInProgress){

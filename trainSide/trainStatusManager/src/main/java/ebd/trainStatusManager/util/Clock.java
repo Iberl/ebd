@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -22,7 +23,6 @@ public class Clock implements Runnable {
     private Thread clockThread;
 
     private int tickTime; //in [ms]
-    private double timeAccFactor;
 
 
     private boolean running = true;
@@ -35,8 +35,7 @@ public class Clock implements Runnable {
 
     public Clock(EventBus eventBus) {
         this.eventBus = eventBus;
-        this.lastClockTickTime = System.nanoTime();
-        this.timeAccFactor = ConfigHandler.getInstance().timeAccFactor;
+        this.lastClockTickTime = AppTime.nanoTime();
         this.clockThread = new Thread(this);
     }
 
@@ -45,10 +44,10 @@ public class Clock implements Runnable {
         while(this.running){
             try {
                 if(!paused){
-                    long timeDifference = System.nanoTime() - this.lastClockTickTime;
+                    long timeDifference = AppTime.nanoTime() - this.lastClockTickTime;
                     double deltaT = timeDifference / 1E9;
                     this.eventBus.post(new ClockTickEvent("clock", this.eventTargets, deltaT));
-                    this.lastClockTickTime = System.nanoTime();
+                    this.lastClockTickTime = AppTime.nanoTime();
                 }
                 Thread.sleep(this.tickTime);
             } catch (InterruptedException e) {
@@ -81,7 +80,7 @@ public class Clock implements Runnable {
 
     public void setPaused (boolean paused){
         if(this.paused == paused) return;
-        if(!paused) this.lastClockTickTime = System.nanoTime();
+        if(!paused) this.lastClockTickTime = AppTime.nanoTime();
         this.paused = paused;
     }
 }

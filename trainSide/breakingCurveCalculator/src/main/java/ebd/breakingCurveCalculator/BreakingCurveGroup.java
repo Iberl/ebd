@@ -78,7 +78,7 @@ public class BreakingCurveGroup {
         return serviceWarningCurve;
     }
 
-    public BreakingCurve getServicePermittedSpeedCurve() {
+    public BreakingCurve getPermittedSpeedCurve() {
         return servicePermittedSpeedCurve;
     }
 

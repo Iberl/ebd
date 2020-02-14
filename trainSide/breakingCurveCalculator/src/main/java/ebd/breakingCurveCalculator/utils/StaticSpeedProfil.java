@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
@@ -21,7 +22,9 @@ import ebd.messageLibrary.packet.trackpackets.Packet_65;
  *
  */
 public class StaticSpeedProfil extends ForwardSpline{
-	
+
+	private ConfigHandler ch = ConfigHandler.getInstance();
+
 	/**
 	 * Empty constructor
 	 */
@@ -207,8 +210,35 @@ public class StaticSpeedProfil extends ForwardSpline{
 		this.curve = newSpline.curve;
 		
 	}
-	
-	
+
+	/**
+	 * This function
+	 * @param xValue
+	 * 			Distance in [m] on the speed profile
+	 * @param curveType
+	 * 			{@link ebd.breakingCurveCalculator.BreakingCurveCalculator.CurveType}
+	 * @return Speed in [m/s]
+	 */
+	public Double getSpeedAtDistance(Double xValue, BreakingCurveCalculator.CurveType curveType) {
+		Double speed = super.getPointOnCurve(xValue);
+		if(speed <= 0.1){
+			return 0.0;
+		}
+		switch (curveType){
+			case PERMITTED_SPEED:
+				return speed;
+			case WARNING_CURVE:
+				return speed + warningCeiling(speed);
+			case SERVICE_CURVE:
+				return speed + serviceInterventionCeiling(speed);
+			case INDICATION_CURVE:
+			case EMERGENCY_CURVE:
+				return speed + emergencyInterventionCeiling(speed);
+			default:
+				throw new SSPInvalidInputException("CurveType was not caught");
+		}
+	}
+
 	/**
 	 * This method generates a SSP from an BreakingCurveRequestEvent. It is based on SRS 3.6 and 3.11. <br>
 	 * This method does not check completeness of the Event and does throw {@link NullPointerException} in case it is missing relevant information.
@@ -343,6 +373,49 @@ public class StaticSpeedProfil extends ForwardSpline{
 		for (ForwardSpline slice : listOfSlices) {
 			addSplineToCurve(slice);
 		}
+	}
+
+	/**
+	 * @return the emergency ceiling speed for the ceiling supervision limits in [m/s]
+	 */
+	private double emergencyInterventionCeiling(double maxV) {
+		if(maxV <= ch.V_ebi_min){
+			return ch.dV_ebi_min;
+		}
+		if(maxV >= ch.V_ebi_max){
+			return ch.dV_ebi_max;
+		}
+
+		return (maxV - ch.V_ebi_min) / (ch.V_ebi_max - ch.V_ebi_min) * (ch.dV_ebi_max - ch.dV_ebi_min);
+	}
+
+	/**
+	 * @return the service break ceiling speed for the ceiling supervision limits in [m/s]
+	 */
+	private double serviceInterventionCeiling(double maxV) {
+		if(maxV < ch.V_sbi_min){
+			return ch.dV_sbi_min;
+		}
+		if(maxV > ch.V_sbi_max){
+			return ch.dV_sbi_max;
+		}
+
+		return (maxV - ch.V_sbi_min) / (ch.V_sbi_max - ch.V_sbi_min) * (ch.dV_sbi_max - ch.dV_sbi_min);
+	}
+
+	/**
+	 * @param maxV current maximum speed in m/s
+	 * @return the warning ceiling speed for the ceiling supervision limits in [m/s]
+	 */
+	private double warningCeiling(double maxV) {
+		if(maxV < ch.V_warning_min){
+			return ch.dV_warning_min;
+		}
+		if(maxV > ch.V_warning_max){
+			return ch.dV_warning_max;
+		}
+
+		return (maxV - ch.V_warning_min) / (ch.V_warning_max - ch.V_warning_min) * (ch.dV_warning_max - ch.dV_warning_min);
 	}
 }
 	

@@ -13,16 +13,12 @@ import java.util.List;
  * the time simulation.
  */
 public class ClockTickEvent extends NormalEvent {
-    /**
-     * Time difference between this ClockTickEvent and the last ClockTickEvent in [s]
-     */
-    private double deltaT;
 
     /**
      * Time difference between this ClockTickEvent and the last ClockTickEvent in [s],
      * modified by the time acceleration factor {@link ebd.globalUtils.configHandler.ConfigHandler#timeAccFactor}.
      */
-    public double modifiedDeltaT;
+    public double deltaT;
 
     /**
      * Constructs an Event
@@ -36,14 +32,6 @@ public class ClockTickEvent extends NormalEvent {
     public ClockTickEvent(String source, List<String> targets, double deltaT) {
         super(source, targets);
         this.deltaT = deltaT;
-        this.modifiedDeltaT = deltaT * ConfigHandler.getInstance().timeAccFactor;
     }
 
-    /**
-     * Use only if you really need the unmodified time between clock tick events.
-     * @return unmodified deltaT in [s]
-     */
-    public double getDeltaT() {
-        return deltaT;
-    }
 }

@@ -66,10 +66,10 @@ public class BreakingCurveCalculatorTest {
 		eventBus.post(bcre);
 		
 		
-		Thread.sleep(2000);
+		/*Thread.sleep(2000);
 		BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
 		System.out.printf("New distance to end of movement authority: %f%n", MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
-		eventBus.post(bclre);
+		eventBus.post(bclre);*/
 	}
 
 }

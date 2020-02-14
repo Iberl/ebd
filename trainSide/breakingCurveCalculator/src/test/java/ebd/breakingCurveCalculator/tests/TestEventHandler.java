@@ -52,7 +52,7 @@ public class TestEventHandler{
 		lobc.add(e.breakingCurveGroup.getServiceDecelerationCurve());
 		lobc.add(e.breakingCurveGroup.getServiceInterventionCurve());
 		lobc.add(e.breakingCurveGroup.getServiceWarningCurve());
-		lobc.add(e.breakingCurveGroup.getServicePermittedSpeedCurve());
+		lobc.add(e.breakingCurveGroup.getPermittedSpeedCurve());
 		lobc.add(e.breakingCurveGroup.getServiceIndicationCurve());
 		lobc.add(e.breakingCurveGroup.getServiceCoastingPhaseCurve());
 

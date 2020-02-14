@@ -98,13 +98,13 @@ public class SpeedSupervisionModule {
         SpeedInterventionLevel speedInterventionLevel;
 
         if(this.maxServiceIndicationSpeed == this.maxServiceSpeed) { //Ceiling supervision regime //TODO make more robust
-            if(curSpeed > this.maxEmergencyInterventionSpeed + emergencyInterventionCeiling()){
+            if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
-            else if(curSpeed > this.maxServiceInterventionSpeed + serviceInterventionCeiling()){
+            else if(curSpeed > this.maxServiceInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
             }
-            else if(curSpeed > this.maxServiceWarningSpeed + warningCeiling()){
+            else if(curSpeed > this.maxServiceWarningSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
             else {
@@ -149,47 +149,6 @@ public class SpeedSupervisionModule {
         this.maxEmergencyDistance = this.breakingCurveGroup.getEmergencyDecelerationCurve().getHighestXValue();
     }
 
-    /**
-     * @return the emergency ceiling speed for the ceiling supervision limits in [m/s]
-     */
-    private double emergencyInterventionCeiling() {
-        if(this.maxServiceSpeed <= ch.V_ebi_min){
-            return ch.dV_ebi_min;
-        }
-        if(this.maxServiceSpeed >= ch.V_ebi_max){
-            return ch.dV_ebi_max;
-        }
-
-        return (this.maxServiceSpeed - ch.V_ebi_min) / (ch.V_ebi_max - ch.V_ebi_min) * (ch.dV_ebi_max - ch.dV_ebi_min);
-    }
-
-    /**
-     * @return the service break ceiling speed for the ceiling supervision limits in [m/s]
-     */
-    private double serviceInterventionCeiling() {
-        if(this.maxServiceSpeed < ch.V_sbi_min){
-            return ch.dV_sbi_min;
-        }
-        if(this.maxServiceSpeed > ch.V_sbi_max){
-            return ch.dV_sbi_max;
-        }
-
-        return (this.maxServiceSpeed - ch.V_sbi_min) / (ch.V_sbi_max - ch.V_sbi_min) * (ch.dV_sbi_max - ch.dV_sbi_min);
-    }
-
-    /**
-     * @return the warning ceiling speed for the ceiling supervision limits in [m/s]
-     */
-    private double warningCeiling() {
-        if(this.maxServiceSpeed < ch.V_warning_min){
-            return ch.dV_warning_min;
-        }
-        if(this.maxServiceSpeed > ch.V_warning_max){
-            return ch.dV_warning_max;
-        }
-
-        return (this.maxServiceSpeed - ch.V_warning_min) / (ch.V_warning_max - ch.V_warning_min) * (ch.dV_warning_max - ch.dV_warning_min);
-    }
 
     /**
      * Sets the current max speeds of all breaking curves at the current position
@@ -212,7 +171,7 @@ public class SpeedSupervisionModule {
             this.maxServiceSpeed = this.breakingCurveGroup.getServiceDecelerationCurve().getPointOnCurve(tripDistance);
             this.maxServiceInterventionSpeed = this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(tripDistance);
             this.maxServiceWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(tripDistance);
-            this.maxServicePermittedSpeed = this.breakingCurveGroup.getServicePermittedSpeedCurve().getPointOnCurve(tripDistance);
+            this.maxServicePermittedSpeed = this.breakingCurveGroup.getPermittedSpeedCurve().getPointOnCurve(tripDistance);
             this.maxServiceIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(tripDistance);
             this.maxServiceCoastingPhaseSpeed = this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(tripDistance);
 

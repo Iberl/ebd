@@ -5,6 +5,7 @@ import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
@@ -62,8 +63,8 @@ public class DrivingDynamics {
     private DynamicState dynamicState;
     private DrivingProfile drivingProfile;
 
-    private double time;
-    private double timeOfLastAction = -1;
+    private long time;
+    private long timeOfLastAction = -1;
     private double timeBetweenActions;
     private boolean locked = true;
 
@@ -115,7 +116,8 @@ public class DrivingDynamics {
         Getting the modified time between two clock ticks, which is the time between clock ticks modified by the
         time acceleration factor.
          */
-        double deltaT = cte.modifiedDeltaT;
+        this.time = AppTime.nanoTime();
+        double deltaT = cte.deltaT;
 
         /*
         If driving dynamics is locked, nothing will be done.
@@ -239,7 +241,7 @@ public class DrivingDynamics {
         if(this.dynamicState == null){
             this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
         }
-        this.time = System.nanoTime();
+        this.time = AppTime.nanoTime();
         this.locked = false;
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                 "Starting mission"));
