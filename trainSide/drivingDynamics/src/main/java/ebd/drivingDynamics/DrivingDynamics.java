@@ -25,6 +25,7 @@ import ebd.globalUtils.location.Location;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
+import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
@@ -78,6 +79,7 @@ public class DrivingDynamics {
     private int cylceCountMax = 20; //TODO Connect to Config
     private MovementState currentMovementState = MovementState.UNCHANGED;
     private SpeedInterventionLevel currentSil = SpeedInterventionLevel.NO_INTERVENTION;
+    private SpeedSupervisionState currentSsState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
@@ -170,8 +172,8 @@ public class DrivingDynamics {
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
+            this.currentSsState = speedSupervisionReport.supervisionState;
         }
-
         /*
          * Log movement state changes
          */
@@ -368,16 +370,16 @@ public class DrivingDynamics {
      */
     private void updateDMI(){
         double speed = this.dynamicState.getSpeed();
-        double targetSpeed = this.trainDataVolatile.getCurrentServicePermittedSpeed();
+        double targetSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-        double currentIndSpeed = this.trainDataVolatile.getCurrentServiceIndicationSpeed();
-        double currentWarnSpeed = this.trainDataVolatile.getCurrentServiceWarningSpeed();
+        double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
+        double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
         String source = "dd;T=" + etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 
         EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive,
-                this.currentSil, currentIndSpeed, currentWarnSpeed, currentIntervSpeed));
+                this.currentSil, this.currentSsState, currentIndSpeed, currentWarnSpeed, currentIntervSpeed));
     }
 
     /**

@@ -8,6 +8,7 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
+import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -43,14 +44,12 @@ public class SpeedSupervisionModule {
     private Double maxServiceDistance = 0d; //in [m]
     private Double maxEmergencyDistance = 0d; //in [m]
 
-    private double maxEmergencySpeed; //in {m/s]
     private double maxEmergencyInterventionSpeed; //in {m/s]
-    private double maxServiceSpeed; //in {m/s]
     private double maxServiceInterventionSpeed; //in {m/s]
-    private double maxServiceWarningSpeed; //in {m/s]
-    private double maxServicePermittedSpeed; //in {m/s]
-    private double maxServiceIndicationSpeed; //in {m/s]
-    private double maxServiceCoastingPhaseSpeed; //in {m/s]
+    private double maxWarningSpeed; //in {m/s]
+    private double maxPermittedSpeed; //in {m/s]
+    private double maxIndicationSpeed; //in {m/s]
+    private double maxCoastingPhaseSpeed; //in {m/s]
 
     /**
      * Constructor
@@ -96,15 +95,17 @@ public class SpeedSupervisionModule {
         updateMaxSpeeds(tripDistance);
 
         SpeedInterventionLevel speedInterventionLevel;
+        SpeedSupervisionState supervisionState;
 
-        if(this.maxServiceIndicationSpeed == this.maxServiceSpeed) { //Ceiling supervision regime //TODO make more robust
+        if(this.maxIndicationSpeed >= curSpeed && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO make more robust
+            supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
             if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(curSpeed > this.maxServiceInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
             }
-            else if(curSpeed > this.maxServiceWarningSpeed){
+            else if(curSpeed > this.maxWarningSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
             else {
@@ -112,19 +113,20 @@ public class SpeedSupervisionModule {
             }
         }
         else{ //Target supervision regime
+            supervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
             if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(curSpeed > this.maxServiceInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
             }
-            else if(curSpeed > this.maxServiceWarningSpeed){
+            else if(curSpeed > this.maxWarningSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
-            else if(curSpeed > this.maxServicePermittedSpeed){
+            else if(curSpeed > this.maxPermittedSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
             }
-            else if(curSpeed > this.maxServiceIndicationSpeed){
+            else if(curSpeed > this.maxIndicationSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.INDICATION;
             }
             else {
@@ -133,7 +135,7 @@ public class SpeedSupervisionModule {
         }
 
 
-        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel, supervisionState));
         sendCurrentMaxSpeed();
     }
 
@@ -155,29 +157,24 @@ public class SpeedSupervisionModule {
      * @param tripDistance Current trip distance starting at the reference point of the breaking curves
      */
     private void updateMaxSpeeds(double tripDistance) {
-        this.maxEmergencySpeed = 0;
         this.maxEmergencyInterventionSpeed = 0;
-        this.maxServiceSpeed = 0;
         this.maxServiceInterventionSpeed = 0;
-        this.maxServiceWarningSpeed = 0;
-        this.maxServicePermittedSpeed = 0;
-        this.maxServiceIndicationSpeed = 0;
-        this.maxServiceCoastingPhaseSpeed = 0;
+        this.maxWarningSpeed = 0;
+        this.maxPermittedSpeed = 0;
+        this.maxIndicationSpeed = 0;
+        this.maxCoastingPhaseSpeed = 0;
 
         if(tripDistance < this.maxServiceDistance){
-            this.maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(tripDistance);
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
 
-            this.maxServiceSpeed = this.breakingCurveGroup.getServiceDecelerationCurve().getPointOnCurve(tripDistance);
             this.maxServiceInterventionSpeed = this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(tripDistance);
-            this.maxServiceWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(tripDistance);
-            this.maxServicePermittedSpeed = this.breakingCurveGroup.getPermittedSpeedCurve().getPointOnCurve(tripDistance);
-            this.maxServiceIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(tripDistance);
-            this.maxServiceCoastingPhaseSpeed = this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(tripDistance);
+            this.maxWarningSpeed = this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(tripDistance);
+            this.maxPermittedSpeed = this.breakingCurveGroup.getPermittedSpeedCurve().getPointOnCurve(tripDistance);
+            this.maxIndicationSpeed = this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(tripDistance);
+            this.maxCoastingPhaseSpeed = this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(tripDistance);
 
         }
         else if (tripDistance < this.maxEmergencyDistance){
-            this.maxEmergencySpeed = this.breakingCurveGroup.getEmergencyDecelerationCurve().getPointOnCurve(tripDistance);
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
         }
     }
@@ -188,14 +185,12 @@ public class SpeedSupervisionModule {
     private void sendCurrentMaxSpeed() {
 
         HashMap<String, Object> updateMap = new HashMap<>();
-        updateMap.put("currentMaximumSpeed", this.maxServiceSpeed);
-        updateMap.put("currentEmergencySpeed", this.maxEmergencySpeed);
+        updateMap.put("currentMaximumSpeed", this.maxPermittedSpeed);
         updateMap.put("currentEmergencyInterventionSpeed", this.maxEmergencyInterventionSpeed);
         updateMap.put("currentServiceInterventionSpeed", this.maxServiceInterventionSpeed);
-        updateMap.put("currentServiceWarningSpeed", this.maxServiceWarningSpeed);
-        updateMap.put("currentServicePermittedSpeed", this.maxServicePermittedSpeed);
-        updateMap.put("currentServiceIndicationSpeed", this.maxServiceIndicationSpeed);
-        updateMap.put("currentServiceCoastingPhaseSpeed", this.maxServiceCoastingPhaseSpeed);
+        updateMap.put("currentWarningSpeed", this.maxWarningSpeed);
+        updateMap.put("currentIndicationSpeed", this.maxIndicationSpeed);
+        updateMap.put("currentCoastingPhaseSpeed", this.maxCoastingPhaseSpeed);
 
         this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }

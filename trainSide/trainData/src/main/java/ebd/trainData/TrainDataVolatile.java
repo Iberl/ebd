@@ -61,17 +61,11 @@ public class TrainDataVolatile {
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the service deceleration curve
+     * the permitted speed curve
      * Updated from the speed supervision module
      */
     protected volatile double currentMaximumSpeed = 0d;
 
-    /**
-     * The current emergency max speed of the train in [m/s] based on the
-     * emergency deceleration curve
-     * Updated from the speed supervision module
-     */
-    protected volatile double currentEmergencySpeed = 0d;
 
     /**
      * The current emergency intervention speed of the train in [m/s] based on
@@ -92,28 +86,21 @@ public class TrainDataVolatile {
      * the service warning curve
      * Updated from the speed supervision module
      */
-    protected volatile double currentServiceWarningSpeed = 0d;
-
-    /**
-     * The current service permitted speed speed of the train in [m/s] based on
-     * the service permitted speed curve
-     * Updated from the speed supervision module
-     */
-    protected volatile double currentServicePermittedSpeed = 0d;
+    protected volatile double currentWarningSpeed = 0d;
 
     /**
      * The current service indication speed of the train in [m/s] based on
      * the service indication curve
      * Updated from the speed supervision module
      */
-    protected volatile double currentServiceIndicationSpeed = 0d;
+    protected volatile double currentIndicationSpeed = 0d;
 
     /**
      * The current service coasting phase speed of the train in [m/s] based on
      * the service coasting phase curve
      * Updated from the speed supervision module
      */
-    protected volatile double currentServiceCoastingPhaseSpeed = 0d;
+    protected volatile double currentCoastingPhaseSpeed = 0d;
 
     /**
      * The target speed of the train in [m/s] based on the trip profile.
@@ -317,15 +304,6 @@ public class TrainDataVolatile {
     }
 
     /**
-     * The current emergency max speed of the train in [m/s] based on the
-     * emergency deceleration curve
-     * Updated from the speed supervision module
-     */
-    public double getCurrentEmergencySpeed() {
-        return currentEmergencySpeed;
-    }
-
-    /**
      * The current emergency intervention speed of the train in [m/s] based on
      * the service intervention curve
      * Updated from the speed supervision module
@@ -348,17 +326,8 @@ public class TrainDataVolatile {
      * the service warning curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceWarningSpeed() {
-        return currentServiceWarningSpeed;
-    }
-
-    /**
-     * The current service permitted speed speed of the train in [m/s] based on
-     * the service permitted speed curve
-     * Updated from the speed supervision module
-     */
-    public double getCurrentServicePermittedSpeed() {
-        return currentServicePermittedSpeed;
+    public double getCurrentWarningSpeed() {
+        return currentWarningSpeed;
     }
 
     /**
@@ -366,8 +335,8 @@ public class TrainDataVolatile {
      * the service indication curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceIndicationSpeed() {
-        return currentServiceIndicationSpeed;
+    public double getCurrentIndicationSpeed() {
+        return currentIndicationSpeed;
     }
 
     /**
@@ -375,8 +344,8 @@ public class TrainDataVolatile {
      * the service coasting phase curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceCoastingPhaseSpeed() {
-        return currentServiceCoastingPhaseSpeed;
+    public double getCurrentCoastingPhaseSpeed() {
+        return currentCoastingPhaseSpeed;
     }
 
     /**
