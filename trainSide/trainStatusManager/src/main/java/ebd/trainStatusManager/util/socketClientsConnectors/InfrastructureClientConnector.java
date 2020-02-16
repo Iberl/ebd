@@ -1,8 +1,6 @@
 package ebd.trainStatusManager.util.socketClientsConnectors;
 
-import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
@@ -10,12 +8,8 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * //TODO Move up to main module of the program, use global events on this level
@@ -74,6 +68,7 @@ public class InfrastructureClientConnector {
         curV += weightedCarry;
         long curVlong = Math.round(curV);
         this.carry = (curV - curVlong) / deltaTime;
+
         this.globalEventBus.post(new UpdatingInfrastructureEvent(eventSource,targets,(int)curVlong));
     }
 }
