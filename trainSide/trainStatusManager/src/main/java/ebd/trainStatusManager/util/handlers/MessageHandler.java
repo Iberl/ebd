@@ -16,6 +16,7 @@ import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
+import ebd.messageLibrary.packet.trainpackets.Packet_1;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -240,6 +241,9 @@ public class MessageHandler {
                 break;
             case 58:
                 PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                break;
+            case 80:
+                PackageHandler.p80(this.localBus,(Packet_80)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);

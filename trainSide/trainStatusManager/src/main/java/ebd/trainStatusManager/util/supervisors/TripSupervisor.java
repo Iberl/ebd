@@ -6,6 +6,8 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.position.Position;
+import ebd.routeData.RouteDataVolatile;
+import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
@@ -29,10 +31,10 @@ public class TripSupervisor {
     //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Own module, Remember SRS 3 A.3.5
     private EventBus localBus;
+    private RouteDataVolatile routeDataVolatile;
     private TrainDataVolatile trainDataVolatile;
     private double L_TRAIN;
     private int etcsID;
-    private boolean missionEnded = true;
     /**
      * In [m]
      */
@@ -47,6 +49,7 @@ public class TripSupervisor {
     public TripSupervisor(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
+        this.routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
@@ -68,7 +71,9 @@ public class TripSupervisor {
 
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
 
-        if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
+        if(routeDataVolatile.isLastMABeforeEndOfMission()
+                && distanceToEMA <= this.targetReachedDistance
+                && trainDataVolatile.getCurrentSpeed() == 0){
             sendEndOfMission();
         }
     }
@@ -80,7 +85,6 @@ public class TripSupervisor {
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
         this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
-        this.missionEnded = false;
     }
 
     /**
@@ -88,12 +92,9 @@ public class TripSupervisor {
      */
     private void sendEndOfMission() {
         //TODO Send Message 150
-        if(!this.missionEnded){
-            this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
-            String msg = "Train " + etcsID + " reached the target location";
-            this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
-            this.missionEnded = true;
-        }
+        this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
+        String msg = "Train " + etcsID + " reached the target location";
+        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
     }
 
 
