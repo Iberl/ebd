@@ -66,7 +66,7 @@ public final class DMIUtility {
 		this.farben[DMIColor.WHITE.ordinal()] = new Color(255, 255, 255);
 		this.farben[DMIColor.BLACK.ordinal()] = new Color(0, 0, 0);
 		this.farben[DMIColor.GREY.ordinal()] = new Color(195, 195, 195);
-		this.farben[DMIColor.MEDIUM_GRAY.ordinal()] = new Color(150, 150, 150);
+		this.farben[DMIColor.MEDIUM_GREY.ordinal()] = new Color(150, 150, 150);
 		this.farben[DMIColor.DARK_GREY.ordinal()] = new Color(85, 85, 85);
 		this.farben[DMIColor.DARK_BLUE.ordinal()] = new Color(3, 17, 34);
 		this.farben[DMIColor.SHADOW.ordinal()] = new Color(8, 24, 57);

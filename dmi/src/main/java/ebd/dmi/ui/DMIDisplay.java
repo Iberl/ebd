@@ -111,6 +111,10 @@ public class DMIDisplay extends JFrame {
         this.panelB.getSpeedometer().setCurrentIndSpeed((int) currentIndSpeed);
     }
 
+    public void setCurrentPermSpeed(double currentPermSpeed) {
+        this.panelB.getSpeedometer().setCurrentPermSpeed((int) currentPermSpeed);
+    }
+
     public void setCurrentWarnSpeed(double currentWarnSpeed) {
         this.panelB.getSpeedometer().setCurrentWarnSpeed((int) currentWarnSpeed);
     }

@@ -15,6 +15,7 @@ public class DMIUpdateEvent extends NormalEvent {
     private SpeedInterventionLevel speedInterventionLevel;
     private SpeedSupervisionState speedSupervisionState;
     private double currentIndSpeed;
+    private double currentPermSpeed;
     private double currentWarnSpeed;
     private double currentIntervSpeed;
 
@@ -27,7 +28,7 @@ public class DMIUpdateEvent extends NormalEvent {
      */
     public DMIUpdateEvent(String source, List<String> targets, double currentSpeed, double targetSpeed, int targetDistance,
                           SpeedInterventionLevel speedInterventionLevel, SpeedSupervisionState speedSupervisionState,
-                          double currentIndSpeed, double currentWarnSpeed, double currentIntervSpeed) {
+                          double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) {
         super(source, targets);
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
@@ -35,6 +36,7 @@ public class DMIUpdateEvent extends NormalEvent {
         this.speedInterventionLevel = speedInterventionLevel;
         this.speedSupervisionState = speedSupervisionState;
         this.currentIndSpeed = currentIndSpeed;
+        this.currentPermSpeed = currentPermSpeed;
         this.currentWarnSpeed = currentWarnSpeed;
         this.currentIntervSpeed = currentIntervSpeed;
     }
@@ -60,6 +62,10 @@ public class DMIUpdateEvent extends NormalEvent {
 
     public double getCurrentIndSpeed() {
         return this.currentIndSpeed*3.6;
+    }
+
+    public double getCurrentPermSpeed() {
+        return this.currentPermSpeed*3.6;
     }
 
     public double getCurrentWarnSpeed() {

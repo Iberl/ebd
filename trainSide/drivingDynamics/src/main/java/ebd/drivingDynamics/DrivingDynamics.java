@@ -375,13 +375,14 @@ public class DrivingDynamics {
         double targetSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
         double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
+        double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
         String source = "dd;T=" + etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 
         EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive,
-                this.currentSil, this.currentSsState, currentIndSpeed, currentWarnSpeed, currentIntervSpeed));
+                this.currentSil, this.currentSsState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
     }
 
     /**
