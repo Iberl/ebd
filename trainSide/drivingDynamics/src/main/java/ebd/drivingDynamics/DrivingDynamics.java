@@ -172,7 +172,7 @@ public class DrivingDynamics {
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
-            this.currentSsState = speedSupervisionReport.supervisionState;
+            sendToLogEventSpeedState(speedSupervisionReport.supervisionState);
         }
         /*
          * Log movement state changes
@@ -212,7 +212,6 @@ public class DrivingDynamics {
         if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
             cycleCount = 0;
             sendToLogEventDynamicState();
-            /*System.out.println(currentSil);*/
         }
     }
 
@@ -422,7 +421,16 @@ public class DrivingDynamics {
         String msg = String.format("Current speed supervision intervention level: %s ", newSil);
         this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
         if(movementState != MovementState.UNCHANGED) sendToLogEventSpeedSupervisionMovementState(movementState);
+    }
 
+    /**
+     * Sends logging information regarding the current {@link SpeedInterventionLevel}
+     */
+    private void sendToLogEventSpeedState(SpeedSupervisionState speedSupervisionState) {
+        if(this.currentSsState == speedSupervisionState) return;
+        this.currentSsState = speedSupervisionState;
+        String msg = String.format("Current speed supervision state: %s ", speedSupervisionState);
+        this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
     }
 
     /**
