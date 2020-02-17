@@ -4,6 +4,7 @@ import ebd.dmi.ui.panels.*;
 import ebd.dmi.ui.utility.DMIUtility;
 import ebd.dmi.ui.utility.DMIColor;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
+import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 
 import javax.swing.*;
 import java.awt.*;
@@ -105,6 +106,10 @@ public class DMIDisplay extends JFrame {
 
     public void setSpeedInterventionLevel(SpeedInterventionLevel speedInterventionLevel) {
         this.panelB.getSpeedometer().setSpeedInterventionLevel(speedInterventionLevel);
+    }
+
+    public void setSpeedSupervisionLevel(SpeedSupervisionState speedInterventionState) {
+        this.panelB.getSpeedometer().setSpeedSupervisionState(speedInterventionState);
     }
 
     public void setCurrentIndSpeed(double currentIndSpeed) {

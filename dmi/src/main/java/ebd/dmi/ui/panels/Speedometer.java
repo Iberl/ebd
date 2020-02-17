@@ -4,7 +4,6 @@ package ebd.dmi.ui.panels;
 import ebd.dmi.ui.templates.MyLabel;
 import ebd.dmi.ui.templates.MyPanel;
 import ebd.dmi.ui.utility.DMIColor;
-import ebd.dmi.ui.utility.DMISound;
 import ebd.dmi.ui.utility.DMIUtility;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
@@ -32,8 +31,9 @@ public class Speedometer extends MyPanel {
 	protected int minorTickStop;
 	protected int maxVal;
 	protected int[] array;
-	protected Color colorForLowerArc;
-	protected Color colorForUpperArc;
+	protected Color colorForCSMArc;
+	protected Color colorForLowerTSMArc;
+	protected Color colorForUpperTSMArc;
 	protected Color colorForNeedle;
 	protected Color colorForSpeed;
 	protected Color colorForOverspeedArc;
@@ -112,8 +112,7 @@ public class Speedometer extends MyPanel {
             if (speedInterventionLevel.equals(SpeedInterventionLevel.NO_INTERVENTION)) {
                 this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
 				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForCSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
                 this.lblB12.setBackground(this.colorForNeedle);
@@ -123,8 +122,7 @@ public class Speedometer extends MyPanel {
             } else if (speedInterventionLevel.equals(SpeedInterventionLevel.PERMITTED_SPEED) || speedInterventionLevel.equals(SpeedInterventionLevel.WARNING)) {
                 this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
 				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForCSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
                 this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.ORANGE);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
@@ -140,8 +138,7 @@ public class Speedometer extends MyPanel {
                     this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
 					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
 				}
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForCSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
                 this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.RED);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
@@ -160,8 +157,8 @@ public class Speedometer extends MyPanel {
                     this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
                 }
 				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.colorForLowerTSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperTSMArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
                 this.lblB12.setBackground(this.colorForNeedle);
@@ -171,8 +168,8 @@ public class Speedometer extends MyPanel {
             } else if (speedInterventionLevel.equals(SpeedInterventionLevel.PERMITTED_SPEED) || speedInterventionLevel.equals(SpeedInterventionLevel.WARNING)) {
                 this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
 				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.colorForLowerTSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperTSMArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
                 this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.ORANGE);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
@@ -191,8 +188,8 @@ public class Speedometer extends MyPanel {
                     this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
 					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
 				}
-                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.colorForLowerTSMArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperTSMArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
                 this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.RED);
                 this.lblB11.setBackground(this.colorForNeedle);
                 this.lblB11.setForeground(this.colorForSpeed);
@@ -282,36 +279,47 @@ public class Speedometer extends MyPanel {
 
 
 	private void paintCircularSpeedGauge(Graphics2D g, int radius) {
-		// Ellipse2D.Double kreisB0 = new Ellipse2D.Double(x - r, y - r, 2 * r,
-		// 2 * r); g.draw(kreisB0);
+		drawInitialArc(g);
+		int startingAngle = 234;
 
-		int startingAngle = 239;
-		// Vsoll -> extend umwandeln = Vsoll * (288/400)
-		double lowerArcExtend = -(this.currentTargetSpeed * 0.72 + 4);
-		double upperArcExtend = -((this.currentPermSpeed - this.currentTargetSpeed) * 0.72);
+		if (speedSupervisionState.equals(SpeedSupervisionState.CEILING_SPEED_SUPERVISION)) {
+			drawCSMArc(g, -(this.currentPermSpeed * 0.72));
 
-		if (this.currentSpeed > this.currentPermSpeed) {
-			drawUeberhang(g, startingAngle + lowerArcExtend + upperArcExtend, radius);
+		} else if (speedSupervisionState.equals(SpeedSupervisionState.TARGET_SPEED_SUPERVISION)) {
+			double lowerArcExtend = -(this.currentTargetSpeed * 0.72);
+			double upperArcExtend = -((this.currentPermSpeed - this.currentTargetSpeed) * 0.72);
+
+			drawLowerTSMArc(g, lowerArcExtend);
+			drawUpperTSMArc(g, lowerArcExtend, upperArcExtend);
 		}
 
-		drawLowerArc(g, startingAngle, lowerArcExtend);
-		drawUpperArc(g, startingAngle + lowerArcExtend, upperArcExtend);
-		drawSpeedRectangle(g,startingAngle + lowerArcExtend + upperArcExtend);
-
+		drawSpeedRectangle(g, startingAngle -(this.currentPermSpeed * 0.72));
+		if (this.currentSpeed > this.currentPermSpeed) {
+			drawOverspeedArc(g, startingAngle -(this.currentPermSpeed * 0.72), radius);
+		}
 	}
 
-
-	private void drawLowerArc(Graphics2D g, double startingAngle, double extend) { ;
-		g.setColor(this.colorForLowerArc);
-		Area area = drawArc(137, 128, startingAngle, extend);
+	private void drawInitialArc(Graphics2D g) {
+		g.setColor(DMIUtility.instance().getColor(DMIColor.DARK_GREY));
+		Area area = drawArc(137, 128, 239, -5);
 		g.fill(area);
-
 	}
 
+	private void drawCSMArc(Graphics2D g, double extend) {
+		g.setColor(this.colorForCSMArc);
+		Area area = drawArc(137, 128, 234, extend);
+		g.fill(area);
+	}
 
-	private void drawUpperArc(Graphics2D g, double startingAngle, double extend) {
-		g.setColor(this.colorForUpperArc);
-		Area area = drawArc(137, 128, startingAngle, extend);
+	private void drawLowerTSMArc(Graphics2D g, double extend) { ;
+		g.setColor(this.colorForLowerTSMArc);
+		Area area = drawArc(137, 128, 234, extend);
+		g.fill(area);
+	}
+
+	private void drawUpperTSMArc(Graphics2D g, double lowerArcExtend, double extend) {
+		g.setColor(this.colorForUpperTSMArc);
+		Area area = drawArc(137, 128, 234 + lowerArcExtend, extend);
 		g.fill(area);
 
 //		double angle = Math.toRadians(-(startingAngle + extend - 90));
@@ -331,7 +339,7 @@ public class Speedometer extends MyPanel {
     }
 
 
-	private void drawUeberhang(Graphics2D g, double startingAngle, int radius) {
+	private void drawOverspeedArc(Graphics2D g, double startingAngle, int radius) {
 		g.setColor(colorForOverspeedArc);
 		double extend = -(this.currentSpeed - this.currentTargetSpeed) * 0.72;
 		Area area = drawArc(137, 117, startingAngle, extend);
@@ -513,6 +521,10 @@ public class Speedometer extends MyPanel {
 		chooseColor();
 		repaint();
 	}
+
+    public void setSpeedSupervisionState(SpeedSupervisionState speedSupervisionState) {
+        this.speedSupervisionState = speedSupervisionState;
+    }
 
 	public void setCurrentIndSpeed(int currentIndSpeed) {
 		this.currentIndSpeed = currentIndSpeed;
