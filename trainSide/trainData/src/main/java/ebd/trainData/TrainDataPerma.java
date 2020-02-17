@@ -122,7 +122,7 @@ public class TrainDataPerma {
      *                              data in the response.
      */
     public TrainDataPerma(int trainID) throws IOException, ParseException, TDBadDataException {
-        if(ConfigHandler.getInstance().useTrainConfiguratorTool) setInstanceFromFile();
+        if(!ConfigHandler.getInstance().useTrainConfiguratorTool) setInstanceFromFile();
         else setInstanceFromURL(trainID);
     }
 
@@ -148,7 +148,7 @@ public class TrainDataPerma {
 
         String trainConfiguratorIP = ConfigHandler.getInstance().ipToInfrastructureServer;
         String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
-        String urlName = "https://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/rest/zug/extended/" + trainID;
+        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfigurator/rest/zug/extended/" + trainID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

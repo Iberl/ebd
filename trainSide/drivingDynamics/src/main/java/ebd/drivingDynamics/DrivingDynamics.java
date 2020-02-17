@@ -178,13 +178,6 @@ public class DrivingDynamics {
             this.currentSsState = speedSupervisionReport.supervisionState;
             sendToLogEventSpeedState();
         }
-        /*
-         * Log movement state changes
-         */
-        /*if(this.prevMovementState == null || !this.prevMovementState.equals(this.dynamicState.getMovementState())){
-            sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
-            this.prevMovementState = this.dynamicState.getMovementState();
-        }*/
 
         /*
         Calculate the next dynamic state.
