@@ -53,9 +53,15 @@ public class TrainDataVolatile {
     @Nullable
     protected volatile Spline currentTripProfile = null;
 
+    /**
+     * The target speed of the train in [m/s] based on the trip profile.
+     * Updated trough driving dynamics
+     */
+    protected volatile double currentProfileTargetSpeed = 0d;
 
     /**
      * The current speed of the train in [m/s]
+     * Updated trough driving dynamics
      */
     protected volatile double currentSpeed = 0d;
 
@@ -102,11 +108,12 @@ public class TrainDataVolatile {
      */
     protected volatile double currentCoastingPhaseSpeed = 0d;
 
+
     /**
-     * The target speed of the train in [m/s] based on the trip profile.
-     * Updated trough driving dynamics
+     * Target speed of the next breaking phase of the train in [m/s].
+     * Updated from the speed supervision module
      */
-    protected volatile double currentProfileTargetSpeed = 0d;
+    protected volatile double targetSpeed = 0d;
 
 
     /**
@@ -289,7 +296,15 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return current speed in [m/s]
+     * @return current maximum allowed speed in [m/s] based on the trip profile
+     */
+    @NotNull
+    public Double getCurrentProfileTargetSpeed() {
+        return currentProfileTargetSpeed;
+    }
+
+    /**
+     * @return current speed of the train in [m/s]
      */
     @NotNull
     public Double getCurrentSpeed() {
@@ -349,12 +364,12 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return current maximum allowed speed in [m/s]
+     * @return Target speed of the next breaking phase of the train in [m/s].
      */
-    @NotNull
-    public Double getCurrentProfileTargetSpeed() {
-        return currentProfileTargetSpeed;
+    public double getTargetSpeed() {
+        return targetSpeed;
     }
+
 
     @Nullable
     public Integer getM_MODE() {

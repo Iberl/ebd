@@ -212,8 +212,7 @@ public class DrivingDynamics {
         if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
             cycleCount = 0;
             sendToLogEventDynamicState();
-            /*System.out.println(currentSil);
-            System.out.println(currentSsState);*/
+            /*System.out.println(currentSil);*/
         }
     }
 
@@ -372,7 +371,7 @@ public class DrivingDynamics {
      */
     private void updateDMI(){
         double speed = this.dynamicState.getSpeed();
-        double targetSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
+        double targetSpeed = this.trainDataVolatile.getTargetSpeed();
         double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
         double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
         double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
