@@ -23,5 +23,6 @@ public class DMIDisplayConnector {
         this.dmiDisplay.setCurrentPermSpeed(dmiUpdateEvent.getCurrentPermSpeed());
         this.dmiDisplay.setCurrentWarnSpeed(dmiUpdateEvent.getCurrentWarnSpeed());
         this.dmiDisplay.setCurrentIntervSpeed(dmiUpdateEvent.getCurrentIntervSpeed());
+        this.dmiDisplay.setSpeedSupervisionLevel(dmiUpdateEvent.getSpeedSupervisionState());
     }
 }
