@@ -212,6 +212,8 @@ public class DrivingDynamics {
         if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
             cycleCount = 0;
             sendToLogEventDynamicState();
+            /*System.out.println(currentSil);
+            System.out.println(currentSsState);*/
         }
     }
 
