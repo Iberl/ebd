@@ -341,7 +341,7 @@ public class Speedometer extends MyPanel {
 
 	private void drawOverspeedArc(Graphics2D g, double startingAngle, int radius) {
 		g.setColor(colorForOverspeedArc);
-		double extend = -(this.currentSpeed - this.currentTargetSpeed) * 0.72;
+		double extend = -(this.currentSpeed - this.currentPermSpeed) * 0.72;
 		Area area = drawArc(137, 117, startingAngle, extend);
 		g.fill(area);
 	}
