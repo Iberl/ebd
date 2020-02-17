@@ -13,6 +13,8 @@ public class NewBreakingCurveEvent extends NormalEvent {
 	
 
 	public BreakingCurveGroup breakingCurveGroup;
+
+	public boolean lastMovementAuthorityMessage;
 	/**
 	 * @param source
 	  *          ID from the module the event was sent by

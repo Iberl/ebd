@@ -105,6 +105,9 @@ public class MessageHandler {
         else {
             lop.add(makeP57(20));
         }
+        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0){
+            lop.add(makeP80(d_EOL));
+        }
 
         Message_3 msg3 = new Message_3();
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;
@@ -196,6 +199,13 @@ public class MessageHandler {
         packet58.M_LOC = M_LOC_AT_BALISE_GROUP;
 
         return packet58;
+    }
+
+    private Packet_80 makeP80(double d_EOL) {
+        Packet_80 p80 = new Packet_80();
+        p80.mode.D_MAMODE = (int)d_EOL;
+        p80.mode.M_MAMODE = ETCSVariables.M_MAMODE_SHUNTING;
+        return p80;
     }
 
     private boolean validTarget(List<String> targetList){

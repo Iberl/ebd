@@ -56,29 +56,18 @@ public class RouteDataVolatile {
     protected volatile double currentGradient = 0d;
 
     /**
+     * True if this is the last movement authority before end of mission
+     * //TODO Should be replaced by something more fitting
+     */
+    protected volatile boolean lastMABeforeEndOfMission = false;
+
+    /**
      * Linking Information
      */
     @Nullable
     protected volatile HashMap<Integer,Location> linkingInformation = null;
 
     public RouteDataVolatile(){}
-
-    /**
-     * Only For Testing!
-     */
-    @Deprecated
-    public RouteDataVolatile(@Nullable Location refLocation, @Nullable Packet_15 packet_15, @Nullable Packet_21 packet_21, @Nullable Packet_27 packet_27, @Nullable List<Packet_65> packet_65) {
-        NoSuchMethodException noSuchMethodException = new NoSuchMethodException("This Constructor is only for use in tests");
-        ExceptionEvent exceptionEvent = new ExceptionEvent("RD", Arrays.asList(new String[]{"all"}), new NotCausedByAEvent(),noSuchMethodException, ExceptionEventTyp.WARNING);
-        EventBus.getDefault().post(exceptionEvent);
-
-        this.refLocation = refLocation;
-        this.packet_15 = packet_15;
-        this.packet_21 = packet_21;
-        this.packet_27 = packet_27;
-        this.packet_65 = packet_65;
-    }
-
 
     /*
     Getter
@@ -119,6 +108,13 @@ public class RouteDataVolatile {
      */
     public double getCurrentGradient() {
         return currentGradient;
+    }
+    /**
+     * True if this is the last movement authority before end of mission
+     * //TODO Should be replaced by something more fitting
+     */
+    public boolean isLastMABeforeEndOfMission() {
+        return lastMABeforeEndOfMission;
     }
     /**
      * Linking Information

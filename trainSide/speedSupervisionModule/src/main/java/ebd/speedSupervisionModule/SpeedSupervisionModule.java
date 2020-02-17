@@ -97,7 +97,8 @@ public class SpeedSupervisionModule {
         SpeedInterventionLevel speedInterventionLevel;
         SpeedSupervisionState supervisionState;
 
-        if(this.maxIndicationSpeed >= curSpeed && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO make more robust
+        if(this.maxIndicationSpeed >= curSpeed
+                && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO make more robust
             supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
             if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
