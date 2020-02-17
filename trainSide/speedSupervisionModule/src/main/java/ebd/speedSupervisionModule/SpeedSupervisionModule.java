@@ -92,8 +92,6 @@ public class SpeedSupervisionModule {
 
         if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
 
-        //System.out.println(this.breakingCurve.getRefLocation().getId());
-
         double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurveGroup.getServiceDecelerationCurve().getRefLocation().getId());
 
         updateMaxSpeeds(tripDistance, curSpeed);
@@ -138,7 +136,6 @@ public class SpeedSupervisionModule {
                 speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
             }
         }
-
 
         this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel, supervisionState));
         sendCurrentMaxSpeed();

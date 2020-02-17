@@ -2,6 +2,11 @@ package ebd.globalUtils.speedInterventionLevel;
 
 public enum SpeedInterventionLevel {
     /**
+     * Null replacement
+     */
+    NOT_SET,
+
+    /**
      * Speed is uncritical
      */
     NO_INTERVENTION,

@@ -79,7 +79,9 @@ public class DrivingDynamics {
     private int cylceCountMax = 20; //TODO Connect to Config
     private MovementState currentMovementState = MovementState.UNCHANGED;
     private SpeedInterventionLevel currentSil = SpeedInterventionLevel.NO_INTERVENTION;
+    private SpeedInterventionLevel lastSendSil = SpeedInterventionLevel.NOT_SET;
     private SpeedSupervisionState currentSsState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+    private SpeedSupervisionState lastSendState = SpeedSupervisionState.NOT_SET;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
@@ -143,36 +145,38 @@ public class DrivingDynamics {
             actionParser(this.drivingProfile.actionToTake());
         }
         else {
-
-            switch (speedSupervisionReport.interventionLevel){
+            this.currentSil = speedSupervisionReport.interventionLevel;
+            switch (this.currentSil){
                 case NO_INTERVENTION:
                 case INDICATION:
+                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case PERMITTED_SPEED:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
+                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case WARNING:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.UNCHANGED);
+                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
                     break;
                 case CUT_OFF_TRACTION:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.COASTING);
+                    sendToLogEventSpeedSupervision(MovementState.COASTING);
                     this.dynamicState.setMovementState(MovementState.COASTING);
                     break;
                 case APPLY_SERVICE_BREAKS:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.BREAKING);
+                    sendToLogEventSpeedSupervision(MovementState.BREAKING);
                     this.dynamicState.setMovementState(MovementState.BREAKING);
                     this.dynamicState.setBreakingModification(1d);
                     break;
                 case APPLY_EMERGENCY_BREAKS:
                 default:
-                    sendToLogEventSpeedSupervision(speedSupervisionReport.interventionLevel, MovementState.EMERGENCY_BREAKING);
+                    sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                     this.dynamicState.setBreakingModification(1d);
             }
-            sendToLogEventSpeedState(speedSupervisionReport.supervisionState);
+            this.currentSsState = speedSupervisionReport.supervisionState;
+            sendToLogEventSpeedState();
         }
         /*
          * Log movement state changes
@@ -415,10 +419,10 @@ public class DrivingDynamics {
     /**
      * Sends logging information regarding the current {@link SpeedInterventionLevel}
      */
-    private void sendToLogEventSpeedSupervision(SpeedInterventionLevel newSil, MovementState movementState) {
-        if(this.currentSil == newSil) return;
-        this.currentSil = newSil;
-        String msg = String.format("Current speed supervision intervention level: %s ", newSil);
+    private void sendToLogEventSpeedSupervision(MovementState movementState) {
+        if(this.lastSendSil == this.currentSil) return;
+        this.lastSendSil = this.currentSil;
+        String msg = String.format("Current speed supervision intervention level: %s ", this.currentSil);
         this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
         if(movementState != MovementState.UNCHANGED) sendToLogEventSpeedSupervisionMovementState(movementState);
     }
@@ -426,10 +430,10 @@ public class DrivingDynamics {
     /**
      * Sends logging information regarding the current {@link SpeedInterventionLevel}
      */
-    private void sendToLogEventSpeedState(SpeedSupervisionState speedSupervisionState) {
-        if(this.currentSsState == speedSupervisionState) return;
-        this.currentSsState = speedSupervisionState;
-        String msg = String.format("Current speed supervision state: %s ", speedSupervisionState);
+    private void sendToLogEventSpeedState() {
+        if(this.lastSendState == this.currentSsState) return;
+        this.lastSendState = this.currentSsState;
+        String msg = String.format("Current speed supervision state: %s ", this.currentSsState);
         this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
     }
 
