@@ -7,6 +7,7 @@ import ebd.dmi.ui.utility.DMIColor;
 import ebd.dmi.ui.utility.DMISound;
 import ebd.dmi.ui.utility.DMIUtility;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
+import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -35,6 +36,7 @@ public class Speedometer extends MyPanel {
 	protected Color colorForUpperArc;
 	protected Color colorForNeedle;
 	protected Color colorForSpeed;
+	protected Color colorForOverspeedArc;
 	protected Color bgColor;
 
 	protected final MyLabel lblB11;
@@ -49,8 +51,10 @@ public class Speedometer extends MyPanel {
 	//default
 	SpeedInterventionLevel speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
 	protected int currentIndSpeed;
+	protected int currentPermSpeed;
 	protected int currentWarnSpeed;
 	protected int currentIntervSpeed;
+	SpeedSupervisionState speedSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 
 	//	protected PanelMessages pm;
 	protected boolean speedingOccured = false;
@@ -68,12 +72,7 @@ public class Speedometer extends MyPanel {
 		this.minorTickStop = array[3];
 		this.maxVal = array[4];
 
-		//TODO Farben ändern oder löschen
 		this.bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
-		this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.WHITE);
-		this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.RED);
-		this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.RED);
-		this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.RED);
 
 		Color black = DMIUtility.instance().getColor(DMIColor.BLACK);
 		Color shadow = DMIUtility.instance().getColor(DMIColor.SHADOW);
@@ -109,83 +108,125 @@ public class Speedometer extends MyPanel {
 
 
 	private void chooseColor() {
-		if (speedInterventionLevel.equals(SpeedInterventionLevel.NO_INTERVENTION)) {
-			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.MEDIUM_GRAY);
-			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-			this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-			this.lblB11.setBackground(this.colorForNeedle);
-			this.lblB11.setForeground(this.colorForSpeed);
-			this.lblB12.setBackground(this.colorForNeedle);
-			this.lblB12.setForeground(this.colorForSpeed);
-			this.lblB13.setBackground(this.colorForNeedle);
-			this.lblB13.setForeground(this.colorForSpeed);
-			//TODO: Abhängigkeiten von Message entfernen
-			if (this.speedingOccured) {
+        if (speedSupervisionState.equals(SpeedSupervisionState.CEILING_SPEED_SUPERVISION)) {
+            if (speedInterventionLevel.equals(SpeedInterventionLevel.NO_INTERVENTION)) {
+                this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
+				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            } else if (speedInterventionLevel.equals(SpeedInterventionLevel.PERMITTED_SPEED) || speedInterventionLevel.equals(SpeedInterventionLevel.WARNING)) {
+                this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
+				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.ORANGE);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            } else if (speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_SERVICE_BREAKS) || speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS)) {
+                if (currentSpeed > currentPermSpeed) {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.RED);
+					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.WHITE);
+				} else {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
+					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+				}
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.RED);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            }
+        }
+
+        else if (speedSupervisionState.equals(SpeedSupervisionState.TARGET_SPEED_SUPERVISION)) {
+            if (speedInterventionLevel.equals(SpeedInterventionLevel.INDICATION)) {
+                if (currentSpeed > currentTargetSpeed) {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                } else {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
+                }
+				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            } else if (speedInterventionLevel.equals(SpeedInterventionLevel.PERMITTED_SPEED) || speedInterventionLevel.equals(SpeedInterventionLevel.WARNING)) {
+                this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
+				this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.ORANGE);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            } else if (speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_SERVICE_BREAKS) || speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS)) {
+                if (currentSpeed > currentPermSpeed) {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.RED);
+					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.WHITE);
+				} else if (currentSpeed > currentTargetSpeed && currentSpeed < currentPermSpeed) {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.YELLOW);
+					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+				} else if (currentSpeed < currentTargetSpeed) {
+                    this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.GREY);
+					this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
+				}
+                this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
+                this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
+                this.colorForOverspeedArc = DMIUtility.instance().getColor(DMIColor.RED);
+                this.lblB11.setBackground(this.colorForNeedle);
+                this.lblB11.setForeground(this.colorForSpeed);
+                this.lblB12.setBackground(this.colorForNeedle);
+                this.lblB12.setForeground(this.colorForSpeed);
+                this.lblB13.setBackground(this.colorForNeedle);
+                this.lblB13.setForeground(this.colorForSpeed);
+            }
+        }
+
+            //TODO: Abhängigkeiten von Message entfernen
+//			if (this.speedingOccured) {
 //				if (this.pm != null) {
 //					this.pm.addMessage("Reattained authorized speed");
 //				}
-				this.speedingOccured = false;
-			}
-		} else if (speedInterventionLevel.equals(SpeedInterventionLevel.INDICATION)) {
-			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.YELLOW);
-			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-			this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
-			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-			this.lblB11.setBackground(this.colorForNeedle);
-			this.lblB11.setForeground(this.colorForSpeed);
-			this.lblB12.setBackground(this.colorForNeedle);
-			this.lblB12.setForeground(this.colorForSpeed);
-			this.lblB13.setBackground(this.colorForNeedle);
-			this.lblB13.setForeground(this.colorForSpeed);
-			//TODO: Abhängigkeiten von Message entfernen
-			if (this.speedingOccured) {
+//				this.speedingOccured = false;
+//			}
+            //TODO: Abhängigkeiten von Message entfernen
+//			if (this.speedingOccured) {
 //				if (this.pm != null) {
 //					this.pm.addMessage("Reattained authorized speed");
 //				}
-				this.speedingOccured = false;
-			}
-		} else if (speedInterventionLevel.equals(SpeedInterventionLevel.WARNING)) {
-			//TODO: ändern
-			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.ORANGE);
-			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-			this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
-			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.BLACK);
-			this.lblB11.setBackground(this.colorForNeedle);
-			this.lblB11.setForeground(this.colorForSpeed);
-			this.lblB12.setBackground(this.colorForNeedle);
-			this.lblB12.setForeground(this.colorForSpeed);
-			this.lblB13.setBackground(this.colorForNeedle);
-			this.lblB13.setForeground(this.colorForSpeed);
-			//TODO: Abhängigkeiten von Message entfernen
-			if (this.speedingOccured) {
-//				if (this.pm != null) {
-//					this.pm.addMessage("Reattained authorized speed");
-//				}
-				this.speedingOccured = false;
-			}
-		} else if (speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_SERVICE_BREAKS) || speedInterventionLevel.equals(SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS)) {
-			this.colorForNeedle = DMIUtility.instance().getColor(DMIColor.RED);
-			this.colorForLowerArc = DMIUtility.instance().getColor(DMIColor.DARK_GREY);
-			this.colorForUpperArc = DMIUtility.instance().getColor(DMIColor.YELLOW);
-			this.colorForSpeed = DMIUtility.instance().getColor(DMIColor.WHITE);
-			this.lblB11.setBackground(this.colorForNeedle);
-			this.lblB11.setForeground(this.colorForSpeed);
-			this.lblB12.setBackground(this.colorForNeedle);
-			this.lblB12.setForeground(this.colorForSpeed);
-			this.lblB13.setBackground(this.colorForNeedle);
-			this.lblB13.setForeground(this.colorForSpeed);
-			//TODO: Abhängigkeiten von Message entfernen
-			if (!this.speedingOccured) {
+//				this.speedingOccured = false;
+//			}
+
+            //TODO: Abhängigkeiten von Message entfernen
+//			if (!this.speedingOccured) {
 //				if (this.pm != null) {
 //					this.pm.addMessage("Speeding occured");
 //				}
-				this.speedingOccured = true;
-				DMIUtility.instance().playSound(DMISound.TOO_FAST);
-			}
-		}
+//				this.speedingOccured = true;
+//				DMIUtility.instance().playSound(DMISound.TOO_FAST);
+//			}
 	}
-
 
 	private void setSpeed(int value) {
 		int hunderter = value / 100;
@@ -246,10 +287,10 @@ public class Speedometer extends MyPanel {
 
 		int startingAngle = 239;
 		// Vsoll -> extend umwandeln = Vsoll * (288/400)
-		double lowerArcExtend = -(this.currentIndSpeed * 0.72 + 4);
-		double upperArcExtend = -((this.currentTargetSpeed - this.currentIndSpeed) * 0.72);
+		double lowerArcExtend = -(this.currentTargetSpeed * 0.72 + 4);
+		double upperArcExtend = -((this.currentPermSpeed - this.currentTargetSpeed) * 0.72);
 
-		if (this.currentSpeed > this.currentTargetSpeed) {
+		if (this.currentSpeed > this.currentPermSpeed) {
 			drawUeberhang(g, startingAngle + lowerArcExtend + upperArcExtend, radius);
 		}
 
@@ -291,7 +332,7 @@ public class Speedometer extends MyPanel {
 
 
 	private void drawUeberhang(Graphics2D g, double startingAngle, int radius) {
-		g.setColor(colorForNeedle);
+		g.setColor(colorForOverspeedArc);
 		double extend = -(this.currentSpeed - this.currentTargetSpeed) * 0.72;
 		Area area = drawArc(137, 117, startingAngle, extend);
 		g.fill(area);
@@ -478,6 +519,12 @@ public class Speedometer extends MyPanel {
 		chooseColor();
 		repaint();
 	}
+
+    public void setCurrentPermSpeed(int currentPermSpeed) {
+        this.currentPermSpeed = currentPermSpeed;
+        chooseColor();
+        repaint();
+    }
 
 	public void setCurrentWarnSpeed(int currentWarnSpeed) {
 		this.currentWarnSpeed = currentWarnSpeed;

@@ -19,6 +19,7 @@ public class DMIDisplayConnectorTest {
         SpeedInterventionLevel speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
         SpeedSupervisionState speedSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION; //TODO Von LSF eingebaut.
         double currentIndSpeed = currentTargetSpeed - 30/3.6;
+        double currentPermSpeed = currentTargetSpeed - 20/3.6;
         double currentWarnSpeed = currentTargetSpeed;
         double currentIntervSpeed = currentTargetSpeed + 10/3.6;
 
@@ -36,7 +37,7 @@ public class DMIDisplayConnectorTest {
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
 
-            EventBus.getDefault().post(generateDMIUpdateEvent(currentSpeed, currentTargetSpeed, 0, speedInterventionLevel, speedSupervisionState, currentIndSpeed, currentWarnSpeed, currentIntervSpeed));
+            EventBus.getDefault().post(generateDMIUpdateEvent(currentSpeed, currentTargetSpeed, 0, speedInterventionLevel, speedSupervisionState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
             Thread.sleep(300);
         }
 //
@@ -60,9 +61,9 @@ public class DMIDisplayConnectorTest {
 
     }
 
-    public static DMIUpdateEvent generateDMIUpdateEvent(double currentSpeed, double currentTargetSpeed, int targetDistance, SpeedInterventionLevel speedIntLevel, SpeedSupervisionState speedSupervisionState, double currentIndSpeed, double currentWarnSpeed, double currentIntervSpeed) throws InterruptedException {
+    public static DMIUpdateEvent generateDMIUpdateEvent(double currentSpeed, double currentTargetSpeed, int targetDistance, SpeedInterventionLevel speedIntLevel, SpeedSupervisionState speedSupervisionState, double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) throws InterruptedException {
         dmiUpdateEventTargets = Arrays.asList("a", "b");
-        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTargets, currentSpeed, currentTargetSpeed, targetDistance, speedIntLevel, speedSupervisionState, currentIndSpeed, currentWarnSpeed, currentIntervSpeed);
+        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTargets, currentSpeed, currentTargetSpeed, targetDistance, speedIntLevel, speedSupervisionState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed);
         return dmiUpdateEvent;
     }
 
