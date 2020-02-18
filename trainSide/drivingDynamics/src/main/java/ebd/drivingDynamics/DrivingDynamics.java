@@ -147,15 +147,10 @@ public class DrivingDynamics {
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
             switch (this.currentSil){
+                case NOT_SET:
                 case NO_INTERVENTION:
                 case INDICATION:
-                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
-                    actionParser(this.drivingProfile.actionToTake());
-                    break;
                 case PERMITTED_SPEED:
-                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
-                    actionParser(this.drivingProfile.actionToTake());
-                    break;
                 case WARNING:
                     sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                     actionParser(this.drivingProfile.actionToTake());
@@ -242,8 +237,6 @@ public class DrivingDynamics {
         }
         this.time = AppTime.nanoTime();
         this.locked = false;
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
-                "Starting mission"));
     }
 
     /**
@@ -256,6 +249,8 @@ public class DrivingDynamics {
         if(!(le.targets.contains("dd") || le.targets.contains("all")) || this.locked){
             return;
         }
+        this.dynamicState.setMovementState(MovementState.HALTING);
+        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
         this.locked = true;
     }
 
@@ -294,13 +289,13 @@ public class DrivingDynamics {
     /**
      * Performance some clean up tasks at the end of a trip.
      * @param ttee A {@link TsmTripEndEvent}
-     */
+     *//*
     @Subscribe
     public void atTripEnd(TsmTripEndEvent ttee){
         dynamicState.setMovementState(MovementState.HALTING);
         dynamicState.setAcceleration(0d);
         sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
-    }
+    }*/
 
     /**
      * This function checks if a new location was reached and if so, updates the position inside of dynamic state to

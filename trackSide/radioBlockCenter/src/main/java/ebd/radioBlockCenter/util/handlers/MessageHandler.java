@@ -51,7 +51,12 @@ public class MessageHandler {
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-            sendMessage3(makeM3(rme),trainID);
+            Message_3 msg3 = makeM3(rme);
+            if(msg3 == null){
+                msg = String.format("Could not fulfill MA request from train %s", trainID);
+                this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            }
+            else sendMessage3(msg3,trainID);
         }
         else if(rme.message instanceof Message_136){ //Position Report
             Message_136 msg136 = (Message_136)rme.message;
@@ -93,6 +98,9 @@ public class MessageHandler {
 
     private Message_3 makeM3(ReceivedMessageEvent rme) {
         String trainID = rme.sender.split(";T=")[1];
+        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0){
+            return null;
+        }
         Route nextRoute = this.trainIDsToRoute.get(Integer.parseInt(trainID)).remove(0);
         double d_EOL = nextRoute.getDistance();
 
@@ -100,14 +108,17 @@ public class MessageHandler {
         lop.add(makeP21(nextRoute.getGp()));
         lop.add(makeP27(nextRoute.getTsp()));
         if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0) {
+            lop.add(makeP80(d_EOL));
             lop.add(makeP57(ETCSVariables.T_MAR_INFINITY));
-        }
-        else {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else {
             lop.add(makeP57(20));
         }
-        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0){
-            lop.add(makeP80(d_EOL));
-        }
+
 
         Message_3 msg3 = new Message_3();
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;

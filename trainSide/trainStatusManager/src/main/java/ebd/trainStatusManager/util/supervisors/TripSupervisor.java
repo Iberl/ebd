@@ -3,6 +3,7 @@ package ebd.trainStatusManager.util.supervisors;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.position.Position;
@@ -71,10 +72,12 @@ public class TripSupervisor {
 
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
 
-        if(routeDataVolatile.isLastMABeforeEndOfMission()
-                && distanceToEMA <= this.targetReachedDistance
-                && trainDataVolatile.getCurrentSpeed() == 0){
-            sendEndOfMission();
+        if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
+
+            this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
+            if(routeDataVolatile.isLastMABeforeEndOfMission()){
+                sendEndOfMission();
+            }
         }
     }
 
@@ -84,7 +87,7 @@ public class TripSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
+        this.breakingCurve = bce.breakingCurveGroup.getPermittedSpeedCurve();
     }
 
     /**

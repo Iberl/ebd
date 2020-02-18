@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.handlers;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
@@ -255,7 +256,7 @@ public class MessageHandler {
     private void sendAck(TrackMessage tm) {
         Message_146 message146 = new Message_146();
         message146.NID_ENGINE = this.etcsTrainID;
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);

@@ -4,6 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
@@ -86,7 +87,6 @@ public class TrainStatusManager implements Runnable {
     private DrivingDynamics drivingDynamics;
 
     private Clock clock;
-    private boolean tripInProgress;
 
 
     public TrainStatusManager(int etcsTrainID, int rbcID){
@@ -140,18 +140,12 @@ public class TrainStatusManager implements Runnable {
         BreakingCurve breakingCurve = nbce.breakingCurveGroup.getPermittedSpeedCurve();
         int refLocID = breakingCurve.getRefLocation().getId();
 
-        if(!this.tripInProgress){
-            this.tripInProgress = true;
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
-            this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
-            this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
-                    "Calculated a new breaking curve"));
-        }
-        else {
-            this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
-            this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
-                    "Calculated a new breaking curve"));
-        }
+
+        this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
+        this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
+        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+                "Calculated a new breaking curve"));
+
     }
 
     @Subscribe
@@ -263,7 +257,7 @@ public class TrainStatusManager implements Runnable {
         Position curPos = new Position(0,true, new InitalLocation());
         EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("all"),curPos));
         Message_155 msg155 = new Message_155();
-        long curTime = System.currentTimeMillis();
+        long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
         msg155.NID_ENGINE = this.etcsTrainID;
         this.localEventBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), msg155, Collections.singletonList("mr;R=" + this.rbcID)));
