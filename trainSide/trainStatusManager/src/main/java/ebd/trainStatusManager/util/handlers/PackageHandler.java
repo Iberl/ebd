@@ -10,6 +10,7 @@ import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageLibrary.packet.trackpackets.Packet_57;
 import ebd.messageLibrary.packet.trackpackets.Packet_58;
+import ebd.messageLibrary.packet.trackpackets.Packet_80;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
@@ -102,5 +103,12 @@ public class PackageHandler {
         localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
         localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
         localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters [Packet 58]"));
+    }
+
+    public static void p80(EventBus localBus, Packet_80 p80){
+        //TODO FUll handeling of Packet 80 in a mode supervisor
+        if(p80.mode.M_MAMODE == ETCSVariables.M_MAMODE_SHUNTING){
+            localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "lastMABeforeEndOfMission", true));
+        }
     }
 }

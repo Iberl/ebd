@@ -44,18 +44,33 @@ public class BreakingCurveCalculator {
 
 	private EventBus eventBus;
 	private List<String> eventTargets = new ArrayList<>();
+	private ConfigHandler ch = ConfigHandler.getInstance();
 
 	private boolean bclreCan = false;
 	private boolean isCalculating = false;
 
 	private ForwardSpline breakingPower;
 	private ForwardSpline emergencyBreakingPower;
-	private ForwardSpline ssp;
-	private ForwardSpline gradientProfile;
+	/**
+	 * {@link StaticSpeedProfil}
+	 */
+	private StaticSpeedProfil ssp;
+	/**
+	 * A profile that contains distances in [m] and acceleration in [m/s^2]
+	 */
+	private ForwardSpline gradientProfil;
 	private Position referencePosition;
 	private double dangerPointOffset;
 
 	private BreakingCurveGroup breakingCurveGroup;
+
+	public enum CurveType {
+		INDICATION_CURVE,
+		PERMITTED_SPEED,
+		WARNING_CURVE,
+		SERVICE_CURVE,
+		EMERGENCY_CURVE
+	}
 
 	/**
      * This constructor takes an EventBus object and registers the instance on it 
@@ -70,7 +85,7 @@ public class BreakingCurveCalculator {
 
     /**
      * This function listens to a {@link BreakingCurveRequestEvent}. If such an event occurs, this method prepares
-	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(ForwardSpline, ForwardSpline, double, double, boolean)}
+	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(double, double, CurveType)}
 	 * and then calls {@link BreakingCurveCalculator#getCurveFromList(List, Position, String)}<br>
 	 * It then calculates additional breaking curves from this {@code List<Knot>} by shifting the knots with speed and time.
 	 * This results in the permitted speed, warning speed, overspeed and intervention speed curves. <br>//TODO check which curves to use
@@ -95,7 +110,7 @@ public class BreakingCurveCalculator {
     		this.emergencyBreakingPower = bcre.emergencyBreakingPower;
     		this.referencePosition = bcre.referencePosition;
 	    	this.ssp = new StaticSpeedProfil(bcre);
-	    	this.gradientProfile = GradientProfileConverter.package21ToGP(bcre.packet21, bcre.currentGradient);
+	    	this.gradientProfil = GradientProfileConverter.package21ToGP(bcre.packet21, bcre.currentGradient);
 	    	this.dangerPointOffset = MovementAuthorityConverter.p15ToDangerPointDistance(bcre.packet15);
 
 	    	this.breakingCurveGroup = calculateBreakingCurve(bcre.packet15, bcre.id);
@@ -117,7 +132,7 @@ public class BreakingCurveCalculator {
     
     /**
      * This function listens to a {@link BreakingCurveLimitedRequestEvent}. method prepares
-	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(ForwardSpline, ForwardSpline, double, double, boolean)}
+	 * the calculation of the service breaking curve by first calling {@link BreakingCurveCalculator#calculateKnotList(double, double, CurveType)}
 	 * and then calls {@link BreakingCurveCalculator#getCurveFromList(List, Position, String)}<br>
 	 * It then calculates additional breaking curves from this {@code List<Knot>} by shifting the knots with speed and time.
 	 * This results in the permitted speed, warning speed, overspeed and intervention speed curves. <br>//TODO check which curves to use
@@ -165,26 +180,31 @@ public class BreakingCurveCalculator {
 
 	private BreakingCurveGroup calculateBreakingCurveGroupWIthShiftedPosition(Packet_15 packet15, String id, Position referencePosition){
 		BreakingCurveGroup breakingCurveGroup = new BreakingCurveGroup(id);
-		ConfigHandler ch = ConfigHandler.getInstance();
 
 		double d_EMA = MovementAuthorityConverter.p15ToD_EMA(packet15) + referencePosition.totalDistanceToPreviousPosition(this.referencePosition);
 		double v_loa = packet15.V_LOA * ETCS_VALUE_TO_MS;
-		List<Knot> knotListEmergency = calculateKnotList(ssp, gradientProfile, d_EMA, v_loa, true);
-		List<Knot> knotListService = calculateKnotList(ssp, gradientProfile, d_EMA, v_loa, false);
+		List<Knot> knotListEmergency = calculateKnotList(d_EMA, v_loa, CurveType.EMERGENCY_CURVE);
+		List<Knot> knotListService = calculateKnotList(d_EMA, v_loa, CurveType.SERVICE_CURVE);
+		List<Knot> knotListWarning = calculateKnotList(d_EMA, v_loa, CurveType.WARNING_CURVE);
+		List<Knot> knotListPermittedSpeed = calculateKnotList(d_EMA, v_loa, CurveType.PERMITTED_SPEED);
+		List<Knot> knotListIndicationSpeed = calculateKnotList(d_EMA, v_loa, CurveType.INDICATION_CURVE);
 
 		breakingCurveGroup.setEmergencyDecelerationCurve(getCurveFromList(knotListEmergency,this.referencePosition, "EmergencyDecelerationCurve"));
-		breakingCurveGroup.setEmergencyInterventionCurve(getCurveFromListAndOffset(knotListEmergency, ch.emergencyInterventionOffset,
+		breakingCurveGroup.setEmergencyInterventionCurve(getCurveFromListAndOffset(knotListEmergency, this.ch.emergencyInterventionOffset,
 				this.referencePosition, "EmergencyInterventionCurve"));
 
 		breakingCurveGroup.setServiceDecelerationCurve(getCurveFromList(knotListService,this.referencePosition,"ServiceDecelerationCurve"));
-		breakingCurveGroup.setServiceInterventionCurve(getCurveFromListAndOffset(knotListService, ch.serviceInterventionOffset,
+		breakingCurveGroup.setServiceInterventionCurve(getCurveFromListAndOffset(knotListService, this.ch.serviceInterventionOffset,
 				this.referencePosition,"ServiceInterventionCurve"));
-		breakingCurveGroup.setServiceWarningCurve(getCurveFromListAndOffset(knotListService, ch.serviceWarningOffset,
+		breakingCurveGroup.setServiceWarningCurve(getCurveFromListAndOffset(knotListWarning, this.ch.serviceWarningOffset,
 				this.referencePosition,"ServiceWarningCurve"));
-		breakingCurveGroup.setServicePermittedSpeedCurve(getCurveFromListAndOffset(knotListService, ch.servicePermittedOffset,
+		breakingCurveGroup.setServicePermittedSpeedCurve(getCurveFromListAndOffset(knotListPermittedSpeed, this.ch.servicePermittedOffset,
 				this.referencePosition,"ServicePermittedSpeedCurve"));
-		breakingCurveGroup.setServiceIndicationCurve(getCurveFromListAndOffset(knotListService, ch.serviceIndicationOffset,
+		breakingCurveGroup.setServiceIndicationCurve(getCurveFromListAndOffset(knotListIndicationSpeed, this.ch.serviceIndicationOffset,
 				this.referencePosition,"ServiceIndicationCurve"));
+		breakingCurveGroup.setServiceCoastingPhaseCurve(getCurveFromListAndOffset(knotListPermittedSpeed, this.ch.serviceCoastingPhaseOffset,
+				this.referencePosition,"ServiceCoastingPhaseCurve"));
+				//TODO Check if BCLRE still works
 
 		return breakingCurveGroup;
 	}
@@ -231,7 +251,10 @@ public class BreakingCurveCalculator {
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
-			double newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
+			double newSlope = 0;
+			if(knot.coefficients.get(1) != 0){
+				newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
+			}
 
 			double[] newCoefficents = {knot.coefficients.get(0), newSlope};
 
@@ -247,14 +270,12 @@ public class BreakingCurveCalculator {
 
 	/**
 	 * This Function calculates a breaking curve out of all the given information. It uses the algorithm developed by Georg Boltz in "Einfaches Bremskurvenmodell" <br>
-	 *
+	 * <br>
+	 * <br>
 	 * Shorthands:
 	 * EMA End of movement authority
 	 *
-	 * @param staticSpeedProfil
-	 * 		{@link StaticSpeedProfil}
-	 * @param gradientProfil
-	 * 		A profile that contains distances in [m] and acceleration in [m/s^2]
+
 	 * @param distanceToEMA
 	 * 		Distance to the EMA
 	 * @param speedAtEndOfMoveAut
@@ -262,15 +283,12 @@ public class BreakingCurveCalculator {
 	 * @return
 	 * 		{@link BreakingCurve}
 	 */
-	private List<Knot> calculateKnotList(
-			ForwardSpline staticSpeedProfil, ForwardSpline gradientProfil,
-			double distanceToEMA, double speedAtEndOfMoveAut, boolean emergencyCurve
-	)
+	private List<Knot> calculateKnotList(double distanceToEMA, double speedAtEndOfMoveAut, CurveType curveType)
 			throws IllegalArgumentException, IndexOutOfBoundsException {
 		List<Knot> knotList = new ArrayList<>();
 		ForwardSpline breakingPower;
 		double dis_EMA;
-		if(emergencyCurve){
+		if(curveType == CurveType.EMERGENCY_CURVE){
 			breakingPower = this.emergencyBreakingPower;
 			dis_EMA = distanceToEMA + this.dangerPointOffset;
 		}
@@ -284,8 +302,8 @@ public class BreakingCurveCalculator {
 
 		double speed_EMA = speedAtEndOfMoveAut;
 
-		if (speed_EMA > staticSpeedProfil.getPointOnCurve(dis_EMA)) {
-			speed_EMA = staticSpeedProfil.getPointOnCurve(dis_EMA);
+		if (speed_EMA > this.ssp.getSpeedAtDistance(dis_EMA, curveType)) {
+			speed_EMA = this.ssp.getSpeedAtDistance(dis_EMA, curveType);
 		}
 		//s_EAP (see description of algorithm by Boltz) is in this calculation always 0, because we work relative to the current position
 
@@ -299,15 +317,15 @@ public class BreakingCurveCalculator {
 		while (disNow > 0) {
 			double deltaSpeed = deltaspeed_init;
 
-			while (speedNow < staticSpeedProfil.getPointOnCurve(disNow) && disNow > disStar) {
+			while (speedNow < this.ssp.getSpeedAtDistance(disNow, curveType) && disNow > disStar) {
 				speedNext = speedNow + deltaSpeed;
 
-				if (speedNext > staticSpeedProfil.getPointOnCurve(disNow)) {
-					speedNext = staticSpeedProfil.getPointOnCurve(disNow);
+				if (speedNext > this.ssp.getSpeedAtDistance(disNow, curveType)) {
+					speedNext = this.ssp.getSpeedAtDistance(disNow, curveType);
 					deltaSpeed = speedNext - speedNow;
 				}
 
-				disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disNow); //This is "finding the next step s*" (see description of algorithm by Boltz)
+				disStar = this.ssp.getLowerOrFirstKnotXValue(disNow); //This is "finding the next step s*" (see description of algorithm by Boltz)
 
 
 				double speedMidpoint = 0.5 * (speedNext + speedNow);
@@ -327,13 +345,13 @@ public class BreakingCurveCalculator {
 				}
 
 				double disMidpoint = disNow + (0.5 * deltaDis);
-				breakPowerMidpoint += gradientProfil.getPointOnCurve(disMidpoint);
+				breakPowerMidpoint += this.gradientProfil.getPointOnCurve(disMidpoint);
 
 				if (breakPowerMidpoint <= 0) {
-					if (gradientProfil.getPointOnCurve(disMidpoint).equals(-Double.MAX_VALUE)) {
+					if (this.gradientProfil.getPointOnCurve(disMidpoint).equals(-Double.MAX_VALUE)) {
 						throw new IllegalArgumentException("The Movement Authority exceeded the maxium defined distance of the Gradient Profile");
 					}
-					else if (breakPowerMidpoint - gradientProfil.getPointOnCurve(disMidpoint) > 0){
+					else if (breakPowerMidpoint - this.gradientProfil.getPointOnCurve(disMidpoint) > 0){
 						throw new IllegalArgumentException("The downhill slope surpassed the breaking ability of the train");
 					}
 					else {
@@ -359,9 +377,9 @@ public class BreakingCurveCalculator {
 				double disNext = disNow + deltaDis;
 				speedNext = speedNow + deltaSpeed;
 
-				if(speedNext > staticSpeedProfil.getPointOnCurve(disNext)) {
-					deltaSpeed = staticSpeedProfil.getPointOnCurve(disNext) - speedNow;
-					speedNext = staticSpeedProfil.getPointOnCurve(disNext);
+				if(speedNext > this.ssp.getSpeedAtDistance(disNext, curveType)) {
+					deltaSpeed = this.ssp.getSpeedAtDistance(disNext, curveType) - speedNow;
+					speedNext = this.ssp.getSpeedAtDistance(disNext, curveType);
 				}
 
 				coefList = new ArrayList<>();
@@ -384,17 +402,18 @@ public class BreakingCurveCalculator {
 			}
 
 			disNow = disStar;
-			speedNow = Math.min(staticSpeedProfil.getPointOnCurve(disStar),speedNow);
-			disStar = staticSpeedProfil.getLowerOrFirstKnotXValue(disStar);
+			speedNow = Math.min(this.ssp.getSpeedAtDistance(disStar, curveType),speedNow);
+			disStar = this.ssp.getLowerOrFirstKnotXValue(disStar);
 		}
 
 		coefList = new ArrayList<>();
-		coefList.add(Math.min(staticSpeedProfil.getPointOnCurve(0d),speedNow));
+		coefList.add(Math.min(this.ssp.getSpeedAtDistance(0d, curveType),speedNow));
 		coefList.add(0d);
 		knotList.add(0, new Knot(disNow,coefList));
 
 		return knotList;
 	}
+
 
 
 }

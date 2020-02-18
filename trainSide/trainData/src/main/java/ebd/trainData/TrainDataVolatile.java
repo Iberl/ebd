@@ -53,25 +53,25 @@ public class TrainDataVolatile {
     @Nullable
     protected volatile Spline currentTripProfile = null;
 
+    /**
+     * The target speed of the train in [m/s] based on the trip profile.
+     * Updated trough driving dynamics
+     */
+    protected volatile double currentProfileTargetSpeed = 0d;
 
     /**
      * The current speed of the train in [m/s]
+     * Updated trough driving dynamics
      */
     protected volatile double currentSpeed = 0d;
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the service deceleration curve
+     * the permitted speed curve
      * Updated from the speed supervision module
      */
     protected volatile double currentMaximumSpeed = 0d;
 
-    /**
-     * The current emergency max speed of the train in [m/s] based on the
-     * emergency deceleration curve
-     * Updated from the speed supervision module
-     */
-    protected volatile double currentEmergencySpeed = 0d;
 
     /**
      * The current emergency intervention speed of the train in [m/s] based on
@@ -92,29 +92,28 @@ public class TrainDataVolatile {
      * the service warning curve
      * Updated from the speed supervision module
      */
-    protected volatile double currentServiceWarningSpeed = 0d;
-
-    /**
-     * The current service permitted speed speed of the train in [m/s] based on
-     * the service permitted speed curve
-     * Updated from the speed supervision module
-     */
-    protected volatile double currentServicePermittedSpeed = 0d;
+    protected volatile double currentWarningSpeed = 0d;
 
     /**
      * The current service indication speed of the train in [m/s] based on
      * the service indication curve
      * Updated from the speed supervision module
      */
-    protected volatile double currentServiceIndicationSpeed = 0d;
+    protected volatile double currentIndicationSpeed = 0d;
 
+    /**
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
+     */
+    protected volatile double currentCoastingPhaseSpeed = 0d;
 
 
     /**
-     * The target speed of the train in [m/s] based on the trip profile.
-     * Updated trough driving dynamics
+     * Target speed of the next breaking phase of the train in [m/s].
+     * Updated from the speed supervision module
      */
-    protected volatile double currentTargetSpeed = 0d;
+    protected volatile double targetSpeed = 0d;
 
 
     /**
@@ -235,7 +234,7 @@ public class TrainDataVolatile {
      * only for testing!
      * @param currentPosition
      * @param currentSpeed
-     * @param currentTargetSpeed
+     * @param currentProfileTargetSpeed
      * @param m_MODE
      * @param previousLocations
      * @param currentBreakingMode
@@ -245,7 +244,7 @@ public class TrainDataVolatile {
      * @param availableAcceleration
      */
     @SuppressWarnings({"JavaDoc", "ConstantConditions"})
-    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentTargetSpeed, @Nullable Integer m_MODE,
+    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentProfileTargetSpeed, @Nullable Integer m_MODE,
                              @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
@@ -255,7 +254,7 @@ public class TrainDataVolatile {
 
         this.currentPosition = currentPosition;
         this.currentSpeed = currentSpeed;
-        this.currentTargetSpeed = currentTargetSpeed;
+        this.currentProfileTargetSpeed = currentProfileTargetSpeed;
         M_MODE = m_MODE;
         this.previousLocations = previousLocations;
         this.currentBreakingMode = currentBreakingMode;
@@ -297,7 +296,15 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return current speed in [m/s]
+     * @return current maximum allowed speed in [m/s] based on the trip profile
+     */
+    @NotNull
+    public Double getCurrentProfileTargetSpeed() {
+        return currentProfileTargetSpeed;
+    }
+
+    /**
+     * @return current speed of the train in [m/s]
      */
     @NotNull
     public Double getCurrentSpeed() {
@@ -309,15 +316,6 @@ public class TrainDataVolatile {
      */
     public Double getCurrentMaximumSpeed() {
         return currentMaximumSpeed;
-    }
-
-    /**
-     * The current emergency max speed of the train in [m/s] based on the
-     * emergency deceleration curve
-     * Updated from the speed supervision module
-     */
-    public double getCurrentEmergencySpeed() {
-        return currentEmergencySpeed;
     }
 
     /**
@@ -343,17 +341,8 @@ public class TrainDataVolatile {
      * the service warning curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceWarningSpeed() {
-        return currentServiceWarningSpeed;
-    }
-
-    /**
-     * The current service permitted speed speed of the train in [m/s] based on
-     * the service permitted speed curve
-     * Updated from the speed supervision module
-     */
-    public double getCurrentServicePermittedSpeed() {
-        return currentServicePermittedSpeed;
+    public double getCurrentWarningSpeed() {
+        return currentWarningSpeed;
     }
 
     /**
@@ -361,17 +350,26 @@ public class TrainDataVolatile {
      * the service indication curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceIndicationSpeed() {
-        return currentServiceIndicationSpeed;
+    public double getCurrentIndicationSpeed() {
+        return currentIndicationSpeed;
     }
 
     /**
-     * @return current maximum allowed speed in [m/s]
+     * The current service coasting phase speed of the train in [m/s] based on
+     * the service coasting phase curve
+     * Updated from the speed supervision module
      */
-    @NotNull
-    public Double getCurrentTargetSpeed() {
-        return currentTargetSpeed;
+    public double getCurrentCoastingPhaseSpeed() {
+        return currentCoastingPhaseSpeed;
     }
+
+    /**
+     * @return Target speed of the next breaking phase of the train in [m/s].
+     */
+    public double getTargetSpeed() {
+        return targetSpeed;
+    }
+
 
     @Nullable
     public Integer getM_MODE() {

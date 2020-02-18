@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.supervisors;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -162,7 +163,7 @@ public class PositionReportSupervisor {
 
         Message_136 message136 = new Message_136();
         message136.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message136.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
 
         Packet_0 packet0 = new Packet_0();

@@ -2,6 +2,7 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -82,15 +83,16 @@ public class MessageAuthorityRequestSupervisor {
         double distanceToEOL = 0;
         if(this.breakingCurve != null){
             distanceToEOL = this.breakingCurve.getHighestXValue();
-            distanceToEOL -= trainDataVolatile.getCurrentPosition().totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+            distanceToEOL -= trainDataVolatile.getCurTripSectionDistance();
         }
 
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;
 
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
-            if (t_mar >= timeToEOL){
-                this.timeAtRequest = System.currentTimeMillis() / 1000d;
+            double deltaT = AppTime.currentTimeMillis() / 1000d - timeAtRequest;
+            if (timeToEOL <= t_mar && deltaT > 10){
+                this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
                 this.lastQ_MARQSTREASON = 2;
                 sendMaRequest();
             }
@@ -102,9 +104,9 @@ public class MessageAuthorityRequestSupervisor {
         }
 */
 
-        double deltaT = (System.currentTimeMillis() / 1000d) - this.timeAtRequest;
+        double deltaT = (AppTime.currentTimeMillis() / 1000d) - this.timeAtRequest;
         if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_TIMEOUTRQST_INFINITY && t_cycrqst < deltaT){
-            this.timeAtRequest = System.currentTimeMillis() / 1000d;
+            this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
             sendMaRequest();
         }
     }
@@ -121,7 +123,7 @@ public class MessageAuthorityRequestSupervisor {
 
     @Subscribe
     public void newMaRequest(NewMaRequest nmr){
-        this.timeAtRequest = System.currentTimeMillis() / 1000d;
+        this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
         this.lastQ_MARQSTREASON = nmr.Q_MARQSTREASON;
     }
 
@@ -152,7 +154,7 @@ public class MessageAuthorityRequestSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         Message_132 message132 = new Message_132();
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message132.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message132.Q_MARQSTREASON = this.lastQ_MARQSTREASON;
         message132.NID_ENGINE = Integer.parseInt(this.etcsTrainID);

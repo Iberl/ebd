@@ -2,6 +2,11 @@ package ebd.globalUtils.speedInterventionLevel;
 
 public enum SpeedInterventionLevel {
     /**
+     * Null replacement
+     */
+    NOT_SET,
+
+    /**
      * Speed is uncritical
      */
     NO_INTERVENTION,
@@ -20,6 +25,12 @@ public enum SpeedInterventionLevel {
      * Speed will become to high very soon
      */
     WARNING,
+
+    /**
+     * As required by SRS 3.13
+     * Signals the need to cut of traction.
+     */
+    CUT_OFF_TRACTION,
 
     /**
      * Speed will become to high, service breaks will be applied automatically

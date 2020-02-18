@@ -1,5 +1,7 @@
 package ebd.trainStatusManager.util;
 
+import ebd.globalUtils.appTime.AppTime;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -20,8 +22,12 @@ public class Clock implements Runnable {
     private EventBus eventBus;
     private Thread clockThread;
 
-    private int tickTime;
+    private int tickTime; //in [ms]
+
+
     private boolean running = true;
+    private boolean paused;
+    private long lastClockTickTime; //in [ns]
 
     private List<String> exceptionTargets = Collections.singletonList("tsm");
     private List<String> eventTargets = Collections.singletonList("all");
@@ -29,6 +35,7 @@ public class Clock implements Runnable {
 
     public Clock(EventBus eventBus) {
         this.eventBus = eventBus;
+        this.lastClockTickTime = AppTime.nanoTime();
         this.clockThread = new Thread(this);
     }
 
@@ -36,7 +43,12 @@ public class Clock implements Runnable {
     public void run() {
         while(this.running){
             try {
-                this.eventBus.post(new ClockTickEvent("clock", this.eventTargets));
+                if(!paused){
+                    long timeDifference = AppTime.nanoTime() - this.lastClockTickTime;
+                    double deltaT = timeDifference / 1E9;
+                    this.eventBus.post(new ClockTickEvent("clock", this.eventTargets, deltaT));
+                    this.lastClockTickTime = AppTime.nanoTime();
+                }
                 Thread.sleep(this.tickTime);
             } catch (InterruptedException e) {
                 InterruptedException ie = new InterruptedException("Clock was interrupted: " + e.getMessage());
@@ -60,5 +72,15 @@ public class Clock implements Runnable {
      */
     public void stop(){
         this.running = false;
+    }
+
+    public boolean isPaused(){
+        return this.paused;
+    }
+
+    public void setPaused (boolean paused){
+        if(this.paused == paused) return;
+        if(!paused) this.lastClockTickTime = AppTime.nanoTime();
+        this.paused = paused;
     }
 }

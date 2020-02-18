@@ -1,6 +1,7 @@
 package ebd.szenario;
 
 import ebd.dmi.ui.DMIDisplayConnector;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -85,7 +86,7 @@ public class Szenario implements Runnable {
             li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 10, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(200, false, 0, 11, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
 
-            Message_24 message_24 = new Message_24((System.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
+            Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
             ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=192")));
         }
@@ -183,6 +184,7 @@ public class Szenario implements Runnable {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load1(LoadOneEvent loe){
         System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to B");
+        System.out.println(ConfigHandler.getInstance().pathToDriverProfileJson);
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
@@ -195,7 +197,6 @@ public class Szenario implements Runnable {
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        System.out.println(msg);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)

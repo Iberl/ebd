@@ -24,7 +24,7 @@ public enum DMIColor {
 	/**
 	 * RGB: 150, 150, 150.
 	 */
-	MEDIUM_GRAY,
+	MEDIUM_GREY,
 
 	/**
 	 * RGB: 85, 85, 85.

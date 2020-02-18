@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.handlers;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
@@ -14,9 +15,9 @@ import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
-import ebd.messageLibrary.packet.Packet;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
+import ebd.messageLibrary.packet.trainpackets.Packet_1;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -144,7 +145,7 @@ public class MessageHandler {
         int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
         int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
         double l_train = trainDataPerma.getL_train();
-        double currentMaxSpeed = trainDataVolatile.getCurrentTargetSpeed();
+        double currentMaxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
         int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
         Position refPosition;
@@ -242,6 +243,9 @@ public class MessageHandler {
             case 58:
                 PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
                 break;
+            case 80:
+                PackageHandler.p80(this.localBus,(Packet_80)trackPacket);
+                break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
                 localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.NONCRITICAL));
@@ -252,7 +256,7 @@ public class MessageHandler {
     private void sendAck(TrackMessage tm) {
         Message_146 message146 = new Message_146();
         message146.NID_ENGINE = this.etcsTrainID;
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);

@@ -115,9 +115,9 @@ public class InfrastructureClient {
     }
 
     /**
-     * Fahrzeug am System anmelden. Es wird angehalten und die Richtung auf
-     * Pfeilrichtung gesetzt. Funktion 0 wird aktiviert, 1 bis 4 werden
-     * deaktiviert.
+     * Signs the train into the system. It stops and the direction the train driving
+     * direction will be set on nominal. Function 0 will be activated, 1 to 4 will be
+     * deactivated.
      *
      * @param address Tfz-Adresse
      */
@@ -126,9 +126,10 @@ public class InfrastructureClient {
     }
 
     /**
-     * Fahrzeug vom System abmelden. Es wird angehalten und die Richtung auf
-     * Pfeilrichtung gesetzt. Funktionen 0 bis 4 werden deaktiviert.
-     * Funktioniert nur, wenn Fahrzeug steht.
+     * Disconnects the train from the system. It stops and the direction the train driving
+     * direction will be set on nominal. Function 0 to 4 will be
+     * deactivated.
+     * Only works if the train is standing still.
      *
      * @param address Tfz-Adresse
      */
@@ -138,15 +139,24 @@ public class InfrastructureClient {
 
 
     /**
-     * Fahrzeug manuell fahren. Wenn keine Geschwindigkeitsinformationen fÃ¼r das
-     * Fahrzeug vorhanden sind, wird ein Fehler ausgegeben und keine Aktion
-     * ausgefÃ¼hrt.
-     *
+     * Manuel train drive based on speed. If the train on the infrastructure
+     * has no saved speed information a warning will be displayed and no action
+     * will be taken
      * @param address Tfz-Adresse
-     * @param velocity Geschwindigkeit in km/h
+     * @param velocity Speed in km/h
      */
     private void gok(Integer address, Integer velocity) {
         send("gok %s %s", address, velocity);
+    }
+
+    /**
+     * Manuel train drive
+     *
+     * @param address Tfz-Address
+     * @param trainPowerLevel train power level in the range of 0 to 100
+     */
+    private void go(Integer address, Integer trainPowerLevel) {
+        send("go %s %s", address, trainPowerLevel);
     }
 
     /**
@@ -167,21 +177,25 @@ public class InfrastructureClient {
             registeredTrains.add(trainID);
             init(trainID);
         }
-
-        gok(trainID, uie.speedInKmh);
+        if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
+            /*
+            Necessary, because the infrastructure logic has a quirk. which sets the train power level to 0
+            from 0 to 10 km/h and starts with two at 10 km/h.
+            */
+            go(trainID, 1);
+        }
+        else {
+            gok(trainID, uie.speedInKmh);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void terminateTrain(TerminateTrainEvent tte){
-
         if(!this.useInfrastructureServer || !validTarget(tte.targets)){
             return;
         }
 
-        this.globalEventBus.unregister(this);
-
         int trainID = getTrainIDFromSource(tte.source);
-
         if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
 
         terminate(trainID);
@@ -190,7 +204,11 @@ public class InfrastructureClient {
 
     @Subscribe
     public void disconnect(DisconnectEvent de){
+        if(!validTarget(de.targets)){
+            return;
+        }
 
+        this.globalEventBus.unregister(this);
     }
 
 
@@ -198,7 +216,7 @@ public class InfrastructureClient {
     private int getTrainIDFromSource(String source){
         int etcsID = -1;
         //TODO: set train number by questioning the DBD database or by initialisation
-        etcsID = trainNumber;
+        etcsID = this.trainNumber;
         return etcsID;
     }
 

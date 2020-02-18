@@ -26,7 +26,7 @@ public class Clock implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            this.eventBus.post(new ClockTickEvent("clock", Collections.singletonList("all")));
+            this.eventBus.post(new ClockTickEvent("clock", Collections.singletonList("all"), 2));
         }
     }
 
