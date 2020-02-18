@@ -55,6 +55,7 @@ public class MessageHandler {
             if(msg3 == null){
                 msg = String.format("Could not fulfill MA request from train %s", trainID);
                 this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+                sendMessage24withPacket57(rme, ETCSVariables.T_MAR_INFINITY);
             }
             else sendMessage3(msg3,trainID);
         }
@@ -94,6 +95,15 @@ public class MessageHandler {
         Message_24 msg24 = makeMessage24(trackPackets);
         this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg24, Collections.singletonList("mr;T=" + trainID)));
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters and Position Report Parameters"));
+    }
+
+    private void sendMessage24withPacket57(ReceivedMessageEvent rme, int t_mar){
+        String trainID = rme.sender.split(";T=")[1];
+        List<TrackPacket> trackPackets = new ArrayList<>();
+        trackPackets.add(makeP57(t_mar));
+        Message_24 msg24 = makeMessage24(trackPackets);
+        this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg24, Collections.singletonList("mr;T=" + trainID)));
+        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters"));
     }
 
     private Message_3 makeM3(ReceivedMessageEvent rme) {

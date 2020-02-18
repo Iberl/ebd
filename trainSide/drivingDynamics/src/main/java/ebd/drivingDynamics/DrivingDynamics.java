@@ -250,6 +250,7 @@ public class DrivingDynamics {
             return;
         }
         this.dynamicState.setMovementState(MovementState.HALTING);
+        this.dynamicState.setAcceleration(0d);
         sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
         this.locked = true;
     }
