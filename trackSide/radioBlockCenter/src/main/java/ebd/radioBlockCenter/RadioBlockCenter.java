@@ -54,7 +54,7 @@ public class RadioBlockCenter {
         //this.localBus.register(this);
         this.rbcID = rbcID;
 
-        SocketClient socketClient = new SocketClient();
+        SocketClient socketClient = new SocketClient("rbc");
         JSONParser jsonParser = new JSONParser();
         List<JSONObject> tmsInfos = new ArrayList<>();
 
