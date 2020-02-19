@@ -110,11 +110,6 @@ public class MessageHandler {
         if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0) {
             lop.add(makeP80(d_EOL));
             lop.add(makeP57(ETCSVariables.T_MAR_INFINITY));
-            try {
-                Thread.sleep(60000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }else {
             lop.add(makeP57(20));
         }

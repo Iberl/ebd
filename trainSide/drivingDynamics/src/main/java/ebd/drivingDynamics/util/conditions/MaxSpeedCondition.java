@@ -17,7 +17,7 @@ import java.util.function.BiFunction;
  *     {"type" : "v_m", "condition" : {"op" : "<", "value" : 50 }}</p>
  * @author Lars Schulze-Falck
  */
-public class MaxSpeedCondition extends Condition {
+public class MaxSpeedCondition extends CurveBasedCondition {
 
     private Double speedTotal;
     private BiFunction<Double,Double, Boolean> comparator;
@@ -32,9 +32,21 @@ public class MaxSpeedCondition extends Condition {
 
     @Override
     public boolean eval() {
-        double currentTargetSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
 
-        return comparator.apply(currentTargetSpeed,speedTotal);
+        double maxSpeed;
+        switch (this.curveBase){
+            case C30:
+                maxSpeed = this.trainDataVolatile.getCurrentCoastingPhaseSpeed();
+                break;
+            case TRIP_PROFILE:
+                maxSpeed = this.trainDataVolatile.getCurrentProfileTargetSpeed();
+                break;
+            default:
+                maxSpeed = 0d;
+                System.err.println(String.format("You have to add %s to this switch statement", this.curveBase));
+        }
+
+        return comparator.apply(maxSpeed,speedTotal);
     }
 
     @Override
@@ -62,5 +74,20 @@ public class MaxSpeedCondition extends Condition {
             this.comparator = ComparisonParser.parse(opCode);
         }
         else throw new DDBadDataException("The key 'op' was missing for a MaxSpeedCondition");
+
+        if(jsonObject.containsKey("curveBase")){
+            switch ((String) jsonObject.get("curveBase")){
+                case "c30":
+                    this.curveBase = CurveBase.C30;
+                    break;
+                case "trip":
+                    this.curveBase = CurveBase.TRIP_PROFILE;
+                    break;
+                default:
+                    this.curveBase = CurveBase.NOT_SET;
+                    throw new DDBadDataException(String.format("Condition was formatted wrong, %s is not a valid curve base", jsonObject.get("curveBase")));
+            }
+        }
+        else throw new DDBadDataException("The key curveBase was missing from a Condition");
     }
 }
