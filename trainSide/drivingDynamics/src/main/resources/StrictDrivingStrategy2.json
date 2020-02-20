@@ -10,7 +10,7 @@
             {
               "type": "v_rel",
               "condition": {
-                "curveBase" : "c30",
+                "curveBase" : "trip",
                 "op": ">",
                 "value": 100
               }
@@ -27,8 +27,34 @@
       }
     },
     {
-      "type": "v_cruise",
+      "type": "v_break",
       "priority": 1,
+      "action": {
+        "value": 100,
+        "conditions": {
+          "orBlock": [
+            {
+              "type": "v_rel",
+              "condition": {
+                "curveBase" : "c30",
+                "op": ">",
+                "value": 110
+              }
+            },
+            {
+              "type": "v",
+              "condition": {
+                "op": ">=",
+                "value": 120
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "v_cruise",
+      "priority": 2,
       "action": {
         "conditions": {
           "andBlock": [
@@ -37,7 +63,7 @@
               "condition": {
                 "curveBase" : "c30",
                 "op": ">=",
-                "value": 95
+                "value": 90
               }
             },
             {
@@ -45,7 +71,7 @@
               "condition": {
                 "curveBase" : "c30",
                 "op": "<=",
-                "value": 100
+                "value": 110
               }
             },
             {
@@ -61,7 +87,7 @@
     },
     {
       "type": "v_acc",
-      "priority": 2,
+      "priority": 3,
       "action": {
         "value": 100,
         "conditions": {
@@ -71,11 +97,27 @@
               "condition": {
                 "curveBase" : "c30",
                 "op": "<",
-                "value": 95
+                "value": 90
               }
             }
           ]
         }
+      }
+    },
+    {
+      "type": "v_cruise",
+      "priority": 100,
+      "action": {
+        "conditions":
+            {
+              "type": "v_rel",
+              "condition": {
+                "curveBase" : "c30",
+                "op": "<=",
+                "value": 110
+              }
+            }
+
       }
     }
   ]
