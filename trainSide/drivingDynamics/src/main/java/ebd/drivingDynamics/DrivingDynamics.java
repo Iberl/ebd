@@ -212,7 +212,7 @@ public class DrivingDynamics {
      * This can happen when a new balise is reached, which results in a new position with new location and increment.
      * @param ntdve A {@link NewTrainDataVolatileEvent}
      */
-/*    @Subscribe
+    @Subscribe
     public void newTrainData(NewTrainDataVolatileEvent ntdve){
         if(!(ntdve.targets.contains("all") || ntdve.targets.contains("dd"))){
             return;
@@ -221,7 +221,7 @@ public class DrivingDynamics {
         if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
             this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
         }
-    }*/
+    }
 
     /**
      * This method unlocks Drvining Dynamics, which signals the start of movement of the train
@@ -377,7 +377,7 @@ public class DrivingDynamics {
     }
 
     /**
-     * This method calculates the new MaxSpeed for the current location. Also sends these to {@link TrainDataVolatile}
+     * This method calculates the new profile target speed for the current location. Also sends these to {@link TrainDataVolatile}
      */
     private void updateCurrentTargetSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();

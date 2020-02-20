@@ -232,7 +232,7 @@ public class Szenario implements Runnable {
         }
         Route a = new Route("A1", 600,new int[]{0,100},new int[]{0,1});
         Route b = new Route("12", 1900,new int[]{0,100,900,80,700,120},new int[]{0,1,750,0,450,-2});
-        Route c = new Route("2C", 1700,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
+        Route c = new Route("2C", 1400,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
 
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
