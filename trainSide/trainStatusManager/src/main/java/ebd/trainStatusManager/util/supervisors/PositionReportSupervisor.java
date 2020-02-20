@@ -49,6 +49,7 @@ public class PositionReportSupervisor {
     private double tripDistanceAtCycleStart = 0d;
     private int d_cycleNumber = 1;
 
+    private double curFullTripTime = 0;
     private String rbcID;
 
     private IncrPosRprtDist positionReportDistances = null;
@@ -79,13 +80,13 @@ public class PositionReportSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-
+        this.curFullTripTime += cte.deltaT;
         int t_cycle = trainDataVolatile.getT_CYCLOC();
         if(t_cycle != ETCSVariables.T_CYCLOC && t_cycle < ETCSVariables.T_CYCLOC_INFINITY){
-            double curTime = trainDataVolatile.getCurTripTime() - this.tripTimeAtCycleStart;
-            double curCycleNumber = curTime / t_cycle;
-            if(curCycleNumber > this.t_cycleNumber){
-                this.t_cycleNumber = (int)curCycleNumber + 1;
+            double curTime = this.curFullTripTime - this.tripTimeAtCycleStart;
+            //double curCycleNumber = curTime / t_cycle;
+            if(curTime > t_cycle){
+                //this.t_cycleNumber = (int)curCycleNumber + 1;
                 sendPositionReport();
             }
         }
@@ -150,7 +151,7 @@ public class PositionReportSupervisor {
 
         this.tripDistanceAtCycleStart = trainDataVolatile.getCurTripDistance();
         this.d_cycleNumber = 1;
-        this.tripTimeAtCycleStart = trainDataVolatile.getCurTripTime();
+        this.tripTimeAtCycleStart = this.curFullTripTime;
         this.t_cycleNumber = 1;
     }
 
@@ -184,6 +185,7 @@ public class PositionReportSupervisor {
         message136.PACKET_POSITION = packet0;
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, Collections.singletonList("mr;R=" + this.rbcID))); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Position Report"));
+        this.tripTimeAtCycleStart = this.curFullTripTime;
     }
 
     /**

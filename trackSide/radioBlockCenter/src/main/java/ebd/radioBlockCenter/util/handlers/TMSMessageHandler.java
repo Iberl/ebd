@@ -19,8 +19,7 @@ import org.json.simple.JSONValue;
 
 import java.util.*;
 
-import static ebd.messageLibrary.util.ETCSVariables.M_LOC_AT_BALISE_GROUP;
-import static ebd.messageLibrary.util.ETCSVariables.Q_DIR_NOMINAL;
+import static ebd.messageLibrary.util.ETCSVariables.*;
 
 public class TMSMessageHandler {
 
@@ -33,7 +32,11 @@ public class TMSMessageHandler {
 
     private int scenario;
     private int nextMaInfo = 0;
+    private int nextSpeedSegment = 0;
     private double maDistance = 0;
+    private int nid_lrbg = 0;
+    private int d_lrbg = 0;
+    private boolean trainShouldStop = false;
 
     public TMSMessageHandler(EventBus localBus, String rbcID, List<JSONObject> maInfos, int scenario) {
         this.localBus = localBus;
@@ -46,33 +49,54 @@ public class TMSMessageHandler {
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void receivedMessage(ReceivedMessageEvent rme){
+    public void receivedMessage(ReceivedMessageEvent rme) {
         if(!validTarget(rme.targets)) return;
         String trainID = (rme.sender.split(";T="))[1];
 
 
-        if(rme.message instanceof Message_132){ //MA Request
-            Message_132 msg132 = (Message_132)rme.message;
+        if(rme.message instanceof Message_132) { //MA Request
+            Message_132 msg132 = (Message_132) rme.message;
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-            sendMessage3(makeM3(rme.sender.split(";T=")[1]), trainID);
-        }
-        else if(rme.message instanceof Message_136){ //Position Report
-            Message_136 msg136 = (Message_136)rme.message;
+            if(!trainShouldStop) {
+                sendMessage3(makeM3(rme.sender.split(";T=")[1]), trainID);
+            }
+        } else if(rme.message instanceof Message_136) { //Position Report
+            Message_136 msg136 = (Message_136) rme.message;
+            int nid_lrbg = msg136.PACKET_POSITION.NID_LRBG;
+            int d_lrbg = msg136.PACKET_POSITION.D_LRBG;
+            int q_scale = msg136.PACKET_POSITION.Q_SCALE;
+            d_lrbg = (int) (Math.pow(10, q_scale - 1) * d_lrbg);
+
+            if(trainShouldStop && this.nid_lrbg == nid_lrbg && d_lrbg - this.d_lrbg == 0) {
+                trainShouldStop = false;
+                try {
+                    System.out.println("Waiting ... 10s");
+                    Thread.sleep(10000);
+                } catch(InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Sending next MA");
+                sendMessage3(makeM3(rme.sender.split(";T=")[1]), trainID);
+            } else {
+                System.out.println(d_lrbg);
+                System.out.println("qscale" + q_scale);
+                this.nid_lrbg = nid_lrbg;
+                this.d_lrbg = d_lrbg;
+                System.out.println(this.nid_lrbg);
+                System.out.println(this.d_lrbg);
+            }
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg136.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received position report from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-        }
-        else if(rme.message instanceof Message_146){
+        } else if(rme.message instanceof Message_146) {
             String msg = String.format("Received Acknowledge from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-        }
-        else if(rme.message instanceof Message_150){
+        } else if(rme.message instanceof Message_150) {
             String msg = String.format("Received Mission End message from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-        }
-        else if(rme.message instanceof Message_155){
+        } else if(rme.message instanceof Message_155) {
             this.controlledTrainsByID.add(((Message_155) rme.message).NID_ENGINE);
             String msg = String.format("Received communication initiation from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
@@ -81,12 +105,12 @@ public class TMSMessageHandler {
         }
     }
 
-    private void sendMessage3(Message_3 msg3, String trainID){
+    private void sendMessage3(Message_3 msg3, String trainID) {
         this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg3, Collections.singletonList("mr;T=" + trainID)));
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), "Sending MA Message"));
     }
 
-    private void sendMessage24withPackets57MARZEROAnd58(ReceivedMessageEvent rme){
+    private void sendMessage24withPackets57MARZEROAnd58(ReceivedMessageEvent rme) {
         String trainID = rme.sender.split(";T=")[1];
         List<TrackPacket> trackPackets = new ArrayList<>();
         trackPackets.add(makeP57(0));
@@ -110,31 +134,54 @@ public class TMSMessageHandler {
             JSONObject maInfo = maInfos.get(nextMaInfo);
             JSONObject eoa = (JSONObject) maInfo.get("endOfAuthority");
 
+            nextSpeedSegment = 0;
+
             int beginPosition = 0;
+            int endPosition = 0;
             JSONObject sp = ((JSONObject) maInfo.get("speedProfile"));
 
             // Speed Profile
+            boolean done = false;
 
-            if(gpList.size() == 0 && !(boolean) eoa.get("shunting")) {
-                JSONObject tspJSON = (JSONObject) ((JSONArray) sp.get("speedSegments")).get(0);
-                beginPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("begin")).get("chainage")).get("iMeters")).intValue();
+            if(!(boolean) eoa.get("shunting")) {
+                JSONArray speedSegmentsJSON = (JSONArray) sp.get("speedSegments");
 
-                int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue() * 5;
-                tspList.add(beginPosition);
-                tspList.add(v_static);
+                System.out.println(speedSegmentsJSON.size());
+                for(;nextSpeedSegment < speedSegmentsJSON.size(); nextSpeedSegment++) {
 
-                JSONObject chainage = (JSONObject) eoa.get("chainage");
-                long iMeters = (Long) chainage.get("iMeters");
-                d_eoa = (double) iMeters;
-                //d_eoa = 100;
+                    JSONObject tspJSON = (JSONObject) speedSegmentsJSON.get(nextSpeedSegment);
 
-                gpList.add(beginPosition);
-                gpList.add(0);
+                    beginPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("begin")).get("chainage")).get("iMeters")).intValue();
+                    endPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("end")).get("chainage")).get("iMeters")).intValue();
 
-                if(d_eoa - maDistance > 900) {
-                    nextMaInfo += 1;
-                    break;
+                    int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue() * 5;
+                    tspList.add(beginPosition);
+                    tspList.add(v_static);
+
+                    JSONObject chainage = (JSONObject) eoa.get("chainage");
+                    long iMeters = (Long) chainage.get("iMeters");
+                    d_eoa = (double) iMeters;
+                    //d_eoa = 100;
+
+                    gpList.add(beginPosition);
+                    gpList.add(0);
+
+                    /*if(d_eoa - maDistance > 2000) {
+                        nextSpeedSegment++;
+                        done = true;
+                        break;
+                    }*/
+
+                    System.out.println(beginPosition + " " + endPosition + " " + v_static);
+                    if(beginPosition == endPosition && v_static == 0) {
+                        System.out.println("train should halt");
+                        trainShouldStop = true;
+                        nextSpeedSegment++;
+                        done = true;
+                        break;
+                    }
                 }
+
             } else if(nextMaInfo == maInfos.size()) {
                 tspList.add(beginPosition);
                 tspList.add(0);
@@ -142,7 +189,8 @@ public class TMSMessageHandler {
                 gpList.add(0);
                 break;
             }
-
+            System.out.println("nach innerer schleife: " + nextMaInfo + ' ' + done);
+            if(done) break;
         }
 
         nextMaDistance = (int) d_eoa;
@@ -150,15 +198,19 @@ public class TMSMessageHandler {
         int[] gp = new int[gpList.size()];
         int[] tsp = new int[tspList.size()];
 
-        for(int i = 0; i < gpList.size(); i++) { gp[i] = gpList.get(i); }
-        for(int i = 0; i < tspList.size(); i++) { tsp[i] = tspList.get(i); }
+        for(int i = 0; i < gpList.size(); i++) {
+            gp[i] = gpList.get(i);
+        }
+        for(int i = 0; i < tspList.size(); i++) {
+            tsp[i] = tspList.get(i);
+        }
 
         packets.add(makeP21(gp));
         packets.add(makeP27(tsp));
         if(nextMaInfo == maInfos.size()) {
             packets.add(makeP57(ETCSVariables.T_MAR_INFINITY));
-        }
-        else {
+            packets.add(makeP80());
+        } else {
             packets.add(makeP57(20));
         }
 
@@ -172,14 +224,14 @@ public class TMSMessageHandler {
         return msg3;
     }
 
-    private Message_24 makeMessage24(List<TrackPacket> trackPackets){
+    private Message_24 makeMessage24(List<TrackPacket> trackPackets) {
         Message_24 m24 = new Message_24();
         m24.NID_LRBG = 0;
         m24.packets.addAll(trackPackets);
         return m24;
     }
 
-    private Packet_15 makeP15(double d_EOA){
+    private Packet_15 makeP15(double d_EOA) {
         Packet_15 packet15 = new Packet_15();
 
         packet15.Q_SCALE = ETCSVariables.Q_SCALE_1M;
@@ -189,13 +241,13 @@ public class TMSMessageHandler {
         return packet15;
     }
 
-    private Packet_21 makeP21(int[] gp){
+    private Packet_21 makeP21(int[] gp) {
         //int[] gp = {0,1,750,0,550,-2,600,1}; //[m,0/00]
         Packet_21.Packet_21_Gradient gradient = new Packet_21.Packet_21_Gradient(gp[0], gp[1] >= 0, Math.abs(gp[1]));
         ArrayList<Packet_21.Packet_21_Gradient> gradients = new ArrayList<>();
 
-        for (int i = 2; i < gp.length; i+=2) {
-            Packet_21.Packet_21_Gradient tempgrad = new Packet_21.Packet_21_Gradient(gp[i], gp[i+1] >= 0, Math.abs(gp[i+1]));
+        for(int i = 2; i < gp.length; i += 2) {
+            Packet_21.Packet_21_Gradient tempgrad = new Packet_21.Packet_21_Gradient(gp[i], gp[i + 1] >= 0, Math.abs(gp[i + 1]));
             gradients.add(tempgrad);
         }
         Packet_21 packet21 = new Packet_21();
@@ -206,7 +258,7 @@ public class TMSMessageHandler {
         return packet21;
     }
 
-    private Packet_27 makeP27(int[] tsp){
+    private Packet_27 makeP27(int[] tsp) {
         //int[] tsp = {0,100,900,80,700,120}; //[m,km/h]
 
         Packet_27 packet27 = new Packet_27();
@@ -221,9 +273,9 @@ public class TMSMessageHandler {
 
         ArrayList<Packet_27.Packet_27_StaticSpeedProfile> profileList = new ArrayList<>();
 
-        for (int i = 2; i < tsp.length; i+=2) {
+        for(int i = 2; i < tsp.length; i += 2) {
 
-            p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[i],tsp[i+1] / 5,true);
+            p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[i], tsp[i + 1] / 5, true);
             sectionList = new ArrayList<>();
             p27SSP.sections = sectionList;
             profileList.add(p27SSP);
@@ -233,7 +285,7 @@ public class TMSMessageHandler {
         return packet27;
     }
 
-    private Packet_57 makeP57(int T_MAR){
+    private Packet_57 makeP57(int T_MAR) {
         Packet_57 packet57 = new Packet_57();
         packet57.T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
         packet57.T_MAR = T_MAR;
@@ -241,23 +293,30 @@ public class TMSMessageHandler {
         return packet57;
     }
 
-    private Packet_58 makeP58(){
+    private Packet_58 makeP58() {
 
         Packet_58 packet58 = new Packet_58();
         packet58.Q_DIR = Q_DIR_NOMINAL;
-        packet58.M_LOC = M_LOC_AT_BALISE_GROUP;
+        packet58.T_CYCLOC = 10;
+        packet58.M_LOC = M_LOC_NOT_AT_BALISE_GROUP;
 
         return packet58;
     }
 
-    private boolean validTarget(List<String> targetList){
+    private Packet_80 makeP80() {
+        Packet_80 packet_80 = new Packet_80();
 
-        for(String target : targetList){
-            if(target.contains("tsm") || target.contains("all")){
-                if(!target.contains(";")){
+        packet_80.mode.M_MAMODE = ETCSVariables.M_MAMODE_SHUNTING;
+        return packet_80;
+    }
+
+    private boolean validTarget(List<String> targetList) {
+
+        for(String target : targetList) {
+            if(target.contains("tsm") || target.contains("all")) {
+                if(!target.contains(";")) {
                     return true;
-                }
-                else if (target.contains(";R=" + this.rbcID)){
+                } else if(target.contains(";R=" + this.rbcID)) {
                     return true;
                 }
             }
