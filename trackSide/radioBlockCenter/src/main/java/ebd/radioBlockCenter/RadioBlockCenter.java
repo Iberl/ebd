@@ -12,13 +12,12 @@ import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.util.Route;
 import ebd.radioBlockCenter.util.SocketClient;
-
 import ebd.radioBlockCenter.util.handlers.TMSMessageHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.M_DUP_NO_DUPLICATE;
@@ -102,17 +101,16 @@ public class RadioBlockCenter {
 
         // Adding BaliseGroups
         lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 0, 0, 0, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 0, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 3, 2, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 4, 3, 100, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 0, 400, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 600, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 3, 2, 400, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 4, 3, 500, false, null));
         lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 5, 4, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 6, 5, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 7, 6, 300, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 6, 5, 200, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 7, 6, 100, false, null));
         lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 8, 7, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 9, 8, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 10, 9, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 11, 10, 200, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 9, 8, 200, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 10, 9, 600, false, null));
 
         // Add 1 Balise to BaliseGroups
         lob.getBaliseGroup(0).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
@@ -126,7 +124,6 @@ public class RadioBlockCenter {
         lob.getBaliseGroup(8).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(9).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(10).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-        lob.getBaliseGroup(11).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
 
         // Add Connections
         lob.addConnection(0, 1);
@@ -139,7 +136,6 @@ public class RadioBlockCenter {
         lob.addConnection(7, 8);
         lob.addConnection(8, 9);
         lob.addConnection(9, 10);
-        lob.addConnection(10, 11);
 
 
         return new BaliseTelegramGenerator(localBus, lob);

@@ -9,17 +9,16 @@ import ebd.messageLibrary.message.trainmessages.*;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.radioBlockCenter.util.Route;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.util.*;
 
-import static ebd.messageLibrary.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.M_LOC_NOT_AT_BALISE_GROUP;
+import static ebd.messageLibrary.util.ETCSVariables.Q_DIR_NOMINAL;
 
 public class TMSMessageHandler {
 
@@ -37,6 +36,7 @@ public class TMSMessageHandler {
     private int nid_lrbg = 0;
     private int d_lrbg = 0;
     private boolean trainShouldStop = false;
+    private int[] balisePositions = new int[] {0, 400, 1000, 1400, 1900, 2200, 2400, 2500, 2800, 3000, 3600};
 
     public TMSMessageHandler(EventBus localBus, String rbcID, List<JSONObject> maInfos, int scenario) {
         this.localBus = localBus;
@@ -130,6 +130,8 @@ public class TMSMessageHandler {
         List<Integer> gpList = new ArrayList<>();
         List<Integer> tspList = new ArrayList<>();
 
+
+
         for(; nextMaInfo < maInfos.size(); nextMaInfo++) {
             JSONObject maInfo = maInfos.get(nextMaInfo);
             JSONObject eoa = (JSONObject) maInfo.get("endOfAuthority");
@@ -152,7 +154,10 @@ public class TMSMessageHandler {
                     JSONObject tspJSON = (JSONObject) speedSegmentsJSON.get(nextSpeedSegment);
 
                     beginPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("begin")).get("chainage")).get("iMeters")).intValue();
+                    beginPosition = beginPosition - balisePositions[Math.min(nid_lrbg, balisePositions.length)];
                     endPosition = ((Long) ((JSONObject) ((JSONObject) tspJSON.get("end")).get("chainage")).get("iMeters")).intValue();
+                    endPosition = endPosition - balisePositions[Math.min(nid_lrbg, balisePositions.length)];
+
 
                     int v_static = ((Long) ((JSONObject) tspJSON.get("v_STATIC")).get("bSpeed")).intValue() * 5;
                     tspList.add(beginPosition);
@@ -161,6 +166,7 @@ public class TMSMessageHandler {
                     JSONObject chainage = (JSONObject) eoa.get("chainage");
                     long iMeters = (Long) chainage.get("iMeters");
                     d_eoa = (double) iMeters;
+                    d_eoa = d_eoa - balisePositions[Math.min(nid_lrbg, balisePositions.length)];
                     //d_eoa = 100;
 
                     gpList.add(beginPosition);
