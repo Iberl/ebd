@@ -259,7 +259,7 @@ public class TMSMessageHandler {
 
             p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[i], tsp[i + 1] / 5, true);
 
-            System.out.println(tsp[i + 1] / 5);
+            //System.out.println(tsp[i + 1] / 5);
             sectionList = new ArrayList<>();
             p27SSP.sections = sectionList;
             profileList.add(p27SSP);
