@@ -35,7 +35,7 @@ public class ConfigHandler {
     public String ipToInfrastructureServer = "";
     public String portOfInfrastructureServer = "";
 
-    public String ipToTMSServer = "127.0.0.1";
+    public String ipToTMSServer = "";
     public String portOfTMSServer = "";
 
 

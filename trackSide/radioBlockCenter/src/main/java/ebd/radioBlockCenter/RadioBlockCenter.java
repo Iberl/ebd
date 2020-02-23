@@ -14,6 +14,7 @@ import ebd.radioBlockCenter.util.Route;
 import ebd.radioBlockCenter.util.SocketClient;
 import ebd.radioBlockCenter.util.handlers.TMSMessageHandler;
 import org.greenrobot.eventbus.EventBus;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -55,16 +56,30 @@ public class RadioBlockCenter {
 
         SocketClient socketClient = new SocketClient("rbc");
         JSONParser jsonParser = new JSONParser();
-        List<JSONObject> tmsInfos = new ArrayList<>();
+        List<int[]> speedSegments = new ArrayList<>();
 
         while(true) {
             try {
                 socketClient.request("test");
                 JSONObject resp = (JSONObject) jsonParser.parse((String) socketClient.outputQueue.take());
+                //System.out.println(resp.toJSONString());
                 JSONObject eoa = (JSONObject) resp.get("endOfAuthority");
+                if((boolean) eoa.get("shunting") == true) {
+                    break;
+                }
 
-                if((boolean) eoa.get("shunting") == true) break;
-                tmsInfos.add(resp);
+                JSONObject sp = (JSONObject) resp.get("speedProfile");
+                JSONArray speedSegmentsJSON = (JSONArray) sp.get("speedSegments");
+
+                for(int i = 0; i < speedSegmentsJSON.size(); i++) {
+                    JSONObject curr = (JSONObject) speedSegmentsJSON.get(i);
+                    int[] newSegment = new int[3];
+                    newSegment[0] = ((Long) ((JSONObject) ((JSONObject) curr.get("begin")).get("chainage")).get("iMeters")).intValue();
+                    newSegment[1] = ((Long) ((JSONObject) curr.get("v_STATIC")).get("bSpeed")).intValue() * 5;
+                    newSegment[2] = ((Long) ((JSONObject) ((JSONObject) ((JSONObject) speedSegmentsJSON.get(i)).get("end")).get("chainage")).get("iMeters")).intValue();
+                    speedSegments.add(newSegment);
+                }
+
             } catch(Exception e) {
                 System.err.println("Received an Error from TMS");;
                 e.printStackTrace();
@@ -72,8 +87,8 @@ public class RadioBlockCenter {
 
         }
 
-        for(JSONObject info: tmsInfos) {
-            System.out.println(info.toJSONString());
+        for(int[] segment: speedSegments) {
+            System.out.println("begin: " + segment[0] + " v: " + segment[1] + " end: " + segment[2]);
         }
 
         try {
@@ -86,7 +101,7 @@ public class RadioBlockCenter {
 
 
 
-        this.messageHandler = new TMSMessageHandler(this.localBus, this.rbcID, tmsInfos, scenario);
+        this.messageHandler = new TMSMessageHandler(this.localBus, this.rbcID, speedSegments, scenario);
         this.messageSender = new MessageSender(this.localBus, this.rbcID, false);
         this.messageReceiver = new MessageReceiver(this.localBus, this.rbcID, "all", true);
 

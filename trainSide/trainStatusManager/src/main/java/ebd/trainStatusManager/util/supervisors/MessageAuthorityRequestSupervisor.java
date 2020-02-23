@@ -41,6 +41,8 @@ public class MessageAuthorityRequestSupervisor {
     private String etcsTrainID;
     private String rbcID; //TODO: make updateable
 
+    private boolean waitingOnMA = false;
+
     /**
      * In [m]
      */
@@ -88,13 +90,18 @@ public class MessageAuthorityRequestSupervisor {
 
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;
-
+        if(distanceToEOL == 0 || curSpeed == 0){
+            timeToEOL = 0;
+        }
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
-            double deltaT = AppTime.currentTimeMillis() / 1000d - timeAtRequest;
-            if (timeToEOL <= t_mar && deltaT > 10){
+            if (timeToEOL <= t_mar){
+                double deltaT = AppTime.currentTimeMillis() / 1000d - timeAtRequest;
+
+                if(!this.waitingOnMA || deltaT > 10){
                 this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
                 this.lastQ_MARQSTREASON = 2;
                 sendMaRequest();
+                }
             }
         }
 
@@ -105,7 +112,7 @@ public class MessageAuthorityRequestSupervisor {
 */
 
         double deltaT = (AppTime.currentTimeMillis() / 1000d) - this.timeAtRequest;
-        if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_TIMEOUTRQST_INFINITY && t_cycrqst < deltaT){
+        if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_CYCRQST_INFINITY && t_cycrqst < deltaT){
             this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
             sendMaRequest();
         }
@@ -114,22 +121,13 @@ public class MessageAuthorityRequestSupervisor {
     @Subscribe
     public void newBC(NewBreakingCurveEvent bce){
         this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
-    }
-
-    @Subscribe
-    public void newParameter(NewMaRequestParametersEvent nmrpe){
-        return;
+        this.waitingOnMA = false;
     }
 
     @Subscribe
     public void newMaRequest(NewMaRequest nmr){
         this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
         this.lastQ_MARQSTREASON = nmr.Q_MARQSTREASON;
-    }
-
-    @Subscribe
-    public void newMaMessage(NewMaMessage nmm){
-        this.timeAtRequest = -1;
     }
 
     private void sendMaRequest(){
@@ -139,7 +137,7 @@ public class MessageAuthorityRequestSupervisor {
         if(curPos == null) return;
 
         Packet_0 packet0 = new Packet_0();
-        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
+        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : ETCSVariables.NID_LRBG_UNKNOWN;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
         packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
         packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
@@ -163,5 +161,7 @@ public class MessageAuthorityRequestSupervisor {
         List<String> destinations = Collections.singletonList("mr;R=" + this.rbcID);
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message132, destinations));
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending a MA Request"));
+
+        this.waitingOnMA = true;
     }
 }

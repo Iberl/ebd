@@ -4,7 +4,7 @@ import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.szenario.util.events.LoadFourEvent;
-import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.LoadThreeEvent;
 import ebd.szenario.util.events.LoadTwoEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -41,8 +41,8 @@ public class InputHandler implements Runnable {
                 this.globalEventBus.post(new DisconnectEvent("szenario", Collections.singletonList("all")));
                 System.exit(0);
                 break;
-            case "load1":
-                this.globalEventBus.post(new LoadOneEvent("szenario", Collections.singletonList("szenario")));
+            case "load":
+                this.globalEventBus.post(new LoadEvent("szenario", Collections.singletonList("szenario")));
                 break;
             case "load2":
                 this.globalEventBus.post(new LoadTwoEvent("szenario", Collections.singletonList("szenario")));
