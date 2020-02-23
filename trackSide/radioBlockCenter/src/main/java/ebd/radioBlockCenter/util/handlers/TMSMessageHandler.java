@@ -120,20 +120,40 @@ public class TMSMessageHandler {
 
         List<Integer> gpList = new ArrayList<>();
         List<Integer> tspList = new ArrayList<>();
-
-        int beginPosition = 0;
-        int endPosition = 0;
         int t_mar = 20;
 
-        for(; nextSpeedSegment < speedsegments.size(); nextSpeedSegment++) {
-            beginPosition = speedsegments.get(nextSpeedSegment)[0] - balisePositions[Math.min(nid_lrbg, balisePositions.length -1)];
-            int v_static = speedsegments.get(nextSpeedSegment)[1];
-            endPosition = speedsegments.get(nextSpeedSegment)[2] - balisePositions[Math.min(nid_lrbg, balisePositions.length -1)];
+        int p_lrbg = balisePositions[Math.min(nid_lrbg, balisePositions.length -1)];
 
-            tspList.add(beginPosition);
+
+        // first segment
+        int prevDistance = 0;
+        int beginPosition = speedsegments.get(nextSpeedSegment)[0] - p_lrbg;
+        int v_static = beginPosition > 0 ? 40 : speedsegments.get(nextSpeedSegment)[1];
+        int endPosition = speedsegments.get(nextSpeedSegment)[2] - p_lrbg;
+
+        System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
+
+        tspList.add(beginPosition);
+        tspList.add(v_static);
+        gpList.add(beginPosition);
+        gpList.add(0);
+
+        prevDistance = endPosition - beginPosition;
+        nextSpeedSegment++;
+
+        for(; nextSpeedSegment < speedsegments.size(); nextSpeedSegment++) {
+            beginPosition = speedsegments.get(nextSpeedSegment)[0] - p_lrbg;
+            v_static = speedsegments.get(nextSpeedSegment)[1];
+            endPosition = speedsegments.get(nextSpeedSegment)[2] - p_lrbg;
+
+            System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
+
+            tspList.add(prevDistance);
             tspList.add(v_static);
-            gpList.add(beginPosition);
+            gpList.add(prevDistance);
             gpList.add(0);
+
+            prevDistance = endPosition - beginPosition;
 
             if(beginPosition == endPosition && v_static == 0) {
                 //System.out.println("train should halt");
@@ -142,7 +162,6 @@ public class TMSMessageHandler {
                 t_mar = ETCSVariables.T_MAR_INFINITY;
                 break;
             }
-
         }
 
         if(nextSpeedSegment == speedsegments.size()) {
@@ -158,6 +177,7 @@ public class TMSMessageHandler {
             gp[i] = gpList.get(i);
         }
         for(int i = 0; i < tspList.size(); i++) {
+            System.out.println("tsp[" + i + "] " + tspList.get(i));
             tsp[i] = tspList.get(i);
         }
 
@@ -169,6 +189,7 @@ public class TMSMessageHandler {
         msg3.NID_LRBG = nid_lrbg;
 
         //System.out.println("msg 3 LRBG: " + msg3.NID_LRBG);
+        System.out.println("eoa: " + endPosition);
         msg3.Packet_15 = makeP15(endPosition);
         msg3.packets = packets;
         return msg3;
