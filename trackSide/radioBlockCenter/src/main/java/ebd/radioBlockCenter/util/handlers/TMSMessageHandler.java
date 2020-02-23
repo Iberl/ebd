@@ -131,7 +131,7 @@ public class TMSMessageHandler {
         int v_static = speedsegments.get(nextSpeedSegment)[1];
         int endPosition = speedsegments.get(nextSpeedSegment)[2] - p_lrbg;
 
-        System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
+        //System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
 
 
         if(beginPosition > 0) {
