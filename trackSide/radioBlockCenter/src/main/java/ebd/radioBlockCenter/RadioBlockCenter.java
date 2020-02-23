@@ -88,7 +88,7 @@ public class RadioBlockCenter {
         }
 
         for(int[] segment: speedSegments) {
-            System.out.println("begin: " + segment[0] + " v: " + segment[1] + " end: " + segment[2]);
+            //System.out.println("begin: " + segment[0] + " v: " + segment[1] + " end: " + segment[2]);
         }
 
         try {
