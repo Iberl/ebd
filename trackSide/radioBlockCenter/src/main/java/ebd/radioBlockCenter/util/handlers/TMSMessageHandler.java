@@ -155,7 +155,7 @@ public class TMSMessageHandler {
             v_static = speedsegments.get(nextSpeedSegment)[1];
             endPosition = speedsegments.get(nextSpeedSegment)[2] - p_lrbg;
 
-            System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
+            //System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
 
             if(beginPosition == endPosition && v_static == 0) {
                 //System.out.println("train should halt");
@@ -186,7 +186,7 @@ public class TMSMessageHandler {
             gp[i] = gpList.get(i);
         }
         for(int i = 0; i < tspList.size(); i++) {
-            System.out.println("tsp[" + i + "] " + tspList.get(i));
+            //System.out.println("tsp[" + i + "] " + tspList.get(i));
             tsp[i] = tspList.get(i);
         }
 
@@ -198,7 +198,7 @@ public class TMSMessageHandler {
         msg3.NID_LRBG = nid_lrbg;
 
         //System.out.println("msg 3 LRBG: " + msg3.NID_LRBG);
-        System.out.println("eoa: " + endPosition);
+        //System.out.println("eoa: " + endPosition);
         msg3.Packet_15 = makeP15(endPosition);
         msg3.packets = packets;
         return msg3;
@@ -245,7 +245,7 @@ public class TMSMessageHandler {
 
         Packet_27.Packet_27_StaticSpeedProfile p27SSP = new Packet_27.Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
 
-        System.out.println(tsp[1] / 5);
+        //System.out.println(tsp[1] / 5);
 
         ArrayList<Packet_27.Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
 
