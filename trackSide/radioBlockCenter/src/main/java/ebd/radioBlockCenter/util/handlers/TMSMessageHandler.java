@@ -128,18 +128,27 @@ public class TMSMessageHandler {
         // first segment
         int prevDistance = 0;
         int beginPosition = speedsegments.get(nextSpeedSegment)[0] - p_lrbg;
-        int v_static = beginPosition > 0 ? 40 : speedsegments.get(nextSpeedSegment)[1];
+        int v_static = speedsegments.get(nextSpeedSegment)[1];
         int endPosition = speedsegments.get(nextSpeedSegment)[2] - p_lrbg;
 
         System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
 
-        tspList.add(beginPosition);
-        tspList.add(v_static);
-        gpList.add(beginPosition);
-        gpList.add(0);
 
-        prevDistance = endPosition - beginPosition;
-        nextSpeedSegment++;
+        if(beginPosition > 0) {
+            tspList.add(0);
+            tspList.add(40);
+            gpList.add(beginPosition);
+            gpList.add(0);
+            prevDistance = endPosition;
+        } else {
+            tspList.add(beginPosition);
+            tspList.add(v_static);
+            gpList.add(beginPosition);
+            gpList.add(0);
+            nextSpeedSegment++;
+            prevDistance = endPosition - beginPosition;
+        }
+
 
         for(; nextSpeedSegment < speedsegments.size(); nextSpeedSegment++) {
             beginPosition = speedsegments.get(nextSpeedSegment)[0] - p_lrbg;
@@ -148,13 +157,6 @@ public class TMSMessageHandler {
 
             System.out.println("P_lrbg " + p_lrbg + " begin " + beginPosition + " v " + v_static + " end " + endPosition);
 
-            tspList.add(prevDistance);
-            tspList.add(v_static);
-            gpList.add(prevDistance);
-            gpList.add(0);
-
-            prevDistance = endPosition - beginPosition;
-
             if(beginPosition == endPosition && v_static == 0) {
                 //System.out.println("train should halt");
                 trainShouldStop = true;
@@ -162,6 +164,13 @@ public class TMSMessageHandler {
                 t_mar = ETCSVariables.T_MAR_INFINITY;
                 break;
             }
+
+            tspList.add(prevDistance);
+            tspList.add(v_static);
+            gpList.add(prevDistance);
+            gpList.add(0);
+
+            prevDistance = endPosition - beginPosition;
         }
 
         if(nextSpeedSegment == speedsegments.size()) {
