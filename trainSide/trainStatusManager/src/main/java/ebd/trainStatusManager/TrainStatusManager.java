@@ -16,6 +16,7 @@ import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -30,9 +31,8 @@ import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
-import ebd.trainStatusManager.util.*;
+import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
-import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.trainStatusManager.util.handlers.ExceptionHandler;
 import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
@@ -46,7 +46,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TrainStatusManager implements Runnable {
 
@@ -145,6 +148,7 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                 "Calculated a new breaking curve"));
+        
 
     }
 

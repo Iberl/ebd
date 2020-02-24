@@ -12,7 +12,7 @@ portOfTrainConfigurator = 8080
 ipToInfrastructureServer = 127.0.0.1
 portOfInfrastructureServer = 25555
 ipToTMSServer = 127.0.0.1
-portOfTMSServer = 23333
+portOfTMSServer = 22223
 
 ######
 ###### Integers

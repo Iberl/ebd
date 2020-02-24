@@ -18,7 +18,7 @@ import ebd.szenario.util.InfrastructureClient;
 import ebd.szenario.util.InfrastructureDummyServer;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
-import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.LoadThreeEvent;
 import ebd.szenario.util.events.LoadTwoEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
@@ -181,8 +181,10 @@ public class Szenario implements Runnable {
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void load1(LoadOneEvent loe){
-        System.out.println("Scenario 1");
+    public void load1(LoadEvent loe){
+        String driverName = ConfigHandler.getInstance().pathToDriverProfileJson;
+        driverName = driverName.replace("DrivingStrategy.json", "");
+        System.out.printf("Running this scenario with a %s driving strategy%n", driverName);
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
@@ -190,7 +192,7 @@ public class Szenario implements Runnable {
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(192, listRoute);
+        mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 

@@ -386,7 +386,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 			return ch.dV_ebi_max;
 		}
 
-		return (maxV - ch.V_ebi_min) / (ch.V_ebi_max - ch.V_ebi_min) * (ch.dV_ebi_max - ch.dV_ebi_min);
+		return ch.dV_ebi_min + (maxV - ch.V_ebi_min) / (ch.V_ebi_max - ch.V_ebi_min) * (ch.dV_ebi_max - ch.dV_ebi_min);
 	}
 
 	/**
@@ -400,7 +400,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 			return ch.dV_sbi_max;
 		}
 
-		return (maxV - ch.V_sbi_min) / (ch.V_sbi_max - ch.V_sbi_min) * (ch.dV_sbi_max - ch.dV_sbi_min);
+		return ch.dV_sbi_min + (maxV - ch.V_sbi_min) / (ch.V_sbi_max - ch.V_sbi_min) * (ch.dV_sbi_max - ch.dV_sbi_min);
 	}
 
 	/**
@@ -415,7 +415,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 			return ch.dV_warning_max;
 		}
 
-		return (maxV - ch.V_warning_min) / (ch.V_warning_max - ch.V_warning_min) * (ch.dV_warning_max - ch.dV_warning_min);
+		return ch.dV_warning_min + (maxV - ch.V_warning_min) / (ch.V_warning_max - ch.V_warning_min) * (ch.dV_warning_max - ch.dV_warning_min);
 	}
 }
 	
