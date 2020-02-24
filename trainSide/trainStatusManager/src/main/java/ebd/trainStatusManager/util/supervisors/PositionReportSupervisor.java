@@ -43,7 +43,6 @@ public class PositionReportSupervisor {
 
     //private int t_cycle = ETCSVariables.T_CYCLOC;
     private double tripTimeAtCycleStart = 0d;
-    private int t_cycleNumber = 1;
 
     //private double d_cycle = ETCSVariables.D_CYCLOC;
     private double tripDistanceAtCycleStart = 0d;
@@ -152,7 +151,6 @@ public class PositionReportSupervisor {
         this.tripDistanceAtCycleStart = trainDataVolatile.getCurTripDistance();
         this.d_cycleNumber = 1;
         this.tripTimeAtCycleStart = this.curFullTripTime;
-        this.t_cycleNumber = 1;
     }
 
     /**
