@@ -2,17 +2,22 @@ package ebd.trainData;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.trainData.util.dataConstructs.*;
+import ebd.trainData.util.exceptions.TDBadDataException;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import ebd.trainData.util.exceptions.TDBadDataException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class contains the permanent information of a train. These values can only be set once per train.
@@ -145,9 +150,10 @@ public class TrainDataPerma {
 
         JSONParser parser = new JSONParser();
 
-        String trainConfiguratorIP = ConfigHandler.getInstance().ipToInfrastructureServer;
+        String trainConfiguratorIP = ConfigHandler.getInstance().ipToTrainConfigurator;
         String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
-        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfigurator/rest/zug/extended/" + trainID;
+        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfig/rest/zug/extended/" + trainID;
+        System.out.println(urlName);
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

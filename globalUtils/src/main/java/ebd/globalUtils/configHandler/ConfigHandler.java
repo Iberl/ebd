@@ -44,7 +44,7 @@ public class ConfigHandler {
      */
     public int trainClockTickInMS = 100;
     public int trainNumber = 0;
-    public int etcsID = 192;
+    public int etcsEngineID = 192;
 
     public int defaultDangerPoint = 200;
 

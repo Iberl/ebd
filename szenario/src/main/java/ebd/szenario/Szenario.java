@@ -135,7 +135,7 @@ public class Szenario implements Runnable {
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
-        this.etcsID = ConfigHandler.getInstance().etcsID;
+        this.etcsID = ConfigHandler.getInstance().etcsEngineID;
 
         szenarioThread.start();
     }
