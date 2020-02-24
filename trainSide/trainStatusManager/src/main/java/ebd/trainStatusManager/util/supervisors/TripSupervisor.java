@@ -55,7 +55,7 @@ public class TripSupervisor {
         this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-        this.etcsID = trainDataPerma.getId();
+        this.etcsID = trainDataPerma.getEtcsID();
         this.targetReachedDistance = ConfigHandler.getInstance().targetReachedDistance;
     }
 

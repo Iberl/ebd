@@ -14,8 +14,7 @@ public class AccelerationPowerCurveCalculator {
     public static ForwardSpline calculate(EventBus eventBus){
         ForwardSpline accelerationCurve = new ForwardSpline(2);
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
-
-        boolean locomotiveTrain = false;
+        
         TrainCar poweredCar = null;
         double trainForce = 0; //in [N]
         double trainWeight = 0; //in [kg]
@@ -26,15 +25,22 @@ public class AccelerationPowerCurveCalculator {
         }
         for(TrainCar tc : trainDataPerma.getTrainCarList()){
             if(tc.getTypeName().equals("Triebzug")){
-                locomotiveTrain = true;
                 poweredCar = tc;
                 LocomotiveTrain lt = (LocomotiveTrain)tc;
-                trainForce += lt.getTractiveForceAtStart();
+                if(lt.getTractiveForceAtStart() == 0){
+                    trainForce += lt.getMaxWeight() * 0.30 * 9.81;
+                }else {
+                    trainForce += lt.getTractiveForceAtStart();
+                }
             }
             else if(tc.getTypeName().equals("Triebfahrzeug")){
                 poweredCar = tc;
                 Locomotive l = (Locomotive)tc;
-                trainForce += l.getTractiveForceAtStart();
+                if(l.getTractiveForceAtStart() == 0){
+                    trainForce += l.getServiceWeight() * 0.30 * 9.81;
+                }else {
+                    trainForce += l.getTractiveForceAtStart();
+                }
             }
         }
         if (poweredCar == null){

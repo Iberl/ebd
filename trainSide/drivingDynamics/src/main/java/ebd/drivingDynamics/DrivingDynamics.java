@@ -101,7 +101,7 @@ public class DrivingDynamics {
         }
 
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getId();
+        this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getEtcsID();
 
         this.timeBetweenActions = this.ch.timeBetweenActions;
     }

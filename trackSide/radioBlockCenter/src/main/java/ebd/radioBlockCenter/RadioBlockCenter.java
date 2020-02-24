@@ -54,7 +54,7 @@ public class RadioBlockCenter {
         //this.localBus.register(this);
         this.rbcID = rbcID;
 
-        SocketClient socketClient = new SocketClient("rbc");
+        SocketClient socketClient = new SocketClient("RBC");
         JSONParser jsonParser = new JSONParser();
         List<int[]> speedSegments = new ArrayList<>();
 
