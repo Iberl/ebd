@@ -56,7 +56,7 @@ public class Locomotive extends TrainCar {
     private int peakPower;
 
     /**
-     *  tractive force at starting in [kN]
+     *  tractive force at starting in [N]
      */
     private int tractiveForceAtStart;
 
@@ -228,7 +228,7 @@ public class Locomotive extends TrainCar {
 
         if (jsonObjectKeySet.contains("Anfahrzugkraft")){
             Long tempLong = (Long)jsonObject.get("Anfahrzugkraft");
-            this.tractiveForceAtStart = tempLong.intValue();
+            this.tractiveForceAtStart = tempLong.intValue() * 1000;
         }
         else throw new TDBadDataException("The key 'Anfahrzugkraft' was missing in the trainCar data send by the tool TrainConfigurator");
 

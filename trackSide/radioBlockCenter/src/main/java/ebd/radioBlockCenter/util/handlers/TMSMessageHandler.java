@@ -12,7 +12,6 @@ import ebd.messageLibrary.util.ETCSVariables;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.simple.JSONObject;
 
 import java.util.*;
 
@@ -139,7 +138,7 @@ public class TMSMessageHandler {
             tspList.add(40);
             gpList.add(beginPosition);
             gpList.add(0);
-            prevDistance = endPosition;
+            prevDistance = beginPosition;
         } else {
             tspList.add(beginPosition);
             tspList.add(v_static);

@@ -27,7 +27,7 @@ public class AccelerationPowerCurveCalculator {
             if(tc.getTypeName().equals("Triebzug")){
                 poweredCar = tc;
                 LocomotiveTrain lt = (LocomotiveTrain)tc;
-                if(lt.getTractiveForceAtStart() == 0){
+                if(lt.getTractiveForceAtStart() <= 0){
                     trainForce += lt.getMaxWeight() * 0.30 * 9.81;
                 }else {
                     trainForce += lt.getTractiveForceAtStart();
@@ -36,7 +36,7 @@ public class AccelerationPowerCurveCalculator {
             else if(tc.getTypeName().equals("Triebfahrzeug")){
                 poweredCar = tc;
                 Locomotive l = (Locomotive)tc;
-                if(l.getTractiveForceAtStart() == 0){
+                if(l.getTractiveForceAtStart() <= 0){
                     trainForce += l.getServiceWeight() * 0.30 * 9.81;
                 }else {
                     trainForce += l.getTractiveForceAtStart();
@@ -46,6 +46,7 @@ public class AccelerationPowerCurveCalculator {
         if (poweredCar == null){
             throw new IllegalArgumentException("There was no powered train car in this train");
         }
+
         trainWeight = trainDataPerma.getTrainWeight();
         double trainAcceleration = trainForce / trainWeight;
         accelerationCurve.addKnotToCurve(new Knot(0d, new double[]{trainAcceleration,0,0})); //huge oversimplification!
