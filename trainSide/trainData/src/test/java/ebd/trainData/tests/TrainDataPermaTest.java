@@ -21,7 +21,7 @@ class TrainDataPermaTest {
     @Test
     public void fileTest() throws IOException, ParseException, TDBadDataException {
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
-        TrainDataPerma trainDataPerma = new TrainDataPerma(192);
+        TrainDataPerma trainDataPerma = new TrainDataPerma();
     }
 
 }

@@ -21,11 +21,10 @@ portOfTMSServer = 22223
 trainClockTickInMS = 100
 # Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
 infrastructureUpdateMultiplier = 10
-# Train number that is used on the infrastructure server to id the train
-trainNumber = 0
-# The ETCS Engine ID of the train that should be fetched from the train configurator tool.
-# This has to change once additional trains are controlled
-etcsEngineID = 192
+# Train number that is used as the etcs ID and on the infrastructure server to id the train.
+etcsEngineAndInfrastructureID = 2181
+# The ID of the train that should be fetched from the train configurator tool.
+trainConfigID = 192
 # Default Dangerpoint Distance
 defaultDangerPoint = 200
 

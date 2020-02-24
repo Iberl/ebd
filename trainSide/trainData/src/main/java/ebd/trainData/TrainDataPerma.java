@@ -27,10 +27,12 @@ import java.util.Set;
  */
 public class TrainDataPerma {
 
+    ConfigHandler ch;
+
     /**
-     * The ETCS-ID of the Train //TODO get the correct one!
+     * The ID of the Train in the Train Config tool
      */
-    private int etcsID = 0;
+    private int trainConfigID = 0;
 
     /**
      * The name the Train
@@ -116,8 +118,6 @@ public class TrainDataPerma {
     /**
      * Sets the class from the data found in the tool "Zugkonfigurator", a web app.
      *
-     * @param trainID The ETCS-ID of the Train, found in trainconfigurator
-     *
      * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
      *
      * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
@@ -125,17 +125,16 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    public TrainDataPerma(int trainID) throws IOException, ParseException, TDBadDataException {
+    public TrainDataPerma() throws IOException, ParseException, TDBadDataException {
+        this.ch = ConfigHandler.getInstance();
         if(!ConfigHandler.getInstance().useTrainConfiguratorTool) setInstanceFromFile();
-        else setInstanceFromURL(trainID);
+        else setInstanceFromURL();
     }
 
 
     /**
      * Sets the instance by parsing the JSONObject that is returned from the app.
      *
-     * @param trainID The ETCS-ID of the Train
-     *
      * @throws IOException Thrown if there is a problem with the connection to the trainconfigurator
      *
      * @throws ParseException Thrown if there the response from the trainconfigurator can non be parsed
@@ -143,7 +142,7 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    private void setInstanceFromURL(int trainID) throws IOException, ParseException, TDBadDataException {
+    private void setInstanceFromURL() throws IOException, ParseException, TDBadDataException {
         /*
         Getting the Json Object from the tool "Zug Konfigurator", a web based train configuration tool.
          */
@@ -152,7 +151,7 @@ public class TrainDataPerma {
 
         String trainConfiguratorIP = ConfigHandler.getInstance().ipToTrainConfigurator;
         String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
-        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfig/rest/zug/extended/" + trainID;
+        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfig/rest/zug/extended/" + ch.trainConfigID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -160,10 +159,10 @@ public class TrainDataPerma {
         int responseCode = connection.getResponseCode();
 
         if (responseCode == 400){
-            throw new TDBadDataException("The train " + trainID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
+            throw new TDBadDataException("The train " + ch.trainConfigID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
         }
         else if(responseCode != 200){
-            throw new IOException("The train " + trainID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
+            throw new IOException("The train " + ch.trainConfigID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
         }
 
         /*
@@ -223,7 +222,7 @@ public class TrainDataPerma {
         else throw new TDBadDataException("The key 'Name' was missing in the train data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("EtcsEngineID")){
-            this.etcsID = ((Long)jsonObject.get("EtcsEngineID")).intValue();
+            this.trainConfigID = ((Long)jsonObject.get("EtcsEngineID")).intValue();
         }
         else throw new TDBadDataException("The key 'EtcsEngineID' was missing in the train data send by the tool TrainConfigurator");
 
@@ -335,8 +334,8 @@ public class TrainDataPerma {
     Getter
      */
 
-    public int getEtcsID() {
-        return etcsID;
+    public int getTrainConfigID() {
+        return trainConfigID;
     }
 
     public String getName() {

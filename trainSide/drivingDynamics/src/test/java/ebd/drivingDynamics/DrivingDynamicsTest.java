@@ -37,7 +37,7 @@ class DrivingDynamicsTest {
         List<String> targetList = Arrays.asList(new String[]{"all"});
         RouteData routeData = new RouteData(eb);
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
-        TrainData trainData = new TrainData(eb, 192);
+        TrainData trainData = new TrainData(eb);
 
         eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
 
@@ -58,7 +58,7 @@ class DrivingDynamicsTest {
         BackwardSpline breakingCurve = new BackwardSpline(2);
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
-        DrivingDynamics drivingDynamics = new DrivingDynamics(eb);
+        DrivingDynamics drivingDynamics = new DrivingDynamics(eb, 192);
         eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve, 0));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();

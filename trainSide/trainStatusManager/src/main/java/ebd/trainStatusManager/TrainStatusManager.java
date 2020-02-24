@@ -12,6 +12,7 @@ import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
@@ -53,12 +54,12 @@ import java.util.Map;
 
 public class TrainStatusManager implements Runnable {
 
-    private int etcsTrainID;
-    private int rbcID;
-
     private EventBus localEventBus = new EventBus();
     private EventBus globalEventBus = EventBus.getDefault();
+    ConfigHandler ch;
 
+    private int etcsTrainID;
+    private int rbcID;
     private Thread tsmThread = new Thread(this);
 
     /*
@@ -94,15 +95,7 @@ public class TrainStatusManager implements Runnable {
 
     public TrainStatusManager(int etcsTrainID, int rbcID){
         this.localEventBus.register(this);
-        this.etcsTrainID = etcsTrainID;
-        this.rbcID = rbcID;
-        setUpTrain();
-        this.tsmThread.start();
-        connectToRBC();
-    }
-
-    public TrainStatusManager(EventBus eventBus, int etcsTrainID, int rbcID){
-        this.localEventBus = eventBus;
+        this.ch = ConfigHandler.getInstance();
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
         setUpTrain();
@@ -233,7 +226,7 @@ public class TrainStatusManager implements Runnable {
 
         this.routeData = new RouteData(this.localEventBus);
 
-        this.trainData = new TrainData(this.localEventBus,this.etcsTrainID);
+        this.trainData = new TrainData(this.localEventBus);
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
         this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
@@ -242,7 +235,7 @@ public class TrainStatusManager implements Runnable {
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
-        this.drivingDynamics = new DrivingDynamics(this.localEventBus);
+        this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
 
         Position curPos = new Position(0,true, new InitalLocation());
@@ -255,6 +248,7 @@ public class TrainStatusManager implements Runnable {
         this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
 
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
+        this.localEventBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "etcsID", this.etcsTrainID));
     }
 
     private void connectToRBC() {

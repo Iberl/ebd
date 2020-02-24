@@ -71,7 +71,7 @@ public class Szenario implements Runnable {
             return new BaliseTelegramGenerator(lob);
         }*/
 
-        public static void sendLinkingInformation(MessageSender ms) {
+        public static void sendLinkingInformation(MessageSender ms, int etcsID) {
             // Create Linking Information
             Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 0, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(400, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
@@ -87,7 +87,7 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=192")));
+            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=" + etcsID)));
         }
     }
 
@@ -135,7 +135,7 @@ public class Szenario implements Runnable {
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
-        this.etcsID = ConfigHandler.getInstance().etcsEngineID;
+        this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
         szenarioThread.start();
     }
@@ -181,7 +181,7 @@ public class Szenario implements Runnable {
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void load1(LoadEvent loe){
+    public void load(LoadEvent loe){
         String driverName = ConfigHandler.getInstance().pathToDriverProfileJson;
         driverName = driverName.replace("DrivingStrategy.json", "");
         System.out.printf("Running this scenario with a %s driving strategy%n", driverName);
@@ -196,7 +196,7 @@ public class Szenario implements Runnable {
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -217,7 +217,7 @@ public class Szenario implements Runnable {
         this.rbc = new RadioBlockCenter("1", mapRoute, 2);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -243,7 +243,7 @@ public class Szenario implements Runnable {
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
     }
 

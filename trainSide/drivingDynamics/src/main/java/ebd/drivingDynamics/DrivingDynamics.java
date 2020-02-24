@@ -88,7 +88,7 @@ public class DrivingDynamics {
      *
      * @param localBus The local {@link EventBus} of the train
      */
-    public DrivingDynamics(EventBus localBus){
+    public DrivingDynamics(EventBus localBus, int etcsTrainID){
         this.localBus = localBus;
         this.localBus.register(this);
         this.ch = ConfigHandler.getInstance();
@@ -101,7 +101,7 @@ public class DrivingDynamics {
         }
 
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        this.etcsTrainID = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma.getEtcsID();
+        this.etcsTrainID = etcsTrainID;
 
         this.timeBetweenActions = this.ch.timeBetweenActions;
     }

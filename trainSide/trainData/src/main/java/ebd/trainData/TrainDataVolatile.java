@@ -25,7 +25,10 @@ import java.util.List;
  */
 public class TrainDataVolatile {
 
-
+    /**
+     * ETCS ID
+     */
+    protected volatile int etcsID = 0;
     /**
      * The current {@link Position}
      */
@@ -265,6 +268,13 @@ public class TrainDataVolatile {
     }
 
     //Getter and setter
+
+    /**
+     * @return ETCS ID
+     */
+    public int getEtcsID() {
+        return etcsID;
+    }
 
     @Nullable
     public Position getCurrentPosition() {

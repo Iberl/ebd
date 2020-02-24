@@ -31,7 +31,7 @@ class SpeedSupervisionModuleTest {
 
         SpeedSupervisionModule ssm = new SpeedSupervisionModule(eventBus);
 
-        TrainData trainData = new TrainData(eventBus, 192);
+        TrainData trainData = new TrainData(eventBus);
         eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"),"currentSpeed", 51d));
         Location startLoc = new Location(0, ETCSVariables.NID_LRBG, 0d);
         Position startPos = new Position(0d,true,startLoc);

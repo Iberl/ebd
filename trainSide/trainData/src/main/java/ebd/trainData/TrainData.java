@@ -1,6 +1,7 @@
 package ebd.trainData;
 
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -40,16 +41,14 @@ public class TrainData {
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
      *
      * @param localBus The local {@link EventBus} of the train
-     *
-     * @param trainID the ID of the train inside the train configurator
      */
-    public TrainData(EventBus localBus, int trainID){
+    public TrainData(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
         this.eventTargets.add("all;");
         try {
-            this.trainDataPerma = new TrainDataPerma(trainID);
+            this.trainDataPerma = new TrainDataPerma();
         } catch (IOException | ParseException e) {
             localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
@@ -137,7 +136,7 @@ public class TrainData {
     private void sendToLog() {
         String msg1;
         StringBuilder msg2 = new StringBuilder();
-        int etcsID = this.trainDataPerma.getEtcsID();
+        int etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
         double mass = this.trainDataPerma.getTrainWeight() / 1000;
         double length = this.trainDataPerma.getL_train();
         int maxSpeed = this.trainDataPerma.getV_maxtrain();
@@ -156,7 +155,7 @@ public class TrainData {
             else System.err.println("Trainconfigurator data was malformed, traincar has a position outside the train");
         }
 
-        msg1 = String.format("Traindata: ETCS ID = %d; Mass = %2f t; Length = %2f m; Max Speed = %d km/h; Type = %d",
+        msg1 = String.format("Traindata: ETCS ID = %d; Mass = %.2f t; Length = %.2f m; Max Speed = %d km/h; Type = %d",
                 etcsID, mass, length, maxSpeed, uic);
         msg2.append("Traincomposition: ");
         for(int i = 0; i < carlist.length; i++){
