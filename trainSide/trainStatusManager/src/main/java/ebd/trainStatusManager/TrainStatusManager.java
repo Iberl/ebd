@@ -2,7 +2,6 @@ package ebd.trainStatusManager;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
-import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
@@ -17,6 +16,7 @@ import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -31,9 +31,8 @@ import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.speedSupervisionModule.SpeedSupervisionModule;
 import ebd.trainData.TrainData;
-import ebd.trainStatusManager.util.*;
+import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
-import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.trainStatusManager.util.handlers.ExceptionHandler;
 import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
@@ -46,10 +45,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TrainStatusManager implements Runnable {
 
@@ -148,52 +148,7 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
                 "Calculated a new breaking curve"));
-
-        List<BreakingCurve> lobc = new ArrayList<>();
-        lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceWarningCurve());
-        lobc.add(nbce.breakingCurveGroup.getPermittedSpeedCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceIndicationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
-
-		/*
-		Double searchKey2 = bCurve.getHighestXValue();
-		while (!(searchKey2 == null )) {
-			System.out.println(searchKey2);
-			System.out.println(bCurve.curve.get(searchKey2));
-			System.out.println("----------");
-
-			searchKey2 = bCurve.curve.lowerKey(searchKey2);
-		}
-		*/
-        for(BreakingCurve bCurve : lobc) {
-            double xPosition = 0d;
-            double step = bCurve.getHighestXValue() / 100000d;
-            FileWriter fW;
-            try {
-
-                fW = new FileWriter(bCurve.getID() + ".txt");
-                BufferedWriter writer = new BufferedWriter(fW);
-                writer.write("");
-
-                while (xPosition <= bCurve.getHighestXValue()) {
-
-                    Double yValue = bCurve.getPointOnCurve(xPosition);
-                    writer.append(String.format("%f:%f%n", xPosition, yValue));
-                    xPosition += step;
-                }
-
-                writer.close();
-
-            } catch (IOException e1) {
-                List<String> eventTargets = new ArrayList<>();
-                eventTargets.add("tsm;");
-                localEventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, nbce, e1));
-            }
-        }
+        
 
     }
 
