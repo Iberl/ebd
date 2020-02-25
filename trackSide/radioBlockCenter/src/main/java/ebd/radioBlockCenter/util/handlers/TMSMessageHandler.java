@@ -185,7 +185,7 @@ public class TMSMessageHandler {
             gp[i] = gpList.get(i);
         }
         for(int i = 0; i < tspList.size(); i++) {
-            System.out.println("tsp[" + i + "] " + tspList.get(i));
+            //System.out.println("tsp[" + i + "] " + tspList.get(i));
             tsp[i] = tspList.get(i);
         }
 
