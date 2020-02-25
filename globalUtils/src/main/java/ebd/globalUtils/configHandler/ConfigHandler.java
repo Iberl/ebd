@@ -28,6 +28,7 @@ public class ConfigHandler {
     */
     public String pathToDriverProfileJson = "";
     public String pathToTestTrainJson = "";
+    public String pathToSzenarioJSON = "";
 
     public String ipToTrainConfigurator = "";
     public String portOfTrainConfigurator = "";
@@ -183,6 +184,7 @@ public class ConfigHandler {
      */
     public boolean useTrainConfiguratorTool = false;
     public boolean useInfrastructureServer = false;
+    public boolean useTSMServer = false;
     public boolean debug = false;
 
     /*

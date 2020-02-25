@@ -5,6 +5,7 @@ import ebd.baliseTelegramGenerator.Balise;
 import ebd.baliseTelegramGenerator.BaliseGroup;
 import ebd.baliseTelegramGenerator.BaliseTelegramGenerator;
 import ebd.baliseTelegramGenerator.ListOfBalises;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
@@ -17,8 +18,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.M_DUP_NO_DUPLICATE;
@@ -53,38 +58,82 @@ public class RadioBlockCenter {
         this.localBus = new EventBus();
         //this.localBus.register(this);
         this.rbcID = rbcID;
-
-        SocketClient socketClient = new SocketClient("RBC");
         JSONParser jsonParser = new JSONParser();
         List<int[]> speedSegments = new ArrayList<>();
 
-        while(true) {
-            try {
-                socketClient.request("test");
-                JSONObject resp = (JSONObject) jsonParser.parse((String) socketClient.outputQueue.take());
-                //System.out.println(resp.toJSONString());
-                JSONObject eoa = (JSONObject) resp.get("endOfAuthority");
-                if((boolean) eoa.get("shunting") == true) {
-                    break;
+        ConfigHandler configHandler = ConfigHandler.getInstance();
+
+        if(configHandler.useTSMServer) {
+
+            SocketClient socketClient = new SocketClient("RBC");
+
+            while(true) {
+                try {
+                    socketClient.request("test");
+                    JSONObject resp = (JSONObject) jsonParser.parse((String) socketClient.outputQueue.take());
+                    //System.out.println(resp.toJSONString());
+                    JSONObject eoa = (JSONObject) resp.get("endOfAuthority");
+                    if((boolean) eoa.get("shunting") == true) {
+                        break;
+                    }
+
+                    JSONObject sp = (JSONObject) resp.get("speedProfile");
+                    JSONArray speedSegmentsJSON = (JSONArray) sp.get("speedSegments");
+
+                    for(int i = 0; i < speedSegmentsJSON.size(); i++) {
+                        JSONObject curr = (JSONObject) speedSegmentsJSON.get(i);
+                        int[] newSegment = new int[3];
+                        newSegment[0] = ((Long) ((JSONObject) ((JSONObject) curr.get("begin")).get("chainage")).get("iMeters")).intValue();
+                        newSegment[1] = ((Long) ((JSONObject) curr.get("v_STATIC")).get("bSpeed")).intValue() * 5;
+                        newSegment[2] = ((Long) ((JSONObject) ((JSONObject) ((JSONObject) speedSegmentsJSON.get(i)).get("end")).get("chainage")).get("iMeters")).intValue();
+                        speedSegments.add(newSegment);
+                    }
+
+                } catch(Exception e) {
+                    System.err.println("Received an Error from TMS");
+                    ;
+                    e.printStackTrace();
                 }
 
-                JSONObject sp = (JSONObject) resp.get("speedProfile");
-                JSONArray speedSegmentsJSON = (JSONArray) sp.get("speedSegments");
-
-                for(int i = 0; i < speedSegmentsJSON.size(); i++) {
-                    JSONObject curr = (JSONObject) speedSegmentsJSON.get(i);
-                    int[] newSegment = new int[3];
-                    newSegment[0] = ((Long) ((JSONObject) ((JSONObject) curr.get("begin")).get("chainage")).get("iMeters")).intValue();
-                    newSegment[1] = ((Long) ((JSONObject) curr.get("v_STATIC")).get("bSpeed")).intValue() * 5;
-                    newSegment[2] = ((Long) ((JSONObject) ((JSONObject) ((JSONObject) speedSegmentsJSON.get(i)).get("end")).get("chainage")).get("iMeters")).intValue();
-                    speedSegments.add(newSegment);
-                }
-
-            } catch(Exception e) {
-                System.err.println("Received an Error from TMS");;
-                e.printStackTrace();
             }
+        } else {
+            try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(configHandler.pathToSzenarioJSON)){
+                try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
 
+            /*
+            Reading the input data into the variables
+            */
+                    JSONParser parser = new JSONParser();
+                    Object object = parser.parse(input);
+                    JSONArray jsonArray = (JSONArray) object;
+
+                    for(int j = 0; j < jsonArray.size(); j++) {
+                        JSONObject resp = (JSONObject) jsonArray.get(j);
+                        //System.out.println(resp.toJSONString());
+                        JSONObject eoa = (JSONObject) resp.get("endOfAuthority");
+                        if((boolean) eoa.get("shunting") == true) {
+                            break;
+                        }
+
+                        JSONObject sp = (JSONObject) resp.get("speedProfile");
+                        JSONArray speedSegmentsJSON = (JSONArray) sp.get("speedSegments");
+
+                        for(int i = 0; i < speedSegmentsJSON.size(); i++) {
+                            JSONObject curr = (JSONObject) speedSegmentsJSON.get(i);
+                            int[] newSegment = new int[3];
+                            newSegment[0] = ((Long) ((JSONObject) ((JSONObject) curr.get("begin")).get("chainage")).get("iMeters")).intValue();
+                            newSegment[1] = ((Long) ((JSONObject) curr.get("v_STATIC")).get("bSpeed")).intValue() * 5;
+                            newSegment[2] = ((Long) ((JSONObject) ((JSONObject) ((JSONObject) speedSegmentsJSON.get(i)).get("end")).get("chainage")).get("iMeters")).intValue();
+                            speedSegments.add(newSegment);
+                        }
+                    }
+
+
+                }
+            }
+            catch (NullPointerException | IOException | ParseException npe){
+                npe.printStackTrace();
+            }
         }
 
         for(int[] segment: speedSegments) {
