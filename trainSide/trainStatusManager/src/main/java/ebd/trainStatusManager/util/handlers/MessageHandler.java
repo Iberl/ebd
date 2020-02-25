@@ -148,7 +148,6 @@ public class MessageHandler {
         double currentMaxSpeed = trainDataVolatile.getCurrentMaximumSpeed();
         int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
-        Position refPosition;
 
 
         Message_3 msg3 = (Message_3)rme.message;
@@ -169,7 +168,9 @@ public class MessageHandler {
         /logging
          */
 
+        Position refPosition;
         Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null); //TODO check if viable
+        // System.out.println("Location ID: " + msg3.NID_LRBG);
         refPosition = new Position(0,true, refLocation);
 
         packet15 = msg3.Packet_15;

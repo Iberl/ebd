@@ -7,6 +7,7 @@
 ######
 pathToDriverProfileJson = StrictDrivingStrategy.json
 pathToTestTrainJson = testTrain650.json
+pathToSzenarioJSON = szenarioAB.json
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080
 ipToInfrastructureServer = 127.0.0.1
@@ -79,4 +80,5 @@ V_warning_max = 58.33
 ######
 useTrainConfiguratorTool = false
 useInfrastructureServer = false
+useTSMServer = false
 debug = false
