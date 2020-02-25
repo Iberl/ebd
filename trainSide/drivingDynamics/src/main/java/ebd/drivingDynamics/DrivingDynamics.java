@@ -33,7 +33,6 @@ import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.speedSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -127,6 +126,11 @@ public class DrivingDynamics {
         If driving dynamics is locked, nothing will be done.
          */
         if(this.locked || this.tripProfile == null){
+            String source = "dd;T=" + trainDataVolatile.getEtcsID();
+            List<String> targets = Collections.singletonList("dmi");
+            EventBus.getDefault().post(new DMIUpdateEvent(source, targets, 0, 0, (int)0,
+                    SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
+                    0, 0, 0, 0));
             return;
         }
 

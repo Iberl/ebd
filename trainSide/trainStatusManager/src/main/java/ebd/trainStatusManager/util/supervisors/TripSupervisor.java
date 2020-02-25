@@ -3,14 +3,11 @@ package ebd.trainStatusManager.util.supervisors;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -23,7 +20,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the distance the train has traveled the current trip. If the distance is close to or
@@ -78,11 +74,6 @@ public class TripSupervisor {
 
         if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
             this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
-            String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            List<String> targets = Collections.singletonList("dmi");
-            EventBus.getDefault().post(new DMIUpdateEvent(source, targets, 0, 0, (int)0,
-                    SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
-                    0, 0, 0, 0));
 
             if(routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
