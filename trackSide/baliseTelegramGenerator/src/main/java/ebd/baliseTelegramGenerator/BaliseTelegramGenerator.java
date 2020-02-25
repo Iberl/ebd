@@ -45,7 +45,7 @@ public class BaliseTelegramGenerator {
 		Position lastKnownPosition = positions.get(trainId).getKey();
 		Integer lastSendingBalise = positions.get(trainId).getValue();
 
-		if(lastSendingBalise == 11) return; //TODO Get better handeling of reaching last balise! LSF
+		if(lastSendingBalise == 10) return; //TODO Get better handeling of reaching last balise! LSF
 		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
 
 		if(lastKnownPosition.getIncrement() >= nextBG.getLocation().getDistanceToPrevious()) {
@@ -55,9 +55,9 @@ public class BaliseTelegramGenerator {
 	}
 
 	private void sendInitialTelegram(String trainId) {
-		Telegram telegram = listOfBalises.getBaliseGroup(0).generateTelegramFor(0);
+		Telegram telegram = listOfBalises.getBaliseGroup(1).generateTelegramFor(0);
 		localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), telegram, Collections.singletonList(trainId)));
-		positions.put(trainId, new Pair<>(positions.get(trainId).getKey(), 0));
+		positions.put(trainId, new Pair<>(positions.get(trainId).getKey(), 1));
 	}
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)

@@ -30,10 +30,10 @@ public class TMSMessageHandler {
     private int scenario;
     private int nextSpeedSegment = 0;
     private double maDistance = 0;
-    private int nid_lrbg = 0;
+    private int nid_lrbg = 1;
     private int d_lrbg = 0;
     private boolean trainShouldStop = false;
-    private int[] balisePositions = new int[] {0, 400, 1000, 1400, 1900, 2200, 2400, 2500, 2800, 3000, 3600};
+    private int[] balisePositions = new int[] {0, 0, 584, 982, 1328, 1511, 2000, 2440, 2566, 2650, 2849};
 
     public TMSMessageHandler(EventBus localBus, String rbcID, List<int[]> speedsegments, int scenario) {
         this.localBus = localBus;
@@ -185,7 +185,7 @@ public class TMSMessageHandler {
             gp[i] = gpList.get(i);
         }
         for(int i = 0; i < tspList.size(); i++) {
-            //System.out.println("tsp[" + i + "] " + tspList.get(i));
+            System.out.println("tsp[" + i + "] " + tspList.get(i));
             tsp[i] = tspList.get(i);
         }
 

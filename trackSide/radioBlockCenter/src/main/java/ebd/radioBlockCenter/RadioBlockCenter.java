@@ -164,20 +164,18 @@ public class RadioBlockCenter {
         ListOfBalises lob = new ListOfBalises(1, 12);
 
         // Adding BaliseGroups
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 0, 0, 0, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 0, 400, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 600, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 3, 2, 400, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 4, 3, 500, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 5, 4, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 6, 5, 200, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 7, 6, 100, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 8, 7, 300, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 9, 8, 200, false, null));
-        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 10, 9, 600, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 1, 0, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 584, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 3, 2, 398, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 4, 3, 346, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 5, 4, 183, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 6, 5, 489, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 7, 6, 440, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 8, 7, 126, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 9, 8, 84, false, null));
+        lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 10, 9, 199, false, null));
 
         // Add 1 Balise to BaliseGroups
-        lob.getBaliseGroup(0).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(1).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(2).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
         lob.getBaliseGroup(3).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
@@ -190,7 +188,6 @@ public class RadioBlockCenter {
         lob.getBaliseGroup(10).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
 
         // Add Connections
-        lob.addConnection(0, 1);
         lob.addConnection(1, 2);
         lob.addConnection(2, 3);
         lob.addConnection(3, 4);
