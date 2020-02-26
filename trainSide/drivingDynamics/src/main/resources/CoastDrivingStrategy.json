@@ -19,7 +19,7 @@
               "type": "v",
               "condition": {
                 "op": ">=",
-                "value": 120
+                "value": 140
               }
             }
           ]
@@ -45,7 +45,7 @@
               "type": "v",
               "condition": {
                 "op": ">=",
-                "value": 120
+                "value": 140
               }
             }
           ]
@@ -78,7 +78,7 @@
               "type": "v",
               "condition": {
                 "op": "<",
-                "value": 120
+                "value": 140
               }
             }
           ]
@@ -114,7 +114,7 @@
               "condition": {
                 "curveBase" : "c30",
                 "op": "<=",
-                "value": 110
+                "value": 130
               }
             }
 
