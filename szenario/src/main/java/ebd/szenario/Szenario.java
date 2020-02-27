@@ -186,7 +186,7 @@ public class Szenario implements Runnable {
         String routeName = ConfigHandler.getInstance().pathToSzenarioJSON;
         routeName = routeName.replace("szenario", "");
         routeName = routeName.replace(".json", "");
-        System.out.printf("Running this scenario with a %s driving strategy an route %s%n", driverName, routeName);
+        System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
