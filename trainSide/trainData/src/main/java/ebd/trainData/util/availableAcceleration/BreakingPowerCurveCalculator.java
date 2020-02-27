@@ -30,8 +30,14 @@ public class BreakingPowerCurveCalculator {
         else if(chosenBreakingMethod.contains("p")){
             deceleration = 0.8;
         }
-        else if(chosenBreakingMethod.contains("r")){
+        else if(chosenBreakingMethod.contains("p+mg")){
+            deceleration = 0.9;
+        }
+        else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
             deceleration = 1;
+        }
+        else if(chosenBreakingMethod.contains("r+e")){
+            deceleration = 1.2;
         }
         else if(chosenBreakingMethod.contains("r+mg")){
             deceleration = 1.2;
@@ -66,8 +72,14 @@ public class BreakingPowerCurveCalculator {
         else if(chosenBreakingMethod.contains("p")){
             deceleration = 0.9;
         }
+        else if(chosenBreakingMethod.contains("p+mg")){
+            deceleration = 0.1;
+        }
         else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
             deceleration = 1.1;
+        }
+        else if(chosenBreakingMethod.contains("r+e")){
+            deceleration = 1.3;
         }
         else if(chosenBreakingMethod.contains("r+mg")){
             deceleration = 1.3;
