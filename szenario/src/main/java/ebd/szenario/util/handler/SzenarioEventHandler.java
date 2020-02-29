@@ -1,4 +1,4 @@
-package ebd.szenario.util;
+package ebd.szenario.util.handler;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import org.greenrobot.eventbus.EventBus;

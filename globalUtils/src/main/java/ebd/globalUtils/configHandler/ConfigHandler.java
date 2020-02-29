@@ -185,6 +185,7 @@ public class ConfigHandler {
     public boolean useTrainConfiguratorTool = false;
     public boolean useInfrastructureServer = false;
     public boolean useTSMServer = false;
+    public boolean useGUI = false;
     public boolean debug = false;
 
     /*

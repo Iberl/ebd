@@ -1,4 +1,4 @@
-package ebd.szenario.util;
+package ebd.szenario.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
@@ -80,7 +80,7 @@ public class InfrastructureClient {
         if (out != null) {
             out.println(cmd);
             if (!out.checkError()) {
-                System.out.println("Command \"" + cmd.toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
+                //System.out.println("Command \"" + cmd.toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
             } else {
                 try {
                     reconnect();
@@ -98,7 +98,7 @@ public class InfrastructureClient {
                 out.printf(format, params);
                 out.println();
                 if (!out.checkError()) {
-                    System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
+                    //System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
                 } else {
                     try {
                         reconnect();

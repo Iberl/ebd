@@ -81,4 +81,5 @@ V_warning_max = 58.33
 useTrainConfiguratorTool = false
 useInfrastructureServer = false
 useTSMServer = false
+useGUI = false
 debug = false
