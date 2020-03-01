@@ -14,11 +14,11 @@ import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.clients.InfrastructureClient;
-import ebd.szenario.util.gui.GUI;
 import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
+import ebd.szenario.util.server.GUIserver;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -65,6 +65,12 @@ public class Szenario implements Runnable {
     Sockets
      */
     private InfrastructureClient infrastructureClient;
+
+    /*
+    Server
+     */
+    private GUIserver guiServer;
+
     /*
     TrackSide
      */
@@ -83,20 +89,19 @@ public class Szenario implements Runnable {
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
+            if(ch.allowGUI) this.guiServer = new GUIserver();
         } catch (IOException e) {
             e.printStackTrace();
         }
         new DMIDisplayConnector(globalEventBus);
-        System.out.println("This is the virtual environment for the ETCS@EBD project");
-
 
         this.szenarioEventHandler = new SzenarioEventHandler();
-        if(this.ch.useGUI) GUI.launch(GUI.class);
-        else this.inputHandler = new InputHandler();
+        this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
         this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
+        System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
     }
 

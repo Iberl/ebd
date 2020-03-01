@@ -39,6 +39,16 @@ public class ConfigHandler {
     public String ipToTMSServer = "";
     public String portOfTMSServer = "";
 
+    public String portOfGUIServer = "";
+
+    /*
+boolean
+ */
+    public boolean useTrainConfiguratorTool = false;
+    public boolean useInfrastructureServer = false;
+    public boolean useTSMServer = false;
+    public boolean allowGUI = false;
+    public boolean debug = false;
 
     /*
     ints
@@ -178,15 +188,6 @@ public class ConfigHandler {
      * in [m/s]
      */
     public double V_warning_max = 58.33;
-
-    /*
-    boolean
-     */
-    public boolean useTrainConfiguratorTool = false;
-    public boolean useInfrastructureServer = false;
-    public boolean useTSMServer = false;
-    public boolean useGUI = false;
-    public boolean debug = false;
 
     /*
     other
