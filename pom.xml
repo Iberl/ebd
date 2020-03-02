@@ -102,15 +102,6 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <plugin>
-          <groupId>org.openjfx</groupId>
-          <artifactId>javafx-maven-plugin</artifactId>
-          <version>0.0.3</version>
-          <configuration>
-            <!-- <mainClass>ebd.szenario.util.gui.GUI</mainClass> -->
-            <mainClass>ebd.szenario.Main</mainClass>
-          </configuration>
-        </plugin>
       </plugins>
     </pluginManagement>
 
