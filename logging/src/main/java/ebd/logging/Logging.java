@@ -1,9 +1,11 @@
 package ebd.logging;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.logging.util.handler.PipeHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -77,6 +79,7 @@ public class Logging{
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
+        if(ConfigHandler.getInstance().allowGUI) logger.addHandler(new PipeHandler());
         eventBus = EventBus.getDefault();
         eventBus.register(this);
     }

@@ -85,6 +85,8 @@ public class Szenario implements Runnable {
     public Szenario(){
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
+        this.szenarioEventHandler = new SzenarioEventHandler();
+
         this.ch = ConfigHandler.getInstance();
         try {
             this.logger = new Logging();
@@ -95,7 +97,6 @@ public class Szenario implements Runnable {
         }
         new DMIDisplayConnector(globalEventBus);
 
-        this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
