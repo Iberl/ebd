@@ -104,7 +104,7 @@ public class Szenario implements Runnable {
 
         System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
-        load(new LoadEvent("ha", Collections.singletonList("haha")));
+        if(ch.autoStart) load(new LoadEvent("szenario", Collections.singletonList("szenario")));
     }
 
     @Override

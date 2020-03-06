@@ -19,7 +19,5 @@ public class SzenarioEventHandler {
      * Dummy to prevent warnings from {@link EventBus}
      */
     @Subscribe
-    public void dummyHandler(LogToGUIPipeEvent ghe){
-        System.out.println("Event was send");
-    }
+    public void dummyHandler(LogToGUIPipeEvent ghe){}
 }

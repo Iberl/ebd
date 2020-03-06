@@ -48,6 +48,7 @@ boolean
     public boolean useInfrastructureServer = false;
     public boolean useTSMServer = false;
     public boolean allowGUI = false;
+    public boolean autoStart = false;
     public boolean debug = false;
 
     /*

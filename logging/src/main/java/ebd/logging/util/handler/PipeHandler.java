@@ -6,6 +6,8 @@ import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -13,13 +15,14 @@ import java.util.logging.LogRecord;
 
 public class PipeHandler extends Handler {
 
+    private ConfigHandler ch = ConfigHandler.getInstance();
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("[uuuu-MM-dd HH:mm:ss");
     private PipedOutputStream pos;
     private BufferedWriter out;
-    private ConfigHandler ch = ConfigHandler.getInstance();
+
 
     public PipeHandler() throws IOException {
         super();
-        System.out.println("Pipe Handler");
         PipedOutputStream pos = new PipedOutputStream();
         this.pos = pos;
         this.out = new BufferedWriter(new OutputStreamWriter(this.pos));
@@ -30,9 +33,11 @@ public class PipeHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         if(!record.getLevel().equals(Level.INFO) || !ch.allowGUI) {
+            //TODO Connect Level with config.txt
             return;
         }
-        String msg = record.getLevel() + " || " + record.getMessage();
+        LocalDateTime ldt = LocalDateTime.ofInstant(record.getInstant(), ZoneId.systemDefault());
+        String msg = "[" + ldt.format(this.dtf) + "] " + record.getMessage();
         try {
             this.out.write(msg);
             this.out.newLine();

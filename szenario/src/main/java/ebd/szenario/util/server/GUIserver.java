@@ -76,9 +76,12 @@ public class GUIserver implements Runnable {
     private void setUpMap() {
         this.clientMap = new HashMap<>();
         this.clientMap.put("rbc", new HashMap<>());
-        this.clientMap.put("tsm", new HashMap<>());
+        this.clientMap.put("trn", new HashMap<>());
         this.clientMap.put("gb", new HashMap<>());
         this.clientMap.put("all", new HashMap<>());
+
+        this.clientMap.get("gb").put(0, new ArrayList<>());
+        this.clientMap.get("all").put(0, new ArrayList<>());
     }
 
     /**
@@ -89,12 +92,19 @@ public class GUIserver implements Runnable {
      */
     private void addGUIClientWorkerToMap(String greeting, Socket client) throws IOException {
         String entityName = greeting.split(";")[0];
-        Integer entityID = Integer.parseInt(greeting.split(";")[1]);
+
+        int entityID;
+        if(entityName.equals("all") || entityName.equals("gb")){//both "all" and "gb" only have one list on 0
+            entityID = 0;
+        }
+        else {
+            entityID = Integer.parseInt(greeting.split(";")[1]);
+        }
+
         if(this.clientMap.containsKey(entityName)){
             Map<Integer, List<GUIClientWorker>> innerMap = this.clientMap.get(entityName);
             if(innerMap.containsKey(entityID)){
-                List<GUIClientWorker> innerList = innerMap.get(entityID);
-                innerList.add(new GUIClientWorker(client));
+                innerMap.get(entityID).add(new GUIClientWorker(client));
             }
             else {
                 ArrayList<GUIClientWorker> innerList = new ArrayList<>();
@@ -103,6 +113,7 @@ public class GUIserver implements Runnable {
             }
         }
         else {
+            client.close();
             IllegalArgumentException iae = new IllegalArgumentException("Entity name " + entityName + " not found");
             EventBus.getDefault().post(new ExceptionEvent("szenario", Collections.singletonList("szenario"),
                     new NotCausedByAEvent(), iae, ExceptionEventTyp.WARNING));

@@ -24,6 +24,7 @@ useTrainConfiguratorTool = false
 useInfrastructureServer = false
 useTSMServer = false
 allowGUI = false
+autoStart = false
 debug = false
 
 ######
