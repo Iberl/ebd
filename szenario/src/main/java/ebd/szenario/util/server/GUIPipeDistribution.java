@@ -9,23 +9,34 @@ import java.util.Map;
 
 public class GUIPipeDistribution implements Runnable {
 
+    private Thread guiPDThread;
     private PipedInputStream pipedInputStream;
+    private InputStreamReader inputStreamReader;
     private BufferedReader bufferedReader;
     private Map<String, Map<Integer, List<GUIClientWorker>>> clientMap;
+
+
     private boolean running = true;
 
     public GUIPipeDistribution(PipedInputStream pis, Map<String, Map<Integer, List<GUIClientWorker>>> clientMap){
         this.pipedInputStream = pis;
+        this.inputStreamReader = new InputStreamReader(pipedInputStream);
         this.bufferedReader = new BufferedReader(new InputStreamReader(pipedInputStream));
         this.clientMap = clientMap;
+        this.guiPDThread = new Thread(this);
+        this.guiPDThread.start();
     }
 
     @Override
     public void run() {
-        while(this.running){
+        while(this.running ){
             try {
+                //System.out.println(pipedInputStream.available());
+                //System.out.println(pipedInputStream.read());
+                //System.out.println(inputStreamReader.read());
                 String line = bufferedReader.readLine();
-                distribute(line);
+                System.out.println(line);
+                //distribute(line);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -33,11 +44,12 @@ public class GUIPipeDistribution implements Runnable {
     }
 
     private void distribute(String line) {
+        System.out.println(line);
         String[] lineSplit = line.split(" ");
-        for (String s : lineSplit){
+        /*for (String s : lineSplit){
             System.out.println("Split: " + s);
         }
-
+*/
 
     }
 

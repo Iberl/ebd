@@ -13,10 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 
 public class Logging{
@@ -79,7 +76,6 @@ public class Logging{
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
-        if(ConfigHandler.getInstance().allowGUI) logger.addHandler(new PipeHandler());
         eventBus = EventBus.getDefault();
         eventBus.register(this);
     }
@@ -148,13 +144,13 @@ public class Logging{
         }
     }
 
-    /**
+/*    *//**
      * log when ToLogDebugEvent occurred
      * @param toLogDebugEvent
-     */
+     *//*
     @Subscribe
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
         logger.fine(toLogDebugEvent.msg);
-    }
+    }*/
 }
