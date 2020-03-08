@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,10 @@ public class GUIPipeDistribution implements Runnable {
 
     private void distribute(String line) {
         String[] lineSplit = line.split(" ");
+        if(lineSplit.length < 3) {
+            lineSplit = Arrays.copyOf(lineSplit, 4);
+            lineSplit[2] = "all";
+        }
         switch (lineSplit[2].toLowerCase()){
             case "rbc":
             case "trn":

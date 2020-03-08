@@ -37,7 +37,10 @@ public class PipeHandler extends Handler {
             return;
         }
         LocalDateTime ldt = LocalDateTime.ofInstant(record.getInstant(), ZoneId.systemDefault());
+
         String msg = "[" + ldt.format(this.dtf) + "] " + record.getMessage();
+        msg = msg.replaceAll("\\[\\d+m", ""); //Removes logging color codes from string
+
         try {
             this.out.write(msg);
             this.out.newLine();
