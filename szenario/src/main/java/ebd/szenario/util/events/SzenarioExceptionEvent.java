@@ -8,8 +8,11 @@ import java.util.List;
 
 public class SzenarioExceptionEvent extends ExceptionEvent {
 
-
     public SzenarioExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-        super(source, targets, cause, exception, ExceptionEventTyp.FATAL);
+        super(source, targets, cause, exception);
+    }
+
+    public SzenarioExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+        super(source, targets, cause, exception, exceptionEventTyp);
     }
 }

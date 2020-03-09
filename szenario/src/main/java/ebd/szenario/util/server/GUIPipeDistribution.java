@@ -1,10 +1,18 @@
 package ebd.szenario.util.server;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.szenario.util.events.SzenarioExceptionEvent;
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,21 +36,26 @@ public class GUIPipeDistribution implements Runnable {
 
     @Override
     public void run() {
-        while(this.running ){
+        while(this.running){
             try {
                 String line = bufferedReader.readLine();
                 distribute(line);
-            } catch (IOException e) {
-                e.printStackTrace();
+            }
+            catch (IOException e) {
+                this.running = false;
+                SzenarioExceptionEvent see = new SzenarioExceptionEvent("szenario",
+                        Collections.singletonList("szenario"), new NotCausedByAEvent(), e, ExceptionEventTyp.WARNING);
+                EventBus.getDefault().post(see);
             }
         }
     }
 
-    private void distribute(String line) {
+    private void distribute(String line) { //TODO More stable distribution
         String[] lineSplit = line.split(" ");
         if(lineSplit.length < 3) {
             lineSplit = Arrays.copyOf(lineSplit, 4);
             lineSplit[2] = "all";
+            lineSplit[3] = "0";
         }
         switch (lineSplit[2].toLowerCase()){
             case "rbc":
