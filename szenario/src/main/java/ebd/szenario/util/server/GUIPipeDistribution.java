@@ -47,6 +47,10 @@ public class GUIPipeDistribution implements Runnable {
         }
     }
 
+    public void stop() {
+        this.running = false;
+    }
+
     private void distribute(String line) { //TODO More stable distribution that does not depend on formatting of the string
         String[] lineSplit = line.split(" ");
         if(lineSplit.length < 3) {
@@ -93,9 +97,5 @@ public class GUIPipeDistribution implements Runnable {
         for(GUIClientWorker gcw : this.clientMap.get("all").get(0)){
             gcw.sendString(line);
         }
-    }
-
-    public void stop() {
-        this.running = false;
     }
 }
