@@ -49,7 +49,7 @@ public class GUIserver implements Runnable {
             try {
                 Socket client = serverSocket.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                String greeting = in.readLine();
+                String greeting = in.readLine(); //TODO Absichern
                 addGUIClientWorkerToMap(greeting, client);
 
             } catch (IOException e) {

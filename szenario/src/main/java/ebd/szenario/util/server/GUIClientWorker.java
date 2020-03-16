@@ -35,6 +35,6 @@ public class GUIClientWorker implements Runnable{
     }
 
     public void sendString(String string){
-        this.out.println(string);
+        if(!this.client.isClosed()) this.out.println(string);
     }
 }
