@@ -5,7 +5,7 @@ package ebd.dmi.ui.utility;
  * 
  * @author Simon Weiler
  */
-public enum DMIColor {
+public enum DMIColour {
 	/**
 	 * RGB: 255, 255, 255.
 	 */

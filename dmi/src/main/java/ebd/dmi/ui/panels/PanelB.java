@@ -52,46 +52,6 @@ public class PanelB extends MyPanel {
 		this.speedometer.setCurrentTargetSpeed(currentTargetSpeed);
 		this.speedometer.setCurrentSpeed(currentSpeed);
 		this.add(this.speedometer);
-
-		//kopierte main
-//		JFrame frame = new JFrame();
-//		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//
-//		//int[] array4 = { 8, 50, 40, 5, 400 };
-//		final Speedometer speedometer = new Speedometer(array4);
-//		frame.add(speedometer, BorderLayout.CENTER);
-//
-//		speedometer.setVsoll(120);
-//		new Thread() {
-//
-//			{
-//				setDaemon(true);
-//			}
-//
-//
-//			@Override
-//			public void run() {
-//				for (int speed = 0; speed <= 140; speed++) {
-//					speedometer.setVist(speed);
-//					try {
-//						Thread.sleep(50);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//				for (int speed = speedometer.getVist(); speed >= 0; speed--) {
-//					speedometer.setVist(speed);
-//					try {
-//						Thread.sleep(50);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}.start();
-//
-//		frame.pack();
-//		frame.setVisible(true);
 	}
 
 

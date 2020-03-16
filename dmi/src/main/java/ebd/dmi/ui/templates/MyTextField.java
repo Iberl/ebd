@@ -1,7 +1,7 @@
 package ebd.dmi.ui.templates;
 
 import ebd.dmi.ui.Scalable;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIUtility;
 
 import javax.swing.*;
@@ -34,10 +34,10 @@ public class MyTextField extends JTextField implements Scalable {
 	 */
 	public MyTextField(final int x, final int y, final int breite, final int hoehe, final String str) {
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
-		Color fontColor = DMIUtility.instance().getColor(DMIColor.GREY);
-		Color black = DMIUtility.instance().getColor(DMIColor.BLACK);
-		Color shadow = DMIUtility.instance().getColor(DMIColor.SHADOW);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
+		Color fontColor = DMIUtility.instance().getColour(DMIColour.GREY);
+		Color black = DMIUtility.instance().getColour(DMIColour.BLACK);
+		Color shadow = DMIUtility.instance().getColour(DMIColour.SHADOW);
 		Border myBorder = new CompoundBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, black), BorderFactory.createMatteBorder(0, 0, 1, 1, shadow));
 		setBorder(myBorder);
 
@@ -57,8 +57,8 @@ public class MyTextField extends JTextField implements Scalable {
 	public MyTextField(final int x, final int y, final int breite, final int hoehe) {
 		super();
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
-		Color fontColor = DMIUtility.instance().getColor(DMIColor.GREY);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
+		Color fontColor = DMIUtility.instance().getColour(DMIColour.GREY);
 		setBorder(DMIUtility.instance().getMyLabelBorder());
 		setHorizontalAlignment(SwingConstants.CENTER);
 		setForeground(fontColor);

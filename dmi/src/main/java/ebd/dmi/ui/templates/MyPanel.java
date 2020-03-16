@@ -3,7 +3,7 @@ package ebd.dmi.ui.templates;
 //import ebd.dmi.ui.MainFrame;
 import ebd.dmi.ui.DMIDisplay;
 import ebd.dmi.ui.Scalable;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIUtility;
 
 import javax.swing.*;
@@ -23,7 +23,7 @@ public class MyPanel extends JPanel implements Scalable {
 	/**
 	 * Wird noch ersetzt durch Farbe von Utility-Klasse.
 	 */
-	private Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+	private Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 
 	/**
 	 * Speichert die ursprünglichen Abmessungen.

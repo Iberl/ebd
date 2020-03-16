@@ -4,7 +4,7 @@ package ebd.dmi.ui.panels;
 import ebd.dmi.ui.templates.MyChangeableLabel;
 import ebd.dmi.ui.templates.MyLabel;
 import ebd.dmi.ui.templates.MyPanel;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIPictures;
 import ebd.dmi.ui.utility.DMIUtility;
 
@@ -60,7 +60,7 @@ public class PanelA extends MyPanel {
 		this.lblDistanceDigitalAnzeige.setBorder(null);
 		this.lblDistanceDigitalAnzeige.setFont(new Font("Arial", Font.BOLD, 10));
 		this.lblDistanceDigitalAnzeige.setHorizontalAlignment(JLabel.RIGHT);
-		this.lblDistanceDigitalAnzeige.setForeground(DMIUtility.instance().getColor(DMIColor.GREY));
+		this.lblDistanceDigitalAnzeige.setForeground(DMIUtility.instance().getColour(DMIColour.GREY));
 		this.add(this.lblDistanceDigitalAnzeige);
 
 
@@ -86,14 +86,14 @@ public class PanelA extends MyPanel {
 		Graphics2D g2d = DMIUtility.instance().setupGrafik(g);
 
 		// Paint A2 & A3 area
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 		g2d.setColor(bgColor);
 		g2d.fillRect(0, 54, 54, 220);
 
 		// Paint target bar
 		int targetBarHeight = computeTargetBarHeight(this.targetDistance);
 
-		g2d.setColor(DMIUtility.instance().getColor(DMIColor.GREY));
+		g2d.setColor(DMIUtility.instance().getColour(DMIColour.GREY));
 		g2d.fillRect(29, 270 - targetBarHeight, 10, targetBarHeight);
 
 		// Paint normal indicators

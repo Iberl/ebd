@@ -2,7 +2,7 @@ package ebd.dmi.ui;
 
 import ebd.dmi.ui.panels.*;
 import ebd.dmi.ui.utility.DMIUtility;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 
@@ -33,11 +33,11 @@ public class DMIDisplay extends JFrame {
         setResizable(true);
         setTitle("ETCS DMI - Main");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBackground(DMIUtility.instance().getColor(DMIColor.DARK_BLUE));
+        setBackground(DMIUtility.instance().getColour(DMIColour.DARK_BLUE));
         double skalierungsFaktor = DMIUtility.instance().getSkalierungsFaktor();
         getContentPane().setLayout(new BorderLayout());
         this.contentPane = new JPanel();
-        this.contentPane.setBackground(DMIUtility.instance().getColor(DMIColor.DARK_BLUE));
+        this.contentPane.setBackground(DMIUtility.instance().getColour(DMIColour.DARK_BLUE));
         getContentPane().add(this.contentPane, BorderLayout.CENTER);
         this.contentPane.setLayout(null);
         this.contentPane.setPreferredSize(new Dimension((int) (640 * skalierungsFaktor), (int) (480 * skalierungsFaktor)));

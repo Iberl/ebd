@@ -1,7 +1,7 @@
 package ebd.dmi.ui.templates;
 
 import ebd.dmi.ui.Scalable;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIPictures;
 import ebd.dmi.ui.utility.DMIUtility;
 
@@ -36,8 +36,8 @@ public class MyLabel extends JLabel implements Scalable {
 	 */
 	public MyLabel(final int x, final int y, final int breite, final int hoehe, final String str) {
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
-		Color fontColor = DMIUtility.instance().getColor(DMIColor.GREY);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
+		Color fontColor = DMIUtility.instance().getColour(DMIColour.GREY);
 		setBorder(DMIUtility.instance().getMyLabelBorder());
 		setHorizontalAlignment(SwingConstants.CENTER);
 		setForeground(fontColor);
@@ -56,7 +56,7 @@ public class MyLabel extends JLabel implements Scalable {
 
 	public MyLabel(final int x, final int y, final int breite, final int hoehe, final DMIPictures pic) {
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 		setBorder(DMIUtility.instance().getMyLabelBorder());
 		setFocusable(false);
 		setHorizontalAlignment(SwingConstants.CENTER);

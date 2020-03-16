@@ -33,7 +33,7 @@ public final class DMIUtility {
 	/**
 	 * Array, in dem alle Farben, die vorkommen können gespeichert werden.
 	 */
-	private Color[] farben = new Color[DMIColor.values().length];
+	private Color[] farben = new Color[DMIColour.values().length];
 
 	/**
 	 * Enthält alle abspielbaren Sounds als Array
@@ -63,22 +63,22 @@ public final class DMIUtility {
 	 */
 	private DMIUtility() {
 		// Hier wird das Array farben initialisiert.
-		this.farben[DMIColor.WHITE.ordinal()] = new Color(255, 255, 255);
-		this.farben[DMIColor.BLACK.ordinal()] = new Color(0, 0, 0);
-		this.farben[DMIColor.GREY.ordinal()] = new Color(195, 195, 195);
-		this.farben[DMIColor.MEDIUM_GREY.ordinal()] = new Color(150, 150, 150);
-		this.farben[DMIColor.DARK_GREY.ordinal()] = new Color(85, 85, 85);
-		this.farben[DMIColor.DARK_BLUE.ordinal()] = new Color(3, 17, 34);
-		this.farben[DMIColor.SHADOW.ordinal()] = new Color(8, 24, 57);
-		this.farben[DMIColor.YELLOW.ordinal()] = new Color(223, 223, 0);
-		this.farben[DMIColor.ORANGE.ordinal()] = new Color(234, 145, 0);
-		this.farben[DMIColor.RED.ordinal()] = new Color(191, 0, 2);
-		this.farben[DMIColor.PASP_DARK.ordinal()] = new Color(33, 49, 74);
-		this.farben[DMIColor.PASP_LIGHT.ordinal()] = new Color(41, 74, 107);
+		this.farben[DMIColour.WHITE.ordinal()] = new Color(255, 255, 255);
+		this.farben[DMIColour.BLACK.ordinal()] = new Color(0, 0, 0);
+		this.farben[DMIColour.GREY.ordinal()] = new Color(195, 195, 195);
+		this.farben[DMIColour.MEDIUM_GREY.ordinal()] = new Color(150, 150, 150);
+		this.farben[DMIColour.DARK_GREY.ordinal()] = new Color(85, 85, 85);
+		this.farben[DMIColour.DARK_BLUE.ordinal()] = new Color(3, 17, 34);
+		this.farben[DMIColour.SHADOW.ordinal()] = new Color(8, 24, 57);
+		this.farben[DMIColour.YELLOW.ordinal()] = new Color(223, 223, 0);
+		this.farben[DMIColour.ORANGE.ordinal()] = new Color(234, 145, 0);
+		this.farben[DMIColour.RED.ordinal()] = new Color(191, 0, 2);
+		this.farben[DMIColour.PASP_DARK.ordinal()] = new Color(33, 49, 74);
+		this.farben[DMIColour.PASP_LIGHT.ordinal()] = new Color(41, 74, 107);
 
 		// Borders werden erstellt
-		Color black = getColor(DMIColor.BLACK);
-		Color shadow = getColor(DMIColor.SHADOW);
+		Color black = getColour(DMIColour.BLACK);
+		Color shadow = getColour(DMIColour.SHADOW);
 		Border myTempBorder = new CompoundBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, black), BorderFactory.createMatteBorder(0, 0, 1, 1, shadow));
 		this.myLabelBorder = myTempBorder;
 		Border myInnerBorder = new CompoundBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, black), BorderFactory.createMatteBorder(0, 0, 1, 1, shadow));
@@ -237,7 +237,7 @@ public final class DMIUtility {
 	 * @param color Der DMIColor-Wert der gesuchten Farbe
 	 * @return Ein Color-Objekt, das die RGB-Darstellung der Farbe enthält.
 	 */
-	public Color getColor(final DMIColor color) {
+	public Color getColour(final DMIColour color) {
 		try {
 			// Das Array farben ist so aufgebaut, dass es genau
 			// an dieser Stelle die gesuchte Farbe enthält.

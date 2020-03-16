@@ -2,7 +2,7 @@ package ebd.dmi.ui.templates;
 
 import ebd.dmi.ui.Scalable;
 //import ebd.dmi.ui.panels.CardPanel;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIPictures;
 import ebd.dmi.ui.utility.DMISound;
 import ebd.dmi.ui.utility.DMIUtility;
@@ -31,7 +31,7 @@ public abstract class MyButton extends JButton implements Scalable {
 	/**
 	 * Wird noch ersetzt durch Farbe von Utility-Klasse.
 	 */
-	private Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+	private Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 
 	/**
 	 * Wird noch ersetzt durch Border von Utility-Klasse.

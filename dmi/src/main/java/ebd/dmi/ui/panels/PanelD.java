@@ -4,7 +4,7 @@ import ebd.dmi.ui.templates.MyButton;
 import ebd.dmi.ui.templates.MyDummyLabel;
 import ebd.dmi.ui.templates.MyLabel;
 import ebd.dmi.ui.templates.MyPanel;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIPictures;
 import ebd.dmi.ui.utility.DMIUtility;
 
@@ -42,7 +42,7 @@ public class PanelD extends MyPanel {
 		//this.add(this.panelDistanceScale);
 
 		MyDummyLabel lblD8 = new MyDummyLabel(240, 15, 6, 270);
-		lblD8.setBackground(DMIUtility.instance().getColor(DMIColor.PASP_DARK));
+		lblD8.setBackground(DMIUtility.instance().getColour(DMIColour.PASP_DARK));
 		this.add(lblD8);
 
 		this.lblD9 = new MyButton(0, 285, 40, 15, "Zoom++", DMIPictures.NA_03) {

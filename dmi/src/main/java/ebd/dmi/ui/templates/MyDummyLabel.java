@@ -1,7 +1,7 @@
 package ebd.dmi.ui.templates;
 
 import ebd.dmi.ui.Scalable;
-import ebd.dmi.ui.utility.DMIColor;
+import ebd.dmi.ui.utility.DMIColour;
 import ebd.dmi.ui.utility.DMIPictures;
 import ebd.dmi.ui.utility.DMIUtility;
 
@@ -36,7 +36,7 @@ public class MyDummyLabel extends JLabel implements Scalable {
 	 */
 	public MyDummyLabel(final int x, final int y, final int breite, final int hoehe) {
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 
 		// Color black = DMIUtility.instance().getColor(DMIColor.BLACK);
 		// Color shadow = DMIUtility.instance().getColor(DMIColor.SHADOW);
@@ -63,7 +63,7 @@ public class MyDummyLabel extends JLabel implements Scalable {
 
 	public MyDummyLabel(final int x, final int y, final int breite, final int hoehe, final DMIPictures pic) {
 		this.oldBounds = new Rectangle(x, y, breite, hoehe);
-		Color bgColor = DMIUtility.instance().getColor(DMIColor.DARK_BLUE);
+		Color bgColor = DMIUtility.instance().getColour(DMIColour.DARK_BLUE);
 
 		// Color black = DMIUtility.instance().getColor(DMIColor.BLACK);
 		// Color shadow = DMIUtility.instance().getColor(DMIColor.SHADOW);
