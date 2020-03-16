@@ -79,7 +79,7 @@ public class PackageHandler {
         double d_cycle;
         int m_loc;
 
-        if(p58.T_CYCLOC < ETCSVariables.T_CYCLOC){
+        if(p58.T_CYCLOC < ETCSVariables.T_CYCLOC_INFINITY){
             t_cycle = p58.T_CYCLOC;
         }
         else {

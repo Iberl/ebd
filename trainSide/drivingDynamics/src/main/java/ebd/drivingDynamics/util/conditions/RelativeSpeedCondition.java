@@ -17,7 +17,7 @@ import java.util.function.BiFunction;
  *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50 }}</p>
  * @author Lars Schulze-Falck
  */
-public class RelativeSpeedCondition extends Condition {
+public class RelativeSpeedCondition extends CurveBasedCondition {
 
     private Double speedPercentage;
     private BiFunction<Double,Double, Boolean> comparator;
@@ -36,10 +36,21 @@ public class RelativeSpeedCondition extends Condition {
     @Override
     public boolean eval() {
 
-        double maxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed() * speedPercentage;
+        double maxSpeed;
+        switch (this.curveBase){
+            case C30:
+                maxSpeed = trainDataVolatile.getCurrentCoastingPhaseSpeed();
+                break;
+            case TRIP_PROFILE:
+                maxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
+                break;
+            default:
+                maxSpeed = 0d;
+                System.err.println(String.format("You have to add %s to this switch statement", this.curveBase));
+        }
         double curSpeed = trainDataVolatile.getCurrentSpeed();
 
-        return comparator.apply(curSpeed,maxSpeed);
+        return comparator.apply(curSpeed,maxSpeed * speedPercentage);
     }
 
     @Override
@@ -66,5 +77,20 @@ public class RelativeSpeedCondition extends Condition {
             this.comparator = ComparisonParser.parse(opCode);
         }
         else throw new DDBadDataException("The key 'op' was missing for a RelativeSpeedCondition");
+
+        if(jsonObject.containsKey("curveBase")){
+            switch ((String) jsonObject.get("curveBase")){
+                case "c30":
+                    this.curveBase = CurveBase.C30;
+                    break;
+                case "trip":
+                    this.curveBase = CurveBase.TRIP_PROFILE;
+                    break;
+                default:
+                    this.curveBase = CurveBase.NOT_SET;
+                    throw new DDBadDataException(String.format("Condition was formatted wrong, %s is not a valid curve base", jsonObject.get("curveBase")));
+            }
+        }
+        else throw new DDBadDataException("The key curveBase was missing from a Condition");
     }
 }

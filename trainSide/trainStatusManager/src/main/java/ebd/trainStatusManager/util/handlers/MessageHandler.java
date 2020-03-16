@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.handlers;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
@@ -144,10 +145,9 @@ public class MessageHandler {
         int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
         int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
         double l_train = trainDataPerma.getL_train();
-        double currentMaxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
+        double currentMaxSpeed = trainDataVolatile.getCurrentMaximumSpeed();
         int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
-        Position refPosition;
 
 
         Message_3 msg3 = (Message_3)rme.message;
@@ -168,7 +168,9 @@ public class MessageHandler {
         /logging
          */
 
+        Position refPosition;
         Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null); //TODO check if viable
+        // System.out.println("Location ID: " + msg3.NID_LRBG);
         refPosition = new Position(0,true, refLocation);
 
         packet15 = msg3.Packet_15;
@@ -255,7 +257,7 @@ public class MessageHandler {
     private void sendAck(TrackMessage tm) {
         Message_146 message146 = new Message_146();
         message146.NID_ENGINE = this.etcsTrainID;
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);

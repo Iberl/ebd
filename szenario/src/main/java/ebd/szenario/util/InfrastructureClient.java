@@ -39,7 +39,7 @@ public class InfrastructureClient {
         this.ip = ch.ipToInfrastructureServer;
         this.port = Integer.parseInt(ch.portOfInfrastructureServer);
         this.useInfrastructureServer = ch.useInfrastructureServer;
-        this.trainNumber = ch.trainNumber;
+        this.trainNumber = ch.etcsEngineAndInfrastructureID;
 
         if(this.useInfrastructureServer) connect();
     }

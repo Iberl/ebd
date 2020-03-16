@@ -1,0 +1,371 @@
+[
+  {
+    "trainMovement": null,
+    "superviesedLocation": null,
+    "speedProfile": {
+      "speedSegments": [
+        {
+          "speedChangeEnd": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1000
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 2",
+              "geoCoordinates": null
+            }
+          },
+          "nc_DIFF": null,
+          "end": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1000
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 2",
+              "geoCoordinates": null
+            }
+          },
+          "v_STATIC": {
+            "bSpeed": 23
+          },
+          "begin": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 0
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 0",
+              "geoCoordinates": null
+            }
+          },
+          "nc_CDDIFF": null,
+          "direction": "BOTH"
+        },
+        {
+          "speedChangeEnd": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1900
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 4",
+              "geoCoordinates": null
+            }
+          },
+          "nc_DIFF": null,
+          "end": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1900
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 4",
+              "geoCoordinates": null
+            }
+          },
+          "v_STATIC": {
+            "bSpeed": 15
+          },
+          "begin": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1000
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 2",
+              "geoCoordinates": null
+            }
+          },
+          "nc_CDDIFF": null,
+          "direction": "BOTH"
+        }
+      ]
+    },
+    "sTrainId": "ICE 12",
+    "gradientProfile": null,
+    "endOfAuthority": {
+      "lineSection": {
+        "locations": []
+      },
+      "chainage": {
+        "iMeters": 1900
+      },
+      "q_scale": "SCALE_1_M",
+      "q_DANGERPOINT": false,
+      "overlap": null,
+      "shunting": false,
+      "d_ENDTIMERSTARTLOC": null,
+      "q_ENDTIMER": false,
+      "t_ENDTIMER": {
+        "sTimer": 0
+      },
+      "v_EMA": 15,
+      "q_OVERLAP": false,
+      "dangerPoint": null
+    }
+  },
+  {
+    "trainMovement": null,
+    "superviesedLocation": null,
+    "speedProfile": {
+      "speedSegments": [
+        {
+          "speedChangeEnd": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2300
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "Con Between 5 And 6",
+              "geoCoordinates": null
+            }
+          },
+          "nc_DIFF": null,
+          "end": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2300
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "Con Between 5 And 6",
+              "geoCoordinates": null
+            }
+          },
+          "v_STATIC": {
+            "bSpeed": 27
+          },
+          "begin": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 1900
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 4",
+              "geoCoordinates": null
+            }
+          },
+          "nc_CDDIFF": null,
+          "direction": "BOTH"
+        },
+        {
+          "speedChangeEnd": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2500
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 7",
+              "geoCoordinates": null
+            }
+          },
+          "nc_DIFF": null,
+          "end": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2500
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 7",
+              "geoCoordinates": null
+            }
+          },
+          "v_STATIC": {
+            "bSpeed": 23
+          },
+          "begin": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2300
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "Con Between 5 And 6",
+              "geoCoordinates": null
+            }
+          },
+          "nc_CDDIFF": null,
+          "direction": "BOTH"
+        }
+      ]
+    },
+    "sTrainId": "ICE 12",
+    "gradientProfile": null,
+    "endOfAuthority": {
+      "lineSection": {
+        "locations": []
+      },
+      "chainage": {
+        "iMeters": 2500
+      },
+      "q_scale": "SCALE_1_M",
+      "q_DANGERPOINT": false,
+      "overlap": null,
+      "shunting": false,
+      "d_ENDTIMERSTARTLOC": null,
+      "q_ENDTIMER": false,
+      "t_ENDTIMER": {
+        "sTimer": 0
+      },
+      "v_EMA": 19,
+      "q_OVERLAP": false,
+      "dangerPoint": null
+    }
+  },
+  {
+    "trainMovement": null,
+    "superviesedLocation": null,
+    "speedProfile": {
+      "speedSegments": [
+        {
+          "speedChangeEnd": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 3500
+            },
+            "trackElement": {
+              "chainageEnd": {
+                "iMeters": 3500
+              },
+              "chainageBeginn": {
+                "iMeters": 3500
+              },
+              "viewName": "Right Cehausen",
+              "geoCoordinates": null
+            }
+          },
+          "nc_DIFF": null,
+          "end": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 3500
+            },
+            "trackElement": {
+              "chainageEnd": {
+                "iMeters": 3500
+              },
+              "chainageBeginn": {
+                "iMeters": 3500
+              },
+              "viewName": "Right Cehausen",
+              "geoCoordinates": null
+            }
+          },
+          "v_STATIC": {
+            "bSpeed": 19
+          },
+          "begin": {
+            "lineSection": {
+              "locations": []
+            },
+            "chainage": {
+              "iMeters": 2500
+            },
+            "trackElement": {
+              "chainageEnd": null,
+              "chainageBeginn": null,
+              "viewName": "B 7",
+              "geoCoordinates": null
+            }
+          },
+          "nc_CDDIFF": null,
+          "direction": "BOTH"
+        }
+      ]
+    },
+    "sTrainId": "ICE 12",
+    "gradientProfile": null,
+    "endOfAuthority": {
+      "lineSection": {
+        "locations": []
+      },
+      "chainage": {
+        "iMeters": 3500
+      },
+      "q_scale": "SCALE_1_M",
+      "q_DANGERPOINT": false,
+      "overlap": null,
+      "shunting": false,
+      "d_ENDTIMERSTARTLOC": null,
+      "q_ENDTIMER": false,
+      "t_ENDTIMER": {
+        "sTimer": 0
+      },
+      "v_EMA": 0,
+      "q_OVERLAP": false,
+      "dangerPoint": null
+    }
+  },
+  {
+    "trainMovement": null,
+    "superviesedLocation": null,
+    "speedProfile": null,
+    "sTrainId": "ICE 12",
+    "gradientProfile": null,
+    "endOfAuthority": {
+      "lineSection": null,
+      "chainage": null,
+      "q_scale": null,
+      "q_DANGERPOINT": false,
+      "overlap": null,
+      "shunting": true,
+      "d_ENDTIMERSTARTLOC": null,
+      "q_ENDTIMER": false,
+      "t_ENDTIMER": null,
+      "v_EMA": 0,
+      "q_OVERLAP": false,
+      "dangerPoint": null
+    }
+  }
+]

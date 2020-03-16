@@ -9,6 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>ebd</groupId>
+    <version>0.1-SNAPSHOT</version>
     <artifactId>breakingCurveCalculator</artifactId>
 
     <dependencies>

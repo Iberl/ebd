@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.supervisors;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -42,12 +43,12 @@ public class PositionReportSupervisor {
 
     //private int t_cycle = ETCSVariables.T_CYCLOC;
     private double tripTimeAtCycleStart = 0d;
-    private int t_cycleNumber = 1;
 
     //private double d_cycle = ETCSVariables.D_CYCLOC;
     private double tripDistanceAtCycleStart = 0d;
     private int d_cycleNumber = 1;
 
+    private double curFullTripTime = 0;
     private String rbcID;
 
     private IncrPosRprtDist positionReportDistances = null;
@@ -78,13 +79,13 @@ public class PositionReportSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-
+        this.curFullTripTime += cte.deltaT;
         int t_cycle = trainDataVolatile.getT_CYCLOC();
         if(t_cycle != ETCSVariables.T_CYCLOC && t_cycle < ETCSVariables.T_CYCLOC_INFINITY){
-            double curTime = trainDataVolatile.getCurTripTime() - this.tripTimeAtCycleStart;
-            double curCycleNumber = curTime / t_cycle;
-            if(curCycleNumber > this.t_cycleNumber){
-                this.t_cycleNumber = (int)curCycleNumber + 1;
+            double curTime = this.curFullTripTime - this.tripTimeAtCycleStart;
+            //double curCycleNumber = curTime / t_cycle;
+            if(curTime > t_cycle){
+                //this.t_cycleNumber = (int)curCycleNumber + 1;
                 sendPositionReport();
             }
         }
@@ -149,8 +150,7 @@ public class PositionReportSupervisor {
 
         this.tripDistanceAtCycleStart = trainDataVolatile.getCurTripDistance();
         this.d_cycleNumber = 1;
-        this.tripTimeAtCycleStart = trainDataVolatile.getCurTripTime();
-        this.t_cycleNumber = 1;
+        this.tripTimeAtCycleStart = this.curFullTripTime;
     }
 
     /**
@@ -162,7 +162,7 @@ public class PositionReportSupervisor {
 
         Message_136 message136 = new Message_136();
         message136.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message136.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
 
         Packet_0 packet0 = new Packet_0();
@@ -183,6 +183,7 @@ public class PositionReportSupervisor {
         message136.PACKET_POSITION = packet0;
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, Collections.singletonList("mr;R=" + this.rbcID))); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Position Report"));
+        this.tripTimeAtCycleStart = this.curFullTripTime;
     }
 
     /**

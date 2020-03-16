@@ -47,11 +47,17 @@ public class MessageHandler {
         String trainID = (rme.sender.split(";T="))[1];
 
         if(rme.message instanceof Message_132){ //MA Request
-            Message_132 msg132 = (Message_132)rme.message;
+            Message_132 msg132 = (Message_132) rme.message;
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
             this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
-            sendMessage3(makeM3(rme),trainID);
+            Message_3 msg3 = makeM3(rme);
+            if(msg3 == null){
+                msg = String.format("Could not fulfill MA request from train %s", trainID);
+                this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+                sendMessage24withPacket57(rme, ETCSVariables.T_MAR_INFINITY);
+            }
+            else sendMessage3(msg3,trainID);
         }
         else if(rme.message instanceof Message_136){ //Position Report
             Message_136 msg136 = (Message_136)rme.message;
@@ -91,8 +97,20 @@ public class MessageHandler {
         this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters and Position Report Parameters"));
     }
 
+    private void sendMessage24withPacket57(ReceivedMessageEvent rme, int t_mar){
+        String trainID = rme.sender.split(";T=")[1];
+        List<TrackPacket> trackPackets = new ArrayList<>();
+        trackPackets.add(makeP57(t_mar));
+        Message_24 msg24 = makeMessage24(trackPackets);
+        this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg24, Collections.singletonList("mr;T=" + trainID)));
+        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters"));
+    }
+
     private Message_3 makeM3(ReceivedMessageEvent rme) {
         String trainID = rme.sender.split(";T=")[1];
+        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0){
+            return null;
+        }
         Route nextRoute = this.trainIDsToRoute.get(Integer.parseInt(trainID)).remove(0);
         double d_EOL = nextRoute.getDistance();
 
@@ -100,14 +118,12 @@ public class MessageHandler {
         lop.add(makeP21(nextRoute.getGp()));
         lop.add(makeP27(nextRoute.getTsp()));
         if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0) {
+            lop.add(makeP80(d_EOL));
             lop.add(makeP57(ETCSVariables.T_MAR_INFINITY));
-        }
-        else {
+        }else {
             lop.add(makeP57(20));
         }
-        if(this.trainIDsToRoute.get(Integer.parseInt(trainID)).size() == 0){
-            lop.add(makeP80(d_EOL));
-        }
+
 
         Message_3 msg3 = new Message_3();
         msg3.M_ACK = ETCSVariables.M_ACK_REQUIRED;

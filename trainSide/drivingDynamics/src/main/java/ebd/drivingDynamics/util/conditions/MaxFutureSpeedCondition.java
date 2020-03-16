@@ -6,8 +6,6 @@ import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
-import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;
@@ -33,25 +31,26 @@ import java.util.function.BiFunction;
  *
  * @author Lars Schulze-Falck
  */
-public class MaxFutureSpeedCondition extends Condition {
+public class MaxFutureSpeedCondition extends CurveBasedCondition {
+    private List<String> exceptionTargets = Collections.singletonList("all");
+    private BiFunction<Double,Double, Boolean> comparator;
+    private Spline tripProfile;
+
     /**
      * In [m/s]
      */
     private double totalSpeed;
-    private BiFunction<Double,Double, Boolean> comparator;
 
     /**
      * in [s]
      */
     double time;
 
-    private Spline tripProfile;
     /**
      * in [m]
      */
     private double maxTripSectionDistance;
 
-    private List<String> exceptionTargets = Collections.singletonList("all");
 
     /**
      * @param localEventBus The local {@link EventBus} of the train.
@@ -67,15 +66,26 @@ public class MaxFutureSpeedCondition extends Condition {
         if(this.tripProfile == null){
             return false;
         }
-
-        double curSpeed = trainDataVolatile.getCurrentSpeed();
-        double curSecDis = trainDataVolatile.getCurTripSectionDistance();
         double maxSpeed;
-        if((curSecDis + curSpeed * this.time) > this.maxTripSectionDistance){
-            maxSpeed = 0;
-        }
-        else {
-            maxSpeed = tripProfile.getPointOnCurve((curSecDis + curSpeed * this.time));
+        switch (this.curveBase){
+            case C30:
+                maxSpeed = trainDataVolatile.getCurrentCoastingPhaseSpeed();
+                //TODO wrong, needs a way to see breakingCurveGroup!
+                break;
+            case TRIP_PROFILE:
+                double curSpeed = trainDataVolatile.getCurrentSpeed();
+                double curSecDis = trainDataVolatile.getCurTripSectionDistance();
+
+                if((curSecDis + curSpeed * this.time) > this.maxTripSectionDistance){
+                    maxSpeed = 0;
+                }
+                else {
+                    maxSpeed = this.tripProfile.getPointOnCurve((curSecDis + curSpeed * this.time));
+                }
+                break;
+            default:
+                maxSpeed = 0d;
+                System.err.println(String.format("You have to add %s to this switch statement", this.curveBase));
         }
 
         return this.comparator.apply(maxSpeed,this.totalSpeed);
@@ -143,6 +153,21 @@ public class MaxFutureSpeedCondition extends Condition {
             else throw new DDBadDataException("MaxFutureSpeedCondition value was not a number");
         }
         else throw new DDBadDataException("The key 'value_t' was missing for a MaxFutureSpeedCondition");
+
+        if(jsonObject.containsKey("curveBase")){
+            switch ((String) jsonObject.get("curveBase")){
+                case "c30":
+                    this.curveBase = CurveBase.C30;
+                    break;
+                case "trip":
+                    this.curveBase = CurveBase.TRIP_PROFILE;
+                    break;
+                default:
+                    this.curveBase = CurveBase.NOT_SET;
+                    throw new DDBadDataException(String.format("Condition was formatted wrong, %s is not a valid curve base", jsonObject.get("curveBase")));
+            }
+        }
+        else throw new DDBadDataException("The key curveBase was missing from a Condition");
 
     }
 }

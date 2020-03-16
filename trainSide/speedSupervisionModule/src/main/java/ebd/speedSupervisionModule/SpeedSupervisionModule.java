@@ -78,6 +78,8 @@ public class SpeedSupervisionModule {
     public void clockTick(ClockTickEvent cte){
 
         if (this.breakingCurveGroup == null){
+
+
             return;
         }
         double curSpeed;
@@ -90,9 +92,9 @@ public class SpeedSupervisionModule {
         }
         else return;
 
-        if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
-
-        //System.out.println(this.breakingCurve.getRefLocation().getId());
+        if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) {
+            return;
+        }
 
         double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurveGroup.getServiceDecelerationCurve().getRefLocation().getId());
 
@@ -138,7 +140,6 @@ public class SpeedSupervisionModule {
                 speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
             }
         }
-
 
         this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel, supervisionState));
         sendCurrentMaxSpeed();

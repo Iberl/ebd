@@ -2,6 +2,7 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -39,6 +40,8 @@ public class MessageAuthorityRequestSupervisor {
     private TrainDataVolatile trainDataVolatile;
     private String etcsTrainID;
     private String rbcID; //TODO: make updateable
+
+    private boolean waitingOnMA = false;
 
     /**
      * In [m]
@@ -82,17 +85,23 @@ public class MessageAuthorityRequestSupervisor {
         double distanceToEOL = 0;
         if(this.breakingCurve != null){
             distanceToEOL = this.breakingCurve.getHighestXValue();
-            distanceToEOL -= trainDataVolatile.getCurrentPosition().totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+            distanceToEOL -= trainDataVolatile.getCurTripSectionDistance();
         }
 
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double timeToEOL = distanceToEOL / curSpeed;
-
+        if(distanceToEOL == 0 || curSpeed == 0){
+            timeToEOL = 0;
+        }
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
-            if (t_mar >= timeToEOL){
-                this.timeAtRequest = System.currentTimeMillis() / 1000d;
+            if (timeToEOL <= t_mar){
+                double deltaT = AppTime.currentTimeMillis() / 1000d - timeAtRequest;
+
+                if(!this.waitingOnMA || deltaT > 10){
+                this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
                 this.lastQ_MARQSTREASON = 2;
                 sendMaRequest();
+                }
             }
         }
 
@@ -102,9 +111,9 @@ public class MessageAuthorityRequestSupervisor {
         }
 */
 
-        double deltaT = (System.currentTimeMillis() / 1000d) - this.timeAtRequest;
-        if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_TIMEOUTRQST_INFINITY && t_cycrqst < deltaT){
-            this.timeAtRequest = System.currentTimeMillis() / 1000d;
+        double deltaT = (AppTime.currentTimeMillis() / 1000d) - this.timeAtRequest;
+        if(t_cycrqst != ETCSVariables.T_CYCRQST && t_cycrqst < ETCSVariables.T_CYCRQST_INFINITY && t_cycrqst < deltaT){
+            this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
             sendMaRequest();
         }
     }
@@ -112,22 +121,13 @@ public class MessageAuthorityRequestSupervisor {
     @Subscribe
     public void newBC(NewBreakingCurveEvent bce){
         this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
-    }
-
-    @Subscribe
-    public void newParameter(NewMaRequestParametersEvent nmrpe){
-        return;
+        this.waitingOnMA = false;
     }
 
     @Subscribe
     public void newMaRequest(NewMaRequest nmr){
-        this.timeAtRequest = System.currentTimeMillis() / 1000d;
+        this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
         this.lastQ_MARQSTREASON = nmr.Q_MARQSTREASON;
-    }
-
-    @Subscribe
-    public void newMaMessage(NewMaMessage nmm){
-        this.timeAtRequest = -1;
     }
 
     private void sendMaRequest(){
@@ -137,7 +137,7 @@ public class MessageAuthorityRequestSupervisor {
         if(curPos == null) return;
 
         Packet_0 packet0 = new Packet_0();
-        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
+        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : ETCSVariables.NID_LRBG_UNKNOWN;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
         packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
         packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
@@ -152,7 +152,7 @@ public class MessageAuthorityRequestSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         Message_132 message132 = new Message_132();
-        long curTime = System.currentTimeMillis() / 10L;
+        long curTime = AppTime.currentTimeMillis() / 10L;
         message132.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message132.Q_MARQSTREASON = this.lastQ_MARQSTREASON;
         message132.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
@@ -161,5 +161,7 @@ public class MessageAuthorityRequestSupervisor {
         List<String> destinations = Collections.singletonList("mr;R=" + this.rbcID);
         this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message132, destinations));
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending a MA Request"));
+
+        this.waitingOnMA = true;
     }
 }

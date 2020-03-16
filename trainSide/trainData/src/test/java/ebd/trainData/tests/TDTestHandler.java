@@ -25,7 +25,7 @@ public class TDTestHandler {
     @Subscribe
     public void newTrainDataPerma(NewTrainDataPermaEvent trainDataPermaEvent){
         TrainDataPerma trainDataPerma = trainDataPermaEvent.trainDataPerma;
-        System.out.println(String.format("Got new TrainDataPerma with ID %s", trainDataPerma.getId()));
+        System.out.println(String.format("Got new TrainDataPerma with ID %s", trainDataPerma.getTrainConfigID()));
     }
 
     @Subscribe

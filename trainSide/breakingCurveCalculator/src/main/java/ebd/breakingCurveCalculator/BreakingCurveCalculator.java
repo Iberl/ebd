@@ -106,6 +106,7 @@ public class BreakingCurveCalculator {
     		}else {
 				this.isCalculating = true;
     		}
+		    //System.out.println(bcre.packet15.toString());
     		this.breakingPower = bcre.breakingPower;
     		this.emergencyBreakingPower = bcre.emergencyBreakingPower;
     		this.referencePosition = bcre.referencePosition;

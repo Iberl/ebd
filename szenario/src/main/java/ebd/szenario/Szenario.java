@@ -1,6 +1,7 @@
 package ebd.szenario;
 
 import ebd.dmi.ui.DMIDisplayConnector;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -17,7 +18,7 @@ import ebd.szenario.util.InfrastructureClient;
 import ebd.szenario.util.InfrastructureDummyServer;
 import ebd.szenario.util.InputHandler;
 import ebd.szenario.util.SzenarioEventHandler;
-import ebd.szenario.util.events.LoadOneEvent;
+import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.LoadThreeEvent;
 import ebd.szenario.util.events.LoadTwoEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
@@ -70,24 +71,22 @@ public class Szenario implements Runnable {
             return new BaliseTelegramGenerator(lob);
         }*/
 
-        public static void sendLinkingInformation(MessageSender ms) {
+        public static void sendLinkingInformation(MessageSender ms, int etcsID) {
             // Create Linking Information
-            Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 0, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 3, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(100, false, 0, 4, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 5, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 6, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 7, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 8, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 9, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(300, false, 0, 10, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
-            li.links.add(new Packet_5.Packet_5_Link(200, false, 0, 11, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(584, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(398, false, 0, 3, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(346, false, 0, 4, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(183, false, 0, 5, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(489, false, 0, 6, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(440, false, 0, 7, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(126, false, 0, 8, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(84, false, 0, 9, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
+            li.links.add(new Packet_5.Packet_5_Link(199, false, 0, 10, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
 
-            Message_24 message_24 = new Message_24((System.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
+            Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=192")));
+            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=" + etcsID)));
         }
     }
 
@@ -135,7 +134,7 @@ public class Szenario implements Runnable {
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
-        this.etcsID = ConfigHandler.getInstance().etcsID;
+        this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
         szenarioThread.start();
     }
@@ -181,21 +180,25 @@ public class Szenario implements Runnable {
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void load1(LoadOneEvent loe){
-        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to B");
-        System.out.println(ConfigHandler.getInstance().pathToDriverProfileJson);
+    public void load(LoadEvent loe){
+        String driverName = ConfigHandler.getInstance().pathToDriverProfileJson;
+        driverName = driverName.replace("DrivingStrategy.json", "");
+        String routeName = ConfigHandler.getInstance().pathToSzenarioJSON;
+        routeName = routeName.replace("szenario", "");
+        routeName = routeName.replace(".json", "");
+        System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
-        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
+        Route a = new Route("AB", 1000, new int[]{0,100,900,80}, new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(192, listRoute);
+        mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -216,7 +219,7 @@ public class Szenario implements Runnable {
         this.rbc = new RadioBlockCenter("1", mapRoute, 2);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -231,7 +234,7 @@ public class Szenario implements Runnable {
         }
         Route a = new Route("A1", 600,new int[]{0,100},new int[]{0,1});
         Route b = new Route("12", 1900,new int[]{0,100,900,80,700,120},new int[]{0,1,750,0,450,-2});
-        Route c = new Route("2C", 1700,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
+        Route c = new Route("2C", 1400,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
 
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
@@ -242,7 +245,7 @@ public class Szenario implements Runnable {
         this.rbc = new RadioBlockCenter("1", mapRoute, 3);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
         EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
     }
 

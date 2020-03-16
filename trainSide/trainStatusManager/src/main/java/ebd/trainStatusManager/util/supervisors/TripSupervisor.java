@@ -3,16 +3,18 @@ package ebd.trainStatusManager.util.supervisors;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
-import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -53,7 +55,7 @@ public class TripSupervisor {
         this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-        this.etcsID = trainDataPerma.getId();
+        this.etcsID = trainDataPerma.getTrainConfigID();
         this.targetReachedDistance = ConfigHandler.getInstance().targetReachedDistance;
     }
 
@@ -67,14 +69,15 @@ public class TripSupervisor {
         if(this.breakingCurve == null) return;
 
         Position curPos = trainDataVolatile.getCurrentPosition();
-        if(curPos == null) return;
-
+        if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
 
-        if(routeDataVolatile.isLastMABeforeEndOfMission()
-                && distanceToEMA <= this.targetReachedDistance
-                && trainDataVolatile.getCurrentSpeed() == 0){
-            sendEndOfMission();
+        if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
+            this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
+
+            if(routeDataVolatile.isLastMABeforeEndOfMission()){
+                sendEndOfMission();
+            }
         }
     }
 
@@ -84,7 +87,7 @@ public class TripSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
+        this.breakingCurve = bce.breakingCurveGroup.getPermittedSpeedCurve();
     }
 
     /**

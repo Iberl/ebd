@@ -28,6 +28,7 @@ public class ConfigHandler {
     */
     public String pathToDriverProfileJson = "";
     public String pathToTestTrainJson = "";
+    public String pathToSzenarioJSON = "";
 
     public String ipToTrainConfigurator = "";
     public String portOfTrainConfigurator = "";
@@ -35,15 +36,19 @@ public class ConfigHandler {
     public String ipToInfrastructureServer = "";
     public String portOfInfrastructureServer = "";
 
+    public String ipToTMSServer = "";
+    public String portOfTMSServer = "";
+
 
     /*
     ints
      */
     public int trainClockTickInMS = 100;
-    public int trainNumber = 0;
-    public int etcsID = 192;
+    public int etcsEngineAndInfrastructureID = 0;
+    public int trainConfigID = 192;
 
     public int defaultDangerPoint = 200;
+
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
      */
@@ -60,6 +65,7 @@ public class ConfigHandler {
      * Distance before end of movement authority that is seen as "target reached" in [m]
      */
     public double targetReachedDistance = 20;
+
     /**
      * Minimum time between actions
      */
@@ -178,11 +184,12 @@ public class ConfigHandler {
      */
     public boolean useTrainConfiguratorTool = false;
     public boolean useInfrastructureServer = false;
+    public boolean useTSMServer = false;
+    public boolean debug = false;
 
     /*
     other
      */
-
 
 
 
