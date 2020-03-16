@@ -19,8 +19,6 @@ public class GUIserver implements Runnable {
     private EventBus globalBus;
     private Thread guiServerThread;
     private GUIPipeDistribution guiPipeDistribution = null;
-    private GUISystemDistribution soutDistribution;
-    private GUISystemDistribution serrDistribution;
 
     private ServerSocket serverSocket;
     private Map<String, Map<Integer,List<GUIClientWorker>>> clientMap;
@@ -33,7 +31,6 @@ public class GUIserver implements Runnable {
         this.guiServerThread = new Thread(this);
         this.serverSocket = new ServerSocket(Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer));
         setUpMap();
-        setUpSystemDistribution();
         guiServerThread.start();
     }
 
@@ -82,13 +79,9 @@ public class GUIserver implements Runnable {
         this.clientMap.put("trn", new HashMap<>());
         this.clientMap.put("gb", new HashMap<>());
         this.clientMap.put("all", new HashMap<>());
-        this.clientMap.put("s.out", new HashMap<>());
-        this.clientMap.put("s.err", new HashMap<>());
 
         this.clientMap.get("gb").put(0, new ArrayList<>());
         this.clientMap.get("all").put(0, new ArrayList<>());
-        this.clientMap.get("s.out").put(0, new ArrayList<>());
-        this.clientMap.get("s.err").put(0, new ArrayList<>());
     }
 
     /**
@@ -125,21 +118,5 @@ public class GUIserver implements Runnable {
             EventBus.getDefault().post(new ExceptionEvent("szenario", Collections.singletonList("szenario"),
                     new NotCausedByAEvent(), iae, ExceptionEventTyp.WARNING));
         }
-    }
-
-    private void setUpSystemDistribution() throws IOException {
-        /*PipedOutputStream soutPipe = new PipedOutputStream();
-        System.setOut(new PrintStream(soutPipe, true));
-        PipedInputStream soutIN = new PipedInputStream(soutPipe);
-        this.soutDistribution = new GUISystemDistribution(soutIN, this.clientMap, "s.out");*/
-
-
-
-/*        this.serrPipe = new PipedOutputStream();
-        PrintStream serrP = new PrintStream(this.serrPipe);
-        System.setOut(serrP);
-        PipedInputStream serrIN = new PipedInputStream(this.serrPipe);
-        this.serrDistribution = new GUISystemDistribution(serrIN, this.clientMap, "s.err");*/
-
     }
 }
