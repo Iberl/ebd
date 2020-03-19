@@ -39,14 +39,51 @@ public class ConfigHandler {
     public String ipToTMSServer = "";
     public String portOfTMSServer = "";
 
+    public String portOfGUIServer = "";
+
+    /*
+boolean
+ */
+    /**
+     * If true, the program will try to connect to the TrainConfig program.
+     */
+    public boolean useTrainConfiguratorTool = false;
+    /**
+     * If true, the program will try to connect to the infrastructure server.
+     */
+    public boolean useInfrastructureServer = false;
+    /**
+     * If true, the program will try to connect to the Train Manager System program.
+     */
+    public boolean useTSMServer = false;
+    /**
+     * If true, GUIs can connect to the program.
+     */
+    public boolean allowGUI = false;
+    /**
+     * If true, the program does wait for an input and just calls load.
+     */
+    public boolean autoStart = false;
+    public boolean debug = false;
 
     /*
     ints
      */
+    /**
+     * The time between calculation cycles in the train in [ms].
+     */
     public int trainClockTickInMS = 100;
+    /**
+     * The etcs id of the train. Currently the same id as used for the train on the infrastructure server.
+     */
     public int etcsEngineAndInfrastructureID = 0;
+    /**
+     * The id of the train in the Train Config Tool
+     */
     public int trainConfigID = 192;
-
+    /**
+     * Default distance between end of movement authority and danger point in [m]
+     */
     public int defaultDangerPoint = 200;
 
     /**
@@ -178,14 +215,6 @@ public class ConfigHandler {
      * in [m/s]
      */
     public double V_warning_max = 58.33;
-
-    /*
-    boolean
-     */
-    public boolean useTrainConfiguratorTool = false;
-    public boolean useInfrastructureServer = false;
-    public boolean useTSMServer = false;
-    public boolean debug = false;
 
     /*
     other

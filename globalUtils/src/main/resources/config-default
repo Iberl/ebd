@@ -15,6 +15,23 @@ portOfInfrastructureServer = 25555
 ipToTMSServer = 127.0.0.1
 portOfTMSServer = 22223
 
+portOfGUIServer = 22224
+
+######
+###### Booleans (either " = true" or " = false")
+######
+# If true, the program will try to connect to the TrainConfig program.
+useTrainConfiguratorTool = false
+# If true, the program will try to connect to the infrastructure server.
+useInfrastructureServer = false
+# If true, the program will try to connect to the Train Manager System program.
+useTSMServer = false
+# If true, GUIs can connect to the program.
+allowGUI = false
+# If true, the program does wait for an input and just calls load.
+autoStart = false
+debug = false
+
 ######
 ###### Integers
 ######
@@ -75,10 +92,3 @@ V_warning_min = 38.89
 # Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
 V_warning_max = 58.33
 
-######
-###### Booleans (either " = true" or " = false")
-######
-useTrainConfiguratorTool = false
-useInfrastructureServer = false
-useTSMServer = false
-debug = false
