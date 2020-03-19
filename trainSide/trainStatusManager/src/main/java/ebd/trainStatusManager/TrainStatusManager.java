@@ -204,6 +204,7 @@ public class TrainStatusManager implements Runnable {
         msg150.NID_ENGINE = this.etcsTrainID;
         Packet_0 p0 = new Packet_0();
         msg150.PACKET_POSITION = p0;
+        this.infrastructureClientConnector.disconnect();
         SendMessageEvent sme = new SendMessageEvent("tsm", Collections.singletonList("ms"), msg150, Collections.singletonList("mr;R=" + this.etcsTrainID));
         this.messageSender.send(sme);
         disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));

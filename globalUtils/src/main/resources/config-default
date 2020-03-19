@@ -20,10 +20,15 @@ portOfGUIServer = 22224
 ######
 ###### Booleans (either " = true" or " = false")
 ######
+# If true, the program will try to connect to the TrainConfig program.
 useTrainConfiguratorTool = false
+# If true, the program will try to connect to the infrastructure server.
 useInfrastructureServer = false
+# If true, the program will try to connect to the Train Manager System program.
 useTSMServer = false
+# If true, GUIs can connect to the program.
 allowGUI = false
+# If true, the program does wait for an input and just calls load.
 autoStart = false
 debug = false
 

@@ -1,28 +1,32 @@
 package ebd.szenario.util.server;
 
-import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.trainStatusManager.util.events.TsmExceptionEvent;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.Collections;
 
+/**
+ * This class manages socket connected to {@link GUIServer}
+ */
 public class GUIClientWorker implements Runnable{
 
     private Thread guiClientWorker;
     private Socket client;
-    private BufferedReader in;
     private PrintWriter out;
 
+    /**
+     * Constructs and starts a thread of itself.
+     * @param client The client socket.
+     * @throws IOException
+     */
     public GUIClientWorker(Socket client) throws IOException {
         this.guiClientWorker = new Thread(this);
         this.client = client;
-        this.in = new BufferedReader(new InputStreamReader(client.getInputStream()));
         this.out = new PrintWriter(client.getOutputStream(), true);
         this.guiClientWorker.start();
     }
 
+    /**
+     * Keeps thread from dying as long as the client is connected.
+     */
     @Override
     public void run() {
         while(!this.client.isClosed()){
@@ -34,6 +38,10 @@ public class GUIClientWorker implements Runnable{
         }
     }
 
+    /**
+     * Sends a string to the client
+     * @param string String to send.
+     */
     public void sendString(String string){
         if(!this.client.isClosed()) this.out.println(string);
     }

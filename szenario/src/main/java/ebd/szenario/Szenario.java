@@ -18,7 +18,7 @@ import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
-import ebd.szenario.util.server.GUIserver;
+import ebd.szenario.util.server.GUIServer;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -69,7 +69,7 @@ public class Szenario implements Runnable {
     /*
     Server
      */
-    private GUIserver guiServer;
+    private GUIServer guiServer;
 
     /*
     TrackSide
@@ -91,7 +91,7 @@ public class Szenario implements Runnable {
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
-            if(ch.allowGUI) this.guiServer = new GUIserver();
+            if(ch.allowGUI) this.guiServer = new GUIServer();
         } catch (IOException e) {
             e.printStackTrace();
         }

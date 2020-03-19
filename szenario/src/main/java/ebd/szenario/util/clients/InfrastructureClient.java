@@ -11,10 +11,15 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+/**
+ * This class is a intermediary between {@link ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector}
+ * and the EBD infrastructure server. It listens to {@link UpdatingInfrastructureEvent} and sends the content over a
+ * socket connection to the server.
+ */
 public class InfrastructureClient {
     private EventBus globalEventBus;
 
@@ -24,14 +29,17 @@ public class InfrastructureClient {
     private PrintWriter out;
 
     private List<Integer> registeredTrains = new ArrayList();
-    private int trainNumber;
 
     /**
      * If simulated, do not connect to any servers
      */
     private boolean useInfrastructureServer;
 
-
+    /**
+     * Constructs this class. Only connects to the infrastructure server if useInfrastructureServer in {@link ConfigHandler} is
+     * set to true.
+     * @throws IOException if {@link Socket#connect(SocketAddress)} fails
+     */
     public InfrastructureClient() throws IOException {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
@@ -39,11 +47,68 @@ public class InfrastructureClient {
         this.ip = ch.ipToInfrastructureServer;
         this.port = Integer.parseInt(ch.portOfInfrastructureServer);
         this.useInfrastructureServer = ch.useInfrastructureServer;
-        this.trainNumber = ch.etcsEngineAndInfrastructureID;
 
         if(this.useInfrastructureServer) connect();
     }
 
+    /**
+     * Listens to {@link UpdatingInfrastructureEvent} and sends the content to the Infrastructure Server
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void updateEvent(UpdatingInfrastructureEvent uie){
+        if(!this.useInfrastructureServer || !validTarget(uie.targets)){
+            return;
+        }
+        int trainID = uie.infrastructureID;
+
+        if(!registeredTrains.contains(trainID)){
+            registeredTrains.add(trainID);
+            init(trainID);
+        }
+        if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
+            /*
+            Necessary, because the infrastructure logic has a quirk. which sets the train power level to 0
+            from 0 to 10 km/h and starts with two at 10 km/h.
+            */
+            go(trainID, 1);
+        }
+        else {
+            gok(trainID, uie.speedInKmh);
+        }
+    }
+
+    /**
+     * Listens to {@link TerminateTrainEvent} and sends the content to the Infrastructure Server to terminate the train
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void terminateTrain(TerminateTrainEvent tte){
+        if(!this.useInfrastructureServer || !validTarget(tte.targets)){
+            return;
+        }
+
+        int trainID = tte.infrastructureID;
+        if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
+
+        terminate(trainID);
+        this.registeredTrains.remove(trainID);
+    }
+
+    /**
+     * Listens to {@link DisconnectEvent} and disconnect this from the global event bus
+     */
+    @Subscribe
+    public void disconnect(DisconnectEvent de){
+        if(!validTarget(de.targets)){
+            return;
+        }
+
+        this.globalEventBus.unregister(this);
+    }
+
+    /**
+     * Closes the socket connection.
+     * @throws IOException If {@link Socket#close()} fails.
+     */
     public void close() throws IOException {
         Socket socket = this.socket;
         if (socket != null) {
@@ -159,66 +224,6 @@ public class InfrastructureClient {
         send("go %s %s", address, trainPowerLevel);
     }
 
-    /**
-     *
-     */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void updateEvent(UpdatingInfrastructureEvent uie){
-        if(!this.useInfrastructureServer || !validTarget(uie.targets)){
-            return;
-        }
-        int trainID = getTrainIDFromSource(uie.source);
-
-        if(trainID == -1){
-            return;
-        }
-
-        if(!registeredTrains.contains(trainID)){
-            registeredTrains.add(trainID);
-            init(trainID);
-        }
-        if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
-            /*
-            Necessary, because the infrastructure logic has a quirk. which sets the train power level to 0
-            from 0 to 10 km/h and starts with two at 10 km/h.
-            */
-            go(trainID, 1);
-        }
-        else {
-            gok(trainID, uie.speedInKmh);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void terminateTrain(TerminateTrainEvent tte){
-        if(!this.useInfrastructureServer || !validTarget(tte.targets)){
-            return;
-        }
-
-        int trainID = getTrainIDFromSource(tte.source);
-        if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
-
-        terminate(trainID);
-        this.registeredTrains.remove(trainID);
-    }
-
-    @Subscribe
-    public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
-            return;
-        }
-
-        this.globalEventBus.unregister(this);
-    }
-
-
-
-    private int getTrainIDFromSource(String source){
-        int etcsID = -1;
-        //TODO: set train number by questioning the DBD database or by initialisation
-        etcsID = this.trainNumber;
-        return etcsID;
-    }
 
     /**
      * True if this Instance is a vaild target of the event

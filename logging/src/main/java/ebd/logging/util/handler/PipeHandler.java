@@ -16,7 +16,7 @@ import java.util.logging.LogRecord;
 public class PipeHandler extends Handler {
 
     private ConfigHandler ch = ConfigHandler.getInstance();
-    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("[uuuu-MM-dd HH:mm:ss");
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("[HH:mm:ss.SS]");
     private PipedOutputStream pos;
     private BufferedWriter out;
 
@@ -36,11 +36,10 @@ public class PipeHandler extends Handler {
             //TODO Connect Level with config.txt
             return;
         }
-        LocalDateTime ldt = LocalDateTime.ofInstant(record.getInstant(), ZoneId.systemDefault());
+        LocalTime ldt = LocalTime.ofInstant(record.getInstant(), ZoneId.systemDefault());
 
         String msg = "[" + ldt.format(this.dtf) + "] " + record.getMessage();
         msg = msg.replaceAll("\\[\\d+m", ""); //Removes logging color codes from string
-
 
         try {
             this.out.write(msg);

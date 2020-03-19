@@ -1,6 +1,7 @@
 package ebd.trainStatusManager.util.socketClientsConnectors;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.szenario.TerminateTrainEvent;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
@@ -8,11 +9,14 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * //TODO Move up to main module of the program, use global events on this level
+ * Connects the the tsm to the EBD infrastructure server which controls the models train by sending out
+ * {@link UpdatingInfrastructureEvent}. These can be used by a InfrastructureClient that listens to the
+ * global bus to notify a infrastructure server of the current speed of this train.
  */
 public class InfrastructureClientConnector {
 
@@ -20,6 +24,7 @@ public class InfrastructureClientConnector {
     private EventBus globalEventBus;
     private TrainDataVolatile trainDataVolatile;
     private int etcsID;
+    private int infrastructureID;
     private String eventSource;
     private List<String> targets = Collections.singletonList("szenario");
 
@@ -27,7 +32,14 @@ public class InfrastructureClientConnector {
     private int updateMultiplier;
 
     private double carry;
+    private List<Double> speeds = new ArrayList<>(); // in [m/s]
+    private List<Double> times = new ArrayList<>(); // in [s]
 
+    /**
+     * Constructs an Instance
+     * @param localEventBus the local {@link EventBus}
+     * @param etcsID the etcsID. Its also used as infrastructure ID.
+     */
     public InfrastructureClientConnector(EventBus localEventBus, int etcsID){
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
@@ -36,12 +48,18 @@ public class InfrastructureClientConnector {
         this.trainDataVolatile = null;
 
         this.etcsID = etcsID;
+        this.infrastructureID = etcsID;
 
         this.eventSource = "tsm;T=" + this.etcsID;
 
         this.updateMultiplier = ConfigHandler.getInstance().infrastructureUpdateMultiplier;
     }
 
+    /**
+     * On every clock tick send out by the trains clock in {@link ebd.trainStatusManager.TrainStatusManager},
+     * this method checks if it has to send out a {@link UpdatingInfrastructureEvent}. It it
+     * @param cte A {@link ClockTickEvent}
+     */
     @Subscribe
     public void clockTick(ClockTickEvent cte){
         if(this.trainDataVolatile == null){
@@ -50,25 +68,44 @@ public class InfrastructureClientConnector {
             this.trainDataVolatile = ntdve.trainDataVolatile;
         }
 
+        this.speeds.add(this.trainDataVolatile.getCurrentSpeed());
+        this.times.add(cte.deltaT);
+
         this.tickCounter += 1;
+        /**
+         * Only calculated a update and send it if there where updateMultiplier many clock tick events.
+         */
         if(this.tickCounter <= this.updateMultiplier) return;
         this.tickCounter = 0;
 
-        double deltaTime = cte.deltaT;
-
-        double curV = this.trainDataVolatile.getCurrentSpeed();
-        curV = curV * 3.6; //To km/h
+        double averageSpeed = 0;
+        double timeBetweenUpdates = 0;
+        for(Double time : this.times){
+            timeBetweenUpdates += time;
+        }
+        for(int i = 0; i < this.speeds.size(); i++){
+            averageSpeed += this.speeds.get(i) * 3.6 * (this.times.get(i) / timeBetweenUpdates);
+        }
 
         /*
-        To reduce rounding to integer errors, the difference between the the int and the double is carried over,
-        weighted with the time spend between clock ticks and then added back in.
+        To reduce rounding to integer errors, the difference between the long and the double is carried over,
+        weighted with the time spend between updates and then added back in.
          */
-        double weightedCarry = this.carry * deltaTime;
+        double weightedCarry = this.carry * timeBetweenUpdates;
 
-        curV += weightedCarry;
-        long curVlong = Math.round(curV);
-        this.carry = (curV - curVlong) / deltaTime;
+        averageSpeed += weightedCarry;
+        long curVlong = Math.round(averageSpeed);
+        this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
+        System.out.println(curVlong);
+        this.speeds = new ArrayList<>();
+        this.times = new ArrayList<>();
+        this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.targets,this.infrastructureID,(int)curVlong));
+    }
 
-        this.globalEventBus.post(new UpdatingInfrastructureEvent(eventSource,targets,(int)curVlong));
+    /**
+     * Signals the infrastructure client that this trains should be terminated.
+     */
+    public void disconnect() {
+        this.globalEventBus.post(new TerminateTrainEvent(this.eventSource,this.targets,this.infrastructureID));
     }
 }

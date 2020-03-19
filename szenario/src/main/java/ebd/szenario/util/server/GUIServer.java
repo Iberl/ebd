@@ -14,7 +14,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
-public class GUIserver implements Runnable {
+/**
+ * This GUIServer organises connecting GUI clients. It creates a {@link GUIClientWorker} for every client and maps them
+ * depending on the greeting the clients provides.<br>
+ * {@link GUIPipeDistribution} then uses this map to serve the clients with data.
+ */
+public class GUIServer implements Runnable {
 
     private EventBus globalBus;
     private Thread guiServerThread;
@@ -25,7 +30,11 @@ public class GUIserver implements Runnable {
 
     private boolean running = true;
 
-    public GUIserver() throws IOException {
+    /**
+     * Constructs the GUIServer and starts a thread of itself.
+     * @throws IOException Should initialization of ServerSocket run into problems
+     */
+    public GUIServer() throws IOException {
         this.globalBus = EventBus.getDefault();
         this.globalBus.register(this);
         this.guiServerThread = new Thread(this);
@@ -35,7 +44,10 @@ public class GUIserver implements Runnable {
     }
 
 
-
+    /**
+     * At first the server waits until a pipe to {@link ebd.logging.Logging} is established.
+     * After that, it allows clients to connect.
+     */
     @Override
     public void run() {
         while (guiPipeDistribution == null){
@@ -60,8 +72,8 @@ public class GUIserver implements Runnable {
 
 
     /**
-     *
-     * @param de
+     * Listens to a global disconnect event and terminates.
+     * @param de {@link DisconnectEvent}
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
@@ -88,9 +100,16 @@ public class GUIserver implements Runnable {
      * Adds a client worker to {@link this.clientMap}
      * @param greeting The greeting string send by the client
      * @param client The socket representing the client
-     * @throws IOException
+     * @throws IOException If there is a problem while writing to a client or closing the client.
      */
     private void addGUIClientWorkerToMap(String greeting, Socket client) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+
+        if(!greeting.contains(";")){
+            bw.write("The greeting has to be of the form 'entityName;entityID'. Could not connect");
+            client.close();
+            return;
+        }
         String entityName = greeting.split(";")[0];
 
         int entityID;
@@ -98,7 +117,7 @@ public class GUIserver implements Runnable {
             entityID = 0;
         }
         else {
-            entityID = Integer.parseInt(greeting.split(";")[1]);
+            entityID = Integer.parseInt(greeting.split(";")[1].replaceAll("[^0-9]", ""));
         }
 
         if(this.clientMap.containsKey(entityName)){
@@ -113,6 +132,8 @@ public class GUIserver implements Runnable {
             }
         }
         else {
+            bw.write("The greeting has to be of the form 'entityName;entityID' and the entityName has to be " +
+                    "'trn', 'rbc', 'gb' or 'all'. Could not connect");
             client.close();
             IllegalArgumentException iae = new IllegalArgumentException("Entity name " + entityName + " not found");
             EventBus.getDefault().post(new ExceptionEvent("szenario", Collections.singletonList("szenario"),
