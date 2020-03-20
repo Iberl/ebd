@@ -144,7 +144,7 @@ public class TrainStatusManager implements Runnable {
 
 
         //For tests
-        /*List<BreakingCurve> lobc = new ArrayList<>();
+        List<BreakingCurve> lobc = new ArrayList<>();
         lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
         lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
         lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
@@ -178,7 +178,7 @@ public class TrainStatusManager implements Runnable {
                 eventTargets.add("tsm;");
                 localEventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, nbce, e1));
             }
-        }*/
+        }
     }
 
     @Subscribe
@@ -256,7 +256,7 @@ public class TrainStatusManager implements Runnable {
         /*
         SocketClientConnectors
          */
-        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus,this.etcsTrainID);
+        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus, this.etcsTrainID, this.etcsTrainID);
         /*
         Modules
          */

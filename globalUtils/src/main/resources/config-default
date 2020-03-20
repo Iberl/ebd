@@ -51,9 +51,13 @@ defaultDangerPoint = 200
 ######
 # Physics acceleration factor
 timeAccFactor = 1
+# Release speed in [m/s]
+releaseSpeed = 11.11
+# Distance to end of movement authority at which train will switch into release speed mode if below release speed in [m]
+releaseSpeedDistance = 20
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 20
-# Minimum time between actions
+# Minimum time between actions in [s]
 timeBetweenActions = 2
 # Emergency break intervention curve offset in [s]
 emergencyInterventionOffset = 2

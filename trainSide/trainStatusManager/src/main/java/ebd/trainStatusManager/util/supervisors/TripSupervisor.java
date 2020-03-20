@@ -6,6 +6,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -20,6 +21,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * This class supervises the distance the train has traveled the current trip. If the distance is close to or
@@ -32,17 +34,16 @@ import java.util.Collections;
 public class TripSupervisor {
     //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Own module, Remember SRS 3 A.3.5
-    private EventBus localBus;
-    private RouteDataVolatile routeDataVolatile;
-    private TrainDataVolatile trainDataVolatile;
-    private double L_TRAIN;
-    private int etcsID;
-    /**
-     * In [m]
-     */
-    private double targetReachedDistance;
+    private final EventBus localBus;
+    private final String eventSource;
+    private final List<String> eventTarget;
+    private final RouteDataVolatile routeDataVolatile;
+    private final TrainDataVolatile trainDataVolatile;
+    private final ConfigHandler ch;
+    private final double L_TRAIN;
 
     private BreakingCurve breakingCurve = null;
+    private boolean inRSM;
 
     /**
      * Constructor
@@ -53,10 +54,13 @@ public class TripSupervisor {
         this.localBus.register(this);
         this.routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         this.trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        this.ch = ConfigHandler.getInstance();
+
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-        this.etcsID = trainDataPerma.getTrainConfigID();
-        this.targetReachedDistance = ConfigHandler.getInstance().targetReachedDistance;
+
+        this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
+        this.eventTarget = Collections.singletonList("all");
     }
 
     /**
@@ -71,11 +75,18 @@ public class TripSupervisor {
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
-        if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
+        if(distanceToEMA <= ch.releaseSpeedDistance && curSpeed <= ch.releaseSpeed && curSpeed > 0 && !this.inRSM){
+            this.inRSM = true;
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true));
+        }
+        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
+            this.inRSM = false;
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false));
             this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
 
-            if(routeDataVolatile.isLastMABeforeEndOfMission()){
+            if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
             }
         }
@@ -96,7 +107,7 @@ public class TripSupervisor {
     private void sendEndOfMission() {
         //TODO Send Message 150
         this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
-        String msg = "Train " + etcsID + " reached the target location";
+        String msg = "Train " + this.trainDataVolatile.getEtcsID() + " reached the target location";
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
     }
 

@@ -28,7 +28,7 @@ public class AccelerationPowerCurveCalculator {
                 poweredCar = tc;
                 LocomotiveTrain lt = (LocomotiveTrain)tc;
                 if(lt.getTractiveForceAtStart() <= 0){
-                    trainForce += lt.getMaxWeight() * 0.30 * 9.81;
+                    trainForce += lt.getMaxWeight() * 0.30 * 9.81; //Start up force
                 }else {
                     trainForce += lt.getTractiveForceAtStart();
                 }
@@ -37,7 +37,7 @@ public class AccelerationPowerCurveCalculator {
                 poweredCar = tc;
                 Locomotive l = (Locomotive)tc;
                 if(l.getTractiveForceAtStart() <= 0){
-                    trainForce += l.getServiceWeight() * 0.30 * 9.81;
+                    trainForce += l.getServiceWeight() * 0.30 * 9.81; //Start up force
                 }else {
                     trainForce += l.getTractiveForceAtStart();
                 }

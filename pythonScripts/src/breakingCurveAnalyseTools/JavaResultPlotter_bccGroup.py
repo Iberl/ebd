@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-pathList = [r"M:\OneDrive\Verkehr\Code\windows\EmergencyDecelerationCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\EmergencyInterventionCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServiceDecelerationCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServiceInterventionCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServiceWarningCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServicePermittedSpeedCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServiceIndicationCurve.txt",
-            r"M:\OneDrive\Verkehr\Code\windows\ServiceCoastingPhaseCurve.txt"]
+pathList = [r"C:\intellij-workspace\etcs\EmergencyDecelerationCurve.txt",
+            r"C:\intellij-workspace\etcs\EmergencyInterventionCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceDecelerationCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceInterventionCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceWarningCurve.txt",
+            r"C:\intellij-workspace\etcs\ServicePermittedSpeedCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceIndicationCurve.txt",
+            r"C:\intellij-workspace\etcs\ServiceCoastingPhaseCurve.txt"]
             
 for path in pathList:
     

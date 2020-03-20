@@ -98,13 +98,25 @@ boolean
      * Physics acceleration factor
      */
     public double timeAccFactor = 0.5;
-    /**
-     * Distance before end of movement authority that is seen as "target reached" in [m]
-     */
-    public double targetReachedDistance = 20;
 
     /**
-     * Minimum time between actions
+     * Release speed in [m/s]
+     */
+    public double releaseSpeed = 11.11;
+
+    /**
+     * Distance to end of movement authority at which train will switch into
+     * release speed mode if below release speed in [m]
+     */
+    public double releaseSpeedDistance = 20;
+
+    /**
+     * Distance to end of movement authority that is seen as "target reached" in [m]
+     */
+    public double targetReachedDistance = 2;
+
+    /**
+     * Minimum time between actions in [s]
      */
     public double timeBetweenActions = 2;
 
@@ -215,6 +227,7 @@ boolean
      * in [m/s]
      */
     public double V_warning_max = 58.33;
+
 
     /*
     other
