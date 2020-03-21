@@ -113,7 +113,7 @@ boolean
     /**
      * Distance to end of movement authority that is seen as "target reached" in [m]
      */
-    public double targetReachedDistance = 2;
+    public double targetReachedDistance = 5;
 
     /**
      * Minimum time between actions in [s]

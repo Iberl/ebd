@@ -73,6 +73,8 @@ public class DrivingDynamics {
     private double maxTripSectionDistance;
 
     private double profileTargetSpeed = 0d;
+    private double breakModifierForRSM = 1;
+    private boolean inRSM = false;
 
     private int cycleCount = 20;
     private int cylceCountMax = 20; //TODO Connect to Config
@@ -150,29 +152,49 @@ public class DrivingDynamics {
         }
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
-            switch (this.currentSil){
-                case NOT_SET:
-                case NO_INTERVENTION:
-                case INDICATION:
-                case PERMITTED_SPEED:
-                case WARNING:
-                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
-                    actionParser(this.drivingProfile.actionToTake());
-                    break;
-                case CUT_OFF_TRACTION:
-                    sendToLogEventSpeedSupervision(MovementState.COASTING);
-                    this.dynamicState.setMovementState(MovementState.COASTING);
-                    break;
-                case APPLY_SERVICE_BREAKS:
-                    sendToLogEventSpeedSupervision(MovementState.BREAKING);
-                    this.dynamicState.setMovementState(MovementState.BREAKING);
-                    this.dynamicState.setBreakingModification(1d);
-                    break;
-                case APPLY_EMERGENCY_BREAKS:
-                default:
-                    sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
-                    this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
-                    this.dynamicState.setBreakingModification(1d);
+            if(speedSupervisionReport.supervisionState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
+                this.inRSM = false;
+                switch (this.currentSil){
+                    case NOT_SET:
+                    case NO_INTERVENTION:
+                    case INDICATION:
+                    case PERMITTED_SPEED:
+                    case WARNING:
+                        sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
+                        actionParser(this.drivingProfile.actionToTake());
+                        break;
+                    case CUT_OFF_TRACTION:
+                        sendToLogEventSpeedSupervision(MovementState.COASTING);
+                        this.dynamicState.setMovementState(MovementState.COASTING);
+                        break;
+                    case APPLY_SERVICE_BREAKS:
+                        sendToLogEventSpeedSupervision(MovementState.BREAKING);
+                        this.dynamicState.setMovementState(MovementState.BREAKING);
+                        this.dynamicState.setBreakingModification(1d);
+                        break;
+                    case APPLY_EMERGENCY_BREAKS:
+                    default:
+                        sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
+                        this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
+                        this.dynamicState.setBreakingModification(1d);
+                }
+            }
+            else {
+                if(!this.inRSM) calculateModifier();
+                this.inRSM = true;
+                //calculateModifier();
+                switch (this.currentSil){
+                    case NO_INTERVENTION:
+                        sendToLogEventSpeedSupervision(MovementState.BREAKING);
+                        this.dynamicState.setMovementState(MovementState.BREAKING);
+                        this.dynamicState.setBreakingModification(this.breakModifierForRSM);
+                        break;
+                    case APPLY_EMERGENCY_BREAKS:
+                    default:
+                        sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
+                        this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
+                        this.dynamicState.setBreakingModification(1d);
+                }
             }
             this.currentSsState = speedSupervisionReport.supervisionState;
             sendToLogEventSpeedState();
@@ -447,6 +469,24 @@ public class DrivingDynamics {
             sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
             this.currentMovementState = this.dynamicState.getMovementState();
         }
+    }
+
+    /**
+     * Calculates the necessary modifier to break gracefully to the signal
+     * @return Modifier
+     */
+    private void calculateModifier() {
+        double currentSpeed = this.dynamicState.getSpeed();
+        double maxBreakingAcc = this.trainDataVolatile.getCurrentBreakingPower().getPointOnCurve(currentSpeed);
+        double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
+        double distanceToBest = distanceToEOA - ch.targetReachedDistance;
+
+        double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToBest;
+        double modifier = -neededBreakingACC/maxBreakingAcc;
+        if(modifier <= 0 || modifier > 1){
+            modifier = 1;
+        }
+        this.breakModifierForRSM = modifier;
     }
 
     /**
