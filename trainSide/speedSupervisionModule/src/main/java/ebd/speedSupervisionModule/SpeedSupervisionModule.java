@@ -6,6 +6,7 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
@@ -41,6 +42,7 @@ public class SpeedSupervisionModule {
     private ConfigHandler ch;
 
     private BreakingCurveGroup breakingCurveGroup = null;
+    private boolean inRSM;
 
     private Double maxServiceDistance = 0d; //in [m]
     private Double maxEmergencyDistance = 0d; //in [m]
@@ -98,12 +100,22 @@ public class SpeedSupervisionModule {
 
         double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurveGroup.getServiceDecelerationCurve().getRefLocation().getId());
 
-        updateMaxSpeeds(tripDistance, curSpeed);
+        if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
+        else updateMaxSpeeds(tripDistance, curSpeed);
 
         SpeedInterventionLevel speedInterventionLevel;
         SpeedSupervisionState supervisionState;
 
-        if(this.maxIndicationSpeed >= curSpeed
+        if(this.inRSM){//Release speed supervision
+            supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
+            if(curSpeed > ch.releaseSpeed || curSpeed > this.maxEmergencyInterventionSpeed){
+                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+            }
+            else {
+                speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+            }
+        }
+        else if(this.maxIndicationSpeed >= curSpeed
                 && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO make more robust
             supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
             if(curSpeed > this.maxEmergencyInterventionSpeed){
@@ -159,6 +171,11 @@ public class SpeedSupervisionModule {
         this.targetSpeedDistance = 0d;
     }
 
+    @Subscribe
+    public void setInRSM(ReleaseSpeedModeStateEvent rsmse){
+        this.inRSM = rsmse.inRSM;
+    }
+
 
     /**
      * Sets the current max speeds of all breaking curves at the current position
@@ -189,6 +206,19 @@ public class SpeedSupervisionModule {
         else if (tripDistance < this.maxEmergencyDistance){
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
             this.targetSpeed = 0d;
+        }
+    }
+
+    private void updateMaxSpeedsToRSM(double tripDistance) {
+        this.maxEmergencyInterventionSpeed = 0d;
+        this.maxServiceInterventionSpeed = ch.releaseSpeed;
+        this.maxWarningSpeed = ch.releaseSpeed;
+        this.maxPermittedSpeed = ch.releaseSpeed;
+        this.maxIndicationSpeed = ch.releaseSpeed;
+        this.maxCoastingPhaseSpeed = ch.releaseSpeed;
+
+        if (tripDistance < this.maxEmergencyDistance) {
+            this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
         }
     }
 

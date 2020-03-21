@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ReleaseSpeedModeStateEvent extends NormalEvent {
 
-    public boolean inRSS;
+    public boolean inRSM;
 
     /**
      * Constructs an Event
@@ -17,6 +17,6 @@ public class ReleaseSpeedModeStateEvent extends NormalEvent {
      */
     public ReleaseSpeedModeStateEvent(String source, List<String> targets, boolean inReleaseSpeedSupervision) {
         super(source, targets);
-        this.inRSS = inReleaseSpeedSupervision;
+        this.inRSM = inReleaseSpeedSupervision;
     }
 }

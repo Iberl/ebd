@@ -84,7 +84,7 @@ public class TripSupervisor {
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false));
-            this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
+            this.localBus.post(new DDLockEvent(this.eventSource, Collections.singletonList("dd")));
 
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
