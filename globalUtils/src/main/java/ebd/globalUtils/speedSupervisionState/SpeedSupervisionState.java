@@ -14,6 +14,7 @@ public enum SpeedSupervisionState {
      */
     NOT_SET,
 
+    RELEASE_SPEED_SUPERVISION,
     CEILING_SPEED_SUPERVISION,
     TARGET_SPEED_SUPERVISION
 }
