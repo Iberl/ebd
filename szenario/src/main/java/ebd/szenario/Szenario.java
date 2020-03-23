@@ -79,7 +79,7 @@ public class Szenario implements Runnable {
     /*
     TrainSide
      */
-    private TrainStatusManager tsm = null;
+    private TrainManager tm = null;
     private int etcsID = 0;
 
     public Szenario(){
@@ -165,7 +165,12 @@ public class Szenario implements Runnable {
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(this.etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
-        this.tsm = new TrainStatusManager(this.etcsID, 1);
+
+        try {
+            this.tm = new TrainManager();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }

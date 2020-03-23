@@ -1,0 +1,8 @@
+#Initialisation file for ETCS at EBD
+#Lines that start with # are comments
+#This file contains the startup information for the ETCS program.
+#Every line is a train.
+#Every train is described by multiple
+#Variable: etcsID trainConfigID infrastructureID trainScheduleID rbcID
+#Type:     int    int           int              String          int
+1620 192 2181 RB5775 1

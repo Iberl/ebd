@@ -26,9 +26,30 @@ import java.util.List;
 public class TrainDataVolatile {
 
     /**
-     * ETCS ID
+     * ETCS ID <br>
+     *     Updated by TSM once on initialisation.
      */
-    protected volatile int etcsID = 0;
+    protected final int etcsID;
+
+    /**
+     * TrainConfig ID used to communicate with the TrainConfig tool.<br>
+     *     Updated by TSM once on initialisation.     *
+     */
+    protected final int trainConfigID;
+
+    /**
+     * Infrastructure ID used to communicate with the model train infrastructure.<br>
+     *    Updated by TSM once on initialisation.
+     */
+    protected final int infrastructureID;
+
+    /**
+     * Current connected RBC ID <br>
+     *     Updated by TSM once on initialisation and on every rbc handover
+     */
+    protected volatile int rbcID;
+
+
     /**
      * The current {@link Position}
      */
@@ -71,7 +92,7 @@ public class TrainDataVolatile {
     /**
      * The current max speed of the train in [m/s] based on
      * the permitted speed curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentMaximumSpeed = 0d;
 
@@ -79,44 +100,51 @@ public class TrainDataVolatile {
     /**
      * The current emergency intervention speed of the train in [m/s] based on
      * the service intervention curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentEmergencyInterventionSpeed = 0d;
 
     /**
      * The current service intervention speed of the train in [m/s] based on
      * the service intervention curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentServiceInterventionSpeed = 0d;
 
     /**
      * The current service warning speed of the train in [m/s] based on
      * the service warning curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentWarningSpeed = 0d;
 
     /**
      * The current service indication speed of the train in [m/s] based on
      * the service indication curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentIndicationSpeed = 0d;
 
     /**
      * The current service coasting phase speed of the train in [m/s] based on
      * the service coasting phase curve
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double currentCoastingPhaseSpeed = 0d;
 
 
     /**
      * Target speed of the next breaking phase of the train in [m/s].
-     * Updated from the speed supervision module
+     * Updated by the speed supervision module
      */
     protected volatile double targetSpeed = 0d;
+
+    /**
+     * Release speed of the train in [m/s]. <br>
+     *     Updated by TSM on first initialization from ConfigHandler.
+     * Then on receiving a MA Message that contains a release speed. //TODO Implement last part
+     */
+    protected volatile double releaseSpeed = 0d;
 
 
     /**
@@ -226,7 +254,10 @@ public class TrainDataVolatile {
 
 
     //Constructor
-    public TrainDataVolatile(EventBus localBus){
+    public TrainDataVolatile(int etcsID, int trainConfigID, int infrastructureID, EventBus localBus){
+        this.etcsID = etcsID;
+        this.trainConfigID = trainConfigID;
+        this.infrastructureID = infrastructureID;
         this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
         this.currentEmergencyBreakingPower = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(localBus);
         this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
@@ -235,6 +266,7 @@ public class TrainDataVolatile {
 
     /**
      * only for testing!
+     * @param etcsID
      * @param currentPosition
      * @param currentSpeed
      * @param currentProfileTargetSpeed
@@ -247,10 +279,15 @@ public class TrainDataVolatile {
      * @param availableAcceleration
      */
     @SuppressWarnings({"JavaDoc", "ConstantConditions"})
-    public TrainDataVolatile(@Nullable Position currentPosition, @Nullable Double currentSpeed, @Nullable Double currentProfileTargetSpeed, @Nullable Integer m_MODE,
-                             @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode, @Nullable ForwardSpline currentBreakingPower,
+    public TrainDataVolatile(int etcsID, int trainConfigID, int infrastructureID, @Nullable Position currentPosition,
+                             @Nullable Double currentSpeed, @Nullable Double currentProfileTargetSpeed, @Nullable Integer m_MODE,
+                             @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode,
+                             @Nullable ForwardSpline currentBreakingPower,
                              @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
                              @Nullable AvailableAcceleration availableAcceleration) {
+        this.etcsID = etcsID;
+        this.trainConfigID = trainConfigID;
+        this.infrastructureID = infrastructureID;
         if(!ConfigHandler.getInstance().useTrainConfiguratorTool){
             throw new RuntimeException("This Constructor is only for use in tests");
         }
@@ -276,6 +313,25 @@ public class TrainDataVolatile {
         return etcsID;
     }
 
+    /**
+     * @return TrainConfig ID used to communicate with the TrainConfig tool.
+     */
+    public int getTrainConfigID() { return trainConfigID; }
+
+    /**
+     * @return Infrastructure ID used to communicate with the model train infrastructure.
+     */
+    public int getInfrastructureID() { return infrastructureID; }
+
+    /**
+     * @return The current RBC ID
+     */
+    public int getRbcID(){ return rbcID;}
+
+    /**
+     * @return The current position of the train, containing a location and a distance
+     *          to this location.
+     */
     @Nullable
     public Position getCurrentPosition() {
         return currentPosition;
@@ -380,6 +436,10 @@ public class TrainDataVolatile {
         return targetSpeed;
     }
 
+    /**
+     * @return Release speed of the train in [m/s].
+     */
+    public double getReleaseSpeed() { return releaseSpeed; }
 
     @Nullable
     public Integer getM_MODE() {

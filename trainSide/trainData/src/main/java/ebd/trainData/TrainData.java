@@ -39,10 +39,12 @@ public class TrainData {
 
     /**
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
-     *
      * @param localBus The local {@link EventBus} of the train
+     * @param etcsID The ETCS ID of the train
+     * @param trainConfigID The ID used to request this train from the TrainConfig tool
+     * @param infrastructureID The ID of the model train on the infrastructure server
      */
-    public TrainData(EventBus localBus){
+    public TrainData(EventBus localBus, int etcsID, int trainConfigID, int infrastructureID){
         this.localBus = localBus;
         this.localBus.register(this);
         this.exceptionTargets.add("tsm;"); //TODO check right recipient
@@ -55,7 +57,7 @@ public class TrainData {
             localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
         }
         this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
-        this.trainDataVolatile = new TrainDataVolatile(localBus);
+        this.trainDataVolatile = new TrainDataVolatile(etcsID, trainConfigID, infrastructureID, localBus);
         localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
         sendToLog();
     }

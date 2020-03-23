@@ -23,6 +23,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
+import ebd.globalUtils.szenario.RemoveTrainEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;
@@ -48,8 +49,11 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class TrainStatusManager implements Runnable {
@@ -61,6 +65,10 @@ public class TrainStatusManager implements Runnable {
     private int etcsTrainID;
     private int rbcID;
     private Thread tsmThread = new Thread(this);
+
+    private String source;
+    private List<String> scenarioTarget;
+    private List<String> rbcTarget;
 
     /*
     Handlers
@@ -93,12 +101,16 @@ public class TrainStatusManager implements Runnable {
     private Clock clock;
 
 
-    public TrainStatusManager(int etcsTrainID, int rbcID){
+    public TrainStatusManager(int etcsTrainID, int trainConfigID, int infrastructureID, int rbcID){
         this.localEventBus.register(this);
         this.ch = ConfigHandler.getInstance();
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
-        setUpTrain();
+        this.source = "tsm;T=" + this.etcsTrainID;
+        this.scenarioTarget = Collections.singletonList("szenario");
+        this.rbcTarget = Collections.singletonList("mr;R=" + this.rbcID);
+
+        setUpTrain(trainConfigID, infrastructureID, rbcID);
         this.tsmThread.start();
         connectToRBC();
     }
@@ -143,42 +155,7 @@ public class TrainStatusManager implements Runnable {
                 "Calculated a new breaking curve"));
 
 
-        //For tests
-        List<BreakingCurve> lobc = new ArrayList<>();
-        lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceWarningCurve());
-        lobc.add(nbce.breakingCurveGroup.getPermittedSpeedCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceIndicationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
-
-        for(BreakingCurve bCurve : lobc) {
-            double xPosition = 0d;
-            double step = bCurve.getHighestXValue() / 100000d;
-            FileWriter fW;
-            try {
-
-                fW = new FileWriter(bCurve.getID() + ".txt");
-                BufferedWriter writer = new BufferedWriter(fW);
-                writer.write("");
-
-                while (xPosition <= bCurve.getHighestXValue()) {
-
-                    Double yValue = bCurve.getPointOnCurve(xPosition);
-                    writer.append(String.format("%f:%f%n", xPosition, yValue));
-                    xPosition += step;
-                }
-
-                writer.close();
-
-            } catch (IOException e1) {
-                List<String> eventTargets = new ArrayList<>();
-                eventTargets.add("tsm;");
-                localEventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, nbce, e1));
-            }
-        }
+        //saveBreakingCurvesToFile(nbce);
     }
 
     @Subscribe
@@ -205,7 +182,8 @@ public class TrainStatusManager implements Runnable {
         Packet_0 p0 = new Packet_0();
         msg150.PACKET_POSITION = p0;
         this.infrastructureClientConnector.disconnect();
-        SendMessageEvent sme = new SendMessageEvent("tsm", Collections.singletonList("ms"), msg150, Collections.singletonList("mr;R=" + this.etcsTrainID));
+        SendMessageEvent sme = new SendMessageEvent("tsm", Collections.singletonList("ms"),
+                msg150, Collections.singletonList("mr;R=" + this.rbcID)); //TODO Update
         this.messageSender.send(sme);
         disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
     }
@@ -219,26 +197,19 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(de.targets)){
             return;
         }
+        kill();
+    }
 
-
+    public void kill() {
         this.clock.stop();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), "ETCS shut down"));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        this.infrastructureClientConnector.disconnect();
+        this.globalEventBus.post(new RemoveTrainEvent( this.source, this.rbcTarget, this.etcsTrainID));
         synchronized (this){
             this.notify();
         }
     }
 
-    private void setUpTrain() {
+    private void setUpTrain( int trainConfigID, int infrastructureID, int rbcID) {
         /*
         Handlers
          */
@@ -256,14 +227,15 @@ public class TrainStatusManager implements Runnable {
         /*
         SocketClientConnectors
          */
-        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus, this.etcsTrainID, this.etcsTrainID);
+        this.infrastructureClientConnector = new InfrastructureClientConnector(this.localEventBus, this.etcsTrainID, infrastructureID);
         /*
         Modules
          */
 
         this.routeData = new RouteData(this.localEventBus);
 
-        this.trainData = new TrainData(this.localEventBus);
+
+        this.trainData = new TrainData(this.localEventBus, this.etcsTrainID, trainConfigID, infrastructureID);
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
         this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
@@ -277,15 +249,16 @@ public class TrainStatusManager implements Runnable {
 
         Position curPos = new Position(0,true, new InitalLocation());
         Map<String,Object> changesForTD = new HashMap<>();
+        changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);
         changesForTD.put("currentSpeed", 0d);
+        changesForTD.put("releaseSpeed", ch.releaseSpeed);
         this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"),changesForTD));
 
         this.clock = new Clock(this.localEventBus);
         this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
 
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
-        this.localEventBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "etcsID", this.etcsTrainID));
     }
 
     private void connectToRBC() {
@@ -297,6 +270,53 @@ public class TrainStatusManager implements Runnable {
         msg155.NID_ENGINE = this.etcsTrainID;
         this.localEventBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), msg155, Collections.singletonList("mr;R=" + this.rbcID)));
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Send communication initiation to RBC " + this.rbcID));
+    }
+
+    private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
+        if(!new File("results/breakingCurve/").mkdirs()){
+            System.err.println("Could not create necessary directories");
+            System.exit(-1); //TODO Make better and Event
+        }
+
+        List<BreakingCurve> lobc = new ArrayList<>();
+        lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
+        lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
+        lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
+        lobc.add(nbce.breakingCurveGroup.getServiceInterventionCurve());
+        lobc.add(nbce.breakingCurveGroup.getServiceWarningCurve());
+        lobc.add(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+        lobc.add(nbce.breakingCurveGroup.getServiceIndicationCurve());
+        lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
+
+        for(BreakingCurve bCurve : lobc) {
+            double xPosition = 0d;
+            double step = bCurve.getHighestXValue() / 100000d;
+            FileWriter fW;
+            LocalDateTime ldt = LocalDateTime.now();
+            DateTimeFormatter dtf = DateTimeFormatter.BASIC_ISO_DATE;
+            String time = dtf.format(ldt);
+            String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),time);
+            
+            try {
+                fW = new FileWriter("results/breakingCurves/" + fileName);
+                BufferedWriter writer = new BufferedWriter(fW);
+                writer.write("");
+
+                while (xPosition <= bCurve.getHighestXValue()) {
+
+                    Double yValue = bCurve.getPointOnCurve(xPosition);
+                    writer.append(String.format("%f:%f%n", xPosition, yValue));
+                    xPosition += step;
+                }
+
+                writer.close();
+
+            } catch (IOException e1) {
+                List<String> eventTargets = new ArrayList<>();
+                eventTargets.add("tsm;");
+                localEventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, nbce, e1));
+            }
+        }
     }
 
     /**
@@ -318,7 +338,4 @@ public class TrainStatusManager implements Runnable {
         }
         return false;
     }
-
-
-
 }
