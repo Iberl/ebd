@@ -3,6 +3,7 @@ package ebd.szenario;
 import ebd.dmi.ui.DMIDisplayConnector;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.configHandler.InitFileHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
@@ -32,7 +33,7 @@ import static ebd.messageLibrary.util.ETCSVariables.*;
 public class Szenario implements Runnable {
 
     static class btgGenerator {
-        public static void sendLinkingInformation(MessageSender ms, int etcsID) {
+        public static void sendLinkingInformation(MessageSender ms) {
             // Create Linking Information
             Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(584, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
@@ -47,7 +48,9 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=" + etcsID)));
+            for(int etcsID : InitFileHandler.getInstance().getEtcsIDs()){
+                ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=" + etcsID)));
+            }
         }
     }
 
@@ -55,6 +58,7 @@ public class Szenario implements Runnable {
     private EventBus globalEventBus;
     private Thread szenarioThread = new Thread(this);
     private ConfigHandler ch;
+    private InitFileHandler iFH;
 
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
@@ -80,7 +84,6 @@ public class Szenario implements Runnable {
     TrainSide
      */
     private TrainManager tm = null;
-    private int etcsID = 0;
 
     public Szenario(){
         this.globalEventBus = EventBus.getDefault();
@@ -88,6 +91,7 @@ public class Szenario implements Runnable {
         this.szenarioEventHandler = new SzenarioEventHandler();
 
         this.ch = ConfigHandler.getInstance();
+        this.iFH = InitFileHandler.getInstance();
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
@@ -99,8 +103,6 @@ public class Szenario implements Runnable {
 
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
-
-        this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
         System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
@@ -163,7 +165,8 @@ public class Szenario implements Runnable {
         List<Route> listRoute = new ArrayList<>();
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(this.etcsID, listRoute);
+
+        for(int etcsID : this.iFH.getEtcsIDs()) mapRoute.put(etcsID, listRoute);
         this.rbc = new RadioBlockCenter("1", mapRoute, 1);
 
         try {
@@ -172,7 +175,7 @@ public class Szenario implements Runnable {
             e.printStackTrace();
         }
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
 
     private boolean validTarget(List<String> targetList) {
