@@ -1,5 +1,8 @@
 package ebd.globalUtils.speedInterventionLevel;
 
+/**
+ * This represents the different kind of intervention level that the speed supervision module (SSM) can reach.
+ */
 public enum SpeedInterventionLevel {
     /**
      * Null replacement
@@ -12,17 +15,17 @@ public enum SpeedInterventionLevel {
     NO_INTERVENTION,
 
     /**
-     * Speed may become to high
+     * Permitted Speed is nearly reached
      */
     INDICATION,
 
     /**
-     * Speed will become to high soon
+     * Permitted speed is exceeded
      */
     PERMITTED_SPEED,
 
     /**
-     * Speed will become to high very soon
+     * Service breaks will intervene if speed is not reduced
      */
     WARNING,
 
@@ -33,12 +36,12 @@ public enum SpeedInterventionLevel {
     CUT_OFF_TRACTION,
 
     /**
-     * Speed will become to high, service breaks will be applied automatically
+     * Service break intervention is necessary, service breaks will be applied automatically
      */
     APPLY_SERVICE_BREAKS,
 
     /**
-     * Speed is to high, danger point is passed, etc., emergency breaks will be applied automatically
+     * Speed is to far to high, danger point is passed, etc., emergency breaks will be applied automatically
       */
     APPLY_EMERGENCY_BREAKS
 }

@@ -6,7 +6,6 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
-import ebd.globalUtils.events.szenario.NewWaitTimeAtStationEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
@@ -14,14 +13,12 @@ import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.radioBlockCenter.util.Route;
-import ebd.szenario.util.InfrastructureClient;
-import ebd.szenario.util.InfrastructureDummyServer;
-import ebd.szenario.util.InputHandler;
-import ebd.szenario.util.SzenarioEventHandler;
+import ebd.szenario.util.clients.InfrastructureClient;
+import ebd.szenario.util.handler.InputHandler;
+import ebd.szenario.util.handler.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadEvent;
-import ebd.szenario.util.events.LoadThreeEvent;
-import ebd.szenario.util.events.LoadTwoEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
+import ebd.szenario.util.server.GUIServer;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -35,42 +32,6 @@ import static ebd.messageLibrary.util.ETCSVariables.*;
 public class Szenario implements Runnable {
 
     static class btgGenerator {
-
-        /*public static BaliseTelegramGenerator createBTG() {
-            // Create Empty Instance of ListOfBalise
-            ListOfBalises lob = new ListOfBalises(1, 12);
-
-            // Adding BaliseGroups
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 0, 0, 0, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 1, 0, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 2, 1, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 3, 2, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 4, 3, 100, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 5, 4, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 6, 5, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 7, 6, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 8, 7, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 9, 8, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 10, 9, 300, false, null));
-            lob.addBaliseGroup(new BaliseGroup(M_VERSION_2_0, 0, 11, 10, 200, false, null));
-
-            // Add 1 Balise to BaliseGroups
-            lob.getBaliseGroup(0).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(1).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(2).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(3).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(4).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(5).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(6).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(7).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(8).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(9).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(10).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-            lob.getBaliseGroup(11).add(new Balise(M_DUP_NO_DUPLICATE, 0, new Packet_0(0)));
-
-            return new BaliseTelegramGenerator(lob);
-        }*/
-
         public static void sendLinkingInformation(MessageSender ms, int etcsID) {
             // Create Linking Information
             Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
@@ -93,6 +54,7 @@ public class Szenario implements Runnable {
 
     private EventBus globalEventBus;
     private Thread szenarioThread = new Thread(this);
+    private ConfigHandler ch;
 
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
@@ -103,7 +65,11 @@ public class Szenario implements Runnable {
     Sockets
      */
     private InfrastructureClient infrastructureClient;
-    private InfrastructureDummyServer infrastructureDummyServer;
+
+    /*
+    Server
+     */
+    private GUIServer guiServer;
 
     /*
     TrackSide
@@ -119,24 +85,26 @@ public class Szenario implements Runnable {
     public Szenario(){
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
+        this.szenarioEventHandler = new SzenarioEventHandler();
+
+        this.ch = ConfigHandler.getInstance();
         try {
             this.logger = new Logging();
-            //this.infrastructureDummyServer = new InfrastructureDummyServer(25555);
             this.infrastructureClient = new InfrastructureClient();
+            if(ch.allowGUI) this.guiServer = new GUIServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
         new DMIDisplayConnector(globalEventBus);
-        System.out.println("This is the virtual environment for the ETCS@EBD project");
 
-
-        this.szenarioEventHandler = new SzenarioEventHandler();
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
         this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
+        System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
+        if(ch.autoStart) load(new LoadEvent("szenario", Collections.singletonList("szenario")));
     }
 
     @Override
@@ -187,6 +155,7 @@ public class Szenario implements Runnable {
         routeName = routeName.replace("szenario", "");
         routeName = routeName.replace(".json", "");
         System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
+
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
 
@@ -200,71 +169,6 @@ public class Szenario implements Runnable {
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
     }
-
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void load2(LoadTwoEvent lte){
-        System.out.println("Scenario 2: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a speeding driver from A to B");
-        String msg = "ETCS start up";
-        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
-        List<Route> listRoute = new ArrayList<>();
-        listRoute.add(a);
-        Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(this.etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 2);
-        this.tsm = new TrainStatusManager(this.etcsID, 1);
-
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
-    }
-
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void load3(LoadThreeEvent lte){
-        System.out.println("Scenario 3: In this scenario, a combined train of type 650 with a max speed of 120 km/h is driven by a strict driver from A to 1, then from 1 to 2 and from 2 to C");
-        String msg = "ETCS start up";
-        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Route a = new Route("A1", 600,new int[]{0,100},new int[]{0,1});
-        Route b = new Route("12", 1900,new int[]{0,100,900,80,700,120},new int[]{0,1,750,0,450,-2});
-        Route c = new Route("2C", 1400,new int[]{0,80,300,120},new int[]{0,-2, 600,1});
-
-        List<Route> listRoute = new ArrayList<>();
-        listRoute.add(a);
-        listRoute.add(b);
-        listRoute.add(c);
-        Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(this.etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(this.etcsID, 1);
-
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
-        EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
-    }
-
-/*    @Subscribe
-    public void load4(LoadFourEvent lfe){
-        System.out.println("Scenario 1: In this scenario, a combined train of type 650 with a top speed of 120 km/h is driven by a strict driver from A to B, then from B to A");
-        Route a = new Route("AB", 1000,new int[]{0,100,900,80},new int[]{0,1,750,0});
-        Route b = new Route("BC", 2000,new int[]{0,80,600,120},new int[]{0,0,300,-2});
-        List<Route> listRoute = new ArrayList<>();
-        listRoute.add(a);
-        listRoute.add(b);
-        Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(this.etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 3);
-        this.tsm = new TrainStatusManager(this.etcsID, 1);
-
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        EventBus.getDefault().post(new NewWaitTimeAtStationEvent("szenario", Collections.singletonList("all"), 20));
-    }*/
 
     private boolean validTarget(List<String> targetList) {
         for(String target : targetList){

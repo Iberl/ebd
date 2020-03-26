@@ -1,9 +1,11 @@
 package ebd.logging;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.logging.util.handler.PipeHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -11,10 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 
 public class Logging{
@@ -145,13 +144,13 @@ public class Logging{
         }
     }
 
-    /**
+/*    *//**
      * log when ToLogDebugEvent occurred
      * @param toLogDebugEvent
-     */
+     *//*
     @Subscribe
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
         logger.fine(toLogDebugEvent.msg);
-    }
+    }*/
 }
