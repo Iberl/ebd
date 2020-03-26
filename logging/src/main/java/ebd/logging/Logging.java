@@ -90,10 +90,10 @@ public class Logging{
         if (logPrefix.equals(String.format("%-9s", "GB"))) {
             logger.log(Level.SEVERE, ANSI_BLUE + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
         }
-        else if (logPrefix.equals("RBC 00001")) {
+        else if (logPrefix.contains("RBC")) {
             logger.log(Level.SEVERE, ANSI_BLACK + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
         }
-        else if (logPrefix.equals("TRN 00192")){
+        else if (logPrefix.contains("TRN")){
             logger.log(Level.SEVERE, ANSI_RED + logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred" + ANSI_RESET, exceptionEvent.exception);
         }
         else {
@@ -112,10 +112,10 @@ public class Logging{
             if (logPrefix.equals(String.format("%-9s", "GB"))) {
                 logger.fine(ANSI_BLUE + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
             }
-            else if (logPrefix.equals("RBC 00001")) {
+            else if (logPrefix.contains("RBC")) {
                 logger.fine(ANSI_BLACK + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
             }
-            else if (logPrefix.equals("TRN 00192")){
+            else if (logPrefix.contains("TRN")){
                 logger.fine(ANSI_RED + logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred" + ANSI_RESET);
             }
             else {
@@ -134,10 +134,10 @@ public class Logging{
         if (logPrefix.equals(String.format("%-9s", "GB"))) {
             logger.info(ANSI_BLUE + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
         }
-        else if (logPrefix.equals("RBC 00001")) {
+        else if (logPrefix.contains("RBC")) {
             logger.info(ANSI_BLACK + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
         }
-        else if (logPrefix.equals("TRN 00192")){
+        else if (logPrefix.contains("TRN")){
             logger.info(ANSI_RED + logPrefix + ": " + padSrc + ": " + toLogEvent.msg + ANSI_RESET);
         }
         else {
