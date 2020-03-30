@@ -41,6 +41,8 @@ public class ConfigHandler {
 
     public String portOfGUIServer = "";
 
+    public String dmiServerPort = "";
+
     /*
 boolean
  */
@@ -215,6 +217,7 @@ boolean
      * in [m/s]
      */
     public double V_warning_max = 58.33;
+
 
     /*
     other

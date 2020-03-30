@@ -1,7 +1,6 @@
 package ebd.globalUtils.events.dmi;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 
@@ -50,16 +49,6 @@ public class DMIUpdateEvent extends NormalEvent {
         return this.currentTargetSpeed*3.6;
     }
 
-    public int getTargetDistance() {return this.targetDistance;}
-
-    public SpeedInterventionLevel getSpeedInterventionLevel() {
-        return this.speedInterventionLevel;
-    }
-
-    public SpeedSupervisionState getSpeedSupervisionState() {
-        return speedSupervisionState;
-    }
-
     public double getCurrentIndSpeed() {
         return this.currentIndSpeed*3.6;
     }
@@ -75,4 +64,14 @@ public class DMIUpdateEvent extends NormalEvent {
     public double getCurrentIntervSpeed() {
         return this.currentIntervSpeed*3.6;
     }
+
+    public SpeedInterventionLevel getSpeedInterventionLevel() {
+        return this.speedInterventionLevel;
+    }
+
+    public SpeedSupervisionState getSpeedSupervisionState() {
+        return speedSupervisionState;
+    }
+
+    public int getTargetDistance() {return this.targetDistance;}
 }
