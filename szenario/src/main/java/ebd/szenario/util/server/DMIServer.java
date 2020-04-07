@@ -68,8 +68,8 @@ public class DMIServer implements Runnable {
     public void send(DMIUpdateEvent dmiUpdateEvent) {
         String source = dmiUpdateEvent.source;
         String[] sourceComponents = source.split(";T=");
-        int trainID = Integer.parseInt(sourceComponents[1]);
-        if(this.clientMap.size() == 0 || this.clientMap.get(trainID) == null) return;
+        int entityID = Integer.parseInt(sourceComponents[1]);
+        if(this.clientMap.size() == 0 || this.clientMap.get(entityID) == null) return;
         //order as getter methods in DMIUpdateEvent
         String dmiParameters = dmiUpdateEvent.getCurrentSpeed() + " "
                 + dmiUpdateEvent.getCurrentTargetSpeed() + " "
@@ -80,7 +80,7 @@ public class DMIServer implements Runnable {
                 + dmiUpdateEvent.getSpeedInterventionLevel() + " "
                 + dmiUpdateEvent.getSpeedSupervisionState();
 
-        for(DMIClientWorker dmiClientWorker : this.clientMap.get(trainID)) {
+        for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)) {
             dmiClientWorker.sendString(dmiParameters);
         }
     }
