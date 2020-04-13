@@ -115,6 +115,9 @@ public class SpeedSupervisionModule {
             else if(curSpeed > this.maxWarningSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
+            else if(curSpeed > this.maxPermittedSpeed){
+                speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
+            }
             else {
                 speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
             }

@@ -373,7 +373,7 @@ public class DrivingDynamics {
         double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
-        String source = "dd;T=" + etcsTrainID;
+        String source = "dd;T=" + this.etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 
         EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive,
