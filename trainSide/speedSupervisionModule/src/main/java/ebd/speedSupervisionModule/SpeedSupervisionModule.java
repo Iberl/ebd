@@ -127,6 +127,9 @@ public class SpeedSupervisionModule {
             else if(curSpeed > this.maxWarningSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.WARNING;
             }
+            else if(curSpeed > this.maxPermittedSpeed){
+                speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
+            }
             else {
                 speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
             }
@@ -199,7 +202,7 @@ public class SpeedSupervisionModule {
             this.maxCoastingPhaseSpeed = this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(tripDistance);
 
             if(tripDistance >= this.targetSpeedDistance){
-                BreakingCurve bc = this.breakingCurveGroup.getPermittedSpeedCurve();
+                BreakingCurve bc = this.breakingCurveGroup.getPermittedSpeedCurve(); //TODO Get Trip Profile somehow
                 findNewTargetSpeedAndDistance(bc,tripDistance);
             }
         }
@@ -216,6 +219,7 @@ public class SpeedSupervisionModule {
         this.maxPermittedSpeed = ch.releaseSpeed;
         this.maxIndicationSpeed = ch.releaseSpeed;
         this.maxCoastingPhaseSpeed = ch.releaseSpeed;
+        this.targetSpeed = 0d;
 
         if (tripDistance < this.maxEmergencyDistance) {
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
@@ -223,6 +227,8 @@ public class SpeedSupervisionModule {
     }
 
     private void findNewTargetSpeedAndDistance(BreakingCurve bc, double tripDistance) {
+
+
         double startSpeedOfBreaking = this.targetSpeed;
         double oldTD = tripDistance;
         double newTD;
