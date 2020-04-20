@@ -17,6 +17,8 @@ portOfTMSServer = 22223
 
 portOfGUIServer = 22224
 
+dmiServerPort = 22225
+
 ######
 ###### Booleans (either " = true" or " = false")
 ######

@@ -41,6 +41,8 @@ public class ConfigHandler {
 
     public String portOfGUIServer = "";
 
+    public String dmiServerPort = "";
+
     /*
 boolean
  */

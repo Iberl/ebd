@@ -1,6 +1,6 @@
 package ebd.szenario;
 
-import ebd.dmi.ui.DMIDisplayConnector;
+
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
@@ -18,6 +18,7 @@ import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
+import ebd.szenario.util.server.DMIServer;
 import ebd.szenario.util.server.GUIServer;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
@@ -70,6 +71,7 @@ public class Szenario implements Runnable {
     Server
      */
     private GUIServer guiServer;
+    private DMIServer dmiServer;
 
     /*
     TrackSide
@@ -82,7 +84,7 @@ public class Szenario implements Runnable {
     private TrainStatusManager tsm = null;
     private int etcsID = 0;
 
-    public Szenario(){
+    public Szenario() {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
         this.szenarioEventHandler = new SzenarioEventHandler();
@@ -92,10 +94,11 @@ public class Szenario implements Runnable {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
             if(ch.allowGUI) this.guiServer = new GUIServer();
+            this.dmiServer = new DMIServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        new DMIDisplayConnector(globalEventBus);
+
 
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);

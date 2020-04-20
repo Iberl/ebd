@@ -117,8 +117,6 @@
     <module>trainSide</module>
     <module>trackSide</module>
     <module>szenario</module>
-
-    <module>dmi</module>
     <module>distribution</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
