@@ -1,6 +1,6 @@
 package ebd.globalUtils.etcsModeAndLevel;
 
-public enum ETCSModes {
+public enum ETCSMode {
     /**
      * ETCS Mode NP
      */

@@ -33,17 +33,24 @@ import java.util.List;
  */
 public class TripSupervisor {
     //TODO Respect Dangerpoint, Overlaps etc.
-    //TODO Own module, Remember SRS 3 A.3.5
+    //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
     private final String eventSource;
     private final List<String> eventTarget;
     private final RouteDataVolatile routeDataVolatile;
     private final TrainDataVolatile trainDataVolatile;
     private final ConfigHandler ch;
-    private final double L_TRAIN;
+    private final double L_TRAIN; //in [m]
 
     private BreakingCurve breakingCurve = null;
+
+    /**
+     * If release speed == 0, handel it as if there was no release speed
+     */
+    private double curReleaseSpeed = 0; //in [m/s]
     private boolean inRSM;
+
+    private double dangerPointDistance; // in [m]
 
     /**
      * Constructor
@@ -58,6 +65,7 @@ public class TripSupervisor {
 
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
+        this.dangerPointDistance = ch.defaultDangerPoint;
 
         this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
         this.eventTarget = Collections.singletonList("all");
@@ -77,18 +85,24 @@ public class TripSupervisor {
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
-        if(distanceToEMA <= ch.releaseSpeedDistance && curSpeed <= ch.releaseSpeed && curSpeed > 0 && !this.inRSM){
+        if(!this.inRSM
+                && distanceToEMA <= ch.releaseSpeedDistance
+                && curSpeed <= this.curReleaseSpeed
+                && curSpeed > 0  ){ //If release speed == 0, handel it as if there was no release speed
             this.inRSM = true;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true, this.curReleaseSpeed));
         }
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
             this.localBus.post(new DDLockEvent(this.eventSource, Collections.singletonList("dd")));
 
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
             }
+        }
+        else if(distanceToEMA < (0 - this.dangerPointDistance)){
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
         }
     }
 
@@ -110,6 +124,18 @@ public class TripSupervisor {
         String msg = "Train " + this.trainDataVolatile.getEtcsID() + " reached the target location";
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
     }
+
+    /**
+     * Calculates the release speed based on the danger point distance in {@link ConfigHandler}. <br>
+     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
+     * @return The calculated release speed
+     */
+    private double calculateReleaseSpeed() {
+        //TODO Fill with Math should it be needed for Deutsche Bahn Systems
+        return ch.releaseSpeed;
+    }
+
+
 
 
 

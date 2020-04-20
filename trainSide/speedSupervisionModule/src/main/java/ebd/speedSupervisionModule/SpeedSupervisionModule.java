@@ -28,7 +28,7 @@ import java.util.List;
  * It is the responsibility of the Train Status Manager and the Driving Dynamic Modules to react to these signals
  * correctly.
  *
- * //TODO: Respect SRS 3.13 in total!
+ * //TODO: Full fill applicable requirements of SRS 3.13!
  *
  * @author Lars Schulze-Falck
  */
@@ -55,7 +55,11 @@ public class SpeedSupervisionModule {
     private double maxCoastingPhaseSpeed; //in [m/s]
 
     private double targetSpeed = 0d; //in [m/s]
-    private double targetSpeedDistance = 0d;
+    private double targetSpeedDistance = 0d; //in [m]
+    /**
+     * If release speed == 0, handel it as no release speed applicable!
+     */
+    private double releaseSpeed = 0d; //in [m/s]
 
     /**
      * Constructor
@@ -106,9 +110,9 @@ public class SpeedSupervisionModule {
         SpeedInterventionLevel speedInterventionLevel;
         SpeedSupervisionState supervisionState;
 
-        if(this.inRSM){//Release speed supervision
+        if(this.inRSM && this.releaseSpeed > 0){//Release speed supervision
             supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
-            if(curSpeed > ch.releaseSpeed || curSpeed > this.maxEmergencyInterventionSpeed){
+            if(curSpeed > this.releaseSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else {
@@ -177,8 +181,8 @@ public class SpeedSupervisionModule {
     @Subscribe
     public void setInRSM(ReleaseSpeedModeStateEvent rsmse){
         this.inRSM = rsmse.inRSM;
+        this.releaseSpeed = rsmse.curReleaseSpeed;
     }
-
 
     /**
      * Sets the current max speeds of all breaking curves at the current position
@@ -212,13 +216,17 @@ public class SpeedSupervisionModule {
         }
     }
 
+    /**
+     *
+     * @param tripDistance
+     */
     private void updateMaxSpeedsToRSM(double tripDistance) {
         this.maxEmergencyInterventionSpeed = 0d;
-        this.maxServiceInterventionSpeed = ch.releaseSpeed;
-        this.maxWarningSpeed = ch.releaseSpeed;
-        this.maxPermittedSpeed = ch.releaseSpeed;
-        this.maxIndicationSpeed = ch.releaseSpeed;
-        this.maxCoastingPhaseSpeed = ch.releaseSpeed;
+        this.maxServiceInterventionSpeed = this.releaseSpeed;
+        this.maxWarningSpeed = this.releaseSpeed;
+        this.maxPermittedSpeed = this.releaseSpeed;
+        this.maxIndicationSpeed = this.releaseSpeed;
+        this.maxCoastingPhaseSpeed = this.releaseSpeed;
         this.targetSpeed = 0d;
 
         if (tripDistance < this.maxEmergencyDistance) {
@@ -226,6 +234,12 @@ public class SpeedSupervisionModule {
         }
     }
 
+    /**
+     * Calculates the target speed that has to be reached at the end of the next breaking phase and the distance
+     * to that end. Updates {@code this.targetSpeed} and {@code this.targetSpeedDistance}.
+     * @param bc The main {@link BreakingCurve}
+     * @param tripDistance The distance driven in reference to the start of the breaking curve
+     */
     private void findNewTargetSpeedAndDistance(BreakingCurve bc, double tripDistance) {
 
 
@@ -270,6 +284,7 @@ public class SpeedSupervisionModule {
         updateMap.put("currentIndicationSpeed", this.maxIndicationSpeed);
         updateMap.put("currentCoastingPhaseSpeed", this.maxCoastingPhaseSpeed);
         updateMap.put("targetSpeed", this.targetSpeed);
+        updateMap.put("currentReleaseSpeed",this.releaseSpeed);
 
         this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }
