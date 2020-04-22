@@ -128,7 +128,7 @@ public class DrivingDynamics {
         if(this.locked || this.tripProfile == null){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
             List<String> targets = Collections.singletonList("dmi");
-            EventBus.getDefault().post(new DMIUpdateEvent(source, targets, 0, 0, (int)0,
+            EventBus.getDefault().post(new DMIUpdateEvent(source, targets, 0, 0, (int)0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
                     0, 0, 0, 0));
             return;
@@ -376,7 +376,7 @@ public class DrivingDynamics {
         String source = "dd;T=" + this.etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 
-        EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive,
+        EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive, 0,
                 this.currentSil, this.currentSsState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
     }
 

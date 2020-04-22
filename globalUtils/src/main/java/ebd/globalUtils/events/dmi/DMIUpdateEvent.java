@@ -11,6 +11,7 @@ public class DMIUpdateEvent extends NormalEvent {
     private double currentSpeed;
     private double currentTargetSpeed;
     private int targetDistance;
+    private double currentReleaseSpeed;
     private SpeedInterventionLevel speedInterventionLevel;
     private SpeedSupervisionState speedSupervisionState;
     private double currentIndSpeed;
@@ -25,13 +26,14 @@ public class DMIUpdateEvent extends NormalEvent {
      * @param source  ID from the module the event was sent by
      * @param targets ID from all modules the event is adressed to
      */
-    public DMIUpdateEvent(String source, List<String> targets, double currentSpeed, double targetSpeed, int targetDistance,
+    public DMIUpdateEvent(String source, List<String> targets, double currentSpeed, double targetSpeed, int targetDistance, double releaseSpeed,
                           SpeedInterventionLevel speedInterventionLevel, SpeedSupervisionState speedSupervisionState,
                           double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) {
         super(source, targets);
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
         this.targetDistance = targetDistance;
+        this.currentReleaseSpeed = releaseSpeed;
         this.speedInterventionLevel = speedInterventionLevel;
         this.speedSupervisionState = speedSupervisionState;
         this.currentIndSpeed = currentIndSpeed;
@@ -47,6 +49,12 @@ public class DMIUpdateEvent extends NormalEvent {
 
     public double getCurrentTargetSpeed() {
         return this.currentTargetSpeed*3.6;
+    }
+
+    public int getTargetDistance() {return this.targetDistance;}
+
+    public double getCurrentReleaseSpeed() {
+        return this.currentReleaseSpeed*3.6;
     }
 
     public double getCurrentIndSpeed() {
@@ -73,5 +81,5 @@ public class DMIUpdateEvent extends NormalEvent {
         return speedSupervisionState;
     }
 
-    public int getTargetDistance() {return this.targetDistance;}
+
 }

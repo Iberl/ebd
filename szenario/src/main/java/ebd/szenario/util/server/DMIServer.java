@@ -73,6 +73,7 @@ public class DMIServer implements Runnable {
         //order as getter methods in DMIUpdateEvent
         String dmiParameters = dmiUpdateEvent.getCurrentSpeed() + " "
                 + dmiUpdateEvent.getCurrentTargetSpeed() + " "
+                + dmiUpdateEvent.getCurrentReleaseSpeed() + " "
                 + dmiUpdateEvent.getCurrentIndSpeed() + " "
                 + dmiUpdateEvent.getCurrentPermSpeed() + " "
                 + dmiUpdateEvent.getCurrentWarnSpeed() + " "
