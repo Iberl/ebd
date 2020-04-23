@@ -395,6 +395,7 @@ public class DrivingDynamics {
         double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
+        double curApplReleaseSpeed = this.trainDataVolatile.getCurrentApplicableReleaseSpeed();
         String source = "dd;T=" + this.etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 

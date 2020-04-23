@@ -120,7 +120,7 @@ public class SpeedSupervisionModule {
             }
         }
         else if(this.maxIndicationSpeed >= curSpeed
-                && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO make more robust
+                && this.maxIndicationSpeed >= this.maxPermittedSpeed) { //Ceiling supervision regime //TODO SRS 3.13.10.3 Table 6
             supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
             if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
@@ -139,7 +139,7 @@ public class SpeedSupervisionModule {
             }
         }
         else{ //Target supervision regime
-            supervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
+            supervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION; //TODO SRS 3.13.10.4 Table 10
             if(curSpeed > this.maxEmergencyInterventionSpeed){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
@@ -284,7 +284,7 @@ public class SpeedSupervisionModule {
         updateMap.put("currentIndicationSpeed", this.maxIndicationSpeed);
         updateMap.put("currentCoastingPhaseSpeed", this.maxCoastingPhaseSpeed);
         updateMap.put("targetSpeed", this.targetSpeed);
-        updateMap.put("currentReleaseSpeed",this.releaseSpeed);
+        updateMap.put("currentApplicableReleaseSpeed",this.releaseSpeed);
 
         this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
     }

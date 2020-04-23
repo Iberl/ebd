@@ -9,6 +9,7 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -31,7 +32,7 @@ import java.util.List;
  *
  * @author Lars Schulze-Falck
  */
-public class TripSupervisor {
+public class DistanceSupervisor {
     //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
@@ -48,6 +49,7 @@ public class TripSupervisor {
      * If release speed == 0, handel it as if there was no release speed
      */
     private double curReleaseSpeed = 0; //in [m/s]
+    private double curReleaseSpeedDistance = 0; // in [m]
     private boolean inRSM;
 
     private double dangerPointDistance; // in [m]
@@ -56,7 +58,7 @@ public class TripSupervisor {
      * Constructor
      * @param localBus The local {@link EventBus}
      */
-    public TripSupervisor(EventBus localBus){
+    public DistanceSupervisor(EventBus localBus){
         this.localBus = localBus;
         this.localBus.register(this);
         this.routeDataVolatile = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
@@ -70,6 +72,7 @@ public class TripSupervisor {
         this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
         this.eventTarget = Collections.singletonList("all");
     }
+
 
     /**
      * This method listens to clock tick events. On every tick, this class checks the the current traveled distance
@@ -86,7 +89,7 @@ public class TripSupervisor {
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
         if(!this.inRSM
-                && distanceToEMA <= ch.releaseSpeedDistance
+                && distanceToEMA <= this.curReleaseSpeedDistance
                 && curSpeed <= this.curReleaseSpeed
                 && curSpeed > 0  ){ //If release speed == 0, handel it as if there was no release speed
             this.inRSM = true;
@@ -113,13 +116,14 @@ public class TripSupervisor {
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
         this.breakingCurve = bce.breakingCurveGroup.getPermittedSpeedCurve();
+        this.curReleaseSpeed = calculateReleaseSpeed();
+        this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
     }
 
     /**
      * Sends the necessary events to signal and log an end of mission.
      */
     private void sendEndOfMission() {
-        //TODO Send Message 150
         this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
         String msg = "Train " + this.trainDataVolatile.getEtcsID() + " reached the target location";
         this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
@@ -132,7 +136,19 @@ public class TripSupervisor {
      */
     private double calculateReleaseSpeed() {
         //TODO Fill with Math should it be needed for Deutsche Bahn Systems
+
+        //return this.routeDataVolatile.getPacket_15().V_RELEASEDP;
         return ch.releaseSpeed;
+    }
+
+    /**
+     * Calculates the release speed distance based on the release speed. <br>
+     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
+     * @return The calculated release speed
+     */
+    private double calculateReleaseSpeedDistance() {
+        //TODO Fill with Math should it be needed for Deutsche Bahn Systems
+        return ch.releaseSpeedDistance;
     }
 
 

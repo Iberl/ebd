@@ -123,8 +123,7 @@ public class TrainDataVolatile {
     /**
      * Current release speed of the next breaking phase of the train in [m/s].<br>
      *     <b>0</b> if there is no release speed at the end of the next breaking phase <br>
-     *     <b>ConfigHandler.releaseSpeed</b> if there is a release speed in ETCS Level 1.<br>
-     *     <b>Calculated speed</b> if there is a release speed in ETCS Level 2.<br>
+     *     <b> Greater 0</b> if there is a release speed.<br>
      *     Updated from the speed supervision module.
      */
     protected volatile double currentApplicableReleaseSpeed = 0d;
