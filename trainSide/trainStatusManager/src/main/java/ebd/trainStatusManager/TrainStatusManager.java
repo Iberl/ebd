@@ -136,13 +136,6 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(nbce.targets)){
             return;
         }
-        BreakingCurve breakingCurve = nbce.breakingCurveGroup.getPermittedSpeedCurve();
-        int refLocID = breakingCurve.getRefLocation().getId();
-
-
-        //TODO DDUpdateTripProfile should not be dependend on breaking curve. Make depend on config file or remove once other source can be found.
-        this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
-
 
         this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
         this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),

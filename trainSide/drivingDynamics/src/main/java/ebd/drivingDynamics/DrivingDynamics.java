@@ -1,5 +1,6 @@
 package ebd.drivingDynamics;
 
+import ebd.drivingDynamics.util.TripProfileProvider;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.BreakAction;
@@ -54,6 +55,7 @@ public class DrivingDynamics {
 
     private EventBus localBus;
     private TrainDataVolatile trainDataVolatile;
+    private TripProfileProvider tripProfileProvider;
     private int etcsTrainID;
     private ConfigHandler ch;
 
@@ -102,6 +104,7 @@ public class DrivingDynamics {
         }
 
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        this.tripProfileProvider = new TripProfileProvider(this.localBus);
         this.etcsTrainID = etcsTrainID;
 
         this.timeBetweenActions = this.ch.timeBetweenActions;
@@ -399,8 +402,10 @@ public class DrivingDynamics {
         String source = "dd;T=" + this.etcsTrainID;
         List<String> targets = Collections.singletonList("dmi");
 
-        EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive, 0,
-                this.currentSil, this.currentSsState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
+        EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive,
+                curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,
+                currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
+
     }
 
     /**

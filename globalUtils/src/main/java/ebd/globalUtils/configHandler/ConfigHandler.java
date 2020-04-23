@@ -43,6 +43,21 @@ public class ConfigHandler {
 
     public String dmiServerPort = "";
 
+    /**
+     * Determines the source of the trip profile.
+     * Allowed values are 'breakingcurve', 'file' and 'socket'.
+     */
+    public String tripProfileMode = "breakingcurve";
+
+    /**
+     * Path to the folder containing all trip profiles.
+     * The name of the trip profile path has to be 'etcsID'.txt, for example "1620.txt".
+     */
+    public String tripProfileFolderPath = "/tripprofiles";
+
+    public String ipToTripProfileServer = "";
+    public String portToTripProfileServer = "";
+
     /*
 boolean
  */

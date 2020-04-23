@@ -19,6 +19,19 @@ portOfGUIServer = 22224
 
 dmiServerPort = 22225
 
+#Determines the source of the trip profile. Allowed values are 'breakingcurve', 'file' and 'socket'.
+#file, socket is not implemented
+tripProfileMode = breakingcurve
+
+#Path to the folder containing all trip profiles.
+#The name of the trip profile path has to be 'etcsID'.txt, for example "1620.txt".
+tripProfileFolderPath = tripprofiles/
+
+ipToTripProfileServer = 127.0.0.1
+portToTripProfileServer = 22226
+
+
+
 ######
 ###### Booleans (either " = true" or " = false")
 ######
