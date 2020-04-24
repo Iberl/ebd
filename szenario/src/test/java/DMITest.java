@@ -68,7 +68,7 @@ public class DMITest {
     private void speedometerRSMTest() throws InterruptedException {
         List testTargets;
         testTargets = Arrays.asList("testTarget1", "testtarget2");
-        for(double currentReleaseSpeed = 0; currentReleaseSpeed < 150/3.6; currentReleaseSpeed = currentReleaseSpeed + 10/3.6) {
+        /*for(double currentReleaseSpeed = 0; currentReleaseSpeed < 150/3.6; currentReleaseSpeed = currentReleaseSpeed + 10/3.6) {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
             Thread.sleep(1000);
         }
@@ -98,15 +98,15 @@ public class DMITest {
         for(double currentReleaseSpeed = 150/3.6; currentReleaseSpeed > 0; currentReleaseSpeed = currentReleaseSpeed - 10/3.6) {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
             Thread.sleep(1000);
-        }
+        }*/
 
         for(double currentPermSpeed = 0; currentPermSpeed < 150/3.6; currentPermSpeed = currentPermSpeed + 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 100/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, 60 / 3.6, currentPermSpeed, 105 / 3.6, 110 / 3.6));
+            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 100/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, currentPermSpeed - 10/3.6, currentPermSpeed, currentPermSpeed + 10/3.6, currentPermSpeed + 20/3.6));
             Thread.sleep(1000);
         }
 
         for(double currentPermSpeed = 150/3.6; currentPermSpeed > 0; currentPermSpeed = currentPermSpeed - 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 100/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, 60 / 3.6, currentPermSpeed, 105 / 3.6, 110 / 3.6));
+            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 100/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.RELEASE_SPEED_SUPERVISION, currentPermSpeed - 10/3.6, currentPermSpeed, currentPermSpeed + 10/3.6, currentPermSpeed + 20/3.6));
             Thread.sleep(1000);
         }
     }
