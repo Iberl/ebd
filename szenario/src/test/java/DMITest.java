@@ -49,9 +49,7 @@ public class DMITest {
     private void speedometerCSMTest() throws InterruptedException {
         List testTargets;
         testTargets = Arrays.asList("testTarget1", "testtarget2");
-
-        //releaseSpeed = 0
-
+        
         //currentSpeed variable
         for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 0, SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
@@ -125,84 +123,6 @@ public class DMITest {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, currentTargetSpeed, 0, 0, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
             Thread.sleep(1000);
         }
-
-
-        //releaseSpeed != 0
-
-        //currentSpeed variable
-        for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 150/3.6; currentSpeed >= 0; currentSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 150/3.6; currentSpeed >= 0; currentSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.WARNING, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 150/3.6; currentSpeed >= 0; currentSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.WARNING, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 150/3.6; currentSpeed >= 0; currentSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 0; currentSpeed <= 150/3.6; currentSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentSpeed = 150/3.6; currentSpeed >= 0; currentSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, currentSpeed, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-
-        //currentPermSpeed variable
-        for(double currentPermSpeed = 0; currentPermSpeed <= 150/3.6; currentPermSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, currentPermSpeed - 10/3.6, currentPermSpeed, currentPermSpeed + 10/3.6, currentPermSpeed + 20/3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentPermSpeed = 150/3.6; currentPermSpeed >= 0; currentPermSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, 40/3.6, SpeedInterventionLevel.APPLY_SERVICE_BREAKS, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, currentPermSpeed - 10/3.6, currentPermSpeed, currentPermSpeed + 10/3.6, currentPermSpeed + 20/3.6));
-            Thread.sleep(1000);
-        }
-
-        //targetSpeed variable
-        for(double currentReleaseSpeed = 0; currentReleaseSpeed <= 150/3.6; currentReleaseSpeed += 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
-        for(double currentReleaseSpeed = 150/3.6; currentReleaseSpeed >= 0; currentReleaseSpeed -= 10/3.6) {
-            this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
-            Thread.sleep(1000);
-        }
-
     }
 
     private void speedometerTSMTest() throws InterruptedException {
