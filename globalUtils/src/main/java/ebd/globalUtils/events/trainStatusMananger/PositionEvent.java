@@ -16,10 +16,10 @@ public class PositionEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from all modules the event is addressed to
      */
-    public PositionEvent(String source, List<String> targets, Position position) {
-        super(source, targets);
+    public PositionEvent(String source, String target, Position position) {
+        super(source, target);
         this.position = position;
     }
 }

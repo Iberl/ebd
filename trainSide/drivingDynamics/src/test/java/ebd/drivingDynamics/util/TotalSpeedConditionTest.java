@@ -19,7 +19,7 @@ class TotalSpeedConditionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
         TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 6d, 28d, null, null, null, null, null, null, null);
-        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", new ArrayList<String>(), trainDataVolatile));
+        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
     }
 
     @Test

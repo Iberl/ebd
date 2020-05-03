@@ -10,9 +10,9 @@ public class TsmTripEndEvent extends NormalEvent {
      *
      * @param source  ID from the module the event was sent by
      *
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public TsmTripEndEvent(String source, List<String> targets) {
-        super(source, targets);
+    public TsmTripEndEvent(String source, String target) {
+        super(source, target);
     }
 }

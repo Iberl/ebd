@@ -12,9 +12,9 @@ public class DisconnectEvent extends Event {
      *
      * @param source  ID from the module the event was sent by
      *                TODO: Define Format for IDs
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from all modules the event is adressed to
      */
-    public DisconnectEvent(String source, List<String> targets) {
-        super(source, targets);
+    public DisconnectEvent(String source, String target) {
+        super(source, target);
     }
 }

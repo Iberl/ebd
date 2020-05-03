@@ -102,7 +102,7 @@ public class PositionReportSupervisor {
 
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_NOW){
             sendPositionReport();
-            this.localBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "M_LOC", ETCSVariables.M_LOC_NOT_AT_BALISE_GROUP));
+            this.localBus.post(new TrainDataChangeEvent("tsm", "td", "M_LOC", ETCSVariables.M_LOC_NOT_AT_BALISE_GROUP));
         }
     }
 
@@ -113,7 +113,7 @@ public class PositionReportSupervisor {
      */
     @Subscribe
     public void crossedBaliseGroup(CrossedBaliseGroupEvent cbge){
-        if(!validTarget(cbge.targets)){
+        if(!validTarget(cbge.target)){
             return;
         }
 
@@ -129,7 +129,7 @@ public class PositionReportSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newLocation(NewLocationEvent nle){
-        if(!validTarget(nle.targets)) return;
+        if(!validTarget(nle.target)) return;
 
         if(lastLocationID == nle.newLocation.getId()) return;
         if(trainDataVolatile.getM_LOC() == ETCSVariables.M_LOC_AT_BALISE_GROUP){
@@ -144,7 +144,7 @@ public class PositionReportSupervisor {
      */
     @Subscribe
     public void newPositionReportParameters(NewPositionReportParametersEvent nprpe){
-        if(!validTarget(nprpe.targets)){
+        if(!validTarget(nprpe.target)){
             return;
         }
 
@@ -181,32 +181,28 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message136, Collections.singletonList("mr;R=" + this.rbcID))); //TODO Message136 has to work
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Position Report"));
+        this.localBus.post(new SendMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
+        this.localBus.post(new ToLogEvent("tsm", "log", "Sending Position Report"));
         this.tripTimeAtCycleStart = this.curFullTripTime;
     }
 
     /**
      * True if this Instance is a vaild target of the event
-     * @param targetList the target list a the event
+     * @param target the target list a the event
      * @return True if this instance is a vaild target of the event
      */
-    private boolean validTarget(List<String> targetList){
-        boolean result = false;
+    private boolean validTarget(String target){
 
-        for(String target : targetList){
-            if(target.contains("tsm") || target.contains("all")){
-                if(!target.contains(";")){
-                    result = true;
-                    break;
-                }
-                else if (target.contains(";T=" + this.etcsTrainID)){
-                    result = true;
-                    break;
-                }
+
+        if(target.contains("tsm") || target.contains("all")) {
+            if (!target.contains(";")) {
+                return true;
+
+            } else if (target.contains(";T=" + this.etcsTrainID)) {
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
 }

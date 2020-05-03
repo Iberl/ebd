@@ -33,19 +33,19 @@ public class GlobalHandler {
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
-        if(!validTarget(pce.targets)) return;
+        if(!validTarget(pce.target)) return;
         this.localBus.post(pce);
     }
 
     @Subscribe
     public void continueClock(ContinueClockEvent cce){
-        if(!validTarget(cce.targets)) return;
+        if(!validTarget(cce.target)) return;
         this.localBus.post(cce);
     }
 
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
+        if(!validTarget(de.target)){
             return;
         }
         this.localBus.post(de);
@@ -53,22 +53,19 @@ public class GlobalHandler {
 
     /**
      * True if this Instance is a vaild target of the event
-     * @param targetList the target list a the event
+     * @param target the target list a the event
      * @return True if this instance is a vaild target of the event
      */
-    private boolean validTarget(List<String> targetList){
+    private boolean validTarget(String target){
         boolean result = false;
 
-        for(String target : targetList){
-            if(target.contains("tsm") || target.contains("all")){
-                if(!target.contains(";")){
-                    result = true;
-                    break;
-                }
-                else if (target.contains(";T=" + this.etcsTrainID)){
-                    result = true;
-                    break;
-                }
+
+        if(target.contains("tsm") || target.contains("all")){
+            if(!target.contains(";")){
+                result = true;
+            }
+            else if (target.contains(";T=" + this.etcsTrainID)){
+                result = true;
             }
         }
         return result;

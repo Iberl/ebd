@@ -161,9 +161,9 @@ public class MessageAuthorityRequestSupervisor {
         message132.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
         message132.PACKET_POSITION = packet0;
 
-        List<String> destinations = Collections.singletonList("mr;R=" + this.rbcID);
-        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message132, destinations));
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending a MA Request"));
+        String destination = "mr;R=" + this.rbcID;
+        this.localBus.post(new SendMessageEvent("tsm", "ms", message132, destination));
+        this.localBus.post(new ToLogEvent("tsm", "log", "Sending a MA Request"));
 
         this.waitingOnMA = true;
     }

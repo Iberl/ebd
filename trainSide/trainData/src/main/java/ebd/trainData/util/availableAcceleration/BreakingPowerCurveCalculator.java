@@ -46,9 +46,9 @@ public class BreakingPowerCurveCalculator {
             deceleration = 1.3;
         }
         else {
-            List<String> targets = Arrays.asList(new String[]{"all"});
+            String target = "all";
             IllegalArgumentException iAE = new IllegalArgumentException("Breaking method: " + chosenBreakingMethod + " could not be found, default value will be used");
-            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",targets, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
+            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",target, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
             eventBus.post(exceptionEvent);
         }
 
@@ -88,9 +88,9 @@ public class BreakingPowerCurveCalculator {
             deceleration = 1.4;
         }
         else {
-            List<String> targets = Arrays.asList(new String[]{"all"});
+            String target = "all";
             IllegalArgumentException iAE = new IllegalArgumentException("Breaking method: " + chosenBreakingMethod + " could not be found, default value will be used");
-            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",targets, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
+            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",target, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
             eventBus.post(exceptionEvent);
         }
 

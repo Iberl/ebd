@@ -86,9 +86,8 @@ public class TestEventHandler{
 				writer.close();
 
 			} catch (IOException e1) {
-				List<String> eventTargets = new ArrayList<>();
-				eventTargets.add("tsm;");
-				eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, e, e1));
+				String eventTarget = "tsm";
+				eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTarget, e, e1));
 			}
 		}
 		System.out.println("Done");

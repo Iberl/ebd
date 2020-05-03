@@ -84,7 +84,7 @@ public class SocketClient<T, Resp> {
     }
 
     private void log(String msg) {
-        globalbus.post(new ToLogEvent(moduleID, Collections.singletonList("log"), msg));
+        globalbus.post(new ToLogEvent(moduleID, "log", msg));
     }
 }
 
