@@ -29,14 +29,14 @@ class AvailableAccelerationTest {
     @Test
     void aaTest() throws IOException {
         EventBus eb = EventBus.getDefault();
-        List<String> targetList = Arrays.asList(new String[]{"all"});
+        String target = "all";
         RouteData routeData = new RouteData(eb);
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
         TrainData trainData = new TrainData(eb);
 
-        eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
+        eb.post(new RouteDataChangeEvent("test",target, "packet_21", getp21()));
         AvailableAcceleration aa = new AvailableAcceleration(eb);
-        eb.post(new TrainDataChangeEvent("test", targetList, "availableAcceleration", aa));
+        eb.post(new TrainDataChangeEvent("test", target, "availableAcceleration", aa));
 
 
         assertEquals(0.44,aa.getAcceleration(0,0, MovementState.ACCELERATING),0.001);

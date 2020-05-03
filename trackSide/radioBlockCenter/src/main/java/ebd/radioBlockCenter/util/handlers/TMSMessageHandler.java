@@ -47,7 +47,7 @@ public class TMSMessageHandler {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receivedMessage(ReceivedMessageEvent rme) {
-        if(!validTarget(rme.targets)) return;
+        if(!validTarget(rme.target)) return;
         String trainID = (rme.sender.split(";T="))[1];
 
 
@@ -55,14 +55,14 @@ public class TMSMessageHandler {
             Message_132 msg132 = (Message_132) rme.message;
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg132.PACKET_POSITION.NID_LRBG);
             String msg = String.format("Received MA request from train %s", trainID);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            this.localBus.post(new ToLogEvent("rbc", "log", msg));
             if(!trainShouldStop) {
                 sendMessage3(makeM3(rme.sender.split(";T=")[1]), trainID);
             }
         } else if(rme.message instanceof Message_136) { //Position Report
             Message_136 msg136 = (Message_136) rme.message;
             String msg = String.format("Received position report from train %s", trainID);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            this.localBus.post(new ToLogEvent("rbc", "Log", msg));
 
             int nid_lrbg = msg136.PACKET_POSITION.NID_LRBG;
             int d_lrbg = msg136.PACKET_POSITION.D_LRBG;
@@ -73,7 +73,7 @@ public class TMSMessageHandler {
                 trainShouldStop = false;
                 try {
                     msg = "Waiting until next MA Message can be send.";
-                    this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+                    this.localBus.post(new ToLogEvent("rbc", "log", msg));
                     Thread.sleep(10000);
                 } catch(InterruptedException e) {
                     e.printStackTrace();
@@ -86,22 +86,22 @@ public class TMSMessageHandler {
             this.trainToLRBGMap.put(Integer.parseInt(trainID), msg136.PACKET_POSITION.NID_LRBG);
         } else if(rme.message instanceof Message_146) {
             String msg = String.format("Received Acknowledge from train %s", trainID);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            this.localBus.post(new ToLogEvent("rbc", "log", msg));
         } else if(rme.message instanceof Message_150) {
             String msg = String.format("Received Mission End message from train %s", trainID);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            this.localBus.post(new ToLogEvent("rbc", "log", msg));
         } else if(rme.message instanceof Message_155) {
             this.controlledTrainsByID.add(((Message_155) rme.message).NID_ENGINE);
             String msg = String.format("Received communication initiation from train %s", trainID);
-            this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), msg));
+            this.localBus.post(new ToLogEvent("rbc", "log", msg));
             sendMessage24withPackets57MARZEROAnd58(rme);
 
         }
     }
 
     private void sendMessage3(Message_3 msg3, String trainID) {
-        this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg3, Collections.singletonList("mr;T=" + trainID)));
-        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), "Sending MA Message"));
+        this.localBus.post(new SendMessageEvent("rbc", "ms", msg3, "mr;T=" + trainID));
+        this.localBus.post(new ToLogEvent("rbc", "log", "Sending MA Message"));
     }
 
     private void sendMessage24withPackets57MARZEROAnd58(ReceivedMessageEvent rme) {
@@ -110,8 +110,8 @@ public class TMSMessageHandler {
         trackPackets.add(makeP57(0));
         trackPackets.add(makeP58());
         Message_24 msg24 = makeMessage24(trackPackets);
-        this.localBus.post(new SendMessageEvent("rbc", Collections.singletonList("ms"), msg24, Collections.singletonList("mr;T=" + trainID)));
-        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("ms"), "Sending MA Request Parameters and Position Report Parameters"));
+        this.localBus.post(new SendMessageEvent("rbc", "ms", msg24, "mr;T=" + trainID));
+        this.localBus.post(new ToLogEvent("rbc", "ms", "Sending MA Request Parameters and Position Report Parameters"));
     }
 
     private Message_3 makeM3(String trainID) {
@@ -293,17 +293,16 @@ public class TMSMessageHandler {
         return packet_80;
     }
 
-    private boolean validTarget(List<String> targetList) {
+    private boolean validTarget(String target) {
 
-        for(String target : targetList) {
-            if(target.contains("tsm") || target.contains("all")) {
-                if(!target.contains(";")) {
-                    return true;
-                } else if(target.contains(";R=" + this.rbcID)) {
-                    return true;
-                }
+        if(target.contains("tsm") || target.contains("all")) {
+            if(!target.contains(";")) {
+                return true;
+            } else if(target.contains(";R=" + this.rbcID)) {
+                return true;
             }
         }
+
         return false;
     }
 

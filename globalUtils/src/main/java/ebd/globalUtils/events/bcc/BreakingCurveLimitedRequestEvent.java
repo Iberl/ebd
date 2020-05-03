@@ -21,8 +21,8 @@ public class BreakingCurveLimitedRequestEvent extends NormalEvent {
 	 * @param referencePosition
 	 * 			Reference {@link Position} to the data
 	 */
-	public BreakingCurveLimitedRequestEvent(String source, List<String> targets, String id, Packet_15 packet15, Position referencePosition) {
-		super(source, targets);
+	public BreakingCurveLimitedRequestEvent(String source, String target, String id, Packet_15 packet15, Position referencePosition) {
+		super(source, target);
 		this.id = id;
 		this.packet15 = packet15;
 		this.referencePosition = referencePosition;

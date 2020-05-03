@@ -12,11 +12,11 @@ public class CrossedBaliseGroupEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     *                TODO: Define Format for IDs
-     * @param targets ID from all modules the event is adressed to
+     *
+     * @param target ID from from the target module or 'all' if more then one target should be reached.
      */
-    public CrossedBaliseGroupEvent(String source, List<String> targets, int baliseGroupID) {
-        super(source, targets);
+    public CrossedBaliseGroupEvent(String source, String target, int baliseGroupID) {
+        super(source, target);
         this.baliseGroupID = baliseGroupID;
     }
 }

@@ -18,15 +18,13 @@ public class RouteData {
     private EventBus eventBus;
     private RouteDataVolatile routeDataVolatile = new RouteDataVolatile();
 
-    private List<String> exceptionTargets = new ArrayList<>();
-    private List<String> eventTargets = new ArrayList<>();
+    private String exceptionTarget = "tsm";
+    private String eventTarget = "all";
 
     public RouteData(EventBus eventBus) {
         this.eventBus = eventBus;
         this.eventBus.register(this);
-        this.exceptionTargets.add("tsm;");
-        this.eventTargets.add("all;");
-        this.eventBus.postSticky(new NewRouteDataVolatileEvent("rd", this.eventTargets,this.routeDataVolatile));
+        this.eventBus.postSticky(new NewRouteDataVolatileEvent("rd", this.eventTarget,this.routeDataVolatile));
     }
 
     /**
@@ -37,9 +35,9 @@ public class RouteData {
     public void changeInRouteData(RouteDataChangeEvent routeDataChangeEvent){
         try {
             changingRoutDataVolatile(routeDataChangeEvent.fieldName,routeDataChangeEvent.fieldValue);
-            eventBus.postSticky(new NewRouteDataVolatileEvent("rd;", eventTargets, this.routeDataVolatile));
+            eventBus.postSticky(new NewRouteDataVolatileEvent("rd;", eventTarget, this.routeDataVolatile));
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            this.eventBus.post(new RouteDataExceptionEvent("rd",this.exceptionTargets,routeDataChangeEvent,e));
+            this.eventBus.post(new RouteDataExceptionEvent("rd",this.exceptionTarget,routeDataChangeEvent,e));
         }
     }
 
@@ -50,9 +48,9 @@ public class RouteData {
             for (String key : namesToValues.keySet()){
                 changingRoutDataVolatile(key,namesToValues.get(key));
             }
-            eventBus.postSticky(new NewRouteDataVolatileEvent("rd;", eventTargets, this.routeDataVolatile));
+            eventBus.postSticky(new NewRouteDataVolatileEvent("rd;", eventTarget, this.routeDataVolatile));
         } catch (IllegalAccessException | IllegalArgumentException e) {
-            this.eventBus.post(new RouteDataExceptionEvent("rd",this.exceptionTargets,routeDataMultiChangeEvent,e));
+            this.eventBus.post(new RouteDataExceptionEvent("rd",this.exceptionTarget,routeDataMultiChangeEvent,e));
         }
 
     }

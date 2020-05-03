@@ -2,7 +2,6 @@ package ebd.trainStatusManager;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
-import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
@@ -47,8 +46,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -112,7 +109,7 @@ public class TrainStatusManager implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("rsm;R=" + this.rbcID),
+            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, "rsm;R=" + this.rbcID,
                     new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
         }
     }
@@ -123,23 +120,23 @@ public class TrainStatusManager implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("rsm;R=" + this.rbcID),
+            this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, "rsm;R=" + this.rbcID,
                     new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
         }
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
-        if(!validTarget(nbce.targets)){
+        if(!validTarget(nbce.target)){
             return;
         }
         BreakingCurve breakingCurve = nbce.breakingCurveGroup.getPermittedSpeedCurve();
         int refLocID = breakingCurve.getRefLocation().getId();
 
 
-        this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", Collections.singletonList("dd"), breakingCurve, refLocID));
-        this.localEventBus.post(new DDUnlockEvent("tsm", Collections.singletonList("dd")));
-        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+        this.localEventBus.post(new DDUpdateTripProfileEvent("tsm", "dd", breakingCurve, refLocID));
+        this.localEventBus.post(new DDUnlockEvent("tsm", "dd"));
+        this.localEventBus.post(new ToLogEvent("tsm", "log",
                 "Calculated a new breaking curve"));
 
 
@@ -183,31 +180,31 @@ public class TrainStatusManager implements Runnable {
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
-        if(!validTarget(pce.targets)) return;
+        if(!validTarget(pce.target)) return;
         this.clock.setPaused(true);
     }
 
     @Subscribe
     public void continueClock(ContinueClockEvent cce){
-        if(!validTarget(cce.targets)) return;
+        if(!validTarget(cce.target)) return;
         this.clock.setPaused(false);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void tripEnd(TsmTripEndEvent tee){
-        if(!validTarget(tee.targets)){
+        if(!validTarget(tee.target)){
             return;
         }
-        this.localEventBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
+        this.localEventBus.post(new DDLockEvent("tsm", "dd"));
         //TODO until better TrainsManager exists:
         Message_150 msg150 = new Message_150();
         msg150.NID_ENGINE = this.etcsTrainID;
         Packet_0 p0 = new Packet_0();
         msg150.PACKET_POSITION = p0;
         this.infrastructureClientConnector.disconnect();
-        SendMessageEvent sme = new SendMessageEvent("tsm", Collections.singletonList("ms"), msg150, Collections.singletonList("mr;R=" + this.etcsTrainID));
+        SendMessageEvent sme = new SendMessageEvent("tsm", "ms", msg150, "mr;R=" + this.etcsTrainID);
         this.messageSender.send(sme);
-        disconnect(new DisconnectEvent("tsm", Collections.singletonList("tsm")));
+        disconnect(new DisconnectEvent("tsm", "tsm"));
     }
 
     /**
@@ -216,7 +213,7 @@ public class TrainStatusManager implements Runnable {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
+        if(!validTarget(de.target)){
             return;
         }
 
@@ -227,7 +224,7 @@ public class TrainStatusManager implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), "ETCS shut down"));
+        EventBus.getDefault().post(new ToLogEvent("glb", "log", "ETCS shut down"));
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -279,43 +276,43 @@ public class TrainStatusManager implements Runnable {
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("currentPosition",curPos);
         changesForTD.put("currentSpeed", 0d);
-        this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"),changesForTD));
+        this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", "td",changesForTD));
 
         this.clock = new Clock(this.localEventBus);
         this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
 
-        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "TSM initialized"));
-        this.localEventBus.post(new TrainDataChangeEvent("tsm", Collections.singletonList("td"), "etcsID", this.etcsTrainID));
+        this.localEventBus.post(new ToLogEvent("tsm", "log", "TSM initialized"));
+        this.localEventBus.post(new TrainDataChangeEvent("tsm", "td", "etcsID", this.etcsTrainID));
     }
 
     private void connectToRBC() {
         Position curPos = new Position(0,true, new InitalLocation());
-        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("all"),curPos));
+        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, "all",curPos));
         Message_155 msg155 = new Message_155();
         long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
         msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), msg155, Collections.singletonList("mr;R=" + this.rbcID)));
-        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Send communication initiation to RBC " + this.rbcID));
+        this.localEventBus.post(new SendMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
+        this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + this.rbcID));
     }
 
     /**
      * True if this Instance is a vaild target of the event
-     * @param targetList the target list a the event
+     * @param target the target list a the event
      * @return True if this instance is a vaild target of the event
      */
-    private boolean validTarget(List<String> targetList){
+    private boolean validTarget(String target){
 
-        for(String target : targetList){
-            if(target.contains("tsm") || target.contains("all")){
-                if(!target.contains(";")){
-                    return true;
-                }
-                else if (target.contains(";T=" + this.etcsTrainID)){
-                    return true;
-                }
+
+        if(target.contains("tsm") || target.contains("all")){
+            if(!target.contains(";")){
+                return true;
+            }
+            else if (target.contains(";T=" + this.etcsTrainID)){
+                return true;
             }
         }
+
         return false;
     }
 

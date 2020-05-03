@@ -22,15 +22,15 @@ public class ReceivedTelegramEvent extends NormalEvent {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is adressed to
+	 * @param target
+	 *          ID from from the target module or "all" if more then one target should be reached.
 	 * @param telegram
 	 *          The Telegram received by Message Receiver
 	 * @param sender
 	 *          Sender ID of the received Telegram
 	 */
-	public ReceivedTelegramEvent(String source, List<String> targets, Telegram telegram, String sender) {
-		super(source, targets);
+	public ReceivedTelegramEvent(String source, String target, Telegram telegram, String sender) {
+		super(source, target);
 		this.telegram = telegram;
 		this.sender = sender;
 	}

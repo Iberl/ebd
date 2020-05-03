@@ -24,12 +24,12 @@ public class DMIUpdateEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from from the target module or 'all' if more then one target should be reached.
      */
-    public DMIUpdateEvent(String source, List<String> targets, double currentSpeed, double targetSpeed, int targetDistance,
+    public DMIUpdateEvent(String source, String target, double currentSpeed, double targetSpeed, int targetDistance,
                           SpeedInterventionLevel speedInterventionLevel, SpeedSupervisionState speedSupervisionState,
                           double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) {
-        super(source, targets);
+        super(source, target);
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
         this.targetDistance = targetDistance;

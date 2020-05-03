@@ -13,10 +13,10 @@ public class NewLocationEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from from the target module or 'all' if more then one target should be reached.
      */
-    public NewLocationEvent(String source, List<String> targets, Location newLocation) {
-        super(source, targets);
+    public NewLocationEvent(String source, String target, Location newLocation) {
+        super(source, target);
         this.newLocation = newLocation;
     }
 }

@@ -25,12 +25,12 @@ public class ClockTickEvent extends NormalEvent {
      *
      * @param source  ID from the module the event was sent by
      *
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from from the target module or 'all' if more then one target should be reached.
      *
      * @param deltaT Time difference between this ClockTickEvent and the last ClockTickEvent in [s]
      */
-    public ClockTickEvent(String source, List<String> targets, double deltaT) {
-        super(source, targets);
+    public ClockTickEvent(String source, String target, double deltaT) {
+        super(source, target);
         this.deltaT = deltaT;
     }
 

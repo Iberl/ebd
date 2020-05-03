@@ -9,13 +9,13 @@ public class MessageSenderExceptionEvent extends ExceptionEvent {
 
 	/**
 	 * @param source    ID from the module the event was sent by
-	 *                  TODO: Define Format for IDs
-	 * @param targets   ID from all modules the event is adressed to
-	 *                  TODO: Define Format for IDs
+	 *
+	 * @param target   ID from from the target module or "all" if more then one target should be reached.
+	 *
 	 * @param cause     The Event causing an Exception
 	 * @param exception
 	 */
-	public MessageSenderExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-		super(source, targets, cause, exception);
+	public MessageSenderExceptionEvent(String source, String target, Event cause, Exception exception) {
+		super(source, target, cause, exception);
 	}
 }

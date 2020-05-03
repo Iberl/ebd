@@ -5,11 +5,10 @@ import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class DMIDisplayConnectorTest {
 
-    private static List<String> dmiUpdateEventTargets;
+    private static String dmiUpdateEventTarget;
     private static DMIUpdateEvent dmiUpdateEvent;
 
     public static void main(String[] args) throws InterruptedException {
@@ -62,8 +61,8 @@ public class DMIDisplayConnectorTest {
     }
 
     public static DMIUpdateEvent generateDMIUpdateEvent(double currentSpeed, double currentTargetSpeed, int targetDistance, SpeedInterventionLevel speedIntLevel, SpeedSupervisionState speedSupervisionState, double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) throws InterruptedException {
-        dmiUpdateEventTargets = Arrays.asList("a", "b");
-        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTargets, currentSpeed, currentTargetSpeed, targetDistance, speedIntLevel, speedSupervisionState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed);
+        dmiUpdateEventTarget = "a";
+        dmiUpdateEvent = new DMIUpdateEvent("source of DMIUpdateEvent", dmiUpdateEventTarget, currentSpeed, currentTargetSpeed, targetDistance, speedIntLevel, speedSupervisionState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed);
         return dmiUpdateEvent;
     }
 

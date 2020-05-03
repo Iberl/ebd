@@ -23,7 +23,7 @@ class RouteDataTest {
 
         Thread.sleep(100);
 
-        RouteDataChangeEvent routeDataChangeEvent = new RouteDataChangeEvent("test",new ArrayList<String>(),"packet_21",new Packet_21());
+        RouteDataChangeEvent routeDataChangeEvent = new RouteDataChangeEvent("test","rd","packet_21",new Packet_21());
 
         EventBus.getDefault().post(routeDataChangeEvent);
 
@@ -31,7 +31,7 @@ class RouteDataTest {
         nameToValue.put("packet_15", new Packet_15());
         nameToValue.put("packet_27", new Packet_27());
 
-        EventBus.getDefault().post( new RouteDataMultiChangeEvent("test", new ArrayList<>(), nameToValue));
+        EventBus.getDefault().post( new RouteDataMultiChangeEvent("test", "rd", nameToValue));
 
 
     }

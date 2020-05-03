@@ -32,11 +32,11 @@ class SpeedSupervisionModuleTest {
         SpeedSupervisionModule ssm = new SpeedSupervisionModule(eventBus);
 
         TrainData trainData = new TrainData(eventBus);
-        eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"),"currentSpeed", 51d));
+        eventBus.post(new TrainDataChangeEvent("test", "td","currentSpeed", 51d));
         Location startLoc = new Location(0, ETCSVariables.NID_LRBG, 0d);
         Position startPos = new Position(0d,true,startLoc);
         Position curPos = new Position(10d,true,startLoc);
-        eventBus.post(new TrainDataChangeEvent("test", Collections.singletonList("td"),"currentPosition", curPos));
+        eventBus.post(new TrainDataChangeEvent("test", "td","currentPosition", curPos));
 
         BreakingCurveCalculator bcc = new BreakingCurveCalculator(eventBus);
 
@@ -47,11 +47,11 @@ class SpeedSupervisionModuleTest {
         BreakingCurveRequestEvent bcre = generator.generate();
         bcre.referencePosition = startPos;
         bcre.source = "test";
-        bcre.targets = Collections.singletonList("bcc");
+        bcre.target = "bcc";
         eventBus.post(bcre);
 
         Thread.sleep(8000);
-        eventBus.post(new DisconnectEvent("all", Collections.singletonList("all")));
+        eventBus.post(new DisconnectEvent("all", "all"));
     }
 
 }

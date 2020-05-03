@@ -43,7 +43,7 @@ public class BreakingCurveCalculator {
 	public static final double ETCS_VALUE_TO_MS = 5d * (10d / 36d);
 
 	private EventBus eventBus;
-	private List<String> eventTargets = new ArrayList<>();
+	private String eventTarget;
 	private ConfigHandler ch = ConfigHandler.getInstance();
 
 	private boolean bclreCan = false;
@@ -80,7 +80,7 @@ public class BreakingCurveCalculator {
     public BreakingCurveCalculator(EventBus eventBus) {
     	this.eventBus = eventBus;
     	eventBus.register(this);
-		this.eventTargets.add("tsm");
+		this.eventTarget = "tsm";
     }
 
     /**
@@ -116,17 +116,17 @@ public class BreakingCurveCalculator {
 
 	    	this.breakingCurveGroup = calculateBreakingCurve(bcre.packet15, bcre.id);
 
-			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTargets, this.breakingCurveGroup));
+			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTarget, this.breakingCurveGroup));
 			this.bclreCan = true; //bclre can only be calculated after the first full request is done.
 			this.isCalculating = false;
     	}
     	catch(BreakingCurveCalculatorBusyException bccbe) {
-    		eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTargets, bcre, bccbe));
+    		eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTarget, bcre, bccbe));
     	}
     	catch(Exception e) {
-			this.eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTargets, bcre, e));
+			this.eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTarget, bcre, e));
     		this.breakingCurveGroup = new BreakingCurveGroup();
-			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTargets, this.breakingCurveGroup));
+			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTarget, this.breakingCurveGroup));
 			this.isCalculating = false;
     	}
     }
@@ -161,15 +161,15 @@ public class BreakingCurveCalculator {
 
     		this.breakingCurveGroup = calculateBreakingCurveGroupWIthShiftedPosition(bclre.packet15, bclre.id, bclre.referencePosition);
 
-			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTargets, this.breakingCurveGroup));
+			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTarget, this.breakingCurveGroup));
 			this.isCalculating = false;
     	}
     	catch(BreakingCurveCalculatorBusyException bccbe) {
-			this.eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTargets, bclre, bccbe));
+			this.eventBus.post(new BreakingCurveExceptionEvent("bcc", this.eventTarget, bclre, bccbe));
     	}
     	catch(Exception e) {
 			this.breakingCurveGroup = new BreakingCurveGroup();
-			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTargets, this.breakingCurveGroup));
+			this.eventBus.post(new NewBreakingCurveEvent("bcc", this.eventTarget, this.breakingCurveGroup));
 			this.isCalculating = false;
     	}
     }

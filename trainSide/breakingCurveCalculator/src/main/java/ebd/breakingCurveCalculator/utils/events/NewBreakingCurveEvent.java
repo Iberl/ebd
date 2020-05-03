@@ -19,13 +19,13 @@ public class NewBreakingCurveEvent extends NormalEvent {
 	 * @param source
 	  *          ID from the module the event was sent by
 	  *          TODO: Define Format for IDs
-	  * @param targets
+	  * @param target
 	  *          ID from all modules the event is adressed to
 	 * @param breakingCurveGroup
 	 * 			The breaking curve group, containing all breaking curves
 	 */
-	public NewBreakingCurveEvent(String source, List<String> targets, BreakingCurveGroup breakingCurveGroup) {
-		super(source, targets);
+	public NewBreakingCurveEvent(String source, String target, BreakingCurveGroup breakingCurveGroup) {
+		super(source, target);
 		this.breakingCurveGroup = breakingCurveGroup;
 	}
 }

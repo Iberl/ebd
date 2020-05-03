@@ -43,7 +43,7 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
     private Spline tripProfile;
     private double maxTripSectionDistance;
 
-    private List<String> exceptionTargets = Collections.singletonList("all");
+    private String exceptionTarget = "all";
 
     /**
      * Builds an Instance out of a {@link JSONObject}
@@ -96,7 +96,7 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
      */
     @Subscribe
     public void updateTripProfile(DDUpdateTripProfileEvent utpe){
-        if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
+        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }
         this.tripProfile = utpe.tripProfile;
@@ -110,7 +110,7 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
+            this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
         }
     }
 

@@ -73,7 +73,7 @@ public class TripSupervisor {
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
 
         if(distanceToEMA <= this.targetReachedDistance && trainDataVolatile.getCurrentSpeed() == 0){
-            this.localBus.post(new DDLockEvent("tsm", Collections.singletonList("dd")));
+            this.localBus.post(new DDLockEvent("tsm", "dd"));
 
             if(routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
@@ -95,9 +95,9 @@ public class TripSupervisor {
      */
     private void sendEndOfMission() {
         //TODO Send Message 150
-        this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
+        this.localBus.post(new TsmTripEndEvent("tsm", "tsm"));
         String msg = "Train " + etcsID + " reached the target location";
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("tsm", "log", msg));
     }
 
 
