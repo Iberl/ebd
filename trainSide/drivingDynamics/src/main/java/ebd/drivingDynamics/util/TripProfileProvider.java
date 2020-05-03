@@ -1,10 +1,13 @@
 package ebd.drivingDynamics.util;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.spline.Spline;
+import ebd.trainData.TrainDataVolatile;
+import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -13,7 +16,6 @@ import java.util.Collections;
 public class TripProfileProvider {
 
     private final EventBus localEventBus;
-    private Location profileRefLoc;
 
     private enum Mode {
         FROM_BREAKINGCURVE,
@@ -22,6 +24,7 @@ public class TripProfileProvider {
     }
 
     ConfigHandler ch = ConfigHandler.getInstance();
+    TrainDataVolatile trainDataVolatile;
 
     private Mode mode;
     private Spline profile = null;
@@ -29,6 +32,7 @@ public class TripProfileProvider {
     public TripProfileProvider(EventBus localBus){
         this.localEventBus = localBus;
         this.localEventBus.register(this);
+        this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         switch(ch.tripProfileMode){
             case("breakkingcurve"):
                 this.mode = Mode.FROM_BREAKINGCURVE;
@@ -46,18 +50,40 @@ public class TripProfileProvider {
 
     @Subscribe
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
-        if(this.mode != Mode.FROM_BREAKINGCURVE) return;
+        if(this.mode != Mode.FROM_BREAKINGCURVE) {
+            getProfilefromSource(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+            return;
+        }
 
         this.profile = nbce.breakingCurveGroup.getPermittedSpeedCurve();
-        this.profileRefLoc = nbce.breakingCurveGroup.getPermittedSpeedCurve().getRefLocation();
+        Location profileRefLoc = nbce.breakingCurveGroup.getPermittedSpeedCurve().getRefLocation();
         this.localEventBus.post(new DDUpdateTripProfileEvent("dd",
                                 Collections.singletonList("dd"),
                                 this.profile,
-                                this.profileRefLoc.getId()));
+                                profileRefLoc.getId()));
 
     }
 
+
     public Spline getProfile() {
         return profile;
+    }
+
+    private void getProfilefromSource(BreakingCurve breakingCurve) {
+
+        int etcsID = trainDataVolatile.getEtcsID();
+        int refLocID = breakingCurve.getRefLocation().getId();
+
+        if(this.mode == Mode.FROM_FILE) getProfilefromFile(etcsID, refLocID);
+        else if (this.mode == Mode.FROM_SOCKET) getProfilefromSocket(etcsID, refLocID);
+
+    }
+
+    private void getProfilefromFile(int etcsID, int refLocID) {
+        //TODO Implement after Spline File Format is determined
+    }
+
+    private void getProfilefromSocket(int etcsID, int refLocID) {
+        //TODO Implement after Spline File Format is determined
     }
 }

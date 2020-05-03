@@ -81,7 +81,7 @@ public class MessageAuthorityRequestSupervisor {
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
-        //TODO Do the calculation of time to EOL correctly!
+        //TODO Do the calculation of time to EOL with higher precision
         double distanceToEOL = 0;
         if(this.breakingCurve != null){
             distanceToEOL = this.breakingCurve.getHighestXValue();
@@ -89,9 +89,12 @@ public class MessageAuthorityRequestSupervisor {
         }
 
         double curSpeed = trainDataVolatile.getCurrentSpeed();
-        double timeToEOL = distanceToEOL / curSpeed;
+        double timeToEOL;
         if(distanceToEOL == 0 || curSpeed == 0){
             timeToEOL = 0;
+        }
+        else {
+            timeToEOL = distanceToEOL / curSpeed;
         }
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
             if (timeToEOL <= t_mar){

@@ -135,10 +135,12 @@ public class DistanceSupervisor {
      * @return The calculated release speed
      */
     private double calculateReleaseSpeed() {
-        //TODO Fill with Math should it be needed for Deutsche Bahn Systems
+        double releaseSpeed = this.routeDataVolatile.getPacket_15().V_RELEASEDP * 5 / 3.6;
+        if(releaseSpeed <= 0){
+            releaseSpeed = ch.releaseSpeed;
+        }
 
-        //return this.routeDataVolatile.getPacket_15().V_RELEASEDP;
-        return ch.releaseSpeed;
+        return releaseSpeed;
     }
 
     /**
@@ -147,12 +149,7 @@ public class DistanceSupervisor {
      * @return The calculated release speed
      */
     private double calculateReleaseSpeedDistance() {
-        //TODO Fill with Math should it be needed for Deutsche Bahn Systems
+        //TODO Fill with Math
         return ch.releaseSpeedDistance;
     }
-
-
-
-
-
 }
