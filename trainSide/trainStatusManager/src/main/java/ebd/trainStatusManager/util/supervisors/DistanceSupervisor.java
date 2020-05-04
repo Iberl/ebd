@@ -37,7 +37,7 @@ public class DistanceSupervisor {
     //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
     private final String eventSource;
-    private final List<String> eventTarget;
+    private final String eventTarget;
     private final RouteDataVolatile routeDataVolatile;
     private final TrainDataVolatile trainDataVolatile;
     private final ConfigHandler ch;
@@ -70,7 +70,7 @@ public class DistanceSupervisor {
         this.dangerPointDistance = ch.defaultDangerPoint;
 
         this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
-        this.eventTarget = Collections.singletonList("all");
+        this.eventTarget = "all";
     }
 
 
@@ -98,7 +98,7 @@ public class DistanceSupervisor {
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
-            this.localBus.post(new DDLockEvent(this.eventSource, Collections.singletonList("dd")));
+            this.localBus.post(new DDLockEvent(this.eventSource, "dd"));
 
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
@@ -124,9 +124,9 @@ public class DistanceSupervisor {
      * Sends the necessary events to signal and log an end of mission.
      */
     private void sendEndOfMission() {
-        this.localBus.post(new TsmTripEndEvent("tsm", Collections.singletonList("tsm")));
+        this.localBus.post(new TsmTripEndEvent("tsm", "tsm"));
         String msg = "Train " + this.trainDataVolatile.getEtcsID() + " reached the target location";
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("tsm", "log", msg));
     }
 
     /**

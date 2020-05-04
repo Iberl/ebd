@@ -13,10 +13,10 @@ public class LevelChangeRequestEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from all modules the event is addressed to
      */
-    public LevelChangeRequestEvent(String source, List<String> targets, ETCSLevel newLevel) {
-        super(source, targets);
+    public LevelChangeRequestEvent(String source, String target, ETCSLevel newLevel) {
+        super(source, target);
         this.newLevel = newLevel;
     }
 }

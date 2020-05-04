@@ -13,10 +13,10 @@ public class ModeChangeRequestEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from all modules the event is addressed to
      */
-    public ModeChangeRequestEvent(String source, List<String> targets, ETCSMode newMode) {
-        super(source, targets);
+    public ModeChangeRequestEvent(String source, String target, ETCSMode newMode) {
+        super(source, target);
         this.newMode = newMode;
     }
 }

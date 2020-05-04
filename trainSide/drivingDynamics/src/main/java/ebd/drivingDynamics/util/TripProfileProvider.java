@@ -58,7 +58,7 @@ public class TripProfileProvider {
         this.profile = nbce.breakingCurveGroup.getPermittedSpeedCurve();
         Location profileRefLoc = nbce.breakingCurveGroup.getPermittedSpeedCurve().getRefLocation();
         this.localEventBus.post(new DDUpdateTripProfileEvent("dd",
-                                Collections.singletonList("dd"),
+                                "dd",
                                 this.profile,
                                 profileRefLoc.getId()));
 
