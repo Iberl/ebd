@@ -235,7 +235,7 @@ public class TrainDataVolatile {
     /**
      * Current ETCS Mode. Updated by tsm.ModeSupervisor
      */
-    protected volatile ETCSMode currentETCSMode = ETCSMode.STAFFE_RESPONSIBLE;
+    protected volatile ETCSMode currentETCSMode = ETCSMode.STAND_BY;
 
 
     //Constructor
