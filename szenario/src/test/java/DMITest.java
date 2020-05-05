@@ -30,9 +30,9 @@ public class DMITest {
     }
 
     private void speedometerTest() throws InterruptedException {
-        //speedometerPermittedSpeedTest();
-        //speedometerCSMTest();
-        //speedometerTSMTest();
+        speedometerPermittedSpeedTest();
+        speedometerCSMTest();
+        speedometerTSMTest();
         speedometerRSMTest();
     }
 
@@ -251,12 +251,12 @@ public class DMITest {
         }
 
         //targetSpeed variable
-        for(double currentReleaseSpeed = 0; currentReleaseSpeed <= 100/3.6; currentReleaseSpeed += 10/3.6) {
+        for(double currentReleaseSpeed = 0; currentReleaseSpeed <= 150/3.6; currentReleaseSpeed += 10/3.6) {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.TARGET_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
             Thread.sleep(1000);
         }
 
-        for(double currentReleaseSpeed = 100/3.6; currentReleaseSpeed >= 0; currentReleaseSpeed -= 10/3.6) {
+        for(double currentReleaseSpeed = 150/3.6; currentReleaseSpeed >= 0; currentReleaseSpeed -= 10/3.6) {
             this.globalEventBus.post(new DMIUpdateEvent("test;T=2181", testTargets, 100/3.6, 0, 0, currentReleaseSpeed, SpeedInterventionLevel.INDICATION, SpeedSupervisionState.TARGET_SPEED_SUPERVISION, 60 / 3.6, 100 / 3.6, 105 / 3.6, 110 / 3.6));
             Thread.sleep(1000);
         }
