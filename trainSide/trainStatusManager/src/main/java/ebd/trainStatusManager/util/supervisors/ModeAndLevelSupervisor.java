@@ -1,10 +1,15 @@
 package ebd.trainStatusManager.util.supervisors;
 
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
-import ebd.globalUtils.events.trainStatusMananger.LevelChangeRequestEvent;
-import ebd.globalUtils.events.trainStatusMananger.ModeChangeRequestEvent;
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.trainStatusMananger.*;
+import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
@@ -13,16 +18,30 @@ import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class ModeAndLevelSupervisor {
 
-    EventBus localEventBus;
-    TrainDataVolatile trainDataVolatile;
-    TrainDataPerma trainDataPerma;
-    RouteDataVolatile routeDataVolatile;
-    ETCSLevel curLevel = ETCSLevel.LEVEL_THREE;
-    ETCSMode curMode = ETCSMode.STAND_BY;
+    private EventBus localEventBus;
+    private TrainDataVolatile trainDataVolatile;
+    private TrainDataPerma trainDataPerma;
+    private RouteDataVolatile routeDataVolatile;
+    private ETCSLevel curLevel = ETCSLevel.LEVEL_TWO;
+    private ETCSMode curMode = ETCSMode.STAND_BY;
 
+    /*
+    Control Booleans
+     */
+    private BreakingCurve bc = null;
+    private boolean errorDetected = false;
+    private boolean unconEStop = false; //TODO Implement unconditional emergency stop message
+    private boolean unspecificModeProfil = true; //TODO Implement ModeProfil
+
+
+    /**
+     *
+     * @param localEventBus The local {@link EventBus}
+     */
     public ModeAndLevelSupervisor(EventBus localEventBus) {
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
@@ -31,56 +50,150 @@ public class ModeAndLevelSupervisor {
         this.routeDataVolatile = this.localEventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
     }
 
-    @Subscribe
-    public void modeChange(ModeChangeRequestEvent mcre){
-        if(!validTarget(mcre.target)) return;
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void clockTick(ClockTickEvent cte){
 
-        boolean approved = checkAndAssignMode(mcre.newMode);
-        sendModeStatus(mcre, approved);
+        testLevelConditions();
+
+        checkAndAssignAllModes();
+
+        this.localEventBus.postSticky(new LevelReportEvent("tsm", "all", this.curLevel));
+        this.localEventBus.postSticky(new ModeReportEvent("tsm", "all", this.curMode));
 
     }
 
+    @Subscribe
+    public void exception(ExceptionEvent ee){
+        if(!validTarget(ee.target)) return;
 
-
+        if(ee.exceptionEventTyp == ExceptionEventTyp.CRITICAL) this.errorDetected = true;
+    }
 
     @Subscribe
-    public void levelChange(LevelChangeRequestEvent lcre){
-        if(!validTarget(lcre.target)) return;
-
-        boolean approved = checkAndAssigneLevel(lcre.newLevel);
-        sendLevelStatus(lcre, approved);
+    public void breakinCurve(NewBreakingCurveEvent nbce){
+        this.bc = nbce.breakingCurveGroup.getPermittedSpeedCurve();
     }
 
     /*
     Modes
      */
+    private void checkAndAssignAllModes(){
 
-    private boolean checkAndAssignMode(ETCSMode newMode) {
+        /*
+        Tests for modes along the priorities defined in SRS-026 4.6.2 .
+        Only implemented modes (see ETCSMode) are considered.
+        Every Priority is tested until one finds a mode applicable, assigns it to this.curMode and returns true.
+         */
+        if (modeP3());
+        else if (modeP4());
+        else if (modeP5());
+        else if (modeP6());
+        else modeP7();
+    }
 
-        switch (newMode){
-            case SYSTEM_FAILURE:
-                return systemFailure();
-            case STAND_BY:
-                return standBy();
-            case SHUNTING:
-                return shunting();
-            case FULL_SUPERVISION:
-                return fullSupervision();
-            case TRIP:
-                return trip();
-            case POST_TRIP:
-                return postTrip();
-            default:
-                return false;
+    /**
+     * See SRS-026 4.6.2 Figure 2
+     * @return True if a mode condtion was vaild and mode was assigned
+     */
+    private boolean modeP3() {
+        if(this.errorDetected) {
+            this.curMode = ETCSMode.SYSTEM_FAILURE; //SRS-026 4.6.3 [13]
+            return true;
         }
+        return false;
     }
 
-    private void sendModeStatus(ModeChangeRequestEvent mcre, boolean approved) {
+    private boolean modeP4() {
+        //SRS-026 4.6.3 [68] ignored, no driver
+        //SRS-026 4.6.3 [28] ignored, no desk to close
+        //SRS-026 4.6.3 [17], [18], [65] ignored because balise implementation does not send trip signals
+        //SRS-026 4.6.3 [41] T_NVCONTACT not implemented
+        //SRS-026 4.6.3 [49], [52], [65] ignored, no driving in shunting mode implemented
+        //SRS-026 4.6.3 [66] ignored //TODO Implement Balise direction
+
+        if(this.curMode == ETCSMode.FULL_SUPERVISION || this.curMode == ETCSMode.STAND_BY && this.unconEStop){//SRS-026 4.6.3 [20]
+            this.curMode = ETCSMode.TRIP;
+            return true;
+        }
+
+        boolean etcsLevelOneOrTwoOrThree = this.curLevel != ETCSLevel.LEVEL_ZERO && this.curLevel != ETCSLevel.NTC_PZBLZB;
+
+        if(this.curMode == ETCSMode.TRIP && etcsLevelOneOrTwoOrThree && this.trainDataVolatile.getCurrentSpeed() == 0){//SRS-026 4.6.3 [7]
+            this.curMode = ETCSMode.POST_TRIP;
+            return true;
+        }
+
+        Position curPos = this.trainDataVolatile.getCurrentPosition();
+        double distanceToEoaLoa = this.bc.getHighestXValue() - curPos.totalDistanceToPastLocation(this.bc.getRefLocation().getId());
+        boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
+
+
+
+        if(this.curMode == ETCSMode.FULL_SUPERVISION && loaOrEoaPassed && etcsLevelOneOrTwoOrThree){//SRS-026 4.6.3 [12], [16]
+            this.curMode = ETCSMode.TRIP;
+            return true;
+        }
+
+        int locationID = this.routeDataVolatile.getRefLocation().getId();
+        boolean trainBeforeStartOfSSPOrGP = !curPos.previousLocationsContainID(locationID);
+
+        if(this.curMode == ETCSMode.FULL_SUPERVISION && trainBeforeStartOfSSPOrGP) {//SRS-026 4.6.3 [69]
+            this.curMode = ETCSMode.TRIP;
+            return true;
+        }
+
+
+        return false;
     }
 
-    private boolean systemFailure() {
-        this.curMode = ETCSMode.SYSTEM_FAILURE; //SRS-026 4.6.3 [13]
-        return true;
+    private boolean modeP5() {
+        //SRS-026 4.6.3 [5], [19], [50] ignored, no driver
+        //SRS-026 4.6.3 [27], [28], [30] ignored, no desks to operate
+        //SRS-026 4.6.3 [6] ignored, until Shunting Request is implemented
+
+
+        Position curPos = this.trainDataVolatile.getCurrentPosition();
+        if(curPos == null || this.routeDataVolatile.getRefLocation() == null) return false;
+
+        int locationID = this.routeDataVolatile.getRefLocation().getId();
+        boolean trainBeforeStartOfSSPOrGP = !curPos.previousLocationsContainID(locationID);
+
+        boolean etcsLevelTwoOrThree = this.curLevel == ETCSLevel.LEVEL_TWO || this.curLevel == ETCSLevel.LEVEL_THREE;
+        boolean vaildRouteData = routeDataVolatile != null
+                && routeDataVolatile.getPacket_15() != null
+                && routeDataVolatile.getPacket_21() != null
+                && routeDataVolatile.getPacket_27() != null
+                && trainBeforeStartOfSSPOrGP;
+
+        if(this.curMode == ETCSMode.POST_TRIP && this.unspecificModeProfil && vaildRouteData && etcsLevelTwoOrThree){//SRS-026 4.6.3 [31]
+            this.curMode = ETCSMode.FULL_SUPERVISION;
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean modeP6() {
+        //SRS-026 4.6.3 [28] ignored, no desks to operate
+        //SRS-026 4.6.3 [51] //TODO Implement Mode Profil
+        return false;
+    }
+
+    private boolean modeP7() {
+        boolean vaildRouteData = routeDataVolatile != null
+                && routeDataVolatile.getPacket_15() != null
+                && routeDataVolatile.getPacket_21() != null
+                && routeDataVolatile.getPacket_27() != null;
+
+        boolean vaildTrainData = trainDataPerma != null && trainDataVolatile != null;
+        vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition() != null;
+        vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition().getLocation().getId() != ETCSVariables.NID_LRBG_UNKNOWN;
+
+        if(this.curMode == ETCSMode.STAND_BY && vaildTrainData && vaildRouteData && this.unspecificModeProfil){//SRS-026 4.6.3 [10]
+            this.curMode = ETCSMode.FULL_SUPERVISION;
+            return true;
+        }
+        return false;
     }
 
     private boolean standBy(){
@@ -180,14 +293,11 @@ public class ModeAndLevelSupervisor {
     /*
     Levels
      */
-
-    private boolean checkAndAssigneLevel(ETCSLevel newLevel) {
-        return false;
+    private void testLevelConditions() {
+        //TODO Implement other levels then ETCSLevel.LEVEL_TWO
+        if(this.curLevel != ETCSLevel.LEVEL_TWO) this.curLevel = ETCSLevel.LEVEL_TWO;
     }
 
-    private void sendLevelStatus(LevelChangeRequestEvent mcre, boolean approved) {
-
-    }
 
     private boolean validTarget(String target){
 

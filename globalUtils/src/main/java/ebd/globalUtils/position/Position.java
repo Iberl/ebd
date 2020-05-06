@@ -130,6 +130,8 @@ public class Position {
     public Double totalDistanceToFuturePosition(Position futurePosition) throws PositionReferenzException {
     	return futurePosition.totalDistanceToPreviousPosition(this) - getIncrement();
     }
+
+    public boolean previousLocationsContainID(int locID){ return this.previousLocations.containsKey(locID); }
     
     
     public double getIncrement() {

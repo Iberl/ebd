@@ -1,5 +1,7 @@
 package ebd.globalUtils.etcsModeAndLevel;
 
+import ebd.messageLibrary.util.ETCSVariables;
+
 public enum ETCSMode {
 
 
