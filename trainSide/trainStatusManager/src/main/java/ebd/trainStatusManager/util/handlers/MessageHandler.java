@@ -4,7 +4,7 @@ import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -260,7 +260,7 @@ public class MessageHandler {
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
         String destination = "mr;R=" + this.rbcID;
-        this.localBus.post(new SendMessageEvent("tsm", "ms", message146, destination ));
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message146, destination ));
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending Acknowledgment [Msg ID: 146]"));
     }
 

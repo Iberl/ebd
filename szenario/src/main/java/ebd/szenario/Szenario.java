@@ -5,14 +5,12 @@ import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
-import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.clients.InfrastructureClient;
 import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
@@ -48,7 +46,7 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
+            ms.send(new SendETCSMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
         }
     }
 
@@ -76,7 +74,7 @@ public class Szenario implements Runnable {
     /*
     TrackSide
      */
-    private RadioBlockCenter rbc = null;
+    private OldRadioBlockCenter rbc = null;
 
     /*
     TrainSide
@@ -167,7 +165,7 @@ public class Szenario implements Runnable {
         listRoute.add(a);
         Map<Integer, List<Route>> mapRoute = new HashMap<>();
         mapRoute.put(this.etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 1);
+        this.rbc = new OldRadioBlockCenter("1", mapRoute, 1);
         this.tsm = new TrainStatusManager(this.etcsID, 1);
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
