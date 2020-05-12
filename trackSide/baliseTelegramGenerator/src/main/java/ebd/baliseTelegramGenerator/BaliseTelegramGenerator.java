@@ -49,14 +49,14 @@ public class BaliseTelegramGenerator {
 		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
 
 		if(lastKnownPosition.getIncrement() >= nextBG.getLocation().getDistanceToPrevious()) {
-			localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), nextBG.generateTelegramFor(0), Collections.singletonList(trainId)));
+			localbus.post(new SendTelegramEvent("btg1", "ms", nextBG.generateTelegramFor(0), trainId));
 			positions.put(trainId, new Pair<>(lastKnownPosition, nextBG.getNID_BG()));
 		}
 	}
 
 	private void sendInitialTelegram(String trainId) {
 		Telegram telegram = listOfBalises.getBaliseGroup(1).generateTelegramFor(0);
-		localbus.post(new SendTelegramEvent("btg1", Collections.singletonList("ms"), telegram, Collections.singletonList(trainId)));
+		localbus.post(new SendTelegramEvent("btg1", "ms", telegram, trainId));
 		positions.put(trainId, new Pair<>(positions.get(trainId).getKey(), 1));
 	}
 

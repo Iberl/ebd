@@ -68,8 +68,8 @@ public class DrivingDynamics {
     private double timeBetweenActions;
     private boolean locked = true;
 
-    private List<String> tdTargets = new ArrayList<String>(Arrays.asList(new String[]{"td"}));
-    private List<String> exceptionTargets = new ArrayList<String>(Arrays.asList(new String[]{"tsm"}));
+    private String tdTarget = "td";
+    private String exceptionTarget = "tsm";
     private double maxTripSectionDistance;
 
     private double profileTargetSpeed = 0d;
@@ -94,9 +94,9 @@ public class DrivingDynamics {
         try {
             this.drivingProfile = new DrivingProfile(this.localBus);
         } catch (IOException | ParseException e) {
-            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
-            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e));
         }
 
         this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
@@ -127,9 +127,9 @@ public class DrivingDynamics {
          */
         if(this.locked || this.tripProfile == null){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            List<String> targets = Collections.singletonList("dmi");
-            EventBus.getDefault().post(new DMIUpdateEvent(source, targets, 0, 0, (int)0, 0,
-                    SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
+            String target = "dmi";
+            //TODO check if releaseSpeed is correct
+            EventBus.getDefault().post(new DMIUpdateEvent(source, target, 0, 0, (int)0, 0, SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
                     0, 0, 0, 0));
             return;
         }
@@ -192,7 +192,7 @@ public class DrivingDynamics {
         Sends global PositionEvent
          */
 
-        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, Collections.singletonList("all"), dynamicState.getPosition()));
+        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, "all", dynamicState.getPosition()));
 
         /*
         Update TrainDataVolatile with the newly calculated values
@@ -218,7 +218,7 @@ public class DrivingDynamics {
      */
     @Subscribe
     public void newTrainData(NewTrainDataVolatileEvent ntdve){
-        if(!(ntdve.targets.contains("all") || ntdve.targets.contains("dd"))){
+        if(!(ntdve.target.contains("all") || ntdve.target.contains("dd"))){
             return;
         }
         this.trainDataVolatile = ntdve.trainDataVolatile;
@@ -233,7 +233,7 @@ public class DrivingDynamics {
      */
     @Subscribe
     public void unlock(@NotNull DDUnlockEvent ue){
-        if(!(ue.targets.contains("dd") || !ue.targets.contains("all") || !this.locked)){
+        if(!(ue.target.contains("dd") || !ue.target.contains("all") || !this.locked)){
             return;
         }
         if(this.dynamicState == null){
@@ -250,7 +250,7 @@ public class DrivingDynamics {
      */
     @Subscribe
     public void setLocked(DDLockEvent le){
-        if(!(le.targets.contains("dd") || le.targets.contains("all")) || this.locked){
+        if(!(le.target.contains("dd") || le.target.contains("all")) || this.locked){
             return;
         }
         this.dynamicState.setMovementState(MovementState.HALTING);
@@ -266,7 +266,7 @@ public class DrivingDynamics {
      */
     @Subscribe
     public void updateTripProfile(DDUpdateTripProfileEvent utpe){
-        if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
+        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }
         this.tripProfile = utpe.tripProfile;
@@ -280,7 +280,7 @@ public class DrivingDynamics {
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
+            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
         }
 
 
@@ -345,7 +345,7 @@ public class DrivingDynamics {
         this.localBus.removeStickyEvent(nle);
 
         String msg = "New location with ID " + newLoc.getId() + " was reached";
-        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("dd", "log", msg));
     }
 
     /**
@@ -358,7 +358,7 @@ public class DrivingDynamics {
         nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
         nameToValue.put("curTripSectionDistance", this.dynamicState.getDistanceToStartOfProfile());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
-        this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTargets, nameToValue));
+        this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTarget, nameToValue));
     }
 
     /**
@@ -374,9 +374,9 @@ public class DrivingDynamics {
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
         String source = "dd;T=" + this.etcsTrainID;
-        List<String> targets = Collections.singletonList("dmi");
+        String target = "dmi";
 
-        EventBus.getDefault().post(new DMIUpdateEvent(source, targets, speed, targetSpeed, (int)distanceToDrive, 0,
+        EventBus.getDefault().post(new DMIUpdateEvent(source, target, speed, targetSpeed, (int)distanceToDrive, 0,
                 this.currentSil, this.currentSsState, currentIndSpeed, currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
     }
 
@@ -389,7 +389,7 @@ public class DrivingDynamics {
         if(tripSectionDistance < this.maxTripSectionDistance) this.profileTargetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
         else this.profileTargetSpeed = 0d;
 
-        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTargets, "currentProfileTargetSpeed", this.profileTargetSpeed));
+        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileTargetSpeed", this.profileTargetSpeed));
     }
 
     /**
@@ -405,7 +405,7 @@ public class DrivingDynamics {
         double tt = dynamicState.getTime();
         String msg = String.format("Acc: %5.2f m/s^2 V: %5.2f m/s, V_max: %5.2f m/s, ",a,v,vm);
         String msg2 = String.format("Pos: LRBG %3d + %7.2f m, TripDist: %8.2f m, TripTime: %6.1f s",l,i,td,tt);
-        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg + msg2));
+        this.localBus.post(new ToLogEvent("dd", "log", msg + msg2));
 
     }
 
@@ -416,7 +416,7 @@ public class DrivingDynamics {
         if(this.lastSendSil == this.currentSil) return;
         this.lastSendSil = this.currentSil;
         String msg = String.format("Current speed supervision intervention level: %s ", this.currentSil);
-        this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("ssm", "log", msg));
         if(movementState != MovementState.UNCHANGED) sendToLogEventSpeedSupervisionMovementState(movementState);
     }
 
@@ -427,7 +427,7 @@ public class DrivingDynamics {
         if(this.lastSendState == this.currentSsState) return;
         this.lastSendState = this.currentSsState;
         String msg = String.format("Current speed supervision state: %s ", this.currentSsState);
-        this.localBus.post(new ToLogEvent("ssm", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("ssm", "log", msg));
     }
 
     /**
@@ -435,7 +435,7 @@ public class DrivingDynamics {
      */
     private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
-        this.localBus.post(new ToLogEvent("dd", Collections.singletonList("log"), msg));
+        this.localBus.post(new ToLogEvent("dd", "log", msg));
 
     }
 
@@ -487,7 +487,7 @@ public class DrivingDynamics {
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
-                localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
+                localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
     }
 

@@ -24,7 +24,7 @@ import ebd.messageLibrary.util.ETCSVariables;
  */
 public class BCREgeneratorFromDataset{
 
-	private List<String> targets = new ArrayList<>();
+	private String target = "bcc";
 	int[] tsp;
 	double[] bp;
 	int[] gp;
@@ -36,8 +36,6 @@ public class BCREgeneratorFromDataset{
 		this.tsp = tsp;
 		this.bp = bp;
 		this.gp = gp;
-		targets.add("bcc;");
-
 	}
 
 	/**
@@ -152,7 +150,7 @@ public class BCREgeneratorFromDataset{
 		//setting V_MAX
 		int V_MAXTRAIN = 200;
 
-		return new BreakingCurveRequestEvent("devTests", targets,id,breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
+		return new BreakingCurveRequestEvent("devTests", target, id, breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
 				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);
 	}
 

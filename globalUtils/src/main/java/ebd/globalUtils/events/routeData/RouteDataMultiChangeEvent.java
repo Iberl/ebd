@@ -17,11 +17,11 @@ public class RouteDataMultiChangeEvent extends NormalEvent {
      *
      * @param source  ID from the module the event was sent by
      *                TODO: Define Format for IDs
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from from the target module or 'all' if more then one target should be reached.
      * @param fieldNamesToFieldValues A map of field names and valid field values
      */
-    public RouteDataMultiChangeEvent(String source, List<String> targets, Map<String,Object> fieldNamesToFieldValues) {
-        super(source, targets);
+    public RouteDataMultiChangeEvent(String source, String target, Map<String,Object> fieldNamesToFieldValues) {
+        super(source, target);
         this.fieldNamesToFieldValues = fieldNamesToFieldValues;
     }
 }

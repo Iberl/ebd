@@ -14,25 +14,25 @@ public class SendTelegramEvent extends NormalEvent {
 
 	/** The Message transferred by the event*/
 	public Telegram telegram;
-	/** List of all Destinations to send the telegram to */
-	public List<String> destinations;
+	/** ID from from the target module or "all" if more then one target should be reached. to */
+	public String destination;
 
 	/**
 	 * Constructs an SendTelegramEvent
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is adressed to
+	 * @param target
+	 *          ID from from the target module or "all" if more then one target should be reached.
 	 * @param telegram
 	 *          The Telegram to send
-	 * @param destinations
-	 * 			List of all Destinations to send the telegram to
+	 * @param destination
+	 * 			ID from from the target module or "all" if more then one target should be reached.
 	 */
-	public SendTelegramEvent(String source, List<String> targets, Telegram telegram, List<String> destinations) {
-		super(source, targets);
+	public SendTelegramEvent(String source, String target, Telegram telegram, String destination) {
+		super(source, target);
 		this.telegram = telegram;
-		this.destinations = destinations;
+		this.destination = destination;
 	}
 
 }

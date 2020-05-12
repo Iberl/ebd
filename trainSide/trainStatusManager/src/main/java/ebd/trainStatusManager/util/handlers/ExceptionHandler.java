@@ -40,7 +40,7 @@ public class ExceptionHandler {
 		System.err.println("An Message Exception occurred");
 		System.err.println("On Message: " + e.cause);
 		System.err.println("From Module: " + e.source);
-		System.err.println("To Module: " + e.targets.toString());
+		System.err.println("To Module: " + e.target.toString());
 		e.exception.printStackTrace();
 	}
 

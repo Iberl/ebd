@@ -6,31 +6,29 @@ import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.logging.Logging;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 public class LoggingTest{
 
     private static Event cause;
-    private static List<String> causeTargets;
-    private static List<String> exceptionTargets;
+    private static String causeTarget;
+    private static String exceptionTarget;
     private static Exception exception;
     private static ExceptionEvent exceptionEvent;
 
-    private static List<String> normalTargets;
+    private static String normalTarget;
     private static NormalEvent normalEvent;
 
-    private static List<String> toLogTargets;
+    private static String toLogTarget;
     private static ToLogEvent toLogEvent;
 
-    private static List<String> clockTickTargets;
+    private static String clockTickTarget;
     private static ClockTickEvent clockTickEvent;
 
-    private static List<String> toLogDebugTargets;
+    private static String toLogDebugTarget;
     private static ToLogDebugEvent toLogDebugEvent;
 
     /**
@@ -59,11 +57,11 @@ public class LoggingTest{
      * @return an ExceptionEvent
      */
     private static ExceptionEvent generateExceptionEvent(){
-        causeTargets = Arrays.asList("causeTarget1", "causeTarget2");
-        cause = new Event("Source of cause", causeTargets);
+        causeTarget = "causeTarget1";
+        cause = new Event("Source of cause", causeTarget);
         exception = new Exception();
-        exceptionTargets = Arrays.asList("exceptionTarget1", "exceptionTarget2");
-        exceptionEvent = new ExceptionEvent("source of ExceptionEvent", exceptionTargets, cause, exception);
+        exceptionTarget = "exceptionTarget1";
+        exceptionEvent = new ExceptionEvent("source of ExceptionEvent", exceptionTarget, cause, exception);
         return exceptionEvent;
     }
 
@@ -72,8 +70,8 @@ public class LoggingTest{
      * @return a NormalEvent
      */
     private static NormalEvent generateNormalEvent(){
-        normalTargets = Arrays.asList("normalTarget1", "normalTarget2");
-        normalEvent = new NormalEvent("source of NormalEvent", normalTargets);
+        normalTarget = "normalTarget1";
+        normalEvent = new NormalEvent("source of NormalEvent", normalTarget);
         return normalEvent;
     }
 
@@ -82,8 +80,8 @@ public class LoggingTest{
      * @return a ToLogEvent
      */
     private static ToLogEvent generateToLogEvent(){
-        toLogTargets = Arrays.asList("logTarget1", "logTarget2");
-        toLogEvent = new ToLogEvent("source of ToLogEvent", toLogTargets, "logmessage");
+        toLogTarget = "logTarget1";
+        toLogEvent = new ToLogEvent("source of ToLogEvent", toLogTarget, "logmessage");
         return toLogEvent;
     }
 
@@ -92,14 +90,14 @@ public class LoggingTest{
      * @return a ClockTickEvent
      */
     private static ClockTickEvent generateClockTickEvent(){
-        clockTickTargets = Arrays.asList("clockTickTarget1", "clockTickTarget2");
-        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTargets, 0);
+        clockTickTarget = "clockTickTarget1";
+        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTarget, 0);
         return clockTickEvent;
     }
 
     private static ToLogDebugEvent generateToLogDebugEvent() {
-         toLogDebugTargets = Arrays.asList("logDebugTarget1", "logDebugTarget2");
-        toLogDebugEvent = new ToLogDebugEvent("source of ToLogDebugEvent", toLogDebugTargets, "debugmessage");
+         toLogDebugTarget = "logDebugTarget1";
+        toLogDebugEvent = new ToLogDebugEvent("source of ToLogDebugEvent", toLogDebugTarget, "debugmessage");
         return toLogDebugEvent;
     }
 }

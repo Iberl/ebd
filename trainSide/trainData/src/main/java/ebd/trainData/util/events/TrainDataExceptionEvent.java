@@ -14,26 +14,22 @@ public class TrainDataExceptionEvent extends ExceptionEvent {
     /**
      * @param source    ID from the module the event was sent by
      *
-     *                  TODO: Define Format for IDs
-     * @param targets   ID from all modules the event is adressed to
-     *                  TODO: Define Format for IDs
+     * @param target   ID from from the target module or 'all' if more then one target should be reached.
      *
      * @param cause     The Event causing an Exception
      *
      * @param exception The exception that was thrown
      */
-    public TrainDataExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-        super(source, targets, cause, exception);
+    public TrainDataExceptionEvent(String source, String target, Event cause, Exception exception) {
+        super(source, target, cause, exception);
     }
 
     /**
      * @param source
      *              ID from the module the event was sent by
-     *              TODO: Define Format for IDs
      *
-     * @param targets
-     *              ID from all modules the event is adressed to
-     *              TODO: Define Format for IDs
+     * @param target
+     *              ID from from the target module or 'all' if more then one target should be reached.
      *
      * @param cause
      *              The Event causing an Exception
@@ -44,7 +40,7 @@ public class TrainDataExceptionEvent extends ExceptionEvent {
      * @param exceptionEventTyp
      *              The {@link ExceptionEventTyp} appropriate to the exception
      */
-    public TrainDataExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
-        super(source, targets, cause, exception, exceptionEventTyp);
+    public TrainDataExceptionEvent(String source, String target, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+        super(source, target, cause, exception, exceptionEventTyp);
     }
 }

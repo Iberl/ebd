@@ -467,7 +467,7 @@ boolean
             return single_instance;
         }catch (IOException ioe){
             ioe.printStackTrace();
-            ExceptionEvent ev = new ExceptionEvent("cfg", Collections.singletonList("all"), new NotCausedByAEvent(),
+            ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
                     ioe, ExceptionEventTyp.FATAL);
             EventBus.getDefault().post(ev);
         }

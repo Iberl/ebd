@@ -25,14 +25,13 @@ import ebd.messageLibrary.util.ETCSVariables;
  */
 public class BCREgeneratorFromRandom{
 	Random rng;
-	private List<String> targets = new ArrayList<>();
+	private String target = "bcc";
 
 	/**
 	 * Creates an instance with a set seed for repeatability
 	 */
 	public BCREgeneratorFromRandom(long seed) {
 		rng = new Random(seed);
-		targets.add("bcc;");
 	}
 
 	/**
@@ -150,7 +149,7 @@ public class BCREgeneratorFromRandom{
 		//setting V_MAX
 		int V_MAXTRAIN = rng.nextInt(101) + 20;
 		
-		return new BreakingCurveRequestEvent("devTests", targets,id, breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
+		return new BreakingCurveRequestEvent("devTests", target, id, breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
 				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);	
 	}
 

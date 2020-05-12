@@ -17,7 +17,6 @@ import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
-import ebd.messageLibrary.packet.trainpackets.Packet_1;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -49,7 +48,7 @@ public class MessageHandler {
     //TODO: Make rbcID updatetable, make RBC Event
 
     private EventBus localBus;
-    private List<String> exceptionTarget = Collections.singletonList("tsm");
+    private String exceptionTarget = "tsm";
     private int rbcID;
     private int etcsTrainID;
 
@@ -63,7 +62,7 @@ public class MessageHandler {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void msgCollector(ReceivedMessageEvent rme){
-        if(!validTarget(rme.targets)) return;
+        if(!validTarget(rme.target)) return;
         if (!(rme.message instanceof TrackMessage)) {
             IllegalArgumentException iAE = new IllegalArgumentException("This Messages was not a TrackMessage");
             this.localBus.post(new TsmExceptionEvent("tsm", exceptionTarget, rme, iAE, ExceptionEventTyp.WARNING));
@@ -79,7 +78,7 @@ public class MessageHandler {
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("This message ID could not be handled: " + rme.message.NID_MESSAGE);
-                localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.CRITICAL));
+                localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
         }
     }
 
@@ -107,7 +106,7 @@ public class MessageHandler {
          */
 
 
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received universal Message" + ids));
+        this.localBus.post(new ToLogEvent("tsm", "log", "Received universal Message" + ids));
 
         for(TrackPacket tp : message24.packets){
             handleOptionalTrackPackages(rme,tp);
@@ -163,7 +162,7 @@ public class MessageHandler {
             ids = ids.subSequence(0,ids.lastIndexOf(",")).toString();
         }
         ids += "]";
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received MA Message" + ids));
+        this.localBus.post(new ToLogEvent("tsm", "log", "Received MA Message" + ids));
         /*
         /logging
          */
@@ -195,7 +194,7 @@ public class MessageHandler {
 
         if(packet15 == null || packet21 == null || packet27 == null){
                 IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
-                localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.CRITICAL));
+                localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
                 return;
         }
         Map<String, Object> changesForRouteData= new HashMap<>();
@@ -203,12 +202,12 @@ public class MessageHandler {
         changesForRouteData.put("packet_21",packet21);
         changesForRouteData.put("packet_27",packet27);
         changesForRouteData.put("packet_65", listOfPacket65s);
-        localBus.post(new RouteDataMultiChangeEvent("rsm", Collections.singletonList("rd"), changesForRouteData));
+        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData));
 
         AvailableAcceleration availableAcceleration = new AvailableAcceleration(localBus);
-        localBus.post(new TrainDataChangeEvent("rsm", Collections.singletonList("td"), "availableAcceleration", availableAcceleration));
+        localBus.post(new TrainDataChangeEvent("rsm","td", "availableAcceleration", availableAcceleration));
 
-        BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm", Collections.singletonList("bcc"),
+        BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm", "bcc",
                 id,breakingPower, emergencyBreakingPower,
                 packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
                 l_train,currentMaxSpeed,maxTrainSpeed);
@@ -218,7 +217,7 @@ public class MessageHandler {
             sendAck(msg3);
         }
 
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"),
+        this.localBus.post(new ToLogEvent("tsm", "log",
                 "Got a new MA Message and started calculating a new breaking curve"));
     }
 
@@ -249,7 +248,7 @@ public class MessageHandler {
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
-                localBus.post(new TsmExceptionEvent("tsm", Collections.singletonList("tsm"), rme, iAE, ExceptionEventTyp.NONCRITICAL));
+                localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.NONCRITICAL));
         }
 
     }
@@ -260,32 +259,29 @@ public class MessageHandler {
         long curTime = AppTime.currentTimeMillis() / 10L;
         message146.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message146.T_TRAIN_MSG = tm.T_TRAIN;
-        List<String> destination = Collections.singletonList("mr;R=" + this.rbcID);
-        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message146, destination ));
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending Acknowledgment [Msg ID: 146]"));
+        String destination = "mr;R=" + this.rbcID;
+        this.localBus.post(new SendMessageEvent("tsm", "ms", message146, destination ));
+        this.localBus.post(new ToLogEvent("tsm", "log", "Sending Acknowledgment [Msg ID: 146]"));
     }
 
     /**
      * True if this Instance is a vaild target of the event
-     * @param targetList the target list a the event
+     * @param target the target list a the event
      * @return True if this instance is a vaild target of the event
      */
-    private boolean validTarget(List<String> targetList){
-        boolean result = false;
+    private boolean validTarget(String target){
 
-        for(String target : targetList){
-            if(target.contains("tsm") || target.contains("all")){
-                if(!target.contains(";")){
-                    result = true;
-                    break;
-                }
-                else if (target.contains(";T=" + this.etcsTrainID)){
-                    result = true;
-                    break;
-                }
+        if(target.contains("tsm") || target.contains("all")){
+            if(!target.contains(";")){
+                return true;
+
+            }
+            else if (target.contains(";T=" + this.etcsTrainID)){
+                return true;
+
             }
         }
-        return result;
+        return false;
     }
 
 }

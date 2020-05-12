@@ -9,9 +9,9 @@ public class DDLockEvent extends NormalEvent {
      * Constructs an Event that locks DrivingDynamics, preventing it of executing code
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public DDLockEvent(String source, List<String> targets) {
-        super(source, targets);
+    public DDLockEvent(String source, String target) {
+        super(source, target);
     }
 }
