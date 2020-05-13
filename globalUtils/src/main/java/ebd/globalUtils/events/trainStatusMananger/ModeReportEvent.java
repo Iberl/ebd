@@ -5,6 +5,8 @@ import ebd.globalUtils.events.Event;
 
 public class ModeReportEvent extends Event {
 
+    public final ETCSMode curMode;
+
     /**
      * Constructs an Event
      *
@@ -14,5 +16,6 @@ public class ModeReportEvent extends Event {
      */
     public ModeReportEvent(String source, String target, ETCSMode curMode) {
         super(source, target);
+        this.curMode = curMode;
     }
 }

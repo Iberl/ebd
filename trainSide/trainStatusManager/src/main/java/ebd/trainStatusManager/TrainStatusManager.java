@@ -7,6 +7,7 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
@@ -14,10 +15,7 @@ import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
-import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
-import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
-import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
-import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
+import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -40,6 +38,7 @@ import ebd.trainStatusManager.util.handlers.MessageHandler;
 import ebd.trainStatusManager.util.handlers.TelegramHandler;
 import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
 import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
+import ebd.trainStatusManager.util.supervisors.ModeAndLevelSupervisor;
 import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.trainStatusManager.util.supervisors.DistanceSupervisor;
 import org.greenrobot.eventbus.EventBus;
@@ -77,11 +76,13 @@ public class TrainStatusManager implements Runnable {
 
     /*
     Internal modules
+    The order of initialisation is important and reflected in the listing of the fields here!
      */
     private RouteData routeData;
     private TrainData trainData;
     private MessageReceiver messageReceiver;
     private MessageSender messageSender;
+    private ModeAndLevelSupervisor modeAndLevelSupervisor;
     private SpeedSupervisionModule speedSupervisionModule;
     private DistanceSupervisor distanceSupervisor;
     private MessageAuthorityRequestSupervisor messageAuthorityRequestSupervisor;
@@ -137,7 +138,7 @@ public class TrainStatusManager implements Runnable {
             return;
         }
 
-        this.localEventBus.post(new DDUnlockEvent("tsm", "dd"));
+        //this.localEventBus.post(new DDUnlockEvent("tsm", "dd"));
         this.localEventBus.post(new ToLogEvent("tsm", "log",
                 "Calculated a new breaking curve"));
 
@@ -145,6 +146,14 @@ public class TrainStatusManager implements Runnable {
         if(ch.debug){
             savingBreakingCurves(nbce);
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void reactToTrip(ModeReportEvent mre){
+        if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
+
+        //TODO fill with logic
+
     }
 
     @Subscribe
@@ -256,6 +265,7 @@ public class TrainStatusManager implements Runnable {
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
         this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
+        this.modeAndLevelSupervisor = new ModeAndLevelSupervisor(this.localEventBus);
         this.speedSupervisionModule = new SpeedSupervisionModule(this.localEventBus);
         this.distanceSupervisor = new DistanceSupervisor(this.localEventBus);
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
