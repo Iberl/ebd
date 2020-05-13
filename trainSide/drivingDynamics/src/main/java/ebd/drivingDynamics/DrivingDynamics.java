@@ -8,6 +8,7 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
@@ -15,10 +16,7 @@ import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
-import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
-import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
-import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
+import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -85,6 +83,7 @@ public class DrivingDynamics {
     private SpeedInterventionLevel lastSendSil = SpeedInterventionLevel.NOT_SET;
     private SpeedSupervisionState currentSsState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
     private SpeedSupervisionState lastSendState = SpeedSupervisionState.NOT_SET;
+    private ETCSMode currentMode= ETCSMode.NO_MODE;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
@@ -249,6 +248,12 @@ public class DrivingDynamics {
         if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
             this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
         }
+    }
+
+    @Subscribe
+    public void newMode(ModeReportEvent mre){
+        this.currentMode = mre.curMode;
+        System.out.println(this.currentMode);
     }
 
     /**

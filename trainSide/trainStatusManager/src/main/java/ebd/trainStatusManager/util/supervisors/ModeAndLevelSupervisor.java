@@ -111,7 +111,7 @@ public class ModeAndLevelSupervisor {
         //SRS-026 4.6.3 [49], [52], [65] ignored, no driving in shunting mode implemented
         //SRS-026 4.6.3 [66] ignored //TODO Implement Balise direction
 
-        if(this.curMode == ETCSMode.FULL_SUPERVISION || this.curMode == ETCSMode.STAND_BY && this.unconEStop){//SRS-026 4.6.3 [20]
+        if((this.curMode == ETCSMode.FULL_SUPERVISION || this.curMode == ETCSMode.STAND_BY) && this.unconEStop){//SRS-026 4.6.3 [20]
             this.curMode = ETCSMode.TRIP;
             return true;
         }
@@ -123,7 +123,15 @@ public class ModeAndLevelSupervisor {
             return true;
         }
 
+        /*
+         Distance related checks
+         */
         Position curPos = this.trainDataVolatile.getCurrentPosition();
+        if(this.routeDataVolatile.getRefLocation() == null || this.bc == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+            return false;
+        }
+
+        int locationID = this.routeDataVolatile.getRefLocation().getId();
         double distanceToEoaLoa = this.bc.getHighestXValue() - curPos.totalDistanceToPastLocation(this.bc.getRefLocation().getId());
         boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
 
@@ -134,7 +142,6 @@ public class ModeAndLevelSupervisor {
             return true;
         }
 
-        int locationID = this.routeDataVolatile.getRefLocation().getId();
         boolean trainBeforeStartOfSSPOrGP = !curPos.previousLocationsContainID(locationID);
 
         if(this.curMode == ETCSMode.FULL_SUPERVISION && trainBeforeStartOfSSPOrGP) {//SRS-026 4.6.3 [69]
@@ -187,7 +194,12 @@ public class ModeAndLevelSupervisor {
 
         boolean vaildTrainData = trainDataPerma != null && trainDataVolatile != null;
         vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition() != null;
-        vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition().getLocation().getId() != ETCSVariables.NID_LRBG_UNKNOWN;
+        // TODO Insert after a SR/SH start is implemented
+        //vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition().getLocation().getId() != ETCSVariables.NID_LRBG_UNKNOWN;
+
+        System.out.println("vrd: " + vaildRouteData);
+        System.out.println("vtd: " + vaildTrainData);
+        System.out.println("unsp: " + unspecificModeProfil);
 
         if(this.curMode == ETCSMode.STAND_BY && vaildTrainData && vaildRouteData && this.unspecificModeProfil){//SRS-026 4.6.3 [10]
             this.curMode = ETCSMode.FULL_SUPERVISION;

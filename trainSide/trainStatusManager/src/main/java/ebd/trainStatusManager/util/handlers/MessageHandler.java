@@ -138,17 +138,6 @@ public class MessageHandler {
         List<Packet_65> listOfPacket65s = new ArrayList<>();
 
 
-        ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
-        ForwardSpline emergencyBreakingPower = trainDataVolatile.getCurrentEmergencyBreakingPower();
-        double currentGradient = routeDataVolatile.getCurrentGradient();
-        int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
-        int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
-        double l_train = trainDataPerma.getL_train();
-        double currentMaxSpeed = trainDataVolatile.getCurrentMaximumSpeed();
-        int maxTrainSpeed = trainDataPerma.getV_maxtrain();
-
-
-
         Message_3 msg3 = (Message_3)rme.message;
 
         /*
@@ -163,14 +152,13 @@ public class MessageHandler {
         }
         ids += "]";
         this.localBus.post(new ToLogEvent("tsm", "log", "Received MA Message" + ids));
+
         /*
-        /logging
+        check for complete message, save data and notify train
          */
 
-        Position refPosition;
-        Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null); //TODO check if viable
-        // System.out.println("Location ID: " + msg3.NID_LRBG);
-        refPosition = new Position(0,true, refLocation);
+        Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null);
+        Position refPosition = new Position(0,true, refLocation);
 
         packet15 = msg3.Packet_15;
 
@@ -191,18 +179,27 @@ public class MessageHandler {
             }
         }
 
-
         if(packet15 == null || packet21 == null || packet27 == null){
                 IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
                 localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
                 return;
         }
         Map<String, Object> changesForRouteData= new HashMap<>();
+        changesForRouteData.put("refLocation", refLocation);
         changesForRouteData.put("packet_15",packet15);
         changesForRouteData.put("packet_21",packet21);
         changesForRouteData.put("packet_27",packet27);
         changesForRouteData.put("packet_65", listOfPacket65s);
         localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData));
+
+        ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
+        ForwardSpline emergencyBreakingPower = trainDataVolatile.getCurrentEmergencyBreakingPower();
+        double currentGradient = routeDataVolatile.getCurrentGradient();
+        int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
+        int nc_train = ETCSVariables.NC_TRAIN; //Not available in MVP
+        double l_train = trainDataPerma.getL_train();
+        double currentMaxSpeed = trainDataVolatile.getCurrentMaximumSpeed();
+        int maxTrainSpeed = trainDataPerma.getV_maxtrain();
 
         AvailableAcceleration availableAcceleration = new AvailableAcceleration(localBus);
         localBus.post(new TrainDataChangeEvent("rsm","td", "availableAcceleration", availableAcceleration));

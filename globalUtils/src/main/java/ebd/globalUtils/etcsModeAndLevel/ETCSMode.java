@@ -4,6 +4,10 @@ import ebd.messageLibrary.util.ETCSVariables;
 
 public enum ETCSMode {
 
+    /**
+     * Null Replacement
+     */
+    NO_MODE,
 
     /**
      * ETCS Mode SB
@@ -33,6 +37,7 @@ public enum ETCSMode {
      * ETCS Mode PT
      */
     POST_TRIP,
+    ;
 
     /**
      * ETCS Mode SN
@@ -83,5 +88,6 @@ public enum ETCSMode {
      * ETCS Mode IS
      */
     //ISOLATION,
+
 
 }
