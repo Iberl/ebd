@@ -8,6 +8,7 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
@@ -66,7 +67,6 @@ public class DrivingDynamics {
     private long time;
     private long timeOfLastAction = -1;
     private double timeBetweenActions;
-    private boolean locked = true;
 
     private String tdTarget = "td";
     private String exceptionTarget = "tsm";
@@ -84,6 +84,7 @@ public class DrivingDynamics {
     private SpeedSupervisionState currentSsState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
     private SpeedSupervisionState lastSendState = SpeedSupervisionState.NOT_SET;
     private ETCSMode currentMode= ETCSMode.NO_MODE;
+    private ETCSLevel currentLevel = ETCSLevel.NO_LEVEL;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
@@ -129,7 +130,7 @@ public class DrivingDynamics {
         /*
         If driving dynamics is locked, nothing will be done.
          */
-        if(this.locked || this.tripProfile == null){
+        if(this.tripProfile == null || this.currentMode == ETCSMode.NO_MODE){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
             EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, (int)0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
@@ -143,10 +144,162 @@ public class DrivingDynamics {
          */
         updateCurrentTargetSpeed();
 
+
+        if(this.currentMode == ETCSMode.STAND_BY){
+            drivingIllegal();
+        }
+        else {
+            drivingAllowed();
+        }
+
+
         /*
-        Checks the current SsmReportEvent for the status of the train //TODO Enum, more cases
-        Getting next action that should be taken and parsing that action
+        Calculate the next dynamic state.
          */
+        this.dynamicState.nextState(deltaT);
+
+        /*
+        Update Positions after a new location
+         */
+        updateDSPosition();
+
+        /*
+        Sends global PositionEvent
+         */
+
+        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, "all", dynamicState.getPosition()));
+
+        /*
+        Update TrainDataVolatile with the newly calculated values
+         */
+        updateTrainDataVolatile();
+
+        /*
+        Update DMI
+         */
+        updateDMI();
+
+        cycleCount++;
+        if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
+            cycleCount = 0;
+            sendToLogEventDynamicState();
+        }
+    }
+
+
+
+    /**
+     * Updates the Position in dynamic State should it change outside of driving dynamics.
+     * This can happen when a new balise is reached, which results in a new position with new location and increment.
+     * @param ntdve A {@link NewTrainDataVolatileEvent}
+     */
+    @Subscribe
+    public void newTrainData(NewTrainDataVolatileEvent ntdve){
+        if(!(ntdve.target.contains("all") || ntdve.target.contains("dd"))){
+            return;
+        }
+        this.trainDataVolatile = ntdve.trainDataVolatile;
+        if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
+            this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
+        }
+    }
+
+    @Subscribe
+    public void newMode(ModeReportEvent mre){
+        this.currentMode = mre.curMode;
+    }
+
+    @Subscribe
+    public void newLevel(LevelReportEvent mre){
+        this.currentLevel = mre.curLevel;
+    }
+
+
+
+    /**
+     * This method locks Driving Dynamics, signaling the end of movement of the train
+     * //TODO Only allow lock at standstill
+     * @param le A {@link DDLockEvent}
+     */
+    @Subscribe
+    public void setLocked(DDLockEvent le){
+        this.dynamicState.setMovementState(MovementState.HALTING);
+        this.dynamicState.setAcceleration(0d);
+        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
+        //TODO Put this somewere else, get rid of lock event
+    }
+
+    /**
+     * This method updates the trip profile. This can become necessary should a new one become available. This does
+     * <b>not</b> require the train to be at standstill.
+     * @param utpe {@link DDUpdateTripProfileEvent}
+     */
+    @Subscribe
+    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
+        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
+            return;
+        }
+        this.tripProfile = utpe.tripProfile;
+
+        if(this.tripProfile instanceof BackwardSpline){
+            BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
+            this.maxTripSectionDistance = backwardSpline.getHighestXValue();
+        }
+        else if(this.tripProfile instanceof ForwardSpline){
+            this.maxTripSectionDistance = Double.MAX_VALUE;
+        }
+        else{
+            IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
+            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE, ExceptionEventTyp.FATAL));
+        }
+
+
+        Position curPos = this.trainDataVolatile.getCurrentPosition();
+        //we need a copy, no referenz to current Position
+        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
+        if(this.dynamicState == null){
+            this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
+        }
+        else {
+            this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
+        }
+        this.time = AppTime.nanoTime();
+    }
+
+    /**
+     * Performance some clean up tasks at the end of a trip.
+     * @param ttee A {@link TsmTripEndEvent}
+     *//*
+    @Subscribe
+    public void atTripEnd(TsmTripEndEvent ttee){
+        dynamicState.setMovementState(MovementState.HALTING);
+        dynamicState.setAcceleration(0d);
+        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
+    }*/
+
+    /**
+     * Decision tree should the current {@link ETCSMode} forbid movement.
+     */
+    private void drivingIllegal(){
+        if(this.dynamicState.getSpeed() != 0){
+            IllegalStateException ise = new IllegalStateException("The train was moving when movement was not allowed");
+            DrivingDynamicsExceptionEvent ddee = new DrivingDynamicsExceptionEvent("tsm",
+                                                                                    "dd",
+                                                                                    new NotCausedByAEvent(),
+                                                                                    ise,
+                                                                                    ExceptionEventTyp.FATAL
+                                                                                    );
+        }
+    }
+
+    /**
+     * Decision tree should the current {@link ETCSMode} allow movement.
+     */
+    private void drivingAllowed() {
+    /*
+    Checks the current SsmReportEvent for the status of the train
+    Getting next action that should be taken and parsing that action
+     */
         SsmReportEvent speedSupervisionReport = this.localBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
             actionParser(this.drivingProfile.actionToTake());
@@ -200,136 +353,7 @@ public class DrivingDynamics {
             this.currentSsState = speedSupervisionReport.supervisionState;
             sendToLogEventSpeedState();
         }
-
-        /*
-        Calculate the next dynamic state.
-         */
-        this.dynamicState.nextState(deltaT);
-
-        /*
-        Update Positions after a new location
-         */
-        updateDSPosition();
-
-        /*
-        Sends global PositionEvent
-         */
-
-        EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, "all", dynamicState.getPosition()));
-
-        /*
-        Update TrainDataVolatile with the newly calculated values
-         */
-        updateTrainDataVolatile();
-
-        /*
-        Update DMI
-         */
-        updateDMI();
-
-        cycleCount++;
-        if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
-            cycleCount = 0;
-            sendToLogEventDynamicState();
-        }
     }
-
-    /**
-     * Updates the Position in dynamic State should it change outside of driving dynamics.
-     * This can happen when a new balise is reached, which results in a new position with new location and increment.
-     * @param ntdve A {@link NewTrainDataVolatileEvent}
-     */
-    @Subscribe
-    public void newTrainData(NewTrainDataVolatileEvent ntdve){
-        if(!(ntdve.target.contains("all") || ntdve.target.contains("dd"))){
-            return;
-        }
-        this.trainDataVolatile = ntdve.trainDataVolatile;
-        if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
-            this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
-        }
-    }
-
-    @Subscribe
-    public void newMode(ModeReportEvent mre){
-        this.currentMode = mre.curMode;
-        System.out.println(this.currentMode);
-    }
-
-    /**
-     * This method unlocks Drvining Dynamics, which signals the start of movement of the train
-     * @param ue A {@link DDUnlockEvent}
-     */
-    @Subscribe
-    public void unlock(@NotNull DDUnlockEvent ue){
-        if(!(ue.target.contains("dd") || !ue.target.contains("all") || !this.locked)){
-            return;
-        }
-        if(this.dynamicState == null){
-            this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
-        }
-        this.time = AppTime.nanoTime();
-        this.locked = false;
-    }
-
-    /**
-     * This method locks Driving Dynamics, signaling the end of movement of the train
-     * //TODO Only allow lock at standstill
-     * @param le A {@link DDLockEvent}
-     */
-    @Subscribe
-    public void setLocked(DDLockEvent le){
-        if(!(le.target.contains("dd") || le.target.contains("all")) || this.locked){
-            return;
-        }
-        this.dynamicState.setMovementState(MovementState.HALTING);
-        this.dynamicState.setAcceleration(0d);
-        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
-        this.locked = true;
-    }
-
-    /**
-     * This method updates the trip profile. This can become necessary should a new one become available. This does
-     * <b>not</b> require the train to be at standstill.
-     * @param utpe {@link DDUpdateTripProfileEvent}
-     */
-    @Subscribe
-    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
-        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
-            return;
-        }
-        this.tripProfile = utpe.tripProfile;
-
-        if(this.tripProfile instanceof BackwardSpline){
-            BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
-            this.maxTripSectionDistance = backwardSpline.getHighestXValue();
-        }
-        else if(this.tripProfile instanceof ForwardSpline){
-            this.maxTripSectionDistance = Double.MAX_VALUE;
-        }
-        else{
-            IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
-        }
-
-
-        Position curPos = this.trainDataVolatile.getCurrentPosition();
-        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
-        if(this.dynamicState != null){
-            this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
-        }
-    }
-
-    /**
-     * Performance some clean up tasks at the end of a trip.
-     * @param ttee A {@link TsmTripEndEvent}
-     *//*
-    @Subscribe
-    public void atTripEnd(TsmTripEndEvent ttee){
-        dynamicState.setMovementState(MovementState.HALTING);
-        dynamicState.setAcceleration(0d);
-        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
-    }*/
 
     /**
      * This function checks if a new location was reached and if so, updates the position inside of dynamic state to

@@ -1,6 +1,10 @@
 package ebd.globalUtils.etcsModeAndLevel;
 
 public enum ETCSLevel {
+    /**
+     * Null replacement value
+     */
+    NO_LEVEL,
 
     NTC_PZBLZB,
 

@@ -197,10 +197,6 @@ public class ModeAndLevelSupervisor {
         // TODO Insert after a SR/SH start is implemented
         //vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition().getLocation().getId() != ETCSVariables.NID_LRBG_UNKNOWN;
 
-        System.out.println("vrd: " + vaildRouteData);
-        System.out.println("vtd: " + vaildTrainData);
-        System.out.println("unsp: " + unspecificModeProfil);
-
         if(this.curMode == ETCSMode.STAND_BY && vaildTrainData && vaildRouteData && this.unspecificModeProfil){//SRS-026 4.6.3 [10]
             this.curMode = ETCSMode.FULL_SUPERVISION;
             return true;
