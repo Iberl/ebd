@@ -1,11 +1,9 @@
-package ebd.speedSupervisionModule;
+package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import java.util.Collections;
 
 public class Clock implements Runnable {
 

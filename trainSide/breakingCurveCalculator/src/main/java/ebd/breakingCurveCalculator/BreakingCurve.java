@@ -7,6 +7,7 @@ import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
 import ebd.globalUtils.spline.BackwardSpline;
+import ebd.globalUtils.spline.Knot;
 
 /**
  * <p>
@@ -166,7 +167,53 @@ public class BreakingCurve extends BackwardSpline {
 
 		return getPointOnCurve(distanceToReferenceLocation + offset);
 	}
-	
+
+	/**
+	 * Returns the distance after which the maximum speed of the breaking curve is always lower or equal then the given speed
+	 * @param testSpeed in [m/s]
+	 * @return In [m]. Returns {@link Double#MAX_VALUE} if no part of the breaking curve is lower then the given speed
+	 */
+	//TODO Tests
+	public Double getDistanceSpeedAlwaysLower(double testSpeed){
+
+		Double lastDist = this.curve.lastKey();
+		double lastSpeed = this.curve.lastEntry().getValue().get(0);
+		if(lastSpeed > testSpeed){
+			return Double.MAX_VALUE;
+		}
+		if(lastSpeed == testSpeed){
+			return lastDist;
+		}
+		//Iterating of the tree map to find the highest key with a lower value then testSpeed
+		while(true){
+			Double nextDist = this.curve.lowerKey(lastDist);
+			if (nextDist == null) return 0d;
+
+			double nextSpeed = this.curve.get(nextDist).get(0);
+			if(nextSpeed >= testSpeed){
+				return calculatePreciseIntersection(lastDist,testSpeed);
+			}
+
+			lastDist = nextDist;
+		}
+
+	}
+
+	/**
+	 * Calculates the precise point at which the curve takes a certain value bas on the knowledge of the next higher key.
+	 *
+	 * @param nextHigherKey The next higher key to the precise point
+	 * @param yValue The value that the curve should be equal to
+	 * @return the precise X-value at which the curve is equal to yValue
+	 */
+	private Double calculatePreciseIntersection(Double nextHigherKey, double yValue) {
+
+		double knotSpeed = this.curve.get(nextHigherKey).get(0);
+		double knotConstant = this.curve.get(nextHigherKey).get(1);
+
+		return (yValue - knotSpeed) / knotConstant + nextHigherKey;
+	}
+
 	/**
 	 * @return the reference position
 	 */

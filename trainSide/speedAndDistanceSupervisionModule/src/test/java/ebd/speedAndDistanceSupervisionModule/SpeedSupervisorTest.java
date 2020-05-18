@@ -1,4 +1,4 @@
-package ebd.speedSupervisionModule;
+package ebd.speedAndDistanceSupervisionModule;
 
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
@@ -13,9 +13,7 @@ import ebd.trainData.TrainData;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
-class SpeedSupervisionModuleTest {
+class SpeedSupervisorTest {
 
     @Test
     public void ssmTest() throws InterruptedException {
@@ -29,7 +27,7 @@ class SpeedSupervisionModuleTest {
         double[] bp = {0,1}; // in m and m/ss
         int[] gp = {0,0}; // in m and 0/00
 
-        SpeedSupervisionModule ssm = new SpeedSupervisionModule(eventBus);
+        SpeedSupervisor ssm = new SpeedSupervisor(eventBus);
 
         TrainData trainData = new TrainData(eventBus);
         eventBus.post(new TrainDataChangeEvent("test", "td","currentSpeed", 51d));

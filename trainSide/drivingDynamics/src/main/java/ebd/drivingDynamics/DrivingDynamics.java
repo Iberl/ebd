@@ -12,7 +12,6 @@ import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
-import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -31,13 +30,13 @@ import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
-import ebd.speedSupervisionModule.util.events.SsmReportEvent;
+import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
+import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
@@ -112,7 +111,7 @@ public class DrivingDynamics {
 
     /**
      * Every clock tick event this method runs all code necessary to calculate the next dynamic state from the previous
-     * one. It takes into account {@link SpeedInterventionLevel} decided by the {@link ebd.speedSupervisionModule.SpeedSupervisionModule}
+     * one. It takes into account {@link SpeedInterventionLevel} decided by the {@link SpeedSupervisor}
      * and the {@link Action} decided by the {@link DrivingProfile}.
      * This method also updates {@link TrainDataVolatile} with the new values.
      *
@@ -255,7 +254,7 @@ public class DrivingDynamics {
 
 
         Position curPos = this.trainDataVolatile.getCurrentPosition();
-        //we need a copy, no referenz to current Position
+        //we need a copy of, not a referenz to, the current Position
         this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
         if(this.dynamicState == null){
             this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
@@ -278,7 +277,7 @@ public class DrivingDynamics {
     }*/
 
     /**
-     * Decision tree should the current {@link ETCSMode} forbid movement.
+     * Movement decision tree should the current {@link ETCSMode} forbid movement.
      */
     private void drivingIllegal(){
         if(this.dynamicState.getSpeed() != 0){
@@ -293,7 +292,7 @@ public class DrivingDynamics {
     }
 
     /**
-     * Decision tree should the current {@link ETCSMode} allow movement.
+     * Movement decision tree should the current {@link ETCSMode} allow movement.
      */
     private void drivingAllowed() {
     /*

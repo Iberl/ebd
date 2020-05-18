@@ -1,4 +1,4 @@
-package ebd.speedSupervisionModule;
+package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.BreakingCurveGroup;
@@ -11,14 +11,13 @@ import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
-import ebd.speedSupervisionModule.util.events.SsmReportEvent;
+import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -31,7 +30,7 @@ import java.util.HashMap;
  *
  * @author Lars Schulze-Falck
  */
-public class SpeedSupervisionModule {
+public class SpeedSupervisor {
 
 
     private EventBus localEventBus;
@@ -66,7 +65,7 @@ public class SpeedSupervisionModule {
      * Constructor
      * @param localEventBus The local {@link EventBus} of the train
      */
-    public SpeedSupervisionModule(EventBus localEventBus){
+    public SpeedSupervisor(EventBus localEventBus){
         this.localEventBus = localEventBus;
         localEventBus.register(this);
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;

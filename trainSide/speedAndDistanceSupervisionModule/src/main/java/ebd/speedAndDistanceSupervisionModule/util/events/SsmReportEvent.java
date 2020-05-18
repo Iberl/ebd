@@ -1,10 +1,8 @@
-package ebd.speedSupervisionModule.util.events;
+package ebd.speedAndDistanceSupervisionModule.util.events;
 
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
-
-import java.util.List;
 
 public class SsmReportEvent extends NormalEvent {
 

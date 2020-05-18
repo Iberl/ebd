@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util.supervisors;
+package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
@@ -9,7 +9,6 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -20,9 +19,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the distance the train has traveled the current trip. If the distance is close to or
@@ -82,7 +78,6 @@ public class DistanceSupervisor {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cTE){
         if(this.breakingCurve == null) return;
-        //TODO Take RSM to Speedsupervision
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
@@ -144,12 +139,15 @@ public class DistanceSupervisor {
     }
 
     /**
-     * Calculates the release speed distance based on the release speed. <br>
+     * Calculates based on the release speed the distance to EOA at which the train should switch in to release speed. <br>
      *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
      * @return The calculated release speed
      */
     private double calculateReleaseSpeedDistance() {
-        //TODO Fill with Math
+        double distance = this.breakingCurve.getDistanceSpeedAlwaysLower(this.curReleaseSpeed);
+        if(distance < Double.MAX_VALUE){
+            return breakingCurve.getHighestXValue() - distance;
+        }
         return ch.releaseSpeedDistance;
     }
 }

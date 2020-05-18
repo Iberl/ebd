@@ -20,7 +20,7 @@
         <module>trainData</module>
         <module>routeData</module>
         <module>breakingCurveCalculator</module>
-        <module>speedSupervisionModule</module>
+        <module>speedAndDistanceSupervisionModule</module>
         <module>trainStatusManager</module>
     </modules>
 

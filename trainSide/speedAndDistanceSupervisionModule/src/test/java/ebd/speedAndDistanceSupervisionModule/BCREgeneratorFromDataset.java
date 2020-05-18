@@ -1,7 +1,6 @@
-package ebd.speedSupervisionModule;
+package ebd.speedAndDistanceSupervisionModule;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.location.Location;
