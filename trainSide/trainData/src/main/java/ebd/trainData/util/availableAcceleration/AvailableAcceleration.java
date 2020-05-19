@@ -24,13 +24,13 @@ public class AvailableAcceleration {
 
     private ForwardSpline resistanceCurve;
 
-    private ForwardSpline gradientProfile;
+    private ForwardSpline accGradientProfile;
 
     public AvailableAcceleration(EventBus eventBus){
         this.eventBus = eventBus;
         this.eventBus.register(this);
         RouteDataVolatile rdv = this.eventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
-        this.gradientProfile = GradientProfileConverter.package21ToGP(rdv.getPacket_21(),rdv.getCurrentGradient());
+        this.accGradientProfile = GradientProfileConverter.package21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
         updateCurves();
     }
 
@@ -58,20 +58,20 @@ public class AvailableAcceleration {
             case ACCELERATING:
                 double acceleration = speedUpCurve.getPointOnCurve(currentSpeed) * accelerationModification;
                 acceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                acceleration -= gradientProfile.getPointOnCurve(tripDistance);
+                acceleration -= accGradientProfile.getPointOnCurve(tripDistance);
                 return acceleration;
             case BREAKING:
                 double deceleration = - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification;
                 deceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                deceleration -= gradientProfile.getPointOnCurve(tripDistance);
+                deceleration -= accGradientProfile.getPointOnCurve(tripDistance);
                 return  deceleration;
             case EMERGENCY_BREAKING:
                 double emergencyDeceleration = - emergencyBreakingPowerCurve.getPointOnCurve(currentSpeed);
                 emergencyDeceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                emergencyDeceleration -= gradientProfile.getPointOnCurve(tripDistance);
+                emergencyDeceleration -= accGradientProfile.getPointOnCurve(tripDistance);
                 return  emergencyDeceleration;
             case COASTING:
-                return resistanceCurve.getPointOnCurve(currentSpeed) - gradientProfile.getPointOnCurve(tripDistance);
+                return resistanceCurve.getPointOnCurve(currentSpeed) - accGradientProfile.getPointOnCurve(tripDistance);
             default:
                 throw new IllegalArgumentException("This MovementState was not caught by AvailableAcceleration");
         }
@@ -87,7 +87,7 @@ public class AvailableAcceleration {
     @Subscribe
     public void updateGradientProfile(NewRouteDataVolatileEvent nrdve){
         RouteDataVolatile rdv = nrdve.routeDataVolatile;
-        this.gradientProfile = GradientProfileConverter.package21ToGP(rdv.getPacket_21(),rdv.getCurrentGradient());
+        this.accGradientProfile = GradientProfileConverter.package21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
     }
 
     /*

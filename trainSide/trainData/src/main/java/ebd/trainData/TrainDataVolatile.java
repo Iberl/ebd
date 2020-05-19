@@ -38,17 +38,21 @@ public class TrainDataVolatile {
     protected volatile Position currentPosition = null;
 
     /**
-     * The distance already driven on the current trip in [m]
+     * The distance already driven on the current complete trip in [m]
+     * Updated by DrivingDynamics
      */
     protected volatile double curTripDistance = 0d;
 
     /**
      * Time since the trip started in [s]
+     * Updated by DrivingDynamics
      */
     protected volatile double curTripTime = 0d;
 
     /**
      * The distance already driven on the current trip section in [m]
+     * A trip sections starts at the reference location of the current movement authority.
+     * Updated by DrivingDynamics
      */
     protected volatile double curTripSectionDistance = 0d;
 

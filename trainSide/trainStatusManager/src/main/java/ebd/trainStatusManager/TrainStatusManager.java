@@ -39,6 +39,7 @@ import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor
 import ebd.trainStatusManager.util.supervisors.ModeAndLevelSupervisor;
 import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
 import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
+import ebd.trainStatusManager.util.supervisors.TrackSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -85,6 +86,7 @@ public class TrainStatusManager implements Runnable {
     private DistanceSupervisor distanceSupervisor;
     private MessageAuthorityRequestSupervisor messageAuthorityRequestSupervisor;
     private PositionReportSupervisor positionReportSupervisor;
+    private TrackSupervisor trackSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -268,6 +270,7 @@ public class TrainStatusManager implements Runnable {
         this.distanceSupervisor = new DistanceSupervisor(this.localEventBus);
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
+        this.trackSupervisor = new TrackSupervisor(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
