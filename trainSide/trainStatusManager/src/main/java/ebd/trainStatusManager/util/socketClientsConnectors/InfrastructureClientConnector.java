@@ -40,7 +40,7 @@ public class InfrastructureClientConnector {
      * @param localEventBus the local {@link EventBus}
      * @param etcsID the etcsID. Its also used as infrastructure ID.
      */
-    public InfrastructureClientConnector(EventBus localEventBus, int etcsID){
+    public InfrastructureClientConnector(EventBus localEventBus, int etcsID, int infrastructureID){
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
         this.globalEventBus = EventBus.getDefault();
@@ -48,7 +48,7 @@ public class InfrastructureClientConnector {
         this.trainDataVolatile = null;
 
         this.etcsID = etcsID;
-        this.infrastructureID = etcsID;
+        this.infrastructureID = infrastructureID;
 
         this.eventSource = "tsm;T=" + this.etcsID;
 
@@ -96,7 +96,6 @@ public class InfrastructureClientConnector {
         averageSpeed += weightedCarry;
         long curVlong = Math.round(averageSpeed);
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
-        //System.out.println(curVlong);
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));

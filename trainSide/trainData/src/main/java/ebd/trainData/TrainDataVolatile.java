@@ -1,6 +1,8 @@
 package ebd.trainData;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
+import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -58,66 +60,73 @@ public class TrainDataVolatile {
 
     /**
      * The target speed of the train in [m/s] based on the trip profile.
-     * Updated trough driving dynamics
+     * Updated trough driving dynamics.
      */
     protected volatile double currentProfileTargetSpeed = 0d;
 
     /**
-     * The current speed of the train in [m/s]
+     * The current speed of the train in [m/s].
      * Updated trough driving dynamics
      */
     protected volatile double currentSpeed = 0d;
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the permitted speed curve
-     * Updated from the speed supervision module
+     * the permitted speed curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentMaximumSpeed = 0d;
 
 
     /**
      * The current emergency intervention speed of the train in [m/s] based on
-     * the service intervention curve
-     * Updated from the speed supervision module
+     * the service intervention curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentEmergencyInterventionSpeed = 0d;
 
     /**
      * The current service intervention speed of the train in [m/s] based on
-     * the service intervention curve
-     * Updated from the speed supervision module
+     * the service intervention curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentServiceInterventionSpeed = 0d;
 
     /**
      * The current service warning speed of the train in [m/s] based on
-     * the service warning curve
-     * Updated from the speed supervision module
+     * the service warning curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentWarningSpeed = 0d;
 
     /**
      * The current service indication speed of the train in [m/s] based on
-     * the service indication curve
-     * Updated from the speed supervision module
+     * the service indication curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentIndicationSpeed = 0d;
 
     /**
      * The current service coasting phase speed of the train in [m/s] based on
-     * the service coasting phase curve
-     * Updated from the speed supervision module
+     * the service coasting phase curve.
+     * Updated from the speed supervision module.
      */
     protected volatile double currentCoastingPhaseSpeed = 0d;
 
 
     /**
      * Target speed of the next breaking phase of the train in [m/s].
-     * Updated from the speed supervision module
+     * Updated from the speed supervision module.
      */
     protected volatile double targetSpeed = 0d;
 
+    /**
+     * Current release speed of the next breaking phase of the train in [m/s].<br>
+     *     <b>0</b> if there is no release speed at the end of the next breaking phase <br>
+     *     <b> Greater 0</b> if there is a release speed.<br>
+     *     Updated from the speed supervision module.
+     */
+    protected volatile double currentApplicableReleaseSpeed = 0d;
 
     /**
      * The current {@link ebd.messageLibrary.util.ETCSVariables#M_MODE}
@@ -218,11 +227,15 @@ public class TrainDataVolatile {
     @Nullable
     protected volatile IncrPosRprtDist incrPosRprtDist = null;
 
+    /**
+     * Current ETCS Level. Updated by tsm.ModeSupervisor
+     */
+    protected volatile ETCSLevel currentETCSLevel = ETCSLevel.LEVEL_TWO;
 
     /**
-     * Wait time at stations in [s]
+     * Current ETCS Mode. Updated by tsm.ModeSupervisor
      */
-    protected volatile int waitTimeAtStation = 0;
+    protected volatile ETCSMode currentETCSMode = ETCSMode.STAND_BY;
 
 
     //Constructor
@@ -380,17 +393,36 @@ public class TrainDataVolatile {
         return targetSpeed;
     }
 
+    /**
+     * Current release speed of the next breaking phase of the train in [m/s].<br>
+     *     <b>0</b> if there is no release speed at the end of the next breaking phase <br>
+     *     <b>ConfigHandler.releaseSpeed</b> if there is a release speed in ETCS Level 1.<br>
+     *     <b>Calculated speed</b> if there is a release speed in ETCS Level 2.<br>
+     *     Updated from the speed supervision module.
+     */
+    public double getCurrentApplicableReleaseSpeed() {
+        return currentApplicableReleaseSpeed;
+    }
 
+    /**
+     * The current {@link ebd.messageLibrary.util.ETCSVariables#M_MODE}
+     */
     @Nullable
     public Integer getM_MODE() {
         return M_MODE;
     }
 
+    /**
+     * All locations that where crossed in order (last entry == last crossed location)
+     */
     @Nullable
     public List<Location> getPreviousLocations() {
         return previousLocations;
     }
 
+    /**
+     * The current breaking mode
+     */
     @Nullable
     public String getCurrentBreakingMode() {
         return currentBreakingMode;
@@ -427,6 +459,9 @@ public class TrainDataVolatile {
         return currentResistanceCurve;
     }
 
+    /**
+     * @return Null before a gradient profile is received.<br>
+     */
     @Nullable
     public AvailableAcceleration getAvailableAcceleration() {
         return availableAcceleration;
@@ -486,9 +521,16 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return wait time at stations in [s]
+     * @return Current ETCS Level. Updated by tsm.ModeSupervisor
      */
-    public int getWaitTimeAtStation(){
-        return waitTimeAtStation;
+    public ETCSLevel getCurrentETCSLevel() {
+        return currentETCSLevel;
+    }
+
+    /**
+     * @return Current ETCS Mode. Updated by tsm.ModeSupervisor
+     */
+    public ETCSMode getCurrentETCSMode() {
+        return currentETCSMode;
     }
 }

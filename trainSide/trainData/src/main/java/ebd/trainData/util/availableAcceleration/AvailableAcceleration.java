@@ -54,7 +54,7 @@ public class AvailableAcceleration {
             case UNCHANGED:
             case HALTING:
             case CRUISE:
-                return 0d;
+                return 0d; //TODO Check iff possible
             case ACCELERATING:
                 double acceleration = speedUpCurve.getPointOnCurve(currentSpeed) * accelerationModification;
                 acceleration += resistanceCurve.getPointOnCurve(currentSpeed);

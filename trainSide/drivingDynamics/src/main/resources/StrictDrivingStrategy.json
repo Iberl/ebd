@@ -27,39 +27,6 @@
       }
     },
     {
-      "type": "v_cruise",
-      "priority": 1,
-      "action": {
-        "conditions": {
-          "andBlock": [
-            {
-              "type": "v_rel",
-              "condition": {
-                "curveBase" : "trip",
-                "op": ">=",
-                "value": 95
-              }
-            },
-            {
-              "type": "v_rel",
-              "condition": {
-                "curveBase" : "trip",
-                "op": "<=",
-                "value": 100
-              }
-            },
-            {
-              "type": "v",
-              "condition": {
-                "op": "<",
-                "value": 120
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
       "type": "v_acc",
       "priority": 2,
       "action": {
@@ -71,7 +38,7 @@
               "condition": {
                 "curveBase" : "trip",
                 "op": "<",
-                "value": 95
+                "value": 100
               }
             }
           ]
