@@ -3,7 +3,7 @@ package ebd.speedAndDistanceSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
+import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
@@ -93,7 +93,7 @@ public class DistanceSupervisor {
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
-            this.localBus.post(new DDLockEvent(this.eventSource, "dd"));
+            this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
 
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();

@@ -11,7 +11,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
-import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
+import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -56,6 +56,8 @@ public class DrivingDynamics {
     private TripProfileProvider tripProfileProvider;
     private int etcsTrainID;
     private ConfigHandler ch;
+
+    boolean shouldHalt = false;
 
     private Spline tripProfile;
     private Position tripStartPosition;
@@ -181,7 +183,7 @@ public class DrivingDynamics {
         updateDMI();
 
         cycleCount++;
-        if(this.cycleCount >= this.cylceCountMax || this.dynamicState.getSpeed() < 1){
+        if(this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
             cycleCount = 0;
             sendToLogEventDynamicState();
         }
@@ -216,18 +218,13 @@ public class DrivingDynamics {
     }
 
 
-
     /**
      * This method locks Driving Dynamics, signaling the end of movement of the train
-     * //TODO Only allow lock at standstill
-     * @param le A {@link DDLockEvent}
+     * @param le A {@link DDHaltEvent}
      */
     @Subscribe
-    public void setLocked(DDLockEvent le){
-        this.dynamicState.setMovementState(MovementState.HALTING);
-        this.dynamicState.setAcceleration(0d);
-        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
-        //TODO Put this somewere else, get rid of lock event
+    public void setHalt(DDHaltEvent le){
+        this.shouldHalt = true;
     }
 
     /**
@@ -265,6 +262,7 @@ public class DrivingDynamics {
             this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
         }
         this.time = AppTime.nanoTime();
+        this.shouldHalt = false;
     }
 
     /**
@@ -305,6 +303,11 @@ public class DrivingDynamics {
         if(speedSupervisionReport == null ){
             actionParser(this.drivingProfile.actionToTake());
         }
+        else if(this.shouldHalt && this.dynamicState.getSpeed() == 0){
+            sendToLogEventSpeedSupervision(MovementState.HALTING);
+            this.dynamicState.setMovementState(MovementState.HALTING);
+            this.dynamicState.setBreakingModification(1d);
+        }
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
             if(speedSupervisionReport.supervisionState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
@@ -337,7 +340,6 @@ public class DrivingDynamics {
             else {
                 if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
-                //calculateModifier();
                 //TODO Fix Ebreak into rsm but with stopping before ch.targetReachedDistance. Target will never be reached because in rsm train can not start up again
                 switch (this.currentSil){
                     case NO_INTERVENTION:

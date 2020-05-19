@@ -9,7 +9,6 @@ import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
-import ebd.globalUtils.events.drivingDynamics.DDLockEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
@@ -149,7 +148,7 @@ public class TrainStatusManager implements Runnable {
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
-    public void reactToTrip(ModeReportEvent mre){
+    public void reactToTripMode(ModeReportEvent mre){
         if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
 
         //TODO fill with logic
@@ -177,7 +176,6 @@ public class TrainStatusManager implements Runnable {
         if(!validTarget(tee.target)){
             return;
         }
-        this.localEventBus.post(new DDLockEvent("tsm", "dd"));
         //TODO until better TrainsManager exists:
         Message_150 msg150 = new Message_150();
         msg150.NID_ENGINE = this.etcsTrainID;
