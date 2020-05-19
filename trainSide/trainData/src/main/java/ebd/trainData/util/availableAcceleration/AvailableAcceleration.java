@@ -54,7 +54,7 @@ public class AvailableAcceleration {
             case UNCHANGED:
             case HALTING:
             case CRUISE:
-                return 0d; //TODO Check iff possible
+                return 0d; //TODO Check if 0 is possible
             case ACCELERATING:
                 double acceleration = speedUpCurve.getPointOnCurve(currentSpeed) * accelerationModification;
                 acceleration += resistanceCurve.getPointOnCurve(currentSpeed);
@@ -62,13 +62,13 @@ public class AvailableAcceleration {
                 return acceleration;
             case BREAKING:
                 double deceleration = - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification;
-                deceleration -= resistanceCurve.getPointOnCurve(currentSpeed);
-                deceleration += gradientProfile.getPointOnCurve(tripDistance);
+                deceleration += resistanceCurve.getPointOnCurve(currentSpeed);
+                deceleration -= gradientProfile.getPointOnCurve(tripDistance);
                 return  deceleration;
             case EMERGENCY_BREAKING:
                 double emergencyDeceleration = - emergencyBreakingPowerCurve.getPointOnCurve(currentSpeed);
-                emergencyDeceleration -= resistanceCurve.getPointOnCurve(currentSpeed);
-                emergencyDeceleration += gradientProfile.getPointOnCurve(tripDistance);
+                emergencyDeceleration += resistanceCurve.getPointOnCurve(currentSpeed);
+                emergencyDeceleration -= gradientProfile.getPointOnCurve(tripDistance);
                 return  emergencyDeceleration;
             case COASTING:
                 return resistanceCurve.getPointOnCurve(currentSpeed) - gradientProfile.getPointOnCurve(tripDistance);

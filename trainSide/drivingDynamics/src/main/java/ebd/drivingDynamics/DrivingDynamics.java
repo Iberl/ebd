@@ -76,7 +76,7 @@ public class DrivingDynamics {
     private boolean inRSM = false;
 
     private int cycleCount = 20;
-    private int cylceCountMax = 20; //TODO Connect to Config
+    private int cylceCountMax = 1; //TODO Connect to Config
     private MovementState currentMovementState = MovementState.UNCHANGED;
     private SpeedInterventionLevel currentSil = SpeedInterventionLevel.NO_INTERVENTION;
     private SpeedInterventionLevel lastSendSil = SpeedInterventionLevel.NOT_SET;
@@ -333,9 +333,10 @@ public class DrivingDynamics {
                 }
             }
             else {
-                if(!this.inRSM) calculateModifier();
+                //if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
-                //calculateModifier();
+                calculateModifier();
+                //TODO Fix Ebreak into rsm but with stopping before ch.targetReachedDistance. Target will never be reached because in rsm train can not start up again
                 switch (this.currentSil){
                     case NO_INTERVENTION:
                         sendToLogEventSpeedSupervision(MovementState.BREAKING);
@@ -511,9 +512,9 @@ public class DrivingDynamics {
         double currentSpeed = this.dynamicState.getSpeed();
         double maxBreakingAcc = this.trainDataVolatile.getCurrentBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-        double distanceToBest = distanceToEOA - ch.targetReachedDistance;
+        //double distanceToBest = distanceToEOA - ch.targetReachedDistance;
 
-        double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToBest;
+        double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
         double modifier = -neededBreakingACC/maxBreakingAcc;
         if(modifier <= 0 || modifier > 1){
             modifier = 1;

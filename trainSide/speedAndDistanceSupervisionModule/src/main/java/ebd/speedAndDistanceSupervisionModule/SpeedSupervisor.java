@@ -112,7 +112,7 @@ public class SpeedSupervisor {
 
         if(this.inRSM && this.releaseSpeed > 0){//Release speed monitoring
             supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
-            if(curSpeed > this.releaseSpeed){
+            if(curSpeed > this.releaseSpeed + ch.dV_ebi_min){
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed > 0){
