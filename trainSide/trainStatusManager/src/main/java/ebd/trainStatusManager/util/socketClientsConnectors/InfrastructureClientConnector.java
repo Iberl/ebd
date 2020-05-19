@@ -96,7 +96,7 @@ public class InfrastructureClientConnector {
         averageSpeed += weightedCarry;
         long curVlong = Math.round(averageSpeed);
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
-        System.out.println(curVlong);
+        //System.out.println(curVlong);
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
