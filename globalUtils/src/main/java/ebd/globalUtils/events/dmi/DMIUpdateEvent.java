@@ -18,6 +18,7 @@ public class DMIUpdateEvent extends NormalEvent {
     private double currentPermSpeed;
     private double currentWarnSpeed;
     private double currentIntervSpeed;
+    private double tripDistance;
 
 
     /**
@@ -48,7 +49,7 @@ public class DMIUpdateEvent extends NormalEvent {
      */
     public DMIUpdateEvent(String source, String target, double currentSpeed, double targetSpeed, int targetDistance, double releaseSpeed,
                           SpeedInterventionLevel speedInterventionLevel, SpeedSupervisionState speedSupervisionState,
-                          double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) {
+                          double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed, double tripDistance) {
         super(source, target);
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
@@ -60,6 +61,7 @@ public class DMIUpdateEvent extends NormalEvent {
         this.currentPermSpeed = currentPermSpeed;
         this.currentWarnSpeed = currentWarnSpeed;
         this.currentIntervSpeed = currentIntervSpeed;
+        this.tripDistance = tripDistance;
     }
 
     /**
@@ -129,5 +131,7 @@ public class DMIUpdateEvent extends NormalEvent {
         return speedSupervisionState;
     }
 
-
+    public double getTripDistance() {
+        return this.tripDistance;
+    }
 }

@@ -79,7 +79,8 @@ public class DMIServer implements Runnable {
                 + dmiUpdateEvent.getCurrentWarnSpeed() + " "
                 + dmiUpdateEvent.getCurrentIntervSpeed() + " "
                 + dmiUpdateEvent.getSpeedInterventionLevel() + " "
-                + dmiUpdateEvent.getSpeedSupervisionState();
+                + dmiUpdateEvent.getSpeedSupervisionState() + " "
+                + dmiUpdateEvent.getTripDistance();
 
         for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)) {
             dmiClientWorker.sendString(dmiParameters);

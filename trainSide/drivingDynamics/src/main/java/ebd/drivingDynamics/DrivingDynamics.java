@@ -134,7 +134,7 @@ public class DrivingDynamics {
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
             EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, (int)0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
-                    0, 0, 0, 0));
+                    0, 0, 0, 0, 0));
             return;
         }
 
@@ -401,7 +401,7 @@ public class DrivingDynamics {
         String source = "dd;T=" + this.etcsTrainID;
         EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", speed, targetSpeed, (int)distanceToDrive,
                 curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,
-                currentPermSpeed, currentWarnSpeed, currentIntervSpeed));
+                currentPermSpeed, currentWarnSpeed, currentIntervSpeed, this.dynamicState.getTripDistance()));
     }
 
     /**
