@@ -14,9 +14,9 @@ public class BreakingCurveExceptionEvent extends ExceptionEvent{
 
     /**
      * This Event signals and transmits an exception in the BreakingCurveCalculator module.
-     * {@link ExceptionEvent#ExceptionEvent(String, List, Event, Exception)}
+     * {@link ExceptionEvent#ExceptionEvent(String, String, Event, Exception)}
      */
-    public BreakingCurveExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-        super(source, targets, cause, exception);
+    public BreakingCurveExceptionEvent(String source, String target, Event cause, Exception exception) {
+        super(source, target, cause, exception);
     }
 }

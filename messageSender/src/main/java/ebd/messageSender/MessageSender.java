@@ -67,20 +67,20 @@ public class MessageSender {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void send(SendMessageEvent event) {
-		if(!event.targets.contains(msID)) return;
+		if(!event.target.contains(msID)) return;
 
 		try {
 			BitStreamWriter writer = Serializer.serialize(event.message);
 			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
 
-			globalBus.post(new SerializedBitstreamEvent(msID + (trainToTrack ? ";T=" : ";R=") + localID, event.destinations, bitstream, trainToTrack, false));
+			globalBus.post(new SerializedBitstreamEvent(msID + (trainToTrack ? ";T=" : ";R=") + localID, event.destination, bitstream, trainToTrack, false));
 
 		} catch(FieldTypeNotSupportedException e) {
-			localBus.post(new MessageSenderExceptionEvent(msID, event.targets, event, e));
+			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
 
 		} catch(MissingInformationException e) {
-			localBus.post(new MessageSenderExceptionEvent(msID, event.targets, event, e));
+			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
 		}
 	}
 
@@ -92,19 +92,19 @@ public class MessageSender {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void send(SendTelegramEvent event) {
-		if(!event.targets.contains(msID)) return;
+		if(!event.target.contains(msID)) return;
 
 		try {
 			BitStreamWriter writer = Serializer.serialize(event.telegram);
 			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
-			globalBus.post(new SerializedBitstreamEvent(msID + ';' + localID, event.destinations, bitstream, trainToTrack, true));
+			globalBus.post(new SerializedBitstreamEvent(msID + ';' + localID, event.destination, bitstream, trainToTrack, true));
 
 		} catch(FieldTypeNotSupportedException e) {
-			localBus.post(new MessageSenderExceptionEvent(msID, event.targets, event, e));
+			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
 
 		} catch(MissingInformationException e) {
-			localBus.post(new MessageSenderExceptionEvent(msID, event.targets, event, e));
+			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
 		}
 	}
 

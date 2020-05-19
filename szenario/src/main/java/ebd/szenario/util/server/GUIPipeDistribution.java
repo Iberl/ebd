@@ -47,7 +47,7 @@ public class GUIPipeDistribution implements Runnable {
             catch (IOException e) {
                 if(this.running){
                     SzenarioExceptionEvent see = new SzenarioExceptionEvent("szenario",
-                            Collections.singletonList("szenario"), new NotCausedByAEvent(), e, ExceptionEventTyp.WARNING);
+                            "szenario", new NotCausedByAEvent(), e, ExceptionEventTyp.WARNING);
                     EventBus.getDefault().post(see);
                     this.running = false;
                 }

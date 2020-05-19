@@ -19,7 +19,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class supervises the speed of the train and to some extend the distance traveled.
@@ -35,8 +34,8 @@ public class SpeedSupervisionModule {
 
 
     private EventBus localEventBus;
-    private List<String> tdTargets = Collections.singletonList("td");
-    private List<String> allTargets = Collections.singletonList("all");
+    private String tdTarget = "td";
+    private String allTarget = "all";
     private TrainDataVolatile trainDataVolatile;
     private ConfigHandler ch;
 
@@ -144,7 +143,7 @@ public class SpeedSupervisionModule {
             }
         }
 
-        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTargets , speedInterventionLevel, supervisionState));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, speedInterventionLevel, supervisionState));
         sendCurrentMaxSpeed();
     }
 
@@ -238,7 +237,7 @@ public class SpeedSupervisionModule {
         updateMap.put("currentCoastingPhaseSpeed", this.maxCoastingPhaseSpeed);
         updateMap.put("targetSpeed", this.targetSpeed);
 
-        this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTargets, updateMap));
+        this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTarget, updateMap));
     }
 
 }

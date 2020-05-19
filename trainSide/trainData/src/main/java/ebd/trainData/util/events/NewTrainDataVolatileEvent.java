@@ -8,8 +8,8 @@ import java.util.List;
 public class NewTrainDataVolatileEvent extends NormalEvent {
     public final TrainDataVolatile trainDataVolatile;
 
-    public NewTrainDataVolatileEvent(String source, List<String> eventTargets, TrainDataVolatile trainDataVolatile) {
-        super(source, eventTargets);
+    public NewTrainDataVolatileEvent(String source, String target, TrainDataVolatile trainDataVolatile) {
+        super(source, target);
         this.trainDataVolatile = trainDataVolatile;
     }
 }

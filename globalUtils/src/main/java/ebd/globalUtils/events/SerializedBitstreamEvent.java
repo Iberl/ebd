@@ -23,8 +23,8 @@ public class SerializedBitstreamEvent extends NormalEvent {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is adressed to
+	 * @param target
+	 *          ID from from the target module or 'all' if more then one target should be reached.
 	 * @param bitstream
 	 *          The transferred bitstream which holds the serialized Message
 	 * @param trainToTrack
@@ -32,8 +32,8 @@ public class SerializedBitstreamEvent extends NormalEvent {
 	 * @param isTelegram
 	 * 			Indicates wether the transferred bitstream resembles a Telegram or a Message
 	 */
-	public SerializedBitstreamEvent(String source, List<String> targets, BitStreamReader bitstream, boolean trainToTrack, boolean isTelegram) {
-		super(source, targets);
+	public SerializedBitstreamEvent(String source, String target, BitStreamReader bitstream, boolean trainToTrack, boolean isTelegram) {
+		super(source, target);
 		this.bitstream = bitstream;
 		this.trainToTrack = trainToTrack;
 		this.isTelegram = isTelegram;

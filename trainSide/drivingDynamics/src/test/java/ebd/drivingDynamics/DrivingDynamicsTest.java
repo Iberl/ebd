@@ -34,12 +34,12 @@ class DrivingDynamicsTest {
     @Test
     void drivingDynamicsTest() throws InterruptedException {
         EventBus eb = EventBus.getDefault();
-        List<String> targetList = Arrays.asList(new String[]{"all"});
+        String target ="all";
         RouteData routeData = new RouteData(eb);
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
         TrainData trainData = new TrainData(eb);
 
-        eb.post(new RouteDataChangeEvent("test",targetList, "packet_21", getp21()));
+        eb.post(new RouteDataChangeEvent("test",target, "packet_21", getp21()));
 
         AvailableAcceleration aa = new AvailableAcceleration(eb);
         Location curLoc = new Location(ETCSVariables.NID_LRBG_UNKNOWN, ETCSVariables.NID_LRBG_UNKNOWN, 0d);
@@ -50,23 +50,23 @@ class DrivingDynamicsTest {
         prevLoc.add(curLoc);
         Position curPos = new Position(0, true, curLoc);
 
-        eb.post(new TrainDataChangeEvent("test", targetList, "availableAcceleration", aa));
-        eb.post(new TrainDataChangeEvent("test", targetList, "previousLocations", prevLoc));
-        eb.post(new TrainDataChangeEvent("test", targetList, "currentPosition", curPos));
-        eb.post(new TrainDataChangeEvent("test", targetList, "currentSpeed", 0d));
+        eb.post(new TrainDataChangeEvent("test", target, "availableAcceleration", aa));
+        eb.post(new TrainDataChangeEvent("test", target, "previousLocations", prevLoc));
+        eb.post(new TrainDataChangeEvent("test", target, "currentPosition", curPos));
+        eb.post(new TrainDataChangeEvent("test", target, "currentSpeed", 0d));
 
         BackwardSpline breakingCurve = new BackwardSpline(2);
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
         DrivingDynamics drivingDynamics = new DrivingDynamics(eb, 192);
-        eb.post(new DDUpdateTripProfileEvent("test", Collections.singletonList("dd"),breakingCurve, 0));
+        eb.post(new DDUpdateTripProfileEvent("test", "dd", breakingCurve, 0));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();
         Thread.sleep(5000);
-        eb.post(new DDUnlockEvent("test", targetList));
+        eb.post(new DDUnlockEvent("test", target));
 
         Thread.sleep(10000);
-        eb.post(new DisconnectEvent("test", targetList));
+        eb.post(new DisconnectEvent("test", target));
     }
 
     private Packet_21 getp21(){

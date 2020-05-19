@@ -12,10 +12,10 @@ public class NewMaRequest extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public NewMaRequest(String source, List<String> targets, int Q_MARQSTREASON) {
-        super(source, targets);
+    public NewMaRequest(String source, String target, int Q_MARQSTREASON) {
+        super(source, target);
         this.Q_MARQSTREASON = Q_MARQSTREASON;
     }
 }

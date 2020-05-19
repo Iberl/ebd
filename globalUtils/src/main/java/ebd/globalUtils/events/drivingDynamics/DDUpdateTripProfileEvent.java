@@ -20,10 +20,10 @@ public class DDUpdateTripProfileEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public DDUpdateTripProfileEvent(String source, List<String> targets, Spline tripProfile, int refLocID) {
-        super(source, targets);
+    public DDUpdateTripProfileEvent(String source, String target, Spline tripProfile, int refLocID) {
+        super(source, target);
         this.tripProfile = tripProfile;
         this.refLocID = refLocID;
     }

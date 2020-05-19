@@ -73,7 +73,7 @@ public class DrivingProfile {
         }
         catch (NullPointerException npe){
             IllegalArgumentException iAE = new IllegalArgumentException("This file could not be found: " + pathToProfile);
-            this.localEventBus.post(new TrainDataExceptionEvent("td", Collections.singletonList("tsm"), new NotCausedByAEvent(), iAE));
+            this.localEventBus.post(new TrainDataExceptionEvent("td", "tsm", new NotCausedByAEvent(), iAE));
             return;
         }
 

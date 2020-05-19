@@ -79,7 +79,7 @@ public class MessageReceiver {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		if(!event.targets.contains(mrID + (traintoTrack ? ";R=" : ";T=") + localID) && !event.targets.contains("all")) return;
+		if(!event.target.contains(mrID + (traintoTrack ? ";R=" : ";T=") + localID) && !event.target.contains("all")) return;
 
 		try {
 			BitStreamReader bitstream = event.bitstream;
@@ -87,24 +87,24 @@ public class MessageReceiver {
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
-				localBus.post(new ReceivedTelegramEvent(mrID, Arrays.asList(managerID), telegram, event.source));
+				localBus.post(new ReceivedTelegramEvent(mrID, managerID, telegram, event.source));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
 
-				localBus.post(new ReceivedMessageEvent(mrID, Arrays.asList(managerID), message, event.source));
+				localBus.post(new ReceivedMessageEvent(mrID, managerID, message, event.source));
 			}
 
 		} catch(ClassNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		} catch(MissingInformationException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		} catch(BitLengthOutOfBoundsException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		} catch(ValueNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, Arrays.asList(managerID), event, e));
+			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		}
 	}

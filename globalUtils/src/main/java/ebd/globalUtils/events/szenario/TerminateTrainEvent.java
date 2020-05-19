@@ -11,10 +11,10 @@ public class TerminateTrainEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public TerminateTrainEvent(String source, List<String> targets, int infrastructureID) {
-        super(source, targets);
+    public TerminateTrainEvent(String source, String target, int infrastructureID) {
+        super(source, target);
         this.infrastructureID = infrastructureID;
     }
 }

@@ -56,7 +56,7 @@ public class InfrastructureClient {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void updateEvent(UpdatingInfrastructureEvent uie){
-        if(!this.useInfrastructureServer || !validTarget(uie.targets)){
+        if(!this.useInfrastructureServer || !validTarget(uie.target)){
             return;
         }
         int trainID = uie.infrastructureID;
@@ -82,7 +82,7 @@ public class InfrastructureClient {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void terminateTrain(TerminateTrainEvent tte){
-        if(!this.useInfrastructureServer || !validTarget(tte.targets)){
+        if(!this.useInfrastructureServer || !validTarget(tte.target)){
             return;
         }
 
@@ -98,7 +98,7 @@ public class InfrastructureClient {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
+        if(!validTarget(de.target)){
             return;
         }
 
@@ -227,15 +227,13 @@ public class InfrastructureClient {
 
     /**
      * True if this Instance is a vaild target of the event
-     * @param targetList the target list a the event
+     * @param target the target list a the event
      * @return True if this instance is a vaild target of the event
      */
-    private boolean validTarget(List<String> targetList){
+    private boolean validTarget(String target){
 
-        for(String target : targetList){
-            if(target.contains("szenario") || target.contains("all")){
-                return true;
-            }
+        if(target.contains("szenario") || target.contains("all")){
+            return true;
         }
         return false;
     }

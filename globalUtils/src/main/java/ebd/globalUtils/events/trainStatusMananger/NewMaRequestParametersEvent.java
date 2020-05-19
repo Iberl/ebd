@@ -5,7 +5,7 @@ import ebd.globalUtils.events.NormalEvent;
 import java.util.List;
 
 public class NewMaRequestParametersEvent extends NormalEvent {
-    public NewMaRequestParametersEvent(String source, List<String> targets) {
-        super(source,targets);
+    public NewMaRequestParametersEvent(String source, String target) {
+        super(source,target);
     }
 }

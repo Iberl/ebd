@@ -1,7 +1,6 @@
 package ebd.trainStatusManager.util;
 
 import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -9,7 +8,6 @@ import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * This is the clock of the train system, it determines the tact rate that is used by modules to schedule their
@@ -29,8 +27,8 @@ public class Clock implements Runnable {
     private boolean paused;
     private long lastClockTickTime; //in [ns]
 
-    private List<String> exceptionTargets = Collections.singletonList("tsm");
-    private List<String> eventTargets = Collections.singletonList("all");
+    private String exceptionTarget = "tsm";
+    private String eventTarget = "all";
 
 
     public Clock(EventBus eventBus) {
@@ -46,14 +44,14 @@ public class Clock implements Runnable {
                 if(!paused){
                     long timeDifference = AppTime.nanoTime() - this.lastClockTickTime;
                     double deltaT = timeDifference / 1E9;
-                    this.eventBus.post(new ClockTickEvent("clock", this.eventTargets, deltaT));
+                    this.eventBus.post(new ClockTickEvent("clock", this.eventTarget, deltaT));
                     this.lastClockTickTime = AppTime.nanoTime();
                 }
                 Thread.sleep(this.tickTime);
             } catch (InterruptedException e) {
                 InterruptedException ie = new InterruptedException("Clock was interrupted: " + e.getMessage());
                 ie.setStackTrace(e.getStackTrace());
-                this.eventBus.post(new TsmExceptionEvent("tsm", this.exceptionTargets,new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+                this.eventBus.post(new TsmExceptionEvent("tsm", this.exceptionTarget, new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
             }
         }
     }

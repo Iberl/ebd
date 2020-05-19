@@ -35,17 +35,17 @@ public class InputHandler implements Runnable {
     private void selectNext(String next) {
         switch (next){
             case "quit":
-                this.globalEventBus.post(new DisconnectEvent("szenario", Collections.singletonList("all")));
+                this.globalEventBus.post(new DisconnectEvent("szenario", "all"));
                 System.exit(0);
                 break;
             case "load":
-                this.globalEventBus.post(new LoadEvent("szenario", Collections.singletonList("szenario")));
+                this.globalEventBus.post(new LoadEvent("szenario", "szenario"));
                 break;
             case "pause":
-                this.globalEventBus.post(new PauseClockEvent("szenario", Collections.singletonList("all")));
+                this.globalEventBus.post(new PauseClockEvent("szenario", "all"));
                 break;
             case "continue":
-                this.globalEventBus.post(new ContinueClockEvent("szenario", Collections.singletonList("all")));
+                this.globalEventBus.post(new ContinueClockEvent("szenario", "all"));
                 break;
             default:
                 System.out.println("Could not understand input");
@@ -66,7 +66,7 @@ public class InputHandler implements Runnable {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
+        if(!validTarget(de.target)){
             return;
         }
         synchronized (this){
@@ -76,11 +76,10 @@ public class InputHandler implements Runnable {
         this.shouldRun = false;
     }
 
-    private boolean validTarget(List<String> targetList) {
-        for(String target : targetList){
-            if(target.contains("szenario") || target.contains("all")){
-                return true;
-            }
+    private boolean validTarget(String target) {
+
+        if(target.contains("szenario") || target.contains("all")){
+            return true;
         }
         return false;
     }

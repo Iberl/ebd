@@ -32,7 +32,7 @@ import java.util.function.BiFunction;
  * @author Lars Schulze-Falck
  */
 public class MaxFutureSpeedCondition extends CurveBasedCondition {
-    private List<String> exceptionTargets = Collections.singletonList("all");
+    private String exceptionTarget = "all";
     private BiFunction<Double,Double, Boolean> comparator;
     private Spline tripProfile;
 
@@ -98,7 +98,7 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
      */
     @Subscribe
     public void updateTripProfile(DDUpdateTripProfileEvent utpe){
-        if(!(utpe.targets.contains("dd") || utpe.targets.contains("all"))){
+        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }
         this.tripProfile = utpe.tripProfile;
@@ -112,7 +112,7 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTargets, utpe, iAE));
+            this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
         }
     }
 
