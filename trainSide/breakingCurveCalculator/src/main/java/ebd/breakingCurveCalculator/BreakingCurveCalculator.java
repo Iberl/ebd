@@ -111,7 +111,7 @@ public class BreakingCurveCalculator {
     		this.emergencyBreakingPower = bcre.emergencyBreakingPower;
     		this.referencePosition = bcre.referencePosition;
 	    	this.ssp = new StaticSpeedProfil(bcre);
-	    	this.gradientProfil = GradientProfileConverter.package21ToAccGP(bcre.packet21, bcre.currentGradient);
+	    	this.gradientProfil = GradientProfileConverter.packet21ToAccGP(bcre.packet21, bcre.currentGradient);
 	    	this.dangerPointOffset = MovementAuthorityConverter.p15ToDangerPointDistance(bcre.packet15);
 
 	    	this.breakingCurveGroup = calculateBreakingCurve(bcre.packet15, bcre.id);

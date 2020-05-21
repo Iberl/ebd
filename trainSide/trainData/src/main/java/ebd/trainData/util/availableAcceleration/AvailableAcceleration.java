@@ -30,7 +30,7 @@ public class AvailableAcceleration {
         this.eventBus = eventBus;
         this.eventBus.register(this);
         RouteDataVolatile rdv = this.eventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
-        this.accGradientProfile = GradientProfileConverter.package21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
+        this.accGradientProfile = GradientProfileConverter.packet21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
         updateCurves();
     }
 
@@ -87,7 +87,7 @@ public class AvailableAcceleration {
     @Subscribe
     public void updateGradientProfile(NewRouteDataVolatileEvent nrdve){
         RouteDataVolatile rdv = nrdve.routeDataVolatile;
-        this.accGradientProfile = GradientProfileConverter.package21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
+        this.accGradientProfile = GradientProfileConverter.packet21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
     }
 
     /*
