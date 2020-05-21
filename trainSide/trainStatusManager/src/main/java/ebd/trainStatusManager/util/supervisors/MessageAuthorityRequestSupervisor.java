@@ -3,20 +3,14 @@ package ebd.trainStatusManager.util.supervisors;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewMaMessage;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequest;
-import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_132;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trainpackets.Packet_0;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.routeData.RouteDataVolatile;
-import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
@@ -24,9 +18,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the movement authority requests. It takes the movement request parameter

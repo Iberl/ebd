@@ -5,8 +5,8 @@ import java.util.List;
 
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.etcsPacketToSplineConverters.GradientProfileConverter;
-import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
+import ebd.globalUtils.etcsPacketToProfileConverters.GradientProfileConverter;
+import ebd.globalUtils.etcsPacketToProfileConverters.MovementAuthorityConverter;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

@@ -1,6 +1,5 @@
 package ebd.breakingCurveCalculator.tests;
 
-import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import org.greenrobot.eventbus.EventBus;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;

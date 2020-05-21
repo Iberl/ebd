@@ -1,4 +1,4 @@
-package ebd.globalUtils.etcsPacketToSplineConverters;
+package ebd.globalUtils.etcsPacketToProfileConverters;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.position.Position;
