@@ -39,11 +39,11 @@ public class TrackSupervisor{
         }
         else if (this.package21 == null){
             this.package21 = newP21;
-            this.gradientProfil = GradientProfileConverter.package21ToGP(this.package21, routeDataVolatile.getCurrentGradient());
+            this.gradientProfil = GradientProfileConverter.packet21ToGP(this.package21, routeDataVolatile.getCurrentGradient());
         }
         else if(!this.package21.equals(this.routeDataVolatile.getPacket_21())){
             this.package21 = this.routeDataVolatile.getPacket_21();
-            this.gradientProfil = GradientProfileConverter.package21ToGP(this.package21, routeDataVolatile.getCurrentGradient());
+            this.gradientProfil = GradientProfileConverter.packet21ToGP(this.package21, routeDataVolatile.getCurrentGradient());
         }
 
         /*

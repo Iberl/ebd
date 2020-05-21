@@ -24,7 +24,7 @@ public class GradientProfileConverter {
      *
      * @author Lars Schulze-Falck
      */
-    public static ForwardSpline package21ToAccGP(Packet_21 p21, double refGradient) {
+    public static ForwardSpline packet21ToAccGP(Packet_21 p21, double refGradient) {
 
         double totalDistance = 0d;
         double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);
@@ -75,7 +75,7 @@ public class GradientProfileConverter {
      *
      * @author Lars Schulze-Falck
      */
-    public static ForwardSpline package21ToGP(Packet_21 p21, double refGradient) {
+    public static ForwardSpline packet21ToGP(Packet_21 p21, double refGradient) {
 
         double totalDistance = 0d;
         double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);
@@ -118,7 +118,7 @@ public class GradientProfileConverter {
      * @return A array in the format {totalDistance in [m], grad in [0/00], totalDistance2, grad2 ...}.
      *          The distance values are always in reference to the start of the profile.
      */
-    public static double[] package21ToGradArray(Packet_21 p21, double refGradient) {
+    public static double[] packet21ToGradArray(Packet_21 p21, double refGradient) {
 
         double totalDistance = 0d;
         double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);
