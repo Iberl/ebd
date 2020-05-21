@@ -304,7 +304,7 @@ public class DrivingDynamics {
             actionParser(this.drivingProfile.actionToTake());
         }
         else if(this.shouldHalt && this.dynamicState.getSpeed() == 0){
-            sendToLogEventSpeedSupervision(MovementState.HALTING);
+            sendMovementStateIfNotAlreadySend(MovementState.HALTING);
             this.dynamicState.setMovementState(MovementState.HALTING);
             this.dynamicState.setBreakingModification(1d);
         }
@@ -474,7 +474,7 @@ public class DrivingDynamics {
         this.lastSendSil = this.currentSil;
         String msg = String.format("Current speed supervision intervention level: %s ", this.currentSil);
         this.localBus.post(new ToLogEvent("ssm", "log", msg));
-        if(movementState != MovementState.UNCHANGED) sendToLogEventSpeedSupervisionMovementState(movementState);
+        if(movementState != MovementState.UNCHANGED) sendToLogEventMovementState(movementState);
     }
 
     /**
@@ -488,20 +488,21 @@ public class DrivingDynamics {
     }
 
     /**
-     * Sends logging information regarding the current {@link MovementState} resulting from the {@link SpeedInterventionLevel}
+     * Sends logging information regarding the current {@link MovementState}
      */
-    private void sendToLogEventSpeedSupervisionMovementState(MovementState ms) {
+    private void sendToLogEventMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
         this.localBus.post(new ToLogEvent("dd", "log", msg));
 
     }
 
     /**
-     * Sends logging information regarding the current {@link MovementState}
+     * Sends logging information regarding the current {@link MovementState} if this {@link MovementState}
+     * was not the last MovementState send.
      */
-    private void sendMovementState(MovementState ms){
+    private void sendMovementStateIfNotAlreadySend(MovementState ms){
         if(this.currentMovementState != this.dynamicState.getMovementState()){
-            sendToLogEventSpeedSupervisionMovementState(this.dynamicState.getMovementState());
+            sendToLogEventMovementState(this.dynamicState.getMovementState());
             this.currentMovementState = this.dynamicState.getMovementState();
         }
     }
@@ -541,24 +542,24 @@ public class DrivingDynamics {
             case "AccelerationAction":
                 this.dynamicState.setMovementState(MovementState.ACCELERATING);
                 this.dynamicState.setAccelerationModification(((AccelerationAction)action).getAccelerationPercentage());
-                sendMovementState(MovementState.ACCELERATING);
+                sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
                 break;
             case "BreakAction":
                 this.dynamicState.setMovementState(MovementState.BREAKING);
                 this.dynamicState.setBreakingModification(((BreakAction)action).getBreakPercentage());
-                sendMovementState(MovementState.BREAKING);
+                sendMovementStateIfNotAlreadySend(MovementState.BREAKING);
                 break;
             case "CruiseAction":
                 this.dynamicState.setMovementState(MovementState.CRUISE);
-                sendMovementState(MovementState.CRUISE);
+                sendMovementStateIfNotAlreadySend(MovementState.CRUISE);
                 break;
             case "CoastAction":
                 this.dynamicState.setMovementState(MovementState.COASTING);
-                sendMovementState(MovementState.COASTING);
+                sendMovementStateIfNotAlreadySend(MovementState.COASTING);
                 break;
             case "HaltAction":
                 this.dynamicState.setMovementState(MovementState.HALTING);
-                sendMovementState(MovementState.HALTING);
+                sendMovementStateIfNotAlreadySend(MovementState.HALTING);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
