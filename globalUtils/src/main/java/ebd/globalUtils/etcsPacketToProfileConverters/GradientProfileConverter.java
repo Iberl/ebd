@@ -99,8 +99,8 @@ public class GradientProfileConverter {
         for (Packet_21.Packet_21_Gradient gradient : gradients) {
             totalDistance += gradient.D_GRADIENT * distanceFactor;
             if (gradient.G_A < 255) {
-                if (!gradient.Q_GDIR) 	{gp.addKnotToCurve(new Knot(totalDistance, - gradient.G_A * 1.0));}
-                else 					{gp.addKnotToCurve(new Knot(totalDistance, gradient.G_A * 1.0));}
+                if (!gradient.Q_GDIR) 	{gp.addKnotToCurve(new Knot(totalDistance, -(double)gradient.G_A));}
+                else 					{gp.addKnotToCurve(new Knot(totalDistance, (double)gradient.G_A));}
 
             }
             else {
@@ -144,11 +144,11 @@ public class GradientProfileConverter {
             if (gradient.G_A < 255) {
                 if (!gradient.Q_GDIR) 	{
                     gradientArray[currentIndex++] = totalDistance;
-                    gradientArray[currentIndex++] = - gradient.G_A * 1.0;
+                    gradientArray[currentIndex++] = - gradient.G_A;
                 }
                 else {
                     gradientArray[currentIndex++] = totalDistance;
-                    gradientArray[currentIndex++] = gradient.G_A * 1.0;
+                    gradientArray[currentIndex++] = gradient.G_A;
                 }
 
             }
