@@ -18,10 +18,15 @@ public class DMIUpdateEvent extends NormalEvent {
     private double currentPermSpeed;
     private double currentWarnSpeed;
     private double currentIntervSpeed;
+    private double tripDistance;
 
 
     /**
      * Constructs an Event
+<<<<<<< HEAD
+     * @param source ID from the module the event was sent by
+     * @param target ID from the module the event is adressed to
+=======
      *
      * @param source  ID from the module the event was sent by
      * @param targets ID from all modules the event is adressed to
@@ -30,6 +35,7 @@ public class DMIUpdateEvent extends NormalEvent {
      *
      * @param source ID from the module the event was sent by
      * @param target ID from all modules the event is adressed to
+>>>>>>> dev_trainSide
      * @param currentSpeed [m/s]
      * @param targetSpeed [m/s]
      * @param targetDistance
@@ -43,7 +49,7 @@ public class DMIUpdateEvent extends NormalEvent {
      */
     public DMIUpdateEvent(String source, String target, double currentSpeed, double targetSpeed, int targetDistance, double releaseSpeed,
                           SpeedInterventionLevel speedInterventionLevel, SpeedSupervisionState speedSupervisionState,
-                          double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed) {
+                          double currentIndSpeed, double currentPermSpeed, double currentWarnSpeed, double currentIntervSpeed, double tripDistance) {
         super(source, target);
         this.currentSpeed = currentSpeed;
         this.currentTargetSpeed = targetSpeed;
@@ -55,6 +61,7 @@ public class DMIUpdateEvent extends NormalEvent {
         this.currentPermSpeed = currentPermSpeed;
         this.currentWarnSpeed = currentWarnSpeed;
         this.currentIntervSpeed = currentIntervSpeed;
+        this.tripDistance = tripDistance;
     }
 
     /**
@@ -124,5 +131,7 @@ public class DMIUpdateEvent extends NormalEvent {
         return speedSupervisionState;
     }
 
-
+    public double getTripDistance() {
+        return this.tripDistance;
+    }
 }
