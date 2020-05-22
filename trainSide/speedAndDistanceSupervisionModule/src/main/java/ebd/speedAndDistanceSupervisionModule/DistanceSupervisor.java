@@ -90,6 +90,9 @@ public class DistanceSupervisor {
             this.inRSM = true;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true, this.curReleaseSpeed));
         }
+        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
+            this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
+        }
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));

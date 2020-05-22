@@ -340,12 +340,28 @@ public class DrivingDynamics {
             else {
                 if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
-                //TODO Fix Ebreak into rsm but with stopping before ch.targetReachedDistance. Target will never be reached because in rsm train can not start up again
                 switch (this.currentSil){
                     case NO_INTERVENTION:
-                        sendToLogEventSpeedSupervision(MovementState.BREAKING);
-                        this.dynamicState.setMovementState(MovementState.BREAKING);
-                        this.dynamicState.setBreakingModification(this.breakModifierForRSM);
+                        /*
+                        This control flow is necessary in case the train emergency breaks into RSM.
+                        This control flow allows the train accelerate again until the stopping reagion is reached.
+                        */
+                        if(!shouldHalt && this.dynamicState.getSpeed() == 0){
+                            sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
+                            this.dynamicState.setMovementState(MovementState.ACCELERATING);
+                            this.dynamicState.setAccelerationModification(1d);
+                            calculateModifier();
+                        }
+                        if(!shouldHalt && this.dynamicState.getSpeed() <= 1){
+                            sendToLogEventSpeedSupervision(MovementState.CRUISE);
+                            this.dynamicState.setMovementState(MovementState.CRUISE);
+                            calculateModifier();
+                        }
+                        else {
+                            sendToLogEventSpeedSupervision(MovementState.BREAKING);
+                            this.dynamicState.setMovementState(MovementState.BREAKING);
+                            this.dynamicState.setBreakingModification(this.breakModifierForRSM);
+                        }
                         break;
                     case APPLY_EMERGENCY_BREAKS:
                     default:
