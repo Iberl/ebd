@@ -116,7 +116,7 @@ V_warning_max = 58.33
 ######
 ###### Longs
 ######
-#Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
+#Time base in milli seconds since epoch. The default 1593522000000 equals 2020-06-30 15:00:00 UTC+2h
 #See timeAccFactor under Doubles
 timeBase = 1593522000000
 
