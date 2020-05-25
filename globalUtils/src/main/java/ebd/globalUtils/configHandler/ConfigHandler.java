@@ -114,7 +114,7 @@ boolean
     /**
      * Physics acceleration factor
      */
-    public double timeAccFactor = 0.5;
+    public double timeAccFactor = 1;
 
     /**
      * Release speed in [m/s]
@@ -245,6 +245,13 @@ boolean
      */
     public double V_warning_max = 58.33;
 
+    /*
+    Longs
+     */
+    /**
+     * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
+     */
+    public long timeBase = 1593522000000l;
 
     /*
     other
@@ -458,6 +465,14 @@ boolean
                     case "Double":
                         try {
                             field.set(this, Double.valueOf(split[1]));
+                        } catch (IllegalAccessException ignored) {
+                        }
+                        break;
+                        //Longs
+                    case "long":
+                    case "Long":
+                        try {
+                            field.set(this, Long.valueOf(split[1]));
                         } catch (IllegalAccessException ignored) {
                         }
                         break;
