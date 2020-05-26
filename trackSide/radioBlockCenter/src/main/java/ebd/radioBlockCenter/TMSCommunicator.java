@@ -57,9 +57,10 @@ public class TMSCommunicator extends Thread {
 						in.close();
 						client.close();
 					}
+					// TODO Timeout?
 				}
 			} catch(IOException e) {
-				System.err.println("Could not establish connection with new client");
+				System.err.println("Problem occurred while reading input stream.");
 				e.printStackTrace();
 			} finally {
 				out.close();
@@ -91,11 +92,15 @@ public class TMSCommunicator extends Thread {
 			ServerSocket server = new ServerSocket(_rbcServerPort);
 
 			while(true){
-				Socket client = server.accept();
-				System.out.println(AppTime.currentTimeMillis());
-				TMSClientHandler clientThread = new TMSClientHandler(client);
-				clients.add(clientThread);
-				pool.execute(clientThread);
+				try {
+					Socket           client       = server.accept();
+					TMSClientHandler clientThread = new TMSClientHandler(client);
+					clients.add(clientThread);
+					pool.execute(clientThread);
+				} catch(IOException e) {
+					System.err.println("Could not establish connection with new client");
+					e.printStackTrace();
+				}
 			}
 		} catch(IOException e) {
 			System.err.println("TMS Communication Server could not be established on port " + _rbcServerPort);
