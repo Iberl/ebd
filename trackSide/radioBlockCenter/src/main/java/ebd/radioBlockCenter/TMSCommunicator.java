@@ -42,6 +42,7 @@ public class TMSCommunicator extends Thread {
 				while(true) {
 					StringBuilder data = new StringBuilder();
 					while(in.ready()) {
+						// TODO SocketException
 						data.append(in.readLine());
 					}
 					System.out.println("RBC received: " + data.toString());
