@@ -1,5 +1,9 @@
 package ebd.drivingDynamics.util.conditions;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.drivingDynamics.util.conditions.abstracts.CurveBasedCondition;
+import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -10,8 +14,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -22,16 +24,18 @@ import java.util.function.BiFunction;
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison</p>
  * <p>The <b>value_t</b> key contains a time in seconds a which the maximum allowed speed is compared</p>
+ * <p>The <b>curveBase</b> key contains the ID of the curve this condition operates on. Either "c30" or "trip" </p>
  * <p>
- *      Example: The condition should evaluate to true if the train is currently slower than 50% of maximum speed in 120 seconds.
+ *      Example: The condition should evaluate to true if the train is currently slower than 50% of maximum speed in 120 seconds on the
+ *      trip profil.
  *      The JSON string would look like this:<br>
- *           {"type" : "v_t_rel", "condition" : {"op" : "<", "value" : 50, "value_t" = 120 }}<br>
+ *           {"type" : "v_t_rel", "condition" : {"op" : "<", "value" : 50, "value_t" : 120, "curveBase" : "trip" }}<br>
  *       The value of "condition" is passed to this function<br>
  * </p>
  *
  * @author Lars Schulze-Falck
  */
-public class RelativeFutureSpeedCondition extends CurveBasedCondition{
+public class RelativeFutureSpeedCondition extends CurveBasedCondition {
 
     private double speedPercentage;
     private BiFunction<Double,Double, Boolean> comparator;
@@ -44,6 +48,8 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
     private double maxTripSectionDistance;
 
     private String exceptionTarget = "all";
+    private BreakingCurve c30Curve;
+    private Double maxBreakinCurveDistance;
 
     /**
      * Builds an Instance out of a {@link JSONObject}
@@ -64,15 +70,18 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
         }
 
         double maxSpeed;
+        double curSpeed = trainDataVolatile.getCurrentSpeed();
+        double curSecDis = trainDataVolatile.getCurTripSectionDistance();
         switch (this.curveBase){
             case C30:
-                maxSpeed = trainDataVolatile.getCurrentCoastingPhaseSpeed();
-                //TODO wrong, needs a way to see breakingCurveGroup!
+                if((curSecDis + curSpeed * this.time) > this.maxBreakinCurveDistance){
+                    maxSpeed = 0;
+                }
+                else {
+                    maxSpeed = this.c30Curve.getPointOnCurve((curSecDis + curSpeed * this.time));
+                }
                 break;
             case TRIP_PROFILE:
-                double curSpeed = trainDataVolatile.getCurrentSpeed();
-                double curSecDis = trainDataVolatile.getCurTripSectionDistance();
-
                 if((curSecDis + curSpeed * this.time) > this.maxTripSectionDistance){
                     maxSpeed = 0;
                 }
@@ -84,7 +93,6 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
                 maxSpeed = 0d;
                 System.err.println(String.format("You have to add %s to this switch statement", this.curveBase));
         }
-        double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
         return this.comparator.apply(curSpeed,maxSpeed * this.speedPercentage);
     }
@@ -112,6 +120,14 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
             this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
         }
+    }
+
+    @Subscribe
+    public void newBreakingCurveGroup(NewBreakingCurveEvent nbce){
+        if(!vaildEventTarget(nbce.target)) return;
+        this.c30Curve = nbce.breakingCurveGroup.getServiceCoastingPhaseCurve();
+        this.maxBreakinCurveDistance = this.c30Curve.getHighestXValue();
+
     }
 
     @Override
@@ -167,5 +183,12 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition{
         }
         else throw new DDBadDataException("The key curveBase was missing from a Condition");
 
+    }
+
+    private boolean vaildEventTarget(String eventTarget){
+        if((eventTarget.contains("dd") || eventTarget.contains("all"))){
+            return true;
+        }
+        return false;
     }
 }

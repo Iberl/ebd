@@ -1,5 +1,9 @@
 package ebd.drivingDynamics.util.conditions;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.drivingDynamics.util.conditions.abstracts.CurveBasedCondition;
+import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -10,8 +14,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.BiFunction;
 
 /**
@@ -22,10 +24,12 @@ import java.util.function.BiFunction;
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a speed in [k/m] in the range of [0, 600]</p>
  * <p>The <b>value_t</b> key contains a time in seconds a which the maximum allowed speed is compared</p>
+ * <p>The <b>curveBase</b> key contains the ID of the curve this condition operates on. Either "c30" or "trip" </p>
  * <p>
- *      Example: The condition should evaluate to true if the trains max speed in 120 seconds is slower than 50 km/h
+ *      Example: The condition should evaluate to true if the trains max speed in 120 seconds is slower than 50 km/h on
+ *      the trip profil.
  *      The JSON string would look like this:<br>
- *           {"type" : "v_t_m", "condition" : {"op" : "<", "value" : 50, "value_t" = 120 }}<br>
+ *           {"type" : "v_t_m", "condition" : {"op" : "<", "value" : 50, "value_t" : 120, "curveBase" : "trip"}}<br>
  *       The value of "condition" is passed to this class<br>
  * </p>
  *
@@ -49,7 +53,9 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
     /**
      * in [m]
      */
+    private double maxBreakinCurveDistance;
     private double maxTripSectionDistance;
+    private BreakingCurve c30Curve;
 
 
     /**
@@ -67,15 +73,19 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
             return false;
         }
         double maxSpeed;
+        double curSpeed = trainDataVolatile.getCurrentSpeed();
+        double curSecDis = trainDataVolatile.getCurTripSectionDistance();
         switch (this.curveBase){
+
             case C30:
-                maxSpeed = trainDataVolatile.getCurrentCoastingPhaseSpeed();
-                //TODO wrong, needs a way to see breakingCurveGroup!
+                if((curSecDis + curSpeed * this.time) > this.maxBreakinCurveDistance){
+                    maxSpeed = 0;
+                }
+                else {
+                    maxSpeed = this.c30Curve.getPointOnCurve((curSecDis + curSpeed * this.time));
+                }
                 break;
             case TRIP_PROFILE:
-                double curSpeed = trainDataVolatile.getCurrentSpeed();
-                double curSecDis = trainDataVolatile.getCurTripSectionDistance();
-
                 if((curSecDis + curSpeed * this.time) > this.maxTripSectionDistance){
                     maxSpeed = 0;
                 }
@@ -98,9 +108,7 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
      */
     @Subscribe
     public void updateTripProfile(DDUpdateTripProfileEvent utpe){
-        if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
-            return;
-        }
+        if(!vaildEventTarget(utpe.target)) return;
         this.tripProfile = utpe.tripProfile;
 
         if(this.tripProfile instanceof BackwardSpline){
@@ -114,6 +122,14 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
             this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE));
         }
+    }
+
+    @Subscribe
+    public void newBreakingCurveGroup(NewBreakingCurveEvent nbce){
+        if(!vaildEventTarget(nbce.target)) return;
+        this.c30Curve = nbce.breakingCurveGroup.getServiceCoastingPhaseCurve();
+        this.maxBreakinCurveDistance = this.c30Curve.getHighestXValue();
+
     }
 
     @Override
@@ -169,5 +185,12 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
         }
         else throw new DDBadDataException("The key curveBase was missing from a Condition");
 
+    }
+
+    private boolean vaildEventTarget(String eventTarget){
+        if((eventTarget.contains("dd") || eventTarget.contains("all"))){
+            return true;
+        }
+        return false;
     }
 }

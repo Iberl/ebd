@@ -1,5 +1,7 @@
-package ebd.drivingDynamics.util.conditions;
+package ebd.drivingDynamics.util.conditions.helper;
 
+import ebd.drivingDynamics.util.conditions.*;
+import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;

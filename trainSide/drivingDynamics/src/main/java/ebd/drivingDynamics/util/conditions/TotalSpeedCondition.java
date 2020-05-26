@@ -1,8 +1,8 @@
 package ebd.drivingDynamics.util.conditions;
 
+import ebd.drivingDynamics.util.conditions.abstracts.Condition;
+import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 
@@ -41,11 +41,10 @@ public class TotalSpeedCondition extends Condition {
         if(jsonObject.keySet().contains("value")){
 
             Object tempObject = jsonObject.get("value");
-            String tempObjectName = tempObject.getClass().getSimpleName();
-            if(tempObjectName.equals("Long")){
+            if(tempObject instanceof Long){
                 speedTotal = ((Long)tempObject).doubleValue() / 3.6; //To [m/s]
             }
-            else if(tempObjectName.equals("Double")){
+            else if(tempObject instanceof Double){
                 speedTotal = (Double)tempObject / 3.6; //To [m/s]
             }
             else throw new DDBadDataException("TotalSpeedCondition value was not a number");
