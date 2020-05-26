@@ -1,5 +1,6 @@
 package ebd.radioBlockCenter;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.radioBlockCenter.ReceivedTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
 import ebd.rbc_tms.Message;
@@ -20,7 +21,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TMSCommunicator {
+public class TMSCommunicator extends Thread {
 
 	public class TMSClientHandler implements Runnable {
 
@@ -72,10 +73,11 @@ public class TMSCommunicator {
 
 	}
 
-	private final String _moduleID = "tmsServer";
+	private final String _moduleID      = "tmsServer";
 	private final String _tmsEndpointID = "tmsEndpoint";
-	private final String _ip = "localhost";
-	private final int _port = 2223;
+	private final String _ip            = "localhost";
+	private final int    _tmsServerPort = 22223;
+	private final int	 _rbcServerPort = 22224;
 
 	EventBus _localBus;
 
@@ -83,18 +85,20 @@ public class TMSCommunicator {
 
 	ExecutorService pool = Executors.newCachedThreadPool();
 
-	public TMSCommunicator() {
+	@Override
+	public void run() {
 		try {
-			ServerSocket server = new ServerSocket(_port);
+			ServerSocket server = new ServerSocket(_rbcServerPort);
 
 			while(true){
 				Socket client = server.accept();
+				System.out.println(AppTime.currentTimeMillis());
 				TMSClientHandler clientThread = new TMSClientHandler(client);
 				clients.add(clientThread);
 				pool.execute(clientThread);
 			}
 		} catch(IOException e) {
-			System.err.println("TMS Communication Server could not be established on port " + _port);
+			System.err.println("TMS Communication Server could not be established on port " + _rbcServerPort);
 			e.printStackTrace();
 		}
 	}
@@ -104,7 +108,7 @@ public class TMSCommunicator {
 		if(!Objects.equals(event.target, _moduleID)) return;
 
 		try {
-			Socket socket = new Socket(_ip, _port);
+			Socket socket = new Socket(_ip, _tmsServerPort);
 			PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 			String messageJSON = event.message.parseToJson();
 			output.print(messageJSON);

@@ -11,11 +11,11 @@ import ebd.rbc_tms.message.*;
 import ebd.rbc_tms.payload.Payload_00;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.MA;
+import jdk.jshell.spi.ExecutionControl;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,9 +28,6 @@ import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_3;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_33;
 
 public class TMSEndpoint {
-
-	private final String _ip = "localhost";
-	private final int _port = 2223;
 
 	private final String _moduleID = "tmsEndpoint";
 	private final String _tmsCommunicatorID = "tmsCommunicator";
@@ -144,6 +141,15 @@ public class TMSEndpoint {
 	public void handleMessage(Message_00 message) {
 		// "Error" Messages
 		// TODO Handle Response
+		Conversation conversation = conversations.get(message.getHeader().uuid);
+		int type = message.getHeader().type;
+		switch(type) {
+			case 0: {
+				// Accepted
+				// TODO Differentiations needed?
+				conversation.close();
+			}
+		}
 	}
 
 	/**
@@ -195,7 +201,7 @@ public class TMSEndpoint {
 	public void handleMessage(@NotNull Message_20 message) {
 		// "Position Report Request" Messages
 		// TODO Handle PositionReportRequest
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -230,7 +236,7 @@ public class TMSEndpoint {
 	public void handleMessage(@NotNull Message_22 message) {
 		// "Request To Shorten MA" Messages
 		// TODO Handle Request to Shorten MA
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -243,7 +249,7 @@ public class TMSEndpoint {
 	public void handleMessage(@NotNull Message_23 message) {
 		// "Conditional Emergency Stop" Messages
 		// TODO Handle Conditional EM Stop
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -256,7 +262,7 @@ public class TMSEndpoint {
 	public void handleMessage(@NotNull Message_24 message) {
 		// "Unconditional Emergency Stop" Messages
 		// TODO Handle Unconditional EM Stop
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -269,6 +275,6 @@ public class TMSEndpoint {
 	public void handleMessage(@NotNull Message_25 message) {
 		// "Revocation Of Emergency Stop" Messages
 		// TODO Handle Revocation of EM Stop
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 }
