@@ -19,16 +19,16 @@ public class NewTrainEvent extends NormalEvent {
      * Constructs an Event
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is addressed to
+     * @param target ID from all modules the event is addressed to
      */
     public NewTrainEvent(String source,
-                         List<String> targets,
+                         String target,
                          int etcsID,
                          int trainConfigID,
                          int infrastructureID,
                          String scheduleID,
                          int rbcID) {
-        super(source, targets);
+        super(source, target);
         this.etcsID = etcsID;
         this.trainConfigID = trainConfigID;
         this.infrastructureID = infrastructureID;

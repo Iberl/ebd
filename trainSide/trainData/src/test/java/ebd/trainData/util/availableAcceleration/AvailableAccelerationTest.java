@@ -32,7 +32,7 @@ class AvailableAccelerationTest {
         String target = "all";
         RouteData routeData = new RouteData(eb);
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
-        TrainData trainData = new TrainData(eb);
+        TrainData trainData = new TrainData(eb,1,192,3);
 
         eb.post(new RouteDataChangeEvent("test",target, "packet_21", getp21()));
         AvailableAcceleration aa = new AvailableAcceleration(eb);

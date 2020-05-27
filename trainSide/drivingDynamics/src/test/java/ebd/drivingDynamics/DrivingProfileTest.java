@@ -20,7 +20,7 @@ class DrivingProfileTest {
     static void setTrainDataVolatile(){
         Testhandler testhandler = new Testhandler();
         ConfigHandler.getInstance().useTrainConfiguratorTool = true;
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 33d, 34d, null, null, null, null, null, null, null);
+        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(1, 192, 3, null, 33d, 34d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
 
     }

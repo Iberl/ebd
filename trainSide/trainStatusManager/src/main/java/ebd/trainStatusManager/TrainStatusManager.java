@@ -63,8 +63,6 @@ public class TrainStatusManager implements Runnable {
     private Thread tsmThread = new Thread(this);
 
     private String source;
-    private List<String> scenarioTarget;
-    private List<String> rbcTarget;
 
     /*
     Handlers
@@ -106,8 +104,6 @@ public class TrainStatusManager implements Runnable {
         this.etcsTrainID = etcsTrainID;
         this.rbcID = rbcID;
         this.source = "tsm;T=" + this.etcsTrainID;
-        this.scenarioTarget = Collections.singletonList("szenario");
-        this.rbcTarget = Collections.singletonList("mr;R=" + this.rbcID);
 
         setUpTrain(trainConfigID, infrastructureID, rbcID);
         this.tsmThread.start();
@@ -155,7 +151,7 @@ public class TrainStatusManager implements Runnable {
 
 
         if(ch.debug){
-            savingBreakingCurves(nbce);
+            saveBreakingCurvesToFile(nbce);
         }
     }
 
@@ -214,7 +210,7 @@ public class TrainStatusManager implements Runnable {
     public void kill() {
         this.clock.stop();
         this.infrastructureClientConnector.disconnect();
-        this.globalEventBus.post(new RemoveTrainEvent( this.source, this.rbcTarget, this.etcsTrainID));
+        this.globalEventBus.post(new RemoveTrainEvent( this.source, "mr;R=" + this.rbcID, this.etcsTrainID));
         synchronized (this){
             this.notify();
         }
@@ -284,7 +280,7 @@ public class TrainStatusManager implements Runnable {
         changesForTD.put("currentPosition",curPos);
         changesForTD.put("currentSpeed", 0d);
         changesForTD.put("releaseSpeed", ch.releaseSpeed);
-        this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"),changesForTD));
+        this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", "td",changesForTD));
 
         this.clock = new Clock(this.localEventBus);
         this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
@@ -294,13 +290,13 @@ public class TrainStatusManager implements Runnable {
 
     private void connectToRBC() {
         Position curPos = new Position(0,true, new InitalLocation());
-        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, Collections.singletonList("all"),curPos));
+        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, "all",curPos));
         Message_155 msg155 = new Message_155();
         long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
         msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), msg155, Collections.singletonList("mr;R=" + this.rbcID)));
-        this.localEventBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Send communication initiation to RBC " + this.rbcID));
+        this.localEventBus.post(new SendMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
+        this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + this.rbcID));
     }
 
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
@@ -343,9 +339,7 @@ public class TrainStatusManager implements Runnable {
                 writer.close();
 
             } catch (IOException e1) {
-                List<String> eventTargets = new ArrayList<>();
-                eventTargets.add("tsm;");
-                localEventBus.post(new BreakingCurveExceptionEvent("bcc", eventTargets, nbce, e1));
+                localEventBus.post(new BreakingCurveExceptionEvent("bcc", "tsm", nbce, e1));
             }
         }
     }
