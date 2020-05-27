@@ -6,14 +6,13 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.InitFileHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.clients.InfrastructureClient;
 import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
@@ -50,7 +49,7 @@ public class Szenario implements Runnable {
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
             for(int etcsID : InitFileHandler.getInstance().getEtcsIDs()){
-                ms.send(new SendMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
+                ms.send(new SendETCSMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
             }
 
         }
@@ -165,13 +164,7 @@ public class Szenario implements Runnable {
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", "log", msg));
 
-        Route a = new Route("AB", 1000, new int[]{0,100,900,80}, new int[]{0,1,750,0});
-        List<Route> listRoute = new ArrayList<>();
-        listRoute.add(a);
-        Map<Integer, List<Route>> mapRoute = new HashMap<>();
-
-        for(int etcsID : this.iFH.getEtcsIDs()) mapRoute.put(etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 1);
+        this.rbc = new RadioBlockCenter(); //TODO integer ID?
 
         try {
             this.tm = new TrainManager();

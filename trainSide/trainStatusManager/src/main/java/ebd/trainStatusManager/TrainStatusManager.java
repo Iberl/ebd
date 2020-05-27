@@ -10,7 +10,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -190,7 +190,7 @@ public class TrainStatusManager implements Runnable {
         Packet_0 p0 = new Packet_0();
         msg150.PACKET_POSITION = p0;
         this.infrastructureClientConnector.disconnect();
-        SendMessageEvent sme = new SendMessageEvent("tsm", "ms", msg150, "mr;R=" + this.rbcID);
+        SendETCSMessageEvent sme = new SendETCSMessageEvent("tsm", "ms", msg150, "mr;R=" + this.rbcID);
         this.messageSender.send(sme);
         disconnect(new DisconnectEvent("tsm", "tsm"));
     }
@@ -227,7 +227,7 @@ public class TrainStatusManager implements Runnable {
         long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN; //Resolution of T_Train is 10 ms, format is int
         msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendMessageEvent("tsm", "ms", msg155, "mr;R=" + rbcID));
+        this.localEventBus.post(new SendETCSMessageEvent("tsm", "ms", msg155, "mr;R=" + rbcID));
         this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + rbcID));
     }
 
@@ -295,7 +295,7 @@ public class TrainStatusManager implements Runnable {
         long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
         msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
+        this.localEventBus.post(new SendETCSMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
         this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + this.rbcID));
     }
 
