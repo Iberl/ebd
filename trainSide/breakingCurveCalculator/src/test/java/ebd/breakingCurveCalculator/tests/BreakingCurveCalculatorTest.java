@@ -5,6 +5,7 @@ import org.greenrobot.eventbus.EventBus;
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Lars Schulze-Falck
@@ -18,12 +19,12 @@ public class BreakingCurveCalculatorTest {
 	 * This method runs a breaking curve creation process, starting with a {@link BreakingCurveRequestEvent} from either
 	 * randomly generated data or set data. It is then followed by a {@link BreakingCurveLimitedRequestEvent}.
 	 * The events are monitored in the {@link ebd.breakingCurveCalculator.tests.TestEventHandler}
-	 * @param args No function
 	 *
 	 * @author Lars Schulze-Falck
 	 * @throws InterruptedException If the timer is interrupted
 	 */
-	public static void main(String[] args) throws InterruptedException {
+	@Test
+	public void mainTest() throws InterruptedException {
 		
 		//SETUP
 		//Datasets
