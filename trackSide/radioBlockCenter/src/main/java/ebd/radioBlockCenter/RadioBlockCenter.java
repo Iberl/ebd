@@ -1,15 +1,11 @@
 package ebd.radioBlockCenter;
 
-import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
+import ebd.logging.Logging;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
-import ebd.rbc_tms.message.Message_01;
-import ebd.rbc_tms.message.Message_15;
-import ebd.rbc_tms.payload.Payload_01;
-import ebd.rbc_tms.payload.Payload_15;
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class RadioBlockCenter {
@@ -17,6 +13,7 @@ public class RadioBlockCenter {
     EventBus localBus = new EventBus();
     String rbcID = "rbc";
     String tmsEndpointID = "tmsEndpoint";
+    Logging logger;
 
     TMSCommunicator tmsCommunicator;
     TMSEndpoint tmsEndpoint;
@@ -30,6 +27,12 @@ public class RadioBlockCenter {
     public RadioBlockCenter() {
         tmsCommunicator = new TMSCommunicator();
         tmsCommunicator.start();
+        try {
+            this.logger = new Logging(localBus, 1, "RBC ");
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
         tmsEndpoint = new TMSEndpoint(rbcID, localBus, registeredTMS, trainIDMap);
         etcsEndpoint = new ETCSEndpoint(rbcID, localBus, registeredTMS, trainIDMap);
 

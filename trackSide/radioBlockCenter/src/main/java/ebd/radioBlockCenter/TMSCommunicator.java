@@ -1,8 +1,10 @@
 package ebd.radioBlockCenter;
 
 import ebd.globalUtils.appTime.AppTime;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.radioBlockCenter.ReceivedTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
+import ebd.logging.Logging;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -41,10 +43,8 @@ public class TMSCommunicator extends Thread {
 			try {
 				while(true) {
 					StringBuilder data = new StringBuilder();
-					while(in.ready()) {
-						// TODO SocketException
-						data.append(in.readLine());
-					}
+					// TODO SocketException
+					data.append(in.readLine());
 					System.out.println("RBC received: " + data.toString());
 
 					try {
@@ -75,7 +75,7 @@ public class TMSCommunicator extends Thread {
 
 	}
 
-	private final String _moduleID      = "tmsServer";
+	private final String _moduleID      = "tmsCommunicator";
 	private final String _tmsEndpointID = "tmsEndpoint";
 	private final String _ip            = "localhost";
 	private final int    _tmsServerPort = 22223;
@@ -113,18 +113,19 @@ public class TMSCommunicator extends Thread {
 	public void sendMessage(@NotNull SendTMSMessageEvent event) {
 		if(!Objects.equals(event.target, _moduleID)) return;
 
+		// TODO Queue
 		try {
 			Socket socket = new Socket(_ip, _tmsServerPort);
+			// TODO Connection Exception?
 			PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
 			String messageJSON = event.message.parseToJson();
-			output.print(messageJSON);
-			System.out.println("RBC sending: " + messageJSON);
+			output.println(messageJSON);
+			_localBus.post(new ToLogEvent("com", "log", "RBC sending: " + messageJSON));
 
 			BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			StringBuilder data = new StringBuilder();
-			while(input.ready()) {
-				data.append(input.readLine());
-			}
+			// TODO Multiple input lines possible ?
+			data.append(input.readLine());
 
 			System.out.println("RBC received: " + data.toString());
 			Message response = Message.generateFrom(data.toString());

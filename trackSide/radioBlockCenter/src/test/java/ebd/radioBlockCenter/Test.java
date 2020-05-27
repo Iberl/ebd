@@ -14,7 +14,8 @@ import ebd.rbc_tms.util.TrainInfo;
 
 public class Test {
 
-    public static void main(String[] args) {
+    @org.junit.jupiter.api.Test
+    public void test() {
         RadioBlockCenter rbc = new RadioBlockCenter();
         rbc.localBus.post(new SendTMSMessageEvent(rbc.rbcID, rbc.tmsEndpointID, new Message_01("all", "rbc", new Payload_01(
                 AppTime.currentTimeMillis(), 1, "0.3"))));
