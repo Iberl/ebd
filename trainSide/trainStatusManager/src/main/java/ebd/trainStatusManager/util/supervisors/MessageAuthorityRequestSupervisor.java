@@ -3,20 +3,14 @@ package ebd.trainStatusManager.util.supervisors;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.etcsPacketToSplineConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewMaMessage;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequest;
-import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_132;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trainpackets.Packet_0;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.routeData.RouteDataVolatile;
-import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
@@ -24,9 +18,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the movement authority requests. It takes the movement request parameter
@@ -81,7 +72,7 @@ public class MessageAuthorityRequestSupervisor {
         double t_mar = trainDataVolatile.getT_MAR();
         double t_timeoutrqst = trainDataVolatile.getT_TIMEOUTRQST();
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
-        //TODO Do the calculation of time to EOL correctly!
+        //TODO Do the calculation of time to EOL with higher precision
         double distanceToEOL = 0;
         if(this.breakingCurve != null){
             distanceToEOL = this.breakingCurve.getHighestXValue();
@@ -89,9 +80,12 @@ public class MessageAuthorityRequestSupervisor {
         }
 
         double curSpeed = trainDataVolatile.getCurrentSpeed();
-        double timeToEOL = distanceToEOL / curSpeed;
+        double timeToEOL;
         if(distanceToEOL == 0 || curSpeed == 0){
             timeToEOL = 0;
+        }
+        else {
+            timeToEOL = distanceToEOL / curSpeed;
         }
         if(t_mar != ETCSVariables.T_MAR && t_mar < ETCSVariables.T_MAR_INFINITY){
             if (timeToEOL <= t_mar){
@@ -158,9 +152,9 @@ public class MessageAuthorityRequestSupervisor {
         message132.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
         message132.PACKET_POSITION = packet0;
 
-        List<String> destinations = Collections.singletonList("mr;R=" + this.rbcID);
-        this.localBus.post(new SendMessageEvent("tsm", Collections.singletonList("ms"), message132, destinations));
-        this.localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Sending a MA Request"));
+        String destination = "mr;R=" + this.rbcID;
+        this.localBus.post(new SendMessageEvent("tsm", "ms", message132, destination));
+        this.localBus.post(new ToLogEvent("tsm", "log", "Sending a MA Request"));
 
         this.waitingOnMA = true;
     }

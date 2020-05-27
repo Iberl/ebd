@@ -30,8 +30,8 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is adressed to
+	 * @param target
+	 *          ID from from the target module or "all" if more then one target should be reached.
 	 *
 	 * @param id
 	 * 			String to identify the breaking curve
@@ -61,12 +61,12 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 
 	 */
-	public BreakingCurveRequestEvent(String source, List<String> targets, String id, ForwardSpline breakingPower,
+	public BreakingCurveRequestEvent(String source, String target, String id, ForwardSpline breakingPower,
 									 ForwardSpline emergencyBreakingPower, Packet_15 packet15, Packet_21 packet21,
 									 double currentGradient, Position referencePosition, Packet_27 packet27,
 									 int NC_CDTRAIN, double L_TRAIN,
 									 double currentSpeedLimit, int maxSpeedofTrain) {
-		super(source, targets);
+		super(source, target);
 		this.id = id;
 		this.breakingPower = breakingPower;
 		this.emergencyBreakingPower = emergencyBreakingPower;
@@ -86,8 +86,8 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * Constructor setting all fields
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is addressed to
+	 * @param target
+	 *          ID from from the target module or "all" if more then one target should be reached.
 	 * @param id
 	 * 			String to identify the breaking curve
 	 * @param breakingPower
@@ -119,11 +119,11 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			The maximum Speed of the train in [km/h]. This value will be divided by 5 in the constructor,
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 	 */
-	public BreakingCurveRequestEvent(String source, List<String> targets, String id,ForwardSpline breakingPower, ForwardSpline emergencyBreakingPower,
+	public BreakingCurveRequestEvent(String source, String target, String id,ForwardSpline breakingPower, ForwardSpline emergencyBreakingPower,
 									 Packet_15 packet15, Packet_21 packet21, double currentGradient,
 									 Position referencePosition, Packet_27 packet27, List<Packet_65> listPacket65,
 									 int NC_CDTRAIN, int NC_TRAIN, double L_TRAIN, double currentSpeedLimit, int maxSpeedofTrain) {
-		super(source,targets);
+		super(source,target);
 		this.id = id;
 		this.breakingPower = breakingPower;
 		this.emergencyBreakingPower = emergencyBreakingPower;

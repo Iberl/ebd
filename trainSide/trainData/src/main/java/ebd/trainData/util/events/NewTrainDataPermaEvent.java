@@ -8,8 +8,8 @@ import java.util.List;
 public class NewTrainDataPermaEvent extends NormalEvent {
     public final TrainDataPerma trainDataPerma;
 
-    public NewTrainDataPermaEvent(String source, List<String> eventTargets, TrainDataPerma trainDataPerma) {
-        super(source, eventTargets);
+    public NewTrainDataPermaEvent(String source, String eventTarget, TrainDataPerma trainDataPerma) {
+        super(source, eventTarget);
         this.trainDataPerma = trainDataPerma;
     }
 }

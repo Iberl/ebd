@@ -156,7 +156,7 @@ public class RadioBlockCenter {
 
         this.bTG = createBTG(this.localBus);
 
-        this.localBus.post(new ToLogEvent("rbc", Collections.singletonList("log"), "RBC initialized"));
+        this.localBus.post(new ToLogEvent("rbc", "log", "RBC initialized"));
     }
 
     private BaliseTelegramGenerator createBTG(EventBus localBus) {

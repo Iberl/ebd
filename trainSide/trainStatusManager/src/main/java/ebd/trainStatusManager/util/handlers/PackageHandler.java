@@ -38,8 +38,8 @@ public class PackageHandler {
             linkingMap.put(link.NID_BG, tempLoc);
             prevLoc = link.NID_BG;
         }
-        localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "linkingInformation", linkingMap));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Received new Linking Information [Packet 5]"));
+        localBus.post(new RouteDataChangeEvent("tsm", "rd", "linkingInformation", linkingMap));
+        localBus.post(new ToLogEvent("tsm", "log", "Received new Linking Information [Packet 5]"));
     }
 
     public static void p57(EventBus localBus, Packet_57 p57){
@@ -59,9 +59,9 @@ public class PackageHandler {
         changes.put("T_MAR", t_mar);
         changes.put("T_CYCRQST", t_cycrqst);
         changes.put("T_TIMEOUTRQST", t_timeoutrqst);
-        localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
-        localBus.post( new NewMaRequestParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new MA Request Parameters [Packet 57]"));
+        localBus.post(new TrainDataMultiChangeEvent("tsm", "td", changes));
+        localBus.post( new NewMaRequestParametersEvent("tsm", "all"));
+        localBus.post(new ToLogEvent("tsm", "log", "Got new MA Request Parameters [Packet 57]"));
 
     }
 
@@ -100,15 +100,15 @@ public class PackageHandler {
         changes.put("distanceCycleLocation", d_cycle);
         changes.put("M_LOC", m_loc);
         changes.put("incrPosRprtDist", iprd);
-        localBus.post(new TrainDataMultiChangeEvent("tsm", Collections.singletonList("td"), changes));
-        localBus.post( new NewPositionReportParametersEvent("tsm", Collections.singletonList("all")));
-        localBus.post(new ToLogEvent("tsm", Collections.singletonList("log"), "Got new Position Report Parameters [Packet 58]"));
+        localBus.post(new TrainDataMultiChangeEvent("tsm", "td", changes));
+        localBus.post( new NewPositionReportParametersEvent("tsm", "all"));
+        localBus.post(new ToLogEvent("tsm", "log", "Got new Position Report Parameters [Packet 58]"));
     }
 
     public static void p80(EventBus localBus, Packet_80 p80){
         //TODO FUll handeling of Packet 80 in a mode supervisor
         if(p80.mode.M_MAMODE == ETCSVariables.M_MAMODE_SHUNTING){
-            localBus.post(new RouteDataChangeEvent("tsm", Collections.singletonList("rd"), "lastMABeforeEndOfMission", true));
+            localBus.post(new RouteDataChangeEvent("tsm", "rd", "lastMABeforeEndOfMission", true));
         }
     }
 }

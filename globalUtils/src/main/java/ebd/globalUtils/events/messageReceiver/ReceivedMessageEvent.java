@@ -22,15 +22,15 @@ public class ReceivedMessageEvent extends NormalEvent {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is adressed to
+	 * @param target
+	 *          ID from from the target module or "all" if more then one target should be reached.
 	 * @param message
 	 *          The Message received by Message Receiver
 	 * @param sender
 	 *          Sender ID of the received Message
 	 */
-	public ReceivedMessageEvent(String source, List<String> targets, Message message, String sender) {
-		super(source, targets);
+	public ReceivedMessageEvent(String source, String target, Message message, String sender) {
+		super(source, target);
 		this.message = message;
 		this.sender = sender;
 	}

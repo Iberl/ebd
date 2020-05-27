@@ -11,9 +11,9 @@ public class DDUnlockEvent extends NormalEvent {
      * TrainDataVolatile and RoutDataVolatile have to be set completely befor unlocking!
      *
      * @param source  ID from the module the event was sent by
-     * @param targets ID from all modules the event is adressed to
+     * @param target ID from from the target module or "all" if more then one target should be reached.
      */
-    public DDUnlockEvent(String source, List<String> targets) {
-        super(source, targets);
+    public DDUnlockEvent(String source, String target) {
+        super(source, target);
     }
 }

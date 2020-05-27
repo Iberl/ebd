@@ -27,7 +27,7 @@ public class PipeHandler extends Handler {
         this.pos = pos;
         this.out = new BufferedWriter(new OutputStreamWriter(this.pos));
         PipedInputStream pis = new PipedInputStream(this.pos);
-        EventBus.getDefault().postSticky(new LogToGUIPipeEvent("log", Collections.singletonList("szenario"), pis));
+        EventBus.getDefault().postSticky(new LogToGUIPipeEvent("log", "szenario", pis));
     }
 
     @Override

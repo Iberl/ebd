@@ -26,7 +26,7 @@ public class InfrastructureClientConnector {
     private int etcsID;
     private int infrastructureID;
     private String eventSource;
-    private List<String> targets = Collections.singletonList("szenario");
+    private String target = "szenario";
 
     private int tickCounter = 0;
     private int updateMultiplier;
@@ -98,13 +98,13 @@ public class InfrastructureClientConnector {
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
-        this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.targets,this.infrastructureID,(int)curVlong));
+        this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
     }
 
     /**
      * Signals the infrastructure client that this trains should be terminated.
      */
     public void disconnect() {
-        this.globalEventBus.post(new TerminateTrainEvent(this.eventSource,this.targets,this.infrastructureID));
+        this.globalEventBus.post(new TerminateTrainEvent(this.eventSource,this.target,this.infrastructureID));
     }
 }

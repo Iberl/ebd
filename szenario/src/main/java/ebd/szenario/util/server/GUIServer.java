@@ -136,7 +136,7 @@ public class GUIServer implements Runnable {
                     "'trn', 'rbc', 'gb' or 'all'. Could not connect");
             client.close();
             IllegalArgumentException iae = new IllegalArgumentException("Entity name " + entityName + " not found");
-            EventBus.getDefault().post(new ExceptionEvent("szenario", Collections.singletonList("szenario"),
+            EventBus.getDefault().post(new ExceptionEvent("szenario", "szenario",
                     new NotCausedByAEvent(), iae, ExceptionEventTyp.WARNING));
         }
     }

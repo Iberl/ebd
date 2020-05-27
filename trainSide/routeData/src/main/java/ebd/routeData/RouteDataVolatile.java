@@ -22,30 +22,30 @@ public class RouteDataVolatile {
     //TODO Respect SRS 3 A.3.6
     //TODO Respect SRS 3 A.3.4
     /**
-     * Reference Location to which all packets are relative to.
+     * Reference Location to which all packets are relative to, updated by the MessageHandler in TSM.
      */
     @Nullable
     protected volatile Location refLocation = null;
     /**
-     * A {@link Packet_15} containing a movement authority
+     * A {@link Packet_15} containing a movement authority, updated by the MessageHandler in TSM
      */
     @Nullable
     protected volatile Packet_15 packet_15 = null;
 
     /**
-     * A @{@link Packet_21} containing a gradient profile
+     * A @{@link Packet_21} containing a gradient profile, updated by the MessageHandler in TSM
      */
     @Nullable
     protected volatile Packet_21 packet_21 = null;
 
     /**
-     * A {@link Packet_27} containing a static speed profile
+     * A {@link Packet_27} containing a static speed profile, updated by the MessageHandler in TSM
      */
     @Nullable
     protected volatile Packet_27 packet_27 = null;
 
     /**
-     * A list of @{@link Packet_65} containing Tempory Speed Restrictions
+     * A list of @{@link Packet_65} containing Tempory Speed Restrictions, updated by the MessageHandler in TSM
      */
     @Nullable
     protected volatile List<Packet_65> packet_65 = null;
@@ -62,7 +62,7 @@ public class RouteDataVolatile {
     protected volatile boolean lastMABeforeEndOfMission = false;
 
     /**
-     * Linking Information
+     * Linking Information, updated by the MessageHandler in TSM
      */
     @Nullable
     protected volatile HashMap<Integer,Location> linkingInformation = null;

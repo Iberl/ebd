@@ -19,9 +19,6 @@ import ebd.trainData.util.exceptions.TDBadDataException;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,8 +31,8 @@ public class TrainData {
     private TrainDataPerma trainDataPerma;
     private TrainDataVolatile trainDataVolatile;
 
-    private List<String> exceptionTargets = new ArrayList<>();
-    private List<String> eventTargets = new ArrayList<>();
+    private String exceptionTarget = "tsm;";
+    private String eventTarget = "all;";
 
     /**
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
@@ -47,18 +44,16 @@ public class TrainData {
     public TrainData(EventBus localBus, int etcsID, int trainConfigID, int infrastructureID){
         this.localBus = localBus;
         this.localBus.register(this);
-        this.exceptionTargets.add("tsm;"); //TODO check right recipient
-        this.eventTargets.add("all;");
         try {
             this.trainDataPerma = new TrainDataPerma();
         } catch (IOException | ParseException e) {
-            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
-            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTargets, new NotCausedByAEvent(), e));
+            localBus.post(new TrainDataExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e));
         }
-        this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTargets, this.trainDataPerma));
+        this.localBus.postSticky(new NewTrainDataPermaEvent("td", this.eventTarget, this.trainDataPerma));
         this.trainDataVolatile = new TrainDataVolatile(etcsID, trainConfigID, infrastructureID, localBus);
-        localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTargets, this.trainDataVolatile));
+        localBus.postSticky(new NewTrainDataVolatileEvent("td", this.eventTarget, this.trainDataVolatile));
         sendToLog();
     }
 
@@ -75,7 +70,7 @@ public class TrainData {
             changeTrainDataVolatile(trainDataChangeEvent.fieldName,trainDataChangeEvent.fieldValue);
             //this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         } catch (IllegalAccessException e) {
-           this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataChangeEvent,e));
+           this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTarget,trainDataChangeEvent,e));
         }
     }
 
@@ -94,7 +89,7 @@ public class TrainData {
             }
             //this.localBus.postSticky(new NewTrainDataVolatileEvent("td;", this.eventTargets, this.trainDataVolatile));
         }catch (IllegalAccessException | IllegalArgumentException e){
-            this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTargets,trainDataMultiChangeEvent,e));
+            this.localBus.post(new TrainDataExceptionEvent("td",this.exceptionTarget,trainDataMultiChangeEvent,e));
         }
     }
 
@@ -168,8 +163,8 @@ public class TrainData {
                 msg2.append("-[" + carlist[0] + "]");
             }
         }
-        this.localBus.post(new ToLogEvent("td", Collections.singletonList("log"), msg1));
-        this.localBus.post(new ToLogEvent("td", Collections.singletonList("log"), msg2.toString()));
+        this.localBus.post(new ToLogEvent("td", "log", msg1));
+        this.localBus.post(new ToLogEvent("td", "log", msg2.toString()));
     }
 }
 

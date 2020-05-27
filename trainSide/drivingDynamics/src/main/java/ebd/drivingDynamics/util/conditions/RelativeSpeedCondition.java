@@ -1,5 +1,7 @@
 package ebd.drivingDynamics.util.conditions;
 
+import ebd.drivingDynamics.util.conditions.abstracts.CurveBasedCondition;
+import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
@@ -12,9 +14,11 @@ import java.util.function.BiFunction;
  * <p>The <b>type</b> of this condition is "v_trel"</p>
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison</p>
- * <p>Example: The condition should evaluate to true if the train is slower than 50% of the current maximum speed.
- * The JSON string would look like this:<br>
- *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50 }}</p>
+ * <p>The <b>curveBase</b> key contains the ID of the curve this condition operates on. Either "c30" or "trip" </p>
+ * <p>
+ *     Example: The condition should evaluate to true if the train is slower than 50% of the current maximum speed on the trip profile.
+ *     The JSON string would look like this:<br>
+ *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}</p>
  * @author Lars Schulze-Falck
  */
 public class RelativeSpeedCondition extends CurveBasedCondition {

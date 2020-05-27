@@ -1,6 +1,6 @@
 package ebd.szenario;
 
-import ebd.dmi.ui.DMIDisplayConnector;
+
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.InitFileHandler;
@@ -19,6 +19,7 @@ import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
 import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
+import ebd.szenario.util.server.DMIServer;
 import ebd.szenario.util.server.GUIServer;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
@@ -49,8 +50,9 @@ public class Szenario implements Runnable {
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
             for(int etcsID : InitFileHandler.getInstance().getEtcsIDs()){
-                ms.send(new SendMessageEvent("rbc;R=1", Collections.singletonList("ms"), message_24, Collections.singletonList("mr;T=" + etcsID)));
+                ms.send(new SendMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
             }
+
         }
     }
 
@@ -74,6 +76,7 @@ public class Szenario implements Runnable {
     Server
      */
     private GUIServer guiServer;
+    private DMIServer dmiServer;
 
     /*
     TrackSide
@@ -85,7 +88,7 @@ public class Szenario implements Runnable {
      */
     private TrainManager tm = null;
 
-    public Szenario(){
+    public Szenario() {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
         this.szenarioEventHandler = new SzenarioEventHandler();
@@ -96,17 +99,18 @@ public class Szenario implements Runnable {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
             if(ch.allowGUI) this.guiServer = new GUIServer();
+            this.dmiServer = new DMIServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        new DMIDisplayConnector(globalEventBus);
+
 
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
         System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
-        if(ch.autoStart) load(new LoadEvent("szenario", Collections.singletonList("szenario")));
+        if(ch.autoStart) load(new LoadEvent("szenario", "szenario"));
     }
 
     @Override
@@ -118,7 +122,7 @@ public class Szenario implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", Collections.singletonList("Szenario"),
+            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Szenario",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -129,7 +133,7 @@ public class Szenario implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", Collections.singletonList("Szenario"),
+            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Szenario",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -140,7 +144,7 @@ public class Szenario implements Runnable {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
-        if(!validTarget(de.targets)){
+        if(!validTarget(de.target)){
             return;
         }
         synchronized (this){
@@ -159,7 +163,7 @@ public class Szenario implements Runnable {
         System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
 
         String msg = "ETCS start up";
-        EventBus.getDefault().post(new ToLogEvent("glb", Collections.singletonList("log"), msg));
+        EventBus.getDefault().post(new ToLogEvent("glb", "log", msg));
 
         Route a = new Route("AB", 1000, new int[]{0,100,900,80}, new int[]{0,1,750,0});
         List<Route> listRoute = new ArrayList<>();
@@ -178,12 +182,12 @@ public class Szenario implements Runnable {
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
 
-    private boolean validTarget(List<String> targetList) {
-        for(String target : targetList){
-            if(target.contains("szenario") || target.contains("all")){
-                return true;
-            }
+    private boolean validTarget(String target) {
+
+        if(target.contains("szenario") || target.contains("all")){
+            return true;
         }
+
         return false;
     }
 }

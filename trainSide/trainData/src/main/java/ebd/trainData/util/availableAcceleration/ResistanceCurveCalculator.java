@@ -12,7 +12,7 @@ public class ResistanceCurveCalculator {
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(TrainDataPerma.class);
 
         //TODO fill with math
-        resistanceCurve.addKnotToCurve(new Knot(0d, new double[]{-0.05,0,0}));
+        resistanceCurve.addKnotToCurve(new Knot(0d, new double[]{-0.01,0,0}));
         return resistanceCurve;
     }
 }

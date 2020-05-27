@@ -35,15 +35,15 @@ public class ExceptionEvent extends Event {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
+	 * @param target
 	 *          ID from all modules the event is addressed to
 	 * @param cause
 	 *          The Event causing an Exception
 	 * @param exception
 	 *          The thrown exception to be encapsulated
 	 */
-	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception) {
-		super(source, targets);
+	public ExceptionEvent(String source, String target, Event cause, Exception exception) {
+		super(source, target);
 		this.cause = cause;
 		this.exception = exception;
 	}
@@ -52,8 +52,8 @@ public class ExceptionEvent extends Event {
 	 *
 	 * @param source
 	 *          ID from the module the event was sent by
-	 * @param targets
-	 *          ID from all modules the event is addressed to
+	 * @param target
+	 *          ID from from the target module or 'all' if more then one target should be reached.
 	 * @param cause
 	 *          The Event causing an Exception
 	 * @param exception
@@ -61,8 +61,8 @@ public class ExceptionEvent extends Event {
 	 * @param exceptionEventTyp
 	 * 			The fitting {@link ExceptionEventTyp}
 	 */
-	public ExceptionEvent(String source, List<String> targets, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
-		super(source, targets);
+	public ExceptionEvent(String source, String target, Event cause, Exception exception, ExceptionEventTyp exceptionEventTyp) {
+		super(source, target);
 		this.cause = cause;
 		this.exception = exception;
 		this.exceptionEventTyp = exceptionEventTyp;

@@ -19,14 +19,14 @@ import ebd.messageLibrary.util.ETCSVariables;
  */
 public class BCLREgeneratorFromRandom{
 	private Random rng;
-	private List<String> targets = new ArrayList<>();
+	private String target;
 	
 	/**
 	 * Creates an instance with a set seed for repeatability
 	 */
 	public BCLREgeneratorFromRandom(long seed) {
 		rng = new Random(seed);
-		targets.add("bcc;");
+		target = "bcc;";
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class BCLREgeneratorFromRandom{
 		currentPosition.setPreviousLocations(preLocs);
 		
 		
-		return new BreakingCurveLimitedRequestEvent("devTests", targets, "test_BCLRE", packet15, currentPosition);	
+		return new BreakingCurveLimitedRequestEvent("devTests", target, "test_BCLRE", packet15, currentPosition);
 	}
 
 }
