@@ -4,7 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequest;
 import ebd.globalUtils.position.Position;
@@ -153,7 +153,7 @@ public class MessageAuthorityRequestSupervisor {
         message132.PACKET_POSITION = packet0;
 
         String destination = "mr;R=" + this.rbcID;
-        this.localBus.post(new SendMessageEvent("tsm", "ms", message132, destination));
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message132, destination));
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending a MA Request"));
 
         this.waitingOnMA = true;

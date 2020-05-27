@@ -10,9 +10,9 @@ import java.util.List;
  *
  * @author Christopher Bernjus
  */
-public class SendMessageEvent extends NormalEvent {
+public class SendETCSMessageEvent extends NormalEvent {
 
-	/** The Message transferred by the event*/
+	/** The Message transferred by the event */
 	public Message message;
 	/** List of all Destinations to send the message to */
 	public String destination;
@@ -29,7 +29,7 @@ public class SendMessageEvent extends NormalEvent {
 	 * @param destination
 	 * 			List of all Destinations to send the message to
 	 */
-	public SendMessageEvent(String source, String target, Message message, String destination) {
+	public SendETCSMessageEvent(String source, String target, Message message, String destination) {
 		super(source, target);
 		this.message = message;
 		this.destination = destination;

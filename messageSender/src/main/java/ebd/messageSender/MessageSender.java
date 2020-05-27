@@ -1,6 +1,6 @@
 package ebd.messageSender;
 
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.messageSender.SendTelegramEvent;
 import ebd.globalUtils.events.SerializedBitstreamEvent;
 import ebd.globalUtils.events.messageSender.MessageSenderExceptionEvent;
@@ -63,10 +63,10 @@ public class MessageSender {
 	 * Sends Messages to the RBC over the global EventBus
 	 *
 	 * @param event
-	 *          Received {@link SendMessageEvent} over the localBus
+	 *          Received {@link SendETCSMessageEvent} over the localBus
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void send(SendMessageEvent event) {
+	public void send(SendETCSMessageEvent event) {
 		if(!event.target.contains(msID)) return;
 
 		try {

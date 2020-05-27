@@ -2,7 +2,7 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.CrossedBaliseGroupEvent;
@@ -21,9 +21,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the issuing of position reports from the train to the rbc.
@@ -155,7 +152,7 @@ public class PositionReportSupervisor {
 
     /**
      * Builds a position report message ({@link Message_136}) and places it on the local {@link EventBus}
-     * in a {@link SendMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
+     * in a {@link SendETCSMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
      */
     private void sendPositionReport() {
         Position curPos = trainDataVolatile.getCurrentPosition();
@@ -181,7 +178,7 @@ public class PositionReportSupervisor {
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
         message136.PACKET_POSITION = packet0;
-        this.localBus.post(new SendMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending Position Report"));
         this.tripTimeAtCycleStart = this.curFullTripTime;
     }
