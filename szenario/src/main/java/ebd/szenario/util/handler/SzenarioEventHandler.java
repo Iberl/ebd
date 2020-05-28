@@ -27,6 +27,7 @@ public class SzenarioEventHandler {
      */
     @Subscribe
     public void exceptionHandler(ExceptionEvent ee){
+        ee.exception.printStackTrace();
         switch (ee.exceptionEventTyp){//TODO Fill with functional code
             case WARNING: //Ignore it, logging is already happening in ebd.Logging
                 break;

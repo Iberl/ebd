@@ -164,7 +164,7 @@ public class Szenario implements Runnable {
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", "log", msg));
 
-        this.rbc = new RadioBlockCenter(); //TODO integer ID?
+        this.rbc = new RadioBlockCenter(1);
 
         try {
             this.tm = new TrainManager();
