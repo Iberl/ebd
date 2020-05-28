@@ -153,8 +153,8 @@ public class ETCSPacketCreator {
 			modes.add(new Packet_80.Packet_80_MAMode(mode.d_mamode, mode.m_mamode, mode.v_mamode, mode.l_mamode, mode.l_ackmamode, mode.q_mamode));
 		}
 
-		//Packet_80 packet_80 = new Packet_80(coalesce(modeProfile.q_dir, Q_DIR), coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0));
-		Packet_80 packet_80 = new Packet_80(Q_DIR, coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0)); //TODO modeProfile.q_dir?
+		Packet_80 packet_80 = new Packet_80(coalesce(modeProfile.q_dir, Q_DIR), coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0));
+		//Packet_80 packet_80 = new Packet_80(Q_DIR, coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0)); //TODO modeProfile.q_dir?
 
 		packet_80.modes = modes;
 
