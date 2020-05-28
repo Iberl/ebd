@@ -68,9 +68,9 @@ public class ETCSEndpoint {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receiveMessage(ReceivedMessageEvent event) {
-        if(!Objects.equals(event.target, _rbcID)) return;
+        System.out.println("mr: " + event.message.NID_MESSAGE);
+        if(!Objects.equals(event.target, _moduleID)) return;
         if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
-
         TrainMessage message = (TrainMessage) event.message;
         // TODO Trippy
         trainIDMap.put(message.NID_ENGINE, event.sender);

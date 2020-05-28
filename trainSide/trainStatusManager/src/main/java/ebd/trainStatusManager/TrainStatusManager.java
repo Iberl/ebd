@@ -262,7 +262,7 @@ public class TrainStatusManager implements Runnable {
 
         this.trainData = new TrainData(this.localEventBus, this.etcsTrainID, trainConfigID, infrastructureID);
 
-        this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", false);
+        this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", true);
         this.messageSender = new MessageSender(this.localEventBus,String.valueOf(this.etcsTrainID), true);
         this.modeAndLevelSupervisor = new ModeAndLevelSupervisor(this.localEventBus);
         this.speedSupervisor = new SpeedSupervisor(this.localEventBus);
@@ -291,6 +291,7 @@ public class TrainStatusManager implements Runnable {
     private void connectToRBC() {
         Position curPos = new Position(0,true, new InitalLocation());
         EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, "all",curPos));
+
         Message_155 msg155 = new Message_155();
         long curTime = AppTime.currentTimeMillis();
         msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;

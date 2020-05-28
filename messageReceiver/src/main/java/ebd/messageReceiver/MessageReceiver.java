@@ -79,11 +79,19 @@ public class MessageReceiver {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		if(!event.target.contains(mrID + (traintoTrack ? ";R=" : ";T=") + localID) && !event.target.contains("all")) return;
+		StringBuilder sb = new StringBuilder("localID: " + this.localID);
+		sb.append(", Source: " + event.source);
+		sb.append(", Target: " + event.target);
+		sb.append(", isTelegram: " + event.isTelegram);
+		sb.append(", trainToTrack: " + event.trainToTrack);
+
+
+		if(!event.target.equals(mrID + (traintoTrack ? ";T=" : ";R=") + localID) && !event.target.equals("all")) return;
 
 		try {
 			BitStreamReader bitstream = event.bitstream;
-
+			sb.append(", " + Arrays.toString(bitstream.peekBits(8)));
+			System.out.println(sb.toString());
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
