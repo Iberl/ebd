@@ -8,6 +8,7 @@ import ebd.messageLibrary.message.TrainMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trainmessages.*;
 import ebd.messageLibrary.packet.TrackPacket;
+import ebd.radioBlockCenter.util.Constants;
 import ebd.rbc_tms.message.Message_10;
 import ebd.rbc_tms.message.Message_11;
 import ebd.rbc_tms.message.Message_14;
@@ -29,134 +30,133 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static ebd.radioBlockCenter.util.TMSMessageCreator.createPositionInfo;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_24;
 import static ebd.radioBlockCenter.util.ETCSPacketCreator.createPacket_57;
 import static ebd.radioBlockCenter.util.ETCSPacketCreator.createPacket_58;
+import static ebd.radioBlockCenter.util.TMSMessageCreator.createPositionInfo;
 
 public class ETCSEndpoint {
 
-	private final String _moduleID = "etcsEndpoint";
-	private final String _messageSenderID = "ms";
-	private final String _tmsEndpoint = "tmsEndpoint";
-	private final String _rbcID;
-	private final EventBus _localBus;
+    private EventBus _localBus;
+    private final int _rbcID;
+    private final String _rbcIDString;
 
-	private String registeredTMS;
-	private Map<Integer, String> trainIDMap;
+    private final String _moduleID        = Constants.ID_ETCS_ENDPOINT;
+    private final String _messageSenderID = Constants.ID_MESSAGE_SENDER;
+    private final String _tmsEndpoint     = Constants.ID_TMS_ENDPOINT;
 
-	// Constructor
+    private String               registeredTMS;
+    private Map<Integer, String> trainIDMap;
 
-	public ETCSEndpoint(String rbcID, EventBus localBus, String registeredTMS, Map<Integer, String> trainIDMap) {
-		this._rbcID = rbcID;
-		this._localBus = localBus;
-		this.registeredTMS = registeredTMS;
-		this.trainIDMap = trainIDMap;
-	}
+    // Constructor
 
-	public int getNID_OPERATIONAL(int nid_engine) {
-		String trainID = trainIDMap.get(nid_engine);
-		if(trainID == null || trainID.isEmpty()) throw new IllegalArgumentException("Unknown NID_ENGINE value");
+    public ETCSEndpoint(EventBus localBus, int rbcID, String registeredTMS, Map<Integer, String> trainIDMap) {
+        this._localBus = localBus;
+        this._rbcID = rbcID;
+        this._rbcIDString = String.valueOf(rbcID);
+        this.registeredTMS = registeredTMS;
+        this.trainIDMap = trainIDMap;
+        _localBus.register(this);
+    }
 
-		return Integer.parseInt(trainID.split(";T=")[1]);
-	}
+    public int getNID_OPERATIONAL(int nid_engine) {
+        String trainID = trainIDMap.get(nid_engine);
+        if(trainID == null || trainID.isEmpty()) throw new IllegalArgumentException("Unknown NID_ENGINE value");
 
-	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void receiveMessage(ReceivedMessageEvent event) {
-		if(!Objects.equals(event.target, _rbcID)) return;
-		if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
+        return Integer.parseInt(trainID.split(";T=")[1]);
+    }
 
-		TrainMessage message = (TrainMessage) event.message;
-		// TODO Trippy
-		trainIDMap.put(message.NID_ENGINE, event.sender);
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void receiveMessage(ReceivedMessageEvent event) {
+        if(!Objects.equals(event.target, _rbcID)) return;
+        if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
 
-		// Handle Message
-		try {
-			Method method = this.getClass().getDeclaredMethod("handleMessage", message.getClass(), Integer.class);
-			method.invoke(this, message, getNID_OPERATIONAL(message.NID_ENGINE));
-		} catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-			System.err.println("The received message type is not supported.");
-			e.printStackTrace();
-		}
-	}
+        TrainMessage message = (TrainMessage) event.message;
+        // TODO Trippy
+        trainIDMap.put(message.NID_ENGINE, event.sender);
 
-	public void handleMessage(Message_132 message, int NID_OPERATIONAL) {
-		// MA Request
+        // Handle Message
+        try {
+            Method method = this.getClass().getDeclaredMethod("handleMessage", message.getClass(), Integer.class);
+            method.invoke(this, message, getNID_OPERATIONAL(message.NID_ENGINE));
+        } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            System.err.println("The received message type is not supported.");
+            e.printStackTrace();
+        }
+    }
 
-		// TODO Logging
-		String msg = String.format("Received MA request from train %s", NID_OPERATIONAL);
-		_localBus.post(new ToLogEvent("rbc", "log", msg));
+    public void handleMessage(Message_132 message, int NID_OPERATIONAL) {
+        // MA Request
 
-		// TODO Respond to Train?
+        log("Received MA request from train " + NID_OPERATIONAL);
 
-		// TODO Forward to TMS
-		TrainInfo trainInfo = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
-		PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
-		Payload_15 payload_15 = new Payload_15(trainInfo, positionInfo, message.Q_MARQSTREASON);
-		_localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_15(registeredTMS, _rbcID, payload_15)));
-	}
+        // TODO Respond to Train?
 
-	public void handleMessage(Message_136 message, int NID_OPERATIONAL) {
-		// Position Report
+        // TODO Forward to TMS
+        TrainInfo    trainInfo    = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
+        PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
+        Payload_15   payload_15   = new Payload_15(trainInfo, positionInfo, message.Q_MARQSTREASON);
+        _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_15(registeredTMS, _rbcIDString, payload_15)));
+    }
 
-		// TODO Logging
-		String msg = String.format("Received position report from train %s", NID_OPERATIONAL);
-		this._localBus.post(new ToLogEvent("rbc", "Log", msg));
+    public void handleMessage(Message_136 message, int NID_OPERATIONAL) {
+        // Position Report
 
-		// TODO Respond to Train?
+        // TODO Logging
+        log("Received position report from train " + NID_OPERATIONAL);
 
-		// TODO Forward to TMS
-		TrainInfo trainInfo = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
-		PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
-		Payload_14 payload_14 = new Payload_14(trainInfo, positionInfo);
-		_localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_14(registeredTMS, _rbcID, payload_14)));
-	}
+        // TODO Respond to Train?
 
-	public void handleMessage(Message_146 message, int NID_OPERATIONAL) {
-		// Acknowledgement
+        // TODO Forward to TMS
+        TrainInfo    trainInfo    = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
+        PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
+        Payload_14   payload_14   = new Payload_14(trainInfo, positionInfo);
+        _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_14(registeredTMS, _rbcIDString, payload_14)));
+    }
 
-		// TODO Logging
-		String msg = String.format("Received Acknowledge from train %s", NID_OPERATIONAL);
-		_localBus.post(new ToLogEvent("rbc", "log", msg));
+    public void handleMessage(Message_146 message, int NID_OPERATIONAL) {
+        // Acknowledgement
 
-		// TODO Respond to Train?
+        log("Received knowledge from train " + NID_OPERATIONAL);
 
-		// TODO Forward to TMS?
-	}
+        // TODO Respond to Train?
 
-	public void handleMessage(Message_150 message, int NID_OPERATIONAL) {
-		// End Of Mission
+        // TODO Forward to TMS?
+    }
 
-		// TODO Logging
-		String msg = String.format("Received Mission End message from train %s", NID_OPERATIONAL);
-		_localBus.post(new ToLogEvent("rbc", "log", msg));
+    public void handleMessage(Message_150 message, int NID_OPERATIONAL) {
+        // End Of Mission
 
-		// TODO Respond to Train?
+        log("Received Mission End message from train " + NID_OPERATIONAL);
 
-		// TODO Forward to TMS
-		Payload_11 payload_11 = new Payload_11(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
-		_localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_11(registeredTMS, _rbcID, payload_11)));
-	}
+        // TODO Respond to Train?
 
-	public void handleMessage(Message_155 message, int NID_OPERATIONAL) {
-		// Initiation Of A Communication Session
+        // TODO Forward to TMS
+        Payload_11 payload_11 = new Payload_11(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
+        _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_11(registeredTMS, _rbcIDString, payload_11)));
+    }
 
-		// TODO Logging
-		String msg = String.format("Received communication initiation from train %s", NID_OPERATIONAL);
-		_localBus.post(new ToLogEvent("rbc", "log", msg));
+    public void handleMessage(Message_155 message, int NID_OPERATIONAL) {
+        // Initiation Of A Communication Session
 
-		// TODO Respond to Train
-		List<TrackPacket> packets = new ArrayList<>();
-		packets.add(createPacket_57(0));
-		packets.add(createPacket_58());
-		Message_24 message_24 = assembleMessage_24(false, 0, packets);
+        log("Received communication initiation from train " + NID_OPERATIONAL);
 
-		_localBus.post(new SendETCSMessageEvent(_rbcID, _messageSenderID, message_24, "mr;T=" + NID_OPERATIONAL));
-		_localBus.post(new ToLogEvent(_rbcID, _messageSenderID, "Sending MA Request Parameters and Position Report Parameters"));
+        // TODO Respond to Train
+        List<TrackPacket> packets = new ArrayList<>();
+        packets.add(createPacket_57(0));
+        packets.add(createPacket_58());
+        Message_24 message_24 = assembleMessage_24(false, 0, packets);
 
-		// TODO Forward to TMS
-		Payload_10 payload_10 = new Payload_10(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
-		_localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_10(registeredTMS, _rbcID, payload_10)));
-	}
+        _localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, message_24, "mr;T=" + NID_OPERATIONAL));
+        _localBus.post(new ToLogEvent(_moduleID, _messageSenderID, "Sending MA Request Parameters and Position Report Parameters"));
+
+        // TODO Forward to TMS
+        Payload_10 payload_10 = new Payload_10(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
+        _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_10(registeredTMS, _rbcIDString, payload_10)));
+    }
+
+    private void log(String msg) {
+        _localBus.post(new ToLogEvent(_moduleID, "log", msg));
+    }
 
 }

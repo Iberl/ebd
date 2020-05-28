@@ -38,7 +38,9 @@ public class ConfigHandler {
     public String portOfInfrastructureServer = "";
 
     public String ipToTMSServer = "";
-    public String portOfTMSServer = "";
+    public int portOfTMSServer = 22223;
+
+    public int portOfRBCServer = 22224;
 
     public String portOfGUIServer = "";
 

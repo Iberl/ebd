@@ -14,6 +14,7 @@ ipToInfrastructureServer = 127.0.0.1
 portOfInfrastructureServer = 25555
 ipToTMSServer = 127.0.0.1
 portOfTMSServer = 22223
+portOfRBCServer = 22224
 
 portOfGUIServer = 22224
 
