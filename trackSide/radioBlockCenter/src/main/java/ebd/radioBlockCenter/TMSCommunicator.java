@@ -2,11 +2,14 @@ package ebd.radioBlockCenter;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.radioBlockCenter.ReceivedTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.messageLibrary.message.trackmessages.Message_2;
 import ebd.radioBlockCenter.util.Constants;
+import ebd.radioBlockCenter.util.RBCModule;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -56,12 +59,12 @@ public class TMSCommunicator extends Thread {
                     StringBuilder data = new StringBuilder();
                     // TODO SocketException
                     data.append(in.readLine());
-                    System.out.println("RBC received: " + data.toString());
+                    logDebug("RBC received: " + data.toString());
 
                     try {
                         // Generate Message
                         Message<Payload> message = Message.generateFrom(data.toString());
-                        System.out.println("Received Message " + message.getHeader().type + " from " + message.getHeader().tms_id);
+                        log("Received Message " + message.getHeader().type + " from " + message.getHeader().tms_id);
                         _localBus.post(new ReceivedTMSMessageEvent(_moduleID, _tmsEndpointID, message));
                     } catch(ClassNotFoundException e) {
                         System.err.println(e.getMessage());
@@ -170,6 +173,10 @@ public class TMSCommunicator extends Thread {
 
     private void log(Exception e) {
         _localBus.post(new ExceptionEvent(_moduleID, "log", new NotCausedByAEvent(), e));
+    }
+
+    private void logDebug(String msg) {
+        _localBus.post(new ToLogDebugEvent(_moduleID, "log", msg));
     }
 
 }
