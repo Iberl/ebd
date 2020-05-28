@@ -205,13 +205,13 @@ public abstract class Serializer {
 				try {
 					clazz = Class.forName("ebd.messageLibrary.packet.trainpackets.Packet_" + id);
 				} catch (ClassNotFoundException e1) {
-					throw new ClassNotSupportedException("Could not find the train message/packet class with ID: \"" + id + "\"");
+					throw new ClassNotSupportedException("Could not find the train packet class with ID: \"" + id + "\"");
 				}
 			} else {
 				try {
 					clazz = Class.forName("ebd.messageLibrary.packet.trackpackets.Packet_" + id);
 				} catch (ClassNotFoundException e1) {
-					throw new ClassNotSupportedException("Could not find the track message/packet class with ID: \"" + id + "\"");
+					throw new ClassNotSupportedException("Could not find the track packet class with ID: \"" + id + "\"");
 				}
 			}
 		}
