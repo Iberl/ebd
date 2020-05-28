@@ -68,7 +68,6 @@ public class ETCSEndpoint {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void receiveMessage(ReceivedMessageEvent event) {
-        System.out.println("mr: " + event.message.NID_MESSAGE);
         if(!Objects.equals(event.target, _moduleID)) return;
         if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
         TrainMessage message = (TrainMessage) event.message;
@@ -77,7 +76,7 @@ public class ETCSEndpoint {
 
         // Handle Message
         try {
-            Method method = this.getClass().getDeclaredMethod("handleMessage", message.getClass(), Integer.class);
+            Method method = this.getClass().getDeclaredMethod("handleMessage", message.getClass(), int.class);
             method.invoke(this, message, getNID_OPERATIONAL(message.NID_ENGINE));
         } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.err.println("The received message type is not supported.");

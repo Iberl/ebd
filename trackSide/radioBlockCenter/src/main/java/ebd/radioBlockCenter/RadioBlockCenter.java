@@ -7,6 +7,7 @@ import ebd.radioBlockCenter.util.Constants;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RadioBlockCenter {
@@ -25,7 +26,7 @@ public class RadioBlockCenter {
 
     private String registeredTMS = "";
 
-    private Map<Integer, String> trainIDMap;
+    private Map<Integer, String> trainIDMap = new HashMap<>();
 
     public RadioBlockCenter(int rbcID) {
         this.rbcID = rbcID;
