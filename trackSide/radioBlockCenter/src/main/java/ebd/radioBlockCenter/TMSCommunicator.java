@@ -145,24 +145,11 @@ public class TMSCommunicator extends Thread {
             String      messageJSON = event.message.parseToJson();
             log("RBC sending: " + messageJSON);
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            StringBuilder  data  = new StringBuilder();
-            // TODO Multiple input lines possible ?
-            data.append(input.readLine());
-
-            log("RBC received: " + data.toString());
-            Message response = Message.generateFrom(data.toString());
-
-            _localBus.post(new ReceivedTMSMessageEvent(_moduleID, _tmsEndpointID, response));
-
             output.close();
-            input.close();
             socket.close();
         } catch(IOException e) {
             e.printStackTrace();
         } catch(MissingInformationException e) {
-            e.printStackTrace();
-        } catch(ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
