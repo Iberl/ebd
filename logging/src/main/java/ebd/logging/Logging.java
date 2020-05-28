@@ -81,18 +81,11 @@ public class Logging{
      */
     @Subscribe
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
-        if (logPrefix.equals(String.format("%-9s", "GB"))) {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else if (logPrefix.equals("RBC 00001")) {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else if (logPrefix.equals("TRN 00192")){
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
+
+        String endsection = exceptionEvent.source + ": ExceptionEvent occurred. " + exceptionEvent.exception.getMessage();
+
+        logger.log(Level.SEVERE, logPrefix + ": " + endsection, exceptionEvent.exception);
+
     }
 
     /**
