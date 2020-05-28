@@ -154,7 +154,6 @@ public class ETCSPacketCreator {
 		}
 
 		Packet_80 packet_80 = new Packet_80(coalesce(modeProfile.q_dir, Q_DIR), coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0));
-		//Packet_80 packet_80 = new Packet_80(Q_DIR, coalesce(modeProfile.q_scale, Q_SCALE), modes.remove(0)); //TODO modeProfile.q_dir?
 
 		packet_80.modes = modes;
 

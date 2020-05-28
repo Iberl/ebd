@@ -233,8 +233,7 @@ public class TMSEndpoint {
                                              ma.linkingProfile, ma.modeProfile);
         }
 
-		_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, trainIDMap.get(payload.nid_engine)));
-		//_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, "mr;T=1")); //TODO payload.nid_engine?
+		_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, "mr;T=" + trainIDMap.get(payload.nid_engine)));
 	}
 
     /**
