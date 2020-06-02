@@ -1,5 +1,6 @@
-package ebd.drivingDynamics.util.conditions;
+package ebd.drivingDynamics.util.conditions.abstracts;
 
+import ebd.drivingDynamics.util.conditions.helper.SingleConditionParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;

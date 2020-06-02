@@ -1,5 +1,7 @@
 package ebd.drivingDynamics.util.conditions;
 
+import ebd.drivingDynamics.util.conditions.abstracts.CurveBasedCondition;
+import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
@@ -12,9 +14,12 @@ import java.util.function.BiFunction;
  * <p>The <b>type</b> of this condition is "v_m"</p>
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a fixed speed value in the range of [0 km/h, 600 km/h] </p>
- * <p>Example: The condition should evaluate to true if the trains current  maximum speed is slower than 50 km/h.
- * The JSON string would look like this:<br>
- *     {"type" : "v_m", "condition" : {"op" : "<", "value" : 50 }}</p>
+ * <p>The <b>curveBase</b> key contains the ID of the curve this condition operates on. Either "c30" or "trip" </p>
+ * <p>
+ *     Example: The condition should evaluate to true if the trains current  maximum speed on the trip
+ *     profile is slower than 50 km/h.
+ *      The JSON string would look like this:<br>
+ *     {"type" : "v_m", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}</p>
  * @author Lars Schulze-Falck
  */
 public class MaxSpeedCondition extends CurveBasedCondition {
@@ -44,6 +49,7 @@ public class MaxSpeedCondition extends CurveBasedCondition {
             default:
                 maxSpeed = 0d;
                 System.err.println(String.format("You have to add %s to this switch statement", this.curveBase));
+                System.exit(-1);
         }
 
         return comparator.apply(maxSpeed,speedTotal);
@@ -54,11 +60,10 @@ public class MaxSpeedCondition extends CurveBasedCondition {
         if(jsonObject.keySet().contains("value")){
 
             Object tempObject = jsonObject.get("value");
-            String tempObjectName = tempObject.getClass().getSimpleName();
-            if(tempObjectName.equals("Long")){
+            if(tempObject instanceof Long){
                 speedTotal = ((Long)tempObject).doubleValue() / 3.6; //To [m/s]
             }
-            else if(tempObjectName.equals("Double")){
+            else if(tempObject instanceof Double){
                 speedTotal = (Double)tempObject / 3.6; //To [m/s]
             }
             else throw new DDBadDataException("MaxSpeedCondition value was not a number");

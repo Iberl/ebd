@@ -1,4 +1,4 @@
-package ebd.drivingDynamics.util.conditions;
+package ebd.drivingDynamics.util.conditions.helper;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 

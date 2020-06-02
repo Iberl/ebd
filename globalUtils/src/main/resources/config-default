@@ -20,10 +20,10 @@ portOfGUIServer = 22226
 dmiServerPort = 22225
 
 #Determines the source of the trip profile. Allowed values are 'breakingcurve', 'file' and 'socket'.
-#file, socket is not implemented
+#'file', 'socket' are not implemented yet.
 tripProfileMode = breakingcurve
 
-#Path to the folder containing all trip profiles.
+#Path to the folder containing all trip profiles, necessary if the tripProfileMode equals 'file'.
 #The name of the trip profile path has to be 'etcsID'.txt, for example "1620.txt".
 tripProfileFolderPath = tripprofiles/
 
@@ -64,8 +64,9 @@ defaultDangerPoint = 200
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
-# Physics acceleration factor
+# Time acceleration factor. See timeBase under Longs
 timeAccFactor = 1
+
 # Release speed for ETCS Level 1 in [m/s]
 releaseSpeed = 6.94
 # Distance to end of movement authority at which train will switch into release speed mode if below release speed in [m]
@@ -110,4 +111,12 @@ dV_warning_max = 1.39
 V_warning_min = 38.89
 # Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
 V_warning_max = 58.33
+
+
+######
+###### Longs
+######
+#Time base in milli seconds since epoch. The default 1593522000000 equals 2020-06-30 15:00:00 UTC+2h
+#See timeAccFactor under Doubles
+timeBase = 1593522000000
 

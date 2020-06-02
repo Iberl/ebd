@@ -1,5 +1,6 @@
-package ebd.drivingDynamics.util.conditions;
+package ebd.drivingDynamics.util.conditions.abstracts;
 
+import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import org.greenrobot.eventbus.EventBus;
 
 public abstract class CurveBasedCondition extends Condition {
