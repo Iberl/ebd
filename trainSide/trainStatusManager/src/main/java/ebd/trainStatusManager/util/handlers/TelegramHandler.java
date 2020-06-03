@@ -67,9 +67,10 @@ public class TelegramHandler {
      */
     @Subscribe
     public void newRDV(NewRouteDataVolatileEvent rdve){
+        if (this.savedRTE == null) return;
         RouteDataVolatile routeDataVolatile = rdve.routeDataVolatile;
         Map<Integer, Location> linkingInformation = routeDataVolatile.getLinkingInformation();
-        if (this.savedRTE == null || linkingInformation == null || linkingInformation.size() < 1) {
+        if (linkingInformation == null || linkingInformation.size() < 1) {
             return;
         }
         receivedTelegram(this.savedRTE);
