@@ -1,6 +1,6 @@
 package ebd.drivingDynamics.util;
 
-import ebd.drivingDynamics.util.conditions.AndBlock;
+import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -10,8 +10,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 

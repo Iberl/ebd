@@ -1,7 +1,7 @@
 package ebd.drivingDynamics.util.conditions.abstracts;
 
-import ebd.drivingDynamics.util.conditions.AndBlock;
-import ebd.drivingDynamics.util.conditions.OrBlock;
+import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
+import ebd.drivingDynamics.util.conditions.conditionBlocks.OrBlock;
 import ebd.drivingDynamics.util.conditions.helper.SingleConditionParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;

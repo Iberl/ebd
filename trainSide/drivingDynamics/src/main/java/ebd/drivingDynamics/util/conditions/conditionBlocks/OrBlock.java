@@ -1,4 +1,4 @@
-package ebd.drivingDynamics.util.conditions;
+package ebd.drivingDynamics.util.conditions.conditionBlocks;
 
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.conditions.abstracts.ConditionBlock;
