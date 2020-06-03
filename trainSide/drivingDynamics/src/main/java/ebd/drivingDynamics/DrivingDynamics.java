@@ -162,11 +162,6 @@ public class DrivingDynamics {
         this.dynamicState.nextState(deltaT);
 
         /*
-        Update Positions after a new location
-         */
-        updateDSPosition();
-
-        /*
         Sends global PositionEvent
          */
 
@@ -189,22 +184,22 @@ public class DrivingDynamics {
         }
     }
 
-
-
     /**
-     * Updates the Position in dynamic State should it change outside of driving dynamics.
-     * This can happen when a new balise is reached, which results in a new position with new location and increment.
-     * @param ntdve A {@link NewTrainDataVolatileEvent}
+     * Listens to {@link NewPositionEvent}. Because there could be a unknown amount of time passed since the new
+     * {@link Position} was calculated, this function first calculates a possible offset and then updates {@link DynamicState}
+     * @param npe A {@link NewPositionEvent}
      */
     @Subscribe
-    public void newTrainData(NewTrainDataVolatileEvent ntdve){
-        if(!(ntdve.target.contains("all") || ntdve.target.contains("dd"))){
-            return;
-        }
-        this.trainDataVolatile = ntdve.trainDataVolatile;
-        if(!this.dynamicState.getPosition().equals(this.trainDataVolatile.getCurrentPosition())){
-            this.dynamicState.setPosition(trainDataVolatile.getCurrentPosition());
-        }
+    public void newPosition(NewPositionEvent npe){
+        if (this.dynamicState == null) return;
+        Position newPos = npe.newPosition;
+        Position oldPos = this.dynamicState.getPosition();
+        double offset = oldPos.getIncrement() -  newPos.totalDistanceToPastLocation(oldPos.getLocation().getId());
+        newPos.setIncrement(newPos.getIncrement() + offset);
+        this.dynamicState.setPosition(newPos);
+
+        String msg = "New location with ID " + newPos.getLocation().getId() + " was reached";
+        this.localBus.post(new ToLogEvent("dd", "log", msg));
     }
 
     @Subscribe
@@ -375,51 +370,7 @@ public class DrivingDynamics {
         }
     }
 
-    /**
-     * This function checks if a new location was reached and if so, updates the position inside of dynamic state to
-     * reflect this.
-     */
-    private void updateDSPosition() {
-        NewRouteDataVolatileEvent nrdve = this.localBus.getStickyEvent(NewRouteDataVolatileEvent.class);
-        NewLocationEvent nle = this.localBus.getStickyEvent(NewLocationEvent.class);
 
-        if(nrdve == null || nle == null) return;
-
-        Location newLoc = nle.newLocation;
-
-        if(dynamicState.getPosition().getLocation().getId() == newLoc.getId()) {
-            this.localBus.removeStickyEvent(nle);
-            return;
-        }
-
-        RouteDataVolatile routeDataVolatile = nrdve.routeDataVolatile;
-
-        if(routeDataVolatile.getLinkingInformation() == null) return;
-
-        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
-
-        Position oldPos = dynamicState.getPosition();
-        Map<Integer,Location> prefLocs = oldPos.getPreviousLocations();
-        double overshoot;
-
-        if(prefLocs.size() > 0) {
-            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
-            prefLocs.put(newLoc.getId(),newLoc);}
-        else {
-            InitalLocation initLoc = new InitalLocation();
-            prefLocs.put(initLoc.getId(),initLoc);
-            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
-            overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
-        }
-
-        Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
-
-        this.dynamicState.setPosition(newPos);
-        this.localBus.removeStickyEvent(nle);
-
-        String msg = "New location with ID " + newLoc.getId() + " was reached";
-        this.localBus.post(new ToLogEvent("dd", "log", msg));
-    }
 
     /**
      * This method gathers the new information from dynamic state and send these to {@link TrainDataVolatile}

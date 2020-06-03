@@ -164,5 +164,16 @@ public class TrainData {
         this.localBus.post(new ToLogEvent("td", "log", msg1));
         this.localBus.post(new ToLogEvent("td", "log", msg2.toString()));
     }
+
+    /*
+    Getter
+     */
+    public TrainDataVolatile getTrainDataVolatile(){
+        return this.trainDataVolatile;
+    }
+
+    public TrainDataPerma getTrainDataPerma(){
+        return this.trainDataPerma;
+    }
 }
 
