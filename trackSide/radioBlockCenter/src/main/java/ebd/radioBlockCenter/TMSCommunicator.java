@@ -143,6 +143,7 @@ public class TMSCommunicator extends Thread {
             // TODO Connection Exception?
             PrintWriter output      = new PrintWriter(socket.getOutputStream(), true);
             String      messageJSON = event.message.parseToJson();
+            output.println(messageJSON);
             log("RBC sending: " + messageJSON);
 
             output.close();
