@@ -16,6 +16,7 @@ import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
+import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.szenario.RemoveTrainEvent;
 import ebd.logging.Logging;
@@ -273,8 +274,8 @@ public class TrainStatusManager implements Runnable {
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
-
-        Position curPos = new Position(0,true, new InitalLocation());
+        Location newLoc = new Location(1, ETCSVariables.NID_LRBG_UNKNOWN, 0d); //TODO from init file
+        Position curPos = new Position(0,true, newLoc);
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);
