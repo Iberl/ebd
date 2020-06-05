@@ -49,6 +49,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -148,6 +149,7 @@ public class TrainStatusManager implements Runnable {
 
 
         if(ch.debug){
+            System.out.println("Saving");
             savingBreakingCurves(nbce);
         }
     }
@@ -329,6 +331,12 @@ public class TrainStatusManager implements Runnable {
      * @param nbce {@link NewBreakingCurveEvent}
      */
     private void savingBreakingCurves(NewBreakingCurveEvent nbce) {
+
+        File dirs = new File("results/breakingCurves/");
+        if(!dirs.isDirectory()){
+            dirs.mkdirs();
+        }
+
         List<BreakingCurve> lobc = new ArrayList<>();
         lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
         lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
@@ -345,7 +353,7 @@ public class TrainStatusManager implements Runnable {
             FileWriter fW;
             try {
 
-                fW = new FileWriter(bCurve.getID() + ".txt");
+                fW = new FileWriter("results/breakingCurves/" + bCurve.getID() + ".txt");
                 BufferedWriter writer = new BufferedWriter(fW);
                 writer.write("");
 
@@ -355,7 +363,7 @@ public class TrainStatusManager implements Runnable {
                     writer.append(String.format("%f:%f%n", xPosition, yValue));
                     xPosition += step;
                 }
-
+                writer.flush();
                 writer.close();
 
             } catch (IOException e1) {
