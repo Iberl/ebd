@@ -7,8 +7,10 @@ import ebd.globalUtils.events.messageSender.MessageSenderExceptionEvent;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.BitStreamWriter;
 import ebd.messageLibrary.serialization.Serializer;
+import ebd.messageLibrary.util.exception.ClassMalformedException;
 import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
 import ebd.messageLibrary.util.exception.MissingInformationException;
+import ebd.messageLibrary.util.exception.NotSerializableException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -81,6 +83,10 @@ public class MessageSender {
 
 		} catch(MissingInformationException e) {
 			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
+		} catch(NotSerializableException e) {
+			e.printStackTrace();
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -105,6 +111,10 @@ public class MessageSender {
 
 		} catch(MissingInformationException e) {
 			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
+		} catch(NotSerializableException e) {
+			e.printStackTrace();
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
 		}
 	}
 

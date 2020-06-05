@@ -8,10 +8,7 @@ import ebd.messageLibrary.message.Message;
 import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.Serializer;
-import ebd.messageLibrary.util.exception.BitLengthOutOfBoundsException;
-import ebd.messageLibrary.util.exception.ClassNotSupportedException;
-import ebd.messageLibrary.util.exception.MissingInformationException;
-import ebd.messageLibrary.util.exception.ValueNotSupportedException;
+import ebd.messageLibrary.util.exception.*;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -105,15 +102,16 @@ public class MessageReceiver {
 		} catch(ClassNotSupportedException e) {
 			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
-		} catch(MissingInformationException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
-
 		} catch(BitLengthOutOfBoundsException e) {
 			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		} catch(ValueNotSupportedException e) {
 			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
+		} catch(NotDeserializableException e) {
+			e.printStackTrace();
 		}
 	}
 
