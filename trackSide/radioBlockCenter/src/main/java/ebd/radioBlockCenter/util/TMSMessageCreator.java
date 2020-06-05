@@ -20,7 +20,7 @@ public class TMSMessageCreator {
 				positionPacket.L_DOUBTOVER,
 				positionPacket.L_DOUBTUNDER,
 				positionPacket.Q_LENGTH,
-				(positionPacket.Q_LENGTH == Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE || positionPacket.Q_LENGTH == Q_LENGTH_CONFIRMED_BY_DRIVER) ? positionPacket.L_TRAININIT : null,
+				(positionPacket.Q_LENGTH == Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE || positionPacket.Q_LENGTH == Q_LENGTH_CONFIRMED_BY_DRIVER) ? positionPacket.L_TRAININT : null,
 				positionPacket.V_TRAIN,
 				positionPacket.Q_DIRTRAIN,
 				positionPacket.M_MODE,

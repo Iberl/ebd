@@ -32,7 +32,7 @@ public class ETCSMessageAssembler {
 
 
 	public static Message_33 assembleMessage_33(boolean M_ACK, int NID_LRBG, int Q_DIR, int Q_SCALE, int D_REF, EOA eoa, SpeedProfile speedProfile, GradientProfile gradientProfile, LinkingProfile linkingProfile, ModeProfile modeProfile) {
-		Message_33 message_33 = new Message_33(AppTime.currentTimeMillis(), M_ACK, NID_LRBG, D_REF, createPacket_15(Q_DIR, Q_SCALE, eoa));
+		Message_33 message_33 = new Message_33(AppTime.currentTimeMillis(), M_ACK, NID_LRBG, Q_SCALE, D_REF, createPacket_15(Q_DIR, Q_SCALE, eoa));
 
 		List<TrackPacket> packets = listOptionalMAProfiles(Q_DIR, Q_SCALE, speedProfile, gradientProfile, linkingProfile, modeProfile);
 

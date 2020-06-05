@@ -93,7 +93,7 @@ public class ETCSEndpoint {
 
         // TODO Forward to TMS
         TrainInfo    trainInfo    = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
-        PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
+        PositionInfo positionInfo = createPositionInfo(message.positionPacket);
         Payload_15   payload_15   = new Payload_15(trainInfo, positionInfo, message.Q_MARQSTREASON);
         _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_15(registeredTMS, _rbcIDString, payload_15)));
     }
@@ -108,7 +108,7 @@ public class ETCSEndpoint {
 
         // TODO Forward to TMS
         TrainInfo    trainInfo    = new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN);
-        PositionInfo positionInfo = createPositionInfo(message.PACKET_POSITION);
+        PositionInfo positionInfo = createPositionInfo(message.positionPacket);
         Payload_14   payload_14   = new Payload_14(trainInfo, positionInfo);
         _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_14(registeredTMS, _rbcIDString, payload_14)));
     }

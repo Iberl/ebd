@@ -182,7 +182,7 @@ public class BaliseGroup {
         Telegram telegram = new Telegram(Q_UPDOWN, version, Q_MEDIA, N_PIG, N_TOTAL, balise.getM_DUP(), balise.M_MCOUNT, country, NID_BG, linked);
 
         if (balise.packet_0 != null) {
-            telegram.PACKET_0 = balise.packet_0;
+            telegram.packet_0 = balise.packet_0;
         }
 
         telegram.packets.addAll(balise.packets);

@@ -170,14 +170,14 @@ public class PositionReportSupervisor {
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
         packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
-        packet0.L_TRAININIT = (int)(this.lengthTrain * 10);
+        packet0.L_TRAININT = (int)(this.lengthTrain * 10);
         packet0.L_DOUBTOVER = 100; //TODO Get this value, in fact, remember this value in the first hand
         packet0.L_DOUBTUNDER = 100; //TODO Get this value, in fact, remember this value in the first hand
         packet0.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
         packet0.M_LEVEL = ETCSVariables.M_LEVEL_2;
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
-        message136.PACKET_POSITION = packet0;
+        message136.positionPacket = packet0;
         this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending Position Report"));
         this.tripTimeAtCycleStart = this.curFullTripTime;

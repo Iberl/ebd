@@ -160,7 +160,7 @@ public class MessageHandler {
         Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null);
         Position refPosition = new Position(0,true, refLocation);
 
-        packet15 = msg3.Packet_15;
+        packet15 = msg3.packet_15;
 
         for (TrackPacket packet : msg3.packets){ //TODO Check LRBG reference consistency
             String pName = packet.getClass().getSimpleName();

@@ -103,28 +103,28 @@ public class ETCSPacketCreator {
 		if(speedProfile.sections.isEmpty())
 			throw new IllegalArgumentException("The given speed profile has no sections.");
 
-		List<Packet_27.Packet_27_StaticSpeedProfile> profiles = new ArrayList<>();
+		List<Packet_27.Packet_27_Section> sections = new ArrayList<>();
 
 		for(SpeedProfile.Section section : speedProfile.sections) {
 			if(section.categories.isEmpty())
 				throw new IllegalArgumentException("A section in the given speed profile has no categories.");
 
-			List<Packet_27.Packet_27_StaticSpeedProfileSection> categories = new ArrayList<>();
+			List<Packet_27.Packet_27_Category> categories = new ArrayList<>();
 
 			for(SpeedProfile.Section.Category category : section.categories) {
-				 categories.add(new Packet_27.Packet_27_StaticSpeedProfileSection(category.q_diff, category.nc_cddiff, category.nc_diff, category.v_diff));
+				 categories.add(new Packet_27.Packet_27_Category(category.q_diff, category.nc_cddiff, category.nc_diff, category.v_diff));
 			}
 
-			Packet_27.Packet_27_StaticSpeedProfile profile = new Packet_27.Packet_27_StaticSpeedProfile(section.d_static, section.v_static, section.q_front);
+			Packet_27.Packet_27_Section newSection = new Packet_27.Packet_27_Section(section.d_static, section.v_static, section.q_front);
 
-			profile.sections = categories;
+			newSection.categories = categories;
 
-			profiles.add(profile);
+			sections.add(newSection);
 		}
 
-		Packet_27 packet_27 = new Packet_27(coalesce(speedProfile.q_dir, Q_DIR), coalesce(speedProfile.q_scale, Q_SCALE), profiles.remove(0));
+		Packet_27 packet_27 = new Packet_27(coalesce(speedProfile.q_dir, Q_DIR), coalesce(speedProfile.q_scale, Q_SCALE), sections.remove(0));
 
-		packet_27.speedProfiles = profiles;
+		packet_27.sections = sections;
 
 		return packet_27;
 	}
