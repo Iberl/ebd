@@ -16,7 +16,7 @@ ipToTMSServer = 127.0.0.1
 portOfTMSServer = 22223
 portOfRBCServer = 22224
 
-portOfGUIServer = 22224
+portOfGUIServer = 22226
 
 dmiServerPort = 22225
 
@@ -29,7 +29,7 @@ tripProfileMode = breakingcurve
 tripProfileFolderPath = tripprofiles/
 
 ipToTripProfileServer = 127.0.0.1
-portToTripProfileServer = 22226
+portToTripProfileServer = 22227
 
 
 
