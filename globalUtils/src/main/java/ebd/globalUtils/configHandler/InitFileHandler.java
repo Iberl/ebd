@@ -7,8 +7,51 @@ import java.util.Set;
 
 public class InitFileHandler {
 
+    public class Train {
+
+        public int etcsID;
+        public int trainConfigID;
+        public int infrastructureID;
+        public String trainScheduleID;
+        public int rbcID;
+
+        public int startingBaliseGroup;
+        public String startingTrack;
+
+        public boolean startingDirection;
+
+        /**
+         *
+         * @param etcsID The etcs ID of the train
+         * @param trainConfigID The train config ID used to communicate with the TrainConfig tool
+         * @param infrastructureID The infrastructure ID used to communicate with the model train
+         * @param trainScheduleID The train schedule ID
+         * @param rbcID The ID of the RBC commanding this train
+         * @param startingBaliseGroup The Balise Group at starting position.
+         * @param startingTrack The starting Track on the ModelInfrastructure
+         * @param startingDirection The direction on the track (true means forward)
+         */
+        public Train(int etcsID,
+                     int trainConfigID,
+                     int infrastructureID,
+                     String trainScheduleID,
+                     int rbcID,
+                     int startingBaliseGroup,
+                     String startingTrack,
+                     boolean startingDirection) {
+            this.etcsID = etcsID;
+            this.trainConfigID = trainConfigID;
+            this.infrastructureID = infrastructureID;
+            this.trainScheduleID = trainScheduleID;
+            this.rbcID = rbcID;
+            this.startingBaliseGroup = startingBaliseGroup;
+            this.startingTrack = startingTrack;
+            this.startingDirection = startingDirection;
+        }
+    }
+
     private static InitFileHandler instance = new InitFileHandler();
-    private Map<Integer, Object[]> map;
+    private Map<Integer, Train> map;
 
     /**
      * Set to private to prevent initiation
@@ -41,9 +84,27 @@ public class InitFileHandler {
      * @param infrastructureID The infrastructure ID used to communicate with the model train
      * @param trainScheduleID The train schedule ID
      * @param rbcID The ID of the RBC commanding this train
+     * @param startingBaliseGroup The Balise Group at starting position.
+     * @param startingTrack The starting Track on the ModelInfrastructure
+     * @param startingDirection The direction on the track (true means forward)
      */
-    public synchronized void addTrain(int etcsID, int trainConfigID, int infrastructureID, String trainScheduleID, int rbcID){
-        this.map.put(etcsID, new Object[]{trainConfigID, infrastructureID, trainScheduleID, rbcID});
+    public synchronized void addTrain(int etcsID,
+                                      int trainConfigID,
+                                      int infrastructureID,
+                                      String trainScheduleID,
+                                      int rbcID,
+                                      int startingBaliseGroup,
+                                      String startingTrack,
+                                      boolean startingDirection){
+        this.map.put(etcsID, new Train(etcsID,
+                trainConfigID,
+                infrastructureID,
+                trainScheduleID,
+                rbcID,
+                startingBaliseGroup,
+                startingTrack,
+                startingDirection
+                ));
     }
 
     /**
@@ -67,8 +128,8 @@ public class InitFileHandler {
      * @return TrainConfiguratorID or {@code null} if the ETCS ID is not fond
      */
     public synchronized Integer getTrainConfiguratorID(int etcsID){
-        Object get = this.map.get(etcsID)[0];
-        return (get != null) ? (int)get : null;
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.trainConfigID : null;
     }
 
     /**
@@ -76,8 +137,8 @@ public class InitFileHandler {
      * @return InfrastructureID or {@code null} if the ETCS ID is not fond
      */
     public synchronized Integer getInfrastructureID(int etcsID){
-        Object get = this.map.get(etcsID)[1];
-        return (get != null) ? (int)get : null;
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.infrastructureID : null;
     }
 
     /**
@@ -85,16 +146,53 @@ public class InitFileHandler {
      * @return TrainScheduleID or {@code null} if the ETCS ID is not fond
      */
     public synchronized String getTrainScheduleID(int etcsID){
-        Object get = this.map.get(etcsID)[2];
-        return (get != null) ? (String)get : null;
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.trainScheduleID : null;
     }
 
-    /** @param etcsID The etcsID
+    /**
+     * @param etcsID The etcsID
      * @return RBC ID or {@code null} if the ETCS ID is not fond
      */
     public synchronized Integer getRBCID(int etcsID){
-        Object get = this.map.get(etcsID)[3];
-        return (get != null) ? (int)get : null;
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.rbcID : null;
+    }
+
+    /**
+     * The starting balise group is the first balise group that the train is positioned on.
+     * Used to initialize the train on the TMS infrastructure.
+     * Has to be a valid starting balise group. If the EBD infrastructure is used, the starting track
+     * and the starting balise group have to be at the <b>same</b> position
+     * @param etcsID The etcsID
+     * @return RBC ID or {@code null} if the ETCS ID is not fond
+     */
+    public synchronized Integer getStartingBaliseGroup(int etcsID){
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.startingBaliseGroup : null;
+    }
+
+    /**
+     * The starting track is the first track that the train is positioned on.
+     * Used to initialize the train on the EBD infrastructure.
+     * Has to be a valid starting track on the EBD infrastructure.
+     * @param etcsID The etcsID
+     * @return The starting track or {@code null} if the ETCS ID is not fond
+     */
+    public synchronized String getStartingTrack(int etcsID){
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.startingTrack : null;
+    }
+
+    /**
+     * Used to initialize the train on the EBD and TMS infrastructure.
+     * Has to be a valid starting direction in both.
+     * @param etcsID The etcsID
+     * @return RBC ID or {@code null} if the ETCS ID is not fond
+     */
+    public synchronized Boolean getStartingDirection(int etcsID){
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.startingDirection : null;
     }
 
     /**
@@ -112,25 +210,45 @@ public class InitFileHandler {
 
         for(String string : stringArray){
             if(string.contains("#") || string.isBlank()) continue;
-            String[] split = string.split(" ");
+            string = string.replaceAll(" ", "");
+            String[] split = string.split(";");
             int etcsID = 0;
             int infrastructureID = 0;
             int trainConfigID = 0;
             String trainScheduleID = "";
             int rbcID = 0;
+            int startingBaliseGroup = 0;
+            String startingTrack = "";
+            boolean startingDirection = true;
             try{
                 etcsID = Integer.parseInt(split[0]);
                 infrastructureID = Integer.parseInt(split[1]);
                 trainConfigID = Integer.parseInt(split[2]);
                 trainScheduleID = split[3];
                 rbcID = Integer.parseInt(split[4]);
+                startingBaliseGroup = Integer.parseInt(split[5]);
+                startingTrack = split[6];
+                startingDirection = Boolean.parseBoolean(split[7]);
+
             }
             catch (NumberFormatException nfe){
-                System.err.println("The initFile had non numbers in a number variable: " + string);
+                System.err.println("This line in initFile.txt had non numbers in a number variable: " + string);
                 nfe.printStackTrace();
                 System.exit(-1);
             }
-            this.addTrain(etcsID,infrastructureID,trainConfigID,trainScheduleID, rbcID);
+            catch (IndexOutOfBoundsException ioobe){
+                System.err.println("This line in initFile.txt had to many variables: " + string);
+                ioobe.printStackTrace();
+                System.exit(-1);
+            }
+            this.addTrain(etcsID,
+                    infrastructureID,
+                    trainConfigID,
+                    trainScheduleID,
+                    rbcID,
+                    startingBaliseGroup,
+                    startingTrack,
+                    startingDirection);
         }
     }
 

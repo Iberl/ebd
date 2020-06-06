@@ -26,8 +26,22 @@ public class TrainManager {
         addTrains();
     }
 
-    public void addTrain(int etcsID, int trainConfigID, int infrastructureID, String trainScheduleID, int rbcID){
-        this.iFH.addTrain(etcsID, trainConfigID, infrastructureID, trainScheduleID, rbcID);
+    public void addTrain(int etcsID,
+                         int trainConfigID,
+                         int infrastructureID,
+                         String trainScheduleID,
+                         int rbcID,
+                         int startingBaliseGroup,
+                         String startingTrack,
+                         boolean startingDirection){
+        this.iFH.addTrain(etcsID,
+                trainConfigID,
+                infrastructureID,
+                trainScheduleID,
+                rbcID,
+                startingBaliseGroup,
+                startingTrack,
+                startingDirection);
         TrainStatusManager tsm = new TrainStatusManager(etcsID, trainConfigID, infrastructureID, rbcID);
         this.trainMap.put(etcsID, tsm);
     }
