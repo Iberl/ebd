@@ -256,24 +256,24 @@ public class StaticSpeedProfil extends ForwardSpline{
 		
 		
 		/*
-		 * Adding the first knot, if D_STATIC of the first profile is not 0. 
+		 * Adding the first knot, if D_STATIC of the first section is not 0.
 		 * Then the first speed value is based on the current allowed speed of the train (see SRS 3.6.3.2.2).
 		 * 
 		 */
-		if (bcre.packet27.speedProfile.D_STATIC > 0) {addKnotToCurve(new Knot(0d, bcre.currentSpeedLimit));}
+		if (bcre.packet27.section.D_STATIC > 0) {addKnotToCurve(new Knot(0d, bcre.currentSpeedLimit));}
 		
 		
 		/*
-		 * Adds the first profile into the list of all other profiles.
+		 * Adds the first section into the list of all other sections.
 		 */
-		List<Packet_27.Packet_27_StaticSpeedProfile> profiles = bcre.packet27.speedProfiles;
-		profiles.add(0, bcre.packet27.speedProfile);
+		List<Packet_27.Packet_27_Section> sections = bcre.packet27.sections;
+		sections.add(0, bcre.packet27.section);
 		
 		
 		/*
-		 * Next we iterate through all profiles and add a knot to the SSP
+		 * Next we iterate through all sections and add a knot to the SSP
 		 */
-		for (Packet_27.Packet_27_StaticSpeedProfile profile : profiles) {
+		for (Packet_27.Packet_27_Section section : sections) {
 			
 			
 			
@@ -284,28 +284,28 @@ public class StaticSpeedProfil extends ForwardSpline{
 			ArrayList<Integer> allPossibleSpeeds = new ArrayList<>();
 			boolean cantReplaced = false;
 			
-			Integer cantSpeed = Integer.MAX_VALUE;
-			Integer cantDifference = Integer.MAX_VALUE;
+			int cantSpeed = Integer.MAX_VALUE;
+			int cantDifference = Integer.MAX_VALUE;
 			ArrayList<Integer> otherSpeeds = new ArrayList<>();
 			
-			for (Packet_27.Packet_27_StaticSpeedProfileSection section : profile.sections) {
+			for (Packet_27.Packet_27_Category category : section.categories) {
 				
-				switch(section.Q_DIFF) {
+				switch(category.Q_DIFF) {
 				case 0:
-					int tempdiff = bcre.NC_CDTRAIN - section.NC_CDDIFF; //selects closest but smaller SSP cant category to the train cant category;
+					int tempdiff = bcre.NC_CDTRAIN - category.NC_CDDIFF; //selects closest but smaller SSP cant category to the train cant category;
 					
 					if (tempdiff >= 0 && tempdiff <= cantDifference) {
 						cantDifference = tempdiff;
-						cantSpeed = section.V_DIFF;
+						cantSpeed = category.V_DIFF;
 					}
 				case 1:
-					if(((bcre.NC_TRAIN & (int) Math.pow(2, section.NC_DIFF)) == (int) Math.pow(2, section.NC_DIFF))) {//handles other train categories that replace cant deficency category
+					if(((bcre.NC_TRAIN & (int) Math.pow(2, category.NC_DIFF)) == (int) Math.pow(2, category.NC_DIFF))) {//handles other train categories that replace cant deficency category
 						cantReplaced = true;
-						otherSpeeds.add(section.V_DIFF);
+						otherSpeeds.add(category.V_DIFF);
 					}
 				case 2:
-					if(((bcre.NC_TRAIN & (int) Math.pow(2, section.NC_DIFF)) == (int) Math.pow(2, section.NC_DIFF))) {//handles other train categories that do not replace cant deficency category
-						otherSpeeds.add(section.V_DIFF);
+					if(((bcre.NC_TRAIN & (int) Math.pow(2, category.NC_DIFF)) == (int) Math.pow(2, category.NC_DIFF))) {//handles other train categories that do not replace cant deficency category
+						otherSpeeds.add(category.V_DIFF);
 					}
 				}	
 			}
@@ -315,7 +315,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 					allPossibleSpeeds.add(cantSpeed);
 				}
 				else {
-					allPossibleSpeeds.add(profile.V_STATIC);
+					allPossibleSpeeds.add(section.V_STATIC);
 				}
 			}
 			
@@ -328,9 +328,9 @@ public class StaticSpeedProfil extends ForwardSpline{
 			 * We also keep a lookout for the special value of V_STATIC = 127, which means that the next knot is the last valid knot. (s. SRS 7.5.1.171)
 			 * We represent this fact by setting the last knot to 0 m/s.
 			 */
-			totalDistance += profile.D_STATIC * Math.pow(10, bcre.packet27.Q_SCALE - 1);
+			totalDistance += section.D_STATIC * Math.pow(10, bcre.packet27.Q_SCALE - 1);
 			
-			if (profile.V_STATIC == 127) {
+			if (section.V_STATIC == 127) {
 				addKnotToCurve(new Knot(totalDistance, 0d));
 				break;
 			}
@@ -340,9 +340,9 @@ public class StaticSpeedProfil extends ForwardSpline{
 			/*
 			 * If we have to respect the train length (Train Length Delay) we generate a SSP Slice to add to the SSP later
 			 */
-			if (!profile.Q_FRONT) {
+			if (!section.Q_FRONT) {
 				ForwardSpline slice = new ForwardSpline(0);
-				slice.addKnotToCurve(new Knot(totalDistance, profile.V_STATIC * BreakingCurveCalculator.ETCS_VALUE_TO_MS));
+				slice.addKnotToCurve(new Knot(totalDistance, section.V_STATIC * BreakingCurveCalculator.ETCS_VALUE_TO_MS));
 				slice.addKnotToCurve(new Knot(totalDistance + bcre.L_TRAIN, Double.MAX_VALUE));
 				listOfSlices.add(slice);
 			}

@@ -54,6 +54,11 @@
       <artifactId>rbc_tms</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>ebd</groupId>
+      <artifactId>messageLibrary</artifactId>
+      <version>2.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -114,7 +119,6 @@
 
   <modules>
     <module>globalUtils</module>
-    <module>messageLibrary</module>
     <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
@@ -122,7 +126,6 @@
     <module>trainSide</module>
     <module>trackSide</module>
     <module>szenario</module>
-    <module>distribution</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

@@ -13,13 +13,4 @@
 
   <name>Global Utilities</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>ebd</groupId>
-      <artifactId>messageLibrary</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
-
-
 </project>

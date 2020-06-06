@@ -227,7 +227,7 @@ public class TrainStatusManager implements Runnable {
         Message_150 msg150 = new Message_150();
         msg150.NID_ENGINE = this.etcsTrainID;
         Packet_0 p0 = new Packet_0();
-        msg150.PACKET_POSITION = p0;
+        msg150.positionPacket = p0;
         this.infrastructureClientConnector.disconnect();
         SendETCSMessageEvent sme = new SendETCSMessageEvent("tsm", "ms", msg150, "mr;R=" + this.rbcID);
         this.messageSender.send(sme);

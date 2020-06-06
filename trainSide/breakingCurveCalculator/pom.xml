@@ -13,18 +13,4 @@
     <version>0.1-SNAPSHOT</version>
     <artifactId>breakingCurveCalculator</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>messageLibrary</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>globalUtils</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
-
 </project>
