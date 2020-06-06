@@ -319,7 +319,7 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", "td",changesForTD));
 
         this.clock = new Clock(this.localEventBus);
-        this.clock.start(ConfigHandler.getInstance().trainClockTickInMS);
+        this.clock.start(ConfigHandler.getInstance().clockTickInMS);
 
         this.localEventBus.post(new ToLogEvent("tsm", "log", "TSM initialized"));
     }
