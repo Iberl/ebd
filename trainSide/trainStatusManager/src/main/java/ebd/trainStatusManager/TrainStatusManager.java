@@ -10,6 +10,8 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
@@ -27,8 +29,11 @@ import ebd.messageLibrary.util.ETCSVariables;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
+import ebd.routeData.RouteDataVolatile;
+import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
 import ebd.trainData.TrainData;
+import ebd.trainData.TrainDataVolatile;
 import ebd.trainStatusManager.util.Clock;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import ebd.trainStatusManager.util.handlers.ExceptionHandler;
@@ -154,6 +159,39 @@ public class TrainStatusManager implements Runnable {
         if(ch.debug){
             saveBreakingCurvesToFile(nbce);
         }
+    }
+
+    /**
+     * This function checks if a new location was reached and if so, updates the position of the train to
+     * reflect this.
+     */
+    @Subscribe
+    public void reactToNewLocation(NewLocationEvent nle) {
+        RouteDataVolatile routeDataVolatile = this.routeData.getRouteDataVolatile();
+        if(routeDataVolatile.getLinkingInformation() == null) return;
+
+        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
+        Location newLoc = nle.newLocation;
+
+
+        Position oldPos = this.trainData.getTrainDataVolatile().getCurrentPosition();
+
+        Map<Integer,Location> prefLocs = Objects.requireNonNull(oldPos).getPreviousLocations();
+        double overshoot;
+
+        if(prefLocs.size() > 0) {
+            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
+            prefLocs.put(newLoc.getId(),newLoc);}
+        else {
+            InitalLocation initLoc = new InitalLocation();
+            prefLocs.put(initLoc.getId(),initLoc);
+            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
+            overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
+        }
+
+        Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
+        this.localEventBus.post(new TrainDataChangeEvent("tsm","td","currentPosition",newPos));
+        this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -337,7 +375,7 @@ public class TrainStatusManager implements Runnable {
                     writer.append(String.format("%f:%f%n", xPosition, yValue));
                     xPosition += step;
                 }
-
+                writer.flush();
                 writer.close();
 
             } catch (IOException e1) {

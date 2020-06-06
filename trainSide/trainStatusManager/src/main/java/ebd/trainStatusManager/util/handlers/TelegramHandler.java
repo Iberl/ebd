@@ -55,7 +55,7 @@ public class TelegramHandler {
         //TODO Remember NID_C
         Location newLoc = linkingInformation.get(rte.telegram.NID_BG);
         //this.localBus.post(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
-        this.localBus.postSticky(new NewLocationEvent("tsm", "all", newLoc));
+        this.localBus.post(new NewLocationEvent("tsm", "all", newLoc));
         String msg = "Received a Balise Telegram with location information";
         this.localBus.post(new ToLogEvent("tsm", "log", msg));
     }

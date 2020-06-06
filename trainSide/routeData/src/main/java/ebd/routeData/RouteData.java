@@ -91,4 +91,11 @@ public class RouteData {
         String msg = String.format("fieldName %s was not found in fields of %s", fieldName, routeDataVolatile.getClass());
         throw new IllegalArgumentException(msg);
     }
+
+    /*
+    Getter
+     */
+    public RouteDataVolatile getRouteDataVolatile(){
+        return this.routeDataVolatile;
+    }
 }
