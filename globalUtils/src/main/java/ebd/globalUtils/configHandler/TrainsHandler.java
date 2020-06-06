@@ -5,7 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class InitFileHandler {
+/**
+ * This singleton class contains the data over all values necessary to identify trains.<br>
+ * It also provides and reads out the init file to provide a convenient way to initialize multiple trains.
+ */
+public class TrainsHandler {
 
     public class Train {
 
@@ -19,9 +23,9 @@ public class InitFileHandler {
         public String startingTrack;
 
         public boolean startingDirection;
+        private int startingIncrement;
 
         /**
-         *
          * @param etcsID The etcs ID of the train
          * @param trainConfigID The train config ID used to communicate with the TrainConfig tool
          * @param infrastructureID The infrastructure ID used to communicate with the model train
@@ -30,6 +34,7 @@ public class InitFileHandler {
          * @param startingBaliseGroup The Balise Group at starting position.
          * @param startingTrack The starting Track on the ModelInfrastructure
          * @param startingDirection The direction on the track (true means forward)
+         * @param startingIncrement The starting increment (distance from the balise group) in [m]
          */
         public Train(int etcsID,
                      int trainConfigID,
@@ -38,7 +43,8 @@ public class InitFileHandler {
                      int rbcID,
                      int startingBaliseGroup,
                      String startingTrack,
-                     boolean startingDirection) {
+                     boolean startingDirection,
+                     int startingIncrement) {
             this.etcsID = etcsID;
             this.trainConfigID = trainConfigID;
             this.infrastructureID = infrastructureID;
@@ -47,16 +53,17 @@ public class InitFileHandler {
             this.startingBaliseGroup = startingBaliseGroup;
             this.startingTrack = startingTrack;
             this.startingDirection = startingDirection;
+            this.startingIncrement = startingIncrement;
         }
     }
 
-    private static InitFileHandler instance = new InitFileHandler();
+    private static TrainsHandler instance = new TrainsHandler();
     private Map<Integer, Train> map;
 
     /**
      * Set to private to prevent initiation
      */
-    private InitFileHandler(){
+    private TrainsHandler(){
         this.map = new HashMap<>();
         try {
             parseInitFile();
@@ -68,12 +75,12 @@ public class InitFileHandler {
     }
 
     /**
-     * InitFileHandler loads the initFile.txt in which the startup configuration is saved.
-     * It allows for trains to be added and removed.
+     * TrainsHandler loads the initFile.txt in which the startup configuration is saved.
+     * It further contains all identifying ID of a train and allows for trains to be added and removed.
      * Because of this, you can never assume that a train exists as it could have been removed between calls
-     * @return A singleton Instance InitFileHandler
+     * @return A singleton Instance TrainsHandler
      */
-    public static InitFileHandler getInstance() {
+    public static TrainsHandler getInstance() {
         return instance;
     }
 
@@ -95,7 +102,8 @@ public class InitFileHandler {
                                       int rbcID,
                                       int startingBaliseGroup,
                                       String startingTrack,
-                                      boolean startingDirection){
+                                      boolean startingDirection,
+                                      int startingIncrement){
         this.map.put(etcsID, new Train(etcsID,
                 trainConfigID,
                 infrastructureID,
@@ -103,12 +111,13 @@ public class InitFileHandler {
                 rbcID,
                 startingBaliseGroup,
                 startingTrack,
-                startingDirection
+                startingDirection,
+                startingIncrement
                 ));
     }
 
     /**
-     * Removes the train specified under the ETCS ID from the {@link InitFileHandler}
+     * Removes the train specified under the ETCS ID from the {@link TrainsHandler}
      * @param etcsID The etcs ID of the train to be removed
      */
     public synchronized void removeTrain(int etcsID){
@@ -196,6 +205,17 @@ public class InitFileHandler {
     }
 
     /**
+     * The distance of the train from the starting balise group.
+     * Used to initialize the train on the TMS infrastructure.
+     * @param etcsID The etcsID
+     * @return RBC ID or {@code null} if the ETCS ID is not fond
+     */
+    public synchronized Integer getStartingIncrement(int etcsID){
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.startingIncrement : null;
+    }
+
+    /**
      * Reads and parses the initFile.txt
      *
      * @throws IOException If there is an Exception reading the initFile
@@ -220,6 +240,7 @@ public class InitFileHandler {
             int startingBaliseGroup = 0;
             String startingTrack = "";
             boolean startingDirection = true;
+            int startingIncrement = 0;
             try{
                 etcsID = Integer.parseInt(split[0]);
                 infrastructureID = Integer.parseInt(split[1]);
@@ -229,6 +250,7 @@ public class InitFileHandler {
                 startingBaliseGroup = Integer.parseInt(split[5]);
                 startingTrack = split[6];
                 startingDirection = Boolean.parseBoolean(split[7]);
+                startingIncrement = Integer.parseInt(split[8]);
 
             }
             catch (NumberFormatException nfe){
@@ -248,7 +270,8 @@ public class InitFileHandler {
                     rbcID,
                     startingBaliseGroup,
                     startingTrack,
-                    startingDirection);
+                    startingDirection,
+                    startingIncrement);
         }
     }
 

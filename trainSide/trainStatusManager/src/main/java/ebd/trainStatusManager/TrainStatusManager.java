@@ -7,6 +7,7 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -108,7 +109,7 @@ public class TrainStatusManager implements Runnable {
         this.rbcID = rbcID;
         this.source = "tsm;T=" + this.etcsTrainID;
 
-        setUpTrain(trainConfigID, infrastructureID, rbcID);
+        setUpTrain(trainConfigID, infrastructureID);
         this.tsmThread.start();
         connectToRBC(this.rbcID);
     }
@@ -135,6 +136,19 @@ public class TrainStatusManager implements Runnable {
             ie.setStackTrace(e.getStackTrace());
             this.globalEventBus.post(new TsmExceptionEvent("tsm;T=" + this.etcsTrainID, "rsm;R=" + this.rbcID,
                     new NotCausedByAEvent(),ie, ExceptionEventTyp.WARNING));
+        }
+    }
+
+    /**
+     * Kills the train by stopping clock, disconnecting the train from the infrastructure and letting the
+     * thread run out.
+     */
+    public void kill() {
+        if(this.clock != null) this.clock.stop();
+        if(this.infrastructureClientConnector != null) this.infrastructureClientConnector.disconnect();
+        this.globalEventBus.post(new RemoveTrainEvent( this.source, "mr;R=" + this.rbcID, this.etcsTrainID));
+        synchronized (this){
+            this.notify();
         }
     }
 
@@ -243,15 +257,6 @@ public class TrainStatusManager implements Runnable {
         kill();
     }
 
-    public void kill() {
-        this.clock.stop();
-        this.infrastructureClientConnector.disconnect();
-        this.globalEventBus.post(new RemoveTrainEvent( this.source, "mr;R=" + this.rbcID, this.etcsTrainID));
-        synchronized (this){
-            this.notify();
-        }
-    }
-
     /**
      * Connects this train to the RBC specified by sending a {@link Message_155}
      * @param rbcID The RBC identification
@@ -270,7 +275,16 @@ public class TrainStatusManager implements Runnable {
     /**
      * Initializes all needed instances of handlers, connections and modules, then starts the {@link Clock}.
      */
-    private void setUpTrain( int trainConfigID, int infrastructureID, int rbcID) {
+    private void setUpTrain( int trainConfigID, int infrastructureID) {
+        TrainsHandler th = TrainsHandler.getInstance();
+        Integer startingBalise = th.getStartingBaliseGroup(this.etcsTrainID);
+        Boolean startingDirection = th.getStartingDirection(this.etcsTrainID);
+        Integer startingIncrement = th.getStartingIncrement(this.etcsTrainID);
+        if(startingBalise == null || startingDirection == null || startingIncrement == null){ //Train already removed, so we immediately kill the train
+            kill();
+            return;
+        }
+
         /*
         Handlers
          */
@@ -309,8 +323,8 @@ public class TrainStatusManager implements Runnable {
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
-        Location newLoc = new Location(1, ETCSVariables.NID_LRBG_UNKNOWN, 0d); //TODO from init file
-        Position curPos = new Position(0,true, newLoc);
+        Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, 0d);
+        Position curPos = new Position(startingIncrement, startingDirection, newLoc);
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);

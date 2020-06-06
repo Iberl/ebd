@@ -3,7 +3,7 @@ package ebd.szenario;
 
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.configHandler.InitFileHandler;
+import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
@@ -20,13 +20,11 @@ import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
 import ebd.szenario.util.server.DMIServer;
 import ebd.szenario.util.server.GUIServer;
-import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
-import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 
@@ -48,7 +46,7 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            for(int etcsID : InitFileHandler.getInstance().getEtcsIDs()){
+            for(int etcsID : TrainsHandler.getInstance().getEtcsIDs()){
                 ms.send(new SendETCSMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
             }
 
@@ -59,7 +57,7 @@ public class Szenario implements Runnable {
     private EventBus globalEventBus;
     private Thread szenarioThread = new Thread(this);
     private ConfigHandler ch;
-    private InitFileHandler iFH;
+    private TrainsHandler iFH;
 
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
@@ -93,7 +91,7 @@ public class Szenario implements Runnable {
         this.szenarioEventHandler = new SzenarioEventHandler();
 
         this.ch = ConfigHandler.getInstance();
-        this.iFH = InitFileHandler.getInstance();
+        this.iFH = TrainsHandler.getInstance();
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();

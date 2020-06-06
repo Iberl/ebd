@@ -1,7 +1,7 @@
 package ebd.szenario;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.configHandler.InitFileHandler;
+import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.szenario.RemoveTrainEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
@@ -16,7 +16,7 @@ public class TrainManager {
 
     private final EventBus globalBus;
     private final ConfigHandler ch = ConfigHandler.getInstance();
-    private InitFileHandler iFH = InitFileHandler.getInstance();
+    private TrainsHandler th = TrainsHandler.getInstance();
     private Map<Integer, TrainStatusManager> trainMap;
 
 
@@ -26,6 +26,18 @@ public class TrainManager {
         addTrains();
     }
 
+    /**
+    * @see TrainsHandler#addTrain(int, int, int, String, int, int, String, boolean, int)
+    *
+    * @param etcsID The etcs ID of the train
+    * @param trainConfigID The train config ID used to communicate with the TrainConfig tool
+    * @param infrastructureID The infrastructure ID used to communicate with the model train
+    * @param trainScheduleID The train schedule ID
+    * @param rbcID The ID of the RBC commanding this train
+    * @param startingBaliseGroup The Balise Group at starting position.
+    * @param startingTrack The starting Track on the ModelInfrastructure
+    * @param startingDirection The direction on the track (true means forward)
+    */
     public void addTrain(int etcsID,
                          int trainConfigID,
                          int infrastructureID,
@@ -33,21 +45,23 @@ public class TrainManager {
                          int rbcID,
                          int startingBaliseGroup,
                          String startingTrack,
-                         boolean startingDirection){
-        this.iFH.addTrain(etcsID,
+                         boolean startingDirection,
+                         int startingIncrement){
+        this.th.addTrain(etcsID,
                 trainConfigID,
                 infrastructureID,
                 trainScheduleID,
                 rbcID,
                 startingBaliseGroup,
                 startingTrack,
-                startingDirection);
+                startingDirection,
+                startingIncrement);
         TrainStatusManager tsm = new TrainStatusManager(etcsID, trainConfigID, infrastructureID, rbcID);
         this.trainMap.put(etcsID, tsm);
     }
 
     public void removeTrain(int etcsID, boolean trainKill){
-        this.iFH.removeTrain(etcsID);
+        this.th.removeTrain(etcsID);
         TrainStatusManager tsm = this.trainMap.remove(etcsID);
         if(tsm != null && trainKill) tsm.kill();
     }
@@ -58,10 +72,10 @@ public class TrainManager {
     }
 
     private void addTrains(){
-        Set<Integer> trains = this.iFH.getEtcsIDs();
+        Set<Integer> trains = this.th.getEtcsIDs();
         for(int etcsID : trains){
-            TrainStatusManager tsm = new TrainStatusManager(etcsID, this.iFH.getTrainConfiguratorID(etcsID),
-                    this.iFH.getInfrastructureID(etcsID), this.iFH.getRBCID(etcsID));
+            TrainStatusManager tsm = new TrainStatusManager(etcsID, this.th.getTrainConfiguratorID(etcsID),
+                    this.th.getInfrastructureID(etcsID), this.th.getRBCID(etcsID));
             this.trainMap.put(etcsID, tsm);
         }
     }

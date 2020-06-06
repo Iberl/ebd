@@ -20,7 +20,9 @@
 
 #starting direction (boolean): If true, the train starts in track direction, if false, against the track direction.
 
+#starting increment (int): The distance from the starting balise in [m].
+
 #Every variable is divided by a ; and any number of white spaces (" "). Variables are not allowed to contain white spaces.
 
-# etcsID | trainConfigID | infrastructureID | trainScheduleID | rbcID | startingBaliseGroup | startingTrack | startingDirection
-   1620;       192;              2181;           RB5775;          1;             1;                 W2;              true;
+# etcsID | trainConfigID | infrastructureID | trainScheduleID | rbcID | startingBaliseGroup | startingTrack | startingDirection | startingIncrement
+   1620;       192;              2181;           RB5775;          1;             1;                 W2;              true;          0;
