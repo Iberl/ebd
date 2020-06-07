@@ -6,9 +6,11 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_80;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -20,7 +22,33 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class ModeAndLevelSupervisor {
+
+    private class ModeProfil {
+
+        private boolean unspecified = true;
+        private TreeMap<Double,ETCSMode> modeTreeMap = new TreeMap<>();
+
+        private ModeProfil(){};
+
+        private ModeProfil(TreeMap<Double, ETCSMode> modeTreeMap){
+            this.unspecified = false;
+            this.modeTreeMap = modeTreeMap;
+        }
+
+        private ETCSMode getMode(double distance){
+            return modeTreeMap.floorEntry(distance).getValue();
+        }
+
+        private Map.Entry<Double,ETCSMode> getNextMode(double distance){
+            return modeTreeMap.higherEntry(distance);
+        }
+
+    }
 
     private EventBus localEventBus;
     private TrainDataVolatile trainDataVolatile;
@@ -29,13 +57,14 @@ public class ModeAndLevelSupervisor {
     private ETCSLevel curLevel = ETCSLevel.LEVEL_TWO;
     private ETCSMode curMode = ETCSMode.STAND_BY;
 
+    private ModeProfil modeProfil;
+
     /*
     Control Booleans
      */
     private BreakingCurve bc = null;
     private boolean errorDetected = false;
     private boolean unconEStop = false; //TODO Implement unconditional emergency stop message
-    private boolean unspecificModeProfil = true; //TODO Implement ModeProfil
 
 
     /**
@@ -48,10 +77,13 @@ public class ModeAndLevelSupervisor {
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.trainDataPerma = this.localEventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.routeDataVolatile = this.localEventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
+        this.modeProfil = new ModeProfil();
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
+
+        checkModeProfil();
 
         testLevelConditions();
 
@@ -72,11 +104,32 @@ public class ModeAndLevelSupervisor {
     @Subscribe
     public void breakinCurve(NewBreakingCurveEvent nbce){
         this.bc = nbce.breakingCurveGroup.getPermittedSpeedCurve();
+        Packet_80 p80 = routeDataVolatile.getPacket_80();
+        this.modeProfil = makeModeProfil(p80);
     }
+
 
     /*
     Modes
      */
+    private void checkModeProfil() {
+        if(this.modeProfil.unspecified) return;
+
+        double curDis = trainDataVolatile.getCurTripSectionDistance();
+        if(this.modeProfil.getNextMode(curDis).getValue() == ETCSMode.SHUNTING){
+            if(!routeDataVolatile.isLastMABeforeEndOfMission()) {
+                this.localEventBus.post(new RouteDataChangeEvent("tsm","rd","lastMABeforeEndOfMission", true));
+            }
+        }
+        if(this.modeProfil.getMode(curDis) == ETCSMode.SHUNTING){
+            if(!routeDataVolatile.isLastMABeforeEndOfMission()) {
+                this.localEventBus.post(new RouteDataChangeEvent("tsm","rd","lastMABeforeEndOfMission", true));
+            }
+            //TODO Switch to Shunting?
+        }
+    }
+
+
     private void checkAndAssignAllModes(){
 
         /*
@@ -172,7 +225,7 @@ public class ModeAndLevelSupervisor {
                 && routeDataVolatile.getPacket_27() != null
                 && trainBeforeStartOfSSPOrGP;
 
-        if(this.curMode == ETCSMode.POST_TRIP && this.unspecificModeProfil && vaildRouteData && etcsLevelTwoOrThree){//SRS-026 4.6.3 [31]
+        if(this.curMode == ETCSMode.POST_TRIP && this.modeProfil.unspecified && vaildRouteData && etcsLevelTwoOrThree){//SRS-026 4.6.3 [31]
             this.curMode = ETCSMode.FULL_SUPERVISION;
             return true;
         }
@@ -197,7 +250,7 @@ public class ModeAndLevelSupervisor {
         // TODO Insert after a SR/SH start is implemented
         //vaildTrainData = vaildTrainData && trainDataVolatile.getCurrentPosition().getLocation().getId() != ETCSVariables.NID_LRBG_UNKNOWN;
 
-        if(this.curMode == ETCSMode.STAND_BY && vaildTrainData && vaildRouteData && this.unspecificModeProfil){//SRS-026 4.6.3 [10]
+        if(this.curMode == ETCSMode.STAND_BY && vaildTrainData && vaildRouteData && this.modeProfil.unspecified){//SRS-026 4.6.3 [10]
             this.curMode = ETCSMode.FULL_SUPERVISION;
             return true;
         }
@@ -306,6 +359,36 @@ public class ModeAndLevelSupervisor {
         if(this.curLevel != ETCSLevel.LEVEL_TWO) this.curLevel = ETCSLevel.LEVEL_TWO;
     }
 
+    /*
+    Misc
+     */
+    private ModeProfil makeModeProfil(Packet_80 p80) {
+        if(p80 == null) return new ModeProfil();
+
+        List<Packet_80.Packet_80_MAMode> modeList = p80.modes;
+        modeList.add(0, p80.mode);
+
+        double scale = Math.pow(10,p80.Q_SCALE - 1);
+
+        TreeMap<Double,ETCSMode> modeTreeMap = new TreeMap<>();
+        for (Packet_80.Packet_80_MAMode mode : modeList){
+            modeTreeMap.put(mode.D_MAMODE * scale, modeTranslator(mode.M_MAMODE));
+        }
+
+
+        return new ModeProfil(modeTreeMap);
+    }
+
+    private ETCSMode modeTranslator(int m_mamode) {
+        switch (m_mamode){
+            case 1:
+                return ETCSMode.SHUNTING;
+            case 0:
+            case 2:
+            default:
+                return ETCSMode.NO_MODE;
+        }
+    }
 
     private boolean validTarget(String target){
 

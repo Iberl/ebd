@@ -128,6 +128,18 @@ public class MessageHandler {
         RouteDataVolatile routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
 
         /*
+        Deleting old information, as stipulated by SRS
+         */
+        Map<String, Object> deletedData= new HashMap<>();
+        deletedData.put("refLocation", ebd.rbc_tms.util.ETCSVariables.NID_LRBG_UNKNOWN);
+        deletedData.put("packet_15", null);
+        deletedData.put("packet_21", null);
+        deletedData.put("packet_27",null);
+        deletedData.put("packet_65", new ArrayList<>());
+        deletedData.put("packet_80", null);
+        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", deletedData));
+
+        /*
         Information needed for a BreakingCurveRequestEvent
          */
         String id = "BreakingCurve";
@@ -184,13 +196,13 @@ public class MessageHandler {
                 localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
                 return;
         }
-        Map<String, Object> changesForRouteData= new HashMap<>();
-        changesForRouteData.put("refLocation", refLocation);
-        changesForRouteData.put("packet_15",packet15);
-        changesForRouteData.put("packet_21",packet21);
-        changesForRouteData.put("packet_27",packet27);
-        changesForRouteData.put("packet_65", listOfPacket65s);
-        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData));
+        Map<String, Object> changesForRouteData_2= new HashMap<>();
+        changesForRouteData_2.put("refLocation", refLocation);
+        changesForRouteData_2.put("packet_15",packet15);
+        changesForRouteData_2.put("packet_21",packet21);
+        changesForRouteData_2.put("packet_27",packet27);
+        changesForRouteData_2.put("packet_65", listOfPacket65s);
+        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData_2));
 
         ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
         ForwardSpline emergencyBreakingPower = trainDataVolatile.getCurrentEmergencyBreakingPower();

@@ -106,9 +106,6 @@ public class PackageHandler {
     }
 
     public static void p80(EventBus localBus, Packet_80 p80){
-        //TODO FUll handeling of Packet 80 in a mode supervisor
-        if(p80.mode.M_MAMODE == ETCSVariables.M_MAMODE_SHUNTING){
-            localBus.post(new RouteDataChangeEvent("tsm", "rd", "lastMABeforeEndOfMission", true));
-        }
+        localBus.post(new RouteDataChangeEvent("tsm", "rd", "package_80", p80));
     }
 }
