@@ -52,7 +52,11 @@ public class ETCSPacketCreator {
 		List<Packet_15.Packet_15_Section> sections = new ArrayList<>();
 
 		for(EOA.Section section : eoa.sections) {
-			sections.add(new Packet_15.Packet_15_Section(section.l_section, section.q_sectiontimer, section.t_sectiontimer, section.d_sectiontimerstoploc));
+			//TODO if q_sectiontimer true and t_sectiontimer/d_sectiontimerstoploc null then throw error
+			sections.add(new Packet_15.Packet_15_Section(section.l_section,
+					section.q_sectiontimer,
+					section.t_sectiontimer == null ? 0 : section.t_sectiontimer,
+					section.d_sectiontimerstoploc == null ? 0 : section.d_sectiontimerstoploc));
 		}
 
 		EOA.EndTimer endTimer = eoa.endTimer;
@@ -106,13 +110,13 @@ public class ETCSPacketCreator {
 		List<Packet_27.Packet_27_Section> sections = new ArrayList<>();
 
 		for(SpeedProfile.Section section : speedProfile.sections) {
-			if(section.categories.isEmpty())
-				throw new IllegalArgumentException("A section in the given speed profile has no categories.");
+/*			if(section.categories.isEmpty())
+				throw new IllegalArgumentException("A section in the given speed profile has no categories.");*/
 
 			List<Packet_27.Packet_27_Category> categories = new ArrayList<>();
 
 			for(SpeedProfile.Section.Category category : section.categories) {
-				 categories.add(new Packet_27.Packet_27_Category(category.q_diff, category.nc_cddiff, category.nc_diff, category.v_diff));
+				categories.add(new Packet_27.Packet_27_Category(category.q_diff, category.nc_cddiff, category.nc_diff, category.v_diff));
 			}
 
 			Packet_27.Packet_27_Section newSection = new Packet_27.Packet_27_Section(section.d_static, section.v_static, section.q_front);
@@ -145,7 +149,7 @@ public class ETCSPacketCreator {
 
 	public static Packet_80 createPacket_80(int Q_DIR, int Q_SCALE, @NotNull ModeProfile modeProfile) {
 		if(modeProfile.modes.isEmpty())
-			throw new IllegalArgumentException("The given gradient profile has no gradients.");
+			throw new IllegalArgumentException("The given mode profile has no profile.");
 
 		List<Packet_80.Packet_80_MAMode> modes = new ArrayList<>();
 

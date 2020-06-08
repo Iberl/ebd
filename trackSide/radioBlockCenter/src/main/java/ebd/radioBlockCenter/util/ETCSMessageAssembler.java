@@ -18,7 +18,7 @@ public class ETCSMessageAssembler {
 		Message_3 message_3 = new Message_3(etcsFormattedTimeStamp(AppTime.currentTimeMillis()), M_ACK, NID_LRBG, createPacket_15(Q_DIR, Q_SCALE, eoa));
 
 		List<TrackPacket> packets = listOptionalMAProfiles(Q_DIR, Q_SCALE, speedProfile, gradientProfile, linkingProfile, modeProfile);
-
+		message_3.packets.addAll(packets);
 		return message_3;
 	}
 

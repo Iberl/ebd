@@ -8,6 +8,7 @@ import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -131,7 +132,7 @@ public class MessageHandler {
         Deleting old information, as stipulated by SRS
          */
         Map<String, Object> deletedData= new HashMap<>();
-        deletedData.put("refLocation", ebd.rbc_tms.util.ETCSVariables.NID_LRBG_UNKNOWN);
+        deletedData.put("refLocation", new InitalLocation());
         deletedData.put("packet_15", null);
         deletedData.put("packet_21", null);
         deletedData.put("packet_27",null);
@@ -192,9 +193,10 @@ public class MessageHandler {
         }
 
         if(packet15 == null || packet21 == null || packet27 == null){
-                IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
-                localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
-                return;
+            System.out.println("" +packet15 + packet21 + packet27);
+            IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
+            localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
+            return;
         }
         Map<String, Object> changesForRouteData_2= new HashMap<>();
         changesForRouteData_2.put("refLocation", refLocation);

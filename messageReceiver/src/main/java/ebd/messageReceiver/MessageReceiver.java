@@ -95,7 +95,7 @@ public class MessageReceiver {
 				localBus.post(new ReceivedTelegramEvent(mrID, managerID, telegram, event.source));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
-
+				System.out.println("Message Received " + message.NID_MESSAGE + "from " + event.source);
 				localBus.post(new ReceivedMessageEvent(mrID, managerID, message, event.source));
 			}
 
