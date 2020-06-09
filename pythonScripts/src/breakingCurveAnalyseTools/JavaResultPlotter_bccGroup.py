@@ -1,14 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os.path
 
-pathList = [r"C:\intellij-workspace\etcs\EmergencyDecelerationCurve.txt",
-            r"C:\intellij-workspace\etcs\EmergencyInterventionCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceDecelerationCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceInterventionCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceWarningCurve.txt",
-            r"C:\intellij-workspace\etcs\ServicePermittedSpeedCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceIndicationCurve.txt",
-            r"C:\intellij-workspace\etcs\ServiceCoastingPhaseCurve.txt"]
+pathStart = r"C:\intellij-workspace\etcs\results\breakingCurves"
+
+pathEnd = r"\2020-06-09T12-40-39.4546809"
+
+path = r"C:/intellij-workspace/etcs/results/breakingCurves/2020-06-09T12-40-39.4546809/"
+print(os.listdir(path))
+pathList = [(path + f) for f in os.listdir(path)]
+print(pathList)
             
 for path in pathList:
     
@@ -32,8 +33,17 @@ for path in pathList:
         
     xArray = np.array(xL)
     yArray = np.array(yL) - 1
-    labelList = path.split("\\")
+    labelList = path.split("/")
     name = labelList[-1].replace(".txt", "")
+    name = name[13:-14]
+    name = name.replace("Emergency", "E")
+    name = name.replace("Service", "S")
+    name = name.replace("Deceleration", "Dec")
+    name = name.replace("CoastingPhase", "CP")
+    name = name.replace("PermittedSpeed", "PS")
+    name = name.replace("Intervention", "Inter")
+    name = name.replace("Indication", "Indi")
+
     plt.plot(xArray, yArray, label = name)
 
 plt.legend()

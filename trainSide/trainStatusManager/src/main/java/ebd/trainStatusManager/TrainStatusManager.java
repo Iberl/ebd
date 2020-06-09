@@ -351,7 +351,11 @@ public class TrainStatusManager implements Runnable {
     }
 
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
-        if(!new File("results/breakingCurve/").mkdirs()){
+        LocalDateTime ldt = LocalDateTime.now();
+        String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
+        String dirPathString = "results/breakingCurves/" + timeString.replaceAll(":", "-") + "/";
+
+        if(!new File(dirPathString).mkdirs()){
             System.err.println("Could not create necessary directories");
             System.exit(-1); //TODO Make better and Event
         }
@@ -370,13 +374,11 @@ public class TrainStatusManager implements Runnable {
             double xPosition = 0d;
             double step = bCurve.getHighestXValue() / 100000d;
             FileWriter fW;
-            LocalDateTime ldt = LocalDateTime.now();
-            DateTimeFormatter dtf = DateTimeFormatter.BASIC_ISO_DATE;
-            String time = dtf.format(ldt);
-            String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),time);
+            String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
+            String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),dateString);
 
             try {
-                fW = new FileWriter("results/breakingCurves/" + fileName);
+                fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
                 writer.write("");
 
