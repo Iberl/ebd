@@ -218,9 +218,6 @@ public class MessageHandler {
         AvailableAcceleration availableAcceleration = new AvailableAcceleration(localBus);
         localBus.post(new TrainDataChangeEvent("rsm","td", "availableAcceleration", availableAcceleration));
 
-        //debug
-        packet15.V_LOA = 0;
-
         BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm", "bcc",
                 id,breakingPower, emergencyBreakingPower,
                 packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
