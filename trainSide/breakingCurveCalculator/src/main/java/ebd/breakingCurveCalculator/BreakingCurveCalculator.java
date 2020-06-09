@@ -244,8 +244,7 @@ public class BreakingCurveCalculator {
 	 * 		A breaking curve made from the shifted knots
 	 */
     private BreakingCurve getCurveFromListAndOffset(List<Knot> knotList, double offset, Position referencePosition, String id){
-		List<Knot> knotListCopy = new ArrayList<>();
-		knotListCopy.addAll(knotList);
+		List<Knot> knotListCopy = new ArrayList<>(knotList);
     	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
 		Knot lastKnot = knotListCopy.remove(0);
 		breakingCurve.addKnotToCurve(lastKnot);
