@@ -198,6 +198,8 @@ public class MessageHandler {
             localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
             return;
         }
+
+        packet15.V_LOA = 0;
         Map<String, Object> changesForRouteData_2= new HashMap<>();
         changesForRouteData_2.put("refLocation", refLocation);
         changesForRouteData_2.put("packet_15",packet15);

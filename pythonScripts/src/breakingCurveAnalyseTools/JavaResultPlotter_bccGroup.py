@@ -6,11 +6,9 @@ pathStart = r"C:\intellij-workspace\etcs\results\breakingCurves"
 
 pathEnd = r"\2020-06-09T12-40-39.4546809"
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-09T14-32-55.0237305"
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-09T16-31-14.2960892"
 path = path + "/"
-print(os.listdir(path))
 pathList = [(path + f) for f in os.listdir(path)]
-print(pathList)
             
 for path in pathList:
     
