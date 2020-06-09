@@ -248,6 +248,7 @@ public class BreakingCurveCalculator {
     	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
 		Knot lastKnot = knotListCopy.remove(0);
 		breakingCurve.addKnotToCurve(lastKnot);
+		System.out.println("ID: " + id + " Distance: " + lastKnot.xValue);
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
@@ -385,7 +386,7 @@ public class BreakingCurveCalculator {
 				coefList = new ArrayList<>();
 				coefList.add(speedNow);
 				coefList.add(deltaSpeed / deltaDis);
-				knotList.add(0, new Knot(disNow,coefList));
+				knotList.add(new Knot(disNow,coefList)); //KNOT
 
 				disNow = disNext;
 				speedNow = speedNext;
@@ -398,7 +399,7 @@ public class BreakingCurveCalculator {
 				coefList = new ArrayList<>();
 				coefList.add(speedNow);
 				coefList.add(0d);
-				knotList.add(0, new Knot(disNow,coefList));
+				knotList.add(new Knot(disNow,coefList)); //KNOT
 			}
 
 			disNow = disStar;
@@ -409,7 +410,7 @@ public class BreakingCurveCalculator {
 		coefList = new ArrayList<>();
 		coefList.add(Math.min(this.ssp.getSpeedAtDistance(0d, curveType),speedNow));
 		coefList.add(0d);
-		knotList.add(0, new Knot(disNow,coefList));
+		knotList.add(new Knot(disNow,coefList)); //KNOT
 
 		return knotList;
 	}

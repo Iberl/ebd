@@ -195,6 +195,15 @@ public class SpeedSupervisor {
      * @param tripDistance Current trip distance starting at the reference point of the breaking curves
      */
     private void updateMaxSpeeds(double tripDistance, double curSpeed) {
+        System.out.println("EI: " + this.breakingCurveGroup.getEmergencyInterventionCurve().getHighestXValue());
+        System.out.println("SI: " + this.breakingCurveGroup.getServiceInterventionCurve().getHighestXValue());
+        System.out.println("W: " + this.breakingCurveGroup.getServiceWarningCurve().getHighestXValue());
+        System.out.println("PS: " + this.breakingCurveGroup.getPermittedSpeedCurve().getHighestXValue());
+        System.out.println("I: " + this.breakingCurveGroup.getServiceIndicationCurve().getHighestXValue());
+        System.out.println("CP: " + this.breakingCurveGroup.getServiceCoastingPhaseCurve().getHighestXValue());
+
+
+
         this.maxEmergencyInterventionSpeed = 0d;
         this.maxServiceInterventionSpeed = 0d;
         this.maxWarningSpeed = 0d;
@@ -220,6 +229,7 @@ public class SpeedSupervisor {
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
             this.targetSpeed = 0d;
         }
+
     }
 
     /**
