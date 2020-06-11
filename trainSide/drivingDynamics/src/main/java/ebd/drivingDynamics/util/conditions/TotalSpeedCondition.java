@@ -15,8 +15,9 @@ import java.util.function.BiFunction;
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a fixed speed value in the range of [0 km/h, 600 km/h] </p>
  * <p>Example: The condition should evaluate to true if the train is slower than 50 km/h.
- * The JSON string would look like this:<br>
- *     {"type" : "v", "condition" : {"op" : "<", "value" : 50 }}</p>
+ * The full JSON string would look like this:<br>
+ *     {"type" : "v", "condition" : {"op" : "<", "value" : 50 }}<br>
+ *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
 public class TotalSpeedCondition extends Condition {
@@ -36,6 +37,11 @@ public class TotalSpeedCondition extends Condition {
         return comparator.apply(curSpeed,speedTotal);
     }
 
+    /**
+     *
+     * @param jsonObject a valid {@link JSONObject}. See documentation for expected format.
+     * @throws DDBadDataException
+     */
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
         if(jsonObject.keySet().contains("value")){
