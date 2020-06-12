@@ -17,6 +17,7 @@ pathToSzenarioJSON = szenarioAB.json
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080
 
+#default server1.ebd.signallabor.de
 ipToInfrastructureServer = 127.0.0.1
 portOfInfrastructureServer = 25555
 
