@@ -106,6 +106,6 @@ public class PackageHandler {
     }
 
     public static void p80(EventBus localBus, Packet_80 p80){
-        localBus.post(new RouteDataChangeEvent("tsm", "rd", "package_80", p80));
+        localBus.post(new RouteDataChangeEvent("tsm", "rd", "packet_80", p80));
     }
 }

@@ -5,6 +5,7 @@ import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -129,16 +130,9 @@ public class MessageHandler {
         RouteDataVolatile routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
 
         /*
-        Deleting old information, as stipulated by SRS
+        Deleting old information that does not get overwritten elsewhere
          */
-        Map<String, Object> deletedData= new HashMap<>();
-        deletedData.put("refLocation", new InitalLocation());
-        deletedData.put("packet_15", null);
-        deletedData.put("packet_21", null);
-        deletedData.put("packet_27",null);
-        deletedData.put("packet_65", new ArrayList<>());
-        deletedData.put("packet_80", null);
-        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", deletedData));
+        localBus.post(new RouteDataChangeEvent("rsm", "rd", "packet_80", null));
 
         /*
         Information needed for a BreakingCurveRequestEvent
