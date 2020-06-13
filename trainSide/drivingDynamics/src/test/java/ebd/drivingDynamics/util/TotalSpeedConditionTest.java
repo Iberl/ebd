@@ -1,7 +1,11 @@
 package ebd.drivingDynamics.util;
 
+import ebd.drivingDynamics.Testhandler;
 import ebd.drivingDynamics.util.conditions.TotalSpeedCondition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -18,8 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class TotalSpeedConditionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(1, 192, 3, null, 6d, 28d, null, null, null, null, null, null, null);
-        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
+        Testhandler testhandler = new Testhandler();
+        ConfigHandler.getInstance().useTrainConfiguratorTool = false;
+        TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
     @Test
@@ -27,7 +32,9 @@ class TotalSpeedConditionTest {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
         TotalSpeedCondition totalSpeedCondition = new TotalSpeedCondition(jsonObject, EventBus.getDefault());
-        //System.out.println(totalSpeedCondition.eval());
         assertFalse(totalSpeedCondition.eval());
+
+        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentSpeed", 20));
+        assertTrue(totalSpeedCondition.eval());
     }
 }
