@@ -22,13 +22,13 @@ import java.util.List;
  */
 public class InfrastructureClientConnector {
 
-    private EventBus localEventBus;
-    private EventBus globalEventBus;
+    private final EventBus localEventBus;
+    private final EventBus globalEventBus;
     private TrainDataVolatile trainDataVolatile;
-    private int etcsID;
-    private int infrastructureID;
-    private String eventSource;
-    private String target = "szenario";
+    private final int etcsID;
+    private final int infrastructureID;
+    private final String eventSource;
+    private final String target = "szenario";
 
     private int tickCounter = 0;
     private int updateMultiplier;
@@ -105,7 +105,7 @@ public class InfrastructureClientConnector {
 
     @Subscribe
     public void changeDirection(ChangeInfrastructureDirectionEvent cide){
-        this.globalEventBus.post(new ChangeInfrastructureDirectionEvent(this.eventSource, this.target));
+        this.globalEventBus.post(new ChangeInfrastructureDirectionEvent(this.eventSource, this.target, this.infrastructureID));
     }
 
     /**

@@ -3,15 +3,14 @@ package ebd.trainStatusManager.util.handlers;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.SwitchInfrastructureDirectionEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
-import ebd.messageLibrary.packet.trackpackets.Packet_5;
-import ebd.messageLibrary.packet.trackpackets.Packet_57;
-import ebd.messageLibrary.packet.trackpackets.Packet_58;
-import ebd.messageLibrary.packet.trackpackets.Packet_80;
+import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
+import ebd.messageLibrary.util.StringUtil;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -25,7 +24,7 @@ import java.util.*;
  *
  * @author Lars Schulze-Falck
  */
-public class PackageHandler {
+public class PacketHandler {
 
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
@@ -107,5 +106,20 @@ public class PackageHandler {
 
     public static void p80(EventBus localBus, Packet_80 p80){
         localBus.post(new RouteDataChangeEvent("tsm", "rd", "packet_80", p80));
+    }
+
+    public static void p72(EventBus localBus, Packet_72 trackPacket) {
+        List<Packet_72.Packet_72_Character> charList = trackPacket.X_TEXT;
+        StringBuilder sb = new StringBuilder();
+        for(Packet_72.Packet_72_Character letter : charList){
+            byte temp = (byte)letter.X_TEXT;
+            sb.append(StringUtil.toISO88591_Char(temp));
+
+        }
+        String xText = sb.toString();
+
+        if("rich".equalsIgnoreCase(xText)){
+            localBus.post(new SwitchInfrastructureDirectionEvent("tsm", "tsm"));
+        }
     }
 }

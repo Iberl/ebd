@@ -5,6 +5,7 @@ import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.szenario.StopTrainEvent;
 import ebd.globalUtils.events.szenario.TerminateTrainEvent;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
+import ebd.globalUtils.events.trainStatusMananger.ChangeInfrastructureDirectionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -68,7 +69,7 @@ public class InfrastructureClient {
         }
         if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
             /*
-            Necessary, because the infrastructure logic has a quirk. which sets the train power level to 0
+            Necessary, because the infrastructure logic has a quirk, which sets the train power level to 0
             from 0 to 10 km/h and starts with two at 10 km/h.
             */
             go(trainID, 1);
@@ -78,10 +79,22 @@ public class InfrastructureClient {
         }
     }
 
+    @Subscribe
+    public void changeDirection(ChangeInfrastructureDirectionEvent cide){
+        if(!this.useInfrastructureServer || !validTarget(cide.target)){
+            return;
+        }
+
+        int trainID = cide.infrastructureID;
+        if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
+
+        switchDirection(trainID);
+    }
+
     /**
      * Listens to {@link TerminateTrainEvent} and sends the content to the Infrastructure Server to terminate the train
      */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe
     public void stopTrain(StopTrainEvent tte){
         if(!this.useInfrastructureServer || !validTarget(tte.target)){
             return;
@@ -97,7 +110,7 @@ public class InfrastructureClient {
     /**
      * Listens to {@link TerminateTrainEvent} and sends the content to the Infrastructure Server to terminate the train
      */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe
     public void terminateTrain(TerminateTrainEvent tte){
         if(!this.useInfrastructureServer || !validTarget(tte.target)){
             return;
@@ -214,6 +227,14 @@ public class InfrastructureClient {
      */
     private void terminate(Integer address) {
         send("term %s", address);
+    }
+
+    /**
+     * Switches the direction of the train, only works when the train is stopped.
+     * @param address Tfz-Adresse
+     */
+    private void switchDirection(Integer address){
+        send("rich %s", address);
     }
 
     /**
