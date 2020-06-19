@@ -2,6 +2,7 @@ package ebd.szenario.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.szenario.StopTrainEvent;
 import ebd.globalUtils.events.szenario.TerminateTrainEvent;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -75,6 +76,22 @@ public class InfrastructureClient {
         else {
             gok(trainID, uie.speedInKmh);
         }
+    }
+
+    /**
+     * Listens to {@link TerminateTrainEvent} and sends the content to the Infrastructure Server to terminate the train
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void stopTrain(StopTrainEvent tte){
+        if(!this.useInfrastructureServer || !validTarget(tte.target)){
+            return;
+        }
+
+        int trainID = tte.infrastructureID;
+        if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
+
+        stop(trainID);
+        this.registeredTrains.remove(trainID);
     }
 
     /**
@@ -175,9 +192,6 @@ public class InfrastructureClient {
         }
     }
 
-    private void setEmergencyStop(boolean emergencyStop) {
-        send(emergencyStop ? "nh" : "nh-off");
-    }
 
     /**
      * Signs the train into the system. It stops and the direction the train driving
@@ -200,6 +214,15 @@ public class InfrastructureClient {
      */
     private void terminate(Integer address) {
         send("term %s", address);
+    }
+
+    /**
+     * Stops the train.
+     *
+     * @param address Tfz-Adresse
+     */
+    private void stop(Integer address) {
+        send("stop %s", address);
     }
 
 
