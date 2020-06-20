@@ -26,6 +26,12 @@ import java.util.*;
  */
 public class PacketHandler {
 
+    /**
+     * //TODO Check if nid_lrbg == link.NID_BG
+     * @param localBus
+     * @param nid_lrbg
+     * @param trackPacket
+     */
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
         HashMap<Integer, Location> linkingMap = new HashMap<>();
@@ -104,10 +110,6 @@ public class PacketHandler {
         localBus.post(new ToLogEvent("tsm", "log", "Got new Position Report Parameters [Packet 58]"));
     }
 
-    public static void p80(EventBus localBus, Packet_80 p80){
-        localBus.post(new RouteDataChangeEvent("tsm", "rd", "packet_80", p80));
-    }
-
     public static void p72(EventBus localBus, Packet_72 trackPacket) {
         List<Packet_72.Packet_72_Character> charList = trackPacket.X_TEXT;
         StringBuilder sb = new StringBuilder();
@@ -121,5 +123,10 @@ public class PacketHandler {
         if("rich".equalsIgnoreCase(xText)){
             localBus.post(new SwitchInfrastructureDirectionEvent("tsm", "tsm"));
         }
+        localBus.post(new ToLogEvent("tsm", "log", "Got a text message [Paket 72]: " + xText));
+    }
+
+    public static void p80(EventBus localBus, Packet_80 p80){
+        localBus.post(new RouteDataChangeEvent("tsm", "rd", "packet_80", p80));
     }
 }
