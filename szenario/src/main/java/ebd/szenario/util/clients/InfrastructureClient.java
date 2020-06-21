@@ -104,7 +104,7 @@ public class InfrastructureClient {
         if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
 
         stop(trainID);
-        this.registeredTrains.remove(trainID);
+        this.registeredTrains.remove(Integer.valueOf(trainID));
     }
 
     /**
@@ -120,7 +120,7 @@ public class InfrastructureClient {
         if(trainID == -1 || !this.registeredTrains.contains(trainID)) return;
 
         terminate(trainID);
-        this.registeredTrains.remove(trainID);
+        this.registeredTrains.remove(Integer.valueOf(trainID));
     }
 
     /**
