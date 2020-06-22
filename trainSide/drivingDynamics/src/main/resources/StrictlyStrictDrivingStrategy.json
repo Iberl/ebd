@@ -1,0 +1,112 @@
+{
+  "actions": [
+    {
+      "name": "Start_25",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 25,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": "<", "value": 5 }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 2 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_50",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 50,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">=", "value": 5 }},
+            {"type": "v", "condition": { "op": "<", "value": 10 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_75",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">=", "value": 10 }},
+            {"type": "v", "condition": { "op": "<", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_100",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Acc_100",
+      "type": "v_acc",
+      "priority": 80,
+      "action": {
+        "value": 100,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }},
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Acc_75",
+      "type": "v_acc",
+      "priority": 80,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Acc_30",
+      "type": "v_acc",
+      "priority": 80,
+      "action": {
+        "value": 30,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
+          ]
+        }
+      }
+    }
+  ]
+}

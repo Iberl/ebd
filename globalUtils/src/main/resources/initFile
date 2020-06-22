@@ -14,13 +14,13 @@
 
 #rbcID (int): The RBC the train connects too during start up.
 
-#starting balise group (int): The balise groupe the train starts at, used by the TMS, has to be unique.
+#starting balise group (int): The balise groupe the train starts at, used by the TMS, has to be unique and at or behind the train position.
 
 #starting track (String): The track ID the train is placed on the EBD infrastructure, used by the EBD infrastructure, has to be unique.
 
-#starting direction (boolean): If true, the train starts in track direction, if false, against the track direction.
+#starting direction (boolean): If true, the train starts in track direction defined by the balise, if false, against the track direction.
 
-#starting increment (int): The distance from the starting balise in [m].
+#starting increment (int): The distance between the starting balise and the train in [m].
 
 #Every variable is divided by a ; and any number of white spaces (" "). Variables are not allowed to contain white spaces.
 

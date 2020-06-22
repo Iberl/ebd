@@ -40,6 +40,8 @@ public class SingleConditionParser {
                     return new TimeSinceHaltCondition(conObj, localEventBus);
                 case "t_atHalt":
                     return new TimeAtHaltCondition(conObj, localEventBus);
+                case "sil":
+                    return new SpeedInterventionLevelCondition(conObj, localEventBus);
                 default:
                     throw new DDBadDataException("A condition was not formatted correctly: " + jsonObject.toString());
             }
