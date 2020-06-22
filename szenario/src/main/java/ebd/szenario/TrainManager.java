@@ -68,7 +68,8 @@ public class TrainManager {
 
     @Subscribe
     public void listenToRemoveTrain(RemoveTrainEvent rte){
-        removeTrain(rte.etcsID, false);
+        if(rte.source.contains(String.valueOf(rte.etcsID))) removeTrain(rte.etcsID, false);
+        else removeTrain(rte.etcsID, true);
     }
 
     private void addTrains(){

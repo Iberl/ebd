@@ -165,14 +165,14 @@ public class PositionReportSupervisor {
         Packet_0 packet0 = new Packet_0();
         packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
-        packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
-        packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
+        packet0.D_LRBG = (int)curPos.getIncrement() + 1;
+        packet0.Q_SCALE = 1; //All length values have to be in the resolution of [m]!
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
         packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
-        packet0.L_TRAININT = (int)(this.lengthTrain * 10);
-        packet0.L_DOUBTOVER = 100; //TODO Get this value, in fact, remember this value in the first hand
-        packet0.L_DOUBTUNDER = 100; //TODO Get this value, in fact, remember this value in the first hand
+        packet0.L_TRAININT = (int)this.lengthTrain + 1;
+        packet0.L_DOUBTOVER = 10; //TODO Get this value, in fact, remember this value in the first hand
+        packet0.L_DOUBTUNDER = 10; //TODO Get this value, in fact, remember this value in the first hand
         packet0.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
         packet0.M_LEVEL = ETCSVariables.M_LEVEL_2;
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand

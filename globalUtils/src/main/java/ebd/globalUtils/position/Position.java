@@ -131,7 +131,7 @@ public class Position {
     	return futurePosition.totalDistanceToPreviousPosition(this) - getIncrement();
     }
 
-    public boolean previousLocationsContainID(int locID){ return this.previousLocations.containsKey(locID); }
+    public boolean previousLocationsContainsID(int locID){ return this.previousLocations.containsKey(locID); }
     
     
     public double getIncrement() {

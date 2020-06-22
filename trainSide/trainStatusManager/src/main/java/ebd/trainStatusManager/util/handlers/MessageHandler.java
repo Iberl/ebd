@@ -5,10 +5,10 @@ import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -36,7 +36,7 @@ import java.util.*;
 /**
  * This class handles ETCS Messages for the {@link ebd.trainStatusManager.TrainStatusManager}.
  * Every messages has expected packages, without these the messages will be rejected. Many messages can also have
- * optional packages. These get forwarded to the {@link PackageHandler}.
+ * optional packages. These get forwarded to the {@link PacketHandler}.
  *<p>
  * Currently implemented messages per id: 3, 24<br>
  * Currently implemented optional packages per id: 5, 57, 58<br>
@@ -110,7 +110,7 @@ public class MessageHandler {
         this.localBus.post(new ToLogEvent("tsm", "log", "Received universal Message" + ids));
 
         for(TrackPacket tp : message24.packets){
-            handleOptionalTrackPackages(rme,tp);
+            handleOptionalTrackPacket(rme,tp);
         }
     }
 
@@ -129,16 +129,9 @@ public class MessageHandler {
         RouteDataVolatile routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
 
         /*
-        Deleting old information, as stipulated by SRS
+        Deleting old information that does not get overwritten elsewhere
          */
-        Map<String, Object> deletedData= new HashMap<>();
-        deletedData.put("refLocation", new InitalLocation());
-        deletedData.put("packet_15", null);
-        deletedData.put("packet_21", null);
-        deletedData.put("packet_27",null);
-        deletedData.put("packet_65", new ArrayList<>());
-        deletedData.put("packet_80", null);
-        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", deletedData));
+        localBus.post(new RouteDataChangeEvent("rsm", "rd", "packet_80", null));
 
         /*
         Information needed for a BreakingCurveRequestEvent
@@ -188,7 +181,7 @@ public class MessageHandler {
                     listOfPacket65s.add((Packet_65)packet);
                     break;
                 default:
-                    handleOptionalTrackPackages(rme,packet);
+                    handleOptionalTrackPacket(rme,packet);
             }
         }
 
@@ -243,20 +236,23 @@ public class MessageHandler {
      * @param rme The {@link ReceivedMessageEvent} containing this package
      * @param trackPacket see {@link TrackPacket}
      */
-    private void handleOptionalTrackPackages(ReceivedMessageEvent rme, TrackPacket trackPacket) {
+    private void handleOptionalTrackPacket(ReceivedMessageEvent rme, TrackPacket trackPacket) {
 
         switch (trackPacket.NID_PACKET){
             case 5:
-                PackageHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
+                PacketHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
             case 57:
-                PackageHandler.p57(this.localBus,(Packet_57)trackPacket);
+                PacketHandler.p57(this.localBus,(Packet_57)trackPacket);
                 break;
             case 58:
-                PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                PacketHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                break;
+            case 72:
+                PacketHandler.p72(this.localBus,(Packet_72)trackPacket);
                 break;
             case 80:
-                PackageHandler.p80(this.localBus,(Packet_80)trackPacket);
+                PacketHandler.p80(this.localBus,(Packet_80)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);
