@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 
 /**
  * This compares the current {@link SpeedInterventionLevel} to a given one.<br>
- * <p>The <b>type</b> of this condition is "sil"</p>
+ * <p>The <b>type</b> of this condition is "sss"</p>
  * <p>The <b>value</b> key contains one of the following values: <br>
  *     "RELEASE_SPEED_SUPERVISION"<br>
  *     "CEILING_SPEED_SUPERVISION"<br>
@@ -19,7 +19,7 @@ import org.json.simple.JSONObject;
  *         </p>
  * <p>Example: The condition should evaluate to true if the train is in the speed supervision state CEILING_SPEED_SUPERVISION.
  * The full JSON string would look like this:<br>
- *     {"type" : "sil", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}<br>
+ *     {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}<br>
  *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
