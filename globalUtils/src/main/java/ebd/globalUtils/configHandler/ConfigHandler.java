@@ -29,7 +29,6 @@ public class ConfigHandler {
     Strings
     */
     public String pathToDriverProfileJson = "";
-    public String pathToTestTrainJson = "";
     public String pathToSzenarioJSON = "";
     public String pathToInitFile = "";
 

@@ -184,7 +184,7 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if there is missing data in the file.
      */
     private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
-        String pathToTrainJSON = ConfigHandler.getInstance().pathToTestTrainJson;
+        String pathToTrainJSON = this.trainConfigID + ".json";
         try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON)){
             try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
 

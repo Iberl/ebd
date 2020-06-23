@@ -10,8 +10,7 @@
 ######
 pathToDriverProfileJson = StrictDrivingStrategy.json
 
-pathToTestTrainJson = testTrain650.json
-
+pathToInitFile = initFile.txt
 pathToSzenarioJSON = szenarioAB.json
 
 ipToTrainConfigurator = 127.0.0.1
