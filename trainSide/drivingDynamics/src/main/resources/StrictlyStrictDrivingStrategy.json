@@ -63,46 +63,59 @@
       }
     },
 
+
     {
       "name": "Acc_100",
       "type": "v_acc",
-      "priority": 80,
+      "priority": 60,
       "action": {
         "value": 100,
         "conditions": {
           "andBlock": [
-            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }},
-            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }},
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 85, "curveBase" : "trip" }},
             {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
           ]
         }
       }
     },
-
-    {
-      "name": "Acc_75",
-      "type": "v_acc",
-      "priority": 80,
-      "action": {
-        "value": 75,
-        "conditions": {
-          "andBlock": [
-            {"type": "v", "condition": { "op": ">", "value": 20 }},
-            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
-          ]
-        }
-      }
-    },
-
     {
       "name": "Acc_30",
       "type": "v_acc",
-      "priority": 80,
+      "priority": 60,
       "action": {
         "value": 30,
         "conditions": {
           "andBlock": [
-            {"type": "v", "condition": { "op": ">", "value": 20 }},
+            {"type" : "v_rel", "condition" : {"op" : ">", "value" : 95, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Acc_75",
+      "type": "v_acc",
+      "priority": 61,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : "<>>", "value" : 101, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+   {
+      "name": "Break_100",
+      "type": "v_break",
+      "priority": 20,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : "<>>", "value" : 101, "curveBase" : "trip" }},
             {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }}
           ]
         }
