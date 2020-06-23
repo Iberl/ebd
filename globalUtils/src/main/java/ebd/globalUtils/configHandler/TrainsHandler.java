@@ -224,7 +224,7 @@ public class TrainsHandler {
         createInitFile();
 
         String[] stringArray;
-        try(BufferedReader reader = new BufferedReader(new FileReader("configuration/initFile.txt"))){
+        try(BufferedReader reader = new BufferedReader(new FileReader("configuration/" + ConfigHandler.getInstance().pathToInitFile))){
             stringArray = reader.lines().toArray(String[]::new);
         }
 
@@ -259,7 +259,7 @@ public class TrainsHandler {
                 System.exit(-1);
             }
             catch (IndexOutOfBoundsException ioobe){
-                System.err.println("This line in initFile.txt had to many variables: " + string);
+                System.err.println("This line in initFile.txt had to few variables: " + string);
                 ioobe.printStackTrace();
                 System.exit(-1);
             }
