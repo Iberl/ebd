@@ -148,7 +148,7 @@ public class TMSCommunicator extends Thread {
         if(!Objects.equals(event.target, _moduleID)) return;
 
         send(event.response);
-        log("Responding " + event.response.getHeader().tms_id + " with code " + event.response.getPayload().errorCode);
+        log("Responding with code " + event.response.getPayload().errorCode + " to " + event.response.getHeader().tms_id);
     }
 
     private void send(Message message) {

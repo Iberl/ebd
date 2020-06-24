@@ -96,7 +96,7 @@ public class TMSEndpoint {
         Message_00 message_00 = new Message_00(uuid, tmsID, _rbcIDString, payload_00);
 
         extendConversation(message_00);
-        _localBus.post(new SendTMSResponseEvent(_moduleID, "tmsCommunicator", message_00));
+        _localBus.post(new SendTMSResponseEvent(_moduleID, _tmsCommunicatorID, message_00));
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -130,8 +130,6 @@ public class TMSEndpoint {
             log(new IllegalArgumentException("Received Invalid Message Type"));
             return;
         }
-
-        sendResponse(header.uuid, ERR_ACCEPTED);
 
         // Handle Message
         try {
@@ -241,6 +239,7 @@ public class TMSEndpoint {
                                              ma.linkingProfile, ma.modeProfile);
         }
 		_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, "mr;T=" + trainIDMap.get(payload.nid_engine)));
+        sendResponse(message.getHeader().uuid, ERR_ACCEPTED);
 	}
 
     /**
