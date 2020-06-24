@@ -57,6 +57,7 @@ allowGUI = false
 # If true, the program does wait for an input and just calls load.
 autoStart = false
 
+# Enables the display and saving of debug information. Changes the logger level from INFO to FINE.
 debug = false
 
 ######
