@@ -3,6 +3,7 @@ package ebd.globalUtils.configHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.messageLibrary.util.ETCSVariables;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.*;
@@ -278,6 +279,10 @@ public class ConfigHandler {
     /*
     Strings
     */
+    /**
+     * TMS ID (Temporary)
+     */
+    public String registeredTMS = "1";
 
     /*
     booleans
@@ -286,6 +291,55 @@ public class ConfigHandler {
     /*
     ints
      */
+
+    // Initial MA Request Parameters
+
+    /**
+     * {@link ETCSVariables#Q_DIR}
+     */
+    public int initialPacket57_Q_DIR = ETCSVariables.Q_DIR_BOTH;
+
+    /**
+     * {@link ETCSVariables#T_MAR}
+     */
+    public int initialPacket57_T_MAR = ETCSVariables.T_MAR;
+
+    /**
+     * {@link ETCSVariables#T_TIMEOUTRQST}
+     */
+    public int initialPacket57_T_TIMEOUTRQST = ETCSVariables.T_TIMEOUTRQST_INFINITY;
+
+    /**
+     * {@link ETCSVariables#T_CYCLOC}
+     */
+    public int initialPacket57_T_CYCRQST = ETCSVariables.T_CYCRQST_INFINITY;
+
+    // Initial Position Report Parameters
+
+    /**
+     * {@link ETCSVariables#Q_DIR}
+     */
+    public int initialPacket58_Q_DIR = ETCSVariables.Q_DIR_BOTH;
+
+    /**
+     * {@link ETCSVariables#Q_SCALE}
+     */
+    public int initialPacket58_Q_SCALE = ETCSVariables.Q_SCALE_1M;
+
+    /**
+     * {@link ETCSVariables#T_CYCLOC}
+     */
+    public int initialPacket58_T_CYCLOC = 10;
+
+    /**
+     * {@link ETCSVariables#D_CYCLOC}
+     */
+    public int initialPacket58_D_CYCLOC = ETCSVariables.D_CYCLOC;
+
+    /**
+     * {@link ETCSVariables#M_LOC}
+     */
+    public int initialPacket58_M_LOC = ETCSVariables.M_LOC_NOT_AT_BALISE_GROUP;
 
     /*
     doubles

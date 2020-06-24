@@ -60,7 +60,7 @@ public class TMSCommunicator extends Thread {
                     StringBuilder data = new StringBuilder();
                     // TODO SocketException
                     data.append(in.readLine());
-                    logDebug("RBC received: " + data.toString());
+                    logDebug("Received: " + data.toString());
 
                     try {
                         // Generate Message
@@ -158,7 +158,7 @@ public class TMSCommunicator extends Thread {
             PrintWriter output      = new PrintWriter(socket.getOutputStream(), true);
             String      messageJSON = message.parseToJson();
             output.println(messageJSON);
-            logDebug("RBC sending message: " + messageJSON);
+            logDebug("Sending: " + messageJSON);
 
             output.close();
             socket.close();

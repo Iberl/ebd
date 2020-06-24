@@ -1,13 +1,12 @@
 package ebd.radioBlockCenter.util;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.rbc_tms.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static ebd.messageLibrary.util.ETCSVariables.*;
 
 public class ETCSPacketCreator {
 
@@ -133,18 +132,33 @@ public class ETCSPacketCreator {
 		return packet_27;
 	}
 
-	/**
-	 * Shortcut
-	 */
-	public static Packet_57 createPacket_57(int T_MAR) {
-		return new Packet_57(Q_DIR_NOMINAL, T_MAR, T_TIMEOUTRQST_INFINITY, T_CYCRQST_INFINITY);
+	/* Shortcut */
+	public static Packet_57 createInitialPacket_57() {
+		ConfigHandler configHandler = ConfigHandler.getInstance();
+		return createPacket_57(
+				configHandler.initialPacket57_Q_DIR,
+				configHandler.initialPacket57_T_MAR,
+				configHandler.initialPacket57_T_TIMEOUTRQST,
+				configHandler.initialPacket57_T_CYCRQST);
 	}
 
-	/**
-	 * Shortcut
-	 */
-	public static Packet_58 createPacket_58() {
-		return new Packet_58(Q_DIR_NOMINAL, Q_SCALE_1M, 10, 0, M_LOC_NOT_AT_BALISE_GROUP);
+	public static Packet_57 createPacket_57(int Q_DIR, int T_MAR, int T_TIMEOUTRQST, int T_CYCRQST) {
+		return new Packet_57(Q_DIR, T_MAR, T_TIMEOUTRQST, T_CYCRQST);
+	}
+
+	/* Shortcut */
+	public static Packet_58 createInitialPacket_58() {
+		ConfigHandler configHandler = ConfigHandler.getInstance();
+		return createPacket_58(
+				configHandler.initialPacket58_Q_DIR,
+				configHandler.initialPacket58_Q_SCALE,
+				configHandler.initialPacket58_T_CYCLOC,
+				configHandler.initialPacket58_D_CYCLOC,
+				configHandler.initialPacket58_M_LOC);
+	}
+
+	public static Packet_58 createPacket_58(int Q_DIR, int Q_SCALE, int T_CYCLOC, int D_CYCLOC, int M_LOC) {
+		return new Packet_58(Q_DIR, Q_SCALE, T_CYCLOC, D_CYCLOC, M_LOC);
 	}
 
 	public static Packet_80 createPacket_80(int Q_DIR, int Q_SCALE, @NotNull ModeProfile modeProfile) {
