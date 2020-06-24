@@ -24,7 +24,7 @@ public class RadioBlockCenter {
     private MessageReceiver messageReceiver;
     private MessageSender   messageSender;
 
-    private String registeredTMS = "";
+    private String registeredTMS = "1";
 
     private Map<Integer, String> trainIDMap = new HashMap<>();
 
