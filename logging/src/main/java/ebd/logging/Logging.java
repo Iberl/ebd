@@ -82,8 +82,8 @@ public class Logging{
     @Subscribe
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
 
-        String endsection = exceptionEvent.source + ": ExceptionEvent occurred. " + exceptionEvent.exception.getMessage();
-
+        String endsection = exceptionEvent.source + ": ExceptionEvent occurred. "
+                + exceptionEvent.exception.getMessage() + " With level: " + exceptionEvent.exceptionEventTyp;
         logger.log(Level.SEVERE, logPrefix + ": " + endsection, exceptionEvent.exception);
 
     }
@@ -96,18 +96,7 @@ public class Logging{
     public void onNormalEvent(NormalEvent normalEvent) {
         if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
             String padSrc = String.format("%4s", normalEvent.source); //Inserted by LSF
-            if (logPrefix.equals(String.format("%-9s", "GB"))) {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else if (logPrefix.equals("RBC 00001")) {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else if (logPrefix.equals("TRN 00192")){
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
+            logger.finer(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
         }
     }
 
@@ -118,27 +107,17 @@ public class Logging{
     @Subscribe
     public void onToLogEvent(ToLogEvent toLogEvent){
         String padSrc = String.format("%3s", toLogEvent.source); //Inserted by LSF
-        if (logPrefix.equals(String.format("%-9s", "GB"))) {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else if (logPrefix.equals("RBC 00001")) {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else if (logPrefix.equals("TRN 00192")){
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
+        logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
+
     }
 
-/*    *//**
+    /**
      * log when ToLogDebugEvent occurred
      * @param toLogDebugEvent
-     *//*
+     */
     @Subscribe
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
-        logger.fine(toLogDebugEvent.msg);
-    }*/
+        logger.fine("debug: " + logPrefix + ": " + padSrc + ": " + toLogDebugEvent.msg);
+    }
 }
