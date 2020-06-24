@@ -20,9 +20,6 @@ public class AccelerationPowerCurveCalculator {
         double trainWeight = 0; //in [kg]
         //TODO fill with math
         //TODO Respect multiple locomotives
-        if(trainDataPerma.getTrainCarList().isEmpty()){
-            System.out.println(trainDataPerma.getName());
-        }
         for(TrainCar tc : trainDataPerma.getTrainCarList()){
             if(tc.getTypeName().equals("Triebzug")){
                 poweredCar = tc;

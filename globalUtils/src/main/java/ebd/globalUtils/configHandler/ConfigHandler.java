@@ -23,11 +23,12 @@ public class ConfigHandler {
 
     private static ConfigHandler single_instance = null;
 
+    //############# Program Variables #############
+
     /*
     Strings
     */
     public String pathToDriverProfileJson = "";
-    public String pathToTestTrainJson = "";
     public String pathToSzenarioJSON = "";
     public String pathToInitFile = "";
 
@@ -38,9 +39,6 @@ public class ConfigHandler {
     public String portOfInfrastructureServer = "";
 
     public String ipToTMSServer = "";
-    public int portOfTMSServer = 22223;
-
-    public int portOfRBCServer = 22224;
 
     public String portOfGUIServer = "";
 
@@ -62,8 +60,8 @@ public class ConfigHandler {
     public String portToTripProfileServer = "";
 
     /*
-boolean
- */
+    boolean
+     */
     /**
      * If true, the program will try to connect to the TrainConfig program.
      */
@@ -84,27 +82,20 @@ boolean
      * If true, the program does wait for an input and just calls load.
      */
     public boolean autoStart = false;
+
     public boolean debug = false;
 
     /*
     ints
      */
     /**
-     * The time between calculation cycles in the train in [ms].
+     * The time between calculation cycles in the program in [ms].
      */
-    public int trainClockTickInMS = 100;
-    /**
-     * The etcs id of the train. Currently the same id as used for the train on the infrastructure server.
-     */
-    public int etcsEngineAndInfrastructureID = 0;
-    /**
-     * The id of the train in the Train Config Tool
-     */
-    public int trainConfigID = 192;
-    /**
-     * Default distance between end of movement authority and danger point in [m]
-     */
-    public int defaultDangerPoint = 200;
+    public int clockTickInMS = 100;
+
+    public int portOfTMSServer = 22223;
+
+    public int portOfRBCServer = 22224;
 
     /**
      * Determines how often the infrastructure server is updated in multiples of the train clock tick (default: 10)
@@ -118,6 +109,41 @@ boolean
      * Physics acceleration factor
      */
     public double timeAccFactor = 1;
+
+    /*
+    longs
+     */
+    /**
+     * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
+     */
+    public long timeBase = 1593522000000l;
+
+    //############# Train Variables #############
+
+    /*
+    Strings
+    */
+
+    /*
+    booleans
+     */
+
+    /*
+    ints
+     */
+    /**
+     * Default distance between end of movement authority and danger point in [m]
+     */
+    public int defaultDangerPoint = 200;
+
+    /*
+    doubles
+     */
+    /**
+     * Minimum time between actions in [s].
+     * Train will not switch between accelerating/breaking etc. faster than this value.
+     */
+    public double timeBetweenActions = 2;
 
     /**
      * Release speed in [m/s]
@@ -134,11 +160,6 @@ boolean
      * Distance to end of movement authority that is seen as "target reached" in [m]
      */
     public double targetReachedDistance = 5;
-
-    /**
-     * Minimum time between actions in [s]
-     */
-    public double timeBetweenActions = 2;
 
     /**
      * Emergency break intervention curve offset in [s]
@@ -249,15 +270,29 @@ boolean
     public double V_warning_max = 58.33;
 
     /*
-    Longs
+    longs
      */
-    /**
-     * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
-     */
-    public long timeBase = 1593522000000l;
+
+    //############# RBC Variables #############
 
     /*
-    other
+    Strings
+    */
+
+    /*
+    booleans
+     */
+
+    /*
+    ints
+     */
+
+    /*
+    doubles
+     */
+
+    /*
+    longs
      */
 
 

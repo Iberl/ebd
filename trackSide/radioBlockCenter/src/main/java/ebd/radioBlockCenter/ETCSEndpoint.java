@@ -1,9 +1,12 @@
 package ebd.radioBlockCenter;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.messageLibrary.message.TrainMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trainmessages.*;
@@ -63,7 +66,7 @@ public class ETCSEndpoint {
         String trainID = trainIDMap.get(nid_engine);
         if(trainID == null || trainID.isEmpty()) throw new IllegalArgumentException("Unknown NID_ENGINE value");
 
-        return Integer.parseInt(trainID.split(";T=")[1]);
+        return Integer.parseInt(trainID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -72,7 +75,7 @@ public class ETCSEndpoint {
         if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
         TrainMessage message = (TrainMessage) event.message;
         // TODO Trippy
-        trainIDMap.put(message.NID_ENGINE, event.sender);
+        trainIDMap.put(message.NID_ENGINE, event.sender.replace("ms;T=", ""));
 
         // Handle Message
         try {
@@ -147,7 +150,7 @@ public class ETCSEndpoint {
         Message_24 message_24 = assembleMessage_24(false, 0, packets);
 
         _localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, message_24, "mr;T=" + NID_OPERATIONAL));
-        _localBus.post(new ToLogEvent(_moduleID, _messageSenderID, "Sending MA Request Parameters and Position Report Parameters"));
+        log("Sending MA Request Parameters and Position Report Parameters");
 
         // TODO Forward to TMS
         Payload_10 payload_10 = new Payload_10(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
@@ -156,6 +159,14 @@ public class ETCSEndpoint {
 
     private void log(String msg) {
         _localBus.post(new ToLogEvent(_moduleID, "log", msg));
+    }
+
+    private void log(Exception e) {
+        _localBus.post(new ExceptionEvent(_moduleID, "log", new NotCausedByAEvent(), e));
+    }
+
+    private void logDebug(String msg) {
+        _localBus.post(new ToLogDebugEvent(_moduleID, "log", msg));
     }
 
 }

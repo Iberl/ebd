@@ -27,8 +27,6 @@ import java.util.Set;
  */
 public class TrainDataPerma {
 
-    ConfigHandler ch;
-
     /**
      * The ID of the Train in the Train Config tool
      */
@@ -125,8 +123,8 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if the ETCS-ID can not be found in the trainconfigurator of if there is missing
      *                              data in the response.
      */
-    public TrainDataPerma() throws IOException, ParseException, TDBadDataException {
-        this.ch = ConfigHandler.getInstance();
+    public TrainDataPerma(int trainConfigID) throws IOException, ParseException, TDBadDataException {
+        this.trainConfigID = trainConfigID;
         if(!ConfigHandler.getInstance().useTrainConfiguratorTool) setInstanceFromFile();
         else setInstanceFromURL();
     }
@@ -151,7 +149,7 @@ public class TrainDataPerma {
 
         String trainConfiguratorIP = ConfigHandler.getInstance().ipToTrainConfigurator;
         String trainConfiguratorPort = ConfigHandler.getInstance().portOfTrainConfigurator;
-        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfig/rest/zug/extended/" + ch.trainConfigID;
+        String urlName = "http://" + trainConfiguratorIP + ":" + trainConfiguratorPort + "/trainConfig/rest/zug/extended/" + this.trainConfigID;
         URL url = new URL(urlName);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -159,10 +157,10 @@ public class TrainDataPerma {
         int responseCode = connection.getResponseCode();
 
         if (responseCode == 400){
-            throw new TDBadDataException("The train " + ch.trainConfigID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
+            throw new TDBadDataException("The train " + this.trainConfigID + " could not be found in the tool TrainConfigurator. Response code was " + responseCode);
         }
         else if(responseCode != 200){
-            throw new IOException("The train " + ch.trainConfigID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
+            throw new IOException("The train " + this.trainConfigID + " could not be read from the tool TrainConfigurator. Response code was " + responseCode);
         }
 
         /*
@@ -186,7 +184,7 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if there is missing data in the file.
      */
     private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
-        String pathToTrainJSON = ConfigHandler.getInstance().pathToTestTrainJson;
+        String pathToTrainJSON = this.trainConfigID + ".json";
         try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON)){
             try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
 

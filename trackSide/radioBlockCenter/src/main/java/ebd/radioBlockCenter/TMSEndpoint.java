@@ -1,9 +1,13 @@
 package ebd.radioBlockCenter;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.ReceivedTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSResponseEvent;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.messageLibrary.message.TrackMessage;
 import ebd.radioBlockCenter.util.Constants;
 import ebd.radioBlockCenter.util.Conversation;
@@ -24,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import static ebd.rbc_tms.util.Constants.*;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_3;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_33;
 
@@ -113,17 +118,20 @@ public class TMSEndpoint {
 
         // Check whether TMS is registered
         if(!Objects.equals(header.tms_id, registeredTMS)) {
-            sendResponse(header.tms_id, header.uuid, 1);
+            sendResponse(header.tms_id, header.uuid, ERR_REJECTED);
             closeConversation(header.uuid);
+            return;
         }
 
         // Check whether MessageType is accepted
         int messageType = header.type;
-        if(messageType >= 0 && messageType < 10 || messageType >= 20 && messageType < 30) {
-            // TODO cant throw => post exception event
-            sendResponse(header.uuid, 2);
-            throw new IllegalArgumentException("Received Invalid Message Type");
+        if(messageType >= 10 && messageType < 20) {
+            sendResponse(header.uuid, ERR_INVALID_MESSAGE);
+            log(new IllegalArgumentException("Received Invalid Message Type"));
+            return;
         }
+
+        sendResponse(header.uuid, ERR_ACCEPTED);
 
         // Handle Message
         try {
@@ -232,7 +240,6 @@ public class TMSEndpoint {
             etcsMessage = assembleMessage_33(ma.m_ack, ma.nid_lrbg, ma.q_dir, ma.q_scale, ma.d_ref, ma.eoa, ma.speedProfile, ma.gradientProfile,
                                              ma.linkingProfile, ma.modeProfile);
         }
-
 		_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, "mr;T=" + trainIDMap.get(payload.nid_engine)));
 	}
 
@@ -290,6 +297,18 @@ public class TMSEndpoint {
         // "Revocation Of Emergency Stop" Messages
         // TODO Handle Revocation of EM Stop
         throw new UnsupportedOperationException();
+    }
+
+    private void log(String msg) {
+        _localBus.post(new ToLogEvent(_moduleID, "log", msg));
+    }
+
+    private void log(Exception e) {
+        _localBus.post(new ExceptionEvent(_moduleID, "log", new NotCausedByAEvent(), e));
+    }
+
+    private void logDebug(String msg) {
+        _localBus.post(new ToLogDebugEvent(_moduleID, "log", msg));
     }
 
 }

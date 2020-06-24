@@ -88,14 +88,14 @@ public class MessageReceiver {
 		try {
 			BitStreamReader bitstream = event.bitstream;
 			sb.append(", " + Arrays.toString(bitstream.peekBits(8)));
-			System.out.println(sb.toString());
+			//System.out.println(sb.toString());
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
 				localBus.post(new ReceivedTelegramEvent(mrID, managerID, telegram, event.source));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
-
+				//System.out.println("Message Received " + message.NID_MESSAGE + "from " + event.source);
 				localBus.post(new ReceivedMessageEvent(mrID, managerID, message, event.source));
 			}
 

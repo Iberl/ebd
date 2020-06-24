@@ -49,6 +49,7 @@ public class GlobalHandler {
             return;
         }
         this.localBus.post(de);
+        EventBus.getDefault().unregister(this);
     }
 
     /**

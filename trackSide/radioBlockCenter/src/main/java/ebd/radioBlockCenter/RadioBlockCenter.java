@@ -40,7 +40,7 @@ public class RadioBlockCenter {
         messageReceiver = new MessageReceiver(localBus, String.valueOf(rbcID), Constants.ID_ETCS_ENDPOINT, false);
 
         try {
-            this.logger = new Logging(localBus, rbcID, "RBC");
+            this.logger = new Logging(localBus, rbcID, "RBC ");
         } catch(IOException e) {
             e.printStackTrace();
         }

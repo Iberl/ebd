@@ -1,0 +1,12 @@
+# Initialisation file for ETCS at EBD     Stand: 22.06.2020 21:32 
+# Szenarien rund um Martinstein für 'Showroom EBD' am  30.6.2020       
+#        
+# Szenario 7: Verkürzte Wartezeit wegen Bauzustand       
+#        
+# Parallele Durchfahrt / gleichzeitige Ausfahrt von 2 Zügen: (F –) Asig 10AA/A – Esig 12F/FF – Gl. 1/2 – Asig 12P1/P2 – Esig 12AA/A - Esig 15C/CC (– W). 
+# Wegen Bauzustand (Abschnitt 2001 zw. W25 und W1 gesperrt) muss RE1140 durch Gl. 1 den IC1013 durch Gl. 2 abwarten,      
+# durch Folge verlängerter MA kann RE1140 früher an P1 ab-/durchfahren (jeweils wenn IC1013 W25, W8, KW2/3 freigefahren hat).        
+#        
+# etcsID ; trainConfigID ; infrastructureID ; trainScheduleID ; rbcID ; startingBaliseGroup ; startingTrack ; startingDirection ; startingIncrement
+1140;		1140;		1140;		RE1140;		1;		2;		10W1S;		false;			0
+1013;		1013;		1013;		IC1013;		1;		1;		10W3L;		false;			0

@@ -195,6 +195,7 @@ public class SpeedSupervisor {
      * @param tripDistance Current trip distance starting at the reference point of the breaking curves
      */
     private void updateMaxSpeeds(double tripDistance, double curSpeed) {
+
         this.maxEmergencyInterventionSpeed = 0d;
         this.maxServiceInterventionSpeed = 0d;
         this.maxWarningSpeed = 0d;
@@ -220,6 +221,7 @@ public class SpeedSupervisor {
             this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
             this.targetSpeed = 0d;
         }
+
     }
 
     /**

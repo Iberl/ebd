@@ -34,11 +34,9 @@ public class MovementAuthorityConverter {
         /*
          * Iterate through the entire package to add up all the individual lengths
          */
-        if (p15.sections.size() > 0) {
 
-            for (Packet_15.Packet_15_Section section : p15.sections) {
-                d_ema += section.L_SECTION;
-            }
+        for (Packet_15.Packet_15_Section section : p15.sections) {
+            d_ema += section.L_SECTION;
         }
 
         /*

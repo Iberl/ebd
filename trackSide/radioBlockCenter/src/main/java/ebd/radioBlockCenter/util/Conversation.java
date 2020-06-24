@@ -42,7 +42,7 @@ public class Conversation {
 
 	/** Adds a Message to the Conversation */
 	public void extend(Message message) {
-		if(message.getHeader().uuid != uuid) {
+		if(!message.getHeader().uuid.equals(uuid)) {
 			throw new IllegalArgumentException("The Message has a different uuid. Expected: " + uuid + "(actual: " + message.getHeader().uuid + ")");
 		}
 		messages.add(message);

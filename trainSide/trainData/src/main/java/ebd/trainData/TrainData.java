@@ -27,12 +27,15 @@ import java.util.Map;
  * @version 0.1
  */
 public class TrainData {
-    private EventBus localBus;
+    private final EventBus localBus;
+    private final int etcsID;
+    private final int trainConfigID;
+    private final int infrastructureID;
     private TrainDataPerma trainDataPerma;
-    private TrainDataVolatile trainDataVolatile;
+    private final TrainDataVolatile trainDataVolatile;
 
-    private String exceptionTarget = "tsm;";
-    private String eventTarget = "all;";
+    private final String exceptionTarget = "tsm;";
+    private final String eventTarget = "all;";
 
     /**
      * This constructor sets the {@link TrainDataPerma} and {@link TrainDataVolatile} of the class from a url
@@ -44,8 +47,12 @@ public class TrainData {
     public TrainData(EventBus localBus, int etcsID, int trainConfigID, int infrastructureID){
         this.localBus = localBus;
         this.localBus.register(this);
+        this.etcsID = etcsID;
+        this.trainConfigID = trainConfigID;
+        this.infrastructureID = infrastructureID;
+
         try {
-            this.trainDataPerma = new TrainDataPerma();
+            this.trainDataPerma = new TrainDataPerma(this.trainConfigID);
         } catch (IOException | ParseException e) {
             localBus.post(new TrainDataExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (TDBadDataException e) {
@@ -133,7 +140,6 @@ public class TrainData {
     private void sendToLog() {
         String msg1;
         StringBuilder msg2 = new StringBuilder();
-        int etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
         double mass = this.trainDataPerma.getTrainWeight() / 1000;
         double length = this.trainDataPerma.getL_train();
         int maxSpeed = this.trainDataPerma.getV_maxtrain();
@@ -153,18 +159,29 @@ public class TrainData {
         }
 
         msg1 = String.format("Traindata: ETCS ID = %d; Mass = %.2f t; Length = %.2f m; Max Speed = %d km/h; Type = %d",
-                etcsID, mass, length, maxSpeed, uic);
+                this.etcsID, mass, length, maxSpeed, uic);
         msg2.append("Traincomposition: ");
         for(int i = 0; i < carlist.length; i++){
             if(i == 0){
-                msg2.append("[" + carlist[0] + "]");
+                msg2.append("◢[" + carlist[0] + "]");
             }
             else {
-                msg2.append("-[" + carlist[0] + "]");
+                msg2.append("-[" + carlist[i] + "]");
             }
         }
         this.localBus.post(new ToLogEvent("td", "log", msg1));
         this.localBus.post(new ToLogEvent("td", "log", msg2.toString()));
+    }
+
+    /*
+    Getter
+     */
+    public TrainDataVolatile getTrainDataVolatile(){
+        return this.trainDataVolatile;
+    }
+
+    public TrainDataPerma getTrainDataPerma(){
+        return this.trainDataPerma;
     }
 }
 
