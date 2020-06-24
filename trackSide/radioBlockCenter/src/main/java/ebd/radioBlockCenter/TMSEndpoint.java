@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import static ebd.rbc_tms.util.Constants.*;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_3;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_33;
 
@@ -113,7 +114,7 @@ public class TMSEndpoint {
 
         // Check whether TMS is registered
         if(!Objects.equals(header.tms_id, registeredTMS)) {
-            sendResponse(header.tms_id, header.uuid, 1);
+            sendResponse(header.tms_id, header.uuid, ERR_REJECTED);
             closeConversation(header.uuid);
         }
 
@@ -121,9 +122,11 @@ public class TMSEndpoint {
         int messageType = header.type;
         if(messageType >= 0 && messageType < 10 || messageType >= 20 && messageType < 30) {
             // TODO cant throw => post exception event
-            sendResponse(header.uuid, 2);
+            sendResponse(header.uuid, ERR_INVALID_MESSAGE);
             throw new IllegalArgumentException("Received Invalid Message Type");
         }
+
+        sendResponse(header.uuid, ERR_ACCEPTED);
 
         // Handle Message
         try {
