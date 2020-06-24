@@ -152,12 +152,7 @@ public class Szenario implements Runnable {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load(LoadEvent loe){
-        String driverName = ConfigHandler.getInstance().pathToDriverProfileJson;
-        driverName = driverName.replace("DrivingStrategy.json", "");
-        String routeName = ConfigHandler.getInstance().pathToSzenarioJSON;
-        routeName = routeName.replace("szenario", "");
-        routeName = routeName.replace(".json", "");
-        System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
+        System.out.println("Welcome to the ETCS Train and RBC simulation");
 
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", "log", msg));

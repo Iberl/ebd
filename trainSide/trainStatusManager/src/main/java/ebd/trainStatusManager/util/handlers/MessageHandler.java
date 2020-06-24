@@ -186,7 +186,6 @@ public class MessageHandler {
         }
 
         if(packet15 == null || packet21 == null || packet27 == null){
-            System.out.println("" +packet15 + packet21 + packet27);
             IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
             localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
             return;

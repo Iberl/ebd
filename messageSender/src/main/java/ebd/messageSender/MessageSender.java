@@ -75,7 +75,7 @@ public class MessageSender {
 			BitStreamWriter writer = Serializer.serialize(event.message);
 			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
-			System.out.println("Message wird gesendet: " + event.message.NID_MESSAGE + " to " + event.destination);
+			//System.out.println("Message wird gesendet: " + event.message.NID_MESSAGE + " to " + event.destination);
 			globalBus.post(new SerializedBitstreamEvent(msID + (trainToTrack ? ";T=" : ";R=") + localID, event.destination, bitstream, trainToTrack, false));
 
 		} catch(FieldTypeNotSupportedException e) {
