@@ -48,6 +48,7 @@ public class PacketHandler {
     }
 
     public static void p57(EventBus localBus, Packet_57 p57){
+        //TODO: If NID_LRBG Unknown AND disance information, start calculating from current position, else from NID_LRBG!
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
@@ -71,6 +72,7 @@ public class PacketHandler {
     }
 
     public static void p58(EventBus localBus, int nid_lrbg, Packet_58 p58){
+        //TODO: If NID_LRBG Unknown AND disance information, start calculating from current position, else from NID_LRBG!
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
