@@ -3,15 +3,14 @@ package ebd.trainStatusManager.util.handlers;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
+import ebd.globalUtils.events.trainStatusMananger.SwitchInfrastructureDirectionEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
-import ebd.messageLibrary.packet.trackpackets.Packet_5;
-import ebd.messageLibrary.packet.trackpackets.Packet_57;
-import ebd.messageLibrary.packet.trackpackets.Packet_58;
-import ebd.messageLibrary.packet.trackpackets.Packet_80;
+import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
+import ebd.messageLibrary.util.StringUtil;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -25,8 +24,14 @@ import java.util.*;
  *
  * @author Lars Schulze-Falck
  */
-public class PackageHandler {
+public class PacketHandler {
 
+    /**
+     * //TODO Check if nid_lrbg == link.NID_BG
+     * @param localBus
+     * @param nid_lrbg
+     * @param trackPacket
+     */
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
         HashMap<Integer, Location> linkingMap = new HashMap<>();
@@ -105,10 +110,23 @@ public class PackageHandler {
         localBus.post(new ToLogEvent("tsm", "log", "Got new Position Report Parameters [Packet 58]"));
     }
 
-    public static void p80(EventBus localBus, Packet_80 p80){
-        //TODO FUll handeling of Packet 80 in a mode supervisor
-        if(p80.mode.M_MAMODE == ETCSVariables.M_MAMODE_SHUNTING){
-            localBus.post(new RouteDataChangeEvent("tsm", "rd", "lastMABeforeEndOfMission", true));
+    public static void p72(EventBus localBus, Packet_72 trackPacket) {
+        List<Packet_72.Packet_72_Character> charList = trackPacket.X_TEXT;
+        StringBuilder sb = new StringBuilder();
+        for(Packet_72.Packet_72_Character letter : charList){
+            byte temp = (byte)letter.X_TEXT;
+            sb.append(StringUtil.toISO88591_Char(temp));
+
         }
+        String xText = sb.toString();
+
+        if("rich".equalsIgnoreCase(xText)){
+            localBus.post(new SwitchInfrastructureDirectionEvent("tsm", "tsm"));
+        }
+        localBus.post(new ToLogEvent("tsm", "log", "Got a text message [Paket 72]: " + xText));
+    }
+
+    public static void p80(EventBus localBus, Packet_80 p80){
+        localBus.post(new RouteDataChangeEvent("tsm", "rd", "packet_80", p80));
     }
 }

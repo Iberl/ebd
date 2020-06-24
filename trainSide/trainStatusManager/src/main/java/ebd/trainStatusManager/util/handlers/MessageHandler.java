@@ -5,6 +5,7 @@ import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -35,7 +36,7 @@ import java.util.*;
 /**
  * This class handles ETCS Messages for the {@link ebd.trainStatusManager.TrainStatusManager}.
  * Every messages has expected packages, without these the messages will be rejected. Many messages can also have
- * optional packages. These get forwarded to the {@link PackageHandler}.
+ * optional packages. These get forwarded to the {@link PacketHandler}.
  *<p>
  * Currently implemented messages per id: 3, 24<br>
  * Currently implemented optional packages per id: 5, 57, 58<br>
@@ -109,7 +110,7 @@ public class MessageHandler {
         this.localBus.post(new ToLogEvent("tsm", "log", "Received universal Message" + ids));
 
         for(TrackPacket tp : message24.packets){
-            handleOptionalTrackPackages(rme,tp);
+            handleOptionalTrackPacket(rme,tp);
         }
     }
 
@@ -126,6 +127,11 @@ public class MessageHandler {
         TrainDataPerma trainDataPerma = localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         RouteDataVolatile routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
+
+        /*
+        Deleting old information that does not get overwritten elsewhere
+         */
+        localBus.post(new RouteDataChangeEvent("rsm", "rd", "packet_80", null));
 
         /*
         Information needed for a BreakingCurveRequestEvent
@@ -175,22 +181,23 @@ public class MessageHandler {
                     listOfPacket65s.add((Packet_65)packet);
                     break;
                 default:
-                    handleOptionalTrackPackages(rme,packet);
+                    handleOptionalTrackPacket(rme,packet);
             }
         }
 
         if(packet15 == null || packet21 == null || packet27 == null){
-                IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
-                localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
-                return;
+            IllegalArgumentException iAE = new IllegalArgumentException("A Message_3 did not contain all necessary packets");
+            localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iAE, ExceptionEventTyp.CRITICAL));
+            return;
         }
-        Map<String, Object> changesForRouteData= new HashMap<>();
-        changesForRouteData.put("refLocation", refLocation);
-        changesForRouteData.put("packet_15",packet15);
-        changesForRouteData.put("packet_21",packet21);
-        changesForRouteData.put("packet_27",packet27);
-        changesForRouteData.put("packet_65", listOfPacket65s);
-        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData));
+
+        Map<String, Object> changesForRouteData_2= new HashMap<>();
+        changesForRouteData_2.put("refLocation", refLocation);
+        changesForRouteData_2.put("packet_15",packet15);
+        changesForRouteData_2.put("packet_21",packet21);
+        changesForRouteData_2.put("packet_27",packet27);
+        changesForRouteData_2.put("packet_65", listOfPacket65s);
+        localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData_2));
 
         ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
         ForwardSpline emergencyBreakingPower = trainDataVolatile.getCurrentEmergencyBreakingPower();
@@ -228,20 +235,23 @@ public class MessageHandler {
      * @param rme The {@link ReceivedMessageEvent} containing this package
      * @param trackPacket see {@link TrackPacket}
      */
-    private void handleOptionalTrackPackages(ReceivedMessageEvent rme, TrackPacket trackPacket) {
+    private void handleOptionalTrackPacket(ReceivedMessageEvent rme, TrackPacket trackPacket) {
 
         switch (trackPacket.NID_PACKET){
             case 5:
-                PackageHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
+                PacketHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
             case 57:
-                PackageHandler.p57(this.localBus,(Packet_57)trackPacket);
+                PacketHandler.p57(this.localBus,(Packet_57)trackPacket);
                 break;
             case 58:
-                PackageHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                PacketHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                break;
+            case 72:
+                PacketHandler.p72(this.localBus,(Packet_72)trackPacket);
                 break;
             case 80:
-                PackageHandler.p80(this.localBus,(Packet_80)trackPacket);
+                PacketHandler.p80(this.localBus,(Packet_80)trackPacket);
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("TrackPacket is unhandelt or unknow, NID_PACKET:  " + trackPacket.NID_PACKET);

@@ -120,7 +120,7 @@ public class TMSEndpoint {
 
         // Check whether MessageType is accepted
         int messageType = header.type;
-        if(messageType >= 0 && messageType < 10 || messageType >= 20 && messageType < 30) {
+        if(messageType >= 10 && messageType < 20) {
             // TODO cant throw => post exception event
             sendResponse(header.uuid, ERR_INVALID_MESSAGE);
             throw new IllegalArgumentException("Received Invalid Message Type");
@@ -235,7 +235,6 @@ public class TMSEndpoint {
             etcsMessage = assembleMessage_33(ma.m_ack, ma.nid_lrbg, ma.q_dir, ma.q_scale, ma.d_ref, ma.eoa, ma.speedProfile, ma.gradientProfile,
                                              ma.linkingProfile, ma.modeProfile);
         }
-
 		_localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, etcsMessage, "mr;T=" + trainIDMap.get(payload.nid_engine)));
 	}
 

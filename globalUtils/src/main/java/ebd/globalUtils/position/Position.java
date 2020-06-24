@@ -38,7 +38,7 @@ public class Position {
      * A HashMap of previous locations (s. SRS 3.6.2.2.2c) ). Should be 8 or more locations unless the train has crossed less than 8 balise groups total.
      * The Key of the HashMap is the location ID, the Value the {@link Location} itself
      */
-    @Nullable
+    @NotNull
     private Map<Integer,Location> previousLocations = new HashMap<>();
 
     /**
@@ -53,7 +53,7 @@ public class Position {
         this.location = location;
     }
     
-    public Position(double increment, boolean direction, @NotNull Location location, @Nullable Map<Integer, Location> previousLocations) {
+    public Position(double increment, boolean direction, @NotNull Location location, @NotNull Map<Integer, Location> previousLocations) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
@@ -131,7 +131,7 @@ public class Position {
     	return futurePosition.totalDistanceToPreviousPosition(this) - getIncrement();
     }
 
-    public boolean previousLocationsContainID(int locID){ return this.previousLocations.containsKey(locID); }
+    public boolean previousLocationsContainsID(int locID){ return this.previousLocations.containsKey(locID); }
     
     
     public double getIncrement() {

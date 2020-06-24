@@ -1,8 +1,10 @@
 package ebd.trainStatusManager.util.socketClientsConnectors;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.szenario.StopTrainEvent;
 import ebd.globalUtils.events.szenario.TerminateTrainEvent;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
+import ebd.globalUtils.events.trainStatusMananger.ChangeInfrastructureDirectionEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -20,13 +22,13 @@ import java.util.List;
  */
 public class InfrastructureClientConnector {
 
-    private EventBus localEventBus;
-    private EventBus globalEventBus;
+    private final EventBus localEventBus;
+    private final EventBus globalEventBus;
     private TrainDataVolatile trainDataVolatile;
-    private int etcsID;
-    private int infrastructureID;
-    private String eventSource;
-    private String target = "szenario";
+    private final int etcsID;
+    private final int infrastructureID;
+    private final String eventSource;
+    private final String target = "szenario";
 
     private int tickCounter = 0;
     private int updateMultiplier;
@@ -101,10 +103,15 @@ public class InfrastructureClientConnector {
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
     }
 
+    @Subscribe
+    public void changeDirection(ChangeInfrastructureDirectionEvent cide){
+        this.globalEventBus.post(new ChangeInfrastructureDirectionEvent(this.eventSource, this.target, this.infrastructureID));
+    }
+
     /**
-     * Signals the infrastructure client that this trains should be terminated.
+     * Signals the infrastructure client that this trains should be stopped.
      */
     public void disconnect() {
-        this.globalEventBus.post(new TerminateTrainEvent(this.eventSource,this.target,this.infrastructureID));
+        this.globalEventBus.post(new StopTrainEvent(this.eventSource,this.target,this.infrastructureID));
     }
 }

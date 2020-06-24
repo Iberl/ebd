@@ -59,7 +59,7 @@ public class TMSCommunicator extends Thread {
                     StringBuilder data = new StringBuilder();
                     // TODO SocketException
                     data.append(in.readLine());
-                    logDebug("RBC received: " + data.toString());
+                    log("RBC received: " + data.toString());
 
                     try {
                         // Generate Message

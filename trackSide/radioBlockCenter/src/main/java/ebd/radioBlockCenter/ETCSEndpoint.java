@@ -63,7 +63,7 @@ public class ETCSEndpoint {
         String trainID = trainIDMap.get(nid_engine);
         if(trainID == null || trainID.isEmpty()) throw new IllegalArgumentException("Unknown NID_ENGINE value");
 
-        return Integer.parseInt(trainID.split(";T=")[1]);
+        return Integer.parseInt(trainID);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -72,7 +72,7 @@ public class ETCSEndpoint {
         if(!(event.message instanceof TrainMessage)) throw new IllegalArgumentException("The RBC is not able to receive trackside ETCS messages.");
         TrainMessage message = (TrainMessage) event.message;
         // TODO Trippy
-        trainIDMap.put(message.NID_ENGINE, event.sender);
+        trainIDMap.put(message.NID_ENGINE, event.sender.replace("ms;T=", ""));
 
         // Handle Message
         try {
