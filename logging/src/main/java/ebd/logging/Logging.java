@@ -61,7 +61,6 @@ public class Logging{
         //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
         if(ConfigHandler.getInstance().debug){
             Handler[] handlers = logger.getParent().getHandlers();
-            System.out.println(handlers.length);
             for(Handler handler : handlers){
                 if(handler.getLevel() == Level.INFO){
                     handler.setLevel(Level.FINE);
