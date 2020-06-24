@@ -10,17 +10,17 @@ import ebd.rbc_tms.message.Message_00;
  */
 public class SendTMSResponseEvent extends NormalEvent {
 
-    Message_00 message;
+    public Message_00 response;
 
     /**
      * Constructs an Event
      *
-     * @param message Received Message
+     * @param response Response to send
      *
      * @author Christopher Bernjus
      */
-    public SendTMSResponseEvent(String source, String target, Message_00 message) {
+    public SendTMSResponseEvent(String source, String target, Message_00 response) {
         super(source, target);
-        this.message = message;
+        this.response = response;
     }
 }
