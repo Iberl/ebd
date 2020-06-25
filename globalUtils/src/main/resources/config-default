@@ -57,6 +57,7 @@ allowGUI = false
 # If true, the program does wait for an input and just calls load.
 autoStart = false
 
+# Enables the display and saving of debug information. Changes the logger level from INFO to FINE.
 debug = false
 
 ######
@@ -164,7 +165,7 @@ V_sbi_max = 58.33
 # Speed difference between Permitted speed and Warning supervision limits, minimum value in [m/s]
 dV_warning_min = 1.11
 
-# Speed difference between Permitted speed and Warning supervision limits, maximum value in [m/s[
+# Speed difference between Permitted speed and Warning supervision limits, maximum value in [m/s]
 dV_warning_max = 1.39
 
 # Speed of MRSP where dV_warning starts to increase to dV_warning_max in [m/s]
@@ -183,6 +184,9 @@ V_warning_max = 58.33
 ###### Strings
 ######
 
+# TMS ID (Temporary)
+registeredTMS = 1
+
 ######
 ###### Booleans (either " = true" or " = false")
 ######
@@ -190,6 +194,42 @@ V_warning_max = 58.33
 ######
 ###### Integers
 ######
+
+## Initial MA Request Parameters ##
+# Validity Direction Of Transmitted Data
+# Default: Q_DIR_BOTH
+initialPacket57_Q_DIR = 2
+
+# Time Before Reaching Pre-Indication Location For EOA/LOA in [s]
+initialPacket57_T_MAR = 0
+
+# Time Before Any Section Timer Expires Or The LOA Speed Timer Expires in [s]
+# Default: T_TIMEOUTRQST_INFINITY
+initialPacket57_T_TIMEOUTRQST = 1023
+
+# Time Between Two Cyclic Requests For A MA in [s]
+# Default: T_CYCRQST_INFINITY
+initialPacket57_T_CYCRQST = 255
+
+
+## Initial Position Report Parameters ##
+# Validity Direction Of Transmitted Data
+# Default: Q_DIR_BOTH
+initialPacket58_Q_DIR = 2
+
+# Distance Scale Qualifier
+# Default: Q_SCALE_1_M
+initialPacket58_Q_SCALE = 1
+
+# Time Interval Between Two Position Reports in [s]
+initialPacket58_T_CYCLOC = 10
+
+# Distance Between Two Position Reports From Train [depends on Q_SCALE]
+initialPacket58_D_CYCLOC = 0
+
+# Special Location Where Train Has To Report Its Position
+# Default: M_LOC_NOT_AT_BALISE_GROUP
+initialPacket58_M_LOC = 2
 
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).

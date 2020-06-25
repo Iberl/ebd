@@ -1,13 +1,17 @@
 package ebd.radioBlockCenter;
 
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
+import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.messageLibrary.message.TrainMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trainmessages.*;
 import ebd.messageLibrary.packet.TrackPacket;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.radioBlockCenter.util.Constants;
 import ebd.rbc_tms.message.Message_10;
 import ebd.rbc_tms.message.Message_11;
@@ -31,8 +35,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_24;
-import static ebd.radioBlockCenter.util.ETCSPacketCreator.createPacket_57;
-import static ebd.radioBlockCenter.util.ETCSPacketCreator.createPacket_58;
+import static ebd.radioBlockCenter.util.ETCSPacketCreator.*;
 import static ebd.radioBlockCenter.util.TMSMessageCreator.createPositionInfo;
 
 public class ETCSEndpoint {
@@ -135,27 +138,35 @@ public class ETCSEndpoint {
         _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_11(registeredTMS, _rbcIDString, payload_11)));
     }
 
-    public void handleMessage(Message_155 message, int NID_OPERATIONAL) {
+    public void handleMessage(Message_155 message_155, int NID_OPERATIONAL) {
         // Initiation Of A Communication Session
 
         log("Received communication initiation from train " + NID_OPERATIONAL);
 
         // TODO Respond to Train
         List<TrackPacket> packets = new ArrayList<>();
-        packets.add(createPacket_57(0));
-        packets.add(createPacket_58());
-        Message_24 message_24 = assembleMessage_24(false, 0, packets);
+        packets.add(createInitialPacket_57());
+        packets.add(createInitialPacket_58());
+        Message_24 message_24 = assembleMessage_24(false, ETCSVariables.NID_LRBG_UNKNOWN, packets);
 
         _localBus.post(new SendETCSMessageEvent(_moduleID, _messageSenderID, message_24, "mr;T=" + NID_OPERATIONAL));
-        _localBus.post(new ToLogEvent(_moduleID, _messageSenderID, "Sending MA Request Parameters and Position Report Parameters"));
+        log("Sending MA Request Parameters and Position Report Parameters");
 
         // TODO Forward to TMS
-        Payload_10 payload_10 = new Payload_10(new TrainInfo(message.NID_ENGINE, NID_OPERATIONAL, message.T_TRAIN));
+        Payload_10 payload_10 = new Payload_10(new TrainInfo(message_155.NID_ENGINE, NID_OPERATIONAL, message_155.T_TRAIN));
         _localBus.post(new SendTMSMessageEvent(_moduleID, _tmsEndpoint, new Message_10(registeredTMS, _rbcIDString, payload_10)));
     }
 
     private void log(String msg) {
         _localBus.post(new ToLogEvent(_moduleID, "log", msg));
+    }
+
+    private void log(Exception e) {
+        _localBus.post(new ExceptionEvent(_moduleID, "log", new NotCausedByAEvent(), e));
+    }
+
+    private void logDebug(String msg) {
+        _localBus.post(new ToLogDebugEvent(_moduleID, "log", msg));
     }
 
 }

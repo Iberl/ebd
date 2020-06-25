@@ -1,5 +1,6 @@
 package ebd.radioBlockCenter;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.logging.Logging;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
@@ -24,7 +25,7 @@ public class RadioBlockCenter {
     private MessageReceiver messageReceiver;
     private MessageSender   messageSender;
 
-    private String registeredTMS = "";
+    private String registeredTMS = ConfigHandler.getInstance().registeredTMS;
 
     private Map<Integer, String> trainIDMap = new HashMap<>();
 

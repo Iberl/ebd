@@ -6,6 +6,7 @@ import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.radioBlockCenter.ReceivedTMSMessageEvent;
 import ebd.globalUtils.events.radioBlockCenter.SendTMSMessageEvent;
+import ebd.globalUtils.events.radioBlockCenter.SendTMSResponseEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.messageLibrary.message.trackmessages.Message_2;
 import ebd.radioBlockCenter.util.Constants;
@@ -59,12 +60,12 @@ public class TMSCommunicator extends Thread {
                     StringBuilder data = new StringBuilder();
                     // TODO SocketException
                     data.append(in.readLine());
-                    log("RBC received: " + data.toString());
+                    logDebug("Received: " + data.toString());
 
                     try {
                         // Generate Message
                         Message<Payload> message = Message.generateFrom(data.toString());
-                        log("Received Message " + message.getHeader().type + " from " + message.getHeader().tms_id);
+                        log("Received message " + message.getHeader().type + " from " + message.getHeader().tms_id);
                         _localBus.post(new ReceivedTMSMessageEvent(_moduleID, _tmsEndpointID, message));
                     } catch(ClassNotFoundException e) {
                         System.err.println(e.getMessage());
@@ -134,17 +135,30 @@ public class TMSCommunicator extends Thread {
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void sendMessage(@NotNull SendTMSMessageEvent event) {
+    public void sendTMSMessage(@NotNull SendTMSMessageEvent event) {
         if(!Objects.equals(event.target, _moduleID)) return;
 
         // TODO Queue
+        send(event.message);
+        log("Sending message " + event.message.getHeader().type + " to " + event.message.getHeader().tms_id);
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void sendTMSResponse(@NotNull SendTMSResponseEvent event) {
+        if(!Objects.equals(event.target, _moduleID)) return;
+
+        send(event.response);
+        log("Responding with code " + event.response.getPayload().errorCode + " to " + event.response.getHeader().tms_id);
+    }
+
+    private void send(Message message) {
         try {
             Socket socket = new Socket(_ip, _tmsServerPort);
             // TODO Connection Exception?
             PrintWriter output      = new PrintWriter(socket.getOutputStream(), true);
-            String      messageJSON = event.message.parseToJson();
+            String      messageJSON = message.parseToJson();
             output.println(messageJSON);
-            log("RBC sending: " + messageJSON);
+            logDebug("Sending: " + messageJSON);
 
             output.close();
             socket.close();
