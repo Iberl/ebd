@@ -140,7 +140,7 @@ public class TMSCommunicator extends Thread {
 
         // TODO Queue
         send(event.message);
-        log("Sending message " + event.message.getHeader().type + " to " + event.message.getHeader().tms_id);
+        log("Sending message " + event.message.getHeader().type + " to TMS " + event.message.getHeader().tms_id);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -148,7 +148,7 @@ public class TMSCommunicator extends Thread {
         if(!Objects.equals(event.target, _moduleID)) return;
 
         send(event.response);
-        log("Responding with code " + event.response.getPayload().errorCode + " to " + event.response.getHeader().tms_id);
+        log("Responding with code " + event.response.getPayload().errorCode + " to TMS " + event.response.getHeader().tms_id);
     }
 
     private void send(Message message) {
