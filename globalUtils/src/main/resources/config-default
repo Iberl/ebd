@@ -52,7 +52,7 @@ useInfrastructureServer = false
 useTSMServer = false
 
 # If true, GUIs can connect to the program.
-allowGUI = false
+allowGUI = true
 
 # If true, the program does wait for an input and just calls load.
 autoStart = false
