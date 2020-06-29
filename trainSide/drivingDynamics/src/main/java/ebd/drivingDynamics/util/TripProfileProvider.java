@@ -52,6 +52,7 @@ public class TripProfileProvider {
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
             getProfilefromSource(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+            //TODO Calculate the lowest curve of permitted/warning/service/emergency
             return;
         }
 
