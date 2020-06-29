@@ -8,6 +8,7 @@ import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.util.handler.PipeHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,7 +73,6 @@ public class Logging{
         logDateTime = LocalDateTime.now().format(dateTimeFormatter);
         try {
             fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
-            pipeHandler = new PipeHandler();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,7 +141,7 @@ public class Logging{
      * log when ExceptionEvent occurred
      * @param exceptionEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
 
         String endsection = exceptionEvent.source + ": ExceptionEvent occurred. "
@@ -154,7 +154,7 @@ public class Logging{
      * log when NormalEvent occurred
      * @param normalEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onNormalEvent(NormalEvent normalEvent) {
         if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
             String padSrc = String.format("%4s", normalEvent.source); //Inserted by LSF
@@ -166,7 +166,7 @@ public class Logging{
      * log when ToLogEvent occurred
      * @param toLogEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onToLogEvent(ToLogEvent toLogEvent){
         String padSrc = String.format("%3s", toLogEvent.source); //Inserted by LSF
         logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
@@ -177,7 +177,7 @@ public class Logging{
      * log when ToLogDebugEvent occurred
      * @param toLogDebugEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
         logger.fine("debug: " + logPrefix + ": " + padSrc + ": " + toLogDebugEvent.msg);
