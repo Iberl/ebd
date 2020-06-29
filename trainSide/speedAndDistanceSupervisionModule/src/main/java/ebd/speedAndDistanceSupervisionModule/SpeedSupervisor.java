@@ -40,9 +40,9 @@ public class SpeedSupervisor {
     private ConfigHandler ch;
 
     private BreakingCurveGroup breakingCurveGroup = null;
-    private boolean inRSM;
-    private SpeedInterventionLevel curSpeedInterventionLevel;
-    private SpeedSupervisionState curSupervisionState;
+    private boolean inRSM = false;
+    private SpeedInterventionLevel curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+    private SpeedSupervisionState curSupervisionState = SpeedSupervisionState.NOT_SET;
 
     private Double maxServiceDistance = 0d; //in [m]
     private Double maxEmergencyDistance = 0d; //in [m]
@@ -107,9 +107,8 @@ public class SpeedSupervisor {
         if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
         else updateMaxSpeeds(tripDistance, curSpeed);
 
-        SpeedInterventionLevel speedInterventionLevel;
-        SpeedSupervisionState supervisionState;
-
+        SpeedInterventionLevel speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+        SpeedSupervisionState supervisionState = SpeedSupervisionState.NOT_SET;
         if(this.inRSM && this.releaseSpeed > 0){//Release speed monitoring
             supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
             if(curSpeed > this.releaseSpeed + ch.dV_ebi_min){
@@ -126,7 +125,9 @@ public class SpeedSupervisor {
                 && this.maxIndicationSpeed == this.maxEmergencyInterventionSpeed) { //Ceiling speed monitoring regime
             //Based on SRS 026-3 Table 17
             supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+
             if(curSpeed > this.maxEmergencyInterventionSpeed){
+
                 speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(curSpeed > this.maxServiceInterventionSpeed){

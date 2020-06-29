@@ -56,7 +56,7 @@ public class TMSCommunicator extends Thread {
         @Override
         public void run() {
             try {
-                while(true) {
+
                     StringBuilder data = new StringBuilder();
                     // TODO SocketException
                     data.append(in.readLine());
@@ -74,7 +74,7 @@ public class TMSCommunicator extends Thread {
                         client.close();
                     }
                     // TODO Timeout?
-                }
+
             } catch(IOException e) {
                 System.err.println("Problem occurred while reading input stream.");
                 e.printStackTrace();

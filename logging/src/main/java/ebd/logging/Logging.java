@@ -23,6 +23,7 @@ public class Logging{
     private String logPrefix;
     static String logDateTime;
     static Handler fileHandlerAll;
+    static Handler pipeHandler;
 
     static {
         //format of logs is defined in resources/logging.properties
@@ -37,6 +38,7 @@ public class Logging{
         logDateTime = LocalDateTime.now().format(dateTimeFormatter);
         try {
             fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
+            pipeHandler = new PipeHandler();
         } catch (IOException e) {
             e.printStackTrace();
         }
