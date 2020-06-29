@@ -10,7 +10,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.*;
@@ -26,8 +28,40 @@ public class Logging{
 
     static {
         //format of logs is defined in resources/logging.properties
-        String pathToPropertyFile = Thread.currentThread().getContextClassLoader().getResource("logging.properties").getFile();
-        System.setProperty("java.util.logging.config.file", pathToPropertyFile);
+        File propertyFile = new File("configuration/logging.properties");
+        try{
+            if(!propertyFile.exists() || propertyFile.length() == 0){
+                String pathToPropertyFile = Thread.currentThread().getContextClassLoader().getResource("logging.properties").getFile();
+                boolean createdDir = propertyFile.getParentFile().mkdir();
+                boolean createdFile = propertyFile.createNewFile();
+                if(!createdFile && !propertyFile.exists()){
+                    throw new IOException("logging.properties could not be created");
+                }
+            }
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
+
+                if(inputStream == null) {
+                    throw new IOException("The stream logging.properties could not be found");
+                }
+
+                try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+                    int length;
+                    byte[] buffer = new byte[1024];
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                }catch (IOException ioe){
+                    throw new IOException("logging.properties could not be created. " + ioe.getMessage());
+                }
+            }catch (IOException ioe){
+                throw ioe;
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+        System.setProperty("java.util.logging.config.file", propertyFile.getPath());
         File logDirectory = new File("log/");
         System.out.println(logDirectory.getAbsolutePath());
         if(!logDirectory.exists()){
