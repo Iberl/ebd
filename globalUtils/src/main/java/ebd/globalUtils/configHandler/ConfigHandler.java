@@ -135,7 +135,7 @@ public class ConfigHandler {
     /**
      * Default distance between end of movement authority and danger point in [m]
      */
-    public int defaultDangerPoint = 200;
+    public int minimumDangerPoint = 200;
 
     /*
     doubles

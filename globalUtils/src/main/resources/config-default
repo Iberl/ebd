@@ -103,7 +103,7 @@ timeBase = 1593522000000
 ###### Integers
 ######
 # Default Dangerpoint Distance in [m]
-defaultDangerPoint = 200
+minimumDangerPoint = 200
 
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
