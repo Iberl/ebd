@@ -1,8 +1,11 @@
 package ebd.breakingCurveCalculator.tests;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,33 +49,39 @@ public class TestEventHandler{
 	
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void NewBreakingCurve(NewBreakingCurveEvent e) {
-		List<BreakingCurve> lobc = new ArrayList<>();
-		lobc.add(e.breakingCurveGroup.getEmergencyDecelerationCurve());
-		lobc.add(e.breakingCurveGroup.getEmergencyInterventionCurve());
-		lobc.add(e.breakingCurveGroup.getServiceDecelerationCurve());
-		lobc.add(e.breakingCurveGroup.getServiceInterventionCurve());
-		lobc.add(e.breakingCurveGroup.getServiceWarningCurve());
-		lobc.add(e.breakingCurveGroup.getPermittedSpeedCurve());
-		lobc.add(e.breakingCurveGroup.getServiceIndicationCurve());
-		lobc.add(e.breakingCurveGroup.getServiceCoastingPhaseCurve());
+		saveBreakingCurvesToFile(e);
+		System.out.println("Done");
+	}
 
-		/*
-		Double searchKey2 = bCurve.getHighestXValue();
-		while (!(searchKey2 == null )) {
-			System.out.println(searchKey2);
-			System.out.println(bCurve.curve.get(searchKey2));
-			System.out.println("----------");
-			
-			searchKey2 = bCurve.curve.lowerKey(searchKey2);
+	private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
+		LocalDateTime ldt = LocalDateTime.now();
+		String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
+		String dirPathString = "results/breakingCurves/" + timeString.replaceAll(":", "-") + "/";
+
+		if(!new File(dirPathString).mkdirs()){
+			System.err.println("Could not create necessary directories");
+			System.exit(-1); //TODO Make better and Event
 		}
-		*/
+
+		List<BreakingCurve> lobc = new ArrayList<>();
+		lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
+		lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
+		lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
+		lobc.add(nbce.breakingCurveGroup.getServiceInterventionCurve());
+		lobc.add(nbce.breakingCurveGroup.getServiceWarningCurve());
+		lobc.add(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+		lobc.add(nbce.breakingCurveGroup.getServiceIndicationCurve());
+		lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
+
 		for(BreakingCurve bCurve : lobc) {
 			double xPosition = 0d;
 			double step = bCurve.getHighestXValue() / 100000d;
 			FileWriter fW;
-			try {
+			String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
+			String fileName = String.format("ETCS_ID_%d-%s-%s",6485,bCurve.getID(),dateString);
 
-				fW = new FileWriter(bCurve.getID() + ".txt");
+			try {
+				fW = new FileWriter(dirPathString + fileName);
 				BufferedWriter writer = new BufferedWriter(fW);
 				writer.write("");
 
@@ -82,15 +91,13 @@ public class TestEventHandler{
 					writer.append(String.format("%f:%f%n", xPosition, yValue));
 					xPosition += step;
 				}
-
+				writer.flush();
 				writer.close();
 
 			} catch (IOException e1) {
-				String eventTarget = "tsm";
-				eventBus.post(new BreakingCurveExceptionEvent("bcc", eventTarget, e, e1));
+				eventBus.post(new BreakingCurveExceptionEvent("bcc", "tsm", nbce, e1));
 			}
 		}
-		System.out.println("Done");
 	}
 
 }

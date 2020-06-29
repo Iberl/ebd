@@ -244,7 +244,8 @@ public class BreakingCurveCalculator {
 	 * 		A breaking curve made from the shifted knots
 	 */
     private BreakingCurve getCurveFromListAndOffset(List<Knot> knotList, double offset, Position referencePosition, String id){
-		List<Knot> knotListCopy = new ArrayList<>(knotList);
+		int test = ("EmergencyInterventionCurve".equals(id)) ? 1 : 0;
+    	List<Knot> knotListCopy = new ArrayList<>(knotList);
     	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
 
     	//We get the first and last knot who have to be treated differently. The first knot gets added unchanged
@@ -256,6 +257,9 @@ public class BreakingCurveCalculator {
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
+			if(newX <= formerKnot.xValue){
+				newX = formerKnot.xValue + 0.001;
+			}
 			double newSlope = 0;
 			if(knot.coefficients.get(1) != 0){
 				newSlope = (formerKnot.coefficients.get(0) - knot.coefficients.get(0)) / (formerKnot.xValue - newX);
@@ -392,7 +396,8 @@ public class BreakingCurveCalculator {
 				speedNext = speedNow + deltaSpeed;
 
 				if(speedNext > this.ssp.getSpeedAtDistance(disNext, curveType)) {
-					deltaSpeed = this.ssp.getSpeedAtDistance(disNext, curveType) - speedNow;
+					double test = this.ssp.getSpeedAtDistance(disNext, curveType);
+					deltaSpeed = Math.max(this.ssp.getSpeedAtDistance(disNext, curveType) - speedNow, deltaSpeed_init_min);
 					speedNext = this.ssp.getSpeedAtDistance(disNext, curveType);
 				}
 

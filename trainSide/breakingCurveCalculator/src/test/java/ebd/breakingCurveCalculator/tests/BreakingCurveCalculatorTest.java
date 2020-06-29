@@ -28,8 +28,8 @@ public class BreakingCurveCalculatorTest {
 		//SETUP
 		//Datasets
 
-		int[] tsp = {0,180,4000,180};
-		double[] bp = {0,1};
+		int[] tsp = {0,180,2000,10,2005,120,2010,20,3990,180};
+		double[] bp = {0,0.4,100,0.2};
 		int[] gp = {0,0};
 		
 		
