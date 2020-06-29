@@ -25,14 +25,16 @@ public class BCREgeneratorFromDataset{
 	int[] tsp;
 	double[] bp;
 	int[] gp;
+	int eoa;
 
 	/**
 	 * Creates an instance with the provided data
 	 */
-	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp) {
+	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp, int eoa) {
 		this.tsp = tsp;
 		this.bp = bp;
 		this.gp = gp;
+		this.eoa = eoa;
 	}
 
 	/**
@@ -62,7 +64,7 @@ public class BCREgeneratorFromDataset{
 		Packet_15 packet15 = new Packet_15();
 
 		Packet_15_Section endsection = new Packet_15_Section();
-		endsection.L_SECTION = tsp[tsp.length - 2];
+		endsection.L_SECTION = eoa;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 
 		packet15.Q_SCALE = 1;
