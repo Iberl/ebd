@@ -163,7 +163,7 @@ public class TrainData {
         msg2.append("Traincomposition: ");
         for(int i = 0; i < carlist.length; i++){
             if(i == 0){
-                msg2.append("◢[" + carlist[0] + "]");
+                msg2.append("<[" + carlist[0] + "]");
             }
             else {
                 msg2.append("-[" + carlist[i] + "]");
