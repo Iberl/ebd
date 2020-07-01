@@ -83,12 +83,18 @@ public class DistanceSupervisor {
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
+
+
         if(!this.inRSM
                 && distanceToEMA <= this.curReleaseSpeedDistance
                 && curSpeed <= this.curReleaseSpeed
                 && curSpeed > 0  ){ //If release speed == 0, handel it as if there was no release speed
             this.inRSM = true;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true, this.curReleaseSpeed));
+        }
+        else if(this.inRSM && distanceToEMA > this.curReleaseSpeedDistance){ //This endes the release speed mode if a new movement authority message is received
+            this.inRSM = false;
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
         }
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));

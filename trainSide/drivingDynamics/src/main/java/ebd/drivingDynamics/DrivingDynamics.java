@@ -257,7 +257,6 @@ public class DrivingDynamics {
             this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
         }
         this.time = AppTime.nanoTime();
-        this.inRSM = false;
         this.shouldHalt = false;
     }
 
