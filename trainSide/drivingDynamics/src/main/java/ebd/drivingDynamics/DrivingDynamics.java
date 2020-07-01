@@ -410,7 +410,7 @@ public class DrivingDynamics {
     private void updateCurrentTargetSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
-        if(tripSectionDistance < this.maxTripSectionDistance) this.profileTargetSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();//tripProfile.getPointOnCurve(tripSectionDistance);
+        if(tripSectionDistance < this.maxTripSectionDistance) this.profileTargetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
         else this.profileTargetSpeed = 0d;
 
         this.localBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileTargetSpeed", this.profileTargetSpeed));
