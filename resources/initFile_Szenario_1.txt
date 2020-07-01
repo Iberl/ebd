@@ -1,0 +1,9 @@
+# Initialisation file for ETCS at EBD     Stand: 30.06.2020 10:40 
+#
+# Szenarien rund um Martinstein für 'Showroom EBD' am 30.6.2020       
+#        
+# Szenario 1: Verlangsamte Einfahrten vermeiden
+#        
+# etcsID ; trainConfigID ; infrastructureID ; trainScheduleID ; rbcID ; startingBaliseGroup ; startingTrack ; startingDirection ; startingIncrement
+       1 ;          4090 ;             4090 ;        TGV4090 ;      1 ;                4731 ;      12W13CDL ;             false ;        0
+       2 ;          1452 ;             1452 ;         FE1452 ;      1 ;                4703 ;        15W12S ;             false ;        0

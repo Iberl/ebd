@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-29T22-21-33.040494"
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-30T19-47-30.670838"
 path = path + "/"
 pathList = [(path + f) for f in os.listdir(path)]
             

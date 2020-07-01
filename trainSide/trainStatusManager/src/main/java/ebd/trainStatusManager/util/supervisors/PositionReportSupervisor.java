@@ -83,7 +83,6 @@ public class PositionReportSupervisor {
             //double curCycleNumber = curTime / t_cycle;
             if(curTime > t_cycle){
                 //this.t_cycleNumber = (int)curCycleNumber + 1;
-                System.out.println("reason1");
                 sendPositionReport();
             }
         }
