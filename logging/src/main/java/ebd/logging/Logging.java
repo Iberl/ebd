@@ -26,7 +26,6 @@ public class Logging{
     private String logPrefix;
     static String logDateTime;
     static Handler fileHandlerAll;
-    static Handler pipeHandler;
 
     static {
         //format of logs is defined in resources/logging.properties
