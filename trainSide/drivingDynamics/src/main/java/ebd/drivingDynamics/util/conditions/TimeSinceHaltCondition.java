@@ -13,19 +13,18 @@ import org.json.simple.JSONObject;
 import java.util.function.BiFunction;
 
 /**
- * A time since trip section start compares the time since the start of a trip section to a fixed time.
- * Every trip profile given counts as one trip section<br>
+ * A time since halt compares the time since the last halt to a fixed time.
  * The way it compares the the values are defined in the {@link JSONObject}<br>
- * <p>The <b>type</b> of this condition is "t_secStart"</p>
+ * <p>The <b>type</b> of this condition is "t_sinceHalt"</p>
  * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
  * <p>The <b>value</b> key contains a fixed time value in [s] equal or greater then 0 s. </p>
- * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the start of the trip section.
+ * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the last halt.
  * The JSON string would look like this:<br>
- *     {"type" : "t_secStart", "condition" : {"op" : ">", "value" : 40.5 }}<br>
+ *     {"type" : "t_sinceHalt", "condition" : {"op" : ">", "value" : 40.5 }}<br>
  *         The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
-public class TimeSinceTripSectionStartCondition extends Condition {
+public class TimeSinceHaltCondition extends Condition {
 
     private final TrainDataVolatile trainDataVolatile;
     private long timeAt0Speed; //in [ms]
@@ -33,21 +32,20 @@ public class TimeSinceTripSectionStartCondition extends Condition {
     private BiFunction<Double,Double, Boolean> comparator;
 
     /**
-     * A time since trip section start compares the time since the start of a trip section to a fixed time.
-     * Every trip profile given counts as one trip section<br>
+     * A time since halt compares the time since the last halt to a fixed time.
      * The way it compares the the values are defined in the {@link JSONObject}<br>
-     * <p>The <b>type</b> of this condition is "t_secStart"</p>
+     * <p>The <b>type</b> of this condition is "t_sinceHalt"</p>
      * <p>The <b>op</b> key contains a string that determine the kind of comparison. Allowed values are: "<", "<=", ">=", ">"</p>
      * <p>The <b>value</b> key contains a fixed time value in [s] equal or greater then 0 s. </p>
-     * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the start of the trip section.
+     * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the last halt.
      * The JSON string would look like this:<br>
-     *     {"type" : "t_secStart", "condition" : {"op" : ">", "value" : 40.5 }}<br>
-     *         The value of "condition" is passed to the constructor<br></p>    *
+     *     {"type" : "t_sinceHalt", "condition" : {"op" : ">", "value" : 40.5 }}<br>
+     *         The value of "condition" is passed to the constructor<br></p>
      *
      * @param jsonObject the value of "condition" of the upper level json object
      * @param localEventBus The local {@link EventBus} of the train.
      */
-    public TimeSinceTripSectionStartCondition(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
+    public TimeSinceHaltCondition(JSONObject jsonObject, EventBus localEventBus) throws DDBadDataException {
         super(localEventBus);
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         fromJSON(jsonObject);
@@ -61,7 +59,7 @@ public class TimeSinceTripSectionStartCondition extends Condition {
 
     @Subscribe
     public void trainData(NewTrainDataVolatileEvent ntdve){
-        if(this.trainDataVolatile.getCurrentSpeed() == 0 && this.trainDataVolatile.getCurTripSectionDistance() == 0){
+        if(this.trainDataVolatile.getCurrentSpeed() == 0){
             this.timeAt0Speed = AppTime.currentTimeMillis();
         }
     }
@@ -77,18 +75,18 @@ public class TimeSinceTripSectionStartCondition extends Condition {
             else if(tempObject instanceof Double){
                 this.timeValue = (Double)tempObject * 1000; //to [ms]
             }
-            else throw new DDBadDataException("TimeSinceTripSectionStartCondition value was not a number");
+            else throw new DDBadDataException("TimeSinceHaltCondition value was not a number");
 
             if(this.timeValue < 0){
-                throw new DDBadDataException("TimeSinceTripSectionStartCondition value was not <= 0");
+                throw new DDBadDataException("TimeSinceHaltCondition value was not <= 0");
             }
         }
-        else throw new DDBadDataException("The key 'value' was missing for a TimeSinceTripSectionStartCondition");
+        else throw new DDBadDataException("The key 'value' was missing for a TimeSinceHaltCondition");
 
         if(jsonObject.keySet().contains("op")){
             String opCode = (String)jsonObject.get("op");
             this.comparator = ComparisonParser.parse(opCode);
         }
-        else throw new DDBadDataException("The key 'op' was missing for a TimeSinceTripSectionStartCondition");
+        else throw new DDBadDataException("The key 'op' was missing for a TimeSinceHaltCondition");
     }
 }

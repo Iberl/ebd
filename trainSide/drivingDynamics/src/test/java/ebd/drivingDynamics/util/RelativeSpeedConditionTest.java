@@ -1,8 +1,12 @@
 package ebd.drivingDynamics.util;
 
 
+import ebd.drivingDynamics.Testhandler;
 import ebd.drivingDynamics.util.conditions.RelativeSpeedCondition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
+import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -19,25 +23,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class RelativeSpeedConditionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(1, 192, 3, null, 6d, 28d, null, null, null, null, null, null, null);
-        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
+        Testhandler testhandler = new Testhandler();
+        ConfigHandler.getInstance().useTrainConfiguratorTool = false;
+        TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
     @Test
-    void evalFalse() throws ParseException, DDBadDataException {
+    void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
+        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }");
         RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
-        //System.out.println(relativeSpeedCondition.eval());
         assertFalse(relativeSpeedCondition.eval());
-    }
 
-    @Test
-    void evalTrue() throws ParseException, DDBadDataException {
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \"<\", \"value\" : 25.0 }");
-        RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
-        //System.out.println(relativeSpeedCondition.eval());
+        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentSpeed", 20));
+        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentProfileTargetSpeed", 40));
+
         assertTrue(relativeSpeedCondition.eval());
     }
 }

@@ -34,6 +34,16 @@ public class SingleConditionParser {
                     return new MaxSpeedCondition(conObj,localEventBus);
                 case "v_t_m":
                     return new MaxFutureSpeedCondition(conObj,localEventBus);
+                case "t_secStart":
+                    return new TimeSinceTripSectionStartCondition(conObj, localEventBus);
+                case "t_sinceHalt":
+                    return new TimeSinceHaltCondition(conObj, localEventBus);
+                case "t_atHalt":
+                    return new TimeAtHaltCondition(conObj, localEventBus);
+                case "sil":
+                    return new SpeedInterventionLevelCondition(conObj, localEventBus);
+                case "sss":
+                    return new SpeedSupervisorStateCondition(conObj, localEventBus);
                 default:
                     throw new DDBadDataException("A condition was not formatted correctly: " + jsonObject.toString());
             }

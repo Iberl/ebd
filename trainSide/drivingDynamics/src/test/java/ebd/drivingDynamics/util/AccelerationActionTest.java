@@ -3,6 +3,8 @@ package ebd.drivingDynamics.util;
 import ebd.drivingDynamics.Testhandler;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.trainData.TrainData;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -20,16 +22,16 @@ class AccelerationActionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
         Testhandler testhandler = new Testhandler();
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(1, 192, 3, null, 6d, 28d, null, null, null, null, null, null, null);
-        EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
+        ConfigHandler.getInstance().useTrainConfiguratorTool = false;
+        TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
     @Test
     void test() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse("{ \"value\" : 10 , \"conditions\" : {\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}}");
+        JSONObject jsonObject = (JSONObject) parser.parse("{ \"value\" : 10 , \"conditions\" : {\"orBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \"<\", \"value\" : 25.0 }}]}}");
         AccelerationAction accelerationAction = new AccelerationAction(jsonObject, EventBus.getDefault(), 2);
-        assertFalse(accelerationAction.eval());
+        assertTrue(accelerationAction.eval());
         assertEquals(0.1, accelerationAction.getAccelerationPercentage());
     }
 

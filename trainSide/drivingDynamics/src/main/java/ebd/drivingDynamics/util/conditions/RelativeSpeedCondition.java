@@ -18,7 +18,8 @@ import java.util.function.BiFunction;
  * <p>
  *     Example: The condition should evaluate to true if the train is slower than 50% of the current maximum speed on the trip profile.
  *     The JSON string would look like this:<br>
- *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}</p>
+ *     {"type" : "v_rel", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}<br>
+ *     The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
 public class RelativeSpeedCondition extends CurveBasedCondition {
