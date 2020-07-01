@@ -63,7 +63,7 @@ public class DistanceSupervisor {
 
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-        this.dangerPointDistance = ch.defaultDangerPoint;
+        this.dangerPointDistance = ch.minimumDangerPoint;
 
         this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
         this.eventTarget = "all";

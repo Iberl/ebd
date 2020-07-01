@@ -8,10 +8,7 @@ import ebd.messageLibrary.message.Message;
 import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.Serializer;
-import ebd.messageLibrary.util.exception.BitLengthOutOfBoundsException;
-import ebd.messageLibrary.util.exception.ClassNotSupportedException;
-import ebd.messageLibrary.util.exception.MissingInformationException;
-import ebd.messageLibrary.util.exception.ValueNotSupportedException;
+import ebd.messageLibrary.util.exception.*;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -79,25 +76,30 @@ public class MessageReceiver {
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void receive(SerializedBitstreamEvent event) {
-		if(!event.target.contains(mrID + (traintoTrack ? ";R=" : ";T=") + localID) && !event.target.contains("all")) return;
+		StringBuilder sb = new StringBuilder("localID: " + this.localID);
+		sb.append(", Source: " + event.source);
+		sb.append(", Target: " + event.target);
+		sb.append(", isTelegram: " + event.isTelegram);
+		sb.append(", trainToTrack: " + event.trainToTrack);
+
+
+		if(!event.target.equals(mrID + (traintoTrack ? ";T=" : ";R=") + localID) && !event.target.equals("all")) return;
 
 		try {
 			BitStreamReader bitstream = event.bitstream;
-
+			sb.append(", " + Arrays.toString(bitstream.peekBits(8)));
+			//System.out.println(sb.toString());
 			if(event.isTelegram) {
 				Telegram telegram = Serializer.deserializeTelegram(bitstream);
 
 				localBus.post(new ReceivedTelegramEvent(mrID, managerID, telegram, event.source));
 			} else {
 				Message message = Serializer.deserializeMessage(bitstream, event.trainToTrack);
-
+				//System.out.println("Message Received " + message.NID_MESSAGE + "from " + event.source);
 				localBus.post(new ReceivedMessageEvent(mrID, managerID, message, event.source));
 			}
 
 		} catch(ClassNotSupportedException e) {
-			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
-
-		} catch(MissingInformationException e) {
 			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
 		} catch(BitLengthOutOfBoundsException e) {
@@ -106,6 +108,10 @@ public class MessageReceiver {
 		} catch(ValueNotSupportedException e) {
 			globalBus.post(new MessageReceiverExceptionEvent(event.source, managerID, event, e));
 
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
+		} catch(NotDeserializableException e) {
+			e.printStackTrace();
 		}
 	}
 

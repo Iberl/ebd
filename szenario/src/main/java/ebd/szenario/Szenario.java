@@ -3,16 +3,16 @@ package ebd.szenario;
 
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.radioBlockCenter.util.Route;
 import ebd.szenario.util.clients.InfrastructureClient;
 import ebd.szenario.util.handler.InputHandler;
 import ebd.szenario.util.handler.SzenarioEventHandler;
@@ -20,20 +20,18 @@ import ebd.szenario.util.events.LoadEvent;
 import ebd.szenario.util.events.SzenarioExceptionEvent;
 import ebd.szenario.util.server.DMIServer;
 import ebd.szenario.util.server.GUIServer;
-import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
-import java.util.*;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 
 public class Szenario implements Runnable {
 
     static class btgGenerator {
-        public static void sendLinkingInformation(MessageSender ms, int etcsID) {
+        public static void sendLinkingInformation(MessageSender ms) {
             // Create Linking Information
             Packet_5 li = new Packet_5(Q_DIR_NOMINAL, Q_SCALE_1M, new Packet_5.Packet_5_Link(0, false, 0, 1, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
             li.links.add(new Packet_5.Packet_5_Link(584, false, 0, 2, Q_LINKORIENTATION_NOMINAL, Q_LINKREACTION_NO_REACTION, 12));
@@ -48,7 +46,10 @@ public class Szenario implements Runnable {
 
             Message_24 message_24 = new Message_24((AppTime.currentTimeMillis() / 10l) % T_TRAIN_UNKNOWN, false, 0);
             message_24.packets.add(li);
-            ms.send(new SendMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
+            for(int etcsID : TrainsHandler.getInstance().getEtcsIDs()){
+                ms.send(new SendETCSMessageEvent("rbc;R=1", "ms", message_24, "mr;T=" + etcsID));
+            }
+
         }
     }
 
@@ -56,6 +57,7 @@ public class Szenario implements Runnable {
     private EventBus globalEventBus;
     private Thread szenarioThread = new Thread(this);
     private ConfigHandler ch;
+    private TrainsHandler iFH;
 
     private SzenarioEventHandler szenarioEventHandler;
     private InputHandler inputHandler;
@@ -81,8 +83,7 @@ public class Szenario implements Runnable {
     /*
     TrainSide
      */
-    private TrainStatusManager tsm = null;
-    private int etcsID = 0;
+    private TrainManager tm = null;
 
     public Szenario() {
         this.globalEventBus = EventBus.getDefault();
@@ -90,6 +91,7 @@ public class Szenario implements Runnable {
         this.szenarioEventHandler = new SzenarioEventHandler();
 
         this.ch = ConfigHandler.getInstance();
+        this.iFH = TrainsHandler.getInstance();
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
@@ -102,8 +104,6 @@ public class Szenario implements Runnable {
 
         this.inputHandler = new InputHandler();
         this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
-
-        this.etcsID = ConfigHandler.getInstance().etcsEngineAndInfrastructureID;
 
         System.out.println("This is the virtual environment for the ETCS@EBD project");
         szenarioThread.start();
@@ -152,25 +152,20 @@ public class Szenario implements Runnable {
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void load(LoadEvent loe){
-        String driverName = ConfigHandler.getInstance().pathToDriverProfileJson;
-        driverName = driverName.replace("DrivingStrategy.json", "");
-        String routeName = ConfigHandler.getInstance().pathToSzenarioJSON;
-        routeName = routeName.replace("szenario", "");
-        routeName = routeName.replace(".json", "");
-        System.out.printf("Running this scenario with a %s driving strategy a route %s%n", driverName, routeName);
+        System.out.println("Welcome to the ETCS Train and RBC simulation");
 
         String msg = "ETCS start up";
         EventBus.getDefault().post(new ToLogEvent("glb", "log", msg));
 
-        Route a = new Route("AB", 1000, new int[]{0,100,900,80}, new int[]{0,1,750,0});
-        List<Route> listRoute = new ArrayList<>();
-        listRoute.add(a);
-        Map<Integer, List<Route>> mapRoute = new HashMap<>();
-        mapRoute.put(this.etcsID, listRoute);
-        this.rbc = new RadioBlockCenter("1", mapRoute, 1);
-        this.tsm = new TrainStatusManager(this.etcsID, 1);
+        this.rbc = new RadioBlockCenter(1);
 
-        btgGenerator.sendLinkingInformation(this.messageSenderTrack, this.etcsID);
+        try {
+            this.tm = new TrainManager();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        btgGenerator.sendLinkingInformation(this.messageSenderTrack);
     }
 
     private boolean validTarget(String target) {

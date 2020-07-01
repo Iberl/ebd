@@ -244,17 +244,25 @@ public class BreakingCurveCalculator {
 	 * 		A breaking curve made from the shifted knots
 	 */
     private BreakingCurve getCurveFromListAndOffset(List<Knot> knotList, double offset, Position referencePosition, String id){
-		List<Knot> knotListCopy = new ArrayList<>();
-		knotListCopy.addAll(knotList);
+		int test = ("EmergencyInterventionCurve".equals(id)) ? 1 : 0;
+    	List<Knot> knotListCopy = new ArrayList<>(knotList);
     	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
-		Knot lastKnot = knotListCopy.remove(0);
-		breakingCurve.addKnotToCurve(lastKnot);
+
+    	//We get the first and last knot who have to be treated differently. The first knot gets added unchanged
+		Knot lastKnot = knotListCopy.remove(knotListCopy.size()-1);
+    	Knot formerKnot = knotListCopy.remove(0);
+		breakingCurve.addKnotToCurve(formerKnot);
+
+		//We iterate through all other knots and determine the new xValue and slope for each of them.
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
+			if(newX <= formerKnot.xValue){
+				newX = formerKnot.xValue + 0.001;
+			}
 			double newSlope = 0;
 			if(knot.coefficients.get(1) != 0){
-				newSlope = (lastKnot.coefficients.get(0) - knot.coefficients.get(0)) / (lastKnot.xValue - newX);
+				newSlope = (formerKnot.coefficients.get(0) - knot.coefficients.get(0)) / (formerKnot.xValue - newX);
 			}
 
 			double[] newCoefficents = {knot.coefficients.get(0), newSlope};
@@ -262,8 +270,17 @@ public class BreakingCurveCalculator {
 			Knot newKnot = new Knot(newX, newCoefficents);
 			breakingCurve.addKnotToCurve(newKnot);
 
-			lastKnot = newKnot;
+			formerKnot = newKnot;
 		}
+		//Finally we add the last knot with unchanged xValue to pin the knot to the original knot. But we calculate a new slop.
+		double newX = lastKnot.xValue;
+		double newSlope = 0;
+		if(lastKnot.coefficients.get(1) != 0){
+			newSlope = (formerKnot.coefficients.get(0) - lastKnot.coefficients.get(0)) / (formerKnot.xValue - newX);
+		}
+		double[] newCoefficents = {lastKnot.coefficients.get(0), newSlope};
+		Knot newKnot = new Knot(newX, newCoefficents);
+		breakingCurve.addKnotToCurve(newKnot);
 
 
     	return breakingCurve;
@@ -379,14 +396,15 @@ public class BreakingCurveCalculator {
 				speedNext = speedNow + deltaSpeed;
 
 				if(speedNext > this.ssp.getSpeedAtDistance(disNext, curveType)) {
-					deltaSpeed = this.ssp.getSpeedAtDistance(disNext, curveType) - speedNow;
+					double test = this.ssp.getSpeedAtDistance(disNext, curveType);
+					deltaSpeed = Math.max(this.ssp.getSpeedAtDistance(disNext, curveType) - speedNow, deltaSpeed_init_min);
 					speedNext = this.ssp.getSpeedAtDistance(disNext, curveType);
 				}
 
 				coefList = new ArrayList<>();
 				coefList.add(speedNow);
 				coefList.add(deltaSpeed / deltaDis);
-				knotList.add(0, new Knot(disNow,coefList));
+				knotList.add(0, new Knot(disNow,coefList)); //Add KNOT
 
 				disNow = disNext;
 				speedNow = speedNext;
@@ -399,7 +417,7 @@ public class BreakingCurveCalculator {
 				coefList = new ArrayList<>();
 				coefList.add(speedNow);
 				coefList.add(0d);
-				knotList.add(0, new Knot(disNow,coefList));
+				knotList.add(0, new Knot(disNow,coefList)); //Add KNOT
 			}
 
 			disNow = disStar;
@@ -410,7 +428,7 @@ public class BreakingCurveCalculator {
 		coefList = new ArrayList<>();
 		coefList.add(Math.min(this.ssp.getSpeedAtDistance(0d, curveType),speedNow));
 		coefList.add(0d);
-		knotList.add(0, new Knot(disNow,coefList));
+		knotList.add(0, new Knot(disNow,coefList)); //Add KNOT
 
 		return knotList;
 	}

@@ -1,6 +1,6 @@
 package ebd.drivingDynamics.util;
 
-import ebd.drivingDynamics.util.conditions.AndBlock;
+import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
@@ -11,14 +11,12 @@ import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class AndBlockTest {
     @BeforeAll
     static void setTrainDataVolatile(){
-        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(null, 6d, 28d, null, null, null, null, null, null, null);
+        TrainDataVolatile trainDataVolatile = new TrainDataVolatile(1, 192, 3, null, 6d, 28d, null, null, null, null, null, null, null);
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
     }
 

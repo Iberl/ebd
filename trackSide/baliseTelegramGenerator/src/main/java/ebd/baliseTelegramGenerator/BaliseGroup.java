@@ -4,6 +4,7 @@ import ebd.globalUtils.location.Location;
 import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageLibrary.packet.trackpackets.Packet_79;
+import ebd.messageLibrary.util.ETCSVariables;
 import org.jetbrains.annotations.Nullable;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
@@ -21,23 +22,24 @@ public class BaliseGroup {
 
     private boolean Q_UPDOWN = Q_UPDOWN_UP_LINK;
 
-    private int version = M_VERSION;
+    private int M_VERSION = ETCSVariables.M_VERSION;
 
     private boolean Q_MEDIA = Q_MEDIA_BALISE;
 
-    private Balise[] balises = new Balise[8];
-
     private int N_TOTAL = 0;
 
-    private int country = NID_C;
+    private int NID_C = ETCSVariables.NID_C;
 
     private int NID_BG;
 
-    private boolean linked = Q_LINK;
+    private boolean Q_LINK = ETCSVariables.Q_LINK;
 
     private Location location;
 
     // private int distanceBetweenBalises = 10;
+
+    private Balise[] balises = new Balise[8];
+
 
 
     @Nullable
@@ -54,44 +56,13 @@ public class BaliseGroup {
     // Constructors
 
     public BaliseGroup(int M_VERSION, int NID_C, int NID_BG, int NID_LRBG, double D_LRBG, boolean Q_LINK, @Nullable Packet_5 linkingInformation) {
-        this.version = M_VERSION;
-        this.country = NID_C;
+        this.M_VERSION = M_VERSION;
+        this.NID_C = NID_C;
         this.NID_BG = NID_BG;
-        this.linked = Q_LINK;
+        this.Q_LINK = Q_LINK;
         this.location = new Location(NID_BG, NID_LRBG, D_LRBG);
         this.linkingInformation = linkingInformation;
     }
-
-
-    // Getter and Setter
-
-    public boolean getQ_UPDOWN() { return Q_UPDOWN; }
-
-    public int getM_VERSION() { return version; }
-
-    public void setM_VERSION(int M_VERSION) { this.version = M_VERSION; }
-
-    public boolean getQ_MEDIA() { return Q_MEDIA; }
-
-    public int getN_TOTAL() { return N_TOTAL; }
-
-    public int getNID_C() { return country; }
-
-    public void setNID_C(int NID_C) { this.country = NID_C; }
-
-    public int getNID_BG() { return NID_BG; }
-
-    public boolean getQ_LINK() { return linked; }
-
-    public void setQ_LINK(boolean Q_LINK) { this.linked = Q_LINK; }
-
-    public Location getLocation() { return location; }
-
-    public void setLocation(Location location) { this.location = location; }
-
-    /*public int getDistanceBetweenBalises() { return distanceBetweenBalises; }
-
-    public void setDistanceBetweenBalises(int distance) { this.distanceBetweenBalises = distance; }*/
 
 
     // Manage Balises
@@ -179,18 +150,49 @@ public class BaliseGroup {
     public Telegram generateTelegramFor(int N_PIG) {
 
         Balise balise = balises[N_PIG];
-        Telegram telegram = new Telegram(Q_UPDOWN, version, Q_MEDIA, N_PIG, N_TOTAL, balise.getM_DUP(), balise.M_MCOUNT, country, NID_BG, linked);
+        Telegram telegram = new Telegram(Q_UPDOWN, M_VERSION, Q_MEDIA, N_PIG, N_TOTAL, balise.getM_DUP(), balise.M_MCOUNT, NID_C, NID_BG, Q_LINK);
 
         if (balise.packet_0 != null) {
-            telegram.PACKET_0 = balise.packet_0;
+            telegram.packet_0 = balise.packet_0;
         }
 
         telegram.packets.addAll(balise.packets);
 
-        if(linked && linkingInformationBalise == N_PIG) telegram.packets.add(linkingInformation);
+        if(Q_LINK && linkingInformationBalise == N_PIG) telegram.packets.add(linkingInformation);
         if(geographicPositionBalise == N_PIG) telegram.packets.add(geographicPosition);
 
         return telegram;
     }
+
+
+    // Getter and Setter
+
+    public boolean getQ_UPDOWN() { return Q_UPDOWN; }
+
+    public int getM_VERSION() { return M_VERSION; }
+
+    public void setM_VERSION(int M_VERSION) { this.M_VERSION = M_VERSION; }
+
+    public boolean getQ_MEDIA() { return Q_MEDIA; }
+
+    public int getN_TOTAL() { return N_TOTAL; }
+
+    public int getNID_C() { return NID_C; }
+
+    public void setNID_C(int NID_C) { this.NID_C = NID_C; }
+
+    public int getNID_BG() { return NID_BG; }
+
+    public boolean islinked() { return Q_LINK; }
+
+    public void setQ_LINK(boolean Q_LINK) { this.Q_LINK = Q_LINK; }
+
+    public Location getLocation() { return location; }
+
+    public void setLocation(Location location) { this.location = location; }
+
+    /*public int getDistanceBetweenBalises() { return distanceBetweenBalises; }
+
+    public void setDistanceBetweenBalises(int distance) { this.distanceBetweenBalises = distance; }*/
 
 }

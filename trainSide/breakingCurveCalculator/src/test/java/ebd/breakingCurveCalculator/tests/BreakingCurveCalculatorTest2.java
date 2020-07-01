@@ -32,6 +32,7 @@ public class BreakingCurveCalculatorTest2 {
         int[] tsp = {0,180,1800,180};
         double[] bp = {0,1};
         int[] gp = {0,0};
+        int eoa = 1800;
 
 
 		/*
@@ -57,7 +58,7 @@ public class BreakingCurveCalculatorTest2 {
         TestEventHandler teh = new TestEventHandler(eventBus);
         BreakingCurveCalculator bcc = new BreakingCurveCalculator(eventBus);
         BCREgeneratorFromRandom bcreGenRandom = new BCREgeneratorFromRandom(seed);
-        BCREgeneratorFromDataset bcreGenDataset = new BCREgeneratorFromDataset(tsp, bp, gp);
+        BCREgeneratorFromDataset bcreGenDataset = new BCREgeneratorFromDataset(tsp, bp, gp, eoa);
         BCLREgeneratorFromRandom bclreGenRandom = new BCLREgeneratorFromRandom(seed);
         BreakingCurveRequestEvent bcre;
 

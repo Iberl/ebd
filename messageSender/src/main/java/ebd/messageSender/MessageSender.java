@@ -1,14 +1,16 @@
 package ebd.messageSender;
 
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.messageSender.SendTelegramEvent;
 import ebd.globalUtils.events.SerializedBitstreamEvent;
 import ebd.globalUtils.events.messageSender.MessageSenderExceptionEvent;
 import ebd.messageLibrary.serialization.BitStreamReader;
 import ebd.messageLibrary.serialization.BitStreamWriter;
 import ebd.messageLibrary.serialization.Serializer;
+import ebd.messageLibrary.util.exception.ClassMalformedException;
 import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
 import ebd.messageLibrary.util.exception.MissingInformationException;
+import ebd.messageLibrary.util.exception.NotSerializableException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -63,17 +65,17 @@ public class MessageSender {
 	 * Sends Messages to the RBC over the global EventBus
 	 *
 	 * @param event
-	 *          Received {@link SendMessageEvent} over the localBus
+	 *          Received {@link SendETCSMessageEvent} over the localBus
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void send(SendMessageEvent event) {
+	public void send(SendETCSMessageEvent event) {
 		if(!event.target.contains(msID)) return;
 
 		try {
 			BitStreamWriter writer = Serializer.serialize(event.message);
 			BitStreamReader bitstream = new BitStreamReader(writer.data(), writer.size());
 
-
+			//System.out.println("Message wird gesendet: " + event.message.NID_MESSAGE + " to " + event.destination);
 			globalBus.post(new SerializedBitstreamEvent(msID + (trainToTrack ? ";T=" : ";R=") + localID, event.destination, bitstream, trainToTrack, false));
 
 		} catch(FieldTypeNotSupportedException e) {
@@ -81,6 +83,10 @@ public class MessageSender {
 
 		} catch(MissingInformationException e) {
 			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
+		} catch(NotSerializableException e) {
+			e.printStackTrace();
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -105,6 +111,10 @@ public class MessageSender {
 
 		} catch(MissingInformationException e) {
 			localBus.post(new MessageSenderExceptionEvent(msID, event.target, event, e));
+		} catch(NotSerializableException e) {
+			e.printStackTrace();
+		} catch(ClassMalformedException e) {
+			e.printStackTrace();
 		}
 	}
 

@@ -34,11 +34,9 @@ public class MovementAuthorityConverter {
         /*
          * Iterate through the entire package to add up all the individual lengths
          */
-        if (p15.sections.size() > 0) {
 
-            for (Packet_15.Packet_15_Section section : p15.sections) {
-                d_ema += section.L_SECTION;
-            }
+        for (Packet_15.Packet_15_Section section : p15.sections) {
+            d_ema += section.L_SECTION;
         }
 
         /*
@@ -83,8 +81,8 @@ public class MovementAuthorityConverter {
     }
 
     public static double p15ToDangerPointDistance(Packet_15 p15){
-        if(p15.D_DP == ETCSVariables.INTEGER_NOVALUE || p15.D_DP < ConfigHandler.getInstance().defaultDangerPoint){
-            return ConfigHandler.getInstance().defaultDangerPoint;
+        if(p15.D_DP == ETCSVariables.INTEGER_NOVALUE || p15.D_DP < ConfigHandler.getInstance().minimumDangerPoint){
+            return ConfigHandler.getInstance().minimumDangerPoint;
         }
         return p15.D_DP * Math.pow(10, p15.Q_SCALE - 1);
     }

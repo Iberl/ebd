@@ -40,14 +40,14 @@
       <version>1.1.1</version>
     </dependency>
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-controls</artifactId>
-      <version>12</version>
+      <groupId>ebd</groupId>
+      <artifactId>rbc_tms</artifactId>
+      <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.openjfx</groupId>
-      <artifactId>javafx-fxml</artifactId>
-      <version>12</version>
+      <groupId>ebd</groupId>
+      <artifactId>messageLibrary</artifactId>
+      <version>2.0</version>
     </dependency>
   </dependencies>
 
@@ -77,8 +77,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
           <configuration>
-            <source>1.12</source>
-            <target>1.12</target>
+            <source>14</source>
+            <target>14</target>
           </configuration>
         </plugin>
         <plugin>
@@ -109,7 +109,6 @@
 
   <modules>
     <module>globalUtils</module>
-    <module>messageLibrary</module>
     <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
@@ -117,7 +116,6 @@
     <module>trainSide</module>
     <module>trackSide</module>
     <module>szenario</module>
-    <module>distribution</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

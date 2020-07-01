@@ -4,7 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequest;
 import ebd.globalUtils.position.Position;
@@ -138,7 +138,7 @@ public class MessageAuthorityRequestSupervisor {
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
         packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
-        packet0.L_TRAININIT = (int)(this.lengthTrain * 10);
+        packet0.L_TRAININT = (int)(this.lengthTrain * 10);
         packet0.L_DOUBTOVER = 100; //TODO Get this value, in fact, remember this value in the first hand
         packet0.L_DOUBTUNDER = 100; //TODO Get this value, in fact, remember this value in the first hand
         packet0.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
@@ -150,10 +150,10 @@ public class MessageAuthorityRequestSupervisor {
         message132.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
         message132.Q_MARQSTREASON = this.lastQ_MARQSTREASON;
         message132.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
-        message132.PACKET_POSITION = packet0;
+        message132.positionPacket = packet0;
 
         String destination = "mr;R=" + this.rbcID;
-        this.localBus.post(new SendMessageEvent("tsm", "ms", message132, destination));
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message132, destination));
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending a MA Request"));
 
         this.waitingOnMA = true;

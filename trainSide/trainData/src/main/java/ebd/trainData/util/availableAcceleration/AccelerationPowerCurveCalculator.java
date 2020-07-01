@@ -20,9 +20,6 @@ public class AccelerationPowerCurveCalculator {
         double trainWeight = 0; //in [kg]
         //TODO fill with math
         //TODO Respect multiple locomotives
-        if(trainDataPerma.getTrainCarList().isEmpty()){
-            System.out.println(trainDataPerma.getName());
-        }
         for(TrainCar tc : trainDataPerma.getTrainCarList()){
             if(tc.getTypeName().equals("Triebzug")){
                 poweredCar = tc;
@@ -50,9 +47,9 @@ public class AccelerationPowerCurveCalculator {
         trainWeight = trainDataPerma.getTrainWeight();
         double trainAcceleration = trainForce / trainWeight;
         accelerationCurve.addKnotToCurve(new Knot(0d, new double[]{trainAcceleration,0,0}));
-        accelerationCurve.addKnotToCurve(new Knot(11.11d, new double[]{trainAcceleration,-0.036,0}));//100% power at 40km/h
-        accelerationCurve.addKnotToCurve(new Knot(16.67, new double[]{trainAcceleration * 0.8,-0.036,0})); //80% power at 60km/h
-        accelerationCurve.addKnotToCurve(new Knot(25d, new double[]{trainAcceleration * 0.5,-0.024,0})); //50% power at 90km/h
+        accelerationCurve.addKnotToCurve(new Knot(22.22d, new double[]{trainAcceleration,-0.036,0}));//100% power at 40km/h
+        accelerationCurve.addKnotToCurve(new Knot(27.78, new double[]{trainAcceleration * 0.8,-0.072,0})); //80% power at 60km/h
+        accelerationCurve.addKnotToCurve(new Knot(30.56d, new double[]{trainAcceleration * 0.6,-0.108,0})); //50% power at 90km/h
         accelerationCurve.addKnotToCurve(new Knot(33.33, new double[]{trainAcceleration * 0.3,0,0})); //30% power at 120km/h
 
         return accelerationCurve;

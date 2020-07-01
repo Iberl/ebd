@@ -1,0 +1,28 @@
+#Initialisation file for ETCS at EBD
+#Lines that start with # are comments
+#This file contains startup information about the trains for the ETCS program.
+#Every line is a train.
+#Every train is described by multiple variables of type in, string and boolean:
+
+#etcsID (int): The etcs ID of the train, has to be unique.
+
+#trainConfigID (int): The ID of the train in the TrainConfig Tool (192 if no Tool is used).
+
+#infrastructureID (int): The ID of the train on the EBD infrastructure, has to be unique.
+
+#trainScheduleID (String): The ID of the train in the EBD train schedule, currently not used, has to be unique.
+
+#rbcID (int): The RBC the train connects too during start up.
+
+#starting balise group (int): The balise groupe the train starts at, used by the TMS, has to be unique.
+
+#starting track (String): The track ID the train is placed on the EBD infrastructure, used by the EBD infrastructure, has to be unique.
+
+#starting direction (boolean): If true, the train starts in track direction, if false, against the track direction.
+
+#starting increment (int): The distance from the starting balise in [m].
+
+#Every variable is divided by a ; and any number of white spaces (" "). Variables are not allowed to contain white spaces.
+
+# etcsID | trainConfigID | infrastructureID | trainScheduleID | rbcID | startingBaliseGroup | startingTrack | startingDirection | startingIncrement
+   1620;       192;              2181;           RB5775;          1;             1;                 W2;              true;          0;

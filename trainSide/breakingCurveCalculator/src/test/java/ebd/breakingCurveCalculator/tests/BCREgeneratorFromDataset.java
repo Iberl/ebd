@@ -12,8 +12,6 @@ import ebd.messageLibrary.packet.trackpackets.Packet_15.Packet_15_Section;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_21.Packet_21_Gradient;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
-import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfile;
-import ebd.messageLibrary.packet.trackpackets.Packet_27.Packet_27_StaticSpeedProfileSection;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
 import ebd.messageLibrary.util.ETCSVariables;
 
@@ -27,14 +25,16 @@ public class BCREgeneratorFromDataset{
 	int[] tsp;
 	double[] bp;
 	int[] gp;
+	int eoa;
 
 	/**
 	 * Creates an instance with the provided data
 	 */
-	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp) {
+	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp, int eoa) {
 		this.tsp = tsp;
 		this.bp = bp;
 		this.gp = gp;
+		this.eoa = eoa;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class BCREgeneratorFromDataset{
 		Packet_15 packet15 = new Packet_15();
 
 		Packet_15_Section endsection = new Packet_15_Section();
-		endsection.L_SECTION = tsp[tsp.length - 2];
+		endsection.L_SECTION = eoa;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 
 		packet15.Q_SCALE = 1;
@@ -99,36 +99,36 @@ public class BCREgeneratorFromDataset{
 
 		Packet_27 packet27 = new Packet_27();
 
-		Packet_27_StaticSpeedProfile p27SSP = new Packet_27_StaticSpeedProfile(tsp[0], tsp[1] / 5, true);
+		Packet_27.Packet_27_Section p27SSP = new Packet_27.Packet_27_Section(tsp[0], tsp[1] / 5, true);
 		totalDistance = tsp[0];
-		ArrayList<Packet_27_StaticSpeedProfileSection> sectionList = new ArrayList<>();
-		/*
-		for (int ii = 0; ii < rng.nextInt(3); ii++) {
-			Packet_27_StaticSpeedProfileSection p27sec = packet27.new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
-			sectionList.add(p27sec);
-		}
-		*/
-		p27SSP.sections = sectionList;
+		ArrayList<Packet_27.Packet_27_Category> categoryList = new ArrayList<>();
+		
+/*		for (int ii = 0; ii < rng.nextInt(3); ii++) {
+			Packet_27.Packet_27_Category p27cat = packet27.new Packet_27_Category(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
+			categoryList.add(p27cat);
+		}*/
+		
+		p27SSP.categories = categoryList;
 		packet27.Q_SCALE = 1;
-		packet27.speedProfile = p27SSP;
+		packet27.section = p27SSP;
 
-		ArrayList<Packet_27_StaticSpeedProfile> profileList = new ArrayList<>();
+		ArrayList<Packet_27.Packet_27_Section> sectionList = new ArrayList<>();
 
 		for (int i = 2; i < tsp.length; i+=2) {
 
-			p27SSP = new Packet_27_StaticSpeedProfile(tsp[i] - totalDistance,tsp[i+1] / 5,true);
+			p27SSP = new Packet_27.Packet_27_Section(tsp[i] - totalDistance,tsp[i+1] / 5,true);
 			totalDistance = tsp[i];
-			sectionList = new ArrayList<>();
-			/*
-			for (int ii = 0; ii < rng.nextInt(3); ii++) {
-				Packet_27_StaticSpeedProfileSection p27sec = packet27.new Packet_27_StaticSpeedProfileSection(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
-				sectionList.add(p27sec);
-			}
-			*/
-			p27SSP.sections = sectionList;
-			profileList.add(p27SSP);
+			categoryList = new ArrayList<>();
+
+/*			for (int ii = 0; ii < rng.nextInt(3); ii++) {
+				Packet_27.Packet_27_Category p27sec = packet27.new Packet_27_Category(rng.nextInt(3), rng.nextInt(11), rng.nextInt(3), rng.nextInt(113) + 8);
+				categoryList.add(p27sec);
+			}*/
+
+			p27SSP.categories = categoryList;
+			sectionList.add(p27SSP);
 		}
-		packet27.speedProfiles = profileList;
+		packet27.sections = sectionList;
 
 
 		//generating list of packet65

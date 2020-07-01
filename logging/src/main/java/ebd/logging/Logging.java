@@ -8,9 +8,12 @@ import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.util.handler.PipeHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.*;
@@ -23,10 +26,44 @@ public class Logging{
     private String logPrefix;
     static String logDateTime;
     static Handler fileHandlerAll;
+    static Handler pipeHandler;
 
     static {
         //format of logs is defined in resources/logging.properties
-        System.setProperty("java.util.logging.config.file", "resources/logging.properties");
+        File propertyFile = new File("configuration/logging.properties");
+        try{
+            if(!propertyFile.exists() || propertyFile.length() == 0){
+                String pathToPropertyFile = Thread.currentThread().getContextClassLoader().getResource("logging.properties").getFile();
+                boolean createdDir = propertyFile.getParentFile().mkdir();
+                boolean createdFile = propertyFile.createNewFile();
+                if(!createdFile && !propertyFile.exists()){
+                    throw new IOException("logging.properties could not be created");
+                }
+            }
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
+
+                if(inputStream == null) {
+                    throw new IOException("The stream logging.properties could not be found");
+                }
+
+                try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+                    int length;
+                    byte[] buffer = new byte[1024];
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                }catch (IOException ioe){
+                    throw new IOException("logging.properties could not be created. " + ioe.getMessage());
+                }
+            }catch (IOException ioe){
+                throw ioe;
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
+        System.setProperty("java.util.logging.config.file", propertyFile.getPath());
         File logDirectory = new File("log/");
         System.out.println(logDirectory.getAbsolutePath());
         if(!logDirectory.exists()){
@@ -56,6 +93,19 @@ public class Logging{
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
         logger.addHandler(fileHandler);
+        //logger.getParent().addHandler(new PipeHandler());
+
+        //Connecting the config value debug with the handerls, to pull them to level debug
+        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
+        if(ConfigHandler.getInstance().debug){
+            Handler[] handlers = logger.getParent().getHandlers();
+            for(Handler handler : handlers){
+                if(handler.getLevel() == Level.INFO){
+                    handler.setLevel(Level.FINE);
+                }
+            }
+        }
+
         this.eventBus = eventBus;
         this.eventBus.register(this);
 
@@ -71,6 +121,18 @@ public class Logging{
         logger.addHandler(fileHandlerAll);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
+
+        //Connecting the config value debug with the handerls, to pull them to level debug
+        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
+        if(ConfigHandler.getInstance().debug){
+            Handler[] handlers = logger.getParent().getHandlers();
+            for(Handler handler : handlers){
+                if(handler.getLevel() == Level.INFO){
+                    handler.setLevel(Level.FINE);
+                }
+            }
+        }
+
         eventBus = EventBus.getDefault();
         eventBus.register(this);
     }
@@ -79,42 +141,24 @@ public class Logging{
      * log when ExceptionEvent occurred
      * @param exceptionEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onExceptionEvent(ExceptionEvent exceptionEvent){
-        if (logPrefix.equals(String.format("%-9s", "GB"))) {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else if (logPrefix.equals("RBC 00001")) {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else if (logPrefix.equals("TRN 00192")){
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
-        else {
-            logger.log(Level.SEVERE, logPrefix + ": " + exceptionEvent.source + ": ExceptionEvent occurred", exceptionEvent.exception);
-        }
+
+        String endsection = exceptionEvent.source + ": ExceptionEvent occurred. "
+                + exceptionEvent.exception.getMessage() + " With level: " + exceptionEvent.exceptionEventTyp;
+        logger.log(Level.SEVERE, logPrefix + ": " + endsection, exceptionEvent.exception);
+
     }
 
     /**
      * log when NormalEvent occurred
      * @param normalEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onNormalEvent(NormalEvent normalEvent) {
         if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
             String padSrc = String.format("%4s", normalEvent.source); //Inserted by LSF
-            if (logPrefix.equals(String.format("%-9s", "GB"))) {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else if (logPrefix.equals("RBC 00001")) {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else if (logPrefix.equals("TRN 00192")){
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
-            else {
-                logger.fine(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
-            }
+            logger.finer(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
         }
     }
 
@@ -122,30 +166,20 @@ public class Logging{
      * log when ToLogEvent occurred
      * @param toLogEvent
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void onToLogEvent(ToLogEvent toLogEvent){
         String padSrc = String.format("%3s", toLogEvent.source); //Inserted by LSF
-        if (logPrefix.equals(String.format("%-9s", "GB"))) {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else if (logPrefix.equals("RBC 00001")) {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else if (logPrefix.equals("TRN 00192")){
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
-        else {
-            logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
-        }
+        logger.info(logPrefix + ": " + padSrc + ": " + toLogEvent.msg);
+
     }
 
-/*    *//**
+    /**
      * log when ToLogDebugEvent occurred
      * @param toLogDebugEvent
-     *//*
-    @Subscribe
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
-        logger.fine(toLogDebugEvent.msg);
-    }*/
+        logger.fine("debug: " + logPrefix + ": " + padSrc + ": " + toLogDebugEvent.msg);
+    }
 }

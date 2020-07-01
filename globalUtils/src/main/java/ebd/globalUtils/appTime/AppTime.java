@@ -43,7 +43,7 @@ public class AppTime {
 
     /**
      * see {@link Thread#sleep(long)}
-     * @param milliSeconds
+     * @param milliSeconds Will sleep for milliSeconds / factor
      * @throws InterruptedException see {@link Thread#sleep(long)}
      */
     public static void sleep(long milliSeconds) throws InterruptedException {

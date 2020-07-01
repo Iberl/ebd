@@ -2,7 +2,7 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendMessageEvent;
+import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.CrossedBaliseGroupEvent;
@@ -21,9 +21,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class supervises the issuing of position reports from the train to the rbc.
@@ -86,6 +83,7 @@ public class PositionReportSupervisor {
             //double curCycleNumber = curTime / t_cycle;
             if(curTime > t_cycle){
                 //this.t_cycleNumber = (int)curCycleNumber + 1;
+                System.out.println("reason1");
                 sendPositionReport();
             }
         }
@@ -155,7 +153,7 @@ public class PositionReportSupervisor {
 
     /**
      * Builds a position report message ({@link Message_136}) and places it on the local {@link EventBus}
-     * in a {@link SendMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
+     * in a {@link SendETCSMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
      */
     private void sendPositionReport() {
         Position curPos = trainDataVolatile.getCurrentPosition();
@@ -168,20 +166,20 @@ public class PositionReportSupervisor {
         Packet_0 packet0 = new Packet_0();
         packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
-        packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
-        packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
+        packet0.D_LRBG = (int)curPos.getIncrement() + 1;
+        packet0.Q_SCALE = 1; //All length values have to be in the resolution of [m]!
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
         packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
-        packet0.L_TRAININIT = (int)(this.lengthTrain * 10);
-        packet0.L_DOUBTOVER = 100; //TODO Get this value, in fact, remember this value in the first hand
-        packet0.L_DOUBTUNDER = 100; //TODO Get this value, in fact, remember this value in the first hand
+        packet0.L_TRAININT = (int)this.lengthTrain + 1;
+        packet0.L_DOUBTOVER = 10; //TODO Get this value, in fact, remember this value in the first hand
+        packet0.L_DOUBTUNDER = 10; //TODO Get this value, in fact, remember this value in the first hand
         packet0.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
         packet0.M_LEVEL = ETCSVariables.M_LEVEL_2;
         packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
 
-        message136.PACKET_POSITION = packet0;
-        this.localBus.post(new SendMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
+        message136.positionPacket = packet0;
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
         this.localBus.post(new ToLogEvent("tsm", "log", "Sending Position Report"));
         this.tripTimeAtCycleStart = this.curFullTripTime;
     }
