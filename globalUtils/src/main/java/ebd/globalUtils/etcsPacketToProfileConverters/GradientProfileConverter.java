@@ -4,6 +4,8 @@ import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GradientProfileConverter {
@@ -83,7 +85,7 @@ public class GradientProfileConverter {
         /*
          * We add the gradient into the list of all gradients
          */
-        List<Packet_21.Packet_21_Gradient> gradients = p21.gradients;
+        List<Packet_21.Packet_21_Gradient> gradients = new ArrayList<>(p21.gradients); //Speculative fix for concurrent modification exception
         gradients.add(0,p21.gradient);
 
         ForwardSpline gp = new ForwardSpline(0);
