@@ -371,23 +371,14 @@ public class TrainStatusManager implements Runnable {
         lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
 
         for(BreakingCurve bCurve : lobc) {
-            double xPosition = 0d;
-            double step = bCurve.getHighestXValue() / 100000d;
-            FileWriter fW;
             String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
             String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),dateString);
 
             try {
+                FileWriter fW;
                 fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
-                writer.write("");
-
-                while (xPosition <= bCurve.getHighestXValue()) {
-
-                    Double yValue = bCurve.getPointOnCurve(xPosition);
-                    writer.append(String.format("%f:%f%n", xPosition, yValue));
-                    xPosition += step;
-                }
+                writer.write(bCurve.toString());
                 writer.flush();
                 writer.close();
 
