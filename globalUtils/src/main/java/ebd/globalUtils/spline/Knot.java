@@ -1,6 +1,7 @@
 package ebd.globalUtils.spline;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class functions as representation of a single spline knot.
@@ -66,5 +67,12 @@ public class Knot {
 		this.coefficients.add((double) yValue);
 	}
 
+	@Override
+	public String toString() {
 
+		return "Knot{" +
+				"xValue=" + xValue +
+				", coefficients=" + Arrays.toString(coefficients.toArray()) +
+				'}';
+	}
 }
