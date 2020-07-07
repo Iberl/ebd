@@ -104,4 +104,12 @@ class BackwardSplineTest {
         assertEquals(2d,bs1.getHigherOrLastKnotXValue(2d));
 
     }
+
+    @Test
+    void tostring(){
+        assertEquals("Id: noID, Degree: 1\n" +
+                "Key: 0.0; Coefficients: 0.0, 0.0\n" +
+                "Key: 1.0; Coefficients: 1.0, 1.0\n" +
+                "Key: 2.0; Coefficients: 2.0, 2.0", bs1.toString());
+    }
 }
