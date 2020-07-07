@@ -1,5 +1,6 @@
 package ebd.szenario.util.handler;
 
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
@@ -27,7 +28,9 @@ public class SzenarioEventHandler {
      */
     @Subscribe
     public void exceptionHandler(ExceptionEvent ee){
-        ee.exception.printStackTrace();
+        if(ConfigHandler.getInstance().debug){
+            ee.exception.printStackTrace();
+        }
         switch (ee.exceptionEventTyp){//TODO Fill with functional code
             case WARNING: //Ignore it, logging is already happening in ebd.Logging
                 break;
