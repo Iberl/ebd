@@ -97,7 +97,7 @@ public class TrainDataVolatile {
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the permitted speed curve.
+     * the permitted curve.
      * Updated by the speed supervision module.
      */
     protected volatile double currentMaximumSpeed = 0d;

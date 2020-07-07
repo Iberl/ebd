@@ -320,14 +320,10 @@ public class DrivingDynamics {
                     case NOT_SET:
                     case NO_INTERVENTION:
                     case INDICATION:
-                    case PERMITTED_SPEED:
+                    case OVERSPEED:
                     case WARNING:
                         sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                         actionParser(this.drivingProfile.actionToTake());
-                        break;
-                    case CUT_OFF_TRACTION:
-                        sendToLogEventSpeedSupervision(MovementState.COASTING);
-                        this.dynamicState.setMovementState(MovementState.COASTING);
                         break;
                     case APPLY_SERVICE_BREAKS:
                         sendToLogEventSpeedSupervision(MovementState.BREAKING);
@@ -407,6 +403,7 @@ public class DrivingDynamics {
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
         double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
         double curApplReleaseSpeed = this.trainDataVolatile.getCurrentApplicableReleaseSpeed();
+
         String source = "dd;T=" + this.etcsTrainID;
         EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", speed, targetSpeed, (int)distanceToDrive,
                 curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,

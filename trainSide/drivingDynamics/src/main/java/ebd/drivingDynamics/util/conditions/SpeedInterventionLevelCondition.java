@@ -24,9 +24,9 @@ import java.util.function.BiFunction;
  *     "APPLY_SERVICE_BREAKS"<br>
  *     "APPLY_EMERGENCY_BREAKS"<br>
  *         </p>
- * <p>Example: The condition should evaluate to true if the train is in the speed intervention level PERMITTED_SPEED.
+ * <p>Example: The condition should evaluate to true if the train is in the speed intervention level OVERSPEED.
  * The full JSON string would look like this:<br>
- *     {"type" : "sil", "condition" : {"value" : "PERMITTED_SPEED" }}<br>
+ *     {"type" : "sil", "condition" : {"value" : "OVERSPEED" }}<br>
  *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
@@ -60,30 +60,14 @@ public class SpeedInterventionLevelCondition extends Condition {
         if(jsonObject.keySet().contains("value")){
 
             String valueString = (String)jsonObject.get("value");
-            switch (valueString.toUpperCase()){
-                case "NO_INTERVENTION":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "INDICATION":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "PERMITTED_SPEED":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "WARNING":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "CUT_OFF_TRACTION":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "APPLY_SERVICE_BREAKS":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                case "APPLY_EMERGENCY_BREAKS":
-                    this.value = SpeedInterventionLevel.NO_INTERVENTION;
-                    break;
-                default:
-                    throw new DDBadDataException("No valid entry for key 'value' in a SpeedInterventionLevelCondition: " + valueString);
+            switch (valueString.toUpperCase()) {
+                case "NO_INTERVENTION" -> this.value = SpeedInterventionLevel.NO_INTERVENTION;
+                case "INDICATION" -> this.value = SpeedInterventionLevel.INDICATION;
+                case "OVERSPEED" -> this.value = SpeedInterventionLevel.OVERSPEED;
+                case "WARNING" -> this.value = SpeedInterventionLevel.WARNING;
+                case "APPLY_SERVICE_BREAKS" -> this.value = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+                case "APPLY_EMERGENCY_BREAKS" -> this.value = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                default -> throw new DDBadDataException("No valid entry for key 'value' in a SpeedInterventionLevelCondition: " + valueString);
             }
 
         }

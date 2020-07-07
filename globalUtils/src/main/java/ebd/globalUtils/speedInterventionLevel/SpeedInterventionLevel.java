@@ -22,7 +22,7 @@ public enum SpeedInterventionLevel {
     /**
      * Permitted speed is exceeded
      */
-    PERMITTED_SPEED(3),
+    OVERSPEED(3),
 
     /**
      * Service breaks will intervene if speed is not reduced
@@ -30,20 +30,14 @@ public enum SpeedInterventionLevel {
     WARNING(4),
 
     /**
-     * As required by SRS 3.13
-     * Signals the need to cut of traction.
-     */
-    CUT_OFF_TRACTION(5),
-
-    /**
      * Service break intervention is necessary, service breaks will be applied automatically
      */
-    APPLY_SERVICE_BREAKS(6),
+    APPLY_SERVICE_BREAKS(5),
 
     /**
      * Speed is to far to high, danger point is passed, etc., emergency breaks will be applied automatically
       */
-    APPLY_EMERGENCY_BREAKS(7);
+    APPLY_EMERGENCY_BREAKS(6);
 
     private Integer severity;
 
