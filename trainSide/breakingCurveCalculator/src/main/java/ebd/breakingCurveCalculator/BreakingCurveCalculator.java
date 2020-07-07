@@ -246,20 +246,32 @@ public class BreakingCurveCalculator {
     private BreakingCurve getCurveFromListAndOffset(List<Knot> knotList, double offset, Position referencePosition, String id){
 		int test = ("EmergencyInterventionCurve".equals(id)) ? 1 : 0;
     	List<Knot> knotListCopy = new ArrayList<>(knotList);
-    	BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
+    	List<Knot> tempKnotList = new ArrayList<>();
+    	List<Integer> indexesOfKnotsToBeReset = new ArrayList<>();
 
     	//We get the first and last knot who have to be treated differently. The first knot gets added unchanged
 		Knot lastKnot = knotListCopy.remove(knotListCopy.size()-1);
     	Knot formerKnot = knotListCopy.remove(0);
-		breakingCurve.addKnotToCurve(formerKnot);
+		tempKnotList.add(formerKnot);
 
 		//We iterate through all other knots and determine the new xValue and slope for each of them.
+		boolean bunchedKnots = false;
 		for (Knot knot : knotListCopy){
 
 			double newX = knot.xValue - (knot.coefficients.get(0) * offset);
-			if(newX <= formerKnot.xValue){
-				newX = formerKnot.xValue + 0.001;
+			if(newX <= formerKnot.xValue && bunchedKnots){
+				continue; //prevents multiple knots from bunching up
+
 			}
+			else if(newX <= formerKnot.xValue){
+				bunchedKnots = true;
+				indexesOfKnotsToBeReset.add(tempKnotList.size());
+				newX = formerKnot.xValue + 0.001; //prevents knots from getting moved over a former knot
+			}
+			else {
+				bunchedKnots = false;
+			}
+
 			double newSlope = 0;
 			if(knot.coefficients.get(1) != 0){
 				newSlope = (formerKnot.coefficients.get(0) - knot.coefficients.get(0)) / (formerKnot.xValue - newX);
@@ -268,7 +280,7 @@ public class BreakingCurveCalculator {
 			double[] newCoefficents = {knot.coefficients.get(0), newSlope};
 
 			Knot newKnot = new Knot(newX, newCoefficents);
-			breakingCurve.addKnotToCurve(newKnot);
+			tempKnotList.add(newKnot);
 
 			formerKnot = newKnot;
 		}
@@ -280,9 +292,23 @@ public class BreakingCurveCalculator {
 		}
 		double[] newCoefficents = {lastKnot.coefficients.get(0), newSlope};
 		Knot newKnot = new Knot(newX, newCoefficents);
-		breakingCurve.addKnotToCurve(newKnot);
+		tempKnotList.add(newKnot);
 
+		//We fix the y values and slopes of the bunched knots
+		for(Integer index : indexesOfKnotsToBeReset){
+			if(index >= tempKnotList.size() - 2){
+				break;
+			}
+			Knot thisKnot = tempKnotList.get(index);
+			Knot nextKnot = tempKnotList.get(index + 1);
+			Knot resetKnot = new Knot(thisKnot.xValue,new  double[]{nextKnot.coefficients.get(0),0});
+			tempKnotList.set(index,resetKnot);
+		}
 
+		BreakingCurve breakingCurve = new BreakingCurve(referencePosition.getLocation(), id);
+		for(Knot knot : tempKnotList){
+			breakingCurve.addKnotToCurve(knot);
+		}
     	return breakingCurve;
 	}
 
