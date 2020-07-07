@@ -1,5 +1,6 @@
 package ebd.drivingDynamics;
 
+import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.drivingDynamics.util.TripProfileProvider;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.actions.Action;
@@ -19,8 +20,6 @@ import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.globalUtils.location.InitalLocation;
-import ebd.globalUtils.location.Location;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
@@ -39,7 +38,12 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.simple.parser.ParseException;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -51,7 +55,7 @@ import java.util.*;
  */
 public class DrivingDynamics {
 
-    private EventBus localBus;
+    private EventBus localEventBus;
     private TrainDataVolatile trainDataVolatile;
     private TripProfileProvider tripProfileProvider;
     private int etcsTrainID;
@@ -91,23 +95,23 @@ public class DrivingDynamics {
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
      *
-     * @param localBus The local {@link EventBus} of the train
+     * @param localEventBus The local {@link EventBus} of the train
      */
-    public DrivingDynamics(EventBus localBus, int etcsTrainID){
-        this.localBus = localBus;
-        this.localBus.register(this);
+    public DrivingDynamics(EventBus localEventBus, int etcsTrainID){
+        this.localEventBus = localEventBus;
+        this.localEventBus.register(this);
         this.ch = ConfigHandler.getInstance();
         try {
-            this.drivingProfile = new DrivingProfile(this.localBus);
+            this.drivingProfile = new DrivingProfile(this.localEventBus);
         } catch (IOException | ParseException e) {
-            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
+            localEventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
-            localBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e));
+            localEventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e));
         }
 
-        this.trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        this.routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
-        this.tripProfileProvider = new TripProfileProvider(this.localBus);
+        this.trainDataVolatile = localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        this.routeDataVolatile = localEventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
+        this.tripProfileProvider = new TripProfileProvider(this.localEventBus);
         this.etcsTrainID = etcsTrainID;
 
         this.timeBetweenActions = this.ch.timeBetweenActions;
@@ -199,7 +203,7 @@ public class DrivingDynamics {
         this.dynamicState.setPosition(newPos);
 
         String msg = "New location with ID " + newPos.getLocation().getId() + " was reached";
-        this.localBus.post(new ToLogEvent("dd", "log", msg));
+        this.localEventBus.post(new ToLogEvent("dd", "log", msg));
     }
 
     @Subscribe
@@ -243,7 +247,7 @@ public class DrivingDynamics {
         }
         else{
             IllegalArgumentException iAE = new IllegalArgumentException("The trip profile used an unsupported implementation of Spline");
-            this.localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE, ExceptionEventTyp.FATAL));
+            this.localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, utpe, iAE, ExceptionEventTyp.FATAL));
         }
 
 
@@ -258,6 +262,11 @@ public class DrivingDynamics {
         }
         this.time = AppTime.nanoTime();
         this.shouldHalt = false;
+
+
+        if(ch.debug){
+            saveTripProfileToFile(utpe);
+        }
     }
 
     /**
@@ -294,7 +303,7 @@ public class DrivingDynamics {
     Checks the current SsmReportEvent for the status of the train
     Getting next action that should be taken and parsing that action
      */
-        SsmReportEvent speedSupervisionReport = this.localBus.getStickyEvent(SsmReportEvent.class);
+        SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
             actionParser(this.drivingProfile.actionToTake());
         }
@@ -382,7 +391,7 @@ public class DrivingDynamics {
         nameToValue.put("curTripDistance", this.dynamicState.getTripDistance());
         nameToValue.put("curTripSectionDistance", this.dynamicState.getDistanceToStartOfProfile());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
-        this.localBus.post(new TrainDataMultiChangeEvent("dd", this.tdTarget, nameToValue));
+        this.localEventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTarget, nameToValue));
     }
 
     /**
@@ -413,7 +422,7 @@ public class DrivingDynamics {
         if(tripSectionDistance < this.maxTripSectionDistance) this.profileTargetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
         else this.profileTargetSpeed = 0d;
 
-        this.localBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileTargetSpeed", this.profileTargetSpeed));
+        this.localEventBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileTargetSpeed", this.profileTargetSpeed));
     }
 
     /**
@@ -429,7 +438,7 @@ public class DrivingDynamics {
         double tt = dynamicState.getTime();
         String msg = String.format("Acc: %5.2f m/s^2 V: %5.2f m/s, V_max: %5.2f m/s, ",a,v,vm);
         String msg2 = String.format("Pos: LRBG %3d + %7.2f m, TripDist: %8.2f m, TripTime: %6.1f s",l,i,td,tt);
-        this.localBus.post(new ToLogEvent("dd", "log", msg + msg2));
+        this.localEventBus.post(new ToLogEvent("dd", "log", msg + msg2));
 
     }
 
@@ -440,7 +449,7 @@ public class DrivingDynamics {
         if(this.lastSendSil == this.currentSil) return;
         this.lastSendSil = this.currentSil;
         String msg = String.format("Current speed supervision intervention level: %s ", this.currentSil);
-        this.localBus.post(new ToLogEvent("ssm", "log", msg));
+        this.localEventBus.post(new ToLogEvent("ssm", "log", msg));
         if(movementState != MovementState.UNCHANGED) sendToLogEventMovementState(movementState);
     }
 
@@ -451,7 +460,7 @@ public class DrivingDynamics {
         if(this.lastSendState == this.currentSsState) return;
         this.lastSendState = this.currentSsState;
         String msg = String.format("Current speed supervision state: %s ", this.currentSsState);
-        this.localBus.post(new ToLogEvent("ssm", "log", msg));
+        this.localEventBus.post(new ToLogEvent("ssm", "log", msg));
     }
 
     /**
@@ -459,7 +468,7 @@ public class DrivingDynamics {
      */
     private void sendToLogEventMovementState(MovementState ms) {
         String msg = String.format("Set movement state to: %s ", ms);
-        this.localBus.post(new ToLogEvent("dd", "log", msg));
+        this.localEventBus.post(new ToLogEvent("dd", "log", msg));
 
     }
 
@@ -490,6 +499,38 @@ public class DrivingDynamics {
             modifier = 1;
         }
         this.breakModifierForRSM = modifier;
+    }
+
+    /**
+     * Takes a spline and saves it to a file
+     */
+    private void saveTripProfileToFile(DDUpdateTripProfileEvent ddutpe) {
+        Spline tp = ddutpe.tripProfile;
+        LocalDateTime ldt = LocalDateTime.now();
+        String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
+        String dirPathString = "results/tripProfiles/" + timeString.replaceAll(":", "-") + "/";
+
+        if(!new File(dirPathString).mkdirs()){
+            System.err.println("Could not create necessary directories");
+            System.exit(-1); //TODO Make better and Event
+        }
+
+        String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
+        String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,tp.getID(),dateString);
+
+        try {
+            FileWriter fW = new FileWriter(dirPathString + fileName);
+            BufferedWriter writer = new BufferedWriter(fW);
+            writer.write(tp.toString());
+            writer.flush();
+            writer.close();
+
+        } catch (IOException e1) {
+            localEventBus.post(new BreakingCurveExceptionEvent("dd", "tsm", ddutpe, e1));
+        }
+
+
+
     }
 
     /**
@@ -530,7 +571,7 @@ public class DrivingDynamics {
                 break;
             default:
                 IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
-                localBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
+                localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
     }
 

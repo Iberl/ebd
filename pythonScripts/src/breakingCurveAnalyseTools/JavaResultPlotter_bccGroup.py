@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-30T19-47-30.670838"
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-07-07T14-52-25.9850195"
 path = path + "/"
 pathList = [(path + f) for f in os.listdir(path)]
             
@@ -27,7 +27,7 @@ for path in pathList:
         yL.append(y)
         
     xArray = np.array(xL)
-    yArray = np.array(yL) - 1
+    yArray = np.array(yL)
     labelList = path.split("/")
     name = labelList[-1].replace(".txt", "")
     name = name[13:-14]

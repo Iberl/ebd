@@ -62,7 +62,6 @@ public class TripProfileProvider {
         }
         else {
             getProfileFromBreakingCurveGroup(nbce.breakingCurveGroup);
-            System.out.println("Stop");
         }
 
 
@@ -81,6 +80,7 @@ public class TripProfileProvider {
      * @param breakingCurveGroup A {@link BreakingCurveGroup} from a {@link NewBreakingCurveEvent}
      */
     private void getProfileFromBreakingCurveGroup(BreakingCurveGroup breakingCurveGroup) {
+        //TODO Check Performance inpact. Should be low (only done once per MA)
         BreakingCurve psc = breakingCurveGroup.getPermittedSpeedCurve();
         this.refLocation = psc.getRefLocation();
 
