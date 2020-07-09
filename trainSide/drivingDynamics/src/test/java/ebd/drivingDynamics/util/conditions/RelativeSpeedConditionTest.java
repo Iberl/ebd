@@ -1,7 +1,8 @@
-package ebd.drivingDynamics.util;
+package ebd.drivingDynamics.util.conditions;
+
 
 import ebd.drivingDynamics.Testhandler;
-import ebd.drivingDynamics.util.conditions.TotalSpeedCondition;
+import ebd.drivingDynamics.util.conditions.RelativeSpeedCondition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TotalSpeedConditionTest {
+class RelativeSpeedConditionTest {
     @BeforeAll
     static void setTrainDataVolatile(){
         Testhandler testhandler = new Testhandler();
@@ -28,13 +29,15 @@ class TotalSpeedConditionTest {
     }
 
     @Test
-    void eval() throws DDBadDataException, ParseException {
+    void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
-        TotalSpeedCondition totalSpeedCondition = new TotalSpeedCondition(jsonObject, EventBus.getDefault());
-        assertFalse(totalSpeedCondition.eval());
+        JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }");
+        RelativeSpeedCondition relativeSpeedCondition = new RelativeSpeedCondition(jsonObject, EventBus.getDefault());
+        assertFalse(relativeSpeedCondition.eval());
 
         EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentSpeed", 20));
-        assertTrue(totalSpeedCondition.eval());
+        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentProfileTargetSpeed", 40));
+
+        assertTrue(relativeSpeedCondition.eval());
     }
 }

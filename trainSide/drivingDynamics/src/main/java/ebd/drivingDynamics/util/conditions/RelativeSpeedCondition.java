@@ -47,7 +47,7 @@ public class RelativeSpeedCondition extends CurveBasedCondition {
                 maxSpeed = trainDataVolatile.getCurrentCoastingPhaseSpeed();
                 break;
             case TRIP_PROFILE:
-                maxSpeed = trainDataVolatile.getCurrentProfileTargetSpeed();
+                maxSpeed = trainDataVolatile.getCurrentProfileMaxSpeed();
                 break;
             default:
                 maxSpeed = 0d;

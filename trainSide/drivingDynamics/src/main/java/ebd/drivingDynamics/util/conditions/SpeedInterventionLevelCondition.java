@@ -1,10 +1,8 @@
 package ebd.drivingDynamics.util.conditions;
 
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
-import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
