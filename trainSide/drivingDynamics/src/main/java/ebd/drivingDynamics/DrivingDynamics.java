@@ -149,7 +149,7 @@ public class DrivingDynamics {
         Update TrainDataVolatile to set the current maximum allowed speed of the train
         based on the tripProfile
          */
-        updateCurrentTargetSpeed();
+        updateCurrentMaxTripProfileSpeed();
 
 
         if(this.currentMode == ETCSMode.STAND_BY){
@@ -411,15 +411,15 @@ public class DrivingDynamics {
     }
 
     /**
-     * This method calculates the new profile target speed for the current location. Also sends these to {@link TrainDataVolatile}
+     * This method calculates the new profile maximum speed for the current location. Also sends these to {@link TrainDataVolatile}
      */
-    private void updateCurrentTargetSpeed() {
+    private void updateCurrentMaxTripProfileSpeed() {
         double tripSectionDistance = this.dynamicState.getDistanceToStartOfProfile();
 
         if(tripSectionDistance < this.maxTripSectionDistance) this.profileTargetSpeed = tripProfile.getPointOnCurve(tripSectionDistance);
         else this.profileTargetSpeed = 0d;
 
-        this.localEventBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileTargetSpeed", this.profileTargetSpeed));
+        this.localEventBus.post(new TrainDataChangeEvent("dd", this.tdTarget, "currentProfileMaxSpeed", this.profileTargetSpeed));
     }
 
     /**

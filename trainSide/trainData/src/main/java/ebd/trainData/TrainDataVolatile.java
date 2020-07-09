@@ -1,6 +1,5 @@
 package ebd.trainData;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.location.Location;
@@ -84,10 +83,10 @@ public class TrainDataVolatile {
     protected volatile Spline currentTripProfile = null;
 
     /**
-     * The target speed of the train in [m/s] based on the trip profile.
+     * The maximum speed of the train in [m/s] based on the trip profile.
      * Updated trough driving dynamics.
      */
-    protected volatile double currentProfileTargetSpeed = 0d;
+    protected volatile double currentProfileMaxSpeed = 0d;
 
     /**
      * The current speed of the train in [m/s].
@@ -335,8 +334,8 @@ public class TrainDataVolatile {
      * @return current maximum allowed speed in [m/s] based on the trip profile
      */
     @NotNull
-    public Double getCurrentProfileTargetSpeed() {
-        return currentProfileTargetSpeed;
+    public Double getCurrentProfileMaxSpeed() {
+        return currentProfileMaxSpeed;
     }
 
     /**
