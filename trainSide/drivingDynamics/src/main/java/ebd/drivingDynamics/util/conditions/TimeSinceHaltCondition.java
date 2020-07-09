@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
  * <p>The <b>value</b> key contains a fixed time value in [s] equal or greater then 0 s. </p>
  * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the last halt.
  * The JSON string would look like this:<br>
- *     {"type" : "t_sinceHalt", "condition" : {"op" : ">", "value" : 40.5 }}<br>
+ *     {"type" : "t_sinceHalt", "priority": 1, "condition" : {"op" : ">", "value" : 40.5 }}<br>
  *         The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
