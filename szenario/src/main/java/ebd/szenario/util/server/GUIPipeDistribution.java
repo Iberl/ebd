@@ -68,12 +68,14 @@ public class GUIPipeDistribution implements Runnable {
      */
     private void distribute(String line) { //TODO More stable distribution that does not depend on formatting of the string
         String[] lineSplit = line.split(" ");
+
         if(lineSplit.length < 3) {
             lineSplit = Arrays.copyOf(lineSplit, 4);
             lineSplit[1] = "all";
             lineSplit[2] = "0";
         }
         else {
+            handleSL(line, lineSplit[2]);
             lineSplit[1] = lineSplit[1].replaceAll("[^a-bA-Z]", "");
         }
         switch (lineSplit[1].toLowerCase()){
@@ -81,12 +83,7 @@ public class GUIPipeDistribution implements Runnable {
             case "trn":
                 sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
                 break;
-            case "sl":
-                sendTo(line, lineSplit[1], 1);
-                break;
-            case "tms":
-                sendTo(line, lineSplit[1], 1);
-                break;
+
             case "gb":
                 sendToGB(line);
                 break;
@@ -94,6 +91,17 @@ public class GUIPipeDistribution implements Runnable {
                 sendToAll(line);
         }
 
+    }
+
+    private void handleSL(String line, String entity) {
+        switch (entity.toLowerCase()) {
+            case "sl":
+                sendTo(line, "sl", 1);
+                break;
+            case "tms":
+                sendTo(line, "tms", 1);
+                break;
+        }
     }
 
     /**
