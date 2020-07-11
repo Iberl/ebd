@@ -2,6 +2,7 @@ package ebd.szenario.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -41,6 +42,16 @@ public class GUIServer implements Runnable {
         this.serverSocket = new ServerSocket(Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer));
         setUpMap();
         guiServerThread.start();
+    }
+
+    public GUIServer(EventBus eBus, int iPort) throws Exception {
+        this.globalBus = eBus;
+        this.globalBus.register(this);
+        this.guiServerThread = new Thread(this);
+        this.serverSocket = new ServerSocket(iPort);
+        setUpMap();
+        guiServerThread.start();
+
     }
 
 
