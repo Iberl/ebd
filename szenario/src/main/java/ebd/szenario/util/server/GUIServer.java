@@ -105,6 +105,8 @@ public class GUIServer implements Runnable {
         this.clientMap.put("gb", new HashMap<>());
         this.clientMap.put("all", new HashMap<>());
 
+        this.clientMap.get("tms").put(1, new ArrayList<>());
+        this.clientMap.get("sl").put(1, new ArrayList<>());
         this.clientMap.get("gb").put(0, new ArrayList<>());
         this.clientMap.get("all").put(0, new ArrayList<>());
     }
