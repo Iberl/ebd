@@ -81,6 +81,12 @@ public class GUIPipeDistribution implements Runnable {
             case "trn":
                 sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
                 break;
+            case "sl":
+                sendTo(line, lineSplit[1], 1);
+                break;
+            case "tms":
+                sendTo(line, lineSplit[1], 1);
+                break;
             case "gb":
                 sendToGB(line);
                 break;
