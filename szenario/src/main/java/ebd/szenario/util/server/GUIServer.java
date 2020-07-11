@@ -98,6 +98,8 @@ public class GUIServer implements Runnable {
      */
     private void setUpMap() {
         this.clientMap = new HashMap<>();
+        this.clientMap.put("sl", new HashMap<>());
+        this.clientMap.put("tms", new HashMap<>());
         this.clientMap.put("rbc", new HashMap<>());
         this.clientMap.put("trn", new HashMap<>());
         this.clientMap.put("gb", new HashMap<>());
