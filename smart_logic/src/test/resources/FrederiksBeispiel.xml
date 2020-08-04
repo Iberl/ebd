@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<nsPlanPro:PlanPro_Schnittstelle
+		xmlns:nsPlanPro="http://www.plan-pro.org/modell/PlanPro/1.8.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+>
+	<Identitaet>
+		<Wert>AD16F4ED-D77C-44A2-8553-C9D39E52AC2B</Wert>
+	</Identitaet>
+	<PlanPro_Schnittstelle_Allg>
+		<Erzeugung_Zeitstempel>
+						<Wert>2018-10-18T09:14:00.30</Wert>
+		</Erzeugung_Zeitstempel>
+		<Werkzeug_Name>
+			<Wert>Werkzeugkoffer</Wert>
+		</Werkzeug_Name>
+		<Werkzeug_Version>
+			<Wert>31.0.0</Wert>
+		</Werkzeug_Version>
+	</PlanPro_Schnittstelle_Allg>
+	<LST_Zustand_Information>
+		<Identitaet>
+			<Wert>BD16F4ED-D77C-44A2-8553-C9D39E52AC2B</Wert>
+		</Identitaet>
+		<Container>
+			<W_Kr_Anlage>
+				<Identitaet>
+					<Wert>51D0C687-C33F-4BF5-A10B-93FCE34AF3CB</Wert>
+				</Identitaet>
+				<Basis_Objekt_Allg>
+					<Datum_Regelwerk>
+						<Wert>2012-02-24</Wert>
+					</Datum_Regelwerk>
+				</Basis_Objekt_Allg>
+				<!--Verweis auf Anhang Digitale Weichenskizze-->
+				<ID_Anhang_DWS><Wert>CD16F4ED-D77C-44A2-8553-C9D39E52AC2B</Wert></ID_Anhang_DWS>
+				<!--Verweis auf ein Signal, welches den Zustand der Weiche signalisiert-->
+				<ID_Signal>
+					<Wert>51D0C687-C33F-4BF5-A10B-93FCE34AF3CB</Wert>
+				</ID_Signal>
+				<W_Kr_Anlage_Allg>
+					<Isolierfall><Wert>Isolierfallart</Wert></Isolierfall>
+					<W_Kr_Art><Wert>EW</Wert></W_Kr_Art>
+					<W_Kr_Grundform><Wert>EW 60-7000/6000 1:42</Wert></W_Kr_Grundform>
+				</W_Kr_Anlage_Allg>
+			</W_Kr_Anlage>
+
+
+		</Container>
+	</LST_Zustand_Information>
+</nsPlanPro:PlanPro_Schnittstelle>
