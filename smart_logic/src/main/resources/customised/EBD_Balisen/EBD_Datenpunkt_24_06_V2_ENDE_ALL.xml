@@ -1,0 +1,174 @@
+<Balise>
+    <Identitaet>
+        <Wert>F945F2D5-7A1F-4609-8BB7-B8B37C927817</Wert>
+    </Identitaet>
+    <Basis_Objekt_Allg>
+        <Datum_Regelwerk>
+            <Wert>2020-06-12</Wert>
+        </Datum_Regelwerk>
+    </Basis_Objekt_Allg>
+    <ID_Datenpunkt>
+        <Wert>C51DD801-3560-49DE-9DCC-048FC10D8203/Wert>
+    </ID_Datenpunkt>
+    <Balise_Allg>
+        <Anordnung_im_DP>
+            <Wert>1</Wert>
+        </Anordnung_im_DP>
+    </Balise_Allg>
+</Balise>
+<Datenpunkt>
+<Identitaet>
+    <Wert>C51DD801-3560-49DE-9DCC-048FC10D8203</Wert>
+</Identitaet>
+<Basis_Objekt_Allg>
+    <Datum_Regelwerk>
+        <Wert>2020-06-12</Wert>
+    </Datum_Regelwerk>
+</Basis_Objekt_Allg>
+<Punkt_Objekt_TOP_Kante>
+    <ID_TOP_Kante>
+        <Wert>FA772594-4757-4208-8840-828A2ED5311C</Wert>
+    </ID_TOP_Kante>
+    <Abstand>
+        <Wert>10</Wert>
+    </Abstand>
+    <Seitlicher_Abstand>
+        <Wert>0.000</Wert>
+    </Seitlicher_Abstand>
+    <Wirkrichtung>
+        <Wert>gegen</Wert>
+    </Wirkrichtung>
+</Punkt_Objekt_TOP_Kante>
+<Punkt_Objekt_Strecke>
+    <ID_Strecke>
+        <Wert>0</Wert>
+    </ID_Strecke>
+    <Strecke_Km>
+        <Wert>3</Wert>
+    </Strecke_Km>
+</Punkt_Objekt_Strecke>
+<DP_Bezug_Betrieblich>
+    <DP_Bezug_Betrieblich_Art>
+        <Wert>unmittelbar</Wert>
+    </DP_Bezug_Betrieblich_Art>
+    <ID_DP_Bezugspunkt>
+        <Wert>0</Wert>
+    </ID_DP_Bezugspunkt>
+</DP_Bezug_Betrieblich>
+<Datenpunkt_Allg>
+    <Anwendungssystem>
+        <Wert>ESG</Wert>
+    </Anwendungssystem>
+    <Ausrichtung>
+        <Wert>gegen</Wert>
+    </Ausrichtung>
+    <Datenpunkt_Beschreibung>
+        <Wert>Hauptsignal-DP (Typ HS)</Wert>
+    </Datenpunkt_Beschreibung>
+    <Datenpunkt_Laenge>
+        <Wert>3.000</Wert>
+    </Datenpunkt_Laenge>
+    <Standortangabe>
+        <Wert>Signal</Wert>
+    </Standortangabe>
+</Datenpunkt_Allg>
+<DP_Typ>
+    <DP_Typ_Art>
+        <Wert>primaer</Wert>
+    </DP_Typ_Art>
+    <DP_Typ_GESG>
+        <DP_Typ_ESG>
+            <Wert>HS</Wert>
+        </DP_Typ_ESG>
+    </DP_Typ_GESG>
+</DP_Typ>
+</Datenpunkt>
+
+
+
+        #####
+<Balise>
+    <Identitaet>
+        <Wert>F945F2D5-7A1F-4609-8BB7-B8B37C927830</Wert>
+    </Identitaet>
+    <Basis_Objekt_Allg>
+        <Datum_Regelwerk>
+            <Wert>2020-06-12</Wert>
+        </Datum_Regelwerk>
+    </Basis_Objekt_Allg>
+    <ID_Datenpunkt>
+        <Wert>C51DD801-3560-49DE-9DCC-048FC10D833</Wert>
+    </ID_Datenpunkt>
+    <Balise_Allg>
+        <Anordnung_im_DP>
+            <Wert>1</Wert>
+        </Anordnung_im_DP>
+    </Balise_Allg>
+</Balise>
+<Datenpunkt>
+<Identitaet>
+    <Wert>C51DD801-3560-49DE-9DCC-048FC10D833</Wert>
+</Identitaet>
+<Basis_Objekt_Allg>
+    <Datum_Regelwerk>
+        <Wert>2020-06-12</Wert>
+    </Datum_Regelwerk>
+</Basis_Objekt_Allg>
+<Punkt_Objekt_TOP_Kante>
+    <ID_TOP_Kante>
+        <Wert>FA772594-4757-4208-8840-828A2ED5311C</Wert>
+    </ID_TOP_Kante>
+    <Abstand>
+        <Wert>10</Wert>
+    </Abstand>
+    <Seitlicher_Abstand>
+        <Wert>0.000</Wert>
+    </Seitlicher_Abstand>
+    <Wirkrichtung>
+        <Wert>gegen</Wert>
+    </Wirkrichtung>
+</Punkt_Objekt_TOP_Kante>
+<Punkt_Objekt_Strecke>
+    <ID_Strecke>
+        <Wert>0</Wert>
+    </ID_Strecke>
+    <Strecke_Km>
+        <Wert>3</Wert>
+    </Strecke_Km>
+</Punkt_Objekt_Strecke>
+<DP_Bezug_Betrieblich>
+    <DP_Bezug_Betrieblich_Art>
+        <Wert>unmittelbar</Wert>
+    </DP_Bezug_Betrieblich_Art>
+    <ID_DP_Bezugspunkt>
+        <Wert>0</Wert>
+    </ID_DP_Bezugspunkt>
+</DP_Bezug_Betrieblich>
+<Datenpunkt_Allg>
+    <Anwendungssystem>
+        <Wert>ESG</Wert>
+    </Anwendungssystem>
+    <Ausrichtung>
+        <Wert>gegen</Wert>
+    </Ausrichtung>
+    <Datenpunkt_Beschreibung>
+        <Wert>Hauptsignal-DP (Typ HS)</Wert>
+    </Datenpunkt_Beschreibung>
+    <Datenpunkt_Laenge>
+        <Wert>3.000</Wert>
+    </Datenpunkt_Laenge>
+    <Standortangabe>
+        <Wert>Signal</Wert>
+    </Standortangabe>
+</Datenpunkt_Allg>
+<DP_Typ>
+    <DP_Typ_Art>
+        <Wert>primaer</Wert>
+    </DP_Typ_Art>
+    <DP_Typ_GESG>
+        <DP_Typ_ESG>
+            <Wert>HS</Wert>
+        </DP_Typ_ESG>
+    </DP_Typ_GESG>
+</DP_Typ>
+</Datenpunkt>

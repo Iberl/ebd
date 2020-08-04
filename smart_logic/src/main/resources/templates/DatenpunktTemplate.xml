@@ -1,0 +1,85 @@
+<Balise>
+    <Identitaet>
+        <Wert>F945F2D5-7A1F-4609-8BB7-B8B37C9277F1</Wert> // darf nicht schon existieren
+    </Identitaet>
+    <Basis_Objekt_Allg>
+        <Datum_Regelwerk>
+            <Wert>2020-06-12</Wert>
+        </Datum_Regelwerk>
+    </Basis_Objekt_Allg>
+    <ID_Datenpunkt>
+        <Wert>C51DD801-3560-49DE-9DCC-048FC10D77A0</Wert> muss dem unten entsprechen
+    </ID_Datenpunkt>
+    <Balise_Allg>
+        <Anordnung_im_DP>
+            <Wert>1</Wert>
+        </Anordnung_im_DP>
+    </Balise_Allg>
+</Balise>
+<Datenpunkt>
+    <Identitaet>
+        <Wert>C51DD801-3560-49DE-9DCC-048FC10D77A1</Wert> // darf nicht schon existieren
+    </Identitaet>
+    <Basis_Objekt_Allg>
+        <Datum_Regelwerk>
+            <Wert>2020-06-12</Wert>
+        </Datum_Regelwerk>
+    </Basis_Objekt_Allg>
+    <Punkt_Objekt_TOP_Kante>
+        <ID_TOP_Kante>
+            <Wert>Bezugskante zum Datenpunkt</Wert>
+        </ID_TOP_Kante>
+        <Abstand>
+            <Wert>3 oder -3</Wert>
+        </Abstand>
+        <Seitlicher_Abstand>
+            <Wert>0.000</Wert>
+        </Seitlicher_Abstand>
+        <Wirkrichtung>
+            <Wert>gegen</Wert>
+        </Wirkrichtung>
+    </Punkt_Objekt_TOP_Kante>
+    <Punkt_Objekt_Strecke>
+        <ID_Strecke>
+            <Wert>darf nicht schon existieren</Wert>
+        </ID_Strecke>
+        <Strecke_Km>
+            <Wert>3</Wert>
+        </Strecke_Km>
+    </Punkt_Objekt_Strecke>
+    <DP_Bezug_Betrieblich>
+        <DP_Bezug_Betrieblich_Art>
+            <Wert>unmittelbar</Wert>
+        </DP_Bezug_Betrieblich_Art>
+        <ID_DP_Bezugspunkt>
+            <Wert>0</Wert>
+        </ID_DP_Bezugspunkt>
+    </DP_Bezug_Betrieblich>
+    <Datenpunkt_Allg>
+        <Anwendungssystem>
+            <Wert>ESG</Wert>
+        </Anwendungssystem>
+        <Ausrichtung>
+            <Wert>gegen</Wert>
+        </Ausrichtung>
+        <Datenpunkt_Beschreibung>
+            <Wert>Hauptsignal-DP (Typ HS)</Wert>
+        </Datenpunkt_Beschreibung>
+        <Datenpunkt_Laenge>
+            <Wert>3.000</Wert>
+        </Datenpunkt_Laenge>
+        <Standortangabe>
+            <Wert>Signal</Wert>
+        </Standortangabe>
+    </Datenpunkt_Allg>
+    <DP_Typ>
+        <DP_Typ_Art>
+            <Wert>primaer</Wert>
+        </DP_Typ_Art>
+        <DP_Typ_GESG>
+            <DP_Typ_ESG>
+                <Wert>HS</Wert>
+            </DP_Typ_ESG>
+        </DP_Typ_GESG>
+    </DP_Typ>
+</Datenpunkt>

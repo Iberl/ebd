@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nsPlanPro:PlanPro_Schnittstelle xmlns:nsPlanPro="http://www.plan-pro.org/modell/PlanPro/1.9.0.2" xmlns:nsSignalbegriffe_Ril_301="http://www.plan-pro.org/modell/Signalbegriffe_Ril_301/1.8.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.plan-pro.org/modell/Signalbegriffe_Ril_301/1.8.0 1.8.0.1.0496_2017-11-17_Schema/Signalbegriffe_Ril_301.xsd http://www.plan-pro.org/modell/PlanPro/1.8.0.1 1.8.0.1.0496_2017-11-17_Schema/PlanPro.xsd">
+  <Identitaet>
+    <Wert>86B191E3-89D1-40C7-8779-C4D6EB10506A</Wert>
+  </Identitaet>
+
+  <PlanPro_Schnittstelle_Allg>
+    <Erzeugung_Zeitstempel>
+      <Wert>2020-04-02T17:03:15Z</Wert>
+    </Erzeugung_Zeitstempel>
+    <Werkzeug_Name>
+      <Wert>ProSig</Wert>
+    </Werkzeug_Name>
+    <Werkzeug_Version>
+      <Wert>7.2.38249.6605</Wert>
+    </Werkzeug_Version>
+  </PlanPro_Schnittstelle_Allg>
+
+    <LST_Zustand>
+          <Identitaet>
+            <Wert>D599E694-3EBB-461D-A6D2-26E608CB0FBE</Wert>
+          </Identitaet>
+			TEMPLATE CONTAINER
+    
+          </LST_Zustand>
+
+</nsPlanPro:PlanPro_Schnittstelle>
