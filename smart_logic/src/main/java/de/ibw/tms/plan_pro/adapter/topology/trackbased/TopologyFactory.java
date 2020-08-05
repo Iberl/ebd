@@ -1,42 +1,443 @@
 package de.ibw.tms.plan_pro.adapter.topology.trackbased;
 
-import de.ibw.tms.data.store.DataStore;
+import de.ibw.feed.Balise;
+import de.ibw.feed.BaliseExtractor;
 import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.ui.MainGraphicPanel;
+import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
-import plan_pro.modell.geodaten._1_9_0.CGEOKante;
-import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
-import plan_pro.modell.geodaten._1_9_0.CTOPKante;
-import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
+import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
+import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
+import plan_pro.modell.basisobjekte._1_9_0.CBearbeitungsvermerkAllg;
+import plan_pro.modell.geodaten._1_9_0.*;
+import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.security.InvalidParameterException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
-public class TopologyFactory {
+public class TopologyFactory implements ITopologyFactory {
 
 
-    private DefaultRepo geoBundle; // input
-    private DefaultRepo geoNodeToGeoEdgesRepo; // input
-    private DefaultRepo geoNodeToTopNodeRepo; // output
-    private DefaultRepo topNodeToGeoNodeRepo; // output
+    private static final boolean B_PRINT_BALISE_LIST = false;
+    public static boolean shallAssignToActivePlanData = true;
 
-    private void handleGeoEdges(TopologyGraph.Node StartNode, CGEOKnoten CurrentGeo, CGEOKnoten NextGeoNode, DefaultRepo<String, CGEOKnoten> geoPointRepo, HashMap<String, TopologyGraph.Edge> edgeRepo) {
+
+    private List<CTOPKante> topLines; // input
+    private DefaultRepo<Class<?>,DefaultRepo<String, CBasisObjekt>> geoBundle; // input
+
+    private DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo = new DefaultRepo<>(); // output
+    private DefaultRepo<String, CTOPKnoten> geoNodeToTopNodeRepo = new DefaultRepo<>(); // output
+    private DefaultRepo<String, CGEOKnoten> topNodeToGeoNodeRepo = new DefaultRepo<>(); // output
+
+    private Class[] aPlattformKeys;
+    private Class[] aCrossingKeys;
+    private Class[] aSpeedKeys;
+
+
+    private DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> crossingBundle = new DefaultRepo<>();
+
+
+
+    private DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>(); // output
+
+    private CPlanProSchnittstelle PlanProDefinition;
+
+    public DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo() {
+        return geoNodeToTopNodeRepo;
+    }
+
+    public DefaultRepo<String, CGEOKnoten> getTopNodeToGeoNodeRepo() {
+        return topNodeToGeoNodeRepo;
+    }
+
+    public DefaultRepo<String, CStrecke> getTrackRepo() {
+        return trackRepo;
+    }
+
+    public void setTopLines(List<CTOPKante> topLines) {
+        this.topLines = topLines;
+    }
+
+    public void setGeoBundle(DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle) {
+        this.geoBundle = geoBundle;
+    }
+
+    public void setGeoNodeToGeoEdgesRepo(DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo) {
+        this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
+    }
+
+    public TopologyFactory() throws JAXBException {
+        aCrossingKeys = new Class[]  {
+                CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
+        };
+        initFromFile();
+    }
+
+
+    /**
+     * @Deprecated
+     * @param topLines
+     * @param geoBundle
+     * @param geoNodeToGeoEdgesRepo
+     */
+    public TopologyFactory(List<CTOPKante> topLines, DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle, DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo) {
+        aCrossingKeys = new Class[]  {
+                CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
+        };
+        this.topLines = topLines;
+        this.geoBundle = geoBundle;
+        this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
+
+    }
+
+
+    public TopologyGraph connectTopology() {
+        if(this.topLines == null || this.geoBundle == null || this.geoNodeToGeoEdgesRepo == null) {
+            throw new NullPointerException("Topology Factory Parameters must not be null");
+        }
+        TopologyGraph TG = new TopologyGraph();
+        DefaultRepo<String, CBasisObjekt> nodeRepo = geoBundle.getModel(CTOPKnoten.class);
+        DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
+
+
+        for(CTOPKante Edge : topLines) {
+
+            String sNodeA = Edge.getIDTOPKnotenA().getWert();
+            String sNodeB = Edge.getIDTOPKnotenB().getWert();
+
+            TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sNodeA);
+            if(A == null) {
+                GeoCoordinates GeoA = getGeoCoordinate(nodeRepo,sNodeA);
+                A = new TopologyGraph.Node("", sNodeA, GeoA);
+            }
+            TopologyGraph.Node B = TopologyGraph.NodeRepo.get(sNodeB);
+            if(B == null) {
+                GeoCoordinates GeoB = getGeoCoordinate(nodeRepo,sNodeB);
+                B = new TopologyGraph.Node("", sNodeB , GeoB);
+            }
+
+
+
+            TopologyConnect tcA = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussA().getWert().value());
+            TopologyConnect tcB = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussB().getWert().value());
+            if(Objects.equals(tcA, TopologyConnect.ENDE)) {
+                TopologyGraph.setLeftmostNode(A);
+            }
+
+
+
+
+
+            TopologyGraph.Edge tgEdge = new TopologyGraph.Edge(A,tcA,B,tcB, Edge);
+            TG.EdgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
+
+
+
+
+        }
+
+        if(TopologyGraph.getLeftmostNode() == null) throw new NullPointerException("Not Edge with End in A defined");
+
+        // filling topNodetoGeoNodeRepo with key:ID of geoNodes, value:topNodes
+        for (Object topNodeObj : nodeRepo.getAll()) {
+            CTOPKnoten topNode = (CTOPKnoten) topNodeObj;
+            CGEOKnoten geoNode = (CGEOKnoten) geoPointRepo.getModel(topNode.getIDGEOKnoten().getWert());
+            geoNodeToTopNodeRepo.update(geoNode.getIdentitaet().getWert(),topNode);
+            topNodeToGeoNodeRepo.update(topNode.getIdentitaet().getWert(), geoNode);
+        }
+
+        // filling geoEdgeToGeoNodeRepo with key:ID of geoNodes, value: geoEdge
+        fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
+
+        // iterate over edges
+        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.EdgeRepo.values());
+
+
+
+
+        for(TopologyGraph.Edge E : edgeList) {
+            if(E.getPaintListGeo().isEmpty()) {
+
+                CTOPKante TopKante = E.getPlanProEdge();
+                String sTopNodeA = TopKante.getIDTOPKnotenA().getWert();
+                CGEOKnoten currentGeo = topNodeToGeoNodeRepo.getModel(sTopNodeA);
+                TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sTopNodeA);
+                String sGeoNodeId = currentGeo.getIdentitaet().getWert();
+                List<CGEOKante> geoEdges = geoNodeToGeoEdgesRepo.getModel(sGeoNodeId);
+                for(CGEOKante GeoEdge : geoEdges) {
+                    String sGeoA = GeoEdge.getIDGEOKnotenA().getWert();
+                    String sGeoB = GeoEdge.getIDGEOKnotenB().getWert();
+                    String sNextGeo;
+                    CGEOKnoten NextGeoNode;
+                    if(sGeoA.equals(sGeoNodeId)) {
+                        sNextGeo = sGeoB;
+                    } else if(sGeoB.equals(sGeoNodeId)) {
+                        sNextGeo = sGeoA;
+                    } else {
+                        continue;
+                    }
+                    NextGeoNode = (CGEOKnoten) geoPointRepo.getModel(sNextGeo);
+                    handleGeoEdges(A, currentGeo, NextGeoNode);
+
+
+                }
+
+            }
+        }
+
+
+
+
+
+
+        if(shallAssignToActivePlanData) PlanData.topGraph = TG;
+        return TG;
+
+
+    }
+
+    public void handleBranchingPoints() throws ParseException {
+        initBranchingPoints();
+        DefaultRepo<String, CBasisObjekt> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
+        DefaultRepo<String, CBasisObjekt> crossingPartsRepo = crossingBundle.getModel(CWKrGspElement.class);
+        DefaultRepo<String, CBasisObjekt> crossingKonponentsRepo = crossingBundle.getModel(CWKrGspKomponente.class);
+
+        Collection<CBasisObjekt> listCrossingComponents = crossingKonponentsRepo.getAll();
+
+        //coordinatePartsToCrossing(listCrossingMovement);
+        //coordinateComponentsToPart(listCrossingComponents);
+
+
+
+
+        for (Object o : listCrossingComponents) {
+            CWKrGspKomponente Comp = (CWKrGspKomponente) o;
+            String sElementId = null;
+            String sAnlageId = null;
+            CWKrGspElement Element = null;
+            CWKrAnlage A = null;
+            try {
+                sElementId = Comp.getIDWKrGspElement().getWert();
+            } catch (Exception E) {
+
+            }
+            if (sElementId != null) {
+                Element = (CWKrGspElement) crossingPartsRepo.getModel(sElementId);
+            }
+            try {
+                if (Element != null) sAnlageId = Element.getIDWKrAnlage().getWert();
+
+            } catch (Exception E) {
+
+            }
+            if (sAnlageId != null) {
+                A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
+            }
+            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp);
+            PlanData.RailSwitchList.add(CS);
+        }
+    }
+
+    @Override
+    public List<Balise> getBalises() {
+        return BaliseExtractor.getBalises(PlanProDefinition, BaliseExtractor.ExtractorModeEnum.NORMAL);
+    }
+
+    @Override
+    public void mapBalisesToCoordinate() {
+        DefaultRepo<Integer, Balise> baliseByBg = Balise.baliseByNid_bg;
+        DefaultRepo<Integer, Balise> tempBalises = new DefaultRepo();
+        Collection<Balise> balisesList = baliseByBg.getAll();
+        DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
+        DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
+
+        if(B_PRINT_BALISE_LIST) System.out.println("----Balise-List---");
+        for(Balise B : balisesList) {
+            CDatenpunkt DP = B.getPlanProDataPoint();
+            double dA = DP.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
+            CTOPKante TopKante =  B.getTopPositionOfDataPoint();
+            String sKnotenAid = TopKante.getIDTOPKnotenA().getWert();
+            String sKnotenBid = TopKante.getIDTOPKnotenB().getWert();
+            CTOPKnoten N_A = (CTOPKnoten) topNodeRepo.getModel(sKnotenAid);
+            CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
+            CGEOKnoten GeoNodeA = (CGEOKnoten) geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
+            CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
+            GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
+            GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+
+            // getGeoCoordinate()
+            GeoCoordinates geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+
+            B.setX(geoCoordinate.getX());
+            B.setY(geoCoordinate.getY());
+
+            //UtilFunction.calcTargetGeoByStartPoint(B, dA, Geo_A, Geo_B);
+
+            tempBalises.update(B.getHashcodeOfBaliseDp(), B);
+
+            if(B_PRINT_BALISE_LIST)printBaliseInfo(B, DP, TopKante, Geo_A, Geo_B);
+
+
+            BaliseExtractor.mapBaliseToDataPoint(DP, B);
+
+        }
+        if(B_PRINT_BALISE_LIST) System.out.println("----List-End---");
+        Balise.baliseByNid_bg = tempBalises;
+
+    }
+    private void printBaliseInfo(Balise B, CDatenpunkt DP, CTOPKante topKante, GeoCoordinates geo_A, GeoCoordinates geo_B) {
+        System.out.println("Nid-Bg: " + B.getHashcodeOfBaliseDp());
+        System.out.println("TopKante-ID: " + topKante.getIdentitaet().getWert());
+        System.out.println("DP Abstand: " + DP.getPunktObjektTOPKante().get(0).getAbstand().getWert());
+        System.out.println("Geo_A_x: " + geo_A.getX() + " Geo_A_y: " + geo_A.getY());
+        System.out.println("Geo_B_x: " + geo_B.getX() + " Geo_B_y: " + geo_B.getY());
+    }
+    private void initFromFile() throws JAXBException {
+        PlanProDefinition = getcPlanProSchnittstelle();
+        topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
+        handleGeoData();
+
+    }
+    private void handleGeoData() {
+        List<CGEOPunkt> geoPoints = PlanProDefinition.getLSTZustand().getContainer().getGEOPunkt();
+        geoBundle = new DefaultRepo<>();
+
+        // Punkte enthalten dem payload der Coordinaten,
+        // Aber Knoten werden als String-ID benutzt
+
+        for (CGEOPunkt GeoPunkt : geoPoints) {
+            if (GeoPunkt.getIDGEOKnoten() == null) continue;
+            String sGeoKnotenId = GeoPunkt.getIDGEOKnoten().getWert();
+
+            GeoCoordinates GeoCoordTms = new GeoCoordinates();
+            CGEOPunktAllg GeoPointData = GeoPunkt.getGEOPunktAllg();
+            double x = GeoPointData.getGKX().getWert().doubleValue();
+            double y = GeoPointData.getGKY().getWert().doubleValue();
+            //double z = GeoPointData.getGKZ().getWert().doubleValue();
+            GeoCoordTms.setX(x);
+            GeoCoordTms.setY(y);
+
+            //GeoCoordTms.setHeight(z);
+            PlanData.GeoNodeRepo.update(sGeoKnotenId, GeoCoordTms);
+        }
+
+        List<CStreckePunkt> trackingInfos = PlanProDefinition.getLSTZustand().getContainer().getStreckePunkt();
+        List<CStrecke> trackList = PlanProDefinition.getLSTZustand().getContainer().getStrecke();
+        for (CStrecke Track : trackList) {
+            this.trackRepo.update(Track.getIdentitaet().getWert(), Track);
+        }
+        for (CStreckePunkt Info : trackingInfos) {
+            String sIdGeoNode = Info.getIDGEOKnoten().getWert();
+            if (sIdGeoNode == null) continue;
+            GeoCoordinates GeoCoordTms = PlanData.GeoNodeRepo.getModel(sIdGeoNode);
+            if (GeoCoordTms == null) continue;
+            CStrecke Track = this.trackRepo.getModel(Info.getIDStrecke().getWert());
+            GeoCoordTms.setTrack(Track);
+            GeoCoordTms.setTrack_meter(Info.getStreckeMeter().getWert().doubleValue());
+            PlanData.GeoNodeRepo.update(sIdGeoNode, GeoCoordTms);
+        }
+
+        List<CGEOKnoten> geoNodes = PlanProDefinition.getLSTZustand().getContainer().getGEOKnoten();
+
+
+        List<CGEOKante> geoLines = PlanProDefinition.getLSTZustand().getContainer().getGEOKante();
+
+
+        List<CTOPKante> topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
+        List<CTOPKnoten> topNodes = PlanProDefinition.getLSTZustand().getContainer().getTOPKnoten();
+
+
+        Class[] aGeoKeys = new Class[]{CGEOPunkt.class, CGEOKnoten.class, CGEOKante.class,
+                CTOPKante.class, CTOPKnoten.class};
+        List[] geoContents = new List[]{geoPoints, geoNodes, geoLines, topLines, topNodes};
+        handlePlanProIndexing(aGeoKeys, geoContents, geoBundle);
+    }
+    private void initBranchingPoints() {
+        //List<CGleisAbschnitt> listCtrails =  PlanProDefinition.getLSTZustand().getContainer().getGleisAbschnitt();
+        List<CWKrAnlage> listCrossings = PlanProDefinition.getLSTZustand().getContainer().getWKrAnlage();
+        List<CWKrGspElement> listCrossingMovement = PlanProDefinition.getLSTZustand().getContainer().
+                getWKrGspElement();
+        List<CWKrGspKomponente> listCrossingComponents = PlanProDefinition.getLSTZustand().getContainer()
+                .getWKrGspKomponente();
+
+
+        List[] crossingContents = new List[] { listCrossings, listCrossingMovement, listCrossingComponents};
+
+        handlePlanProIndexing(aCrossingKeys, crossingContents, crossingBundle);
+    }
+
+
+
+    private void handlePlanProIndexing(Object[] aKeys, List[] aContents, DefaultRepo<Class<?>,DefaultRepo<String, CBasisObjekt>> targetBundle) {
+        if(aKeys.length != aContents.length) throw new InvalidParameterException("Given arrays shall have same length");
+
+        else {
+            int iSize = aKeys.length;
+            for(int i = 0; i < iSize; i++) {
+                DefaultRepo<String, CBasisObjekt> defaultRepo = new DefaultRepo<>();
+                Object Bundlekey = aKeys[i];
+                List basicObjectList = aContents[i];
+                for(Object BasicObject : basicObjectList) {
+                    String key;
+                    CBasisObjekt CBO = (CBasisObjekt) BasicObject;
+                    key = CBO.getIdentitaet().getWert();
+                    defaultRepo.update(key, CBO);
+                }
+                targetBundle.update((Class<?>) Bundlekey, defaultRepo);
+            }
+        }
+    }
+
+    private CPlanProSchnittstelle getcPlanProSchnittstelle() throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
+
+        //2. Use JAXBContext instance to create the Unmarshaller.
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        //3. Use the Unmarshaller to unmarshal the XML document to get an instance of JAXBElement.
+        JAXBElement<CPlanProSchnittstelle> unmarshalledObject =
+                (JAXBElement<CPlanProSchnittstelle>)unmarshaller.unmarshal(
+                        ClassLoader.getSystemResourceAsStream(
+                                TranslationModel.TrackplanEnvironment.CurrentEnvironment.resourceLocation));
+
+        //4. Get the instance of the required JAXB Root Class from the JAXBElement.
+        return unmarshalledObject.getValue();
+
+    }
+
+    private boolean checkIfEdgeIsSearchedOne(String sGeoA, String sGeoB, String sCheckA, String sCheckB) {
+        return sCheckA.equals(sGeoA) && sCheckB.equals(sGeoB) ||
+                sCheckA.equals(sGeoB) && sCheckB.equals(sGeoA);
+    }
+
+    private void handleGeoEdges(TopologyGraph.Node StartNode, CGEOKnoten CurrentGeo, CGEOKnoten NextGeoNode) {
         // return value
         ArrayList<CGEOKante> resultEdges = new ArrayList<>();
         // already visitedNodes
         ArrayList<String> visitedGeoNodesIds = new ArrayList<>();
-        CGEOKnoten GeoPointer = CurrentGeo;
         String sGeoA = CurrentGeo.getIdentitaet().getWert();
         String sGeoB = NextGeoNode.getIdentitaet().getWert();
         CTOPKnoten LastTopNode = null;
-        String sGeoCurrent = null;
         // all connected Edges
-        List<CGEOKante> connectedEdges = (List<CGEOKante>) geoNodeToGeoEdgesRepo.getModel(GeoPointer.getIdentitaet().getWert());
+        List<CGEOKante> connectedEdges = geoNodeToGeoEdgesRepo.getModel(CurrentGeo.getIdentitaet().getWert());
 
         // check all nodes from branching point
+        String sGeoCurrent;
         for (CGEOKante EdgeCheck4Connect : connectedEdges) {
             String sCheckA = EdgeCheck4Connect.getIDGEOKnotenA().getWert();
             String sCheckB = EdgeCheck4Connect.getIDGEOKnotenB().getWert();
@@ -73,11 +474,12 @@ public class TopologyFactory {
 
 
 
-            } else {
-                continue;
             }
         }
 
+        if(LastTopNode == null) {
+            throw new NullPointerException("Last TopNode may not be null");
+        }
         TopologyGraph.Node B = TopologyGraph.NodeRepo.get(LastTopNode.getIdentitaet().getWert());
         for(TopologyGraph.Edge OutEdge : StartNode.outEdges) {
             for(TopologyGraph.Edge InEdge: B.inEdges) {
@@ -112,11 +514,11 @@ public class TopologyFactory {
         geoNodeToGeoEdgesRepo.update(geoNodeA.getIdentitaet().getWert(), geoKanteListe);
     }
 
-    private void fillGeoEdgeRelateToGeoNodeRepo(DefaultRepo<String, CGEOKnoten> geoPointRepo) {
-        for (Object geoObject : ((DefaultRepo) geoBundle.getModel(CGEOKante.class)).getAll()) {
+    private void fillGeoEdgeRelateToGeoNodeRepo(DefaultRepo<String, CBasisObjekt> geoPointRepo) {
+        for (Object geoObject :  geoBundle.getModel(CGEOKante.class).getAll()) {
             CGEOKante geoEdge = (CGEOKante) geoObject;
-            CGEOKnoten geoNodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-            CGEOKnoten geoNodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+            CGEOKnoten geoNodeA = (CGEOKnoten) geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+            CGEOKnoten geoNodeB = (CGEOKnoten) geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
             relateEdgeToNode(geoEdge, geoNodeA);
             relateEdgeToNode(geoEdge, geoNodeB);
@@ -124,111 +526,13 @@ public class TopologyFactory {
         }
     }
 
-    public static GeoCoordinates getGeoCoordinate(DefaultRepo nodeRepo, String sNodeA) {
+    public static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
         CTOPKnoten TopNode = (CTOPKnoten) nodeRepo.getModel(sNodeA);
         String sGeoNodeId = TopNode.getIDGEOKnoten().getWert();
         //CGEOKnoten geoPointOfNode = geoPointRepo.getModel(sGeoNodeId);
-        GeoCoordinates CoordinateGeo = PlanData.GeoNodeRepo.getModel(sGeoNodeId);
-        return CoordinateGeo;
+        return PlanData.GeoNodeRepo.getModel(sGeoNodeId);
     }
 
-    public void connectTopology(List<CTOPKante> topLines) {
-        TopologyGraph TG = new TopologyGraph();
-        DefaultRepo<String, CTOPKnoten> nodeRepo = (DefaultRepo<String, CTOPKnoten>) geoBundle.getModel(CTOPKnoten.class);
-        DefaultRepo<String, CGEOKnoten> geoPointRepo = (DefaultRepo<String, CGEOKnoten>) geoBundle.getModel(CGEOKnoten.class);
 
-
-        for(CTOPKante Edge : topLines) {
-
-            String sNodeA = Edge.getIDTOPKnotenA().getWert();
-            String sNodeB = Edge.getIDTOPKnotenB().getWert();
-
-            TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sNodeA);
-            if(A == null) {
-                GeoCoordinates GeoA = getGeoCoordinate(nodeRepo,sNodeA);
-                A = new TopologyGraph.Node("", sNodeA, GeoA);
-            }
-            TopologyGraph.Node B = TopologyGraph.NodeRepo.get(sNodeB);
-            if(B == null) {
-                GeoCoordinates GeoB = getGeoCoordinate(nodeRepo,sNodeB);
-                B = new TopologyGraph.Node("", sNodeB , GeoB);
-            }
-
-
-
-            TopologyConnect tcA = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussA().getWert().value());
-            TopologyConnect tcB = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussB().getWert().value());
-
-
-
-
-
-
-            TopologyGraph.Edge tgEdge = new TopologyGraph.Edge(A,tcA,B,tcB, Edge);
-            TG.EdgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
-
-
-
-
-        }
-
-
-
-        // filling topNodetoGeoNodeRepo with key:ID of geoNodes, value:topNodes
-        for (CTOPKnoten topNode : nodeRepo.getAll()) {
-            CGEOKnoten geoNode = geoPointRepo.getModel(topNode.getIDGEOKnoten().getWert());
-            geoNodeToTopNodeRepo.update(geoNode.getIdentitaet().getWert(),topNode);
-            topNodeToGeoNodeRepo.update(topNode.getIdentitaet().getWert(), geoNode);
-        }
-
-        // filling geoEdgeToGeoNodeRepo with key:ID of geoNodes, value: geoEdge
-        fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
-
-        // iterate over edges
-        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.EdgeRepo.values());
-
-
-
-
-        for(TopologyGraph.Edge E : edgeList) {
-            if(E.getPaintListGeo().isEmpty()) {
-
-                CTOPKante TopKante = E.getPlanProEdge();
-                String sTopNodeA = TopKante.getIDTOPKnotenA().getWert();
-                CGEOKnoten currentGeo = (CGEOKnoten) topNodeToGeoNodeRepo.getModel(sTopNodeA);
-                TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sTopNodeA);
-                String sGeoNodeId = currentGeo.getIdentitaet().getWert();
-                List<CGEOKante> geoEdges = (List<CGEOKante>) geoNodeToGeoEdgesRepo.getModel(sGeoNodeId);
-                for(CGEOKante GeoEdge : geoEdges) {
-                    String sGeoA = GeoEdge.getIDGEOKnotenA().getWert();
-                    String sGeoB = GeoEdge.getIDGEOKnotenB().getWert();
-                    String sNextGeo = null;
-                    CGEOKnoten NextGeoNode = null;
-                    if(sGeoA.equals(sGeoNodeId)) {
-                        sNextGeo = sGeoB;
-                    } else if(sGeoB.equals(sGeoNodeId)) {
-                        sNextGeo = sGeoA;
-                    } else {
-                        continue;
-                    }
-                    NextGeoNode = geoPointRepo.getModel(sNextGeo);
-                    handleGeoEdges(A, currentGeo, NextGeoNode,geoPointRepo,TG.EdgeRepo);
-
-
-                }
-
-            }
-        }
-
-
-
-
-
-
-
-        PlanData.topGraph = TG;
-
-
-    }
 
 }
