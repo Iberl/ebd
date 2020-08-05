@@ -4,7 +4,9 @@ import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.speed.profile.PointComparator;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
@@ -27,6 +29,7 @@ import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
 import java.security.InvalidParameterException;
 import java.text.NumberFormat;
@@ -203,17 +206,17 @@ public class PlanProTmsAdapter {
         for(Balise B : balisesList) {
             CDatenpunkt DP = B.getPlanProDataPoint();
             double dA = DP.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
-           CTOPKante TopKante =  B.getTopPositionOfDataPoint();
-           String sKnotenAid = TopKante.getIDTOPKnotenA().getWert();
-           String sKnotenBid = TopKante.getIDTOPKnotenB().getWert();
-           CTOPKnoten N_A = (CTOPKnoten) topNodeRepo.getModel(sKnotenAid);
-           CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
-           CGEOKnoten GeoNodeA = geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
-           CGEOKnoten GeoNodeB = geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
-           GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
-           GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+            CTOPKante TopKante =  B.getTopPositionOfDataPoint();
+            String sKnotenAid = TopKante.getIDTOPKnotenA().getWert();
+            String sKnotenBid = TopKante.getIDTOPKnotenB().getWert();
+            CTOPKnoten N_A = (CTOPKnoten) topNodeRepo.getModel(sKnotenAid);
+            CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
+            CGEOKnoten GeoNodeA = geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
+            CGEOKnoten GeoNodeB = geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
+            GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
+            GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
-           // getGeoCoordinate()
+            // getGeoCoordinate()
             GeoCoordinates geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
 
             B.setX(geoCoordinate.getX());
@@ -305,11 +308,13 @@ public class PlanProTmsAdapter {
             PlanData.RailSwitchList.add(CS);
         }
 
-        // unused code //necessary????
-        /*for(CWKrAnlage Branching : listCweiche ) {
+        /*
+
+        for(CWKrAnlage Branching : listCweiche ) {
             ENUMWKrArt kind = Branching.getWKrAnlageAllg().getWKrArt().getWert();
             String sMainBranch = Branching.getIdentitaet().getWert();
             CPunktObjektStrecke  ObjectTrack = null;
+
 
 
             switch (kind.value()) {
@@ -323,8 +328,9 @@ public class PlanProTmsAdapter {
                     Chainage C = parseTrackKilometersToChainage(ObjectTrack);
                     SingleSlip SL = new SingleSlip(C);
                     //TODO Topological
-                    //BranchingSwitch BS = new BranchingSwitch(1000.0f,SL, );
+                    BranchingSwitch BS = new BranchingSwitch(1000.0f,SL, );
                     break;
+
                 }
                 case "ABW": {
                     String sFirstPart = this.crossingPartRelation.getModel(sMainBranch).get(0);
@@ -362,6 +368,7 @@ public class PlanProTmsAdapter {
                     DoubleSlip DL = new DoubleSlip(C);
                     //TODO: Schaltzeit fest vorgegeben und Topologie
                     //BranchingSwitch BS = new BranchingSwitch(1000.0f, DL,)
+
                 } default: {
 
                 }

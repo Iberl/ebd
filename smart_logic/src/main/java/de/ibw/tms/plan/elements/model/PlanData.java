@@ -18,6 +18,8 @@ import de.ibw.tms.plan_pro.adapter.topology.DummyChainageSupply;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ChainageSupplyInterface;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.ITopologyFactory;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
@@ -44,6 +46,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 
+    private ITopologyFactory topologyFactory;
 
     private List<GradientSegment> gradientSegmentList = new ArrayList<GradientSegment>();
     private List<SectionOfLine> sectionList = new ArrayList<SectionOfLine>();
@@ -188,14 +191,27 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private void handleDataFromFile() {
         try {
-            createFromFile();
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+            topologyFactory = new TopologyFactory();
+            topologyFactory.connectTopology();
+            topologyFactory.handleBranchingPoints();
+            paintTopologyGraph(new DummyChainageSupply());
+            linkRailsToCrossover();
+            topologyFactory.getBalises();
+
+            topologyFactory.mapBalisesToCoordinate();
+
+            setNodeToBranchingPoints();
+            System.out.println("Test");
+        } catch (JAXBException | ParseException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * @Deprecated
+     * @throws JAXBException
+     * @throws ParseException
+     */
     private void createFromFile() throws JAXBException, ParseException {
         JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
 
@@ -213,13 +229,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         System.out.println(expenseObj.getLSTZustand().getContainer().getGEOKante().size());
 
         PlanProTmsAdapter tmsAdapter = new PlanProTmsAdapter(PlanProTmsAdapter.PlanProVersion.V1_9_0_PATCHED, expenseObj);
-        paintTopologyGraph(new DummyChainageSupply());
-        linkRailsToCrossover();
-        BaliseExtractor.getBalises(expenseObj, BaliseExtractor.ExtractorModeEnum.NORMAL);
 
-        tmsAdapter.mapBalisesToCoordinate();
-
-        setNodeToBranchingPoints();
 
     }
 
@@ -240,6 +250,19 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             E1 = topGraph.EdgeRepo.get(sEdgeId1);
             E2 = topGraph.EdgeRepo.get(sEdgeId2);
             if(E1 == null || E2 == null) continue;
+            TopologyGraph.Node N = null;
+            if(E2.A.equals(E1.A) || E2.B.equals(E1.A)) {
+                N = E1.A;
+            } else if(E2.A.equals(E1.B) || E2.B.equals(E1.B)) {
+                N = E1.B;
+            }
+            if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
+            N.NodeType = CrossingSwitch.class;
+            N.NodeImpl = CS;
+
+
+
+
 
 
 
