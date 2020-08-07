@@ -21,40 +21,40 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 
+/**
+ * Die Smart Logic mit ihren Komponenten
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class SmartLogic {
 
+    /**
+     * Name der Smart-Logic Komponente als Log-file
+     */
     public static final String SMART_LOGIC = "SMART-LOGIC";
 
-    public static <T> List<T> getAll(Queue<T> queue) {
-        synchronized (queue) {
-            if (queue == null) {
-                return null;
-            }
-            List<T> resultList = new ArrayList<>();
 
-            int size = queue.size();
-
-
-            T element = null;
-
-            while(true) {
-                element = queue.poll();
-                if(element == null) break;
-                else resultList.add(element);
-            }
-
-
-            return resultList;
-        }
-    }
     private static RbcModul RbcClient;
 
+    /**
+     * RBC Modul als Client an den Kommunikationsserver im RBC
+     * @return
+     */
     public static RbcModul getRbcClient() {
         return RbcClient;
     }
 
+
     private static SmartServer SmartServForTms;
 
+    /**
+     * Server von Anfragen des TMS in der SmartLogic
+     * @return SmartServer - Server f&uuml;r Anfragen des TMS
+     */
     public static SmartServer getSmartServForTms() {
         return SmartServForTms;
     }
@@ -63,16 +63,17 @@ public class SmartLogic {
 
     private static EventBusManager EM = null;
 
+    /**
+     * Gibt an wie lange auf ein Acknowledge vom RBC gewartet wird
+     */
     public static int TIMEOUT_SETTING_WAITING_MA_ACK_IN_SECONDS = 60;
 
     /**
-     * TMS OutputQueue
+     * Ausgangswarteschlange der SL an das TMS
      */
     public static SynchronousQueue<SmartServerMessage> outputQueue = new SynchronousQueue<SmartServerMessage>();
 
-    /**
-     * @return queue for outputs to tms
-     */
+
 
 
 
@@ -110,6 +111,9 @@ public class SmartLogic {
         TmsReceiverProxy.start();
     }
 
+    /**
+     * Starten der SL
+     */
     public static void startSmartLogic() {
         initSmartLogic();
         startSmartLogicModules();
@@ -119,8 +123,14 @@ public class SmartLogic {
 
     }
 
-
-    public static void createTestSend(boolean bWithUi, boolean bFakeRbcReceiver, boolean bSendRbcRequest, int iSendDummyPos, boolean bStartTms) {
+    /**
+     * Intialisiert die Komponenten der SmartLogic
+     * @param bWithUi - boolean gibt an ob das TMS mit Oberfläche gestartet wird
+     * @param bFakeRbcReceiver - boolean gibt an ob auf der RBC Seite ein Empfänger simuliert werden soll
+     * @param bSendRbcRequest - boolean gibt an ob RBC eine Dummy Anfrage an das TMS stellen soll
+     * @param bStartTms - boolean gibt an ob das TMS mitgestartet werden soll
+     */
+    public static void createSmartLogic(boolean bWithUi, boolean bFakeRbcReceiver, boolean bSendRbcRequest, boolean bStartTms) {
         RbcReceiver RemoteRbcReceiver = null;
         RbcModul RbcClient = null;
         try {
@@ -168,6 +178,12 @@ public class SmartLogic {
 
     }
 
+    /**
+     * Startet das TMS
+     * @param bWithUi - boolean ob die Oberfläche gestartet werden soll
+     * @param bFakeRbcReceiver - boolean ob die RBC Seite als Empfänger simuliert werden soll
+     * @param remoteRbcReceiver - Der RBC Receiver der als Simulation f&uuml;r echte Empf&auml;ger dient
+     */
     public static void startTmsSide(boolean bWithUi, boolean bFakeRbcReceiver, RbcReceiver remoteRbcReceiver) {
         SmartClient SC = new SmartClient(null, 33330);
         // auch ungenutzt zur initialisierung wichtig
@@ -187,6 +203,10 @@ public class SmartLogic {
         }
     }
 
+    /**
+     * Dummy PositionReport Generator
+     * @param iCount - int with number of Position Reports
+     */
     public static void generateRandomDummyPositionReport(int iCount) {
         for(int i = 0; i < iCount; i++) {
             TrainInfo TrInfo = generateRandomTrainInfo(i);
@@ -234,6 +254,11 @@ public class SmartLogic {
 
     }
 
+    /**
+     * Eine Funktion zum Testen der PositionReports. Sie holt eine zufällige Balise aus der PlanPro Datei.
+     * @param index - Zugnummer
+     * @return Balise - Zufällige Balise aus der PlanPro Datei
+     */
     public static Balise pickRandomBalise(int index) {
         ArrayList<Balise> allBalises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
         int iRandom = Math.abs(new Random().nextInt() % allBalises.size());
@@ -249,7 +274,9 @@ public class SmartLogic {
         return TrInfo;
     }
 
-
+    /**
+     * Test Utility Sendet als RBC einen PositionReport
+     */
     public static void sendDummyPositionReport() {
         TrainInfo TrInfo = new TrainInfo(3, 3, ETCSVariables.T_TRAIN_UNKNOWN);
         ArrayList<Balise> allBalises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
@@ -264,6 +291,22 @@ public class SmartLogic {
         RbcClient.start();
     }
 
+    /**
+     * Test Utility generiert PositionReport
+     * @param i_BaliseId id der Balise
+     * @param qScale1m -
+     * @param i -
+     * @param qDirlrbgNominal  -
+     * @param qDlrbgNominal  -
+     * @param integerNovalue  -
+     * @param qLengthConfirmedByMonitoringDevice  -
+     * @param i2  -
+     * @param i3  -
+     * @param qDirtrainNominal  -
+     * @param mModeFullSupervision  -
+     * @param mLevel3  -
+     * @return PositionInfo - Positionsangabe zur Balise
+     */
     public static PositionInfo generatePositionInfo(int i_BaliseId, int qScale1m, int i, int qDirlrbgNominal, int qDlrbgNominal, int integerNovalue, int qLengthConfirmedByMonitoringDevice, int i2, int i3, int qDirtrainNominal, int mModeFullSupervision, int mLevel3) {
         return new PositionInfo(qScale1m, i_BaliseId, i_BaliseId, i,
                 qDirlrbgNominal,
@@ -273,6 +316,10 @@ public class SmartLogic {
                 mLevel3, 0);
     }
 
+    /**
+     * Main EntryPoint der SmartLogic
+     * @param args - keine Bedeutung
+     */
     public static void main(String[] args) {
         //startSmartLogic();
         boolean fakeRbcReceiver = false;
@@ -280,7 +327,7 @@ public class SmartLogic {
         int iSendDummyPos = 0;
         boolean withUI = true;
         boolean bStartTms = false;
-        createTestSend(withUI, fakeRbcReceiver, sendDummyRequest, iSendDummyPos, bStartTms);
+        createSmartLogic(withUI, fakeRbcReceiver, sendDummyRequest, bStartTms);
 
 
 

@@ -8,7 +8,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * class in SmartLogic/TMS sending Ma
+ * wird derzeit nicht mehr verwendet
  */
 public class SocketClient<T, Resp> {
 

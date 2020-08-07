@@ -16,9 +16,21 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * Die Smart Logic simuliert das TMS als Proxy.
+ * Diese Komponente stellt den Proxy auf ein TMS innerhalb der SL dar.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class SmartLogicTmsProxy implements TmsIntf {
 
+    /**
+     * Die Komponentenbezeichnung im Logging
+     */
     public static final String TMS_PROXY = "TMS-PROXY";
     private SmartServer server;
     private EventBusManager EM = null;
@@ -28,26 +40,40 @@ public class SmartLogicTmsProxy implements TmsIntf {
      */
     private long lPriority = 3L;
 
-    public SmartLogicTmsProxy() {
-        try {
-            this.EM = EventBusManager.registerOrGetBus(1, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
+    /**
+     * Setzen der Priority von Nachrichten des Proxies an das TMS
+     * @param lPriority long - Priority
+     */
     public void setiPriority(long lPriority) {
         this.lPriority = lPriority;
     }
 
+    /**
+     * Konstruktor der den Proxy instanziiert.
+     * @param smartServer4Tms - die ServerInstanz in der SmartLogic die den Proxy benutzt
+     */
     public SmartLogicTmsProxy(SmartServer smartServer4Tms) {
         server = smartServer4Tms;
     }
+
+    /**
+     * Wird nicht ver&auml;ndert der Proxy kann zur Laufzeit nicht die Komponente wechseln.
+     * Der TMSServer erh&auml;lt Nachrichten vom RBC
+     * @param TmsServer RBCModul -
+     */
 
     @Override
     public void setTmsServer(RbcModul TmsServer) {
         return;
     }
+
+    /**
+     * verwaltet was der Proxy unternimmt wenn eine Ma-Request vom RBC eintrifft.
+     * Biser wird die Nachricht an das TMs weitergeleitet.
+     * @param msgFromRbc Message - Nachricht des RBC
+     * @return Message - Standard Acknowledgment wird an des RBC als Antwort gesendet
+     */
 
     @Override
     public Message handleMaRequest(Message<Payload> msgFromRbc) {
@@ -73,17 +99,36 @@ public class SmartLogicTmsProxy implements TmsIntf {
         }
     }
 
-
+    /**
+     * verwaltet was der Proxy unternimmt wenn eine Registrierung vom RBC eintrifft.
+     * Bisher wird die Nachricht an das TMS weitergeleitet.
+     * @param msgFromRbc Message - Nachricht des RBC
+     * @return Message - Standard Acknowledgment wird an des RBC als Antwort gesendet
+     */
 
     @Override
     public Message handleRegister(Message<Payload> msgFromRbc) {
         return handleMessageAsProxy(msgFromRbc);
     }
 
+    /**
+     * verwaltet was der Proxy unternimmt wenn eine Anmeldung vom RBC eintrifft.
+     * Bisher wird die Nachricht an das TMS weitergeleitet.
+     * @param msgFromRbc Message - Nachricht des RBC
+     * @return Message - Standard Acknowledgment wird an des RBC als Antwort gesendet
+     */
+
     @Override
     public Message handleLogin(Message<Payload> msgFromRbc) {
         return handleMessageAsProxy(msgFromRbc);
     }
+
+    /**
+     * Verwaltet was der Proxy unternimmt, wenn eine Nachricht vom RBC eintrifft, die anzeigt, das das RBC eine Anfrage
+     * ohne Fehler entgegengenommen hat.
+     * Es wird dabei die SmartLogic das Ack verwalten und dann an das TMS weiterleiten
+     * @param msgFromRbc Message - Nachricht des RBC
+     */
 
     @Override
     public void handleNoError(Message<Payload> msgFromRbc) {
@@ -118,6 +163,13 @@ public class SmartLogicTmsProxy implements TmsIntf {
             }
 
     }
+
+    /**
+     * verwaltet was der Proxy unternimmt wenn eine PositionReport vom RBC eintrifft.
+     * Der Position Report wird vom SmartLogic Server mituntersucht
+     * @param msgFromRbc Message - Nachricht des RBC
+     * @return Message - Acknowledgment wird an des RBC als Antwort gesendet - kann auch einen Fehler senden
+     */
 
     @Override
     public Message handlePositionReport(Message msgFromRbc) {

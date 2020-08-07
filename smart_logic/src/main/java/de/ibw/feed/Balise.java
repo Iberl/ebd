@@ -12,15 +12,24 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Diese Klasse stellt eine Balise mit deren Koordinaten dar.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class Balise implements ICoord<Double> {
     /**
-     * This repository stores first Balise of Balisegroup(PlanProDataPoint) by its nid_bg
-     * The nid_bg is the hash of the String ID from Plan Pro of PlanProDataPoint
+     * Dieses Repository speichert die erste Baise einer Balisengruppe &uuml;ber einem Hashwert der PlanPro Datei
      */
     public static DefaultRepo<Integer, Balise> baliseByNid_bg = new DefaultRepo<>();
+    /**
+     * Dieses Repository gibt f&uuml;r eine Balise als Objekt-Schl&uuml;ssel den Hashwert zur&uuml;ck
+     */
     public static DefaultRepo<Balise, Integer> hashOfBalise = new DefaultRepo<>();
     /**
-     * This repository stores all Balises for this Datapoint
+     * Dieses Repository speichert f&uuml;r eine Datenpunkt eine Liste von Balisen ab
      */
     public static DefaultRepo<CDatenpunkt, List<Balise>> balisesByBaliseGroup = new DefaultRepo<>();
 
@@ -33,12 +42,19 @@ public class Balise implements ICoord<Double> {
     private double x;
     private double y;
 
-
+    /**
+     * Die Darstelung als Bild dieser Balise
+     * @return BufferedImage - Ein Bild
+     * @throws IOException - Falls die Bilddatei nicht gefunden wurde
+     */
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         return UiTools.handleImaging(cl,"images/balise.jpg");
     }
 
+    /**
+     * gibt die x-Koordinate dieser Balise wider
+     */
     public Double getX() {
         return x;
     }
@@ -47,6 +63,9 @@ public class Balise implements ICoord<Double> {
         this.x = x;
     }
 
+    /**
+     * Gibt die Y-Koordinate dieser Balise zur wider
+     */
     public Double getY() {
         return y;
     }
@@ -55,6 +74,10 @@ public class Balise implements ICoord<Double> {
         this.y = y;
     }
 
+    /**
+     * gibt eine definierte Balise, wie sie aus der PlanPro Datei gelesen wird wider
+     * @return CBalise
+     */
     public CBalise getPlanProBalise() {
         return PlanProBalise;
     }
@@ -63,6 +86,10 @@ public class Balise implements ICoord<Double> {
         PlanProBalise = planProBalise;
     }
 
+    /**
+     * gibt den Datenpunkt wie im PlanProFormat wider
+     * @return CDatenpunkt
+     */
     public CDatenpunkt getPlanProDataPoint() {
         return PlanProDataPoint;
     }
@@ -71,6 +98,10 @@ public class Balise implements ICoord<Double> {
         PlanProDataPoint = planProDataPoint;
     }
 
+    /**
+     * gibt eine Topologische Kante wider
+     * @return CTOPKante
+     */
     public CTOPKante getTopPositionOfDataPoint() {
         return TopPositionOfDataPoint;
     }
@@ -79,6 +110,10 @@ public class Balise implements ICoord<Double> {
         TopPositionOfDataPoint = topPositionOfDataPoint;
     }
 
+    /**
+     * gibt die Strecke auf die die Balise liegt wider
+     * @return CStrecke
+     */
     public CStrecke getPlanProTrack() {
         return PlanProTrack;
     }
@@ -97,7 +132,10 @@ public class Balise implements ICoord<Double> {
         return !(BaliseOfHash == null || BaliseOfHash == this);
     }
 
-
+    /**
+     * generiert Hashcode der noch nicht vergeben wurde
+     * @return int - generierter 14 bit Hashcode
+     */
     public int getHashcodeOfBaliseDp() {
         int bitmask = 16383;//14 bit‬;
         Integer currentHash = Balise.hashOfBalise.getModel(this);
@@ -115,20 +153,20 @@ public class Balise implements ICoord<Double> {
      * @param bitmask - bitmask 14 Bit
      * @return hash of 14 bit
      */
-    public Integer calculateNewHash(int bitmask) {
+    private Integer calculateNewHash(int bitmask) {
         Integer currentHash;
         String sId = this.PlanProDataPoint.getIdentitaet().getWert();
         currentHash = sId.hashCode() & bitmask;
 
         Balise BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);
-        // bei eins starten für neuen hash
-        // vermeidet überlauf der 14 bits
+        // bei eins starten f&uuml;r neuen hash
+        // vermeidet &uuml;berlauf der 14 bits
         if(checkifHashOfBaliseIsAlreadyUsed(BaliseOfHash)) {
             currentHash = 1;
             BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);
 
         }
-        // von eins aus prüfen ob ein hash frei ist
+        // von eins aus pr&uuml;fen ob ein hash frei ist
         while (checkifHashOfBaliseIsAlreadyUsed(BaliseOfHash)) {
             currentHash++;
             BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);

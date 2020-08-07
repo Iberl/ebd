@@ -8,7 +8,14 @@ import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
 import java.util.ArrayList;
-
+/**
+ * Inzwischen nicht mehr verwendet deswegen nicht weiter dokumentiert.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class EbdAuthorities {
     public static RbcMA EbdMa;
     private static Chainage LeftChainage = new Chainage(0);

@@ -30,10 +30,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Diese Klasse dient zur Erzeugung eines Topologieschen Graphen
+ */
 public class TopologyFactory implements ITopologyFactory {
 
 
     private static final boolean B_PRINT_BALISE_LIST = false;
+    /**
+     * Dieses Feld gibt an, ob der erzeugte Graph in PlanData gespeichert werden soll
+     */
     public static boolean shallAssignToActivePlanData = true;
 
 
@@ -57,14 +63,27 @@ public class TopologyFactory implements ITopologyFactory {
 
     private CPlanProSchnittstelle PlanProDefinition;
 
+    /**
+     * Diese Getter Methode gibt ein Repository zur&uuml;ck, das die String-Id eine Geo-Knoten als key besitzt.
+     * Als Wertebreich werden Topologische Knoten zur&uuml;ckgegeben
+     * @return Ein Repository mit Geo-Key und Value eine {@link CTOPKnoten}
+     */
     public DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo() {
         return geoNodeToTopNodeRepo;
     }
-
+    /**
+     * Diese Getter Methode gibt ein Repository zurück, das die String-Id eine Top-Knoten als key besitzt.
+     * Als Wertebreich werden Geographisch Knoten zurückgegeben
+     * @return Ein Repository mit top-Key und Value eine {@link CGEOKnoten}
+     */
     public DefaultRepo<String, CGEOKnoten> getTopNodeToGeoNodeRepo() {
         return topNodeToGeoNodeRepo;
     }
 
+    /**
+     *
+     * @return Ein Repository, das die CStrecken key-StringIds zur {@link CStrecke} zuordnet
+     */
     public DefaultRepo<String, CStrecke> getTrackRepo() {
         return trackRepo;
     }
@@ -81,6 +100,10 @@ public class TopologyFactory implements ITopologyFactory {
         this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
     }
 
+    /**
+     * Construktor das die Factory intialisiert
+     * @throws JAXBException - wenn die PlanPro Datei nicht verarbeitet werde konnte
+     */
     public TopologyFactory() throws JAXBException {
         aCrossingKeys = new Class[]  {
                 CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
@@ -90,22 +113,9 @@ public class TopologyFactory implements ITopologyFactory {
 
 
     /**
-     * @Deprecated
-     * @param topLines
-     * @param geoBundle
-     * @param geoNodeToGeoEdgesRepo
+     * Diese Methode generiert den {@link TopologyGraph}
+     * @return TopologyGraph
      */
-    public TopologyFactory(List<CTOPKante> topLines, DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle, DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo) {
-        aCrossingKeys = new Class[]  {
-                CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
-        };
-        this.topLines = topLines;
-        this.geoBundle = geoBundle;
-        this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
-
-    }
-
-
     public TopologyGraph connectTopology() {
         if(this.topLines == null || this.geoBundle == null || this.geoNodeToGeoEdgesRepo == null) {
             throw new NullPointerException("Topology Factory Parameters must not be null");
@@ -211,6 +221,10 @@ public class TopologyFactory implements ITopologyFactory {
 
     }
 
+    /**
+     * Diese Methode generiert Weichen {@link CrossingSwitch} und speichert sie in eine Liste in {@link PlanData}
+     * @throws ParseException - Wenn undefinierte Werte vorhanden sind, diese aber benötigt werden.
+     */
     public void handleBranchingPoints() throws ParseException {
         initBranchingPoints();
         DefaultRepo<String, CBasisObjekt> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
@@ -253,12 +267,20 @@ public class TopologyFactory implements ITopologyFactory {
         }
     }
 
+    /**
+     * List - gibt eine Liste von Balisen aus der PlanProDatei wider
+     */
+
     @Override
     public List<Balise> getBalises() {
         return BaliseExtractor.getBalises(PlanProDefinition, BaliseExtractor.ExtractorModeEnum.NORMAL);
     }
 
     @Override
+    /**
+     * Versieht die Balisen mit Koordinaten und speichert sie nach einem selbst entworfenen Hashcode statisch in die
+     * Klasse {@link Balise}
+     */
     public void mapBalisesToCoordinate() {
         DefaultRepo<Integer, Balise> baliseByBg = Balise.baliseByNid_bg;
         DefaultRepo<Integer, Balise> tempBalises = new DefaultRepo();
@@ -526,7 +548,8 @@ public class TopologyFactory implements ITopologyFactory {
         }
     }
 
-    public static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
+
+    private static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
         CTOPKnoten TopNode = (CTOPKnoten) nodeRepo.getModel(sNodeA);
         String sGeoNodeId = TopNode.getIDGEOKnoten().getWert();
         //CGEOKnoten geoPointOfNode = geoPointRepo.getModel(sGeoNodeId);

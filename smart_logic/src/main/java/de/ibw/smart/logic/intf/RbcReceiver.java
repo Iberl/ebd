@@ -12,6 +12,7 @@ import io.netty.util.CharsetUtil;
 import java.net.InetSocketAddress;
 
 /**
+ * nur f&uuml;r Testzwecke
  * fake RBC
  */
 public class RbcReceiver extends Thread {

@@ -2,11 +2,17 @@ package de.ibw.smart.logic.datatypes;
 
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-
+/**
+ * Diese Klasse stellt Blockierte Gleisabschnitte dar.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class BlockedArea {
 
     /**
-     * Q_SCALE_ENUM
+     * Dieser Datentyp ist die Einheit der zugeordneten Distanzen von 10CM , 1M und 10M kann verwendet werden
      */
     public enum BLOCK_Q_SCALE {
 
@@ -51,7 +57,7 @@ public class BlockedArea {
     private int d_from_PointA_of_GeoEdge_to_BlockEndMa;
 
     /**
-     *
+     * Dieser Konstruktor instanziiiert eine Sperrzone auf einer Kante E von einem Startpunkt bis zu einem Endpunkt
      * @param E Edge beeing blocked
      * @param Start_Ma - Q_Scale Start
      * @param d_A_to_Block_Start - Distance a to Ma- or Block-Start
@@ -68,7 +74,7 @@ public class BlockedArea {
     }
 
     /**
-     * Singel TrackElement beeing Blocked
+     * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
      * @param Element beeing Blocked
      */
     public BlockedArea(TrackElement Element) {

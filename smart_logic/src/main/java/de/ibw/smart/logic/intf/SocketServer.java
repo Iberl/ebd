@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Class im RBC
+ * Class im RBC wird derzeit nicht verwendet
  */
 public abstract class SocketServer<T, Resp> implements IProcessRequest<T,Resp> {
     private static int iPort = 22222;

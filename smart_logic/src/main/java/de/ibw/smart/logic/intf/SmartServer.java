@@ -18,23 +18,29 @@ import io.netty.util.ReferenceCountUtil;
 import javax.swing.tree.ExpandVetoException;
 import java.io.IOException;
 
+/**
+ * Der Smart Server ist ein Server f&uuml;r die Kommunikation der SL zum TMS.
+ * Die SL hat in dieser Kommunikation den Serverpart
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class SmartServer extends RbcModul  {
 
 
 
     private static Channel tmsChannelInstance = null;
-    public static Channel getTmsOutChannel() {
-        return tmsChannelInstance;
-    }
+
+
     public static void setTmsOutChannel(Channel C) {
         tmsChannelInstance = C;
     }
 
 
-    /**
-     * Receives Requests from TMS
-     */
-    private static SmartServer SmartServForTms;
+
     /**
      * Commincation Handler to TMS
      */
@@ -66,9 +72,15 @@ public class SmartServer extends RbcModul  {
         }
 
 
+        /**
+         * Diese Methode verwaltet was getan wird, solange die Verbindung zum TMS von der SL besteht.
+         * Sobald die SL eine Nachricht zum Senden hat, wird durch den TMS Output Worker die Nachricht gesendet
+         *
+         * @param ctx - Netty context
+         */
 
         @Override
-        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        public void channelActive(ChannelHandlerContext ctx)  {
             TmsOuputWorker.SmartToTmsWorker = new TmsOuputWorker<SmartServerMessage>( SmartLogic.outputQueue, ctx);
             TmsOuputWorker.SmartToTmsWorker.start();
 
@@ -81,6 +93,13 @@ public class SmartServer extends RbcModul  {
 
 
         }
+
+        /**
+         * Verwaltet das Lesen von Nachrichten vom TMS
+         * @param ctx - Netty Context
+         * @param msg - Empfangene Nachricht
+         * @throws Exception - Kommunikationsfehler
+         */
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -120,21 +139,32 @@ public class SmartServer extends RbcModul  {
             }
         }
 
+        /**
+         * Verwatet was unternommen wird wenn ein Kanal fertig gelesen hat.
+         * @param ctx - Netty Kontext
+         */
+
         @Override
-        public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        public void channelReadComplete(ChannelHandlerContext ctx) {
             ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
                     .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
         }
 
+        /**
+         * Verwaltet was der Server unternimmt, wenn ein Fehler eintrifft.
+         * Bisher wird die Verbindung geschlossen.
+         * @param ctx - Netty Context
+         * @param cause - Fehler der auftratt
+         */
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
             cause.printStackTrace();
             ctx.close();
         }
     }
 
     /**
-     * Server to TMS constructor
+     * Konstruktor zum Starten des Smart Servers zur Verwaltung von Anfrangen an das SL vom TMS.
      * @param sHost - shall be null
      * @param iPort - port listening for Requests
      */
@@ -147,6 +177,9 @@ public class SmartServer extends RbcModul  {
         this.SmartHandler = new SmartServerHandler(SmartTms);
     }
 
+    /**
+     * Startet einen Netty Server mit dem SmartHandler
+     */
     public void run() {
 
             try {
@@ -157,6 +190,9 @@ public class SmartServer extends RbcModul  {
 
     }
 
+    /**
+     * startet disen Server als Thread
+     */
     @Override
     public void start() {
         super.start();

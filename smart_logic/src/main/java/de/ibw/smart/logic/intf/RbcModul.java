@@ -29,14 +29,38 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
-
+/**
+ * Ein RBC Modul sendet mithilfe des Netty-Framweorks an das RBC.
+ * Kann Nachrichten aus dem RBC erhalten.
+ *
+ * Wird deshalb zweimal instanziiert.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class RbcModul extends Thread {
 
+    /**
+     * Die Smart Logic hat ein Modul das mit dieser Konstante Nachrichten logt, die an das RBC gehen
+     */
     public static final String RBC_MODUL = "RBC-MODUL";
+    /**
+     * Die Smart Logic hat ein Modul, dass Nachrichten aus dem RBC bekommt. Dieses Modul ist der TMS Proxy.
+     * Das ist die Modulbezeichnung im Log.
+     */
     public static final String TMS_PROXY = "TMS-PROXY";
     private ebd.rbc_tms.Message Message = null;
     private PriorityBlockingQueue<PriorityMessage> outputQueue = new PriorityBlockingQueue<>();
 
+    /**
+     * Gibt an wer f&uuml;r dieses Modul als TMS handelt
+     * Bisher hat die SmartLogic einen Proxy, der so tut als sei er selbst das TMS
+     * und alle Nachrichten zwischenliest
+     * @param tmsHandler - Parameter der anzeigt woran das RBC
+     *                   an welche Komonente, es Daten weiterleitet
+     */
     public void setTmsHandler(TmsIntf tmsHandler) {
         TmsHandler = tmsHandler;
     }
@@ -46,16 +70,40 @@ public class RbcModul extends Thread {
 
     private int iSmartLogicID = 1;
 
+    /**
+     * generiert eine Antwort, auf vorher erhaltene Nachrichten.
+     * @param iErrorCode - gibt an ob mit der vorherigen Nachricht ein Fehler verbunde ist
+     * @param rbc_id - ID RBC
+     * @param uuid - ID der Kommunikation
+     * @param tms_id - ID des TMS
+     * @param TI - Informationen zum Zug
+     * @return Message_00 - eine Antwortnachricht
+     */
     public static Message_00 createResponseMessage(int iErrorCode, String rbc_id, UUID uuid, String tms_id, TrainInfo TI) {
 
             Payload_00 Error = new Payload_00(iErrorCode,TI);
             return new Message_00(uuid, tms_id, rbc_id, Error);
     }
 
+    /**
+     * Gibt an ob das Instanziirte Modul horcht oder sendet
+     */
     public Boolean isClient = false;
+    /**
+     * Name des Zielservers
+     */
     public String sHost = "localhost";
+    /**
+     * Port als Integer
+     */
     public int iPort = 22223;
 
+    /**
+     * Kann als Server oder als Client des RBCs instanziiert werden
+     * @param bIsClient - boolean der definiert ob als Client instanziier.
+     * @param sHost - String des Hostnamens
+     * @param iPort - Port der Kommunikation
+     */
     public RbcModul(boolean bIsClient, String sHost, int iPort) {
         if(sHost == null) sHost = "localhost";
         this.isClient = bIsClient;
@@ -63,6 +111,12 @@ public class RbcModul extends Thread {
         this.iPort = iPort;
     }
 
+    /**
+     * Senden einzelner Nachricht nur fr Testzwecke
+     * @param M - Nachricht zu senden
+     * @param sHost - host bezeichnung gibt es in netty auch als Angabe im ServerModus, was nur in netty geht
+     * @param iPort - port auf dem gehorcht oder gesendet wird
+     */
     public RbcModul(Message M, String sHost, int iPort) {
         if(sHost == null) sHost = "localhost";
         this.isClient = true;
@@ -72,24 +126,41 @@ public class RbcModul extends Thread {
 
     }
 
+    /**
+     * Sendet Nachricht an das RBC
+     * @param priorityMessage - Priority-Message, weil in Warteschlange Priority geachtet wird
+     */
     public void sendMessage(PriorityMessage priorityMessage) {
         this.outputQueue.offer(priorityMessage);
     }
 
+    /**
+     * Startet dieses RBC Modul
+     */
     public void start() {
         super.start();
     }
 
+
+    /**
+     * Es gibt zwei Instancen des RBC-Moduls.
+     * Der SERVER
+     * startet TMS Server innerhalb der SL f&uuml;r das RBC.
+     * Dadurch stellt die SL einen Server f&uuml;r das RBC bereit.
+     *
+     * Der CLIENT
+     * Wenn als Client gestartet dann sendet das RBC solange es lauuml;ft Nachrichten aus der Queue an das RBC.
+     */
     public void run() {
 
         if(isClient) {
             try {
 
                 if(this.Message != null) {
-                    startTcpClient(this.sHost, this.iPort, null, this.Message);
+                   // no sensse overjump as guard
                 }
                 if(this.CustomHandlerTcpClient == null) {
-
+                    // use case sl rbc
                     EventBusManager EM = null;
                     try {
                         EM = EventBusManager.registerOrGetBus(iSmartLogicID,false);
@@ -117,6 +188,7 @@ public class RbcModul extends Thread {
                         }
                     }
                 } else {
+                    //unused
                     startTcpClient(this.sHost, this.iPort, this.CustomHandlerTcpClient, null);
                 }
             } catch (InterruptedException e) {
@@ -131,15 +203,29 @@ public class RbcModul extends Thread {
         }
     }
 
+    /**
+     * Diese Klasse stellt einen Thread dar, der eine Nachricht an das RBC sendet
+     */
     public static class SL_To_RBC_ClientThread extends Thread {
         private final String sHost;
         private final int iPort;
         private final Message M;
+
+        /**
+         * Instanziierrt einen Thread mit einer Nachricht an das RBC
+         * @param sHost - Ziel RBC
+         * @param iPort - Port des Servers des Ziels
+         * @param M - Nachricht zu verschicken
+         */
         public SL_To_RBC_ClientThread(String sHost, int iPort, Message M) {
             this.sHost = sHost;
             this.iPort = iPort;
             this.M = M;
         }
+
+        /**
+         * Sendet Nachricht an das RBC
+         */
 
         @Override
         public void run() {
@@ -151,39 +237,21 @@ public class RbcModul extends Thread {
         }
     }
 
-    public static void main(String args[]) throws InterruptedException {
-        //boolean b4Show;
-        /*boolean bIsClient = true;
-        RbcModul TmsServer = new RbcModul(!bIsClient, null, 22223);
-        TmsIntf TestTms = new TestTms();
-        TmsServer.setTmsHandler(TestTms);
-        TestTms.setTmsServer(TmsServer);
-        RbcModul TmsClient = new RbcModul(bIsClient, null, 22224);
-        TmsServer.start();
-        TmsClient.start();
-        */
 
-        RbcModul RbcClient = null;
-        TrainInfo Info = new TrainInfo(0, 0, 0L);
-        PositionInfo PosInfo = new PositionInfo(0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0);
-        Payload_15 MaRequestLoad = new Payload_15(Info, PosInfo, 0);
-        Message_15 RbcMaRequest = new Message_15(UUID.randomUUID(), "TMS_A1", "RBC_1", MaRequestLoad);
-
-        RbcClient = new RbcModul(RbcMaRequest, null, 22223);
-
-        RbcClient.start();
-    }
-
-
-
+    /**
+     * Client in Netty der SL an das RBC.
+     * Kann nur Senden
+     */
     public static class TcpClientHandler extends SimpleChannelInboundHandler {
 
         private final int iSmartLogicId = 1;
         private Message M = null;
         private EventBusManager EM = null;
 
-
+        /**
+         * Netty Client handler zum Schicken von Nachrichten ans RBC
+         * @param Msg - Nachricht die geschickt wird
+         */
         public TcpClientHandler(Message Msg) {
             this.M = Msg;
             try {
@@ -192,6 +260,12 @@ public class RbcModul extends Thread {
                 e.printStackTrace();
             }
         }
+
+        /**
+         * Kanal in Netty durch den das RBC die Nachricht bekommt
+         * @param channelHandlerContext
+         * @throws MissingInformationException
+         */
 
         @Override
         public void channelActive(ChannelHandlerContext channelHandlerContext) throws MissingInformationException {
@@ -209,13 +283,24 @@ public class RbcModul extends Thread {
         }
 
 
-
+        /**
+         * Handler wenn Fehler in Kommunikation zum RBC
+         * @param channelHandlerContext
+         * @param cause - Grund des Fehlers
+         */
 
         @Override
         public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause){
             cause.printStackTrace();
             channelHandlerContext.close();
         }
+
+        /**
+         * Eigentlich unbenutzt, weil zum Empfang, eine andere Client Server Kommunikation verwendet wird.
+         * @param channelHandlerContext
+         * @param sJsonMsg
+         * @throws Exception
+         */
 
         @Override
         protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object sJsonMsg) throws Exception {
@@ -227,13 +312,22 @@ public class RbcModul extends Thread {
         }
     }
 
-
+    /**
+     * Netty Handler eines Servers der SL zur Kommunikation mit RBC
+     * Nur Empfang
+     */
     public class TmsServerHandler extends ChannelInboundHandlerAdapter {
 
+        /**
+         * Name in Log, wenn die SL als TMS gegen&uuml;ber des RBC auftritt
+         */
         public static final String TMS_HANDLER = "TMS-HANDLER";
         private final int iSmartLogicId = 1;
         private EventBusManager EBM;
 
+        /**
+         * Instanziieren eines TMS Empf&auml;ngers in der SL gegen&uuml;ber des RBCs
+         */
         public TmsServerHandler() {
             super();
             try {
@@ -242,6 +336,13 @@ public class RbcModul extends Thread {
                 e.printStackTrace();
             }
         }
+
+        /**
+         * Definiert was passiert wenn Netty eine Nachricht vom RBC bekommt
+         * @param ctx - Netty
+         * @param msg - Die Nachricht aus dem Socket
+         * @throws Exception - IO Error
+         */
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -271,11 +372,24 @@ public class RbcModul extends Thread {
             }.start();
         }
 
+        /**
+         * Channel wird wieder geschlossen
+         * @param ctx
+         * @throws Exception
+         */
+
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
             ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
                     .addListener(ChannelFutureListener.CLOSE);
         }
+
+        /**
+         * Fehler Handler wenn der Netty Server gegen&uuml;ber dem RBC Fehler registriert
+         * @param ctx - Netty IO
+         * @param cause - Grund des Fehlers
+         * @throws Exception - Error throwing
+         */
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -343,6 +457,14 @@ public class RbcModul extends Thread {
         writeCtx.write(Unpooled.copiedBuffer(SendMA.parseToJson(), CharsetUtil.UTF_8));
     }
 
+    /**
+     * Netty TCP Client Builder Method
+     * @param sHost - String of Host beeing called
+     * @param iPort - int iPort
+     * @param customHandlerTcpClient - std null
+     * @param Msg - to be send
+     * @throws InterruptedException - netty communication error
+     */
     public static void startTcpClient(String sHost, int iPort, SimpleChannelInboundHandler customHandlerTcpClient, Message Msg) throws InterruptedException {
         EventBusManager EM = null;
         try {
@@ -377,7 +499,13 @@ public class RbcModul extends Thread {
     }
 
 
-    //SL Server
+    /**
+     * SL Server serving TMS
+     * @param sHost - localhost nicht relevant bei server, aber netty hat diese option
+     * @param iPort - port dieses servers
+     * @param ServerHandler - definiert was netty als server tun soll
+     * @throws InterruptedException - communication exception
+     */
     public void startServer(String sHost, int iPort, ChannelInboundHandlerAdapter ServerHandler) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
         EventBusManager EM = null;
@@ -422,6 +550,12 @@ public class RbcModul extends Thread {
 
     }
 
+    /**
+     * SL stellt Verbindung f&uuml;r das RBC als Server bereit
+     * @param sHost - netty hat eine host definition auf server std localhost
+     * @param iPort - port auf dem der Server arbeitet oder horcht
+     * @throws InterruptedException - Kommunikation hatte einen Fehler verursacht
+     */
     public void startTmsServer(String sHost, int iPort) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
         EventBusManager EM = null;
@@ -470,7 +604,7 @@ public class RbcModul extends Thread {
         }*/
     }
 
-
+    /*
     public static class TestTms implements TmsIntf {
 
         private RbcModul TestServerMod;
@@ -534,4 +668,6 @@ public class RbcModul extends Thread {
             return createDummyNoErrorMsg(rbc_id,msgFromRbc.getHeader().uuid);
         }
     }
+    */
+
 }

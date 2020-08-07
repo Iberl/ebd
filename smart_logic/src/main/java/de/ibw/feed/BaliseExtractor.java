@@ -17,7 +17,13 @@ import javax.xml.bind.Unmarshaller;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+/**
+ * Diese Klasse &uuml;bernimmt das Lesen des PlanProFormates und hinterlegt die dabei verarbeiteten Balisen
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class BaliseExtractor {
 
     private static DefaultRepo<String, CBalise> balisenRepo;
@@ -32,6 +38,10 @@ public class BaliseExtractor {
     private enum RepoEnum {
         Balise, DataPoint, TopEdge, Track
     }
+
+    /**
+     * in entwicklung, kann verwednet werden, wenn man nur Datenpunkte haben will und keien Balisen
+     */
     public enum ExtractorModeEnum {
         NORMAL, DATAPOINT_ONLY
     }
@@ -46,32 +56,12 @@ public class BaliseExtractor {
 
     }
 
-
-
-    public static void main(String[] args) throws JAXBException {
-        getBalisesFromFile("inputPlanPro.ppxml");
-    }
-
-    public static List<Balise> getBalisesFromFile(String sFile) throws JAXBException {
-
-
-
-
-        JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
-
-        //2. Use JAXBContext instance to create the Unmarshaller.
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        //3. Use the Unmarshaller to unmarshal the XML document to get an instance of JAXBElement.
-        JAXBElement<CPlanProSchnittstelle> unmarshalledObject =
-                (JAXBElement<CPlanProSchnittstelle>)unmarshaller.unmarshal(
-                        ClassLoader.getSystemResourceAsStream(sFile));
-
-        //4. Get the instance of the required JAXB Root Class from the JAXBElement.
-        CPlanProSchnittstelle expenseObj = unmarshalledObject.getValue();
-        return getBalises(expenseObj, ExtractorModeEnum.DATAPOINT_ONLY);
-    }
-
+    /**
+     * generiert aus PlanPro Model eine Liste von Balisen
+     * @param expenseObj - planpro inhalte
+     * @param datapointOnly - unterscheidung Datenpunkte oder Balisen (noch unbenutzt)
+     * @return List
+     */
     public static List<Balise> getBalises(CPlanProSchnittstelle expenseObj, ExtractorModeEnum datapointOnly) {
 
             handleFileData(expenseObj);
@@ -114,6 +104,11 @@ public class BaliseExtractor {
 
     }
 
+    /**
+     * Stellt bezug her welche Balisen zu welche Datenpunkt geh&ouml;ren
+     * @param dataPoint - Datenpunkt
+     * @param extractedBalise - der zu Balise gemappt wird
+     */
     public static void mapBaliseToDataPoint(CDatenpunkt dataPoint, Balise extractedBalise) {
         storeBalisesByNid_Bg(extractedBalise);
         List<Balise> baliseList = Balise.balisesByBaliseGroup.getModel(dataPoint);

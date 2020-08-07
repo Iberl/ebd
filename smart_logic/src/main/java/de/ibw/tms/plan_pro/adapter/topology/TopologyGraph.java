@@ -6,6 +6,8 @@ import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
@@ -91,6 +93,12 @@ public class TopologyGraph {
 
         public static class Edge extends TrackElement {
 
+
+
+            private Rail R = null;
+
+            private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
+
             public final Node A;
             public final TopologyConnect TopConnectFromA;
 
@@ -99,11 +107,18 @@ public class TopologyGraph {
             public final double dTopLength;
             @Expose
             public String sId;
-            public boolean bFromNodeAtoNodeBisInTrackDirection;
 
-            private Rail R = null;
+            public Boolean isFromNodeAtoNodeBisInTrackDirection() {
+                try {
+                    ICompareTrackMeter CSA = (ICompareTrackMeter) A.NodeImpl;
+                    ICompareTrackMeter CSB = (ICompareTrackMeter) B.NodeImpl;
+                    return CSA.thisHasLowerTrackMeter(CSB);
+                } catch(Exception E) {
+                    E.printStackTrace();
+                    return null;
+                }
+            }
 
-            private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
 
             public ArrayList<CGEOKante> getPaintListGeo() {
                 return paintListGeo;
