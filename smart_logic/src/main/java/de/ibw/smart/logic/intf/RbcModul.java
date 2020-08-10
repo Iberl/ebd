@@ -30,10 +30,7 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
 /**
- * Ein RBC Modul sendet mithilfe des Netty-Framweorks an das RBC.
- * Kann Nachrichten aus dem RBC erhalten.
- *
- * Wird deshalb zweimal instanziiert.
+ * Ein RBC Modul sendet mithilfe des Netty-Framweorks an das RBC. Kann Nachrichten aus dem RBC erhalten. Wird deshalb zweimal instanziiert.
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de

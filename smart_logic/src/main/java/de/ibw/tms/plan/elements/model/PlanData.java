@@ -38,11 +38,17 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Flow;
 
-public class PlanData implements Flow.Subscriber<GradientProfile> {
 
-    //public static double dZoomFactor = 2d;
-    public static double dTranslateX = -1000d;
-    public static double dTranslateY = 0d;
+/**
+ * Daten Topographischer und Geographischer Art.
+ * Hier wird in Zukunft auch das Gradientenprofil abgebildet.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
+public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 
@@ -51,34 +57,74 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     private List<GradientSegment> gradientSegmentList = new ArrayList<GradientSegment>();
     private List<SectionOfLine> sectionList = new ArrayList<SectionOfLine>();
 
+    /**
+     * Liste von Gradienten werden gesetzt
+     * @param gradientSegmentList {@link List} - Gradientensegment-Liste
+     */
     public void setGradientSegmentList(List<GradientSegment> gradientSegmentList) {
         this.gradientSegmentList = gradientSegmentList;
     }
 
     /**
-     * Key-String is id of GeoKnoten
+     * Ein Reposory der als Schl&uuml;ssel den Identifieer eine PlanPro-GeoKnoten h&auml;lt und als Wert Geo-Coordinaten bereitstellt.
      */
     public static DefaultRepo<String, GeoCoordinates> GeoNodeRepo = new DefaultRepo<>();
+    /**
+     * Bahnh&ouml;fe noch nicht vollst&auml;ndig implementiert
+     */
     public static DefaultRepo<String, PlatformEdge> PlatformRepo = new DefaultRepo<>();
-    public static DefaultRepo<String, Trail> TrailRepo = new DefaultRepo<>();
+
+    /**
+     * Der topGraph speichert das SL-TMS-interen Topologische Modell
+     */
     public static TopologyGraph topGraph;
+    /**
+     * Erlaubte Streckengeschwindigkeit eines Gleises ({@link Rail}  in km/h
+     */
     public static int vmax = 160; // km/h
 
+    /**
+     * Diese Klasse setzt ein TrackElement in Graphische Linien-Objekte um.
+     * Sie setzt ebenfalls TrackElment-Knoten in Graphische-Punkte um
+     */
     public static class TrackElementPositionCalc {
+        /**
+         * {@link HashMap} zum Ermitteln des Gleis {@link Rail} aus einem {@link Trail} - TrackElement eines Gleismodells
+         */
         private static HashMap<TrackElement, Line2D.Double> positionMap = new HashMap<TrackElement, Line2D.Double>();
+        /**
+         * Bisher unbenutzt
+         * {@link HashMap} zum Ermitteln eines Point_RemoteOperated aus einem {@link BranchingSwitch} - TrackElement einer Weiche
+         */
         private static HashMap<TrackElement, Point2D.Double> pointMap = new HashMap<TrackElement, Point2D.Double>();
 
+        /**
+         * dieses Put gibt als Key ein {@link Trail} dem logischen Gleis zu dem Value eines geographischen Gleis {@link Rail}
+         * @param TE {@link TrackElement} - Ein logischen Gleis Trail
+         * @param Line - ein {@link Rail} - geographisches Gleise
+         */
         public static void put(TrackElement TE, Line2D.Double Line) {
             positionMap.put(TE, Line);
         }
+
+        /**
+         * dieses Put gibt als Key ein {@link Point_RemoteOperated} - ein Umschaltelement der Weiche als TrackElment zu dem Value eines {@link BranchingSwitch} - Trackelement einer Weiche
+         * @param TE - {@link TrackElement} - das UmschaltElement der Weiche
+         * @param Point - {@link BranchingSwitch} - das Modell einer Weiche
+         */
         public static void put(TrackElement TE, Point2D.Double Point) {
             pointMap.put(TE, Point);
         }
 
+        /**
+         * Transferiert ein TrackElment zu einer zeichenbaren Linie
+         * @param TE - {@link TrackElement} - Ein logischen Gleis Trail
+         * @return Line2D.Double - Eine Rail die zeichnbar ist
+         */
         public static Line2D.Double translateTeToGraphic(TrackElement TE) {
             return positionMap.get(TE);
         }
-
+        /*
         public static int getY(TrackElement TE, Chainage C) throws Exception {
             int iMarginLeft = 0;
 
@@ -117,13 +163,17 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             return (int) (yCalc);
 
         }
-
+        */
 
     }
 
 
     private static PlanData instance;
 
+    /**
+     * Singleton zum Erstellen der Planungsdaten
+     * @return PlanData - Planungsdaten
+     */
     public static PlanData getInstance() {
         if(instance == null) {
             instance = new PlanData();
@@ -131,23 +181,45 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         return instance;
     }
 
+    /**
+     * Not used
+     */
     public static ArrayList<RailConnector> connectorList = new ArrayList<RailConnector>();
+    /**
+     * not used
+     */
     public static RailConnector ConnectorBetween5To6 = new RailConnector("Con Between 5 And 6");
+    /**
+     * Not used
+     */
     public static RailConnector ConnectorBetween9To10 = new RailConnector("Con Between 9 And 10");
+    /**
+     * Not used
+     */
     public static EdgeOfMap RightEnd;
+    /**
+     * Not used
+     */
     public static ArrayList<TrackElement> trainOccupiedList = new ArrayList<TrackElement>();
+    /**
+     * Not used
+     */
     public static ArrayList<CrossingSwitch> RailSwitchList = new ArrayList<>();
 
 
-    public static void setData(PlanData P) {
-        instance = P;
-    }
-
+    /**
+     * Noch nicht verwendet
+     * Gibt zu einem Geleis Rail Gradientsegmente an
+     * @param key {@link GradientTrailModel} - Gleis mit Gradient
+     * @param values {@link List} - values von mehreren GradientenSegmenten
+     */
     public static void putGradientData(GradientTrailModel key, ArrayList<GradientSegment> values) {
-        PlanData.getInstance();
-        instance.GradientMap.put(key,values);
+        PlanData.getInstance().GradientMap.put(key,values);
     }
 
+    /**
+     * Gradientenzuordnung in {@link HashMap} key {@link GradientTrailModel} value {@link List} von {@link GradientSegment}
+     */
     public HashMap<GradientTrailModel, ArrayList<GradientSegment>> GradientMap = new HashMap<GradientTrailModel, ArrayList<GradientSegment>>();
 
     private GradientProfile GP = new GradientProfile(null);
@@ -158,12 +230,22 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private String sTitle = "Gleisplan";
 
+    /**
+     * Liste aller Gleise die man zeichnen kann
+     */
     public ArrayList<Rail> railList = new ArrayList<Rail>();
-    public ArrayList<TopRailReturn> returnRailEdge = new ArrayList<TopRailReturn>();
+
+    //public ArrayList<TopRailReturn> returnRailEdge = new ArrayList<TopRailReturn>();
+    /**
+     * Liste von allen Weichen
+     */
     public ArrayList<BranchingSwitch> branchingSwitchList = new ArrayList<BranchingSwitch>();
-    public HashMap<TrackElement, Double> HeightMap = new HashMap<TrackElement, Double>();
 
-
+    /**
+     * Rails und Weichen k&ouml;nnen per Kontextmenu angesteuert werden.
+     * Hierf&uuml;r implementieren Gleise und Weichenklassen Iinteractable
+     * @return List - die Liste mit Kontextmenu-interagierbaren Elementen
+     */
     public ArrayList getInteractable() {
         List<Iinteractable> InteractionList = new ArrayList<Iinteractable>(branchingSwitchList);
         InteractionList.addAll(railList);
@@ -171,8 +253,11 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     }
 
 
-
+    @Deprecated
     public static float f_PAINT_AREA_HEIGHT = 0.0f;
+    /**
+     * Dehnungsfaktor in x-Richtung beim Zeichnen von Elmente hier neutales Element 1
+     */
     public static float f_STRETCH_X = 1.0f;
 
 
@@ -207,31 +292,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
     }
 
-    /**
-     * @Deprecated
-     * @throws JAXBException
-     * @throws ParseException
-     */
-    private void createFromFile() throws JAXBException, ParseException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
-
-        //2. Use JAXBContext instance to create the Unmarshaller.
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-        //3. Use the Unmarshaller to unmarshal the XML document to get an instance of JAXBElement.
-        JAXBElement<CPlanProSchnittstelle> unmarshalledObject =
-                (JAXBElement<plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle>)unmarshaller.unmarshal(
-                        ClassLoader.getSystemResourceAsStream(
-                                TranslationModel.TrackplanEnvironment.CurrentEnvironment.resourceLocation));
-
-        //4. Get the instance of the required JAXB Root Class from the JAXBElement.
-        plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle expenseObj = unmarshalledObject.getValue();
-        System.out.println(expenseObj.getLSTZustand().getContainer().getGEOKante().size());
-
-        PlanProTmsAdapter tmsAdapter = new PlanProTmsAdapter(PlanProTmsAdapter.PlanProVersion.V1_9_0_PATCHED, expenseObj);
-
-
-    }
 
     private void setNodeToBranchingPoints() {
         for(CrossingSwitch CS: RailSwitchList) {
@@ -685,259 +745,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     }
 
-
-    private void createDefaultPlan() {
-        // First define all Brachnes
-        // Second connect rails
-        // Third connect waychanges
-
-        Chainage LeftChainage = new Chainage(0);
-        Chainage RightChainage = new Chainage(635);
-        // left to right rails
-        EdgeOfMap LeftEnd = new EdgeOfMap("Left Astetten");
-        LeftEnd.setChainageBeginn(LeftChainage);
-        LeftEnd.setChainageEnd(LeftChainage);
-        EdgeOfMap RightEnd = new EdgeOfMap("Astetten - BÜ1");
-        RightEnd.setChainageBeginn(RightChainage);
-        RightEnd.setChainageEnd(RightChainage);
-
-
-        // CW14
-        Chainage CCW14 = new Chainage(400);
-        SingleSlip SlipCW14 = new SingleSlip(CCW14);
-        //Rail R00W14 = new Rail(10.0d, 50.0d, 49.9d, 50.0d, this.railList, LeftEnd,CCW14);
-        BranchingSwitch CW14 = generateCrossover(SlipCW14, 400.0d, 150.0d, "W14",
-                BranchingSwitch.ViewType.Branch_ORL);
-        // CW15
-        Chainage CCW15 = new Chainage(450);
-        SingleSlip SlipCW15 = new SingleSlip(CCW15);
-        BranchingSwitch CW15 = generateCrossover(SlipCW15, 450.0d, 150.0d, "W15",//TODO
-                BranchingSwitch.ViewType.Branch_RLO);
-        //CW12//13
-        Chainage CCW1213 = new Chainage(300);
-        DoubleSlip SlipCW1213 = new DoubleSlip(CCW1213);
-        BranchingSwitch CW1213 = generateCrossover(SlipCW1213, 300.0d, 100.0d, "W12 W13");
-        //CW16
-        Chainage CCW16 = new Chainage(500);
-        SingleSlip SlipCW16 = new SingleSlip(CCW16);
-        BranchingSwitch CW16 = generateCrossover(SlipCW16, 500.0d, 100.0d, "W16",
-                BranchingSwitch.ViewType.Branch_LRU
-                );
-        //CCW11
-        Chainage CCW11 = new Chainage(200);
-        SingleSlip SlipCW11 = new SingleSlip(CCW11);
-        BranchingSwitch CW11 = generateCrossover(SlipCW11, 200.0d, 50.0d, "W11",
-            BranchingSwitch.ViewType.Branch_ULR
-        );
-
-        // Rails
-
-        Rail LeftW14 = new Rail(0.0d, 150.0d, 400d, 150.0d, this.railList, LeftEnd,
-                CW14.getBranchingPoint(), LeftChainage, CCW14, ApplicationDirection.BOTH, 250,
-                ApplicationDirection.BOTH, new TrackElementStatus(), "Left Astetten - W14");
-
-
-
-        Rail W14W15 = new Rail(400.0d, 150.0d, 450d, 150.0d, this.railList, CW14.getBranchingPoint(),
-                CW15.getBranchingPoint(), CCW14, CCW15, ApplicationDirection.BOTH, 250,
-                ApplicationDirection.BOTH, new TrackElementStatus(), "W14 - W15");
-
-        Rail W15Right = new Rail(450.0d, 150.0d, 635.0d, 150.0d, this.railList, CW15.getBranchingPoint(),
-                RightEnd, CCW15, RightChainage, ApplicationDirection.BOTH, 250, ApplicationDirection.BOTH,
-                new TrackElementStatus(), "W15 - BÜ");
-
-        // Rails 2. Reihe
-        Rail LeftW12 = new Rail(0.0d, 100.0d, 300.0d, 100.0d, this.railList, LeftEnd,
-                CW1213.getBranchingPoint(), LeftChainage, CCW1213, ApplicationDirection.BOTH, 250,
-                ApplicationDirection.BOTH, new TrackElementStatus(), "Left Astetten - W12/13");
-        Rail W12W16 = new Rail(300.0d, 100.0d, 500.0d, 100.0d, this.railList, CW1213.getBranchingPoint(),
-                CW16.getBranchingPoint(), CCW1213, CCW16, ApplicationDirection.BOTH, 250,
-                ApplicationDirection.BOTH, new TrackElementStatus(), "W12/13 - W16");
-        Rail W16Right = new Rail(500.0d, 100.0d, 635.0d, 100.0d, this.railList, CW16.getBranchingPoint(),
-                RightEnd,CCW16, RightChainage, ApplicationDirection.BOTH, 250, ApplicationDirection.BOTH,
-                new TrackElementStatus(), "W16 - BÜ");
-
-        // Rails 3. Reihe
-        Rail LeftW11 = new Rail(0.0d, 50.0d, 200.0d, 50.0d, this.railList, LeftEnd, CW11.getBranchingPoint(),
-            LeftChainage, CCW11, ApplicationDirection.BOTH, 60, ApplicationDirection.BOTH,
-                new TrackElementStatus(), "Left Astetten - W11");
-        // Rail 3. Reihe zum Gleisbock (Gleisbock als Ende rechts)
-        Rail W11Right = new Rail(200.0d, 50.0d, 635.0d, 50.0d, this.railList,
-                CW11.getBranchingPoint(), RightEnd, CCW11, RightChainage, ApplicationDirection.BOTH, 60,
-                ApplicationDirection.BOTH, new TrackElementStatus() , "W11 - BÜ");
-
-        // Quergleise 1. Reihe bis 2. Reihe
-        Rail W12W14 = new Rail(300.0d, 100.0d, 400.0d, 150.0d, this.railList, CW1213.getBranchingPoint(),
-                CW14.getBranchingPoint(), CCW1213, CCW14, ApplicationDirection.BOTH, 60, ApplicationDirection.BOTH,
-                new TrackElementStatus(), "W12/13 - W14");
-        Rail W15W16 = new Rail(450.0d, 150.0d, 500.0d, 100.0d, this.railList,
-                CW15.getBranchingPoint(), CW16.getBranchingPoint(), CCW15, CCW16, ApplicationDirection.BOTH, 60,
-                ApplicationDirection.BOTH, new TrackElementStatus(), "W15 - W16");
-
-        //Quergleise 2.bis 3. Reihe
-        Rail W11W12 = new Rail(200.0d, 50.0d, 300.0d, 100.0d, this.railList, CW11.getBranchingPoint(),
-                CW1213.getBranchingPoint(), CCW11, CCW1213, ApplicationDirection.BOTH, 60, ApplicationDirection.BOTH,
-                new TrackElementStatus(), "W11 - W12/13");
-
-
-        //Weiche W14
-        PositionedRelation PositionLW14W15 = new PositionedRelation();
-        PositionLW14W15.createPositionedRelation((TrackElement) CW14.getBranchingPoint(),(TrackElement) LeftW14.getTrailModel(),(TrackElement) W14W15.getTrailModel(), true, 250, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionW12W14W15 = new PositionedRelation();
-        PositionW12W14W15.createPositionedRelation((TrackElement) CW14.getBranchingPoint(),W12W14.getTrailModel(),(TrackElement) W14W15.getTrailModel(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-        List<PositionedRelation> list = new ArrayList<PositionedRelation>();
-        list.add(PositionW12W14W15);
-        list.add(PositionLW14W15);
-
-
-
-        SlipCW14.updatePositionedRelation(list);
-        SlipCW14.setOutputRelation(PositionLW14W15);
-
-        //Weiche W15
-        PositionedRelation PositionW14W15R = new PositionedRelation();
-        PositionW14W15R.createPositionedRelation((TrackElement) CW15.getBranchingPoint(),(TrackElement) W14W15.getTrailModel(),(TrackElement) W15Right.getTrailModel(), true, 250, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionW14W15W16 = new PositionedRelation();
-        PositionW14W15W16.createPositionedRelation((TrackElement) CW15.getBranchingPoint(),W14W15.getTrailModel(),(TrackElement) W15W16.getTrailModel(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-        list = new ArrayList<PositionedRelation>();
-        list.add(PositionW14W15R);
-        list.add(PositionW14W15W16);
-
-        SlipCW15.updatePositionedRelation(list);
-        SlipCW15.setOutputRelation(PositionW14W15R);
-
-        //Weiche W1213
-        PositionedRelation PositionLW12W13VersionA = new PositionedRelation();
-        PositionLW12W13VersionA.createPositionedRelation((TrackElement) CW1213.getBranchingPoint(),(TrackElement) LeftW12.getTrailModel(),(TrackElement) W12W16.getTrailModel(), true, 250, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionLW12W13VersionB = new PositionedRelation();
-        PositionLW12W13VersionB.createPositionedRelation((TrackElement) CW1213.getBranchingPoint(),(TrackElement) LeftW12.getTrailModel(),(TrackElement) W12W14.getTrailModel(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-        PositionedRelation PositionW11W13W12VersionA = new PositionedRelation();
-        PositionW11W13W12VersionA.createPositionedRelation((TrackElement) CW1213.getBranchingPoint(),(TrackElement) W11W12.getTrailModel(),(TrackElement) W12W14.getTrailModel(), true, 250, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionW11W13W12VersionB = new PositionedRelation();
-        PositionW11W13W12VersionB.createPositionedRelation((TrackElement) CW1213.getBranchingPoint(),(TrackElement) W11W12.getTrailModel(),(TrackElement) W12W16.getTrailModel(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-        list = new ArrayList<PositionedRelation>();
-        list.add(PositionLW12W13VersionA);
-        list.add(PositionLW12W13VersionB);
-        list.add(PositionW11W13W12VersionA);
-        list.add(PositionW11W13W12VersionB);
-
-        SlipCW1213.updatePositionedRelation(list, "From Left Astetten", "From W11");
-        SlipCW1213.setOutputRelation(PositionLW12W13VersionA,PositionW11W13W12VersionA);
-
-
-        //Weiche W16
-        PositionedRelation PositionW12W16R = new PositionedRelation();
-        PositionW12W16R.createPositionedRelation((TrackElement) CW16.getBranchingPoint(),(TrackElement) W12W16.getTrailModel(),(TrackElement) W16Right.getTrailModel(), true, 250, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionW15W16R = new PositionedRelation();
-        PositionW15W16R.createPositionedRelation((TrackElement) CW16.getBranchingPoint(),(TrackElement) W15W16.getTrailModel(),(TrackElement) W16Right.getTrailModel(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-
-
-
-
-        list = new ArrayList<PositionedRelation>();
-        list.add(PositionW12W16R);
-        list.add(PositionW15W16R);
-
-        SlipCW16.updatePositionedRelation(list);
-        SlipCW16.setOutputRelation(PositionW12W16R);
-
-        // Weiche W11
-        PositionedRelation PositionLW11R = new PositionedRelation();
-        PositionLW11R.createPositionedRelation((TrackElement) CW11.getBranchingPoint(),(TrackElement) LeftW11.getTrackReference(),(TrackElement) W11Right.getTrackReference(), false, 0, ApplicationDirection.BOTH, new TrackElementStatus() );
-        PositionedRelation PositionLW11W12 = new PositionedRelation();
-        PositionLW11W12.createPositionedRelation((TrackElement) CW11.getBranchingPoint(),(TrackElement) LeftW11.getTrackReference(),(TrackElement) W11W12.getTrackReference(), true, 60, ApplicationDirection.BOTH, new TrackElementStatus() );
-
-
-
-
-
-        list = new ArrayList<PositionedRelation>();
-        list.add(PositionLW11W12);
-        list.add(PositionLW11R);
-
-        SlipCW11.updatePositionedRelation(list);
-        SlipCW11.setOutputRelation(PositionLW11W12);
-
-
-
-
-
-
-
-
-/*
-
-        // Weichen auf der zweitenLinie
-        // CW12
-        generateCrossover(RW12W13, true, R10W12, false, RW11W12, false);
-        //CW13
-        generateCrossover(RW12W13, false, RW13W16, true, RW13W14, true);
-
-        // CW 16
-
-        // CW 11
-
-
-       Rail RW14W15 = new Rail(50.0f, 50.0f, 52.0f, 50.0f, this.railList, null, null);
-       Rail RW1507 = new Rail(52.1f, 50.0f, 164.0f, 50.0f, this.railList, null, null);
-
-
-
-       //null
-
-        // Cauton RW 14 W 15 connects tow crossofer no link to other rails
-        //R00W14.ConB = RW14W15;
-        //RW14W15.ConA = R00W14;
-
-        //RW14W15.ConB = RW1507;
-        //RW1507.ConA = RW14W15;
-        //null
-
-        Rail R10W12 = new Rail(10.0f, 100.0f, 30.0f, 100.0f, this.railList,null,null);
-        Rail RW12W13 = new Rail(30.0f, 100.0f, 30.1f, 100.0f, this.railList,null,null);
-        Rail RW13W16 = new Rail(30.1f, 100.0f, 57.0f, 100.0f, this.railList, null, null);
-        Rail RW1617 = new Rail(57.0f, 100.0f, 164.0f, 100.0f, this.railList, null, null);
-
-
-
-        Rail R20W11 = new Rail(10.0f, 150.0f, 20.0f, 150.0f, this.railList,null,null);
-        Rail RW11G11 = new Rail(20.0f, 150.0f, 50.f, 150.0f, this.railList, null,null);
-
-
-        // end left to right rails
-
-        // down up line spanning rails
-
-        Rail RW13W14 = new Rail(30.1f, 99.8f, 49.9f, 50.1f, this.railList, null,null);
-        Rail RW15W16 = new Rail(52.1f, 50.1f, 56.9f, 99.8f, this.railList, null,null);
-        //--
-
-        Rail RW11W12 = new Rail(20.1f, 149.9f, 29.9f, 100.1f, this.railList, null,null);
-
-        // end down up
-        // Weichen auf der untersten Linie
-
-
-
-        //ElementConnectionPoint MainCP = new ElementConnectionPoint()
-
-       // Crossover.createCrossover()
-
-
-*/
-
-
-
-
-
-
-    }
-
     private BranchingSwitch generateCrossover(SingleSlip Point, double x, double y, String sName,
                                               BranchingSwitch.ViewType ViewType
                                               ) {
@@ -954,58 +761,56 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         PlanData.TrackElementPositionCalc.put(Point.getRemotePoint(), C);
         return C;
     }
+    /*
     private BranchingSwitch generateCrossover(DoubleSlip Point, double x, double y, String sName
 
                                               ) {
-
-
         // can have also equal x Position then isLeftOf returns null
-
-
-
 
         BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, sName );
         this.branchingSwitchList.add(C);
         PlanData.TrackElementPositionCalc.put(Point.getFirstSlipA().getRemotePoint(), C);
         PlanData.TrackElementPositionCalc.put(Point.getSecondSlipB().getRemotePoint(), C);
         return C;
-    }
+    }*/
 
-    public void refreshData() {
-        boolean bInitialized = true;
-        if (!bInitialized) {
-            return;
-        }
-
-
-
-
-
-    }
-
-
+    /**
+     * Manuelles bearbeiten der Gradienten
+     * @param subscription - subcribe
+     */
+    @Deprecated
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.GradientSubscription = subscription;
         this.GradientSubscription.request(1);
     }
-
+    /**
+    * Manuelles bearbeiten der Gradienten
+    */
+    @Deprecated
     @Override
     public void onNext(GradientProfile item) {
         this.GP = item;
         this.GradientSubscription.request(1);
     }
-
+    /**
+     * Manuelles bearbeiten der Gradienten
+     */
+    @Deprecated
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
-
+    /**
+     * Manuelles bearbeiten der Gradienten
+     */
+    @Deprecated
     @Override
     public void onComplete() {
 
     }
-
+    /*
+    @Deprecated
     private class HandelTopologicalPainting {
         private ChainageSupplyInterface chainageSupply;
         private DefaultRepo<TopologyGraph.Node, Integer> topologicalY;
@@ -1082,4 +887,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             return this;
         }
     }
+
+     */
 }

@@ -18,12 +18,25 @@ import org.apache.log4j.Logger;
 import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 
+/**
+ * Client-Handler im TMS. Er behandelt Interaktionen des TMS mit der SL und umgekehrt.
+ * Beides wird in dieser Klasse nur f&uuml;r die TMS Seite definiert.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerMessage> {
 
 
     private static SmartClientHandler instance = null;
     private static Logger logger = Logger.getLogger( SmartClientHandler.class );
 
+    /**
+     * Singelton um den ClientHandler des TMS widerzugeben
+     * @return SmartClientHandler - Handler der Interaktion im TMS
+     */
     public static SmartClientHandler getInstance() {
         if(instance == null) instance = new SmartClientHandler();
         return instance;
@@ -33,7 +46,7 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
     private SynchronousQueue<String> tmsCommandQueue;
     //private SendCommandThreadFromQueue sender;
-    public SmartClientHandler() {
+    private SmartClientHandler() {
         tmsCommandQueue = new SynchronousQueue<>();
 
 
@@ -74,6 +87,13 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
     }*/
 
 
+    /**
+     * Definiert was das TMS unternimmt, solange eine Verbindung zur SL aktiv ist.
+     * Bis jetzt wird konkret der Postausgang des TMS in den Channel gegeben.
+     * @param channelHandlerContext - Netty-Context
+     * @throws Exception - Fehler bei der Kommunikation zur SL
+     */
+
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
         super.channelActive(channelHandlerContext);
@@ -91,6 +111,11 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
     }
 
 
+    /**
+     * Verhalten wenn Fehler zur SL Verbindung auftreten
+     * @param channelHandlerContext - Netty-Context
+     * @param cause - Fehler der auftrat
+     */
 
 
     @Override
@@ -99,6 +124,14 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         channelHandlerContext.close();
     }
 
+    /**
+     * Definiert, was das TMS unternimmt, wenn eine Nachricht der SL eintrifft.
+     * Bisher wird hier unterschieden ob die SL eine Nachricht des RBC weitergegeben hat.
+     * Oder eine Nachricht der SL eintrifft, weil eine MA akzeptiert oder verworfen wurde.
+     * @param channelHandlerContext - Netty-Context
+     * @param smartServerMessage {@link SmartServerMessage} - Nachricht von der SL
+     * @throws Exception - Fehler in der Kommunikation zur SL
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, SmartServerMessage smartServerMessage) throws Exception {
 
@@ -176,7 +209,7 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
     }
 
-    public void sendDummyCommand() {
+    private void sendDummyCommand() {
         CheckMovementAuthority c = CheckMovementAuthority.getDummyMovementAuthorityCommand();
         TmsMovementAuthority tmsCmd = new TmsMovementAuthority("TMS_TEST_ID", "RBC_ID", c);
 
@@ -196,6 +229,11 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
     }
 
+    /**
+     * Diese Methode gibt die TMS-Nachricht in den Postausgang an die SL.
+     * @param TmsCmd {@link TmsMessage} - Nachricht die an die SL gesendet werden soll
+     * @throws MissingInformationException - Fehler
+     */
     public void sendCommand(TmsMessage TmsCmd) throws MissingInformationException {
         this.tmsCommandQueue.offer(TmsCmd.parseToJson());
     }

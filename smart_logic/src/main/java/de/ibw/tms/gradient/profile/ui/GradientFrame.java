@@ -17,7 +17,15 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.ArrayList;
-
+/**
+ * Noch nicht implementiert
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class GradientFrame extends JFrame {
 
     private JList<GradientTrailModel> TrailList;

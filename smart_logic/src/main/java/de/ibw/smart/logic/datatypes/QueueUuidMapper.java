@@ -8,9 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 /**
- * Diese Klasse verwaltet Warteschlangen f&uuml;r eine Nachricht-UUID (Komminikationsverlauf)
- * Die UUID wird f&uuml;r die Kommunitkation zum RBC verwendet
- * Man kann dadurch registrieren ob ein RBC schon eine Nachricht empfangen hat, weil dann ein Acknowledge gesendet wird.
+ * Diese Klasse verwaltet Warteschlangen f&uuml;r eine Nachricht-UUID (Komminikationsverlauf). Die UUID wird f&uuml;r die Kommunitkation zum RBC verwendet. Man kann dadurch registrieren ob ein RBC schon eine Nachricht empfangen hat, weil dann ein Acknowledge gesendet wird.
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3

@@ -19,8 +19,7 @@ import javax.swing.tree.ExpandVetoException;
 import java.io.IOException;
 
 /**
- * Der Smart Server ist ein Server f&uuml;r die Kommunikation der SL zum TMS.
- * Die SL hat in dieser Kommunikation den Serverpart
+ * Der Smart Server ist ein Server f&uuml;r die Kommunikation der SL zum TMS. Die SL hat in dieser Kommunikation den Serverpart
  *
  *
  *
@@ -191,7 +190,7 @@ public class SmartServer extends RbcModul  {
     }
 
     /**
-     * startet disen Server als Thread
+     * startet diesen Server als Thread
      */
     @Override
     public void start() {

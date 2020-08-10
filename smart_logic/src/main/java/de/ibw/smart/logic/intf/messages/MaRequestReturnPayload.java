@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 /**
- * Diese Klasse stellt eine Anwort des SL an das TMS f&uuml;r eine Ma-Anforderung dar
+ * Diese Klasse stellt eine Anwort des SL an das TMS f&uuml;r eine Ma-Anforderung dar.
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de

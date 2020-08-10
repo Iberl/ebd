@@ -8,8 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * Diese Klasse verwaltet die Senderoutine sowohl aus TMS zu SL als auch von SL zum TMS
- * Der Nachrichtentyp wird durch den Templateparameter T bestimmt
+ * Diese Klasse verwaltet die Senderoutine sowohl aus TMS zu SL als auch von SL zum TMS. Der Nachrichtentyp wird durch den Templateparameter T bestimmt
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3

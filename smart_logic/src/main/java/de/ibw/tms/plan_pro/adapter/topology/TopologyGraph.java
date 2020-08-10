@@ -16,19 +16,37 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
+/**
+ * Der Graph aus Knoten und Kante der Topologie
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class TopologyGraph {
 
     private static Node LeftmostNode = null;
 
+    /**
+     * Setzen des Startknotens
+     * @param leftmostNode {@link Node} - Startknoten links
+     */
     public static void setLeftmostNode(Node leftmostNode) {
         LeftmostNode = leftmostNode;
     }
 
+    /**
+     * Holen des Startknotens
+     * @return Node - Holt Startknoten
+     */
     public static Node getLeftmostNode() {
         return LeftmostNode;
     }
 
+    /**
+     * Holt die X-coordinate des Startknotens
+     * @return Double - X-coordinate
+     */
     public static Double getXofCurrentLeftMostNode() {
         if(LeftmostNode == null) {
             return null;
@@ -37,29 +55,64 @@ public class TopologyGraph {
         if(xy == null) return null;
         return xy.getX();
     }
+
+    /**
+     * Repository, das eine Topoologisch Kante {@link Edge} über die String-PlanPro-Id der Knoten speichert
+     */
     public static DefaultRepo<String, DefaultRepo<String, Edge>> twoTopPointBelongsToEdgeRepo = new DefaultRepo<>();
 
 
     // String is the CTOP_Kante_ID
-        public HashMap<String, Edge> EdgeRepo = new HashMap<>();
+    /**
+     * HashMap die für die PlanPro-Kanten ID die Topologische Kante speichert
+     */
+    public HashMap<String, Edge> EdgeRepo = new HashMap<>();
         // String is TopNode_ID
-        public static HashMap<String, Node> NodeRepo = new HashMap<>();
+    /**
+     * HashMap die für die PlanPro-Knoten ID einen Topologische Knoten speichert
+     */
+    public static HashMap<String, Node> NodeRepo = new HashMap<>();
         @Deprecated
         public static HashMap<CPunktObjekt, Node> NodeMap = new HashMap<>();
 
+    /**
+     * Topologischer Knoten
+     */
+    public static class Node extends TrackElement {
 
-        public static class Node extends TrackElement {
-
-            public final String name;
+        /**
+         * Knoten Bezeichnung
+         */
+        public final String name;
+        /**
+         * PlanPro Knoten Id
+         */
             public final String TopNodeId;
-            public Object NodeImpl;
-            public Class  NodeType;
-            public final HashSet<Edge> inEdges;
-            public final HashSet<Edge> outEdges;
+        /**
+         * Knoten realisierung
+         */
+        public Object NodeImpl;
+        /**
+         * Klasse des Knoten
+         */
+        public Class  NodeType;
+        /**
+         * Kanten eingehend
+         */
+        public final HashSet<Edge> inEdges;
+        /**
+         * Kanten ausgehend
+         */
+        public final HashSet<Edge> outEdges;
             //public GeoCoordinates Coordinates;
 
-
-            public Node(String name, String topNodeId, GeoCoordinates GeoCo) {
+        /**
+         * Konstruktur zur instanziierung eines Knoten
+         * @param name {@link String} - Bezeichnung des Knoten
+         * @param topNodeId {@link String} - PlanPro Id des Knoten
+         * @param GeoCo {@link GeoCoordinates} - Coordinaten des Knotens
+         */
+        public Node(String name, String topNodeId, GeoCoordinates GeoCo) {
                 this.name = name;
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
@@ -68,12 +121,19 @@ public class TopologyGraph {
                 NodeRepo.put(this.TopNodeId, this);
 
             }
-            public Node addEdge(Node Node, Edge E){
+
+        /**
+         * Generiert eine Kante diesem und einem weiteren Knoten
+         * @param Node {@link Node} - Weiterer Knoten zur Kante
+         * @param E {@link Edge} - Kante aus beiden Knoten
+         * @return Node - diesen Knoten
+         */
+        public Node addEdge(Node Node, Edge E){
                 //Edge e = new Edge(this, topConnectFromA, node, topConnectFromB, iTopLength);
                 outEdges.add(E);
                 Node.inEdges.add(E);
                 return this;
-            }
+        }
 
             public CrossoverModel getModel() {
                 return CrossoverModel.CrossoverRepo.getModel(this);

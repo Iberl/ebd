@@ -186,14 +186,14 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
             g2d.setStroke(new BasicStroke((float) (R.iStroke / strokeFactor)));
             g2d.draw(R);
         }
-        for(TopRailReturn ReturnRail : PlanData.getInstance().returnRailEdge) {
+        /*for(TopRailReturn ReturnRail : PlanData.getInstance().returnRailEdge) {
             ArrayList<Line2D.Double> topRails =  ReturnRail.lineList;
             for(Line2D.Double RailPart : topRails) {
                 g2d.setStroke(new BasicStroke(ReturnRail.iStroke));
                 g2d.draw(RailPart);
             }
 
-        }
+        }*/
 
         MainGraphicPanel.paintTrains(g2d);
 

@@ -41,8 +41,8 @@ public class MainTmsSim {
 
         @Override
         public void onNext(PlanData planData) {
-            PlanData.setData(planData);
-            System.out.println("onNext called");
+
+
 
             MainTmsSim.MaSubscription.request(1);
             MainTmsSim.MainFrame.revalidate();

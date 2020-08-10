@@ -17,9 +17,20 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Dieser Test kontrolliert ein Modul in der SmartLogic.
+ * Das Modul in der Smart-Safety untersucht, ob alle Routen-Element kontinuierlich verbunden sind.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SmartSafetyContinousConnectTest {
 
-    PlanData PD = PlanData.getInstance();
+
+    private PlanData PD = PlanData.getInstance();
     private ArrayList<TopologyGraph.Node> nodeList;
     private ArrayList<TopologyGraph.Edge> edgeList;
     private final int I_TRYS_FOR_FINAL_ROUTE = 70;
@@ -36,10 +47,11 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
-
-    // all tests of check if route is connected
+    /**
+     * Kontrolliert, dass die Routenliste nicht null sein darf
+     */
     @Test
-    void checkIfMainNullError() {
+    public void checkIfMainNullError() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
 
         try {
@@ -51,8 +63,11 @@ public class SmartSafetyContinousConnectTest {
         }
     }
 
+    /**
+     * Kontrolliert, dass die Routenliste nicht leer sein darf
+     */
     @Test
-    void checkIfRouteIsContinuousWithEmptyTrackList() {
+    public void checkIfRouteIsContinuousWithEmptyTrackList() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         try {
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, new ArrayList<>());
@@ -62,8 +77,12 @@ public class SmartSafetyContinousConnectTest {
             assertTrue(true);
         }
     }
+
+    /**
+     * Kontrolliert das sie SmartSafty erkennt, dass zu wenig Routenelemente gegeben sind.
+     */
     @Test
-    void checkIfRouteIsContinuousWithToLessItems() {
+    public void checkIfRouteIsContinuousWithToLessItems() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         Pair<Route.TrackElementType, TrackElement> test1 = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, this.pickRandomNode());
         TopologyGraph.Node N = pickRandomNode();
@@ -87,8 +106,11 @@ public class SmartSafetyContinousConnectTest {
         }
     }
 
+    /**
+     * Kontrolliert, ob SmartSafety erkennt, dass ein Routen-Element in der Liste null ist.
+     */
     @Test
-    void checkIfSmartSaftyRecogniseInvalidNullValues() {
+    public void checkIfSmartSaftyRecogniseInvalidNullValues() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
@@ -112,10 +134,11 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
-
-
+    /**
+     * Kontrolliert, ob SmartSafety erkennt, dass die Route in Ordnung ist
+     */
     @Test
-    void checkIfRouteContinousShallReturnTrue() {
+    public void checkIfRouteContinousShallReturnTrue() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
@@ -134,19 +157,32 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das Start-Element nicht in Ordnung ist
+     */
+
     @Test
-    void checkRouteHavingWrongStart() {
+    public void checkRouteHavingWrongStart() {
 
         checkRouteHavingWrongConnection(MalifyRouteWithWrongValues.MALIFY_START);
 
     }
 
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das End-Element nicht in Ordnung ist
+     */
+
     @Test
-    void checkRouteHavingWrongEnd() {
+    public void checkRouteHavingWrongEnd() {
 
         checkRouteHavingWrongConnection(MalifyRouteWithWrongValues.MALIFY_END);
 
     }
+
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das Element in der Mitte nicht in Ordnung ist
+     */
+
     @Test
     void checkRouteHavingWrongMiddle() {
 

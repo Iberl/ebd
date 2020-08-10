@@ -37,12 +37,28 @@ import java.util.concurrent.SubmissionPublisher;
 
 import static ebd.rbc_tms.util.ETCSVariables.*;
 
+/**
+ * Diese Komponente implementiert, was das TMS bei eingehenden PositionReports unternimmt.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class PositionReportController extends SubmissionPublisher implements IController {
 
     private static PositionReportController instance;
+
+    /**
+     * Die L&auml;nge des Zuges in Meter, falls das RBC keine Angabe gemacht hat.
+     */
     public double D_DEFAULT_MIN_LENGTH = 10d;
 
-
+    /**
+     * Singelton zu diesem Controller
+     * @return PositionReportController - Controller verwaltet PositionReports im TMS
+     */
     public static PositionReportController getInstance() {
         if(instance == null) {
             instance = new PositionReportController();
@@ -51,7 +67,11 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     }
 
 
-
+    /**
+     * Verwaltet eingehenden PositionReport
+     * @param PositonReport - {@link Payload_14} - Informationen des Position-Reports
+     * @param sRBC {@link String} - Name des RBC
+     */
     public synchronized void servePositionReport(Payload_14 PositonReport, String sRBC) {
         boolean bSaveable = true;
         Integer iEngineId = null;
@@ -251,7 +271,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         MainTmsSim.MainFrame.repaint();
     }
 
-    public double getdDistanceFromRefPointtoBalise(Balise b) {
+    private double getdDistanceFromRefPointtoBalise(Balise b) {
         CDatenpunkt DataPoint = b.getPlanProDataPoint();
         CTOPKante Top = b.getTopPositionOfDataPoint();
 
@@ -272,7 +292,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         return tm;
     }
 
-    public TopologyGraph.Edge findNewTrainPosition(TopologyGraph.Edge newTrainPositionEdge, TopologyGraph.Node targetNode) throws Exception {
+    private TopologyGraph.Edge findNewTrainPosition(TopologyGraph.Edge newTrainPositionEdge, TopologyGraph.Node targetNode) throws Exception {
         TopologyGraph.Node targetN = targetNode;
         Rail Rail_Current = newTrainPositionEdge.getRail();
         CrossoverModel CrossoverMod = CrossoverModel.CrossoverRepo.getModel(targetN);
@@ -305,7 +325,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         return newTrainPositionEdge;
     }
 
-    public double calcDistanceFromDP(int q_scale, double distance_from_dp) {
+    private double calcDistanceFromDP(int q_scale, double distance_from_dp) {
         switch (q_scale) {
             case Q_SCALE_10CM: {
                 distance_from_dp = distance_from_dp * 0.1d;
@@ -323,7 +343,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         return distance_from_dp;
     }
 
-    public TrainModel initTrainModel(Integer iEngineId) {
+    private TrainModel initTrainModel(Integer iEngineId) {
         TrainModel Tm;
         Tm = TrainModel.getDefaultModel();
         Tm.label = String.valueOf(iEngineId);
@@ -335,12 +355,23 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         return Tm;
     }
 
+    /**
+     * Dieser Controller sendet Nachricht an alle Komponenten des TMS, die sich eingeschrieben haben,
+     * dass es einen neuen PositionReport gab.
+     */
     @Override
     public void publish() {
         this.standardSubscription();
         this.submit("Apply Position of Reports");
     }
 
+
+    /**
+     * Eine Liste von eintragenen Empf&auml;ngern, die Nachricht erhalten, wenn PositionReports eintreffen.
+     * Dazu geh&ouml;ren das Zoom-Fenster und Panels das TMS-Hauptfenster und die Fenster, die zum erstellen von
+     * MAs ge&ouml;ffnet wurden.
+     * @return List - eine Liste von Empf&auml;ngern
+     */
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         ArrayList<JPanel> panels = MainTmsSim.trackPanelRepository;

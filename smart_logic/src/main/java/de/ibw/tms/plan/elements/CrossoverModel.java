@@ -16,14 +16,33 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Branching Switch ein Modell einer Weiche Logischer Art.
+ * Verbindet das Geographische Modell der Weiche {@link BranchingSwitch} mit dem Topologischen {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Node}
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class CrossoverModel {
 
-
-
-
+    /**
+     * Ein Repository das einen topologischen Knoten als key hat und diese Vermittlung als Value widergibt.
+     */
     public static DefaultRepo<TopologyGraph.Node, CrossoverModel> CrossoverRepo = new DefaultRepo<>();
+    /**
+     * Ein Repository das den Schlupf als key hat und diese Vermittlung als Value widergibt.
+     */
     public static DefaultRepo<ControlledTrackElement, CrossoverModel> BranchToCrossoverModelRepo = new DefaultRepo<>();
 
+    /**
+     * Factory Method dieser Vermittlung
+     * @param node {@link TopologyGraph.Node } - Topologische Knoten
+     * @param topConnect - {@link TopologyConnect} Anschlussart an diese Weiche - Rechts-Links oder Spitze
+     * @param railWaySlip {@link SingleSlip} - Schlupf dieser weiche
+     * @param railWaySwitch {@link BranchingSwitch} - Geographische Model der Weiche
+     */
     public static void createCrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
         new CrossoverModel(node, topConnect, railWaySlip, railWaySwitch);
     }
@@ -37,7 +56,7 @@ public class CrossoverModel {
     private Rail PeekRail = null;
 
 
-    public CrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
+    private CrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
         Node = node;
         TopConnect = topConnect;
         RailWaySlip = railWaySlip;
@@ -50,7 +69,9 @@ public class CrossoverModel {
 
     }
 
-
+    /**
+     * Verlinkt die Gleise mit dieser Weiche
+     */
     public void createPositionedRelation() {
         HashSet<TopologyGraph.Edge> edges = this.Node.inEdges;
         ArrayList<TopologyGraph.Edge> notPeekEdges = null;
@@ -83,6 +104,10 @@ public class CrossoverModel {
 
     }
 
+    /**
+     * Gibt die Topologische Weiche wider
+     * @return TopologyGraph.Node - Widergabe des Knoten
+     */
     public TopologyGraph.Node getNode() {
         return Node;
     }
@@ -100,6 +125,10 @@ public class CrossoverModel {
 
     }
 
+    /**
+     * Gibt den Schlupf der Weiche wider
+     * @return SingleSlip - Schlupf dieser Weiche
+     */
     public SingleSlip getRailWaySlip() {
         return RailWaySlip;
     }

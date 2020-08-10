@@ -1,6 +1,7 @@
 package de.ibw.tms.intf;
 
 import de.ibw.smart.logic.intf.RbcModul;
+import de.ibw.tms.intf.cmd.CheckMovementAuthority;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,16 +13,37 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
+/**
+ * Client des TMS zum Server in der SmartLogic
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SmartClient extends RbcModul {
 
+    /**
+     * Dieser Konstruktor erstellt den Client.
+     * @param sHost - Host-ip der SmartLogic.
+     * @param iPort - Port des SmartLogic-Host
+     */
     public SmartClient(String sHost, int iPort) {
         super(true, sHost, iPort);
     }
+
+    /**
+     * Client Startet Verbindung zur SmartLogic
+     */
 
     @Override
     public void start() {
         super.start();
     }
+
+    /**
+     * konkretes Verhalten beim Start des Clients
+     */
 
     @Override
     public void run() {

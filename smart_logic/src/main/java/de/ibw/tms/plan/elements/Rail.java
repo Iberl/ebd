@@ -16,31 +16,72 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Geographisches Gleis
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
+    /**
+     * Click-Abstand dieses Gleises zum Clickpunkt
+     */
     public static double dRailTolerance = 2.0d;
 
+    /**
+     * Name des Gleissegmentes
+     */
     public String segmentName = " ";
     private TopologyGraph.Edge Edge;
 
+    /**
+     * Gibt die Topologiesche Kante dieses Gleis wider
+     * @return {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
+     */
     public TopologyGraph.Edge getEdge() {
         return Edge;
     }
 
+    /**
+     * Setzt Topologische Kante
+     * @param edge {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
+     */
     public void setEdge(TopologyGraph.Edge edge) {
         Edge = edge;
     }
 
+    /**
+     * Zeichendicke der Gleiskante
+     */
     public int iStroke = 3;
 
     private Trail TrailModel;
 
+    /**
+     * Gibt logisches Model des Gleises wieder
+     * @return Trail
+     */
     public Trail getTrailModel() {
         return TrailModel;
     }
 
+    /**
+     * Verbindung eines TrackElments am Ende A
+     */
     public IConnectable ConA;
+    /**
+     * Verbindung eines TrackElments am Ende B
+     */
     public IConnectable ConB;
+
+    /*
+     *
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
 
     public Rail(float x1, float y1, float x2, float y2) {
         super(x1 *PlanData.f_STRETCH_X, y1, x2 * PlanData.f_STRETCH_X,
@@ -69,7 +110,24 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
         this.segmentName = sectionName;
 
     }
+*/
 
+    /**
+     * Dieser Konstruktur erstellt ein Geographisches Gleis
+     * @param x1 - xPosition 1
+     * @param y1 - yPosition 1
+     * @param x2 - xPosition 2
+     * @param y2 - yPosition 2
+     * @param addTo {@link List} - Liste von Gleisen, die diese Gleis zugeordnet werden, nach erstellung
+     * @param IConA {@link TrackElement} - Anschluss A
+     * @param IConB {@link TrackElement} - Anschluss B
+     * @param Cb - not used
+     * @param Cc - not used
+     * @param Navigal - {@link ApplicationDirection} von A zu B, oder B zu A, oder beides
+     * @param vmax int - maximale Geschwindigkeit auf diesem Gleis
+     * @param Direction - {@link ApplicationDirection} Streckenrichtung von A zu B oder B zu A
+     * @param Status - {@link TrackElementStatus} Noch nicht benutzt
+     */
     public Rail(double x1, double y1, double x2, double y2, List<Rail> addTo, IConnectable IConA, IConnectable IConB,
          Chainage Cb, Chainage Cc,  ApplicationDirection Navigal, int vmax, ApplicationDirection Direction, TrackElementStatus Status
     ) {
@@ -86,15 +144,11 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
         PlanData.TrackElementPositionCalc.put(TrailModel, this);
     }
 
-    public double getXatPort(boolean isPortA) {
-        if(isPortA) return this.x1;
-        else return this.x2;
-    }
-    public double getYatPortA(boolean isPortA) {
-        if(isPortA) return this.y1;
-        else return this.y2;
-    }
 
+    /**
+     * Kontextmenu-Elemente bei Rechtsklick am Gleis
+     * @return List - Ui-Komponenten
+     */
 
     @Override
     public ArrayList<JComponent> getViewElements() {
@@ -104,11 +158,19 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
         return uiList;
     }
 
+    /**
+     * Bezeichnung des Gleises
+     * @return String
+     */
     @Override
     public String getViewName() {
         return "Rail";
     }
 
+    /**
+     * Gibt Trail als Logik wider
+     * @return Trail
+     */
     @Override
     public TrackElement getTrackReference() {
         return this.getTrailModel();

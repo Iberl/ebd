@@ -50,22 +50,60 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
 
+
+/**
+ * Dieses Modul stellt alle Tests dar, die die SmartLogic bei eingehenden Anfragen des TMS unternehmen muss.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SmartSafety {
+    /**
+     * Modulname der Smart-Safety im Logging
+     */
     public static final String SMART_SAFETY = "SMART-SAFETY";
+    /**
+     * Untermodul der Routenanalyse der Smart-Safety im Logging
+     */
     public static final String TRACK_SAFETY = "TRACK-SAFETY";
+    /**
+     * Untermodul der Selbstuntersuchung der Smart-Logic
+     */
     public static final String SELF_CHECK = "SELF-CHECK";
+    /**
+     * Nachricht, wenn ein noch nicht definiertes Routen-Element besteht.
+     */
     public static final String UNKNOWN_TRACK_ELEMENT_GIVEN = "Input Track Element Is Unknowed (Only Edges and Nodes allowed)";
     private static SmartSafety instance;
+    /**
+     * Ein Repository, dass durch eine ZugId die Positionsdaten des Zuges speichert.
+     */
     public static DefaultRepo<Integer, PositionInfo> lastPositionReport = new DefaultRepo<>();
+    /**
+     * Ein Repository, dass durch eine ZugId, die Zugdaten zum Zug speichert.
+     */
     public static DefaultRepo<Integer, TrainInfo> trainInformation = new DefaultRepo<>();
+    /**
+     * Ein Repository, dass durch eine ZugId, vergangene Positionsdaten speichert.
+     */
     public static DefaultRepo<Integer, CircularFifoBuffer> positionHistory  = new DefaultRepo<Integer, CircularFifoBuffer>();
     // when trespass new Trail between new Endnode save meters of passed tracks form balise on
     // if balise is not on current trail we know how far it is away
     // First Integer is Train ID // Second Integer is meter of from balise to nearest point of currentTrack
+    /**
+     * Ein Repository, das f&uuml;r eine Zug Id, die Meter ab der letzten Balise speichert
+     */
     public static DefaultRepo<Integer, Integer> passedMetersSinceLrbg = new DefaultRepo<>();
 
     private EventBusManager EBM = null;
 
+    /**
+     * Ein Singleton, dass Sicherheitslogic der SmartLogic widergibt.
+     * @return SmartSafety - Die Sicherheitsanalyse der SmartLogic
+     */
     public static SmartSafety getSmartSafety() {
         if(instance == null) {
             instance = new SmartSafety();
@@ -102,7 +140,15 @@ public class SmartSafety {
 
     }
 
-
+    /**
+     * Methode die untersucht ob auf der angeforderten MA blockierte Streckenabschnitte bestehen.
+     * Es kann zum Beispiel durch einen anderen Zug auf der Strecke, blockierte Abschnitte bestehen.
+     * @param maRequest - {@link MaRequestWrapper } - Anfragedaten zur MA
+     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
+     * @param requestedTrackElementList {@link ArrayList} - Eine Liste der Routenelemente die auch nicht blockiert
+     *                                                   sein sollten. Das untersucht diese Methode.
+     * @return - hat die Route keine blockierten Elemente oder Abschnitte
+     */
     public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
@@ -287,7 +333,7 @@ public class SmartSafety {
         else return dDistanceBaliseFromA - (iDistance_lrbg * Math.pow(10, iQ_scale) / 10.0d - iMetersOnPassedTracks);
     }
 
-    public synchronized PositionInfo guardCheckIfPositonReportIsOk(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, AtomicInteger iSumSectionsLength) throws Exception {
+    private synchronized PositionInfo guardCheckIfPositonReportIsOk(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, AtomicInteger iSumSectionsLength) throws Exception {
         int iTrainId;
         int iNID_LRBG;
         Balise B;
@@ -348,6 +394,12 @@ public class SmartSafety {
         blockList.update(iTrainId, blockedAreasById);
     }
 
+    /**
+     * Diese Methode unterscuht ob alle Routenelemente durchwegs verbunden sind.
+     * @param maRequest - {@link MaRequestWrapper} - Anfragedatend des TMS
+     * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
+     * @return boolean - ist Route durchwegs verbunden
+     */
     public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         if(requestedTrackElementList == null) {
             throw new NullPointerException("Track List is null");
@@ -543,12 +595,23 @@ public class SmartSafety {
         return false;
     }
 
+    /**
+     * Noch Nicht implementiert
+     * Untersucht ob alle Status der Streckenelemente in Ordnung sind.
+     * @param maRequest - {@link MaRequestWrapper } - Anfragedaten zur MA
+     * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
+     * @return boolean
+     */
     public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         return true;
     }
 
 
-
+    /**
+     * Untersucht ob der PositionReport valide ist
+     * @param PositionReport {@link Message} - RBC - PositionReport
+     * @return boolean - ist Positionsangabe valide
+     */
     public synchronized boolean handlePositionReport(Message<Payload_14> PositionReport) {
         try {
             int iTrainId;
@@ -608,7 +671,7 @@ public class SmartSafety {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    public void handlePositionHistory(int iTrainId, PositionInfo posInf) {
+    private void handlePositionHistory(int iTrainId, PositionInfo posInf) {
         CircularFifoBuffer buffer = positionHistory.getModel(iTrainId);
         if(buffer == null) buffer = new CircularFifoBuffer(100);
         buffer.add(posInf);
@@ -670,6 +733,11 @@ public class SmartSafety {
         return summary.getTestsFailedCount() == 0L;
     }
 
+    /**
+     * Untersucht ob die SmartLogic richtig funktioniert
+     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
+     * @return boolean - funktioniert SL
+     */
     public synchronized boolean slSelfCheck(RbcMaAdapter maAdapter) {
 
         if(smartLogicWorking()){
@@ -680,14 +748,32 @@ public class SmartSafety {
 
         return false;
     }
+
+    /**
+     * Noch nicht implementiert
+     * @param tms_id
+     * @return
+     */
     public synchronized boolean verifyTms(String tms_id) {
         return true;
     }
+
+    /**
+     * Noch nicht implementiert
+     * @param maRequest
+     * @param ma
+     * @return
+     */
     public synchronized boolean verifyTrainID(MaRequestWrapper maRequest, MA ma) {
         //return maRequest.Tm.iTrainId > 0;
         return true;
     }
 
+    /**
+     * Noch nicht implementiert
+     * @param maRequest
+     * @return
+     */
     public synchronized boolean checkIfTrainStatusRequestIsFresh(MaRequestWrapper maRequest) {
         // check if Position Report is new 60S
         // Static var PositionReportTimeout
@@ -696,23 +782,34 @@ public class SmartSafety {
     }
 
     /**
+     * Noch nicht implementiert
      * Danger Zones must be retrievable to calculate routes
      * @return
      */
     public synchronized boolean dangerZonesAreReceivable() {
         return true;
     }
-
+    /**
+     * Noch nicht implementiert
+     */
     public synchronized boolean checkTrainForRouteCriteria() {
         return true;
     }
-
+    /**
+     * Noch nicht implementiert
+     */
     public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
     }
+    /**
+     * Noch nicht implementiert
+     */
     public synchronized boolean checkSSP(MA ma) {
         return true;
     }
 
+    /**
+     * Noch nicht implementiert
+     */
     public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
 
     }

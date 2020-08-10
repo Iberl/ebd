@@ -17,8 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 /**
- * Die Smart Logic simuliert das TMS als Proxy.
- * Diese Komponente stellt den Proxy auf ein TMS innerhalb der SL dar.
+ * Die Smart Logic simuliert das TMS als Proxy. Diese Komponente stellt den Proxy auf ein TMS innerhalb der SL dar.
  *
  *
  *

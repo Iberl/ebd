@@ -8,7 +8,14 @@ import javax.swing.*;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
-// Returns to existing Node
+/**
+ *  Not used anymore
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
+@Deprecated
 public class TopRailReturn implements Iinteractable, ITrack {
 
     public TopRailReturn(double dx_startNode, double dy_startNode, double dy_returnEdge, double dx_endNode, double dy_endNode) {

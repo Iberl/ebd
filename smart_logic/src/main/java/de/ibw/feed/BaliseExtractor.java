@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 /**
- * Diese Klasse &uuml;bernimmt das Lesen des PlanProFormates und hinterlegt die dabei verarbeiteten Balisen
+ * Diese Klasse &uuml;bernimmt das Lesen des PlanProFormates und hinterlegt die dabei verarbeiteten Balisen.
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3

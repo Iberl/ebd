@@ -12,25 +12,62 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
+/**
+ * Dieser Befehl entsteht im TMS und weist die SL die beinhaltete MA zu pr&uuml;fen.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class CheckMovementAuthority extends Commands {
+
+    /**
+     * Ma to check
+     */
 
     @Expose
     public MaRequestWrapper MaRequest;
+
+    /**
+     * Nachricht an das RBC
+     */
+
     @Expose
     public RbcMaAdapter MaAdapter;
 
+    /**
+     * Kommunikations UUid
+     */
+
     @Expose
     public UUID uuid;
+
+    /**
+     * Id des TMS
+     */
+
     @Expose
     public String tms_id;
+
+    /**
+     * Id des RBC
+     */
+
     @Expose
     public String rbc_id;
+    /**
+     * Priority dieser Nachricht im Postausgang des TMS
+     */
     @Expose
     public Long lPriority;
 
 
-
+    /**
+     * Dieser Konstruktor erstellt einen neuen leeren Check-Befehl mit einer Priority
+     * @param lPriority long - Priority im TMS Postausgang
+     */
     public CheckMovementAuthority(long lPriority) {
         super(lPriority);
         this.lPriority = lPriority;
@@ -38,9 +75,10 @@ public class CheckMovementAuthority extends Commands {
     }
 
     /**
-     * Parse Command to String
-     * @return String
-     * @throws MissingInformationException
+     * Stellt den Befehl als Json dar.
+     * Es werden nur Elmente mit @Expose verwendet.
+     * @return String - Json-String
+     * @throws MissingInformationException - Fehler beim parsen ins Json.
      */
     public String parseToJson() throws MissingInformationException {
 
@@ -56,6 +94,10 @@ public class CheckMovementAuthority extends Commands {
 
     }
 
+    /**
+     * Std String widergabe
+     * @return String - dieser Nachricht.
+     */
     @Override
     public String toString() {
         return "CheckMovementAuthority{" +
@@ -68,10 +110,21 @@ public class CheckMovementAuthority extends Commands {
                 '}';
     }
 
+    /**
+     * Hashcode dieser Nachricht
+     * @return int - hashcode
+     */
+
     @Override
     public int hashCode() {
         return Objects.hash(CommandType, MaRequest, MaAdapter, uuid, tms_id, rbc_id, lPriority);
     }
+
+    /**
+     * Vergleich ob dieser Befehl und o derselbe sei.
+     * @param o {@link Object} - Vergleichsobject
+     * @return boolean - ist dieser Befehl derselbe wie o
+     */
 
     @Override
     public boolean equals(Object o) {

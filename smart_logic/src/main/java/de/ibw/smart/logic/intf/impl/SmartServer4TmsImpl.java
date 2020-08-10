@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 /**
- * Diese Klasse verwaltet die Serverroutine des SL Servers
+ * Diese Klasse verwaltet die Serverroutine des SL Servers.
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de

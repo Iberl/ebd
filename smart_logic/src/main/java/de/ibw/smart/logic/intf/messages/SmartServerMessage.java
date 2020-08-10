@@ -12,8 +12,7 @@ import java.lang.reflect.Type;
 import java.security.InvalidParameterException;
 
 /**
- * Diese Klasse stellt eine Nachricht von SL zum TMS dar oder umgekehrt
- * Sie ist Priorisierbar und implmentiert de&szlig;halb Comparable
+ * Diese Klasse stellt eine Nachricht von SL zum TMS dar oder umgekehrt. Sie ist Priorisierbar und implmentiert de&szlig;halb Comparable.
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
