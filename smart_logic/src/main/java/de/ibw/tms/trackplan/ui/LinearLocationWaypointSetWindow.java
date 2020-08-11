@@ -13,11 +13,27 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-public class LinearLocationWayointSetWindow extends JDialog {
+/**
+ * Verwaltet Distanzfeld des Routenendes auf dem letzten Gleis einer topologischen Kante.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
+public class LinearLocationWaypointSetWindow extends JDialog {
     private RouteController RouteController;
-    JLabel StatusLabel = new JLabel("",JLabel.CENTER);
-    public LinearLocationWayointSetWindow(TrackElement TE, JFrame Frame, Point P, RouteController RC,TrainModel startingPointTrain) {
+    private JLabel StatusLabel = new JLabel("",JLabel.CENTER);
+
+    /**
+     * Erstellt den Dialog mit Schiebebalken
+     * @param TE - Letzte Element der Route der MA
+     * @param Frame - Zu welchen Frame wird der Dialog gesetzt.
+     * @param P - Position dieses Dialoges
+     * @param RC {@link RouteController} - Verwaltung falls neue Route angelegt wird
+     * @param startingPointTrain  {@link TrainModel} - Zug zu dieser MA
+     */
+    public LinearLocationWaypointSetWindow(TrackElement TE, JFrame Frame, Point P, RouteController RC, TrainModel startingPointTrain) {
 
         super(Frame, "Set Linear Waypoint", true);
 
@@ -55,7 +71,7 @@ public class LinearLocationWayointSetWindow extends JDialog {
         StatusLabel.setText("Chainage Value: " + ChainageSlider.getValue());
         ChainageSlider.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                LinearLocationWayointSetWindow.this.StatusLabel.setText("Chainage Value : " + ((JSlider)e.getSource()).getValue());
+                LinearLocationWaypointSetWindow.this.StatusLabel.setText("Chainage Value : " + ((JSlider)e.getSource()).getValue());
             }
         });
         listPane.add(new JLabel("Set Chainage"));
@@ -67,11 +83,11 @@ public class LinearLocationWayointSetWindow extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                LinearLocationWayointSetWindow.this.getRouteModel().setEndSpot(TE, ChainageSlider.getValue());
+                LinearLocationWaypointSetWindow.this.getRouteModel().setEndSpot(TE, ChainageSlider.getValue());
 
 
-                LinearLocationWayointSetWindow.this.RouteController.publish();
-                LinearLocationWayointSetWindow.this.dispose();
+                LinearLocationWaypointSetWindow.this.RouteController.publish();
+                LinearLocationWaypointSetWindow.this.dispose();
             }
         });
         listPane.add(SubmitButton);
@@ -84,8 +100,10 @@ public class LinearLocationWayointSetWindow extends JDialog {
     }
 
 
-
-
+    /**
+     * Holt Route zu diesem Dialog
+     * @return Route
+     */
     public Route getRouteModel() {
         return this.RouteController.getRouteData();
     }

@@ -28,10 +28,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
+/**
+ * Verwaltet Mas. Mas dieses Controllers werden in einem Track-Dialog-Angelegt.
+ * Dieser hat wie das Hauptfenster eine Karte.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
+public class TrackController extends SubmissionPublisher<String> implements IController<String> {
 
-public class TrackController extends SubmissionPublisher<PlanData> implements IController<PlanData> {
-
-
+    /**
+     * Holt den Kontroller der zum angegebenen Fenster geh&ouml;rt.
+     * @param TrackPanel - Das Fenster zu dem der Controller angefragt wird
+     * @return TrackController - Verwaltung von Mas
+     */
     public static TrackController getInstance(TrackplanGraphicPanel TrackPanel) {
 
             return new TrackController(TrackPanel);
@@ -39,6 +51,9 @@ public class TrackController extends SubmissionPublisher<PlanData> implements IC
 
     }
 
+    /**
+     * Speichert letzeten Punkt, den der Nutzer angeclickt hat
+     */
     public static Point ClickPoint = null;
 
 
@@ -50,10 +65,16 @@ public class TrackController extends SubmissionPublisher<PlanData> implements IC
     private JPopupMenu EditMaMenu;
     private JPopupMenu DeleteMaMenu;
 
+    /**
+     * Beantragt, dass Nutzer eine neue Ma definieren will. Das Fenster wird aufgemacht.
+     */
     public void requestMaAction() {
         new MaCreatingFrame(new MaRequestWrapper(null), MainTmsSim.MainFrame);
     }
 
+    /**
+     * Vorhandene MA soll bearbeitet werden.
+     */
     public void editMaAction() {
         JLabel emptyLabel = new JLabel("keine MA beantragt");
         EditMaMenu = new JPopupMenu();
@@ -123,6 +144,11 @@ public class TrackController extends SubmissionPublisher<PlanData> implements IC
         }
     }
 
+    /**
+     * Verwaltet Clicks auf der Zeichenebene.
+     * @param point {@link Point} Stelle an die geclickt wurde
+     * @param isMainWindow - wurde auf dem Hauptfenster geclickt.
+     */
     public void handleMousePress(Point point, boolean isMainWindow) {
         TranslationModel MapTranslation = TranslationModel.getInstance();
         ZoomModel Zoom = TranslationModel.TrackplanEnvironment.CurrentEnvironment.Zoom;
@@ -157,19 +183,25 @@ public class TrackController extends SubmissionPublisher<PlanData> implements IC
         if(panels.size() > 0) new TrackWindow(panels, point, isMainWindow);
     }
 
-    public RouteViewPort getRoutePort() {
-        return RoutePort;
-    }
+
+    /**
+     * Ma ver&auml;nderung wird weitergegeben
+     */
 
     @Override
     public void publish() {
         this.standardSubscription();
-        this.submit(this.DataModel);
+        this.submit("Ma changed");
 
         //this.close();
         //this.subs
     }
 
+    /**
+     * Liste aller zu benachrichtigten Komponenten.
+     * Bisher nur das Hauptfenster.
+     * @return List - Benachrichtigte Komponenten.
+     */
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         List<Flow.Subscriber> returnList = new ArrayList<Flow.Subscriber>();
@@ -177,10 +209,17 @@ public class TrackController extends SubmissionPublisher<PlanData> implements IC
         return returnList;
     }
 
+    /**
+     * Setzt die Vermittlung zu Routen
+     * @param routePort {@link RouteViewPort} - Vermittlung zu Routen
+     */
     public void setRouteViewPort(RouteViewPort routePort) {
         this.RoutePort = routePort;
     }
 
+    /**
+     * Entfernt eine entworfene nicht gesendete MA.
+     */
     public void deleteMaAction() {
         JLabel emptyLabel = new JLabel("keine MA beantragt");
         DeleteMaMenu = new JPopupMenu();

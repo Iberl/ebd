@@ -19,7 +19,7 @@ public class Cartesian {
 
 
             public void run() {
-                CartesianDialog frame = new SpeedDialog(null,new JFrame(), null);
+             //   CartesianDialog frame = new SpeedDialog(null,new JFrame(), null);
 
             }
         });

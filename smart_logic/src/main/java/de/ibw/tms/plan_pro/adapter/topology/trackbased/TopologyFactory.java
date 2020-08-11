@@ -46,6 +46,10 @@ public class TopologyFactory implements ITopologyFactory {
     private List<CTOPKante> topLines; // input
     private DefaultRepo<Class<?>,DefaultRepo<String, CBasisObjekt>> geoBundle; // input
 
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() {
+        return geoBundle;
+    }
+
     private DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo = new DefaultRepo<>(); // output
     private DefaultRepo<String, CTOPKnoten> geoNodeToTopNodeRepo = new DefaultRepo<>(); // output
     private DefaultRepo<String, CGEOKnoten> topNodeToGeoNodeRepo = new DefaultRepo<>(); // output

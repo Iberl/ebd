@@ -32,7 +32,7 @@ public class MainTmsSim {
     public static JFrame MainFrame = null;
     public static ZoomFrame zoomFrame = null;
     public static ArrayList<JPanel> trackPanelRepository = new ArrayList<>();
-    public static Flow.Subscriber<PlanData> MainSubscriber = new Flow.Subscriber<PlanData>() {
+    public static Flow.Subscriber<String> MainSubscriber = new Flow.Subscriber<String>() {
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
             MainTmsSim.MaSubscription = subscription;
@@ -40,7 +40,7 @@ public class MainTmsSim {
         }
 
         @Override
-        public void onNext(PlanData planData) {
+        public void onNext(String planData) {
 
 
 

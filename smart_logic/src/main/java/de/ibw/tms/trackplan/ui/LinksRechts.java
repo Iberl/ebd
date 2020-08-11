@@ -1,5 +1,12 @@
 package de.ibw.tms.trackplan.ui;
-
+/**
+ * Verwaltet Lage zum Gleis in Bahnh&ouml;fen
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public enum LinksRechts {
     LINKS("links"),
     RECHTS("rechts");

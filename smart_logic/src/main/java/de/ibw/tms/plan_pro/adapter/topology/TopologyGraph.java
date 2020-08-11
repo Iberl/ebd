@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 /**
- * Der Graph aus Knoten und Kante der Topologie
+ * Der Graph aus Knoten und Kanten der Topologie
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3
@@ -57,19 +57,19 @@ public class TopologyGraph {
     }
 
     /**
-     * Repository, das eine Topoologisch Kante {@link Edge} über die String-PlanPro-Id der Knoten speichert
+     * Repository, das eine Topoologisch Kante {@link Edge} &uuml;ber die String-PlanPro-Id der Knoten speichert
      */
     public static DefaultRepo<String, DefaultRepo<String, Edge>> twoTopPointBelongsToEdgeRepo = new DefaultRepo<>();
 
 
     // String is the CTOP_Kante_ID
     /**
-     * HashMap die für die PlanPro-Kanten ID die Topologische Kante speichert
+     * HashMap die f&uuml;r die PlanPro-Kanten ID die Topologische Kante speichert
      */
     public HashMap<String, Edge> EdgeRepo = new HashMap<>();
         // String is TopNode_ID
     /**
-     * HashMap die für die PlanPro-Knoten ID einen Topologische Knoten speichert
+     * HashMap die f&uuml;r die PlanPro-Knoten ID einen Topologische Knoten speichert
      */
     public static HashMap<String, Node> NodeRepo = new HashMap<>();
         @Deprecated
@@ -135,56 +135,98 @@ public class TopologyGraph {
                 return this;
         }
 
-            public CrossoverModel getModel() {
+        /**
+         * Diese Methode zieht die Vermittlung zur Weiche
+         * @return CrossoverModel - Vermittlung zur Logischen Weiche
+         */
+        public CrossoverModel getModel() {
                 return CrossoverModel.CrossoverRepo.getModel(this);
             }
 
+        /**
+         * Knotenbezeichnung als String
+         * @return String - Bezeichnung des Knoten
+         */
 
-            @Override
-            public String toString() {
-                return name;
-            }
-
-            @Override
-            public String getViewName() {
-                return this.name;
-            }
+        @Override
+        public String toString() {
+            return name;
         }
 
-        public static class Edge extends TrackElement {
+        /**
+         * Knotenname in Ansichten
+         * @return String - Bezeichnung des Knoten
+         */
+        @Override
+        public String getViewName() {
+            return name;
+        }
+    }
+
+    /**
+     * Topologische Kante
+     */
+    public static class Edge extends TrackElement {
 
 
 
             private Rail R = null;
 
             private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
-
-            public final Node A;
-            public final TopologyConnect TopConnectFromA;
-
-            public final Node B;
-            public final TopologyConnect TopConnectFromB;
+        /**
+         * Knoten A der Kante
+         */
+        public final Node A;
+        /**
+         * Verbindungsart des Knoten A (Spitze, Rechts, Links)
+         */
+        public final TopologyConnect TopConnectFromA;
+        /**
+         * Knoten B dieser Kante
+         */
+        public final Node B;
+        /**
+         * Verbindungsart des Knoten B (Spitze, Rechts, Links)
+         */
+        public final TopologyConnect TopConnectFromB;
+        /**
+         * Kantenl&auml;nge in meter
+         */
             public final double dTopLength;
-            @Expose
-            public String sId;
+        /**
+         * PlanPro KantenId
+         */
+        @Expose
+        public String sId;
 
-            public Boolean isFromNodeAtoNodeBisInTrackDirection() {
-                try {
-                    ICompareTrackMeter CSA = (ICompareTrackMeter) A.NodeImpl;
-                    ICompareTrackMeter CSB = (ICompareTrackMeter) B.NodeImpl;
-                    return CSA.thisHasLowerTrackMeter(CSB);
-                } catch(Exception E) {
-                    E.printStackTrace();
-                    return null;
-                }
+        /**
+         * Diese Methode gibt an ob von Knotea A zum Knoten B dieser Kante in Streckenkilometrierung verl&auml;ft.
+         * @return Boolean - gibt an ob Kante in Streckenorientierung
+         */
+        public Boolean isFromNodeAtoNodeBisInTrackDirection() {
+            try {
+                ICompareTrackMeter CSA = (ICompareTrackMeter) A.NodeImpl;
+                ICompareTrackMeter CSB = (ICompareTrackMeter) B.NodeImpl;
+                return CSA.thisHasLowerTrackMeter(CSB);
+            } catch(Exception E) {
+                E.printStackTrace();
+                return null;
             }
+        }
 
-
-            public ArrayList<CGEOKante> getPaintListGeo() {
+        /**
+         * Geographische Kanten dieser topologischen Kante
+         * @return List - Geo-Kanten-Liste
+         */
+        public ArrayList<CGEOKante> getPaintListGeo() {
                 return paintListGeo;
-            }
+        }
 
-            public void setPaintListGeo(ArrayList<CGEOKante> paintListGeo) {
+        /**
+         * Setzt die Geographische Kante dieser Topologischen Kante
+         * @param paintListGeo - {@link List} - Geo-Kantenliste
+         */
+        public void setPaintListGeo(ArrayList<CGEOKante> paintListGeo) {
                 if(paintListGeo == null || paintListGeo.isEmpty()) throw new IllegalArgumentException("The list of geo edges is empty or null");
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
@@ -274,21 +316,41 @@ public class TopologyGraph {
                 return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
             }
 
-            public Rail getRail() {
+        /**
+         * Gleis-Model (geographisch) dieser Kante.
+         * Hat aber nicht die geographischen Subkanten.
+         * @return Rail - Gleis als Modell
+         */
+        public Rail getRail() {
                 return R;
             }
 
-            public void setRail(Rail r) {
+        /**
+         * Setzt das logische-geographische Gleis dieser topologischen Kante
+         * @param r - {@link Rail} - Das Gleis, das gesetzt wird.
+         */
+        public void setRail(Rail r) {
                 R = r;
             }
 
             private CTOPKante PlanProEdge;
 
-            public CTOPKante getPlanProEdge() {
+        /**
+         * Gibt die Topologische Kante nach Definition in PlanPro wider
+         * @return CTOPKante - PlanPro-Topologische-Kante
+         */
+        public CTOPKante getPlanProEdge() {
                 return PlanProEdge;
             }
 
-
+        /**
+         * Dieser Konstruktur instanziiert eine Topologische Kante
+         * @param A {@link Node} - Topologischer Knoten A
+         * @param topConnectFromA {@link TopologyConnect} - Verbindungsart an A (Rechts, Links, Spitze)
+         * @param B {@link Node} - Topologischer Knoten B
+         * @param topConnectFromB {@link TopologyConnect} - Verbindungsart an B (Rechts, Links, Spitze)
+         * @param Edge - {@link CTOPKante} - PlanPro-Modell dieser Kante
+         */
             public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB, CTOPKante Edge) {
                 this.A = A;
 
@@ -316,6 +378,12 @@ public class TopologyGraph {
                 twoTopPointBelongsToEdgeRepo.update(Edge.getIDTOPKnotenB().getWert(), SecondPointToEdgeRepo);
 
             }
+
+        /**
+         * Diese Method vergleicht zwei Kanten ob sie identisch sind
+         * @param obj - {@link Object} - Kantenobject zum Vergeich mit dieser Kante
+         * @return boolean - gibt an ob die Kanten identisch sind
+         */
             @Override
             public boolean equals(Object obj) {
                 Edge e = null;
@@ -328,12 +396,22 @@ public class TopologyGraph {
                 return e.A == A && e.B == B;
             }
 
-            @Override
+        /**
+         * Bezeichnung der Kante in Ansichten
+         * @return String - Ansichtsname der Kante
+         */
+        @Override
             public String getViewName() {
                 //TODO:
                 return null;
             }
 
+        /**
+         * Diese Methode untersucht ob zwei Knoten Ids den Knoten dieser Kante angeh&ouml;ren.
+         * @param sIdTopNode1 {@link String} - Knoten-Id 1
+         * @param sIdTopNode2 {@link String} - Knoten-Id 2
+         * @return boolean - gibt an ob die Knoten dieser Kante teilhaft sind
+         */
             public boolean checkIfStartAndEndpointBelongsToThisEdge(String sIdTopNode1, String sIdTopNode2) {
                 String sThisNode1 = this.getPlanProEdge().getIDTOPKnotenA().getWert();
                 String sThisNode2 = this.getPlanProEdge().getIDTOPKnotenB().getWert();

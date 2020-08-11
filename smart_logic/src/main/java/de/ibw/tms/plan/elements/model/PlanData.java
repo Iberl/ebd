@@ -24,6 +24,7 @@ import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
+import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
@@ -53,6 +54,13 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
     private ITopologyFactory topologyFactory;
+
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws JAXBException {
+        if(topologyFactory == null) {
+            this.topologyFactory = new TopologyFactory();
+        }
+        return topologyFactory.getGeoBundle();
+    }
 
     private List<GradientSegment> gradientSegmentList = new ArrayList<GradientSegment>();
     private List<SectionOfLine> sectionList = new ArrayList<SectionOfLine>();
@@ -434,14 +442,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 //TODO
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
-                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus(), "");
+                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
                 } else {
 
 
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
-                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus(), "");
+                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
 
@@ -548,7 +556,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         return gradientProfiles;
     }
-
+/*
     private void createBeheimPlan() {
         SingleTrainSubPanel.xFactor = 0.1f;
         Chainage LeftChainage = new Chainage(0);
@@ -744,7 +752,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
     }
-
+*/
     private BranchingSwitch generateCrossover(SingleSlip Point, double x, double y, String sName,
                                               BranchingSwitch.ViewType ViewType
                                               ) {

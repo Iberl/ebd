@@ -27,7 +27,10 @@ public interface ITopologyFactory {
     DefaultRepo<String, CStrecke> getTrackRepo();
     void setTopLines(List<CTOPKante> topLines);
 
-     void setGeoBundle(DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle);
+    DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle();
+    void setGeoBundle(DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle);
+
+
 
      void setGeoNodeToGeoEdgesRepo(DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo);
      TopologyGraph connectTopology();

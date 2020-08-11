@@ -19,10 +19,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
+/**
+ * Panel zum SSP Dialog
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public class SpeedPanel extends CartesianPanel {
 
+    /**
+     * Speichert aktuelles Speed UI
+     */
     public static SpeedPanel CurrentSpeedPanel;
+    /**
+     * Sub Dialog, wenn man in die Zeichenebene clickt.
+     * Er macht die Daten nacheditierbar.
+     */
     public static AddSegmentDialog OpenAddDialog = null;
 
     private Route R = null;
@@ -33,8 +47,11 @@ public class SpeedPanel extends CartesianPanel {
     private int iYFactor = 40;
 
 
-
-
+    /**
+     * Dieser Konstruktor intiert Komponetnen des eigenen Dialogs
+     * @param SpeedModel {@link CartesianSpeedModel} - Model der aktuellen Ansicht
+     * @param RouteData {@link Route} - beantragte Route
+     */
     public SpeedPanel(CartesianSpeedModel SpeedModel, Route RouteData) {
         if(RouteData != null) {
             R = RouteData;
@@ -102,6 +119,10 @@ public class SpeedPanel extends CartesianPanel {
 
     }
 
+    /**
+     * Speichert ein neues Segment in das SSP ein
+     * @param InsertSegment {@link SpeedSegment} - das Segment das angebaut wird
+     */
     public void addSpeedSegment(SpeedSegment InsertSegment){
         SSP NewProfile = new SSP();
         List<SpeedSegment> segmentList = this.getSpeedSortedByXlocaton();
@@ -231,15 +252,15 @@ public class SpeedPanel extends CartesianPanel {
         return end.getEnd().getChainage().getiMeters() >= InsertSegment.getBegin().getChainage().getiMeters();
     }
 
-    protected float calcSpeed(int y) {
+    private float calcSpeed(int y) {
         return ((y- iYFactor) / (float) Y_AXIS_FIRST_Y_COORD) * 350.0f / 10.0f;
     }
 
-    protected float calcMeter(int x, int iStart, int iEnd) {
+    private float calcMeter(int x, int iStart, int iEnd) {
         return iStart +  ((x - X_AXIS_FIRST_X_COORD) / (float) X_AXIS_FIRST_X_COORD - fPaintFactor) * (iEnd - iStart) / 10.0f;
     }
 
-    protected void checkSpeedProfilSet() {
+    private void checkSpeedProfilSet() {
         SSP SpeedProfile = SpeedModel.getStaticSpeedProfile();
         if(SpeedProfile == null) {
             SpeedProfile = new SSP();
@@ -262,7 +283,7 @@ public class SpeedPanel extends CartesianPanel {
         SpeedModel.setStaticSpeedProfile(SpeedProfile);
     }
 
-    protected SpeedSegment initDefaultSpeed() {
+    private SpeedSegment initDefaultSpeed() {
         SpeedChange BeginnChange = new SpeedChange(WayStart.getChainage(), WayStart.getTrackElement(), new SectionOfLine());
         //TODO SPEED Segment
         SpeedChange EndChange = new SpeedChange(WayEnd.getChainage(), WayEnd.getTrackElement(), new SectionOfLine());
@@ -283,7 +304,7 @@ public class SpeedPanel extends CartesianPanel {
 
     }
 
-    public Comparator<SpeedSegment> SpeedComparator() {
+    private Comparator<SpeedSegment> SpeedComparator() {
         return new Comparator<SpeedSegment>() {
             @Override
             public int compare(SpeedSegment lhs, SpeedSegment rhs) {

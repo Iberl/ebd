@@ -42,7 +42,6 @@ class CWKrAnlageAllgTest {
         System.out.println(expenseObj.getLSTZustand().getContainer().getGEOKante().size());
         assertTrue(expenseObj.getLSTZustand().getContainer().getGEOKante().size() > 0);
 
-        PlanProTmsAdapter tmsAdapter = new PlanProTmsAdapter(PlanProTmsAdapter.PlanProVersion.V1_9_0_PATCHED, expenseObj);
 
     }
 

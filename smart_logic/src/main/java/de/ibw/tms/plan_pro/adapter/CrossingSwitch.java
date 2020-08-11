@@ -16,15 +16,27 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 /**
- * Wrapper for mulitible BranchingObjects of Planpro
+ * Ein Wrapper f&uuml;r Weichen aus PlanPro
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
  */
 public class CrossingSwitch implements ICompareTrackMeter {
+
     private CWKrAnlage Anlage;
     private CWKrGspElement Element;
     private CWKrGspKomponente Component;
     private ArrayList<String> supportedTracks = new ArrayList<>();
     private DefaultRepo<String, BigDecimal> TrackMeterByTrackId = new DefaultRepo<>();
 
+    /**
+     * Instanziiert eine Weichenwrappter
+     * @param A {@link CWKrAnlage} - Weicheanlagedaten
+     * @param E {@link CWKrGspElement} - Weichenelement
+     * @param C {@link CWKrGspKomponente} - Weichenkomponente
+     * @throws ParseException - Falls die Streckenkilometrierung sich nicht in double konvertieren l&auml;&szlig;t
+     */
     public CrossingSwitch(CWKrAnlage A, CWKrGspElement E, CWKrGspKomponente C) throws ParseException {
         this.Anlage = A;
         this.Element = E;
@@ -42,23 +54,47 @@ public class CrossingSwitch implements ICompareTrackMeter {
         }
     }
 
+    /**
+     * Gibt Weichenanlagendaten wider
+     * @return CWKrAnlage - Weichenanlage
+     */
     public CWKrAnlage getAnlage() {
         return Anlage;
     }
 
+    /**
+     * Gibt Weichenelement wider
+     * @return CWKrGspElement - Weichen Element
+     */
     public CWKrGspElement getElement() {
         return Element;
     }
 
+    /**
+     * Gibt Weichenkomponente wider
+     * @return CWKrGspKomponente - Weichenkomponente
+     */
     public CWKrGspKomponente getComponent() {
         return Component;
     }
+
+    /**
+     * Gibt die Streckenkilometrierung einer Strecke wider.
+     * @param trackId {@link String} - StreckenId aus PLanPro, die zur Kilometrierung verwendet wird
+     * @return BigDecimal - Streckekilometrierung in Meter
+     */
 
     @Override
     public BigDecimal getTrackMeterByTrackId(String trackId) {
         return this.TrackMeterByTrackId.getModel(trackId);
     }
 
+
+    /**
+     * Gibt eine Liste von Strecken-Ids von Strecken, die eine Kilometrierung auf dieser Weiche haben.
+     * Es kann vorkommen, dass an einem Knoten eine Strecke aufh&ouml;rt und eine neue beginnt.
+     * @return ArrayList - Liste von Strecken-Ids
+     */
     @Override
     public ArrayList<String> getSupportedTracks() {
         return this.supportedTracks;

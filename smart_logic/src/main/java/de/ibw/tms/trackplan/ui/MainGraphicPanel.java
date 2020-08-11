@@ -38,17 +38,26 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.Flow;
 
-
+/**
+ * Das Panel des Hauptfensters
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private static Logger logger = Logger.getLogger( MainGraphicPanel.class );
 
     private static double TrainStroke = 7d;
-    TrackController TrackControl = null;
+    private TrackController TrackControl = null;
 
     private Flow.Subscription subscription = null;
 
 
-
+    /**
+     * Erstellt Komponenten des Hauptfensters
+     */
     public MainGraphicPanel() {
         super();
         new GraphicMoveByMouse(this);
@@ -83,6 +92,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
+    /**
+     * Zeichnte Z&uuml;ge in das Fenster
+     * @param g2d {@link Graphics2D} - Zeichenutil
+     */
     public static void paintTrains(Graphics2D g2d) {
         ZoomModel Zoom = ZoomModel.getInstance();
         double strokeFactor = Math.max(Zoom.getdZoomX(), Zoom.getdZoomY());
@@ -132,7 +145,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         toPaint.x2 = toPaint.x2 * -1;
     }
 
-
+    /**
+     * Zeichnte die Karte im Hauptfenster
+     * @param g - Zeichenutil
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         ZoomModel Zoom = TranslationModel.TrackplanEnvironment.CurrentEnvironment.Zoom;
@@ -220,6 +236,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
     }
 
+    /**
+     * Zeichnet alle Weichen
+     * @param t_Model {@link TranslationModel} - Nachberechnung der Position.
+     * @param zoom {@link ZoomModel }
+     * @param g2d {@link Graphics2D}
+     */
     public static void paintCrossroad(TranslationModel t_Model, ZoomModel zoom, Graphics2D g2d) {
 
 
@@ -265,6 +287,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         // g2d.translate(-t_Model.getdMoveX(), -t_Model.getdMoveY());
     }
 
+    /**
+     * Zeichnet Balisen
+     * @param t_Model {@link TranslationModel} - Nachberechnung der Position.
+     * @param zoom {@link ZoomModel }
+     * @param g2d {@link Graphics2D}
+     */
     public static void paintBalises(TranslationModel t_Model, ZoomModel zoom, Graphics2D g2d) {
         Collection<Balise> balises = Balise.baliseByNid_bg.getAll();
         int iStepper = 0;
@@ -331,7 +359,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
-    public static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) {
+    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
@@ -383,6 +411,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setStroke(prevStroke);
     }
 
+    /**
+     * Berechnet die GeoCoordinate zu einer Topologischen Kante mit Bezug zu einem Knoten mit distanz.
+     * @param TopKanteId {@link String} - Knoten Id PlanPro
+     * @param b_fromA boolean - ist von A gemessen worden
+     * @param distanceA1 double - Abstand zum Referenzknoten
+     * @return GeoCoordinates - Geographischer Punkt
+     */
     public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
@@ -479,25 +514,42 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.fill(arrowHead);
     }
 
+    /**
+     * Schreibt sich ein als Impuls wann neugezeichnet werden soll
+     * @param subscription
+     */
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.subscription = subscription;
         this.subscription.request(1);
     }
 
+    /**
+     * Andere Komponente ruft neuzeichnen herfor
+     * @param planData - unused
+     */
     @Override
     public void onNext(Object planData) {
         this.repaint();
         this.subscription.request(1);
     }
 
+    /**
+     * Fehler beim Neuzeichnen
+     * @param throwable - Fehler
+     */
+
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
 
+    /**
+     * definiert was in Zusatz getan wird wenn neuzeichnen ankommt.
+     */
     @Override
     public void onComplete() {
-        this.repaint();
+
     }
 }

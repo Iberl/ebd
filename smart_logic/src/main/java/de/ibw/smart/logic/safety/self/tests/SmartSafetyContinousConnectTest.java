@@ -221,17 +221,17 @@ public class SmartSafetyContinousConnectTest {
         int iMaliciousIndex =  Math.abs(new Random().nextInt()) % (route.size() - 1);
         Pair<Route.TrackElementType, TrackElement> BadItem = null;
         switch (malifyPosition) {
-            case MALIFY_START -> {
+            case MALIFY_START: {
                 iMaliciousIndex = 0;
 
                 Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
-                    case(0) -> {
+                    case(0): {
                         //invert type of start element
                         return invertType(route, newMalicousRoute, iMaliciousIndex, maliciosItem, OriginalElementType);
                     }
-                    case(1) -> {
+                    case(1): {
                         //replace current start with other
                         return replaceElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex, OriginalElementType, true);
 
@@ -240,7 +240,7 @@ public class SmartSafetyContinousConnectTest {
                 }
 
             }
-            case MALIFY_MIDDLE -> {
+            case MALIFY_MIDDLE: {
                 if(route.size() <= 2) {
                     route =  generateRandomContinousRoute(calcRouteElementAmountWithLowLimit(3));
                     if(route.size() <= 2) throw new IndexOutOfBoundsException("Track long enough is not able to be created");
@@ -251,17 +251,18 @@ public class SmartSafetyContinousConnectTest {
                 else iMaliciousIndex = Math.abs(new Random().nextInt()) % (iEndIndex - iStartIndex) + iStartIndex;
                 return replaceMiddleElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex);
             }
-            case MALIFY_END -> {
+            case MALIFY_END: {
                 iMaliciousIndex = route.size() - 1;
 
                 Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
-                    case(0) -> {
+                    case(0): {
                         //invert type of start element
                         return invertType(route, newMalicousRoute, iMaliciousIndex, maliciosItem, OriginalElementType);
+
                     }
-                    case(1) -> {
+                    case(1): {
                         //replace current start with other
                         return replaceElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex, OriginalElementType, false);
 
@@ -269,12 +270,10 @@ public class SmartSafetyContinousConnectTest {
                     }
                 }
             }
-            default -> {
+            default: {
                 return null;
             }
         }
-
-        return null;
 
     }
 

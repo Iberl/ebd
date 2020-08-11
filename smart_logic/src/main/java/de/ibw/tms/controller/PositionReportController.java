@@ -12,6 +12,7 @@ import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainDistance;
@@ -22,6 +23,7 @@ import de.ibw.util.UtilFunction;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
+import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basistypen._1_9_0.ENUMWirkrichtung;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
@@ -170,16 +172,16 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
 
 
-            DefaultRepo<String, CGEOKnoten> geoPointRepo = refAdapter.geoBundle.getModel(CGEOKnoten.class);
-            DefaultRepo<String, CTOPKnoten> topNodeRepo = refAdapter.geoBundle.getModel(CTOPKnoten.class);
+            DefaultRepo<String, CBasisObjekt> geoPointRepo = PlanData.getInstance().getGeoBundle().getModel(CGEOKnoten.class);
+            DefaultRepo<String, CBasisObjekt> topNodeRepo = PlanData.getInstance().getGeoBundle().getModel(CTOPKnoten.class);
 
             //CTOPKante TopKante =  B.getTopPositionOfDataPoint();
             String sKnotenAid = NewTrainPositionEdge.A.TopNodeId;
             String sKnotenBid = NewTrainPositionEdge.B.TopNodeId;
             CTOPKnoten N_A = (CTOPKnoten) topNodeRepo.getModel(sKnotenAid);
             CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
-            CGEOKnoten GeoNodeA = geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
-            CGEOKnoten GeoNodeB = geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
+            CGEOKnoten GeoNodeA = (CGEOKnoten) geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
+            CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 

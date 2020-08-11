@@ -126,7 +126,7 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @param Navigal - {@link ApplicationDirection} von A zu B, oder B zu A, oder beides
      * @param vmax int - maximale Geschwindigkeit auf diesem Gleis
      * @param Direction - {@link ApplicationDirection} Streckenrichtung von A zu B oder B zu A
-     * @param Status - {@link TrackElementStatus} Noch nicht benutzt
+
      */
     public Rail(double x1, double y1, double x2, double y2, List<Rail> addTo, IConnectable IConA, IConnectable IConB,
          Chainage Cb, Chainage Cc,  ApplicationDirection Navigal, int vmax, ApplicationDirection Direction, TrackElementStatus Status

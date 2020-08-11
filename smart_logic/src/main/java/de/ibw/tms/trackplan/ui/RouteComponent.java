@@ -196,7 +196,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                     public void actionPerformed(ActionEvent e) {
                         if (TrackEl instanceof Trail) {
 
-                            new LinearLocationWayointSetWindow(TrackEl,
+                            new LinearLocationWaypointSetWindow(TrackEl,
                                     new JFrame(), new Point(150, 200), RC, StartingPointTrain);
 
 
@@ -211,7 +211,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                             RouteComponent.this.RC.setRouteData(R);
                             RC.publish();
                         } else {
-                            new LinearLocationWayointSetWindow(TrackEl,
+                            new LinearLocationWaypointSetWindow(TrackEl,
                                     new JFrame(), new Point(150, 200), RC, StartingPointTrain);
                         }
                         //if(!RouteComponent.START_POINT_MODE_ENABLED) {
