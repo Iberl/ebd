@@ -2,6 +2,10 @@ package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.physical.LocatedNetEntity;
 
+/**
+ * Bahnhof
+ * Unused
+ */
 public class StopPosition extends LocatedNetEntity {
     private int effectiveClearance;
     private boolean water;

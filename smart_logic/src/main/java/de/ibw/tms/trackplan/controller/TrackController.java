@@ -164,14 +164,14 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
             if(S.contains(TranslatedPoint)) {
                 if(S instanceof Iinteractable) {
                     de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable)
-                            S, point, this.RoutePort, isMainWindow);
+                            S, this.RoutePort, isMainWindow);
                     panels.add(TrackUtilPanel);
                 }
             }
             if(S instanceof Line2D) {
                 Line2D LineRail = (Line2D) S;
                 if(LineRail.ptSegDist(TranslatedPoint) < Rail.dRailTolerance) {
-                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, point, this.RoutePort, isMainWindow);
+                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
                     panels.add(TrackUtilPanel);
                 }
             }
@@ -180,7 +180,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
 
 
         }
-        if(panels.size() > 0) new TrackWindow(panels, point, isMainWindow);
+        if(panels.size() > 0) new TrackWindow(panels, point);
     }
 
 

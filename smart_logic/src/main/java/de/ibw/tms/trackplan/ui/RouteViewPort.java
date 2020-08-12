@@ -8,13 +8,24 @@ import de.ibw.tms.trackplan.controller.RouteController;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.concurrent.Flow;
-
+/**
+ * Stellt Beziehung zu genau eienr Route eines Zuges zu dem Streckenfenster einer MA her.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class RouteViewPort implements Flow.Subscriber<Route> {
 
 
 
     private Route R;
 
+    /**
+     * Gibt aktuelle Route im Streckenfester wider.
+     * @return Route
+     */
     public Route getRouteModel() {
 
         System.out.println("--getModel--");
@@ -22,6 +33,11 @@ public class RouteViewPort implements Flow.Subscriber<Route> {
         return R;
 
     }
+
+    /**
+     * Setzt die Route einer Ma in dem Streckenfenster
+     * @param routeModel {@link Route} - R
+     */
     public void setRouteModel(Route routeModel) {
         this.R = routeModel;
     }
@@ -30,6 +46,11 @@ public class RouteViewPort implements Flow.Subscriber<Route> {
 
     private RouteController RouteCntrl = null;
 
+    /**
+     * Erstellt den Bezug von Route zum MA-Streckenfenster
+     * @param RouteModel
+     * @param trackPanel
+     */
     public RouteViewPort(Route RouteModel, TrackplanGraphicPanel trackPanel) {
         trackPanel.setRoutePort(this);
         TrackPanel = trackPanel;
@@ -41,13 +62,21 @@ public class RouteViewPort implements Flow.Subscriber<Route> {
 
     private Flow.Subscription windowSubscription;
 
+    /**
+     * h&ouml;rt auf Nachrichten von Routen&auml;nderungen
+     * @param subscription
+     */
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.windowSubscription = subscription;
         subscription.request(1);
     }
 
-
+    /**
+     * Routen&auml;nderung umsetzen
+     * @param item {@link Route}
+     */
 
     @Override
     public void onNext(Route item) {
@@ -68,20 +97,29 @@ public class RouteViewPort implements Flow.Subscriber<Route> {
         this.windowSubscription.request(1);
     }
 
+    /**
+     * Fehler bei eingehender Routennachricht
+     * @param throwable {@link Throwable} Fehler
+     */
+
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
+
+    /**
+     * Nach verarbeiten der Nachricht wird neugezeichnet
+     */
 
     @Override
     public void onComplete() {
         this.TrackPanel.repaint();
     }
 
-    public void setRouteCntrl(RouteController routeCntrl) {
-        RouteCntrl = routeCntrl;
-    }
-
+    /**
+     * Zeichnet Routen in das Ma-Streckenfenster ein
+     * @param g2d {@link Graphics2D} - Zeichenutil
+     */
     public void paintRoute(Graphics2D g2d)  {
 
         Route R = this.getRouteModel();

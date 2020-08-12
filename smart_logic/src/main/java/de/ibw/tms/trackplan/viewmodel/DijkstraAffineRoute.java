@@ -13,6 +13,9 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * unused
+ */
 public class DijkstraAffineRoute {
 
     private ArrayList<Rail> railTrack = new ArrayList<Rail>();

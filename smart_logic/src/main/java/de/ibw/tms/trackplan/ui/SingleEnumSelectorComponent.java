@@ -7,6 +7,17 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Allgemeine Kompontente zum &Auml;ndern von Enums.
+ * Wird derzeit nur bei den Weichen eingesetzt.
+ * Verwaltet Enum-Werte in einer Combobox.
+ * @param <T> {@link EnumModel} - Art des verwalteten Enums.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ *  @since 2020-08-12
+ */
 public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox {
 
 
@@ -17,6 +28,11 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
 
     private T ViewModel = null;
 
+    /**
+     * Initiert Komponente, wenn ein Fenster den Weichenstatus setzt
+     * @param SelectionModel - Modell des Enums
+     * @param C - Gibt gesetzte Werte an alle registrierten Komponenten weiter.
+     */
     public SingleEnumSelectorComponent(T SelectionModel, IController C) {
         super();
         // viewmodel transmitted by controller
@@ -45,6 +61,11 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
         });
 
     }
+
+    /**
+     * Setzt den Status des Enums, weil das Enum eventuell an einer anderen Stelle gesetzt wurde.
+     * @param Selected {@link Enum} - gesetzter Wert des enums
+     */
     public void update(Enum Selected) {
         EnumModel.EnumField[] fields = this.ViewModel.getEnumMappingList();
         EnumModel.EnumField Field = this.ViewModel.getFieldByDataEnum(Selected);
@@ -57,7 +78,7 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
 
     }
 
-    public void publish() {
+    private void publish() {
         this.C.publish();
     }
 

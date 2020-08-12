@@ -2,6 +2,10 @@ package de.ibw.tms.trackplan.ui;
 
 import java.util.ArrayList;
 
+/**
+ * unused
+ * Bahnhof
+ */
 public class PlatformEdge extends StopPosition {
     public static class Entrances {
         private String sZugangsArt;

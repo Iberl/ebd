@@ -24,18 +24,35 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.util.concurrent.Flow;
-
+/**
+ * Dieses Panel stellt ein Kontextmenu dar.
+ * Die Aktionen dieses Menus betreffen das Setzten der Waypoints einer MA Route
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
-    static public Point FocusedPoint = null;
+
+    /**
+     * Stack zum Speichern der Reihenfolge in der Waypoints als TrackElement angelegt werden.
+     * Er wird verwendet um den letzten Waypoint entfernen zu k&ouml;nnen, wenn der Benutzer dies anfordert.
+     */
     static public Stack<TrackElement> lastTrackElements = new Stack<TrackElement>();
 
-    static public boolean START_POINT_MODE_ENABLED = true;
     private String sInitialSpeedMessage = "Please Enter Initial Speed in km/h";
     private String sIntialSpeedTitle = "Set Intial Speed";
     private String sIntialSpeed = "160";
+    /**
+     * Kapselt das angeforderte Geschwindigkeitsprofil der gesamten Strecke.
+     */
     public static CartesianSpeedModel CSM;
+    /**
+     * Subervised Location
+     */
     public static SvL svl = null;
-    static SpeedDialog speedDialog;
+
 
 
     private static TopologyGraph.Edge retrieveNextEdge(TrackElement LastTrackElement, TrackElement TrackEl) {
@@ -55,6 +72,14 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         return null;
     }
 
+    /**
+     * Berechnet die Streckenl&auml;nge in Metern des letzten Streckenabschnitts.
+     * Wird ben&ouml;tigt um den Nutzer eine Auswahl zu geben, wo der Zug am letzten Streckenabschnitt enden soll.
+     * Das ist dann das Ende der MA.
+     * Die Entfernung von letzten Topologie-Knoten bis zum bestimmten Haltepunkt auf dieser letzen Kante der MA in Meter.
+     * @param TrModel {@link TrainModel} - Zug Model des Zuges, dem die MA betrifft
+     * @return double - Strecke in Meter
+     */
     public static double calcTrackLengthUntilLastWayoint(TrainModel TrModel) {
         double dResult = 0d;
         dResult = TrModel.getdDistanceToNodeRunningTo();
@@ -67,23 +92,39 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         return dResult;
     }
 
-
+    /**
+     * Dies ist ein Knopf, der ein Kompontente des RoutenMenus darstellt.
+     * Konkret wird zum Beispiel ein RoutenMenu-Popup ausgel&ouml;st.
+     */
     static class RouteMenu extends JButton {
         private JPopupMenu popup;
-        public Point p;
-        public RouteMenu(String route_options, Point p) {
+
+        /**
+         * Instanziiert den Knopf als ein Menu-Element
+         * @param route_options - {@link String} - Beschriftung des Knopfes
+         */
+        public RouteMenu(String route_options) {
             super(route_options);
             popup = new JPopupMenu();
             addActionListener(new ActionHandler());
-            this.p = p;
+
         }
 
-
-
+        /**
+         * Erstellung vor Anzeigen des Popups.
+         * Das Popup hat mehrere Option zur Route. Hier wird eine Routenoption zum Ausl&ouml;se-Popup hinzugegeben.
+         * @param c {@link JMenuItem} - Option (z.B. Letzten Waypoint entfernen)
+         * @return
+         */
         public JMenuItem add(JMenuItem c) {
             popup.add(c);
-            return(c);
+            return c;
         }
+
+        /**
+         * Entfernen eines Items des Popups bevor es angezeigt wird.
+         * @param c
+         */
         public void remove(Component c) {
             popup.remove(c);
         }
@@ -100,9 +141,6 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
     private ArrayList<JComponent> routeMenuItemList = new ArrayList<JComponent>();
     private static TrainModel StartingPointTrain = null;
 
-    public static TrainModel getStartingPointTrain() {
-        return StartingPointTrain;
-    }
 
     private static void generateRemoveWaypoint(RouteMenu menu, RouteComponent Component) {
         JMenuItem MenuItem = new JMenuItem("Remove Last Waypoint Set");
@@ -162,14 +200,14 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         Component.RC.publish();
     }
 
-    public void generateRouteItems4AddWaypoint(RouteMenu menu) {
-        FocusedPoint = menu.p;
+    private void generateRouteItems4AddWaypoint(RouteMenu menu) {
+
         boolean bIsEndpoint = false;
         if(this.RC.getRouteData().getLocation().getBegin() == null) {
-            if(RouteComponent.START_POINT_MODE_ENABLED) {
+
                 JMenuItem addWaypointItem = new JMenuItem("Set Train for Start-Waypoint");
                 handleStartRoutingPoint(menu, addWaypointItem);
-            }
+
 
         } else if(checkIfPointIsAccessible(TrackEl, bIsEndpoint)) {
 
@@ -285,7 +323,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
     }
 
-    public boolean checkIfEndPointCanBeSet() {
+    private boolean checkIfEndPointCanBeSet() {
         boolean bIsEndpointCheck = true;
         boolean bEndPointAvail = RouteComponent.this.getRouteModel().getLocation().getEnd() == null &&
                 RouteComponent.this.getRouteModel().getLocation().getBegin() != null;
@@ -298,7 +336,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
 
 
-    public boolean checkIfPointIsAccessible(TrackElement TrackEl, boolean isEndpointCheck) {
+    private boolean checkIfPointIsAccessible(TrackElement TrackEl, boolean isEndpointCheck) {
 
         TrackElement LastTrackElement = null;
         if(RouteComponent.lastTrackElements.size() > 0) {
@@ -345,7 +383,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         }
     }
 
-    public boolean handleRoutingOverWaypoint(ControlledTrackElement TrackEl, ControlledTrackElement lastTrackElement) {
+    private boolean handleRoutingOverWaypoint(ControlledTrackElement TrackEl, ControlledTrackElement lastTrackElement) {
         CrossoverModel RootModel = CrossoverModel.BranchToCrossoverModelRepo.getModel(lastTrackElement);
         CrossoverModel TargetModel = CrossoverModel.BranchToCrossoverModelRepo.getModel(TrackEl);
         TopologyGraph.Node RootNode = RootModel.getNode();
@@ -361,7 +399,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         return false;
     }
 
-    protected int setInitialSpeed() {
+    private int setInitialSpeed() {
         String sInputSpeed = showInitialSpeedDialog();
 
 //If a string was returned, say so.
@@ -393,7 +431,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                 sIntialSpeed);
     }
 
-    protected void handleStartRoutingPoint(RouteMenu menu, JMenuItem addWaypointItem) {
+    private void handleStartRoutingPoint(RouteMenu menu, JMenuItem addWaypointItem) {
         addWaypointItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -439,13 +477,31 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         menu.add(addWaypointItem);
     }
 
-    public RouteComponent(TrackElement TrackEl, RouteController RC, Point p) {
+    /**
+     * Erstellt das anzeigefeld innerhalb eines MA-Anlege-Panels.
+     * Wenn dort in die Zeichenebene geclickt wird. Wird f&uuml;r jedes naheligende Shape eine solche RoutenKomponente
+     * innerhalb eines neuen {@link JFrame} angelegt.
+     * @param TrackEl {@link TrackElement} - Ein Element f&uuml;r das eine {@link RouteComponent} angelegt wird.
+     * @param RC {@link RouteComponent} - F&uuml;hrt Aktionen zum Ver&auml;ndern von Routen aus.
+     */
+    public RouteComponent(TrackElement TrackEl, RouteController RC) {
         super();
         setLayout(new FlowLayout());
-        RouteMenu menu = new RouteMenu("Route Options",p);
+        RouteMenu menu = new RouteMenu("Route Options");
         initComponent(TrackEl, RC, menu);
 
 
+    }
+
+    /**
+     * Erstellt das Panel f&uuml;r ein Auswahlmenu von {@link TrackElement} (meinst Knoten)
+     * @param desc - Name Menus-Knopfes in diesem Kontextmenu-Panel.
+     * @param trackReference {@link TrackElement} - Element das dieses Menu betrifft
+     * @param routeCntrl {@link RouteController} - Stellt Aktionen zum &Auml;ndern der Route in dieser Komponente zur Verf&uuml;gung
+     */
+    public RouteComponent(String desc, TrackElement trackReference, RouteController routeCntrl) {
+        RouteMenu menu = new RouteMenu(desc);
+        initComponent(trackReference, routeCntrl, menu);
     }
 
     private void initComponent(TrackElement TrackEl, RouteController RC, RouteMenu menu) {
@@ -467,20 +523,16 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         this.add(menu);
     }
 
-    public RouteComponent(String desc, TrackElement trackReference, RouteController routeCntrl, Point p) {
-        RouteMenu menu = new RouteMenu(desc,p);
-        initComponent(trackReference, routeCntrl, menu);
-    }
 
-    public Route getRouteModel() {
+
+    private Route getRouteModel() {
         return this.RC.getRouteData();
     }
 
-    public RouteController getRC() {
-        return RC;
-    }
-
-
+    /**
+     * Schreibt sich ein &uuml;ber Routen&auml;nderungen informiert zu werden
+     * @param subscription {@link java.util.concurrent.Flow.Subscription} - Einschreibung
+     */
 
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
@@ -488,6 +540,10 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         this.RouteSubscription.request(1);
     }
 
+    /**
+     * Routenver&auml;nderung trifft ein
+     * @param item {@link Route}
+     */
     @Override
     public void onNext(Route item) {
         //no duplicate update from RouteViewPort
@@ -496,10 +552,18 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         this.RouteSubscription.request(1);
     }
 
+    /**
+     * Behandelt Fehler
+     * @param throwable - Fehler
+     */
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
+
+    /**
+     * Bei Routen&auml;nderungen wird neu gezeichnet.
+     */
 
     @Override
     public void onComplete() {

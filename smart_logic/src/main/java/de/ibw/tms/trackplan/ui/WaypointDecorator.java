@@ -9,7 +9,17 @@ import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
+/**
+ * Ein Wrapper von Wapoints.
+ * Start und Endpunkt sind nicht als Waypoints modeliert worden.
+ * Diese Klasse macht auch für Start- oder End-Knoten  - Waypoint-Funktionen verf&uuml;gbar.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class WaypointDecorator extends Waypoint implements IWaypoint, IPaintable {
 
 
@@ -17,7 +27,7 @@ public class WaypointDecorator extends Waypoint implements IWaypoint, IPaintable
     private int y;
 
     private static BufferedImage img = null;
-    public BufferedImage getImage() throws IOException {
+    private BufferedImage getImage() throws IOException {
 
 
         if(null == img) {
@@ -29,8 +39,15 @@ public class WaypointDecorator extends Waypoint implements IWaypoint, IPaintable
 
     }
 
-    public WaypointDecorator(TrackElement startElement, TrackElementStatus TeStatus, int xPixel, int yPixel ) {
-        super( startElement, TeStatus);
+    /**
+     * Wrapt Start oder End Waypoint
+     * @param startOrEndElement {@link TrackElement} - Element soll Wrapper haben
+     * @param TeStatus {@link TrackElementStatus} - Status des angefragten Elementes
+     * @param xPixel int - xPosition des Bildes in der Streckenansicht
+     * @param yPixel int - yPosition des Bildes in der Streckenansicht
+     */
+    public WaypointDecorator(TrackElement startOrEndElement, TrackElementStatus TeStatus, int xPixel, int yPixel ) {
+        super( startOrEndElement, TeStatus);
 
         this.x = xPixel;
         this.y = yPixel;
@@ -38,14 +55,10 @@ public class WaypointDecorator extends Waypoint implements IWaypoint, IPaintable
 
     }
 
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
+    /**
+     * Zeichnet Bild des Decorators mit Beschriftung.
+     * @param g2d {@link Graphics2D} Zeichenutil.
+     */
 
     @Override
     public void paintImage(Graphics2D g2d) {

@@ -1,7 +1,17 @@
 package de.ibw.tms.trackplan.viewmodel;
-
+/**
+ * Dieses Model verwaltet die Position innerhalb der Streckenansicht.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TranslationModel {
-
+    /**
+     * Diese Klasse verwalet die Start-Positionen der unterschiedlichen Karten.
+     */
     public static class TrackplanEnvironment {
 
 
@@ -14,15 +24,30 @@ public class TranslationModel {
         private static TrackplanEnvironment EBDEnv = new TrackplanEnvironment(EBD, new ZoomModel(),
                 "customised/EBD_Martinstein_24_06V3.ppxml");
 
-
+        /**
+         * Gerade benutztes Strecken-Setting
+         */
         public static TrackplanEnvironment CurrentEnvironment = EBDEnv;
 
 
 
-        public TranslationModel Translation;
+        private TranslationModel Translation;
+        /**
+         * Aktiver Zoom-Faktor als Model
+         */
         public ZoomModel Zoom;
+        /**
+         * Ort der Plan-Pro-Datei in den Ressourcen des Java-Packages
+         */
         public String resourceLocation;
 
+        /**
+         * Erstellt ein neues Setting mit Startpostion, Startzoom und Ort der Plan-Pro-Datei als Name in den
+         * Java-Resourcen
+         * @param translation {@link TranslationModel} - Startposition der Kartenansicht
+         * @param zoom {@link ZoomModel} - Startzoom der Kartenansich
+         * @param resourceLocation {@link String} - Name der Plan-Pro-Datei, als Resourcen-Name
+         */
         public TrackplanEnvironment(TranslationModel translation, ZoomModel zoom, String resourceLocation) {
             Translation = translation;
             Zoom = zoom;
@@ -31,11 +56,15 @@ public class TranslationModel {
     }
     
 
-    public TranslationModel(double x , double y) {
+    private TranslationModel(double x , double y) {
         dMoveX = x;
         dMoveY = y;
     }
 
+    /**
+     * Gibt Aktuelle Karten-Positon als Model wider
+     * @return TranslationModel - Kartenposition
+     */
     public static TranslationModel getInstance() {
         return TrackplanEnvironment.CurrentEnvironment.Translation;
     }
@@ -47,27 +76,34 @@ public class TranslationModel {
 
     private String sInfo = "";
 
+    /**
+     * X-Position der betrachteten Kartenansicht
+     * @return double - xpos
+     */
     public double getdMoveX() {
         return dMoveX;
     }
 
+    /**
+     * Setzt neue X-Position des betrachteten Kartenausschnittes.
+     * @param dMoveX double - neue x-Pos
+     */
     public void setdMoveX(double dMoveX) {
         this.dMoveX = dMoveX;
     }
-
+    /**
+     * Y-Position der betrachteten Kartenansicht
+     * @return double - ypos
+     */
     public double getdMoveY() {
         return dMoveY;
     }
-
+    /**
+     * Setzt neue Y-Position des betrachteten Kartenausschnittes.
+     * @param dMoveY double - neue y-Pos
+     */
     public void setdMoveY(double dMoveY) {
         this.dMoveY = dMoveY;
     }
 
-    public String getsInfo() {
-        return sInfo;
-    }
-
-    public void setsInfo(String sInfo) {
-        this.sInfo = sInfo;
-    }
 }

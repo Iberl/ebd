@@ -6,9 +6,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 import java.util.concurrent.Flow;
-
+/**
+ * Fenster zum Einstellen des Zoom-Faktors
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class ZoomFrame extends JFrame {
-    ZoomPanel zoomPanel;
+    private ZoomPanel zoomPanel;
+
+
     private ZoomFrame() {
         super("Zooming");
         this.getContentPane().setLayout(new BorderLayout());
@@ -19,12 +29,17 @@ public class ZoomFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public synchronized void setTrainModels(Collection<TrainModel> models) {
+    private synchronized void setTrainModels(Collection<TrainModel> models) {
         getZoomFrame().zoomPanel.setTrainBoxEntries(models);
         this.repaint();
     }
 
-    public static ZoomFrame zoomInstance = null;
+    private static ZoomFrame zoomInstance = null;
+
+    /**
+     * Singelton - Gibt Zoom Fenster wider
+     * @return ZoomFrame - Das Zoom-Fenster
+     */
     public static ZoomFrame getZoomFrame() {
         if(zoomInstance == null) {
             zoomInstance = new ZoomFrame();
@@ -35,6 +50,10 @@ public class ZoomFrame extends JFrame {
     private static Flow.Subscriber TrainPositionSubscriber = null;
     private static Flow.Subscription PositionSubscription = null;
 
+    /**
+     * Horcht auf Positionswechsel von Z&uuml;gen, damit das Auswahlfeld der Zugreferenz aktuell bleibt.
+     * @return Subscriber - ein Listener der Positiosnswechsel
+     */
     public static Flow.Subscriber getPositionSubscriber() {
         if(TrainPositionSubscriber == null) {
             TrainPositionSubscriber = new Flow.Subscriber() {

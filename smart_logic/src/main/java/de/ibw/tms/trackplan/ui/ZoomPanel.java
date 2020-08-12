@@ -12,25 +12,37 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
+/**
+ * Panel zum Einstellen des Zoom-Faktors
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class ZoomPanel extends JPanel {
 
 
-    JLabel ZoomXLabel;
-    JTextField ZoomXField;
+    private JLabel ZoomXLabel;
+    private JTextField ZoomXField;
 
-    JLabel ZoomYLabel;
-    JTextField ZoomYField;
+    private JLabel ZoomYLabel;
+    private JTextField ZoomYField;
 
-    JButton ZoomInButton;
-    JButton ZoomOutButton;
-    JButton ZoomApplyButton;
-    JFrame Parent;
+    private JButton ZoomInButton;
+    private JButton ZoomOutButton;
+    private JButton ZoomApplyButton;
+    private JFrame Parent;
 
-    JLabel TrainSlectionLabel;
-    JComboBox<TrainModel> TrainBox;
-    JButton FocusButton;
+    private JLabel TrainSlectionLabel;
+    private JComboBox<TrainModel> TrainBox;
+    private JButton FocusButton;
 
+    /**
+     * Erstellt die Kompontenten des Zoom Fensters
+     * @param parentFrame {@link JFrame} - das Zoom Fenster
+     */
     public ZoomPanel(JFrame parentFrame) {
         this.Parent = parentFrame;
 
@@ -107,7 +119,10 @@ public class ZoomPanel extends JPanel {
         }
     }
 
-
+    /**
+     * setzt die registrierten Z&uuml;ge
+     * @param trainModels {@link Collection} alle Zugmodell, die registriert sind
+     */
     public synchronized void setTrainBoxEntries(Collection<TrainModel> trainModels) {
         List<TrainModel> trainList = new CopyOnWriteArrayList<TrainModel>(trainModels);
         TrainBox.removeAllItems();
