@@ -22,46 +22,70 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Flow;
-
+/**
+ * Das Panel unterhalb der Karte beim Erstellen einer MA
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<TrainModel> {
 
+    /**
+     * Die aktuelle Instanz des Panels
+     */
     public static SingleTrainSubPanel TrainPanel;
 
     private Flow.Subscription windowSubscription;
     private TrainModel Tm;
+    /**
+     * PositonsSkalierung von Bilder sollte 1.0f bleiben
+     */
     public static float xFactor = 1.0f;
 
 
-    JLabel TrainIdLabel;
-    JComboBox<TrainModel> TrainBox;
-    JTextField LabelField;
+    private JLabel TrainIdLabel;
+    private JComboBox<TrainModel> TrainBox;
+    private JTextField LabelField;
 
+    /**
+     * Gibt TrainController wider. Er verwaltet &Auml;nderungen des Nutzers am Zug durch die GUI dieses Subpanels
+     * @return TrainController
+     */
     public TrainController getSubController() {
         return SubController;
     }
 
 
 
-    TrainController SubController;
+    private TrainController SubController;
 
-    JButton ColorButton;
-    JButton SetGradientProfile;
-    JButton SetSpeedProfile;
-    JButton NewTrainButton;
-    JButton MaButton;
-    JButton NewTrain;
-    JLabel CategoryLabel;
-    JComboBox CategoryComboBox;
-    JLabel TrainLength;
-    JTextField LengthField;
-    JLabel SpeedLabel;
-    JTextField SpeedField;
-    SpeedProfilePanel SpeedPanel;
-    TrackplanGraphicPanel TGP;
+    private JButton ColorButton;
+    private JButton SetGradientProfile;
+    private JButton SetSpeedProfile;
+    private JButton NewTrainButton;
+    private JButton MaButton;
+    private JButton NewTrain;
+    private JLabel CategoryLabel;
+    private JComboBox CategoryComboBox;
+    private JLabel TrainLength;
+    private JTextField LengthField;
+    private JLabel SpeedLabel;
+    private JTextField SpeedField;
+    private TrackplanGraphicPanel TGP;
+    /**
+     * Frame der dieses Panel beinhaltet
+     */
     public JFrame Parent;
-    JPanel TopPanel;
-    JPanel SecondPanel;
+    private JPanel TopPanel;
+    private JPanel SecondPanel;
 
+    /**
+     * Instanziiert dieses Panel unterhalb der Streckenansicht bei MA beantragungs UIs.
+     * @param TGP {@link TrackplanGraphicPanel} - das Panel behinhaltet die Karte und dieses Panel
+     * @param parentFrame {@link JFrame} - Frame der &uuml;bergeordnet ist
+     */
     public SingleTrainSubPanel(TrackplanGraphicPanel TGP, JFrame parentFrame) {
         super();
         TrainPanel = this;
@@ -188,7 +212,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
 
     }
 
-    public void manageComboBox() {
+    private void manageComboBox() {
 
 
         int iCurrentManagedTrains = TrainBox.getItemCount();
@@ -197,7 +221,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
 
     }
 
-    public void populateTrainBox(Collection<TrainModel> models, int iCurrentManagedTrains) {
+    private void populateTrainBox(Collection<TrainModel> models, int iCurrentManagedTrains) {
         for(int i = 0; i < iCurrentManagedTrains; i++ ) {
             TrainBox.remove(i);
         }
@@ -206,7 +230,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         }
     }
 
-    public void genTrainComboBox() {
+    private void genTrainComboBox() {
         TrainBox = new JComboBox<TrainModel>();
 
         TrainBox.addActionListener(new ActionListener() {
@@ -222,6 +246,10 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         });
     }
 
+    /**
+     * Setzt das Model des Zuges, der durch dieses Panel bearbeitet werden kann
+     * @param tmLocal {@link TrainModel}
+     */
     public void setTrain(TrainModel tmLocal) {
         if(tmLocal == null) return;
         SingleTrainSubPanel.this.Tm = tmLocal;
@@ -411,6 +439,12 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         });
     }
 
+    /**
+     * Schreibt diese Klasse als horchend auf, wenn Zugdaten ankommen.
+     * Das kann durch Position Reports passieren.
+     * @param subscription Flow.Subscription
+     */
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
 
@@ -420,6 +454,11 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
 
     }
 
+    /**
+     * Neue Daten des Zuges
+     * @param item {@link TrainModel}
+     */
+
     @Override
     public void onNext(TrainModel item) {
         this.Tm = item;
@@ -428,15 +467,24 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         this.windowSubscription.request(1);
     }
 
+    /**
+     * Fehler bei verarbeitung ankommender Zugdaten
+     * @param t {@link Throwable} - Fehler
+     */
+
     @Override
     public void onError(Throwable t) {
         t.printStackTrace();
     }
 
+    /**
+     * Wenn Zugdaten ankommen wird das Hauptfenster mit allen Subkomponenten revalidiert.
+     */
+
     @Override
     public void onComplete() {
 
-        this.applyModel();
+
         MainTmsSim.MainFrame.revalidate();
 
     }

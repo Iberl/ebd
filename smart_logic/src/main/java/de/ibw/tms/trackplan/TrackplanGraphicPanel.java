@@ -30,7 +30,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Flow;
-
+/**
+ * Panel das eine Streckenkarte beinhaltet
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
 
 
@@ -38,13 +45,15 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
 
         private Flow.Subscription windowSubscription;
 
-        private boolean display_plot;
 
 
         private RouteViewPort RoutePort;
         private MaRequestWrapper R = null;
 
-
+    /**
+     * Gibt die Route einer MA an, die gerade geplant werden soll
+     * @param routePort {@link RouteViewPort} - Vermittlung
+     */
     public void setRoutePort(RouteViewPort routePort) {
         RoutePort = routePort;
     }
@@ -52,14 +61,19 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
     private TrackController TrackController;
 
 
-
-
+    /**
+     * Gibt die gerade bearbeitete Route wider
+     * @return Route
+     */
     public Route getRouteModel() {
         return this.RoutePort.getRouteModel();
     }
 
 
-
+    /**
+     * Erstellt ein Panel mit der Streckenansicht
+     * @param Request {@link MaRequestWrapper} - zu bearbeitende MA
+     */
     public TrackplanGraphicPanel(MaRequestWrapper Request) {
             super();
             new GraphicMoveByMouse(this);
@@ -113,15 +127,26 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
 
         }
 
-
+    /**
+     * Gibt Vermittlung von Route zum Fenster wider.
+     * @return RouteViewPort
+     */
     public RouteViewPort getRoutePort() {
         return RoutePort;
     }
 
+    /**
+     * Gibt gerade bearbeitende MA wider.
+     * @return MaRequestWrapper - MA in Wrapper
+     */
     public MaRequestWrapper getR() {
         return R;
     }
 
+    /**
+     * Zeichnet die Kartenansicht in dieses Panel
+     * @param g {@link Graphics} - Zeichenutil
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         ZoomModel Zoom = TranslationModel.TrackplanEnvironment.CurrentEnvironment.Zoom;
@@ -248,9 +273,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
 
 
 
-        private void setDisplayPlot(boolean new_display) {
-            display_plot = new_display;
-        }
+
 
         private void drawCenteredString(Graphics2D g2d, String string,
                                         int x0, int y0, float angle) {
@@ -268,6 +291,11 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
             }
         }
 
+    /**
+     * Meldet Sich als Empf&auml;nger von Neuzeichen-Befehlen an
+     * @param subscription {@link java.util.concurrent.Flow.Subscription} Einschreibung
+     */
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
 
@@ -275,16 +303,30 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
         subscription.request(1);
     }
 
+    /**
+     * Bereitet neuen empfang vor, nach erhalt einer Nachricht.
+     * @param item - Nachricht
+     */
+
     @Override
     public void onNext(Object item) {
-        this.repaint();
+
         this.windowSubscription.request(1);
     }
+
+    /**
+     * Behandelt Fehler bei Empfang von Nachricht
+     * @param t - Fehler
+     */
 
     @Override
     public void onError(Throwable t) {
         t.printStackTrace();
     }
+
+    /**
+     * Zeichnet sich neu nach Erhalt eines Befehls.
+     */
 
     @Override
     public void onComplete() {

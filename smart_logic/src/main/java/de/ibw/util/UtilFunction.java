@@ -1,8 +1,21 @@
 package de.ibw.util;
 
 import de.ibw.tms.ma.GeoCoordinates;
-
+/**
+ * Uitilities Allgemeiner Art
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class UtilFunction {
+    /**
+     * Trennt Einheit von Wert. Gibt den Wert als int wider.
+     * @param sInputSpeed {@link String} - Wert und Einheit
+     * @return int
+     * @throws NumberFormatException - Wenn Wert sich nciht als Integer dargestellt werden kann.
+     */
     public static int formatStringToInt(String sInputSpeed) throws NumberFormatException {
         String[] arr = sInputSpeed.split(" ", 2);
 
@@ -16,6 +29,15 @@ public class UtilFunction {
         }
         return iInitialSpeed;
     }
+
+    /**
+     * Gegeben sind zwei Coordinaten. In der Linie auf den beiden Coordinate wird der Punkt widergegeben der den Abstand dA von Coordinate A hat.
+     * @param CalcTarget {@link ICoord} Die ZielCoordinate, das Ergebnis
+     * @param dA - Abstand zu Coordinate A
+     * @param geo_A - {@link GeoCoordinates} A
+     * @param geo_B {@link GeoCoordinates} B
+     * @return ICoord - Ergebnis
+     */
     public static ICoord<Double> calcTargetGeoByStartPoint(ICoord<Double> CalcTarget, double dA, GeoCoordinates geo_A, GeoCoordinates geo_B) {
         double dx_diff = geo_B.getX() - geo_A.getX();
         if(dx_diff == 0d) {

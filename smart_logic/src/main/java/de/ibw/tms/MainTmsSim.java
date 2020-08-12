@@ -21,17 +21,39 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Flow;
-
+/**
+ * Diese Klasse ist der Main-Entry-Point des TMS.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class MainTmsSim {
 
+    /**
+     * Status von Modus bisher nur Normal
+     */
     public enum TmsMode {
-        Normal, EBD
+        Normal
     }
 
+    /**
+     * Id dieses TMS
+     */
     public static String S_TMS_ID = "1";
+    /**
+     * Das Haupfenster
+     */
     public static JFrame MainFrame = null;
-    public static ZoomFrame zoomFrame = null;
+    private static ZoomFrame zoomFrame = null;
+    /**
+     * Panels von UIs beantragter MAs
+     */
     public static ArrayList<JPanel> trackPanelRepository = new ArrayList<>();
+    /**
+     * Horcht auf Befehl neuzuzeichnen
+     */
     public static Flow.Subscriber<String> MainSubscriber = new Flow.Subscriber<String>() {
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
@@ -69,6 +91,10 @@ public class MainTmsSim {
     private static boolean bSendRbcRequest = false;
     private static int iSendDummyPos = 3;
 
+    /**
+     * Main-Entry-Point
+     * @param args
+     */
     public static void main(String[] args) {
         //SmartLogic.createTestSend(true,bFakeReceiver, bSendRbcRequest, iSendDummyPos);
         startAsModul();
@@ -106,16 +132,11 @@ public class MainTmsSim {
         });
     }
 
-    public static CheckMovementAuthority generateMovementAuthority(MaRequestWrapper mar, RbcMaAdapter Ma4Rbc , long lPriority) {
-        /*CheckMovementAuthority resultMa = new CheckMovementAuthority(lPriority, Ma4Rbc);
-        resultMa.MaRequest = mar;
-
-        return resultMa;
-        */
-         return null;
-    }
-
-
+    /**
+     * Erstellt das Hauptfenster des TMS
+     * @param Mode {@link TmsMode}
+     * @return JFrame
+     */
     public static JFrame createTmsFrame(TmsMode Mode) {
         JFrame frame = new JFrame("TMS SIM");
         frame.getContentPane().setLayout(new BorderLayout());
@@ -125,8 +146,6 @@ public class MainTmsSim {
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             addCommandPanel();
             zoomFrame = ZoomFrame.getZoomFrame();
-        } else if(Mode.equals(TmsMode.EBD)) {
-            addSzenarioPanel();
         }
         String className = UIManager.getSystemLookAndFeelClassName();
         try {
@@ -201,22 +220,14 @@ public class MainTmsSim {
         return CommandPanel;
     }
 
-    public static JButton genCloseButton(JWindow CurrentWindow, String sButtonName) {
-        JButton CloseButton = new JButton(sButtonName);
-        CloseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                CurrentWindow.dispose();
 
-            }
-        });
-        return CloseButton;
-    }
+    private static Flow.Subscription MaSubscription;
 
-    public static Flow.Subscription MaSubscription;
+    private static MainGraphicPanel TrackPanel = null;
 
-    public static MainGraphicPanel TrackPanel = null;
-
+    /**
+     * Zeichnet Ma-Beantragunsfenster neu.
+     */
     public static void updateSubViews() {
         if(TrackPanel != null) TrackPanel.repaint();
     }

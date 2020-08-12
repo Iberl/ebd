@@ -8,19 +8,36 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Random;
-
+/**
+ * Modell eines Zuges, das bei Positionreports neu angelegt wird.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TrainModel {
 
-
+    /**
+     * Verwaltet alle Z&uuml;ge als Repository, Keys sind die Nid-Engine-ID, Values das jeweilige Modell.
+     */
     public static ThreadedRepo<Integer, TrainModel> TrainRepo = new ThreadedRepo<>();
 
 
-
+    /**
+     * Verwaltet benutzte Zugbezeichner als Liste
+     */
     public static ArrayList<String> usedLabelList = new ArrayList<String>();
+    /**
+     * Verwaltet bentzte Zugfarben als Liste
+     */
     public static ArrayList<Color> usedColorList = new ArrayList<Color>();
 
 
-
+    /**
+     * Gibt ein Standard-Zug wider
+     * @return TrainModel
+     */
     public static TrainModel getDefaultModel() {
         Color B = Color.BLUE;
         Color R = Color.RED;
@@ -63,60 +80,123 @@ public class TrainModel {
         return sInitial;
     }
 
+    /**
+     * Gibt den topologischen Knoten auf den sich der Zug hinbewegt wider.
+     * @return TopologyGraph.Node
+     */
     public TopologyGraph.Node getNodeTrainRunningTo() {
         return NodeTrainRunningTo;
     }
 
+    /**
+     * Setzt den Topologischen Ziel-Knoten auf den sich der Zug hinbewegt.
+     * @param nodeTrainRunningTo - ToplogyGraph.Node
+     */
     public void setNodeTrainRunningTo(TopologyGraph.Node nodeTrainRunningTo) {
         NodeTrainRunningTo = nodeTrainRunningTo;
     }
 
-
+    /**
+     * Unused
+     * Misst Geschwindigkeit an Punkt
+     */
     public static class SpeedProfile {
         double waypoint;
         int iSpeed;
     }
 
-    @Expose
-    public int iTrainId;
-    @Expose
-    private double x;
+    /**
+     * Nid Engine Id als Integer
+     */
 
     @Expose
-    private double y;
+    public int iTrainId;
+
+
+    /**
+     * Label als String, normalerweise die Nid Engine Id als String
+     */
 
     @Expose
     public String label;
+
+    /**
+     * Kategorie des Zuges
+     */
+
     @Expose
     public String category;
+
+    /**
+     * Ausdehnung des Zuges
+     */
+
     @Expose
     public double length;
+
+    /**
+     * Maximale Geschwindigkeit des Zuges
+     */
+
     @Expose
     public int iSpeedMax = 120;
+
+    /**
+     * Farbe des Zuges auf der Zeichenebene
+     */
     public Color RepresentedColor;
+
+    /**
+     * Topologische Kante auf der, der Zug sich gerade befindet
+     */
+
     @Expose
     private TopologyGraph.Edge EdgeTrainStandsOn;
+
+    /**
+     * Abstand des Zuges auf der Topologischen Kante zum enthalteten Topologischen Knoten
+     */
 
     @Expose
     private TrainDistance DistanceRefPointOfEdge;
 
+
+    /**
+     * Setzt den Abstand des Zuges auf der Toppologischen Kante zum angegebenen Topologischen Referenzknoten
+     * @param distanceRefPointOfEdge
+     */
     public void setDistanceRefPointOfEdge(TrainDistance distanceRefPointOfEdge) {
         DistanceRefPointOfEdge = distanceRefPointOfEdge;
     }
 
+    /**
+     * Gibt Abstand zum Topologischen Referenzknoten auf der Topologischen Zugkante wider
+     * @return
+     */
     public TrainDistance getDistanceRefPointOfEdge() {
         return DistanceRefPointOfEdge;
     }
 
+    /**
+     * Topologischer Knoten auf den sich der Zug hinbewegt.
+     */
     @Expose
     private TopologyGraph.Node NodeTrainRunningTo;
     private double dDistanceToNodeRunningTo;
     private Integer nid_lrbg = null;
 
+    /**
+     * Gibt die Id des Letzen bekannten RBCs dieses Zug-Models wider
+     * @return String
+     */
     public String getsLastKnownRBC() {
         return sLastKnownRBC;
     }
 
+    /**
+     * Setzt die Id des letzten bekannten RBC des Zuges
+     * @param sLastKnownRBC {@link String} - RbcId
+     */
     public void setsLastKnownRBC(String sLastKnownRBC) {
         this.sLastKnownRBC = sLastKnownRBC;
     }
@@ -133,80 +213,103 @@ public class TrainModel {
     public void setNid_lrbg(Integer nid_lrbg) {
         this.nid_lrbg = nid_lrbg;
     }
-
+    @Deprecated
     public Double getdDistanceToBalise() {
         return dDistanceToBalise;
     }
-
+    @Deprecated
     public void setdDistanceToBalise(Double dDistanceToBalise) {
         this.dDistanceToBalise = dDistanceToBalise;
     }
 
     private int Q_DIR = 2;
 
+    /**
+     * Gibt das ETCS Q_DIR_TRAIN aus dem Position-Report des Zuges wider
+     * @return int
+     */
     public int getQ_DIR() {
         return Q_DIR;
     }
 
+    /**
+     * Setzt das ETCS Q_DIR_TRAIN aus dem Position Report des Zuges
+     * @param q_DIR
+     */
     public void setQ_DIR(int q_DIR) {
         Q_DIR = q_DIR;
     }
 
     private Line2D.Double trainUiLine;
 
+    /**
+     * Gibt zu zeichnende Linde des Zuges wider
+     * @return Line2D.Double
+     */
     public Line2D.Double getTrainUiLine() {
         return trainUiLine;
     }
 
+    /**
+     * Setzt die Zeichenpostion des Zuges f&uuml;r die Karte
+     * @param trainUiLine Line2D.Double - Zuglinie
+     */
     public void setTrainUiLine(Line2D.Double trainUiLine) {
         this.trainUiLine = trainUiLine;
     }
 
-
+    /**
+     * Gibt die Toplogische Kante auf die der Zug sich befindet wider.
+     * @return TopologyGraph.Edge - Kante
+     */
     public TopologyGraph.Edge getEdgeTrainStandsOn() {
         return EdgeTrainStandsOn;
     }
 
+    /**
+     * Setzt die Topologische Kante auf die der Zug sich befindet.
+     * @param edgeTrainStandsOn TopologyGraph.Edge - Kante
+     */
     public void setEdgeTrainStandsOn(TopologyGraph.Edge edgeTrainStandsOn) {
         EdgeTrainStandsOn = edgeTrainStandsOn;
     }
 
     private ArrayList<SpeedProfile> requesedSpeedProfile = new ArrayList<SpeedProfile>();
 
+    @Deprecated
     public void addSpeedProfile(SpeedProfile Profile) {
         this.requesedSpeedProfile.add(Profile);
     }
-    public void resetProfile() {
-        requesedSpeedProfile = new ArrayList<SpeedProfile>();
-    }
+
+    /**
+     * Gib Nid-Engine-ID wider
+     * @return int
+     */
     public int getTrainId() {
         return iTrainId;
     }
 
-    public double getX() {
-        return x;
-    }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
+    /**
+     * Gibt Distance zum Toplogischen Knoten wider, auf dem sich der Zug hinbewegt.
+     * @return double
+     */
     public double getdDistanceToNodeRunningTo() {
         return dDistanceToNodeRunningTo;
     }
 
+    /**
+     * Setzt die Distanz zum Toplogischen Knoten auf dem sich der Zug hinbewegt.
+     * @param dDistanceToNodeRunningTo double
+     */
     public void setdDistanceToNodeRunningTo(double dDistanceToNodeRunningTo) {
         this.dDistanceToNodeRunningTo = dDistanceToNodeRunningTo;
     }
 
+    /**
+     *  Zug Nid-Engine-Id
+     * @return String
+     */
     @Override
     public String toString() {
         return this.label;

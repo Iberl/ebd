@@ -121,7 +121,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 }
                 g2d.setPaint(TM.RepresentedColor);
                 System.out.println(sId + " - D1: " + d1 + " - D2" + TD.getdDistance2());
-                paintGeo(g2d, sId,TD.isB_fromA(), d1, TD.getdDistance2(), TM.RepresentedColor,
+                paintGeo(g2d, sId,TD.isIsfromA(), d1, TD.getdDistance2(), TM.RepresentedColor,
                         BS);
             } catch(Exception E) {
                 E.printStackTrace();

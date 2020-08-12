@@ -26,7 +26,15 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
+/**
+ * Controller der die Metadaten zu dem Zug verwaltet
+ * Das kann im MA-Beantragungsfenster unterhalb der Karte editiert werden.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TrainController extends SubmissionPublisher implements IController {
 
 
@@ -36,16 +44,26 @@ public class TrainController extends SubmissionPublisher implements IController 
 
     private boolean isSubscribed = false;
 
+    /**
+     * Gibt Auskunft, dass ein Zug editiert wurde. Benachrichtigt als eingetragenen Empf&auml;nger
+     */
+
     @Override
     public void publish() {
 
         this.standardSubscription();
 
 
-        this.submit(PlanData.getInstance());
+        this.submit("");
 
 
     }
+
+    /**
+     * Definert welche Komponenten benachrichtigt werden.
+     * Bisher ein UnterModul der Hauptklasse des TMS
+     * @return List
+     */
 
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
@@ -54,11 +72,20 @@ public class TrainController extends SubmissionPublisher implements IController 
         return result;
     }
 
+    /**
+     * Instanziert Controller zu einem Zugmodell und der Gui die Daten zum Zug &auml;ndern kann.
+     * @param Tm
+     * @param Tsp
+     */
     public TrainController(TrainModel Tm, SingleTrainSubPanel Tsp) {
         this.Model = Tm;
         this.TrainSubPanel = Tsp;
     }
 
+    /**
+     * &Auml;ndert Name eines Zuges
+     * @param sLabel
+     */
     public void changeLabel(String sLabel) {
         if(TrainModel.usedLabelList.contains(sLabel)) {
             JOptionPane.showMessageDialog(null, "The trainid has to be unique.");
@@ -68,6 +95,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
+    /**
+     * &Auml;ndert Farbe eines Zuges.
+     * @param RepresentedColor {@link Color} Zielfarbe des Zuges
+     */
     public void changeTraincolor(Color RepresentedColor) {
         Color TrainColor = JColorChooser.showDialog(
                 this.TrainSubPanel, "Choose Train Color", RepresentedColor);
@@ -80,6 +111,16 @@ public class TrainController extends SubmissionPublisher implements IController 
 
     }
 
+    /**
+     * Schicht MA zur SmartLogic
+     * @param requestWrapper {@link MaRequestWrapper} - Die Anfrage einer MA an die SL
+     * @param R {@link Route} - die angeforderte Route
+     * @param sRbcId {@link String} - Ziel RBC Id
+     * @param sTmsId {@link String} - Eigene TMS Id
+     * @param uuid - {@link UUID} - Kommunikations Id
+     * @param bIsShunting boolean - Entscheidet ob Shunting am Schluss der SpotLocation der MA
+     * @throws IOException - Fehler beim Senden an die SmartLogic
+     */
     public void requestMovementAuthority(MaRequestWrapper requestWrapper, Route R, String sRbcId, String sTmsId, UUID uuid, boolean bIsShunting) throws IOException {
         boolean m_ack = true;
         RbcMaAdapter MaAdapter = null;
@@ -227,6 +268,12 @@ public class TrainController extends SubmissionPublisher implements IController 
         }
     }
 
+    /**
+     * TODO
+     * Linking in der MA
+     * @param R
+     * @return
+     */
     public LinkingProfileAdapter extractLinkingProfile(Route R) {
         int q_dir = 0;
         int q_scale = 0;
@@ -365,11 +412,18 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
 
-
+    /**
+     * Setzt Art des Zuges auf den angegebenen Wert
+     * @param sCategory {@link String}
+     */
     public void changeCategory(String sCategory) {
         this.Model.category = sCategory;
     }
 
+    /**
+     * Setzt L&auml;nge des Zuges auf angebenen Wert in Meter
+     * @param sLength {@link String} - neue L&auml;nge in Meter
+     */
     public void changeLength(String sLength) {
         try {
             Double dLength = Double.parseDouble(sLength);
@@ -380,7 +434,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
-
+    /**
+     * Setzt die maximale Geschwindigkeit des Zuges
+     * @param sSpeed {@link String} - Speed in (km per h)
+     */
     public void changeSpeed(String sSpeed) {
         try {
             int iSpeed = Integer.parseInt(sSpeed);
@@ -391,10 +448,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
-    public CartesianSpeedModel getCSM() {
-        return CSM;
-    }
-
+    /**
+     * Setzt das Static Speed Profile des Zuges
+     * @param CSM {@link CartesianSpeedModel} - Wrapper f&uuml;r SSP
+     */
     public void setCSM(CartesianSpeedModel CSM) {
         this.CSM = CSM;
     }
