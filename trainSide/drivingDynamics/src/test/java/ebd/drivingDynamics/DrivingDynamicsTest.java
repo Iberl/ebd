@@ -31,7 +31,7 @@ class DrivingDynamicsTest {
         Testhandler th = new Testhandler();
     }
 
-    @Test
+
     void drivingDynamicsTest() throws InterruptedException {
         EventBus eb = EventBus.getDefault();
         String target ="all";

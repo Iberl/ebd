@@ -20,7 +20,7 @@ class PositionTest {
 	/**
 	 * Test method for {@link ebd.globalUtils.position.Position}.
 	 */
-	@Test
+
 	void testPosition() {
 		HashMap<Integer,Location> previousLocations = new HashMap<>();
 		previousLocations.put(1, new Location(1, ETCSVariables.NID_LRBG, null));

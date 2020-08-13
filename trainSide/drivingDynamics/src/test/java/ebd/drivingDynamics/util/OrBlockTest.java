@@ -20,7 +20,7 @@ class OrBlockTest {
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
     }
 
-    @Test
+
     void evalSimple() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}");
@@ -29,7 +29,7 @@ class OrBlockTest {
         assertFalse(orBlock.eval());
     }
 
-    @Test
+
     void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"v\" : { \"op\" : \"<\", \"value\" : 25.0 }}]}");
@@ -38,7 +38,7 @@ class OrBlockTest {
         assertFalse(orBlock.eval());
     }
 
-    @Test
+
     void evalComplex() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"orBlock\" : [{\"v_rel\" : { \"op\" : \">\", \"value\" : 25.0 }}]}]}");

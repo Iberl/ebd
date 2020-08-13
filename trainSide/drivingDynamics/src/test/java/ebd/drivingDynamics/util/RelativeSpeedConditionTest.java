@@ -23,7 +23,7 @@ class RelativeSpeedConditionTest {
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
     }
 
-    @Test
+
     void evalFalse() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");
@@ -32,7 +32,7 @@ class RelativeSpeedConditionTest {
         assertFalse(relativeSpeedCondition.eval());
     }
 
-    @Test
+
     void evalTrue() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \"<\", \"value\" : 25.0 }");

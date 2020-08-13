@@ -53,7 +53,7 @@ class ForwardSplineTest {
         bs1.addKnotToCurve(cc);
     }
 
-    @Test
+
     void addKnotToCurve() {
         ForwardSpline bs01 = new ForwardSpline(0);
         bs01.addKnotToCurve(a);
@@ -63,7 +63,7 @@ class ForwardSplineTest {
         assertEquals(0d,bs01.getLowestXValue());
     }
 
-    @Test
+
     void getPointOnCurve() {
 
         assertEquals(0d,bs0.getPointOnCurve(0d));
@@ -79,7 +79,7 @@ class ForwardSplineTest {
 
 
 
-    @Test
+
     void getIntervallBoundariesOfPoint() {
 
         ArrayList result = bs0.getIntervallBoundariesOfPoint(0.5);
@@ -91,14 +91,14 @@ class ForwardSplineTest {
         assertEquals(2d, result.get(1));
     }
 
-    @Test
+
     void getHighestXValue() {
 
         assertEquals(0d,bs0.getLowestXValue());
         assertEquals(0d,bs1.getLowestXValue());
     }
 
-    @Test
+
     void getHigherOrLastKnotXValue() {
 
         assertEquals(0d,bs1.getLowerOrFirstKnotXValue(1d));

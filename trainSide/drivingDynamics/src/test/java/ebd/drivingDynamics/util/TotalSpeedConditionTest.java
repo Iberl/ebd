@@ -22,7 +22,7 @@ class TotalSpeedConditionTest {
         EventBus.getDefault().postSticky(new NewTrainDataVolatileEvent("test", "", trainDataVolatile));
     }
 
-    @Test
+
     void eval() throws DDBadDataException, ParseException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");

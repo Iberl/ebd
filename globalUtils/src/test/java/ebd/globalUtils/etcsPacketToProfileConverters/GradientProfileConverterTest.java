@@ -49,7 +49,7 @@ class GradientProfileConverterTest {
         p21_2.Q_SCALE = 1;
     }
 
-    @Test
+
     void packet21ToAccGP() {
         ForwardSpline accGP_1 = GradientProfileConverter.packet21ToAccGP(p21_1,0);
         assertEquals(-1 * GRAD_TO_ACC_FACTOR, accGP_1.getPointOnCurve(10d));
@@ -62,7 +62,7 @@ class GradientProfileConverterTest {
         assertEquals(-2 * GRAD_TO_ACC_FACTOR, accGP_2.getPointOnCurve(305d));
     }
 
-    @Test
+
     void packet21ToGP() {
         ForwardSpline gp_1 = GradientProfileConverter.packet21ToGP(p21_1,0);
         assertEquals(-1, gp_1.getPointOnCurve(10d));
@@ -75,7 +75,7 @@ class GradientProfileConverterTest {
         assertEquals(-2, gp_2.getPointOnCurve(305d));
     }
 
-    @Test
+
     void packet21ToGradArray() {
         double[] gradArr_1 = GradientProfileConverter.packet21ToGradArray(p21_1, 0);
         double[] expected_1 = {0,-1,100,1,300,-2};

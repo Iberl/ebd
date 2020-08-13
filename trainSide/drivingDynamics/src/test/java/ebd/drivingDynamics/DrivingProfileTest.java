@@ -25,7 +25,7 @@ class DrivingProfileTest {
 
     }
 
-    @Test
+
     void actionToTake() throws ParseException, DDBadDataException, IOException {
         DrivingProfile drivingProfile = new DrivingProfile(EventBus.getDefault());
         assertEquals("BreakAction", drivingProfile.actionToTake().getClass().getSimpleName());

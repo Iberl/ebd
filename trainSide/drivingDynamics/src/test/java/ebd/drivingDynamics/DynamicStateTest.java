@@ -28,7 +28,7 @@ class DynamicStateTest {
         Testhandler th = new Testhandler();
     }
 
-    @Test
+
     void nextState() {
         EventBus eb = EventBus.getDefault();
         String target = "all";
