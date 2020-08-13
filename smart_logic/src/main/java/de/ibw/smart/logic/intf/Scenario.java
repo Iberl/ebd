@@ -28,7 +28,7 @@ public class Scenario {
 
     public static void main(String[] args) {
 
-            MainTmsSim.MainFrame = MainTmsSim.createTmsFrame(MainTmsSim.TmsMode.EBD);
+
 
 
     }

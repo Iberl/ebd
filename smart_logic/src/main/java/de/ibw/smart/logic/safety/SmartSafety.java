@@ -21,6 +21,7 @@ import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import info.dornbach.dbdclient.DBDClient;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
@@ -395,7 +396,7 @@ public class SmartSafety {
     }
 
     /**
-     * Diese Methode unterscuht ob alle Routenelemente durchwegs verbunden sind.
+     * Diese Methode untersucht ob alle Routenelemente durchwegs verbunden sind.
      * @param maRequest - {@link MaRequestWrapper} - Anfragedatend des TMS
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
@@ -603,6 +604,7 @@ public class SmartSafety {
      * @return boolean
      */
     public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+        DBDClient dbdclient = new DBDClient();
         return true;
     }
 

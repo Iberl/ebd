@@ -24,6 +24,8 @@ public class ConfigHandler {
     public String ipToGUIServer4TMS = "127.0.0.1";
     public String portOfGUIServer4TMS = "11114";
 
+
+
     //Name of the entity to be observed (rbc, trn, gb, all)
     public String entityName = "all";
 
@@ -41,6 +43,10 @@ public class ConfigHandler {
     /*
     boolean
      */
+
+    public boolean isSimulatingEbd = true;
+    public boolean shallUserPrompt4SimulationFile = false;
+
 
     /*
     other

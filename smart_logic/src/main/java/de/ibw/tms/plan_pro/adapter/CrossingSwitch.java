@@ -4,6 +4,7 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import org.greenrobot.eventbus.Logger;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
+import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
@@ -79,10 +80,29 @@ public class CrossingSwitch implements ICompareTrackMeter {
     }
 
     /**
+     * Gibt den Titel einer Weiche im EBD wider. Zum Beispiel "12W14"
+     * @return String - der Titel
+     */
+    public String getEbdTitle() {
+        CWKrGspElement Element = getElement();
+        if(Element == null) return null;
+        CBezeichnungElement B = Element.getBezeichnung();
+        if(B == null) return null;
+        try {
+            return B.getKennzahl().getWert()  + "W" + B.getOertlicherElementname().getWert();
+        } catch(Exception E) {
+            return null;
+        }
+    }
+
+
+    /**
      * Gibt die Streckenkilometrierung einer Strecke wider.
      * @param trackId {@link String} - StreckenId aus PLanPro, die zur Kilometrierung verwendet wird
      * @return BigDecimal - Streckekilometrierung in Meter
      */
+
+
 
     @Override
     public BigDecimal getTrackMeterByTrackId(String trackId) {
@@ -99,6 +119,8 @@ public class CrossingSwitch implements ICompareTrackMeter {
     public ArrayList<String> getSupportedTracks() {
         return this.supportedTracks;
     }
+
+
 
 
 }

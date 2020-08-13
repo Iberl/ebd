@@ -241,9 +241,9 @@ public class SmartSafetyContinousConnectTest {
 
             }
             case MALIFY_MIDDLE: {
-                if(route.size() <= 2) {
+                while(route.size() <= 2) {
                     route =  generateRandomContinousRoute(calcRouteElementAmountWithLowLimit(3));
-                    if(route.size() <= 2) throw new IndexOutOfBoundsException("Track long enough is not able to be created");
+
                 }
                 int iStartIndex = 1; // first element is not releveant for malify middle
                 int iEndIndex = route.size() - 2; // last element is not relevant for malify middle
