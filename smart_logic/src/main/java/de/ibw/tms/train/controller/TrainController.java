@@ -260,6 +260,7 @@ public class TrainController extends SubmissionPublisher implements IController 
             CheckMoveAuthCommand.uuid = uuid;
             TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
+
                 SmartClientHandler.getInstance().sendCommand(Msg);
             } catch (MissingInformationException e) {
                 e.printStackTrace();
