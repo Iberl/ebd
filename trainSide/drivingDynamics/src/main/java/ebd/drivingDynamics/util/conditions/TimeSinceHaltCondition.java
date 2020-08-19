@@ -4,6 +4,7 @@ import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
+import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -58,7 +59,7 @@ public class TimeSinceHaltCondition extends Condition {
     }
 
     @Subscribe
-    public void trainData(NewTrainDataVolatileEvent ntdve){
+    public void trainData(ClockTickEvent cte){
         if(this.trainDataVolatile.getCurrentSpeed() == 0){
             this.timeAt0Speed = AppTime.currentTimeMillis();
         }
