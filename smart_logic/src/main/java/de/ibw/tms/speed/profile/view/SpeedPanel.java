@@ -56,7 +56,7 @@ public class SpeedPanel extends CartesianPanel {
         if(RouteData != null) {
             R = RouteData;
         }
-        List<Waypoint> wayList = R.getWaypointsList();
+
         this.SpeedModel = Objects.requireNonNullElseGet(SpeedModel, CartesianSpeedModel::new);
         LinearLocation L = R.getLocation();
         this.WayStart = (WaypointStart) L.getBegin();

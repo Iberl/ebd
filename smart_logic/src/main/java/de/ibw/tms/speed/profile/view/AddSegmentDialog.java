@@ -72,7 +72,7 @@ public class AddSegmentDialog extends JDialog {
         SubmitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                SpeedSegmentViewModel ViewModel = AddSegmentDialog.this.SegmentViewModel;
+
                 AddSegmentDialog ThisDialog = AddSegmentDialog.this;
                 String sBeginMeter = ThisDialog.beginField.getText();
                 String sEndMeter = ThisDialog.endField.getText();
