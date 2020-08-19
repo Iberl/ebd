@@ -55,12 +55,12 @@ public class BaliseGroup {
 
     // Constructors
 
-    public BaliseGroup(int M_VERSION, int NID_C, int NID_BG, int NID_LRBG, double D_LRBG, boolean Q_LINK, @Nullable Packet_5 linkingInformation) {
+    public BaliseGroup(int M_VERSION, int NID_C, int NID_BG, int NID_LRBG, int direction, double D_LRBG, boolean Q_LINK, @Nullable Packet_5 linkingInformation) {
         this.M_VERSION = M_VERSION;
         this.NID_C = NID_C;
         this.NID_BG = NID_BG;
         this.Q_LINK = Q_LINK;
-        this.location = new Location(NID_BG, NID_LRBG, D_LRBG);
+        this.location = new Location(NID_BG, NID_LRBG, direction, D_LRBG);
         this.linkingInformation = linkingInformation;
     }
 

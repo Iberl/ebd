@@ -31,7 +31,7 @@ class SpeedSupervisorTest {
 
         TrainData trainData = new TrainData(eventBus, 1,192,3);
         eventBus.post(new TrainDataChangeEvent("test", "td","currentSpeed", 51d));
-        Location startLoc = new Location(0, ETCSVariables.NID_LRBG, 0d);
+        Location startLoc = new Location(0, ETCSVariables.NID_LRBG, ETCSVariables.Q_DIR_NOMINAL, 0d);
         Position startPos = new Position(0d,true,startLoc);
         Position curPos = new Position(10d,true,startLoc);
         eventBus.post(new TrainDataChangeEvent("test", "td","currentPosition", curPos));

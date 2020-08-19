@@ -136,7 +136,7 @@ public class MessageAuthorityRequestSupervisor {
         packet0.D_LRBG = (int)(curPos.getIncrement() * 10);
         packet0.Q_SCALE = 0; //All length values have to be in the resolution of 10 cm!
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
-        packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
+        packet0.Q_DIRTRAIN = curPos.getDirection();
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
         packet0.L_TRAININT = (int)(this.lengthTrain * 10);
         packet0.L_DOUBTOVER = 100; //TODO Get this value, in fact, remember this value in the first hand

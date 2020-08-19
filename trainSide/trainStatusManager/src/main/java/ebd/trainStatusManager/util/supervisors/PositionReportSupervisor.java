@@ -168,7 +168,7 @@ public class PositionReportSupervisor {
         packet0.D_LRBG = (int)curPos.getIncrement() + 1;
         packet0.Q_SCALE = 1; //All length values have to be in the resolution of [m]!
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
-        packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
+        packet0.Q_DIRTRAIN = curPos.getDirection();
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
         packet0.L_TRAININT = (int)this.lengthTrain + 1;
         packet0.L_DOUBTOVER = 10; //TODO Get this value, in fact, remember this value in the first hand

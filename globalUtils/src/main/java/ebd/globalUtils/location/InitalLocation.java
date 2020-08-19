@@ -13,6 +13,6 @@ public class InitalLocation extends Location {
      * of the train, when the actual position of the train is still unknown.
      */
     public InitalLocation() {
-        super(ETCSVariables.NID_LRBG_UNKNOWN, ETCSVariables.NID_LRBG, null);
+        super(ETCSVariables.NID_LRBG_UNKNOWN, ETCSVariables.NID_LRBG, ETCSVariables.Q_DIRLRBG_UNKNOWN, null);
     }
 }

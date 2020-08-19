@@ -16,6 +16,7 @@ import ebd.messageLibrary.message.TrackMessage;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.message.trainmessages.Message_146;
+import ebd.messageLibrary.packet.Packet;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -90,7 +91,39 @@ public class MessageHandler {
      */
     private void handleMsg24(ReceivedMessageEvent rme) {
         Message_24 message24 = (Message_24)rme.message;
+        TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
 
+        Map<Integer, Location> previousLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getPreviousLocations();
+        Location curLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getLocation();
+        Location refLoc;
+        if(!previousLoc.containsKey(message24.NID_LRBG)){
+            if(curLoc.getId() != message24.NID_LRBG){
+                String msg = "ETCS ID " + this.etcsTrainID + " received a Msg3 with a reference LRBG (" + message24.NID_LRBG +") that was not known to the train.";
+                IllegalArgumentException iae = new IllegalArgumentException(msg);
+                this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
+                return;
+            }
+            else refLoc = curLoc;
+
+        }
+        else refLoc = previousLoc.get(message24.NID_LRBG);
+
+        boolean illegalPacket = false;
+        for (Packet p : message24.packets){
+            if (p instanceof TrackPacketDIR){
+                TrackPacketDIR tp = (TrackPacketDIR)p;
+                if (refLoc.getDirection() != tp.Q_DIR){
+                    illegalPacket = true;
+                    break;
+                }
+            }
+        }
+        if(illegalPacket){
+            String msg = "Train " + this.etcsTrainID + " received a Msg3 that contained a packet with a non vaild direction.";
+            IllegalArgumentException iae = new IllegalArgumentException(msg);
+            this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
+            return;
+        }
         /*
         Logging
          */
@@ -110,7 +143,7 @@ public class MessageHandler {
         this.localBus.post(new ToLogEvent("tsm", "log", "Received universal Message" + ids));
 
         for(TrackPacket tp : message24.packets){
-            handleOptionalTrackPacket(rme,tp);
+            handleOptionalTrackPacket(rme,tp, refLoc);
         }
     }
 
@@ -128,6 +161,42 @@ public class MessageHandler {
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         RouteDataVolatile routeDataVolatile = localBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
 
+        Message_3 msg3 = (Message_3)rme.message;
+        /*
+        Check if message has a valid reference position and valid packet directions, set the reference location
+         */
+        Map<Integer, Location> previousLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getPreviousLocations();
+        Location curLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getLocation();
+        Location refLoc;
+        if(!previousLoc.containsKey(msg3.NID_LRBG)){
+            if(curLoc.getId() != msg3.NID_LRBG){
+                String msg = "ETCS ID " + this.etcsTrainID + " received a Msg3 with a reference LRBG (" + msg3.NID_LRBG +") that was not known to the train.";
+                IllegalArgumentException iae = new IllegalArgumentException(msg);
+                this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
+                return;
+            }
+            else refLoc = curLoc;
+
+        }
+        else refLoc = previousLoc.get(msg3.NID_LRBG);
+
+        boolean illegalPacket = false;
+        for (Packet p : msg3.packets){
+            if (p instanceof TrackPacketDIR){
+                TrackPacketDIR tp = (TrackPacketDIR)p;
+                if (refLoc.getDirection() != tp.Q_DIR){
+                    illegalPacket = true;
+                    break;
+                }
+            }
+        }
+        if(refLoc.getDirection() != msg3.packet_15.Q_DIR || illegalPacket){
+            String msg = "Train " + this.etcsTrainID + " received a Msg3 that contained a packet with a non vaild direction.";
+            IllegalArgumentException iae = new IllegalArgumentException(msg);
+            this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
+            return;
+        }
+
         /*
         Deleting old information that does not get overwritten elsewhere
          */
@@ -143,8 +212,6 @@ public class MessageHandler {
         Packet_27 packet27 = null;
         List<Packet_65> listOfPacket65s = new ArrayList<>();
 
-
-        Message_3 msg3 = (Message_3)rme.message;
 
         /*
         Logging
@@ -162,9 +229,7 @@ public class MessageHandler {
         /*
         check for complete message, save data and notify train
          */
-
-        Location refLocation = new Location(msg3.NID_LRBG,ETCSVariables.NID_LRBG,null);
-        Position refPosition = new Position(0,true, refLocation);
+        Position refPosition = new Position(0,true, refLoc);
 
         packet15 = msg3.packet_15;
 
@@ -181,7 +246,7 @@ public class MessageHandler {
                     listOfPacket65s.add((Packet_65)packet);
                     break;
                 default:
-                    handleOptionalTrackPacket(rme,packet);
+                    handleOptionalTrackPacket(rme, packet, refLoc);
             }
         }
 
@@ -192,7 +257,7 @@ public class MessageHandler {
         }
 
         Map<String, Object> changesForRouteData_2= new HashMap<>();
-        changesForRouteData_2.put("refLocation", refLocation);
+        changesForRouteData_2.put("refLocation", refLoc);
         changesForRouteData_2.put("packet_15",packet15);
         changesForRouteData_2.put("packet_21",packet21);
         changesForRouteData_2.put("packet_27",packet27);
@@ -235,17 +300,17 @@ public class MessageHandler {
      * @param rme The {@link ReceivedMessageEvent} containing this package
      * @param trackPacket see {@link TrackPacket}
      */
-    private void handleOptionalTrackPacket(ReceivedMessageEvent rme, TrackPacket trackPacket) {
+    private void handleOptionalTrackPacket(ReceivedMessageEvent rme, TrackPacket trackPacket, Location refLoc) {
 
         switch (trackPacket.NID_PACKET){
             case 5:
                 PacketHandler.p5(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_5)trackPacket);
                 break;
             case 57:
-                PacketHandler.p57(this.localBus,(Packet_57)trackPacket);
+                PacketHandler.p57(this.localBus,(Packet_57)trackPacket, refLoc);
                 break;
             case 58:
-                PacketHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket);
+                PacketHandler.p58(this.localBus,((TrackMessage)rme.message).NID_LRBG,(Packet_58)trackPacket, refLoc);
                 break;
             case 72:
                 PacketHandler.p72(this.localBus,(Packet_72)trackPacket);

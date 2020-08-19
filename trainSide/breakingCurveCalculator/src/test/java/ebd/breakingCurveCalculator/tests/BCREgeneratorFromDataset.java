@@ -93,7 +93,7 @@ public class BCREgeneratorFromDataset{
 		int currentGradient = gp[gp.length-1];
 
 		//setting currentPosition
-		Position currentPosition = new Position(0, true, new Location(1, ETCSVariables.NID_LRBG, null));
+		Position currentPosition = new Position(0, true, new Location(1, ETCSVariables.NID_LRBG, ETCSVariables.Q_DIR_NOMINAL, null));
 
 		//generating packet27
 

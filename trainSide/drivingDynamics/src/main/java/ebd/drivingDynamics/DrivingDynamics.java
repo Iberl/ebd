@@ -253,7 +253,7 @@ public class DrivingDynamics {
 
         Position curPos = this.trainDataVolatile.getCurrentPosition();
         //we need a copy of, not a referenz to, the current Position
-        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
+        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.getDirection(),curPos.getLocation(),curPos.getPreviousLocations());
         if(this.dynamicState == null){
             this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
         }
