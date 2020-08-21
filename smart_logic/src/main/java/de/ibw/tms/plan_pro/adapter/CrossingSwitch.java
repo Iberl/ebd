@@ -9,6 +9,7 @@ import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -84,12 +85,27 @@ public class CrossingSwitch implements ICompareTrackMeter {
      * @return String - der Titel
      */
     public String getEbdTitle() {
+        boolean isDKW = false;
+        try {
+            if (Anlage.getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.DKW)) {
+                isDKW = true;
+            }
+        } catch (Exception E) {
+            E.printStackTrace();
+        }
+
         CWKrGspElement Element = getElement();
         if(Element == null) return null;
         CBezeichnungElement B = Element.getBezeichnung();
         if(B == null) return null;
         try {
-            return B.getKennzahl().getWert()  + "W" + B.getOertlicherElementname().getWert();
+            String sAddOn = "";
+            if(isDKW) {
+                String sID = this.getComponent().getIdentitaet().getWert();
+                sAddOn = "UID" + sID.substring(sID.length() - 3);
+            }
+
+            return B.getBezeichnungTabelle().getWert() + sAddOn;
         } catch(Exception E) {
             return null;
         }

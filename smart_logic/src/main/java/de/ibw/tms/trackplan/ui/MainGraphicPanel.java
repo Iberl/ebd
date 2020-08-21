@@ -13,7 +13,9 @@ import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
+import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.viewmodel.DijkstraAffineRoute;
@@ -255,8 +257,16 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             SingleSlip SiBranch = (SingleSlip) C.getTrackReference();
 
             CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) SiBranch.getRemotePoint());
-            String sTopId = TargetCrossoverModel.getNode().TopNodeId;
-
+            String sTopId;
+            try {
+                CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
+                sTopId = CS.getEbdTitle();
+                if(sTopId == null) {
+                    sTopId = TargetCrossoverModel.getNode().TopNodeId;
+                }
+            } catch (Exception E) {
+                sTopId = TargetCrossoverModel.getNode().TopNodeId;
+            }
 
             int x = (int) ((int) (C.x + t_Model.getdMoveX()) * zoom.getdZoomX());
             int y = (int) ((int) (C.y * -1 + t_Model.getdMoveY()) * zoom.getdZoomY());
@@ -277,7 +287,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(C.getViewName() + sTopId.substring(0, 3) + "..." + sTopId.substring(sTopId.length() - 3), (float) (x - 5.0f), (float) y);
+                g2d.drawString(C.getViewName() + sTopId, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }

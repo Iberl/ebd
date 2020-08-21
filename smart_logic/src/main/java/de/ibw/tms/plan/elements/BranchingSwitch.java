@@ -6,6 +6,7 @@ import de.ibw.tms.plan.elements.interfaces.ICrossover;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
@@ -259,12 +260,41 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         } else {
             Target = (Trail) From;
         }
-        Ref = Target.getRail().getEdge().B;
-        if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-            sNodeIdOutput = Target.getRail().getEdge().A.TopNodeId;
-        } else sNodeIdOutput = Ref.TopNodeId;
 
-        logger.info("Switch: " + Node.TopNodeId + " points to " + sNodeIdOutput + " now.\n");
+
+        String sSrc = Node.TopNodeId;
+        String sTarget;
+        try {
+            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
+            sSrc = CS.getEbdTitle();
+        }catch (Exception E){
+            sSrc =  Node.TopNodeId;
+        }
+
+        try {
+            Ref = Target.getRail().getEdge().B;
+            CrossingSwitch CS = null;
+
+            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
+                CS = (CrossingSwitch) Target.getRail().getEdge().A.NodeImpl;
+
+            } else {
+                CS = (CrossingSwitch) Ref.NodeImpl;
+
+            }
+            sTarget = CS.getEbdTitle();
+
+        } catch ( Exception E) {
+            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
+                sTarget = Target.getRail().getEdge().A.TopNodeId;
+            } else {
+                sTarget = Ref.TopNodeId;
+            }
+        }
+
+
+
+        logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
 
         ///
 

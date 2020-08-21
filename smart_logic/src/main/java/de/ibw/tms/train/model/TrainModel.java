@@ -1,6 +1,7 @@
 package de.ibw.tms.train.model;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
 
@@ -22,6 +23,10 @@ public class TrainModel {
      * Verwaltet alle Z&uuml;ge als Repository, Keys sind die Nid-Engine-ID, Values das jeweilige Modell.
      */
     public static ThreadedRepo<Integer, TrainModel> TrainRepo = new ThreadedRepo<>();
+
+
+    public static ThreadedRepo<Integer, ArrayList<TrackElement>> TrainPathRepo = new ThreadedRepo<>();
+
 
 
     /**

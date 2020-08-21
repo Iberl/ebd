@@ -52,6 +52,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
     private static PositionReportController instance;
 
+
+
+
     /**
      * Die L&auml;nge des Zuges in Meter, falls das RBC keine Angabe gemacht hat.
      */
@@ -104,7 +107,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             CTOPKante CurrentTopKante = B.getTopPositionOfDataPoint();
             ENUMWirkrichtung BalisReferenc = B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getWirkrichtung().getWert();
 
+
+            //TODO
             double dDistanceFromRefPointToBalise = getdDistanceFromRefPointtoBalise(B);
+            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
 
 
             if(BalisReferenc.equals(ENUMWirkrichtung.GEGEN)) {
@@ -276,6 +282,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     private double getdDistanceFromRefPointtoBalise(Balise b) {
         CDatenpunkt DataPoint = b.getPlanProDataPoint();
         CTOPKante Top = b.getTopPositionOfDataPoint();
+
 
         if(DataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.GEGEN)) {
             // change A and B
