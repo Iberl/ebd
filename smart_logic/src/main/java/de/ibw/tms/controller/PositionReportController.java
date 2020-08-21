@@ -20,6 +20,7 @@ import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.DoubleCoord;
 import de.ibw.util.UtilFunction;
+import ebd.ConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
@@ -31,6 +32,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
 import javax.swing.*;
 import java.awt.geom.Line2D;
+import java.io.ObjectInputFilter;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,16 +110,15 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             ENUMWirkrichtung BalisReferenc = B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getWirkrichtung().getWert();
 
 
-            //TODO
+
             double dDistanceFromRefPointToBalise = getdDistanceFromRefPointtoBalise(B);
-            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
 
 
-            if(BalisReferenc.equals(ENUMWirkrichtung.GEGEN)) {
+            /*if(BalisReferenc.equals(ENUMWirkrichtung.GEGEN)) {
                 System.out.println("TMS " + "Engine ID: " + iEngineId + " Distance from Node B To Balise: " + dDistanceFromRefPointToBalise);
             } else System.out.println("TMS " + "Engine ID: " + iEngineId + " Distance from Node A To Balise: " + dDistanceFromRefPointToBalise);
             System.out.println("Before TOP_KANTE_ID: " + CurrentTopKante.getIdentitaet().getWert());
-
+            */
             distance_from_dp = calcDistanceFromDP(q_scale, distance_from_dp);
             System.out.println("TMS " + "Engine ID: " + iEngineId + " POS_REP_Distance_RECOG_Q_SCALE: " + distance_from_dp);
 
@@ -128,28 +129,36 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             if(NewTrainPositionEdge == null) {
                 throw new NullPointerException("Balise Not on Track in TopologyGraph");
             }
-            if(PositonReport.positionInfo.q_dirtrain == Q_DIRTRAIN_NOMINAL) {
+            boolean isNominal;
+            if(iEngineId == 1) {
+
+                isNominal = ConfigHandler.getInstance().train1StartingInTrackDirection;
+            } else if(iEngineId == 2) {
+                isNominal = ConfigHandler.getInstance().train2StartingInTrackDirection;
+
+            } else return;
+
+            if(isNominal) {
                 TargetNode = NewTrainPositionEdge.B;
-                distanceToNextTargetPoint = dDistanceFromRefPointToBalise;
+                distanceToNextTargetPoint = NewTrainPositionEdge.dTopLength - dDistanceFromRefPointToBalise;
                 dDistanceToTrainFromReferencePoint = NewTrainPositionEdge.dTopLength - dDistanceFromRefPointToBalise  + distance_from_dp;
                 b_A_IsTarget = false;
 
-            } else if(PositonReport.positionInfo.q_dirtrain == Q_DIRTRAIN_REVERSE) {
+            } else {
                 TargetNode = NewTrainPositionEdge.A;
                 distanceToNextTargetPoint = dDistanceFromRefPointToBalise;
                 dDistanceToTrainFromReferencePoint = dDistanceFromRefPointToBalise  - distance_from_dp;
                 b_A_IsTarget = true;
-            } else {
-                throw new InvalidParameterException("Q_DirTrain is not nominal and not reverse");
             }
             System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToNextWaypoint: " + distanceToNextTargetPoint);
-            if(distanceToNextTargetPoint < 5.0d) distanceToNextTargetPoint = 5.0d;
 
 
             while(distance_from_dp > distanceToNextTargetPoint) {
 
-                b_TOP_NODE_PASSED = true;
+
                 TopologyGraph.Edge TempPosEdge = findNewTrainPosition(NewTrainPositionEdge, TargetNode);
+                Tm.addPassedElement(NewTrainPositionEdge);
+                Tm.addPassedElement(TargetNode);
                 if(TempPosEdge.A == TargetNode) {
                     TargetNode = TempPosEdge.B;
                     b_A_IsTarget = false;
@@ -241,27 +250,18 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             System.out.println(("Result TOP_NODE drivingTo: " + TargetNode.TopNodeId));
             TrainDistance TD = null;
             //DEBUG
-            if(b_A_IsTarget == true) {
-                double d1 = NewTrainPositionEdge.dTopLength - d_distance_from_referencePointToTrainEnd;
-               if(d1 > NewTrainPositionEdge.dTopLength) {
-                   d1 = NewTrainPositionEdge.dTopLength - 1;
-               }
-                double d2 = NewTrainPositionEdge.dTopLength - dDistanceToTrainFromReferencePoint;
-               if(d2 - d1 < 5.0d) {
-                   d2 -= 5.0d;
-                   if(d2 < 0){
-                       d2 = 1;
-                   }
-               }
-               TD = new TrainDistance(false,d2, d1);
-            } else {
-                double d1 = NewTrainPositionEdge.dTopLength;
-                if(d_distance_from_referencePointToTrainEnd > 0) {
-                    d1 = NewTrainPositionEdge.dTopLength - d_distance_from_referencePointToTrainEnd;
-                }
-                double d2 = NewTrainPositionEdge.dTopLength - dDistanceToTrainFromReferencePoint;
-                TD = new TrainDistance(true, d2,d1);
-            }
+
+            double d1 = NewTrainPositionEdge.dTopLength - d_DistanceTrainToTargetPoint;
+            if(d1 > NewTrainPositionEdge.dTopLength) {
+                d1 = NewTrainPositionEdge.dTopLength - 1;
+            } else if(d1 < 0) d1 = 0;
+
+            double d2 = d1 - Tm.length;
+            if(d2 < 0) d2 = 0;
+
+
+            TD = new TrainDistance(b_A_IsTarget ,d2, d1);
+
             Tm.setDistanceRefPointOfEdge(TD);
 
 
@@ -282,14 +282,17 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     private double getdDistanceFromRefPointtoBalise(Balise b) {
         CDatenpunkt DataPoint = b.getPlanProDataPoint();
         CTOPKante Top = b.getTopPositionOfDataPoint();
+        return DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
 
 
-        if(DataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.GEGEN)) {
+        /*if(DataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.GEGEN)) {
             // change A and B
             double lengthOfTopEdge = Top.getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
             return lengthOfTopEdge - DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
         } else return DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
+        */
     }
+
 
     private TrainModel handleTrainLength(TrainModel tm, PositionInfo positionInfo) {
         if(positionInfo.q_length == Q_LENGTH_CONFIRMED_BY_DRIVER ||

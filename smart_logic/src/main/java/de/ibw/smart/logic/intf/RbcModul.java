@@ -1,6 +1,7 @@
 package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
+import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.message.Message_00;
@@ -34,7 +35,7 @@ import java.util.concurrent.PriorityBlockingQueue;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
+ * @version 0.4
  * @since 2020-08-07
  */
 public class RbcModul extends Thread {
@@ -173,7 +174,7 @@ public class RbcModul extends Thread {
 
 
 
-                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(this.sHost, this.iPort, PM.getMsg());
+                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(this.sHost, PM.getMsg());
 
                         SlThread.start();
                         if(EM != null) {
@@ -193,7 +194,7 @@ public class RbcModul extends Thread {
             }
         } else {
             try {
-                startTmsServer(this.sHost, this.iPort);
+                startTmsServer(this.sHost);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -211,12 +212,11 @@ public class RbcModul extends Thread {
         /**
          * Instanziierrt einen Thread mit einer Nachricht an das RBC
          * @param sHost - Ziel RBC
-         * @param iPort - Port des Servers des Ziels
          * @param M - Nachricht zu verschicken
          */
-        public SL_To_RBC_ClientThread(String sHost, int iPort, Message M) {
+        public SL_To_RBC_ClientThread(String sHost, Message M) {
             this.sHost = sHost;
-            this.iPort = iPort;
+            this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfRBCServer);
             this.M = M;
         }
 
@@ -550,11 +550,11 @@ public class RbcModul extends Thread {
     /**
      * SL stellt Verbindung f&uuml;r das RBC als Server bereit
      * @param sHost - netty hat eine host definition auf server std localhost
-     * @param iPort - port auf dem der Server arbeitet oder horcht
      * @throws InterruptedException - Kommunikation hatte einen Fehler verursacht
      */
-    public void startTmsServer(String sHost, int iPort) throws InterruptedException {
+    public void startTmsServer(String sHost) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
+        this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfTMSServer);
         EventBusManager EM = null;
         try {
             EM = EventBusManager.registerOrGetBus(1, false);
@@ -568,7 +568,7 @@ public class RbcModul extends Thread {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(group);
             serverBootstrap.channel(NioServerSocketChannel.class);
-            serverBootstrap.localAddress(new InetSocketAddress(sHost, iPort));
+            serverBootstrap.localAddress(new InetSocketAddress(sHost, iPort ));
 
             EventBusManager finalEM = EM;
             serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {

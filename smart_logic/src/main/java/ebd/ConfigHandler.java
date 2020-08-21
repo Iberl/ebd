@@ -24,7 +24,10 @@ public class ConfigHandler {
     public String ipToGUIServer4TMS = "127.0.0.1";
     public String portOfGUIServer4TMS = "11114";
 
-
+    //External Port for RBC
+    public String portOfTMSServer = "22223";
+    // External Port To RBC
+    public String portOfRBCServer = "22224";
 
     //Name of the entity to be observed (rbc, trn, gb, all)
     public String entityName = "all";
@@ -46,7 +49,11 @@ public class ConfigHandler {
 
     public boolean isSimulatingEbd = true;
     public boolean shallUserPrompt4SimulationFile = false;
-
+    /*
+    Scenario 2
+     */
+    public boolean train1StartingInTrackDirection = false;
+    public boolean train2StartingInTrackDirection = false;
 
     /*
     other

@@ -95,7 +95,7 @@ public class TopologyGraph {
         /**
          * Klasse des Knoten
          */
-        public Class  NodeType;
+        public Class NodeType;
         /**
          * Kanten eingehend
          */

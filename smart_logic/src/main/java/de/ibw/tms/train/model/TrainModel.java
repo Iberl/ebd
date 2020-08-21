@@ -14,7 +14,7 @@ import java.util.Random;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
+ * @version 0.4
  * @since 2020-08-12
  */
 public class TrainModel {
@@ -25,7 +25,6 @@ public class TrainModel {
     public static ThreadedRepo<Integer, TrainModel> TrainRepo = new ThreadedRepo<>();
 
 
-    public static ThreadedRepo<Integer, ArrayList<TrackElement>> TrainPathRepo = new ThreadedRepo<>();
 
 
 
@@ -189,6 +188,19 @@ public class TrainModel {
     private TopologyGraph.Node NodeTrainRunningTo;
     private double dDistanceToNodeRunningTo;
     private Integer nid_lrbg = null;
+
+    @Expose
+    private ArrayList<TrackElement> passedTopologicalElements = new ArrayList<>();
+
+    public boolean addPassedElement(TrackElement TE) {
+        if(passedTopologicalElements.contains(TE)) return false;
+        else passedTopologicalElements.add(TE);
+        return true;
+    }
+
+    public ArrayList<TrackElement> getPassedTopologicalElements() {
+        return passedTopologicalElements;
+    }
 
     /**
      * Gibt die Id des Letzen bekannten RBCs dieses Zug-Models wider
