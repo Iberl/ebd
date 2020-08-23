@@ -20,7 +20,7 @@ public class TrainsHandler {
         public int rbcID;
 
         public int startingBaliseGroup;
-        private boolean startingBaliseGroupDir;
+        private boolean startingMovementDir;
         public String startingTrack;
 
         public boolean startingDirection;
@@ -33,7 +33,7 @@ public class TrainsHandler {
          * @param trainScheduleID The train schedule ID
          * @param rbcID The ID of the RBC commanding this train
          * @param startingBaliseGroup The Balise Group at starting position.
-         * @param startingBaliseGroupDir The direction of the starting balise group, true for nominal, false for reverse
+         * @param startingMovementDir The direction of the starting balise group, true for nominal, false for reverse
          * @param startingTrack The starting Track on the ModelInfrastructure
          * @param startingDirection The direction of the train in relation to the starting balise group,
          * @param startingIncrement The starting increment (distance from the balise group) in [m]
@@ -44,7 +44,7 @@ public class TrainsHandler {
                      String trainScheduleID,
                      int rbcID,
                      int startingBaliseGroup,
-                     boolean startingBaliseGroupDir, String startingTrack,
+                     boolean startingMovementDir, String startingTrack,
                      boolean startingDirection,
                      int startingIncrement) {
             this.etcsID = etcsID;
@@ -53,7 +53,7 @@ public class TrainsHandler {
             this.trainScheduleID = trainScheduleID;
             this.rbcID = rbcID;
             this.startingBaliseGroup = startingBaliseGroup;
-            this.startingBaliseGroupDir = startingBaliseGroupDir;
+            this.startingMovementDir = startingMovementDir;
             this.startingTrack = startingTrack;
             this.startingDirection = startingDirection;
             this.startingIncrement = startingIncrement;
@@ -94,7 +94,7 @@ public class TrainsHandler {
      * @param trainScheduleID The train schedule ID
      * @param rbcID The ID of the RBC commanding this train
      * @param startingBaliseGroup The Balise Group at starting position.
-     * @param startingBaliseGroupDir
+     * @param startingMovementDir
      * @param startingTrack The starting Track on the ModelInfrastructure
      * @param startingDirection The direction on the track (true means forward)
      */
@@ -104,7 +104,7 @@ public class TrainsHandler {
                                       String trainScheduleID,
                                       int rbcID,
                                       int startingBaliseGroup,
-                                      boolean startingBaliseGroupDir,
+                                      boolean startingMovementDir,
                                       String startingTrack,
                                       boolean startingDirection,
                                       int startingIncrement){
@@ -114,7 +114,7 @@ public class TrainsHandler {
                 trainScheduleID,
                 rbcID,
                 startingBaliseGroup,
-                startingBaliseGroupDir,
+                startingMovementDir,
                 startingTrack,
                 startingDirection,
                 startingIncrement
@@ -187,13 +187,13 @@ public class TrainsHandler {
     }
 
     /**
-     * The direction of the starting balise group, true for nominal, false for reverse
+     * The direction of train movement at start in relation to the orientation of the starting balise, true for nominal, false for reverse
      * @param etcsID The etcsID
      * @return The direction of the starting balise group or {@code null} if the ETCS ID is not fond
      */
-    public synchronized Boolean getStartingBaliseGroupDir(int etcsID){
+    public synchronized Boolean getStartingMovementDir(int etcsID){
         Train train = this.map.get(etcsID);
-        return (train != null) ? train.startingBaliseGroupDir : null;
+        return (train != null) ? train.startingMovementDir : null;
     }
 
     /**
@@ -253,7 +253,7 @@ public class TrainsHandler {
             String trainScheduleID = "";
             int rbcID = 0;
             int startingBaliseGroup = 0;
-            boolean startingBaliseGroupDir = true;
+            boolean startingMovementDir = true;
             String startingTrack = "";
             boolean startingDirection = true;
             int startingIncrement = 0;
@@ -264,7 +264,7 @@ public class TrainsHandler {
                 trainScheduleID = split[3];
                 rbcID = Integer.parseInt(split[4]);
                 startingBaliseGroup = Integer.parseInt(split[5]);
-                startingBaliseGroupDir = Boolean.parseBoolean(split[6]);
+                startingMovementDir = Boolean.parseBoolean(split[6]);
                 startingTrack = split[7];
                 startingDirection = Boolean.parseBoolean(split[8]);
                 startingIncrement = Integer.parseInt(split[9]);
@@ -286,7 +286,7 @@ public class TrainsHandler {
                     trainScheduleID,
                     rbcID,
                     startingBaliseGroup,
-                    startingBaliseGroupDir,
+                    startingMovementDir,
                     startingTrack,
                     startingDirection,
                     startingIncrement);

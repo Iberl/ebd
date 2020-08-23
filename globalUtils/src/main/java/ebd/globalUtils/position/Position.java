@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This class represents a position for a train. It consists out of an absolut reference point, a direction and an increment.
+ * A position represents a precise place on the track. It uses fixed reference points called
+ * {@link Location} and an offset value called "increment" to represent this place.
  * 
  * @author Jan Emrich and Lars Schulze-Falck
  *
@@ -19,12 +20,12 @@ import org.jetbrains.annotations.Nullable;
 public class Position {
 	
 	/**
-	 * Current direction of travel of the train: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
+	 * Current direction of travel of the train in relation the current location: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
 	 */
 	private int direction;
 
 	/**
-     * Reference location //TODO Change according to {@link ebd.messageLibrary.util.ETCSVariables#Q_DIR}
+     * Reference location
      */
 	@NotNull
     private Location location;
@@ -42,7 +43,8 @@ public class Position {
     private Map<Integer,Location> previousLocations = new HashMap<>();
 
     /**
-     * represents a position on the track
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
      * @param increment relative to the location position
      * @param direction the movement direction, true for Nominal, false for Reverse
      * @param location location reference point
@@ -54,7 +56,23 @@ public class Position {
     }
 
     /**
-     * represents a position on the track
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
+     * @param increment relative to the location position
+     * @param direction the movement direction, 1 for Nominal, 0 for Reverse or 2 for unknown
+     * @param location location reference point
+     */
+    public Position(double increment, int direction, @NotNull Location location) {
+        this.increment = increment;
+        this.direction = direction;
+        this.location = location;
+        this.previousLocations = previousLocations;
+    }
+
+
+    /**
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
      * @param increment relative to the location position
      * @param direction the movement direction, true for Nominal, false for Reverse
      * @param location location reference point
@@ -68,7 +86,8 @@ public class Position {
     }
 
     /**
-     * represents a position on the track
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
      * @param increment relative to the location position
      * @param direction the movement direction, 1 for Nominal, 0 for Reverse or 2 for unknown
      * @param location location reference point

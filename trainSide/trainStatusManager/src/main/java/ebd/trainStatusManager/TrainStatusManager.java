@@ -278,7 +278,7 @@ public class TrainStatusManager implements Runnable {
     private void setUpTrain( int trainConfigID, int infrastructureID) {
         TrainsHandler th = TrainsHandler.getInstance();
         Integer startingBalise = th.getStartingBaliseGroup(this.etcsTrainID);
-        int startingBGDir = th.getStartingBaliseGroupDir(this.etcsTrainID) ? 1 : 0;
+        int startingBGDir = th.getStartingMovementDir(this.etcsTrainID) ? 1 : 0;
         Boolean startingDirection = th.getStartingDirection(this.etcsTrainID);
         Integer startingIncrement = th.getStartingIncrement(this.etcsTrainID);
         if(startingBalise == null || startingDirection == null || startingIncrement == null){ //Train already removed, so we immediately kill the train
@@ -325,7 +325,7 @@ public class TrainStatusManager implements Runnable {
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
         Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, startingBGDir, 0d);
-        Position curPos = new Position(startingIncrement, startingDirection, newLoc);
+        Position curPos = new Position(startingIncrement, startingBGDir, newLoc);
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);
