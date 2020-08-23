@@ -3,7 +3,10 @@ package ebd.trainStatusManager.util.handlers;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageReceiver.ReceivedTelegramEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
+import ebd.globalUtils.events.trainStatusMananger.SingleBaliseGroupEvent;
 import ebd.globalUtils.location.Location;
+import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.message.Telegram;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataVolatile;
@@ -12,8 +15,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class handles received telegrams for the {@link ebd.trainStatusManager.TrainStatusManager}
@@ -25,6 +28,8 @@ public class TelegramHandler {
     //TODO: Respect SRS 3 A.3.3
     private EventBus localBus;
     private int etcsTrainID;
+
+    String src = "tsm";
 
     private ReceivedTelegramEvent savedRTE = null;
 
@@ -53,11 +58,33 @@ public class TelegramHandler {
             return;
         }
         //TODO Remember NID_C
-        Location newLoc = linkingInformation.get(rte.telegram.NID_BG);
-        //this.localBus.post(new NewLocationEvent("tsm", Collections.singletonList("all"), newLoc));
-        this.localBus.post(new NewLocationEvent("tsm", "all", newLoc));
+
+        Location newLoc = makeLocation(rte.telegram, linkingInformation, rte);
+
+        this.localBus.post(new NewLocationEvent(src, "all", newLoc));
         String msg = "Received a Balise Telegram with location information";
-        this.localBus.post(new ToLogEvent("tsm", "log", msg));
+        this.localBus.post(new ToLogEvent(src, "log", msg));
+        if(rte.telegram.N_PIG == 0){
+            this.localBus.post(new SingleBaliseGroupEvent(src, src, newLoc));
+        }
+    }
+
+    private Location makeLocation(Telegram telegram, Map<Integer, Location> linkingInformation, ReceivedTelegramEvent rte) {
+        TrainDataVolatile trainDataVolatile = this.localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
+        Location linkLoc = linkingInformation.get(rte.telegram.NID_BG); //TODO Change to NID_LRBG when new linking info is developed
+        Position curPos = trainDataVolatile.getCurrentPosition();
+        Location curLoc = Objects.requireNonNull(curPos).getLocation();
+
+        int NID_BG = telegram.NID_BG;
+        int NID_C = telegram.NID_C;
+        int NID_LRBG = (NID_C << 14) + NID_BG;
+        int Q_DIRTRAIN;
+        if(telegram.N_TOTAL == 0) Q_DIRTRAIN = curLoc.getDirection();
+        else if (telegram.N_PIG == 0) Q_DIRTRAIN = 1;
+        else Q_DIRTRAIN = 0;
+
+        Location loc = new Location(NID_LRBG,curLoc.getId(), Q_DIRTRAIN, linkLoc.getDistanceToPrevious());
+        return loc;
     }
 
     /**

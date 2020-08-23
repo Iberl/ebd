@@ -181,7 +181,6 @@ public class TrainStatusManager implements Runnable {
         RouteDataVolatile routeDataVolatile = this.routeData.getRouteDataVolatile();
         if(routeDataVolatile.getLinkingInformation() == null) return;
 
-        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
         Location newLoc = nle.newLocation;
 
 
@@ -191,8 +190,11 @@ public class TrainStatusManager implements Runnable {
         double overshoot;
 
         if(prefLocs.size() > 0) {
-            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
-            prefLocs.put(newLoc.getId(),newLoc);}
+            Double distanceToPrev = newLoc.getDistanceToPrevious();
+            distanceToPrev = distanceToPrev != null ? distanceToPrev : 0;
+            overshoot = oldPos.getIncrement() - distanceToPrev;
+            prefLocs.put(newLoc.getId(),newLoc);
+        }
         else {
             InitalLocation initLoc = new InitalLocation();
             prefLocs.put(initLoc.getId(),initLoc);
@@ -200,7 +202,7 @@ public class TrainStatusManager implements Runnable {
             overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
         }
 
-        Position newPos = new Position(overshoot, oldPos.getDirection(), newLoc, prefLocs);
+        Position newPos = new Position(overshoot, newLoc.getDirection(), newLoc, prefLocs);
         this.localEventBus.post(new TrainDataChangeEvent("tsm","td","currentPosition",newPos));
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }

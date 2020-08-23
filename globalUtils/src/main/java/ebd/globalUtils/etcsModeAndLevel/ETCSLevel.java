@@ -4,15 +4,23 @@ public enum ETCSLevel {
     /**
      * Null replacement value
      */
-    NO_LEVEL,
+    NO_LEVEL(5),
 
-    NTC_PZBLZB,
+    NTC_PZBLZB(1),
 
-    LEVEL_ZERO,
+    LEVEL_ZERO(0),
 
-    LEVEL_ONE,
+    LEVEL_ONE(2),
 
-    LEVEL_TWO,
+    LEVEL_TWO(3),
 
-    LEVEL_THREE
+    LEVEL_THREE(4);
+
+    private final int valueForETCSPacket;
+
+    ETCSLevel(int valueForETCSPacket){
+        this.valueForETCSPacket = valueForETCSPacket;
+    }
+
+    public int getValueForETCSPacket() { return valueForETCSPacket;}
 }
