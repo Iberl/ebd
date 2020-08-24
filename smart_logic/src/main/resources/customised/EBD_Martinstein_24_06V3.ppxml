@@ -34140,7 +34140,7 @@
                   <Wert>0.000</Wert>
                 </Begrenzung_A>
                 <Begrenzung_B>
-                  <Wert>1862.090</Wert>
+                  <Wert>2300.000</Wert>
                 </Begrenzung_B>
                 <ID_TOP_Kante>
                   <Wert>77C815A1-A01C-42DB-AE33-6F90122A4C58</Wert>
@@ -40207,6 +40207,14 @@
                 </Datum_Regelwerk>
               </Basis_Objekt_Allg>
               <Punkt_Objekt_Strecke>
+                  <ID_Strecke>
+                    <Wert>FF8B47AA-5DEC-4816-93A0-1BAD1F6C6103</Wert>
+                  </ID_Strecke>
+                  <Strecke_Km>
+                    <Wert>0,490</Wert>
+                  </Strecke_Km>
+              </Punkt_Objekt_Strecke>
+              <Punkt_Objekt_Strecke>
                 <ID_Strecke>
                   <Wert>2FED84BC-7DFC-4701-8FD3-9DD618ED1C37</Wert>
                 </ID_Strecke>
@@ -42723,10 +42731,10 @@
 </Punkt_Objekt_TOP_Kante>
 <Punkt_Objekt_Strecke>
     <ID_Strecke>
-        <Wert>0</Wert>
+        <Wert>FF8B47AA-5DEC-4816-93A0-1BAD1F6C6103</Wert>
     </ID_Strecke>
     <Strecke_Km>
-        <Wert>424.600</Wert>
+        <Wert>2.273</Wert>
     </Strecke_Km>
 </Punkt_Objekt_Strecke>
 <DP_Bezug_Betrieblich>
