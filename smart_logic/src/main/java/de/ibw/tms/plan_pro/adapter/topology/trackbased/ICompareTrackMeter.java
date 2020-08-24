@@ -16,5 +16,11 @@ public interface ICompareTrackMeter {
 
     }
     ArrayList<String> getSupportedTracks();
-
+    default BigDecimal absDiff(ICompareTrackMeter other) {
+        ArrayList<String> thisTracks = new ArrayList<>(getSupportedTracks());
+        thisTracks.retainAll(other.getSupportedTracks());
+        if(thisTracks.isEmpty()) return null;
+        String sTrackId = thisTracks.get(0);
+        return this.getTrackMeterByTrackId(sTrackId).subtract(other.getTrackMeterByTrackId(sTrackId)).abs();
+    }
 }

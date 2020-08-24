@@ -1,6 +1,7 @@
 package de.ibw.feed;
 
 import de.ibw.tms.plan.elements.UiTools;
+import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ICoord;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
@@ -10,13 +11,14 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
  * Diese Klasse stellt eine Balise mit deren Koordinaten dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
+ * @version 0.4
  * @since 2020-08-07
  */
 public class Balise implements ICoord<Double> {
@@ -51,6 +53,19 @@ public class Balise implements ICoord<Double> {
         ClassLoader cl = this.getClass().getClassLoader();
         return UiTools.handleImaging(cl,"images/balise.jpg");
     }
+
+    public BigDecimal getMetersOfTrack() {
+        try {
+            String sKM = PlanProDataPoint.getPunktObjektStrecke().get(0).getStreckeKm().getWert();
+            String sMeter = sKM.replace(".", "");
+            return new BigDecimal(sMeter);
+        } catch (Exception E) {
+            E.printStackTrace();
+            return null;
+        }
+    }
+
+
 
     /**
      * gibt die x-Koordinate dieser Balise wider

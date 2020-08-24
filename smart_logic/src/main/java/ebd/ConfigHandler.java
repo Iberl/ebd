@@ -55,6 +55,19 @@ public class ConfigHandler {
     public boolean train1StartingInTrackDirection = false;
     public boolean train2StartingInTrackDirection = false;
 
+
+    /*
+     show kilometrierung
+     */
+    public boolean showMeter = true;
+
+
+    /*
+    streckenkilometrierung Strecke 2000 Balise 4731 ist Absteigend vom Rand gesehen
+     */
+
+    public boolean isTrackPosition_2000_4731_Upward = false;
+
     /*
     other
      */

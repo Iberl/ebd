@@ -10,6 +10,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
+import ebd.ConfigHandler;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CBearbeitungsvermerkAllg;
@@ -23,6 +24,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -292,6 +294,9 @@ public class TopologyFactory implements ITopologyFactory {
         DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
         DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
 
+        ConfigHandler CH = ConfigHandler.getInstance();
+
+
         if(B_PRINT_BALISE_LIST) System.out.println("----Balise-List---");
         for(Balise B : balisesList) {
             CDatenpunkt DP = B.getPlanProDataPoint();
@@ -306,8 +311,89 @@ public class TopologyFactory implements ITopologyFactory {
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
+            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(TopKante.getIdentitaet().getWert());
+
+
+            GeoCoordinates geoCoordinate;
+            try {
+                boolean isAMissing;
+                boolean isBMissing;
+                BigDecimal decBalise = B.getMetersOfTrack();
+                isAMissing = E.TopConnectFromA.equals(TopologyConnect.ENDE) || E.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG);
+                isBMissing = E.TopConnectFromB.equals(TopologyConnect.ENDE) || E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG);
+                if(isAMissing && isBMissing) {
+                    throw new InvalidParameterException("Both Topology Nodes are End-Nodes");
+                } else if (!isAMissing && !isBMissing) {
+                    CrossingSwitch CSA = (CrossingSwitch) E.A.NodeImpl;
+                    CrossingSwitch CSB = (CrossingSwitch) E.B.NodeImpl;
+                    BigDecimal decA = CSA.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+                    BigDecimal decB = CSB.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+
+                    BigDecimal decDistanceFromA = null;
+
+
+                    if(decA.compareTo(decB) < 0) {
+
+                        // not beachten die Balise befindet sich nicht zwischen a und b
+                        if(!(decA.compareTo(decBalise) < 0 && decBalise.compareTo(decB) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+                        decDistanceFromA = decBalise.subtract(decA);
+
+
+
+                    } else {
+                        // not beachten die Balise befindet sich nicht zwischen a und b
+                        if(!(decB.compareTo(decBalise) < 0 && decBalise.compareTo(decA) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+                        decDistanceFromA = decA.subtract(decBalise);
+
+
+
+                    }
+
+                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
+
+
+
+                } else {
+                    Boolean isUpwardToEdge = null;
+                    CrossingSwitch CS = null;
+                    BigDecimal decResult = null;
+                    if(isAMissing) {
+                        CS = (CrossingSwitch) E.B.NodeImpl;
+
+                    } else {
+                        CS = (CrossingSwitch) E.A.NodeImpl;
+
+
+                    }
+                    BigDecimal dec = CS.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+                    if(B.getPlanProTrack().getBezeichnung().getBezeichnungStrecke().getWert().equals("2000")) {
+                        if(B.getHashcodeOfBaliseDp() == 4731) {
+                            isUpwardToEdge = CH.isTrackPosition_2000_4731_Upward;
+                        }
+                    }
+
+                    if(isUpwardToEdge == null) throw new InvalidParameterException("No Setting for Balise prepared.");
+                    if(isUpwardToEdge) {
+
+                        decResult = dec.add(decBalise);
+
+                    } else {
+                        decResult = dec.subtract(decBalise);
+                    }
+                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), !isAMissing, decResult.doubleValue());
+                }
+
+
+            } catch(Exception Ex) {
+                geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+            }
+
+
+
             // getGeoCoordinate()
-            GeoCoordinates geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+
 
             B.setX(geoCoordinate.getX());
             B.setY(geoCoordinate.getY());

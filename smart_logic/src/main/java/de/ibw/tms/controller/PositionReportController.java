@@ -10,10 +10,11 @@ import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.controller.Intf.IController;
+import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
@@ -23,17 +24,14 @@ import de.ibw.util.UtilFunction;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
-import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
-import plan_pro.modell.basistypen._1_9_0.ENUMWirkrichtung;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
 import javax.swing.*;
 import java.awt.geom.Line2D;
-import java.io.ObjectInputFilter;
-import java.security.InvalidParameterException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
@@ -86,20 +84,20 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
         PlanProTmsAdapter refAdapter = PlanProTmsAdapter.getPlanAdapter();
 
-        double dDistanceToTrainFromReferencePoint;
+        BigDecimal dDistanceToTrainFromReferencePoint;
 
         try {
             boolean b_A_IsTarget = false;
             boolean b_TOP_NODE_PASSED = false;
             iEngineId = PositonReport.trainInfo.nid_engine;
-            double distanceToNextTargetPoint = 0;
+            BigDecimal distanceToNextTargetPoint = null;
             Tm = TrainModel.TrainRepo.getModel(iEngineId);
 
             if (Tm == null) {
                 Tm = initTrainModel(iEngineId);
             }
             int q_scale = PositonReport.positionInfo.q_scale;
-            double distance_from_dp = PositonReport.positionInfo.d_lrbg;
+            BigDecimal distance_from_dp = new BigDecimal(PositonReport.positionInfo.d_lrbg);
             System.out.println("TMS " + "Engine ID: " + iEngineId + " POS_REP_Distance: " + distance_from_dp);
             int bgId = PositonReport.positionInfo.nid_lrbg;
             Tm.setNid_lrbg(bgId);
@@ -107,11 +105,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             Tm.setQ_DIR(PositonReport.positionInfo.q_dirtrain);
             Balise B = Balise.baliseByNid_bg.getModel(bgId);
             CTOPKante CurrentTopKante = B.getTopPositionOfDataPoint();
-            ENUMWirkrichtung BalisReferenc = B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getWirkrichtung().getWert();
+            String sBalisesTrackId = B.getPlanProTrack().getIdentitaet().getWert();
 
 
-
-            double dDistanceFromRefPointToBalise = getdDistanceFromRefPointtoBalise(B);
+            BigDecimal trackMeterOfBalise = B.getMetersOfTrack();
 
 
             /*if(BalisReferenc.equals(ENUMWirkrichtung.GEGEN)) {
@@ -140,21 +137,27 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
             if(isNominal) {
                 TargetNode = NewTrainPositionEdge.B;
-                distanceToNextTargetPoint = NewTrainPositionEdge.dTopLength - dDistanceFromRefPointToBalise;
-                dDistanceToTrainFromReferencePoint = NewTrainPositionEdge.dTopLength - dDistanceFromRefPointToBalise  + distance_from_dp;
+                CrossingSwitch CS = (CrossingSwitch) TargetNode.NodeImpl;
+
+                distanceToNextTargetPoint = CS.getTrackMeterByTrackId(sBalisesTrackId).subtract(trackMeterOfBalise);
+
+
                 b_A_IsTarget = false;
 
             } else {
                 TargetNode = NewTrainPositionEdge.A;
-                distanceToNextTargetPoint = dDistanceFromRefPointToBalise;
-                dDistanceToTrainFromReferencePoint = dDistanceFromRefPointToBalise  - distance_from_dp;
+                CrossingSwitch CS = (CrossingSwitch) TargetNode.NodeImpl;
+                distanceToNextTargetPoint = CS.getTrackMeterByTrackId(sBalisesTrackId).subtract(trackMeterOfBalise);
+
                 b_A_IsTarget = true;
             }
+
+            distanceToNextTargetPoint = distanceToNextTargetPoint.abs();
+
             System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToNextWaypoint: " + distanceToNextTargetPoint);
 
 
-            while(distance_from_dp > distanceToNextTargetPoint) {
-
+            while(distance_from_dp.compareTo(distanceToNextTargetPoint) > 0 ) {
 
                 TopologyGraph.Edge TempPosEdge = findNewTrainPosition(NewTrainPositionEdge, TargetNode);
                 Tm.addPassedElement(NewTrainPositionEdge);
@@ -169,10 +172,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                     throw new Exception("Node missmatch, cannot find node connection");
                 }
                 NewTrainPositionEdge = TempPosEdge;
-                dDistanceToTrainFromReferencePoint = distance_from_dp - distanceToNextTargetPoint;
+                //dDistanceToTrainFromReferencePoint = distance_from_dp.subtract(distanceToNextTargetPoint);
 
-                System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToTrainFromReferencePoint: " + dDistanceToTrainFromReferencePoint);
-                distanceToNextTargetPoint = distanceToNextTargetPoint + NewTrainPositionEdge.dTopLength;
+                //System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToTrainFromReferencePoint: " + dDistanceToTrainFromReferencePoint);
+                distanceToNextTargetPoint = calcNextTargetPointDistanc(distanceToNextTargetPoint, NewTrainPositionEdge, Tm);//distanceToNextTargetPoint + NewTrainPositionEdge.dTopLength;
                 System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToNextWaypoint: " + distanceToNextTargetPoint);
 
 
@@ -199,6 +202,16 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+
+
+            Tm.setEdgeTrainStandsOn(NewTrainPositionEdge);
+            double distanceToBackOfTrain = distanceToNextTargetPoint.add(new BigDecimal(Tm.length)).doubleValue();
+            TrainDistance TD = new TrainDistance(b_A_IsTarget, distanceToBackOfTrain, distanceToNextTargetPoint.doubleValue());
+
+            /*
+
+            MainGraphicPanel.getGeoCoordinate(NewTrainPositionEdge.sId, !b_A_IsTarget)
+
 
             Line2D.Double resultPainting = new Line2D.Double();
             double d_distance_from_referencePointToTrainEnd = dDistanceToTrainFromReferencePoint - Tm.length;
@@ -261,7 +274,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
 
             TD = new TrainDistance(b_A_IsTarget ,d2, d1);
-
+            */
             Tm.setDistanceRefPointOfEdge(TD);
 
 
@@ -279,19 +292,34 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         MainTmsSim.MainFrame.repaint();
     }
 
+    private BigDecimal calcNextTargetPointDistanc(BigDecimal distanceToNextTargetPoint, TopologyGraph.Edge newTrainPositionEdge, TrainModel tm) {
+        BigDecimal result = null;
+        try {
+            CrossingSwitch CSA = (CrossingSwitch) newTrainPositionEdge.A.NodeImpl;
+            CrossingSwitch CSB = (CrossingSwitch) newTrainPositionEdge.B.NodeImpl;
+            result = CSA.absDiff(CSB);
+            if(result == null) throw new NullPointerException("No Result Via StreckenKilometriasation");
+            return distanceToNextTargetPoint.add(result);
+        } catch(Exception E) {
+          return distanceToNextTargetPoint.add(new BigDecimal(newTrainPositionEdge.dTopLength));
+        }
+
+
+    }
+    /*
     private double getdDistanceFromRefPointtoBalise(Balise b) {
         CDatenpunkt DataPoint = b.getPlanProDataPoint();
         CTOPKante Top = b.getTopPositionOfDataPoint();
         return DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
 
 
-        /*if(DataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.GEGEN)) {
+        if(DataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.GEGEN)) {
             // change A and B
             double lengthOfTopEdge = Top.getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
             return lengthOfTopEdge - DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
         } else return DataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
-        */
-    }
+
+    }*/
 
 
     private TrainModel handleTrainLength(TrainModel tm, PositionInfo positionInfo) {
@@ -337,10 +365,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         return newTrainPositionEdge;
     }
 
-    private double calcDistanceFromDP(int q_scale, double distance_from_dp) {
+    private BigDecimal calcDistanceFromDP(int q_scale, BigDecimal distance_from_dp) {
         switch (q_scale) {
             case Q_SCALE_10CM: {
-                distance_from_dp = distance_from_dp * 0.1d;
+                distance_from_dp = distance_from_dp.multiply(new BigDecimal(0.1d));
                 break;
             }
             case Q_SCALE_1M: {
@@ -348,7 +376,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                 break;
             }
             case Q_SCALE_10M: {
-                distance_from_dp = distance_from_dp * 10.0d;
+                distance_from_dp = distance_from_dp.multiply(new BigDecimal(10.0d));
                 break;
             }
         }

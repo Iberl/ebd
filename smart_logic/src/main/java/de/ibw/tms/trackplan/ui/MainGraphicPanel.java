@@ -24,6 +24,7 @@ import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
+import ebd.ConfigHandler;
 import org.apache.log4j.Logger;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
 
@@ -35,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,8 +47,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-11
+ * @version 0.4
+ * @since 2020-08-24
  */
 public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private static Logger logger = Logger.getLogger( MainGraphicPanel.class );
@@ -196,6 +198,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
             // diese Liste zeichenen
@@ -207,6 +210,9 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
                 GeoCoordinates nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
                 GeoCoordinates nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+
+
+
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
                 g2d.draw(line);
 //                Ellipse2D.Double circle = new Ellipse2D.Double(nodeA.getX(), nodeA.getY(), 10, 10);
@@ -250,6 +256,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         //g2d.translate(t_Model.getdMoveX(), t_Model.getdMoveY());
         
         g2d.setPaint(Color.cyan);
+        ConfigHandler CH = ConfigHandler.getInstance();
+
         for(Object OCrossover: PlanData.getInstance().branchingSwitchList) {
             BranchingSwitch C = (BranchingSwitch) OCrossover;
 
@@ -258,15 +266,20 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) SiBranch.getRemotePoint());
             String sTopId;
+            String sTrackKilometers = "";
             try {
                 CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
                 sTopId = CS.getEbdTitle();
                 if(sTopId == null) {
                     sTopId = TargetCrossoverModel.getNode().TopNodeId;
                 }
+
+                if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
             } catch (Exception E) {
                 sTopId = TargetCrossoverModel.getNode().TopNodeId;
             }
+
+
 
             int x = (int) ((int) (C.x + t_Model.getdMoveX()) * zoom.getdZoomX());
             int y = (int) ((int) (C.y * -1 + t_Model.getdMoveY()) * zoom.getdZoomY());
@@ -287,7 +300,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(C.getViewName() + sTopId, (float) (x - 5.0f), (float) y);
+                g2d.drawString(C.getViewName() + sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -295,6 +308,34 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
 
         // g2d.translate(-t_Model.getdMoveX(), -t_Model.getdMoveY());
+    }
+
+    private static String retrieveTrackInfo(CrossingSwitch cs, boolean inShort) {
+        StringBuilder result = new StringBuilder();
+        for(String sTrackId : cs.getSupportedTracks()) {
+            BigDecimal dKilo = cs.getTrackMeterByTrackId(sTrackId);
+            if(!inShort)retrieveTrackInfoLong(result, sTrackId, dKilo);
+            else {
+                retrieveTrackInfoShort(result, sTrackId, dKilo);
+            }
+        }
+        return result.toString();
+    }
+
+    private static void retrieveTrackInfoShort(StringBuilder result, String sTrackId, BigDecimal dKilo) {
+        if(dKilo == null) {
+            result.append("TId: ").append(sTrackId, 0, 3).append(" m: ").append("na");
+        } else {
+            result.append("TId: ").append(sTrackId, 0, 3).append(" m: ").append(dKilo);
+        }
+    }
+
+    private static void retrieveTrackInfoLong(StringBuilder result, String sTrackId, BigDecimal dKilo) {
+        if(dKilo == null) {
+            result.append("TrackId: ").append(sTrackId, 0, 3).append(" has meter: ").append("na");
+        } else {
+            result.append("TrackId: ").append(sTrackId, 0, 3).append(" has meter: ").append(dKilo);
+        }
     }
 
     /**
@@ -444,8 +485,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             GeoCoordinates nodeA = edge.A.getGeoCoordinates();
             GeoCoordinates nodeB = edge.B.getGeoCoordinates();
 
-            // Create a new Coordinates instance
-            return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            else {
+                distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+            }
+
+
         }
 
             double    prevDistance  = 0;
