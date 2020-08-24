@@ -417,6 +417,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         if(edge.dTopLength < distanceA1 || edge.dTopLength < distanceA2) throw new IllegalArgumentException("The desired point must lay on the top edge.");
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
 
+        double lengthOfGeoEdges = 0;
+        for(CGEOKante geoEdge : geoEdgeList) {
+            lengthOfGeoEdges += geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+        }
+
+
         double prevDistance = 0;
         double geoEdgeLength = 0;
         CGEOKante geoEdge = null;
@@ -429,6 +435,11 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setColor(color);
         g2d.setStroke(stroke);
 
+        if(Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
+            distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+            distanceA2 = distanceA2 * lengthOfGeoEdges / edge.dTopLength;
+        }
+
         int i = b_fromA ? 0 : geoEdgeList.size() - 1;
         boolean first = true;
         for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
@@ -438,7 +449,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
             // First node
-            if(prevDistance + geoEdgeLength < distanceA1) continue;
+            if(prevDistance + geoEdgeLength < distanceA1) {
+                prevDistance += geoEdgeLength;
+                continue;
+            }
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
