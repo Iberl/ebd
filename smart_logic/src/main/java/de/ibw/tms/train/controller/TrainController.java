@@ -2,6 +2,7 @@ package de.ibw.tms.train.controller;
 
 import de.ibw.feed.Balise;
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsMovementAuthority;
@@ -10,6 +11,7 @@ import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
@@ -22,6 +24,7 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -357,7 +360,6 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
     /**
-     * TODO
      * Extrahiert distanz von Referenzbalise Topologischen End-Knoten ACHTUNG nicht für letztes Wegst&uuml;ck gedacht.
      * Deshalb ohne letzten Gleisabschnitt
      * @param R {@link Route} - die angeforderte Route
@@ -374,16 +376,22 @@ public class TrainController extends SubmissionPublisher implements IController 
 
             Balise B = Balise.baliseByNid_bg.getModel(iNid_Lrbg);
             if(B == null) return resultDistance;
-
+            R.saveWaypointsForProcessing(false);
 
             if(R.getElemetTypes().size() < 2) return resultDistance;
             iLastIndex = R.getElemetTypes().size() -1;
 
             if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
-
+            resultDistance = resultDistance.add(PositionReportController.calcDistanceToFirstNodeOfTrainViaBalise(TM));
 
             for(int i = 0; i < R.getElemetTypes().size(); i++) {
-
+                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.RAIL_TYPE)) {
+                    TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(R.getElementListIds().get(i));
+                    if(!E.equals(TM.getEdgeTrainStandsOn())) {
+                        // Start distanz wurde schon in result distanz gespeichert
+                        resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
+                    }
+                }
             }
 
             return resultDistance;

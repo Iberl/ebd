@@ -35517,7 +35517,7 @@
                   <Wert>Ende_Bestdig</Wert>
                 </TOP_Anschluss_B>
                 <TOP_Laenge>
-                  <Wert>2500.00</Wert>
+                  <Wert>1862</Wert>
                 </TOP_Laenge>
               </TOP_Kante_Allg>
             </TOP_Kante>
@@ -42720,7 +42720,7 @@
         <Wert>77C815A1-A01C-42DB-AE33-6F90122A4C58</Wert>
     </ID_TOP_Kante>
     <Abstand>
-        <Wert>1862.090</Wert>
+        <Wert>1861.00</Wert>
     </Abstand>
     <Seitlicher_Abstand>
         <Wert>0.000</Wert>
@@ -42734,7 +42734,7 @@
         <Wert>FF8B47AA-5DEC-4816-93A0-1BAD1F6C6103</Wert>
     </ID_Strecke>
     <Strecke_Km>
-        <Wert>2.273</Wert>
+        <Wert>2.253</Wert>
     </Strecke_Km>
 </Punkt_Objekt_Strecke>
 <DP_Bezug_Betrieblich>

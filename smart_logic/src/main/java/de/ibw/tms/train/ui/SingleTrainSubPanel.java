@@ -356,7 +356,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 bIsShunting = iShuntingMode == JOptionPane.YES_OPTION;
 
                 try {
-                    R.saveWaypointIForTransmission();
+                    R.saveWaypointsForProcessing(true);
                     SubController.requestMovementAuthority(RequestWrapper, R, sRBC, MainTmsSim.S_TMS_ID, uuid, bIsShunting);
                 } catch (IOException ex) {
                     ex.printStackTrace();

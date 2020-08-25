@@ -43,7 +43,7 @@ public class Route implements Cloneable, Serializable {
         return elemetTypes;
     }
 
-    public void saveWaypointIForTransmission() {
+    public void saveWaypointsForProcessing(boolean withEndpoint) {
         elemetTypes = new ArrayList<>();
         elementListIds = new ArrayList<>();
         int iCountWaypoints = 0;
@@ -58,13 +58,13 @@ public class Route implements Cloneable, Serializable {
         iCountWaypoints = waypoints.size();
         for(int i = 1; i < iCountWaypoints -1; i++) {
             Waypoint W = waypoints.get(i);
-            String sId = null;
+
 
 
             TrackElement CTE = W.getTrackElement();
             handleCrossoverWaypoint(CTE);
         }
-        handleEndWaypoint(TrackElementOfEnd);
+        if(withEndpoint) handleEndWaypoint(TrackElementOfEnd);
 
 
     }

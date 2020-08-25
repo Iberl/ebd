@@ -45,8 +45,8 @@ import static ebd.rbc_tms.util.ETCSVariables.*;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-08-25
  */
 public class PositionReportController extends SubmissionPublisher implements IController {
 
@@ -69,6 +69,52 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             instance = new PositionReportController();
         }
         return instance;
+    }
+
+    /**
+     * Berechnet die Distanz zum n&auml;chsten Knoten von einem Knoten f&uuml;r einen Zug
+     * @param TrM {@link TrainModel} - Modell des Zuges, f&uuml;r den eine Berechnung folgt.
+     * @return BigDecimal - Entfernung in meter
+     */
+    public static BigDecimal calcDistanceToFirstNodeOfTrainViaBalise(TrainModel TrM) {
+        boolean isNominal;
+        int iEngineId = TrM.iTrainId;
+        TopologyGraph.Edge NewTrainPositionEdge = TrM.getEdgeTrainStandsOn();
+        Balise B = Balise.baliseByNid_bg.getModel(TrM.getNid_lrbg());
+        if(B == null) return null;
+        BigDecimal distanceToNextTargetPoint;
+        BigDecimal dLengthOfEdge = new BigDecimal(NewTrainPositionEdge.dTopLength);
+        BigDecimal trackMeterOfBalise = new BigDecimal(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue());
+
+        if(iEngineId == 1) {
+
+            isNominal = ConfigHandler.getInstance().train1StartingInTrackDirection;
+        } else if(iEngineId == 2) {
+            isNominal = ConfigHandler.getInstance().train2StartingInTrackDirection;
+
+        } else return null;
+        TopologyGraph.Node TargetNode;
+        if(isNominal) {
+
+
+
+
+
+
+            distanceToNextTargetPoint = dLengthOfEdge.subtract(trackMeterOfBalise);
+
+
+
+
+        } else {
+
+
+            distanceToNextTargetPoint = trackMeterOfBalise;
+
+
+        }
+
+        return distanceToNextTargetPoint.abs();
     }
 
 
@@ -108,7 +154,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             String sBalisesTrackId = B.getPlanProTrack().getIdentitaet().getWert();
 
 
-            BigDecimal trackMeterOfBalise = B.getMetersOfTrack();
+            BigDecimal trackMeterOfBalise = new BigDecimal(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue());
+
+
 
 
             /*if(BalisReferenc.equals(ENUMWirkrichtung.GEGEN)) {
@@ -126,6 +174,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             if(NewTrainPositionEdge == null) {
                 throw new NullPointerException("Balise Not on Track in TopologyGraph");
             }
+            BigDecimal dLengthOfEdge = new BigDecimal(NewTrainPositionEdge.dTopLength);
             boolean isNominal;
             if(iEngineId == 1) {
 
@@ -137,17 +186,20 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
             if(isNominal) {
                 TargetNode = NewTrainPositionEdge.B;
-                CrossingSwitch CS = (CrossingSwitch) TargetNode.NodeImpl;
 
-                distanceToNextTargetPoint = CS.getTrackMeterByTrackId(sBalisesTrackId).subtract(trackMeterOfBalise);
+
+
+
+
+                distanceToNextTargetPoint = dLengthOfEdge.subtract(trackMeterOfBalise);
 
 
                 b_A_IsTarget = false;
 
             } else {
                 TargetNode = NewTrainPositionEdge.A;
-                CrossingSwitch CS = (CrossingSwitch) TargetNode.NodeImpl;
-                distanceToNextTargetPoint = CS.getTrackMeterByTrackId(sBalisesTrackId).subtract(trackMeterOfBalise);
+
+                distanceToNextTargetPoint = trackMeterOfBalise;
 
                 b_A_IsTarget = true;
             }
@@ -208,6 +260,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
             Tm.setEdgeTrainStandsOn(NewTrainPositionEdge);
             double distanceToBackOfTrain = distanceToNextTargetPoint.add(new BigDecimal(Tm.length)).doubleValue();
+            if(distanceToBackOfTrain > NewTrainPositionEdge.dTopLength) {
+                distanceToBackOfTrain = NewTrainPositionEdge.dTopLength -1;
+            }
             TrainDistance TD = new TrainDistance(b_A_IsTarget, distanceToBackOfTrain, distanceToNextTargetPoint.doubleValue());
             Tm.setNodeTrainRunningTo(TargetNode);
             /*
@@ -296,15 +351,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
     private BigDecimal calcNextTargetPointDistanc(BigDecimal distanceToNextTargetPoint, TopologyGraph.Edge newTrainPositionEdge, TrainModel tm) {
         BigDecimal result = null;
-        try {
-            CrossingSwitch CSA = (CrossingSwitch) newTrainPositionEdge.A.NodeImpl;
-            CrossingSwitch CSB = (CrossingSwitch) newTrainPositionEdge.B.NodeImpl;
-            result = CSA.absDiff(CSB);
-            if(result == null) throw new NullPointerException("No Result Via StreckenKilometriasation");
+
+            result = new BigDecimal(newTrainPositionEdge.dTopLength);
             return distanceToNextTargetPoint.add(result);
-        } catch(Exception E) {
-          return distanceToNextTargetPoint.add(new BigDecimal(newTrainPositionEdge.dTopLength));
-        }
+
 
 
     }
