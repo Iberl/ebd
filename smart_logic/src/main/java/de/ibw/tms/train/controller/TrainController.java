@@ -1,5 +1,6 @@
 package de.ibw.tms.train.controller;
 
+import de.ibw.feed.Balise;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
@@ -21,6 +22,7 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,8 +34,8 @@ import java.util.concurrent.SubmissionPublisher;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-08-25
  */
 public class TrainController extends SubmissionPublisher implements IController {
 
@@ -142,7 +144,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         ArrayList<EOA.Section> eoaSections = new ArrayList<>();
         SpeedProfile RbcSpeedProfil = null;
         try {
-            double dLengthOfEoaSectionsAsOnce = extractDistanceOfSelectedTrack(R);
+            double dLengthOfEoaSectionsAsOnce = R.getLocation().getEnd().chainage.iMeters;
             if (dLengthOfEoaSectionsAsOnce > 32000) {
                 EOA_Q_SCALE = ETCSVariables.Q_SCALE_10M;
                 L_SECTION = (int) (dLengthOfEoaSectionsAsOnce / 10);
@@ -354,10 +356,37 @@ public class TrainController extends SubmissionPublisher implements IController 
         return iQ_SCALE;
     }
 
-    private double extractDistanceOfSelectedTrack(Route R) {
-        double resultDistance = 0d;
+    /**
+     * TODO
+     * Extrahiert distanz von Referenzbalise Topologischen End-Knoten ACHTUNG nicht für letztes Wegst&uuml;ck gedacht.
+     * Deshalb ohne letzten Gleisabschnitt
+     * @param R {@link Route} - die angeforderte Route
+     * @param TM {@link TrainModel} - der Zug auf der Route
+     * @return BigDecimal - Entfernung
+     */
+    public static BigDecimal extractDistanceOfSelectedTrack(Route R, TrainModel TM) {
+        BigDecimal resultDistance = new BigDecimal(0d);
         try {
-            return R.getLocation().getEnd().chainage.iMeters;
+            int iLastIndex = -1;
+            if(TM == null || R == null) return resultDistance;
+
+            Integer iNid_Lrbg = TM.getNid_lrbg();
+
+            Balise B = Balise.baliseByNid_bg.getModel(iNid_Lrbg);
+            if(B == null) return resultDistance;
+
+
+            if(R.getElemetTypes().size() < 2) return resultDistance;
+            iLastIndex = R.getElemetTypes().size() -1;
+
+            if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
+
+
+            for(int i = 0; i < R.getElemetTypes().size(); i++) {
+
+            }
+
+            return resultDistance;
         } catch(Exception E) {
             E.printStackTrace();
         }

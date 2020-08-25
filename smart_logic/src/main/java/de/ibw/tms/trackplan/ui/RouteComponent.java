@@ -13,6 +13,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.speed.profile.view.SpeedDialog;
 import de.ibw.tms.trackplan.controller.RouteController;
+import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.UtilFunction;
@@ -30,8 +31,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-08-25
  */
 public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
@@ -73,6 +74,8 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
     }
 
     /**
+     * @Deprecated
+     *
      * Berechnet die Streckenl&auml;nge in Metern des letzten Streckenabschnitts.
      * Wird ben&ouml;tigt um den Nutzer eine Auswahl zu geben, wo der Zug am letzten Streckenabschnitt enden soll.
      * Das ist dann das Ende der MA.
@@ -80,8 +83,9 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
      * @param TrModel {@link TrainModel} - Zug Model des Zuges, dem die MA betrifft
      * @return double - Strecke in Meter
      */
+    @Deprecated
     public static double calcTrackLengthUntilLastWayoint(TrainModel TrModel) {
-        double dResult = 0d;
+        double dResult;
         dResult = TrModel.getdDistanceToNodeRunningTo();
         for(int i = 2; i < lastTrackElements.size(); i++) {
             ControlledTrackElement LastTrackElement = (ControlledTrackElement) lastTrackElements.get(i - 1);
@@ -243,7 +247,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                             Route R = RouteComponent.this.getRouteModel();
                             RouteComponent.lastTrackElements.push(TrackEl);
 
-                            dEnd = RouteComponent.calcTrackLengthUntilLastWayoint(StartingPointTrain);
+                            dEnd = TrainController.extractDistanceOfSelectedTrack(R, StartingPointTrain).doubleValue();
 
                             R.setEndSpot(RouteComponent.this.TrackEl, (int) dEnd);
                             RouteComponent.this.RC.setRouteData(R);

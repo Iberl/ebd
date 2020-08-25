@@ -316,6 +316,7 @@ public class TrainModel {
     }
 
     /**
+     * Gemeint ist hier die Distanz von der Balise zum ersten topologischen Zielknoten
      * Setzt die Distanz zum Toplogischen Knoten auf dem sich der Zug hinbewegt.
      * @param dDistanceToNodeRunningTo double
      */

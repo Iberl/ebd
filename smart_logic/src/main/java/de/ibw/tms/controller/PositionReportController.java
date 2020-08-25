@@ -82,9 +82,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         Integer iEngineId = null;
         TrainModel Tm = null;
 
-        PlanProTmsAdapter refAdapter = PlanProTmsAdapter.getPlanAdapter();
 
-        BigDecimal dDistanceToTrainFromReferencePoint;
+
+
 
         try {
             boolean b_A_IsTarget = false;
@@ -153,6 +153,8 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             }
 
             distanceToNextTargetPoint = distanceToNextTargetPoint.abs();
+            Tm.setdDistanceToNodeRunningTo(distanceToNextTargetPoint.doubleValue());
+
 
             System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToNextWaypoint: " + distanceToNextTargetPoint);
 
@@ -207,7 +209,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             Tm.setEdgeTrainStandsOn(NewTrainPositionEdge);
             double distanceToBackOfTrain = distanceToNextTargetPoint.add(new BigDecimal(Tm.length)).doubleValue();
             TrainDistance TD = new TrainDistance(b_A_IsTarget, distanceToBackOfTrain, distanceToNextTargetPoint.doubleValue());
-
+            Tm.setNodeTrainRunningTo(TargetNode);
             /*
 
             MainGraphicPanel.getGeoCoordinate(NewTrainPositionEdge.sId, !b_A_IsTarget)

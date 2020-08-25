@@ -4,7 +4,11 @@ import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.tms.trackplan.controller.RouteController;
+import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
 
 import javax.swing.*;
@@ -51,7 +55,17 @@ public class LinearLocationWaypointSetWindow extends JDialog {
 
         Rail R = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE);
         double dTrackLength = R.getEdge().dTopLength;
-        double dMinimum = RouteComponent.calcTrackLengthUntilLastWayoint(startingPointTrain);
+        try {
+            TopologyGraph.Edge E = R.getEdge();
+            CrossingSwitch CSA = (CrossingSwitch) E.A.NodeImpl;
+
+            dTrackLength = CSA.absDiff((ICompareTrackMeter) E.B.NodeImpl).doubleValue();
+        } catch(Exception E) {
+
+        }
+        double dMinimum = TrainController.extractDistanceOfSelectedTrack(this.getRouteModel(), startingPointTrain).doubleValue();
+
+                //RouteComponent.calcTrackLengthUntilLastWayoint(startingPointTrain);
         double dMax = dMinimum + dTrackLength;
         if(startingPointTrain.getEdgeTrainStandsOn().getRail().getTrailModel() == TE) {
 
