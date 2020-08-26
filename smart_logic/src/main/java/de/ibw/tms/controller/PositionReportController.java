@@ -134,7 +134,6 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
         try {
             boolean b_A_IsTarget = false;
-            boolean b_TOP_NODE_PASSED = false;
             iEngineId = PositonReport.trainInfo.nid_engine;
             BigDecimal distanceToNextTargetPoint = null;
             Tm = TrainModel.TrainRepo.getModel(iEngineId);
@@ -210,7 +209,6 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
             System.out.println("TMS " + "Engine ID: " + iEngineId + " DistanceToNextWaypoint: " + distanceToNextTargetPoint);
 
-
             while(distance_from_dp.compareTo(distanceToNextTargetPoint) > 0 ) {
 
                 TopologyGraph.Edge TempPosEdge = findNewTrainPosition(NewTrainPositionEdge, TargetNode);
@@ -234,6 +232,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
 
             }
+
+            distanceToNextTargetPoint = distanceToNextTargetPoint.subtract(distance_from_dp);
+
+
 
             Tm = handleTrainLength(Tm, PositonReport.positionInfo);
 

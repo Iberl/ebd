@@ -105,7 +105,7 @@
             <groupId>de.tms_simulator</groupId>
             <artifactId>dbdclient-ebd</artifactId>
             <version>1.0</version>
-
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>

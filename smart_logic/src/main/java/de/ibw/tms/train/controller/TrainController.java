@@ -17,6 +17,7 @@ import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
+import de.ibw.util.DefaultRepo;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.ModeProfile.Mode;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -384,15 +385,24 @@ public class TrainController extends SubmissionPublisher implements IController 
             if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
             resultDistance = resultDistance.add(PositionReportController.calcDistanceToFirstNodeOfTrainViaBalise(TM));
 
-            for(int i = 0; i < R.getElemetTypes().size(); i++) {
-                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.RAIL_TYPE)) {
-                    TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(R.getElementListIds().get(i));
-                    if(!E.equals(TM.getEdgeTrainStandsOn())) {
+            for(int i = 2; i < R.getElemetTypes().size(); i++) {
+                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.CROSSOVER_TYPE) &&
+                R.getElemetTypes().get(i - 1).equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+                    String s1NodeId = R.getElementListIds().get(i);
+                    String s2NodeId = R.getElementListIds().get(i-1);
+
+
+                    DefaultRepo<String, TopologyGraph.Edge> drEdge = TopologyGraph.twoTopPointBelongsToEdgeRepo.getModel(s1NodeId);
+
+
+
+                    TopologyGraph.Edge E = drEdge.getModel(s2NodeId);
+
                         // Start distanz wurde schon in result distanz gespeichert
-                        resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
+                    resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
                     }
                 }
-            }
+
 
             return resultDistance;
         } catch(Exception E) {
