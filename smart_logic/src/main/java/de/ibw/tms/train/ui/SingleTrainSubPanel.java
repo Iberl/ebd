@@ -1,9 +1,11 @@
 package de.ibw.tms.train.ui;
 
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.gradient.profile.controller.GradientController;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.speed.profile.view.SpeedDialog;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.RouteController;
@@ -17,6 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
@@ -358,9 +361,13 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 try {
                     R.saveWaypointsForProcessing(true);
                     SubController.requestMovementAuthority(RequestWrapper, R, sRBC, MainTmsSim.S_TMS_ID, uuid, bIsShunting);
+                    SingleTrainSubPanel.this.Parent.dispatchEvent(new WindowEvent(SingleTrainSubPanel.this.Parent, WindowEvent.WINDOW_CLOSING));
                 } catch (IOException ex) {
                     ex.printStackTrace();
+                    JOptionPane.showMessageDialog(SingleTrainSubPanel.this.Parent,
+                            "Die Ma wurde nicht gesendet, bitte Route prüfen.");
                 }
+
 
             }
         });

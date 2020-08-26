@@ -36,7 +36,7 @@ import java.util.concurrent.PriorityBlockingQueue;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-08-07
+ * @since 2020-08-26
  */
 public class RbcModul extends Thread {
 
@@ -174,7 +174,7 @@ public class RbcModul extends Thread {
 
 
 
-                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(this.sHost, PM.getMsg());
+                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(PM.getMsg());
 
                         SlThread.start();
                         if(EM != null) {
@@ -211,11 +211,10 @@ public class RbcModul extends Thread {
 
         /**
          * Instanziierrt einen Thread mit einer Nachricht an das RBC
-         * @param sHost - Ziel RBC
          * @param M - Nachricht zu verschicken
          */
-        public SL_To_RBC_ClientThread(String sHost, Message M) {
-            this.sHost = sHost;
+        public SL_To_RBC_ClientThread(Message M) {
+            this.sHost = ConfigHandler.getInstance().ipOfRBCServer;
             this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfRBCServer);
             this.M = M;
         }

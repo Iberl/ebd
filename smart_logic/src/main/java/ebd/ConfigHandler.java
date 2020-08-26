@@ -24,6 +24,8 @@ public class ConfigHandler {
     public String ipToGUIServer4TMS = "127.0.0.1";
     public String portOfGUIServer4TMS = "11114";
 
+    public String ipOfRBCServer = "127.0.0.1";
+
     //External Port for RBC
     public String portOfTMSServer = "22223";
     // External Port To RBC
@@ -59,7 +61,7 @@ public class ConfigHandler {
     /*
      show kilometrierung
      */
-    public boolean showMeter = true;
+    public boolean showMeter = false;
 
 
     /*
