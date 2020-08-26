@@ -265,7 +265,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             if(distanceToBackOfTrain > NewTrainPositionEdge.dTopLength) {
                 distanceToBackOfTrain = NewTrainPositionEdge.dTopLength -1;
             }
-            TrainDistance TD = new TrainDistance(b_A_IsTarget, distanceToBackOfTrain, distanceToNextTargetPoint.doubleValue());
+            TrainDistance TD = new TrainDistance(b_A_IsTarget, distanceToNextTargetPoint.doubleValue(), distanceToBackOfTrain);
             Tm.setNodeTrainRunningTo(TargetNode);
             /*
 
