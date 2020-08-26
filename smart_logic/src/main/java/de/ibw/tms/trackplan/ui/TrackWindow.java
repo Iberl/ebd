@@ -12,10 +12,10 @@ import java.util.List;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-08-26
  */
-public class TrackWindow extends JFrame {
+public class TrackWindow extends JDialog {
     private static int windowWidth = 300;
     private static ArrayList<TrackWindow> instances = new ArrayList<TrackWindow>();
 
@@ -34,7 +34,8 @@ public class TrackWindow extends JFrame {
      * @param panels {@link List} eine Liste von Panels je element im Clickbereich.
      * @param P {@link Point} Punkt der im Streckenfester geclickt wurde.
      */
-    public TrackWindow(List panels, Point P) {
+    public TrackWindow(JFrame frame, List panels, Point P) {
+        super(frame, "Track Options", true);
 
         javax.swing.JPanel listPane = new javax.swing.JPanel();
         BoxLayout WindowLayout = new BoxLayout(listPane, BoxLayout.Y_AXIS);

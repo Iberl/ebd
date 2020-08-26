@@ -30,8 +30,8 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-08-26
  */
 public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<TrainModel> {
 

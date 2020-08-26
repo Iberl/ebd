@@ -34,8 +34,8 @@ import java.util.concurrent.SubmissionPublisher;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-11
+ * @version 0.4
+ * @since 2020-08-28
  */
 public class TrackController extends SubmissionPublisher<String> implements IController<String> {
 
@@ -180,7 +180,13 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
 
 
         }
-        if(panels.size() > 0) new TrackWindow(panels, point);
+        JFrame jFscopeFrame;
+        if(isMainWindow) {
+            jFscopeFrame = MainTmsSim.MainFrame;
+        } else {
+            jFscopeFrame = MaCreatingFrame.CurrentMaCreatingFrame;
+        }
+        if(panels.size() > 0) new TrackWindow(jFscopeFrame, panels, point);
     }
 
 
