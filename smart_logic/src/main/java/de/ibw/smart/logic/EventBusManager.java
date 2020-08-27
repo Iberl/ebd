@@ -20,13 +20,15 @@ import java.util.TimerTask;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-08-27
  */
 
 public class EventBusManager {
     private final EventBus LocalBus;
     private Logging logger;
+    private boolean isTMS = false;
+
 
     private static DefaultRepo<Integer, EventBusManager> tmsBusById = new DefaultRepo<>();
     private static DefaultRepo<Integer, EventBusManager> smartLogicBusById = new DefaultRepo<>();
@@ -52,6 +54,7 @@ public class EventBusManager {
                 prefix = "sl ";
             }
            EBM = new EventBusManager(id, prefix);
+           EBM.isTMS = isTMS;
            scopedRepo.update(id, EBM);
         }
         return EBM;
