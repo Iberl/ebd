@@ -225,10 +225,16 @@ public class TrainController extends SubmissionPublisher implements IController 
             // 0 vmax
             SvL SuperVL = RouteComponent.svl;
             if(SuperVL == null) {
-                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this.TrainSubPanel);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(TrainController.this.TrainSubPanel);
 
-                JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
-                return;
+                        JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
+                        return;
+                    }
+                });
+
             }
 
             SuperVL.setMovementAuthority(Ma);

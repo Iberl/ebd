@@ -63,7 +63,7 @@ public class RouteController extends SubmissionPublisher<Route> implements ICont
         } catch(IllegalStateException Ex) {
             Ex.printStackTrace();
         }
-        TrackWindow.closeAllTrackWindows();
+
 
     }
 

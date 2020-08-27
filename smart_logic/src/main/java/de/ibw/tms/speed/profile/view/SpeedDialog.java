@@ -36,6 +36,8 @@ public class SpeedDialog extends CartesianDialog {
      */
     public static void displaySpeedDialog(CartesianSpeedModel CSM, Route RouteData) {
         JFrame MaFrame =  MaCreatingFrame.CurrentMaCreatingFrame;
+
+
         SpDialog = new SpeedDialog(CSM, MaFrame, RouteData);
         SpDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         SpDialog.addWindowListener(new WindowAdapter() {

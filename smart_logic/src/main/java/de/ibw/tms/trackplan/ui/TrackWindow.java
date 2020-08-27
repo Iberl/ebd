@@ -19,12 +19,18 @@ public class TrackWindow extends JDialog {
     private static int windowWidth = 300;
     private static ArrayList<TrackWindow> instances = new ArrayList<TrackWindow>();
 
+
+
+
     /**
      * Entfernt alle Rechtsclck-Fenster
      */
     public static void closeAllTrackWindows() {
         for(TrackWindow Window: instances) {
-            Window.dispatchEvent(new WindowEvent(Window, WindowEvent.WINDOW_CLOSING));
+            if(Window == null) continue;
+            Window.dispose();
+            Window.setVisible(false);
+
         }
         instances = new ArrayList<TrackWindow>();
     }
@@ -36,6 +42,8 @@ public class TrackWindow extends JDialog {
      */
     public TrackWindow(JFrame frame, List panels, Point P) {
         super(frame, "Track Options", true);
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 
         javax.swing.JPanel listPane = new javax.swing.JPanel();
         BoxLayout WindowLayout = new BoxLayout(listPane, BoxLayout.Y_AXIS);
@@ -51,7 +59,7 @@ public class TrackWindow extends JDialog {
         this.setBounds(P.x, P.y, windowWidth,400);
 
         this.setVisible(true);
-        instances.add(this);
+
     }
 
 }

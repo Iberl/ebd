@@ -42,7 +42,13 @@ public class ZoomFrame extends JFrame {
      */
     public static ZoomFrame getZoomFrame() {
         if(zoomInstance == null) {
-            zoomInstance = new ZoomFrame();
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    zoomInstance = new ZoomFrame();
+                }
+            });
+
         }
         return zoomInstance;
     }

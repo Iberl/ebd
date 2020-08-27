@@ -44,20 +44,26 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
     }
 
     private static DefaultRepo<String, Integer> useSimulatedDbdClient(ConfigHandler ch) {
-        DefaultRepo<String, Integer> fakeRepo = new DefaultRepo<>();
+        final DefaultRepo<String, Integer>[] fakeRepo = new DefaultRepo[]{new DefaultRepo<>()};
         if(ch.shallUserPrompt4SimulationFile) {
-            fakeRepo = prompt4CsvFileLocation(fakeRepo);
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    fakeRepo[0] = prompt4CsvFileLocation(fakeRepo[0]);
+                }
+            });
+
         } else {
             InputStream in = RealDbdClient.class.getResourceAsStream("DbdClient/DBD.SIM.CSV");
             CSVReader reader = new CSVReader(new InputStreamReader(in));
             try {
-                fillRepoByCsv(fakeRepo, reader);
+                fillRepoByCsv(fakeRepo[0], reader);
             } catch (CsvValidationException | IOException e) {
                 e.printStackTrace();
-                fakeRepo = new DefaultRepo<>();
+                fakeRepo[0] = new DefaultRepo<>();
             }
         }
-        return fakeRepo;
+        return fakeRepo[0];
     }
 
     private static DefaultRepo<String, Integer> prompt4CsvFileLocation(DefaultRepo<String, Integer> fakeRepo) {

@@ -55,7 +55,6 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
     public static SvL svl = null;
 
 
-
     private static TopologyGraph.Edge retrieveNextEdge(TrackElement LastTrackElement, TrackElement TrackEl) {
 
         CrossoverModel RootModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) LastTrackElement);
@@ -224,6 +223,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                     RouteComponent.lastTrackElements.push(TrackEl);
                     RouteComponent.this.RC.setRouteData(R);
                     RC.publish();
+                    RouteComponent.this.closeTrackSubWindow();
                 }
             });
 
@@ -236,62 +236,79 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                 addWaypointItem.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (TrackEl instanceof Trail) {
-
-                            new LinearLocationWaypointSetWindow(TrackEl,
-                                    new JFrame(), new Point(150, 200), RC, StartingPointTrain);
-
-
-                        } else if (TrackEl.getChainageBeginn().getiMeters() == TrackEl.getChainageEnd().getiMeters()) {
-                            double dEnd = 0d;
-                            Route R = RouteComponent.this.getRouteModel();
-                            RouteComponent.lastTrackElements.push(TrackEl);
-
-                            dEnd = TrainController.extractDistanceOfSelectedTrack(R, StartingPointTrain).doubleValue();
-
-                            R.setEndSpot(RouteComponent.this.TrackEl, (int) dEnd);
-                            RouteComponent.this.RC.setRouteData(R);
-                            RC.publish();
-                        } else {
-                            new LinearLocationWaypointSetWindow(TrackEl,
-                                    new JFrame(), new Point(150, 200), RC, StartingPointTrain);
-                        }
-                        //if(!RouteComponent.START_POINT_MODE_ENABLED) {
-
-                        Route R = RouteComponent.this.getRouteModel();
-                        //Rail Rail0 = PlanData.getInstance().railList.get(0);
-                        //TrackElement StartTrackElement = Rail0.getTrackReference();
-
-
-                        RouteComponent.this.RC.setRouteData(R);
-                        RC.publish();
-                        int iSpeed;
-                        try {
-                            iSpeed = setInitialSpeed();
-                        }catch (Exception E) {
-                            iSpeed = 160;
-                        }
-
-                        CSM = new CartesianSpeedModel();
-                        SSP SpeedProfile = new SSP();
-                        SpotLocation SlEnd = R.getLocation().getEnd();
-                        SpotLocation SlStart = R.getLocation().getBegin();
-                        SpeedChange SpeedBegin = new SpeedChange(new Chainage(0), SlStart.getTrackElement(), new SectionOfLine());
-                        SpeedChange SpeedEnd = new SpeedChange(SlEnd.getChainage(), SlEnd.getTrackElement(), new SectionOfLine());
-                        SpeedSegment SpeedSeg = new SpeedSegment(SpeedBegin, SpeedEnd, ApplicationDirection.BOTH);
-                        ETCS_SPEED etcsSpeed = new ETCS_SPEED();
-                        etcsSpeed.bSpeed = (byte) Math.floor(iSpeed / 5.0f);
-                        SpeedSeg.setV_STATIC(etcsSpeed);
-                        ArrayList<SpeedSegment> segmentList = new ArrayList<SpeedSegment>();
-                        segmentList.add(SpeedSeg);
-                        SpeedProfile.setSpeedSegments(segmentList);
-                        CSM.setStaticSpeedProfile(SpeedProfile);
-                        //SpeedDialog SD = new SpeedDialog(CSM, MaCreatingFrame.CurrentMaCreatingFrame, RouteComponent.this.RC.getRouteData());
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
-                                SpeedDialog.displaySpeedDialog(CSM, RouteComponent.this.RC.getRouteData());
+                                if (TrackEl instanceof Trail) {
+
+                                    new LinearLocationWaypointSetWindow(TrackEl,
+                                            new JFrame(), new Point(150, 200), RC, StartingPointTrain);
+
+
+
+                                } else if (TrackEl.getChainageBeginn().getiMeters() == TrackEl.getChainageEnd().getiMeters()) {
+                                    double dEnd = 0d;
+                                    Route R = RouteComponent.this.getRouteModel();
+                                    RouteComponent.lastTrackElements.push(TrackEl);
+
+                                    dEnd = TrainController.extractDistanceOfSelectedTrack(R, StartingPointTrain).doubleValue();
+
+                                    R.setEndSpot(RouteComponent.this.TrackEl, (int) dEnd);
+                                    RouteComponent.this.RC.setRouteData(R);
+                                    RC.publish();
+
+                                } else {
+                                    SwingUtilities.invokeLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            new LinearLocationWaypointSetWindow(TrackEl,
+                                                    new JFrame(), new Point(150, 200), RC, StartingPointTrain);
+                                        }
+                                    });
+
+                                }
+                                //if(!RouteComponent.START_POINT_MODE_ENABLED) {
+
+                                Route R = RouteComponent.this.getRouteModel();
+                                //Rail Rail0 = PlanData.getInstance().railList.get(0);
+                                //TrackElement StartTrackElement = Rail0.getTrackReference();
+
+
+                                RouteComponent.this.RC.setRouteData(R);
+                                RC.publish();
+                                final int[] iSpeed = new int[1];
+                                try {
+                                    iSpeed[0] = setInitialSpeed();
+
+
+                                }catch (Exception E) {
+                                    iSpeed[0] = 160;
+                                }
+
+                                CSM = new CartesianSpeedModel();
+                                SSP SpeedProfile = new SSP();
+                                SpotLocation SlEnd = R.getLocation().getEnd();
+                                SpotLocation SlStart = R.getLocation().getBegin();
+                                SpeedChange SpeedBegin = new SpeedChange(new Chainage(0), SlStart.getTrackElement(), new SectionOfLine());
+                                SpeedChange SpeedEnd = new SpeedChange(SlEnd.getChainage(), SlEnd.getTrackElement(), new SectionOfLine());
+                                SpeedSegment SpeedSeg = new SpeedSegment(SpeedBegin, SpeedEnd, ApplicationDirection.BOTH);
+                                ETCS_SPEED etcsSpeed = new ETCS_SPEED();
+                                etcsSpeed.bSpeed = (byte) Math.floor(iSpeed[0] / 5.0f);
+                                SpeedSeg.setV_STATIC(etcsSpeed);
+                                ArrayList<SpeedSegment> segmentList = new ArrayList<SpeedSegment>();
+                                segmentList.add(SpeedSeg);
+                                SpeedProfile.setSpeedSegments(segmentList);
+                                CSM.setStaticSpeedProfile(SpeedProfile);
+                                RouteComponent.this.closeTrackSubWindow();
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    public void run() {
+                                        SpeedDialog.displaySpeedDialog(CSM, RouteComponent.this.RC.getRouteData());
+                                    }
+                                });
+
                             }
                         });
+
 
 
 
@@ -406,6 +423,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
     }
 
     private int setInitialSpeed() {
+
         String sInputSpeed = showInitialSpeedDialog();
 
 //If a string was returned, say so.
@@ -427,6 +445,8 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
     private String showInitialSpeedDialog() {
 
+
+
         return (String) JOptionPane.showInputDialog(
                 new JFrame(),
                 sInitialSpeedMessage,
@@ -441,46 +461,60 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         addWaypointItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JPanel panel = new JPanel(new GridBagLayout());
-                Object[] trainModels = TrainModel.TrainRepo.getAll().toArray();
-                StartingPointTrain = null;
-                TrackElement TrackTrainStandsOn = null;
-                if(trainModels.length == 0) {
-                    StartingPointTrain = TrainModel.getDefaultModel();
-                } else if(trainModels.length == 1) {
-                    StartingPointTrain = (TrainModel) trainModels[0];
-                } else {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JPanel panel = new JPanel(new GridBagLayout());
+                        Object[] trainModels = TrainModel.TrainRepo.getAll().toArray();
+                        StartingPointTrain = null;
+                        TrackElement TrackTrainStandsOn = null;
+                        if (trainModels.length == 0) {
+                            StartingPointTrain = TrainModel.getDefaultModel();
+                        } else if (trainModels.length == 1) {
+                            StartingPointTrain = (TrainModel) trainModels[0];
+                        } else {
 
-                    StartingPointTrain = (TrainModel) JOptionPane.showInputDialog(new JFrame(),
-                            "Please select Train", "Train Selection", JOptionPane.INFORMATION_MESSAGE,
-                            null, trainModels, trainModels[0]);
-                    if (StartingPointTrain == null) {
-                        System.out.println("TMS: No Train Model available");
-                        return;
-                    } else {
-                        SingleTrainSubPanel.TrainPanel.setTrain(StartingPointTrain);
+                            StartingPointTrain = (TrainModel) JOptionPane.showInputDialog(new JFrame(),
+                                    "Please select Train", "Train Selection", JOptionPane.INFORMATION_MESSAGE,
+                                    null, trainModels, trainModels[0]);
+                            if (StartingPointTrain == null) {
+                                System.out.println("TMS: No Train Model available");
+                                return;
+                            } else {
+                                SingleTrainSubPanel.TrainPanel.setTrain(StartingPointTrain);
+                            }
+                        }
+
+
+                        try {
+                            TopologyGraph.Edge ElementOnTrain = StartingPointTrain.getEdgeTrainStandsOn();
+                            Rail RailTrainStandsOn = ElementOnTrain.getRail();
+                            TrackTrainStandsOn = RailTrainStandsOn.getTrackReference();
+                        } catch (Exception E) {
+                            System.out.println("Track Element of Train cannot be calculated.");
+                            E.printStackTrace();
+                        }
+
+
+                        Route R = RouteComponent.this.RC.getRouteData();
+                        R.setStartSpot(TrackTrainStandsOn, 0);
+                        RouteComponent.lastTrackElements = new Stack<>();
+                        RouteComponent.lastTrackElements.push(TrackTrainStandsOn);
+                        RouteComponent.this.RC.setRouteData(R);
+                        RC.publish();
+                        closeTrackSubWindow();
                     }
-                }
-                try {
-                    TopologyGraph.Edge ElementOnTrain = StartingPointTrain.getEdgeTrainStandsOn();
-                    Rail RailTrainStandsOn = ElementOnTrain.getRail();
-                    TrackTrainStandsOn = RailTrainStandsOn.getTrackReference();
-                } catch(Exception E) {
-                    System.out.println("Track Element of Train cannot be calculated.");
-                    E.printStackTrace();
-                }
-
-
-                    Route R = RouteComponent.this.RC.getRouteData();
-                    R.setStartSpot(TrackTrainStandsOn, 0);
-                    RouteComponent.lastTrackElements = new Stack<>();
-                    RouteComponent.lastTrackElements.push(TrackTrainStandsOn);
-                    RouteComponent.this.RC.setRouteData(R);
-                    RC.publish();
-
-            }
+            });
+        };
         });
         menu.add(addWaypointItem);
+
+    }
+
+    public void closeTrackSubWindow() {
+        Window W = SwingUtilities.getWindowAncestor(RouteComponent.this);
+        W.setVisible(false);
+        W.dispose();
     }
 
     /**

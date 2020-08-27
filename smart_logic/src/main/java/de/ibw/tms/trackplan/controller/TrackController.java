@@ -69,7 +69,12 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
      * Beantragt, dass Nutzer eine neue Ma definieren will. Das Fenster wird aufgemacht.
      */
     public void requestMaAction() {
-        new MaCreatingFrame(new MaRequestWrapper(null), MainTmsSim.MainFrame);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MaCreatingFrame(new MaRequestWrapper(null), MainTmsSim.MainFrame);
+            }
+        });
     }
 
     /**
@@ -124,7 +129,14 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                 RequestItem.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        new MaCreatingFrame(Request, MainTmsSim.MainFrame);
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                new MaCreatingFrame(Request, MainTmsSim.MainFrame);
+                            }
+                        });
+
+
                     }
                 });
                 EditMaMenu.add(RequestItem);
@@ -186,7 +198,17 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         } else {
             jFscopeFrame = MaCreatingFrame.CurrentMaCreatingFrame;
         }
-        if(panels.size() > 0) new TrackWindow(jFscopeFrame, panels, point);
+        if(panels.size() > 0) {
+
+            SwingUtilities.invokeLater(new Runnable() {
+
+
+                @Override
+                public void run() {
+                    new TrackWindow(jFscopeFrame, panels, point);
+                }
+            });
+        }
     }
 
 

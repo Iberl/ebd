@@ -104,9 +104,14 @@ public class SpeedPanel extends CartesianPanel {
                     Model.setMinChainage(SpeedPanel.this.WayStart.getChainage());
                     Model.setMaxChainage(SpeedPanel.this.WayEnd.getChainage());
                     SegmentAddController Ctrl = new SegmentAddController();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            SpeedPanel.OpenAddDialog = new AddSegmentDialog(Model, Ctrl);
+                            SpeedPanel.OpenAddDialog = null;
+                        }
+                    });
 
-                    SpeedPanel.OpenAddDialog = new AddSegmentDialog(Model, Ctrl);
-                    SpeedPanel.OpenAddDialog = null;
                 }
 
             }
