@@ -116,7 +116,7 @@ public class ConfigHandler {
                 System.err.println("First try of loading config did fail");
                 try(FileInputStream inputStream = new FileInputStream("config-default")) {
 
-                    try (FileOutputStream outputStream = new FileOutputStream("configuration/config.txt")) {
+                    try (FileOutputStream outputStream = new FileOutputStream("configuration/sl_config.txt")) {
                         int length;
                         byte[] buffer = new byte[1024];
                         while ((length = inputStream.read(buffer)) != -1){
@@ -192,7 +192,7 @@ public class ConfigHandler {
         }
 
         try {
-            File file = new File("configuration/config.txt");
+            File file = new File("configuration/sl_config.txt");
             try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
                 for (String line : lines) {
                     out.println(line);
@@ -223,7 +223,7 @@ public class ConfigHandler {
         if(!fromDefault) {
 
             try{
-                BufferedReader reader = new BufferedReader(new FileReader("configuration/config.txt"));
+                BufferedReader reader = new BufferedReader(new FileReader("configuration/sl_config.txt"));
                 stringArray = reader.lines().toArray(String[]::new);
             } catch (IOException e) {
                 IOException ioe = new IOException("The config file could not be opened. " + e.getMessage());

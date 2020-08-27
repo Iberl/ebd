@@ -150,7 +150,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             Tm.setQ_DIR(PositonReport.positionInfo.q_dirtrain);
             Balise B = Balise.baliseByNid_bg.getModel(bgId);
             CTOPKante CurrentTopKante = B.getTopPositionOfDataPoint();
-            String sBalisesTrackId = B.getPlanProTrack().getIdentitaet().getWert();
+
 
 
             BigDecimal trackMeterOfBalise = new BigDecimal(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue());

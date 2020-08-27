@@ -350,6 +350,18 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 boolean bIsShunting = false;
                 UUID uuid = UUID.randomUUID();
                 Route R = SingleTrainSubPanel.this.TGP.getRouteModel();
+                try {
+
+
+                    RouteComponent.requestSVL(Parent, R.getLocation().getEnd());
+
+                } catch(Exception E) {
+                    E.printStackTrace();
+                    JOptionPane.showMessageDialog(SingleTrainSubPanel.this.Parent,
+                            "Die MA wurde nicht gesendet, da die SVL nicht gesetzt werden konnte, bitte Route prüfen.");
+                    return;
+                }
+
                 MaRequestWrapper RequestWrapper = SingleTrainSubPanel.this.TGP.getR();
                 RequestWrapper.setTm(SingleTrainSubPanel.this.Tm);
                 String sRBC = SingleTrainSubPanel.this.Tm.getsLastKnownRBC();

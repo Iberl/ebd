@@ -292,27 +292,6 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                                 SpeedDialog.displaySpeedDialog(CSM, RouteComponent.this.RC.getRouteData());
                             }
                         });
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(RouteComponent.this);
-                                Integer iMeterOfSvl = null;
-                                while (iMeterOfSvl == null) {
-                                    String sMeterOfSvl = JOptionPane.showInputDialog(topFrame, "Please enter SVL-Meter from Endpoint selected",
-                                            "Define SVL in meter", JOptionPane.QUESTION_MESSAGE);
-                                    try {
-                                        iMeterOfSvl = Integer.parseInt(sMeterOfSvl);
-                                    } catch (NumberFormatException NFE) {
-                                        iMeterOfSvl = null;
-                                    }
-                                }
-                                int iSvlMeter = SlEnd.chainage.iMeters + iMeterOfSvl;
-                                Chainage SvLCh = new Chainage(iSvlMeter);
-
-
-                                RouteComponent.svl = new SvL(SvLCh, SlEnd.getTrackElement(), new SectionOfLine());
-                            }
-                        });
-
 
 
 
@@ -325,6 +304,29 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
 
 
+    }
+
+    public static void requestSVL(JFrame frame, SpotLocation slEnd) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JFrame topFrame = frame;
+                Integer iMeterOfSvl = null;
+                while (iMeterOfSvl == null) {
+                    String sMeterOfSvl = JOptionPane.showInputDialog(topFrame, "Please enter SVL-Meter from Endpoint selected",
+                            "Define SVL in meter", JOptionPane.QUESTION_MESSAGE);
+                    try {
+                        iMeterOfSvl = Integer.parseInt(sMeterOfSvl);
+                    } catch (NumberFormatException NFE) {
+                        iMeterOfSvl = null;
+                    }
+                }
+                int iSvlMeter = slEnd.chainage.iMeters + iMeterOfSvl;
+                Chainage SvLCh = new Chainage(iSvlMeter);
+
+
+                RouteComponent.svl = new SvL(SvLCh, slEnd.getTrackElement(), new SectionOfLine());
+            }
+        });
     }
 
     private boolean checkIfEndPointCanBeSet() {
