@@ -367,7 +367,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     String sBaliseDesc = "B" + sDP_Typ + ":" + B.getHashcodeOfBaliseDp();
                     //double sTopLang = B.getTopPositionOfDataPoint().getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
                     g2d.drawImage(B.getImage(), null, x, y);
-                    g2d.drawString(sBaliseDesc, (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f);
+                    g2d.drawString(sBaliseDesc, (float) (x + 5.0f), (float) y + (iStepper % 7) * 7.0f);
                     //g2d.drawString(sBaliseDesc + " " + String.valueOf(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert()), (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f + 10);
 
 
