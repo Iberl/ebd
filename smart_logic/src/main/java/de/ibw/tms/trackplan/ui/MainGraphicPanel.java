@@ -410,7 +410,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
-    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) {
+    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
@@ -421,7 +421,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         for(CGEOKante geoEdge : geoEdgeList) {
             lengthOfGeoEdges += geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
         }
-
+        LinkedGeo linkedGeo = null;
+        try {
+            linkedGeo = new LinkedGeo(geoEdgeList,b_fromA, edge);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         double prevDistance = 0;
         double geoEdgeLength = 0;
@@ -435,6 +441,15 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setColor(color);
         g2d.setStroke(stroke);
 
+        /*if(!b_fromA) {
+            double dTemp = distanceA1;
+            distanceA1 = distanceA2;
+            distanceA2 = dTemp;
+            distanceA1 = edge.dTopLength - distanceA1;
+            distanceA2 = edge.dTopLength - distanceA2;
+        }*/
+
+
         if(Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
             distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
             distanceA2 = distanceA2 * lengthOfGeoEdges / edge.dTopLength;
@@ -442,11 +457,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         int i = b_fromA ? 0 : geoEdgeList.size() - 1;
         boolean first = true;
-        for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
-            geoEdge = geoEdgeList.get(i);
+        for(i = 0; i < linkedGeo.getUsedEdgesSorted().size(); i++) {
+            geoEdge = linkedGeo.getUsedEdgesSorted().get(i);
             geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
             GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
             GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+
+
 
             // First node
             if(prevDistance + geoEdgeLength < distanceA1) {
@@ -456,17 +473,19 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
-                nodeA = getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+                nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
             }
 
             // Last node
             if(prevDistance + geoEdgeLength > distanceA2) {
-                nodeB = getGeoCoordinate(geoEdge, b_fromA, distanceA2 - prevDistance);
+                nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
             // Draw Line
             Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
             g2d.draw(line);
+            g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
+            g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
 
             prevDistance += geoEdgeLength;
             if(prevDistance > distanceA2) break;
