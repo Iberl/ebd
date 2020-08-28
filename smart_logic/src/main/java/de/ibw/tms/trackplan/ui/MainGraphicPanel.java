@@ -97,7 +97,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     }
 
     /**
-     * Zeichnte Z&uuml;ge in das Fenster
+     * Zeichnet Z&uuml;ge in das Fenster
      * @param g2d {@link Graphics2D} - Zeichenutil
      */
     public static void paintTrains(Graphics2D g2d) {
@@ -484,9 +484,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             // Draw Line
             Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
             g2d.draw(line);
-            g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
-            g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
-
+            /*
+                g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
+                g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
+            */
             prevDistance += geoEdgeLength;
             if(prevDistance > distanceA2) break;
         }

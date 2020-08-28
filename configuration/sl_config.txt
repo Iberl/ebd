@@ -45,7 +45,7 @@ tripProfileFolderPath = tripprofiles/
 ######
 
 # show kilometrierung in TMS
-showMeter = true
+showMeter = false
 
 
 
