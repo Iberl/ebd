@@ -355,11 +355,20 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             //int y = (int) B.getY();
             try {
                 if (null != B.getImage()) {
-                    String sBaliseDesc = "B" + B.getHashcodeOfBaliseDp();
-                    double sTopLang = B.getTopPositionOfDataPoint().getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
+                    String sDP_Typ = "";
+                    String sB_Point = "";
+                    try {
+                        sDP_Typ = B.getPlanProDataPoint().getDPTyp().get(0).getDPTypGESG().getDPTypESG().getWert().value();
+                    } catch(Exception E) {
+
+                    }
+
+
+                    String sBaliseDesc = "B" + sDP_Typ + ":" + B.getHashcodeOfBaliseDp();
+                    //double sTopLang = B.getTopPositionOfDataPoint().getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
                     g2d.drawImage(B.getImage(), null, x, y);
-                    g2d.drawString(sBaliseDesc, (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f);
-                    g2d.drawString(sBaliseDesc + " " + String.valueOf(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert()), (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f + 10);
+                    g2d.drawString(sBaliseDesc, (float) (x + 5.0f), (float) y + (iStepper % 7) * 7.0f);
+                    //g2d.drawString(sBaliseDesc + " " + String.valueOf(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert()), (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f + 10);
 
 
                 }
