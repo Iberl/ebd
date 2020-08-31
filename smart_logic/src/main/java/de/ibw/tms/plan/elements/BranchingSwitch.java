@@ -272,43 +272,14 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
         TopologyGraph.Node Ref = null;
-        if(From.getRail().equals(PeekRail)) {
-            Target = (Trail) outputRelation.getTo();
-        } else {
-            Target = (Trail) From;
-        }
+        Target = getTargetOfOutputChange(outputRelation, From);
 
 
         String sSrc = Node.TopNodeId;
         String sTarget;
-        try {
-            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
-            sSrc = CS.getEbdTitle();
-        }catch (Exception E){
-            sSrc =  Node.TopNodeId;
-        }
+        sSrc = getThisNode();
 
-        try {
-            Ref = Target.getRail().getEdge().B;
-            CrossingSwitch CS = null;
-
-            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-                CS = (CrossingSwitch) Target.getRail().getEdge().A.NodeImpl;
-
-            } else {
-                CS = (CrossingSwitch) Ref.NodeImpl;
-
-            }
-            sTarget = CS.getEbdTitle();
-
-        } catch ( Exception E) {
-            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-                sTarget = Target.getRail().getEdge().A.TopNodeId;
-            } else {
-                sTarget = Ref.TopNodeId;
-            }
-        }
-
+        sTarget = getTargetOfOutputEdge(Target, Ref);
 
 
         logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
@@ -316,6 +287,54 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         ///
 
 
+    }
+
+    private String getTargetOfOutputEdge(Trail target, TopologyGraph.Node ref) {
+        String sTarget;
+        try {
+
+            ref = target.getRail().getEdge().B;
+            CrossingSwitch CS = null;
+
+            if(ref.TopNodeId.equals(Node.TopNodeId)) {
+                CS = (CrossingSwitch) target.getRail().getEdge().A.NodeImpl;
+                logger.info("Switched to \n");
+
+            } else {
+                CS = (CrossingSwitch) ref.NodeImpl;
+
+            }
+            sTarget = CS.getEbdTitle();
+
+        } catch ( Exception E) {
+            if(ref.TopNodeId.equals(Node.TopNodeId)) {
+                sTarget = target.getRail().getEdge().A.TopNodeId;
+            } else {
+                sTarget = ref.TopNodeId;
+            }
+        }
+        return sTarget;
+    }
+
+    private String getThisNode() {
+        String sSrc;
+        try {
+            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
+            sSrc = CS.getEbdTitle();
+        }catch (Exception E){
+            sSrc =  Node.TopNodeId;
+        }
+        return sSrc;
+    }
+
+    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
+        Trail Target;
+        if(from.getRail().equals(PeekRail)) {
+            Target = (Trail) outputRelation.getTo();
+        } else {
+            Target = from;
+        }
+        return Target;
     }
 
     /**

@@ -12,7 +12,7 @@ import java.awt.*;
 import java.io.*;
 
 /**
- * Wrapper-Classe, sie benutzt den Anlagen-Client und dient nicht zur Simulation der Anlage
+ * Wrapper-Class, sie benutzt den Anlagen-Client und dient nicht zur Simulation der Anlage
  * !Achtung die Anlage kann wirklich bedient werden.
  *
  * Es implementiert das Interface zum Wechsel zwischen Echtanwendung und Simulation der Anlage

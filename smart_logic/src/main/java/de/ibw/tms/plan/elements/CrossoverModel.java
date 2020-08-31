@@ -108,15 +108,18 @@ public class CrossoverModel {
                 new TrackElementStatus()
         );
         List<PositionedRelation> list = new ArrayList<PositionedRelation>();
-        list.add(PosRelationA);
-        list.add(PosRelationB);
-        this.RailWaySlip.updatePositionedRelation(list);
+
+
         if(isIndex_0_RightPosition) {
-            this.RailWaySlip.getRemotePoint().setRightPosition(PosRelationA);
-            this.RailWaySlip.getRemotePoint().setLeftPosition(PosRelationB);
+
+            list.add(PosRelationA);
+            list.add(PosRelationB);
+            this.RailWaySlip.updatePositionedRelation(list);
         } else {
-            this.RailWaySlip.getRemotePoint().setRightPosition(PosRelationB);
-            this.RailWaySlip.getRemotePoint().setLeftPosition(PosRelationA);
+
+            list.add(PosRelationB);
+            list.add(PosRelationA);
+            this.RailWaySlip.updatePositionedRelation(list);
         }
         this.RailWaySlip.setOutputRelation(PosRelationA);
 
