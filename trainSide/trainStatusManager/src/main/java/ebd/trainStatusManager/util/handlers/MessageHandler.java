@@ -92,13 +92,13 @@ public class MessageHandler {
     private void handleMsg24(ReceivedMessageEvent rme) {
         Message_24 message24 = (Message_24)rme.message;
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-
-        Map<Integer, Location> previousLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getPreviousLocations();
+        Location curLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getLocation();
+        /*Map<Integer, Location> previousLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getPreviousLocations();
         Location curLoc = Objects.requireNonNull(trainDataVolatile.getCurrentPosition()).getLocation();
         Location refLoc;
         if(!previousLoc.containsKey(message24.NID_LRBG)){
             if(curLoc.getId() != message24.NID_LRBG){
-                String msg = "ETCS ID " + this.etcsTrainID + " received a Msg3 with a reference LRBG (" + message24.NID_LRBG +") that was not known to the train.";
+                String msg = "ETCS ID " + this.etcsTrainID + " received a Msg24 with a reference LRBG (" + message24.NID_LRBG +") that was not known to the train.";
                 IllegalArgumentException iae = new IllegalArgumentException(msg);
                 this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
                 return;
@@ -123,7 +123,10 @@ public class MessageHandler {
             IllegalArgumentException iae = new IllegalArgumentException(msg);
             this.localBus.post(new TsmExceptionEvent("tsm", "tsm", rme, iae, ExceptionEventTyp.NONCRITICAL));
             return;
-        }
+        }*/
+
+        Location refLoc = curLoc;
+
         /*
         Logging
          */
