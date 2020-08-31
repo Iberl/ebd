@@ -341,7 +341,7 @@ public class DrivingDynamics {
                 if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
                 switch (this.currentSil){
-                    case NO_INTERVENTION:
+                    case INDICATION:
                         /*
                         This control flow is necessary in case the train emergency breaks into RSM.
                         This control flow allows the train accelerate again until the stopping reagion is reached.
