@@ -271,7 +271,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         String sNodeIdOutput = "";
         Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
-        TopologyGraph.Node Ref = null;
+
         Target = getTargetOfOutputChange(outputRelation, From);
 
 
@@ -279,7 +279,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         String sTarget;
         sSrc = getThisNode();
 
-        sTarget = getTargetOfOutputEdge(Target, Ref);
+        sTarget = getTargetOfOutputEdge(Target);
+
+
 
 
         logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
@@ -289,29 +291,27 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     }
 
-    private String getTargetOfOutputEdge(Trail target, TopologyGraph.Node ref) {
+    private String getTargetOfOutputEdge(Trail target) {
         String sTarget;
         try {
 
-            ref = target.getRail().getEdge().B;
+            TopologyGraph.Node ref = target.getRail().getEdge().B;
             CrossingSwitch CS = null;
 
             if(ref.TopNodeId.equals(Node.TopNodeId)) {
                 CS = (CrossingSwitch) target.getRail().getEdge().A.NodeImpl;
-                logger.info("Switched to \n");
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromB.value());
 
             } else {
                 CS = (CrossingSwitch) ref.NodeImpl;
-
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromA.value());
             }
             sTarget = CS.getEbdTitle();
 
         } catch ( Exception E) {
-            if(ref.TopNodeId.equals(Node.TopNodeId)) {
+
                 sTarget = target.getRail().getEdge().A.TopNodeId;
-            } else {
-                sTarget = ref.TopNodeId;
-            }
+
         }
         return sTarget;
     }
