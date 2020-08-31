@@ -327,6 +327,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
+            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
 
 
 

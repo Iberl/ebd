@@ -56,6 +56,10 @@ public class CrossoverModel {
     private Rail PeekRail = null;
 
 
+    public BranchingSwitch getRailWaySwitch() {
+        return RailWaySwitch;
+    }
+
     private CrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
         Node = node;
         TopConnect = topConnect;

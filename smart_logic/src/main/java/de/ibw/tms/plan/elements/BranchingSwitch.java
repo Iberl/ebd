@@ -73,6 +73,12 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private String sBrachName;
 
+    public void setsBrachName(String sBrachName) {
+        if(sBrachName == null) {
+            uiList.add(0,new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
+        }
+        this.sBrachName = sBrachName;
+    }
 
     /**
      * Bild das die Weiche darsstellt. Es wird aus einer Datei geladen
@@ -166,8 +172,16 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private ArrayList<JComponent> uiList = new ArrayList();
     private SingleEnumSelectorComponent<CrossoverEnumModel> BrachingStates = null;
+
+
+
+
+    /**
+     * Bereitet UI f&uuml;r die Weiche vor
+     * @param Model {@link CrossoverEnumModel} - Auswahlm&ouml;glichkeit von Status einer Weiche
+     */
     private void initUiList(CrossoverEnumModel Model) {
-        uiList.add(new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
+
         uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
         Model.setSingleSelection(Model.getEnumMappingList()[0]);
         this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(Model, this.controller);
