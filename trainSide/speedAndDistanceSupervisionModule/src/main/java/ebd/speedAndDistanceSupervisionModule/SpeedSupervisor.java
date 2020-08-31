@@ -116,7 +116,7 @@ public class SpeedSupervisor {
                 this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else {
-                this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
             }
         }
         else if(this.maxIndicationSpeed >= curSpeed
