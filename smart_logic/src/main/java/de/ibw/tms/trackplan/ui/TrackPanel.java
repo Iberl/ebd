@@ -45,7 +45,6 @@ public class TrackPanel extends javax.swing.JPanel {
     public TrackPanel(Iinteractable Model, RouteViewPort RoutePort, boolean isMainWindow) {
         super();
 
-
         this.setModel(Model);
         ArrayList<JComponent> uiList = TrackElementModel.getViewElements();
         javax.swing.JPanel listPane = new javax.swing.JPanel();
@@ -53,17 +52,21 @@ public class TrackPanel extends javax.swing.JPanel {
         listPane.setLayout(WindowLayout);
         for(JComponent UiElement: uiList) {
             if(isMainWindow) {
-                listPane.add(UiElement);
+                this.add(UiElement);
+                if(UiElement instanceof JLabel) {
+                    UiElement.setSize(UiElement.getPreferredSize());
+                }
             }
         }
         if(!isMainWindow) {
-            listPane.add(uiList.get(0));
+            this.add(uiList.get(0));
         }
 
-        this.add(listPane);
+        //this.add(listPane);
         this.RouteCntrl = new RouteController(RoutePort);
 
         if(this.TrackElementModel instanceof BranchingSwitch) {
+
             BranchingSwitch TrackElement = (BranchingSwitch) this.TrackElementModel;
             SlipConnectionPoint SlipPoint = TrackElement.getBranchingPoint();
             if(SlipPoint instanceof SingleSlip) {

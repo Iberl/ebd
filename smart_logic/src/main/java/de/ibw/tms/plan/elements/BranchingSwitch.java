@@ -73,11 +73,14 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private String sBrachName;
 
-    public void setsBrachName(String sBrachName) {
-        if(sBrachName == null) {
-            uiList.add(0,new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
+    public void setsBrachName(String sName) {
+        if(this.sBrachName == null || this.sBrachName.isEmpty() || this.sBrachName.equals("")) {
+            JLabel LabName = new JLabel("<HTML><b><u>".concat(sName).concat("</u></b></HTML>"));
+
+
+            uiList.add(0,LabName);
         }
-        this.sBrachName = sBrachName;
+        this.sBrachName = sName;
     }
 
     /**
