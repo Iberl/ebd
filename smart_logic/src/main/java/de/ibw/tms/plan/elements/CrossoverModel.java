@@ -73,6 +73,7 @@ public class CrossoverModel {
      * Verlinkt die Gleise mit dieser Weiche
      */
     public void createPositionedRelation() {
+        boolean isIndex_0_RightPosition = false;
         HashSet<TopologyGraph.Edge> edges = this.Node.inEdges;
         ArrayList<TopologyGraph.Edge> notPeekEdges = null;
         edges.addAll(this.Node.outEdges);
@@ -84,6 +85,13 @@ public class CrossoverModel {
         notPeekEdges.remove(PeekEdge);
         Rail RailA = notPeekEdges.get(0).getRail();
         Rail RailB = notPeekEdges.get(1).getRail();
+        try {
+            isIndex_0_RightPosition = checkCrossingSwitchIsFirstRight(notPeekEdges);
+        } catch (Exception e) {
+            e.printStackTrace();
+            isIndex_0_RightPosition = true;
+        }
+
 
         PosRelationA = new PositionedRelation();
         PosRelationA.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
@@ -99,10 +107,35 @@ public class CrossoverModel {
         list.add(PosRelationA);
         list.add(PosRelationB);
         this.RailWaySlip.updatePositionedRelation(list);
+        if(isIndex_0_RightPosition) {
+            this.RailWaySlip.getRemotePoint().setRightPosition(PosRelationA);
+            this.RailWaySlip.getRemotePoint().setLeftPosition(PosRelationB);
+        } else {
+            this.RailWaySlip.getRemotePoint().setRightPosition(PosRelationB);
+            this.RailWaySlip.getRemotePoint().setLeftPosition(PosRelationA);
+        }
         this.RailWaySlip.setOutputRelation(PosRelationA);
 
 
     }
+
+    private boolean checkCrossingSwitchIsFirstRight(ArrayList<TopologyGraph.Edge> notPeekEdges) throws Exception {
+        TopologyGraph.Node N = this.Node;
+        TopologyGraph.Edge E =  notPeekEdges.get(0);
+            if(E.A.equals(N)) {
+                if(E.TopConnectFromA.equals(TopologyConnect.RECHTS)) return true;
+                else return false;
+            } else {
+                if(E.TopConnectFromB.equals(TopologyConnect.RECHTS)) return false;
+                else return true;
+            }
+
+
+
+    }
+
+
+
 
     /**
      * Gibt die Topologische Weiche wider
