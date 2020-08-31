@@ -107,24 +107,22 @@ public class SpeedSupervisor {
         if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
         else updateMaxSpeeds(tripDistance, curSpeed);
 
-        SpeedInterventionLevel speedInterventionLevel;
-        SpeedSupervisionState supervisionState;
         if(this.inRSM && this.releaseSpeed > 0){//Release speed monitoring
-            supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
             if(curSpeed > this.releaseSpeed + ch.dV_ebi_min){
-                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed > 0){
-                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else {
-                speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
             }
         }
         else if(this.maxIndicationSpeed >= curSpeed
                 && this.maxIndicationSpeed == this.maxEmergencyInterventionSpeed) { //Ceiling speed monitoring regime
             //Based on SRS 026-3 Table 17
-            supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 
             switch (this.curSpeedInterventionLevel){
 
@@ -139,7 +137,7 @@ public class SpeedSupervisor {
 
         }
         else{ //Target speed monitoring regime
-            supervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
             //Based on SRS 026-3 Table 12
             switch (this.curSpeedInterventionLevel){
 
