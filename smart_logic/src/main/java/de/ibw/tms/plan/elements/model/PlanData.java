@@ -1,6 +1,7 @@
 package de.ibw.tms.plan.elements.model;
 
 import de.ibw.feed.BaliseExtractor;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
@@ -24,6 +25,7 @@ import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
+import ebd.dbd.client.extension.RealDbdClient;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
@@ -81,6 +83,11 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * Bahnh&ouml;fe noch nicht vollst&auml;ndig implementiert
      */
     public static DefaultRepo<String, PlatformEdge> PlatformRepo = new DefaultRepo<>();
+
+    /**
+     * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W13 und als Value die Weiche
+     */
+    public static DefaultRepo<String, TopologyGraph.Node> SwitchRepo = new DefaultRepo<>();
 
     /**
      * Der topGraph speichert das SL-TMS-interen Topologische Modell
@@ -277,6 +284,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         //Beheim
         //createBeheimPlan();
         handleDataFromFile();
+        if(SmartLogic.IS_STARTED_AS_SL) {
+            RealDbdClient.getInstance();
+        }
 
     }
 
@@ -328,14 +338,21 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
             N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
+            if(CS.isDKW()) {
+                handleDKW();
+            } else {
 
+                SwitchRepo.update(CS.getEbdTitle(), N);
 
-
+            }
 
 
 
 
         }
+    }
+
+    private void handleDKW() {
     }
 
     private void linkRailsToCrossover() {

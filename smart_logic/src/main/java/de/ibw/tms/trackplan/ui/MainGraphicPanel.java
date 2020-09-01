@@ -300,7 +300,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(C.getViewName() + sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
+                g2d.drawString(sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }

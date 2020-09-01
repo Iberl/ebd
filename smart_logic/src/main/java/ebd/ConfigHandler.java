@@ -50,6 +50,7 @@ public class ConfigHandler {
      */
 
     public boolean isSimulatingEbd = true;
+    public boolean initCrossoversInRealdDbdClient = false;
     public boolean shallUserPrompt4SimulationFile = false;
     /*
     Scenario 2
