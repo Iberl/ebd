@@ -26,7 +26,7 @@ class AccelerationActionTest {
         TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
-    @Test
+
     void test() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"value\" : 10 , \"conditions\" : {\"orBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \"<\", \"value\" : 25.0 }}]}}");

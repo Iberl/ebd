@@ -72,6 +72,7 @@ public class Logging{
         logDateTime = LocalDateTime.now().format(dateTimeFormatter);
         try {
             fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
+            pipeHandler = new PipeHandler();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,6 +91,7 @@ public class Logging{
         logPrefix = prefix + trainIDwlZeros;
         logger = Logger.getLogger(logPrefix);
         logger.addHandler(fileHandlerAll);
+        logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
         logger.addHandler(fileHandler);
         //logger.getParent().addHandler(new PipeHandler());
@@ -118,6 +120,7 @@ public class Logging{
         logPrefix = String.format("%-9s", "GB");
         logger = Logger.getLogger("GlobalEventBus");
         logger.addHandler(fileHandlerAll);
+        logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
 
