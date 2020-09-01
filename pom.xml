@@ -41,11 +41,6 @@
     </dependency>
     <dependency>
       <groupId>ebd</groupId>
-      <artifactId>rbc_tms</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>ebd</groupId>
       <artifactId>messageLibrary</artifactId>
       <version>2.0</version>
     </dependency>
@@ -118,10 +113,10 @@
   <reporting>
     <plugins>
       <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-javadoc-plugin</artifactId>
-      <version>3.2.0</version>
-      <reportSets>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.2.0</version>
+        <reportSets>
         <reportSet>
           <id>aggregate</id>
           <reports>
@@ -129,9 +124,6 @@
           </reports>
         </reportSet>
       </reportSets>
-      <configuration>
-         <javadocExecutable>C:\Users\iberl.FG-BS\scoop\apps\openjdk12\current\bin\javadoc.exe</javadocExecutable>
-      </configuration>
     </plugin>
     </plugins>
   </reporting>

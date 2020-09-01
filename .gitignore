@@ -1,3 +1,14 @@
+#TextFiles
+*.txt
+
+#Configuration
+configuration/
+
+#Eclipse Files
+.classpath
+.project
+.settings/
+
 # DS Store
 .DS_Store
 

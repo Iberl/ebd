@@ -327,7 +327,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
-            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
 
 
 
@@ -342,7 +341,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         Collection<CrossoverModel> models = CrossoverModel.CrossoverRepo.getAll();
         for(CrossoverModel M: models) {
             M.createPositionedRelation();
-
         }
 
     }
@@ -463,16 +461,11 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     }
 
     private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2, float x1, float y1, float x2, float y2) {
-        String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
-            try {
-                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle();
-            } catch(Exception E) {
-                sName = "";
-            }
+
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN2);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x2,
-                    y2,sName, BranchingSwitch.ViewType.Branch_LRU);
+                    y2,"", BranchingSwitch.ViewType.Branch_LRU);
 
 
             CrossoverModel.createCrossoverModel(n2, connectN2, RailWaySwitchSlip, RailwaySwitch);
@@ -480,14 +473,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
 
         if(connectN.equals(TopologyConnect.SPITZE)) {
-            try {
-                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle();
-            } catch(Exception E) {
-                sName = "";
-            }
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x1,
-                    y1,sName, BranchingSwitch.ViewType.Branch_LRU);
+                    y1,"", BranchingSwitch.ViewType.Branch_LRU);
 
 
             CrossoverModel.createCrossoverModel(n, connectN, RailWaySwitchSlip, RailwaySwitch);

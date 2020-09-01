@@ -31,8 +31,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-08-31
+ * @version 0.3
+ * @since 2020-08-10
  */
 public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover, ITrack, Flow.Subscriber<CrossoverMainModel> {
 
@@ -73,15 +73,6 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private String sBrachName;
 
-    public void setsBrachName(String sName) {
-        if(this.sBrachName == null || this.sBrachName.isEmpty() || this.sBrachName.equals("")) {
-            JLabel LabName = new JLabel("<HTML><b><u>".concat(sName).concat("</u></b></HTML>"));
-
-
-            uiList.add(0,LabName);
-        }
-        this.sBrachName = sName;
-    }
 
     /**
      * Bild das die Weiche darsstellt. Es wird aus einer Datei geladen
@@ -175,16 +166,8 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private ArrayList<JComponent> uiList = new ArrayList();
     private SingleEnumSelectorComponent<CrossoverEnumModel> BrachingStates = null;
-
-
-
-
-    /**
-     * Bereitet UI f&uuml;r die Weiche vor
-     * @param Model {@link CrossoverEnumModel} - Auswahlm&ouml;glichkeit von Status einer Weiche
-     */
     private void initUiList(CrossoverEnumModel Model) {
-
+        uiList.add(new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
         uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
         Model.setSingleSelection(Model.getEnumMappingList()[0]);
         this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(Model, this.controller);
@@ -272,14 +255,43 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
         TopologyGraph.Node Ref = null;
-        Target = getTargetOfOutputChange(outputRelation, From);
+        if(From.getRail().equals(PeekRail)) {
+            Target = (Trail) outputRelation.getTo();
+        } else {
+            Target = (Trail) From;
+        }
 
 
         String sSrc = Node.TopNodeId;
         String sTarget;
-        sSrc = getThisNode();
+        try {
+            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
+            sSrc = CS.getEbdTitle();
+        }catch (Exception E){
+            sSrc =  Node.TopNodeId;
+        }
 
-        sTarget = getTargetOfOutputEdge(Target, Ref);
+        try {
+            Ref = Target.getRail().getEdge().B;
+            CrossingSwitch CS = null;
+
+            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
+                CS = (CrossingSwitch) Target.getRail().getEdge().A.NodeImpl;
+
+            } else {
+                CS = (CrossingSwitch) Ref.NodeImpl;
+
+            }
+            sTarget = CS.getEbdTitle();
+
+        } catch ( Exception E) {
+            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
+                sTarget = Target.getRail().getEdge().A.TopNodeId;
+            } else {
+                sTarget = Ref.TopNodeId;
+            }
+        }
+
 
 
         logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
@@ -287,54 +299,6 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         ///
 
 
-    }
-
-    private String getTargetOfOutputEdge(Trail target, TopologyGraph.Node ref) {
-        String sTarget;
-        try {
-
-            ref = target.getRail().getEdge().B;
-            CrossingSwitch CS = null;
-
-            if(ref.TopNodeId.equals(Node.TopNodeId)) {
-                CS = (CrossingSwitch) target.getRail().getEdge().A.NodeImpl;
-                logger.info("Switched to \n");
-
-            } else {
-                CS = (CrossingSwitch) ref.NodeImpl;
-
-            }
-            sTarget = CS.getEbdTitle();
-
-        } catch ( Exception E) {
-            if(ref.TopNodeId.equals(Node.TopNodeId)) {
-                sTarget = target.getRail().getEdge().A.TopNodeId;
-            } else {
-                sTarget = ref.TopNodeId;
-            }
-        }
-        return sTarget;
-    }
-
-    private String getThisNode() {
-        String sSrc;
-        try {
-            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
-            sSrc = CS.getEbdTitle();
-        }catch (Exception E){
-            sSrc =  Node.TopNodeId;
-        }
-        return sSrc;
-    }
-
-    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
-        Trail Target;
-        if(from.getRail().equals(PeekRail)) {
-            Target = (Trail) outputRelation.getTo();
-        } else {
-            Target = from;
-        }
-        return Target;
     }
 
     /**
