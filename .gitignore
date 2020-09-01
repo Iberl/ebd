@@ -1,5 +1,4 @@
 #TextFiles
-*.txt
 
 #Configuration
 configuration/
@@ -17,9 +16,6 @@ configuration/
 
 # Maven
 *.iml
-
-# Configurations Folder
-configuration/
 
 # Logging Folder
 log/
@@ -85,7 +81,6 @@ vcs.xml
  .idea/modules.xml
  .idea/*.iml
  .idea/modules
- *.iml
  *.ipr
 
 # CMake
