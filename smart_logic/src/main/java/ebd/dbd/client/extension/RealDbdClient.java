@@ -55,7 +55,7 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
     private static void updateUi4InitState(DefaultRepo<String, Integer> initStateRepo) {
         //TODO
 
-        PlanData.getInstance().branchingSwitchList
+        //PlanData.getInstance().branchingSwitchList;
 
     }
 
@@ -70,8 +70,9 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
             });
 
         } else {
-            InputStream in = RealDbdClient.class.getResourceAsStream("DbdClient/DBD.SIM.CSV");
+            InputStream in = RealDbdClient.class.getClassLoader().getResourceAsStream("DbdClient/DBD.SIM.CSV");
             CSVReader reader = new CSVReader(new InputStreamReader(in));
+
             try {
                 fillRepoByCsv(fakeRepo[0], reader);
             } catch (CsvValidationException | IOException e) {

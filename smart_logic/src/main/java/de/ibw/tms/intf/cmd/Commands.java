@@ -2,6 +2,7 @@ package de.ibw.tms.intf.cmd;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
+import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMovementAuthority;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -19,12 +20,13 @@ import java.lang.reflect.Type;
  * @version 0.3
  * @since 2020-08-10
  */
-public class Commands extends Payload implements Comparable<Commands>, Serializable {
+public class Commands extends Payload implements Comparable<Commands>, Serializable, IjsonParser {
     /**
      * String-Id der CheckMovementAuthority.
      * Dient zum Identifizieren in der SL welcher Befehlsart empfangen wurde
      */
     public static final String S_CHECK_MOVEMENT_AUTHORITY = "checkMa";
+    protected static final String S_CHECK_DBD_COMMAND = "checkDBD";
 
     /**
      * Gibt den Typ zur String Id wider. Ist im Json wichtig
@@ -35,6 +37,8 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
     public static Type getTypeByString(String sType) {
         if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
             return new TypeToken<TmsMovementAuthority>(){}.getType();
+        } else if(sType.equals(S_CHECK_DBD_COMMAND)) {
+            return new TypeToken<TmsDbdCommand>(){}.getType();
         }
         return null;
     }
@@ -48,7 +52,8 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
     public static Class getClassByString(String sType) {
         if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
             return TmsMovementAuthority.class;
-        }
+        } else if (sType.equals(S_CHECK_DBD_COMMAND))
+            return TmsDbdCommand.class;
         return null;
     }
 

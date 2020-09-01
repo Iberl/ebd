@@ -76,7 +76,8 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
             Ex.printStackTrace();
         }
 
-            TrackController.getInstance(null).publish();
+
+        TrackController.getInstance(null).publish();
 
 
     }

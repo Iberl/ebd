@@ -74,25 +74,7 @@ public class CheckMovementAuthority extends Commands {
         this.CommandType = Commands.S_CHECK_MOVEMENT_AUTHORITY;
     }
 
-    /**
-     * Stellt den Befehl als Json dar.
-     * Es werden nur Elmente mit @Expose verwendet.
-     * @return String - Json-String
-     * @throws MissingInformationException - Fehler beim parsen ins Json.
-     */
-    public String parseToJson() throws MissingInformationException {
 
-
-            Gson gson = new GsonBuilder().serializeNulls().excludeFieldsWithoutExposeAnnotation().create();
-            // Check For Correct Values
-            // Only Accordingly Annotated Fields Aan Hold The Null Value
-            // Lists Must Have A Minimum Of 1 Element
-            //ClassAnalysis.checkValues(this);
-
-            // Serialize Message
-            return gson.toJson(this);
-
-    }
 
     /**
      * Std String widergabe

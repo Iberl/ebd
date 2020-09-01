@@ -40,6 +40,18 @@ public class ConfigHandler {
     //ID of the entity to be observed
     public int entityID = 0;
 
+    /*
+    longs
+     */
+    /*
+    Message Priorities in Transmission Queues
+    lowest value is send first
+     */
+     /*
+     Priority for Check a CrossingSwitchCommand from TMS to SL
+      */
+    public long lCheckDbdCommand = 3L;
+
 
     /*
     doubles

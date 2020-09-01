@@ -1,5 +1,10 @@
 package de.ibw.tms.plan.elements;
 
+import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.SmartClient;
+import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.intf.TmsDbdCommand;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
@@ -8,14 +13,19 @@ import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
+import ebd.ConfigHandler;
+import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -185,11 +195,46 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     private void initUiList(CrossoverEnumModel Model) {
 
-        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
-        Model.setSingleSelection(Model.getEnumMappingList()[0]);
-        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(Model, this.controller);
+
+        setBranchingStatesUnit(Model);
         uiList.add(BrachingStates);
 
+    }
+
+    private void setBranchingStatesUnit(CrossoverEnumModel model) {
+        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(model, this.controller,false);
+        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
+        model.setSingleSelection(model.getEnumMappingList()[0]);
+        ActionListener al = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendDbdCommandToSL();
+            }
+        };
+        BrachingStates.addActionListener(al);
+    }
+
+    public void sendDbdCommandToSL() {
+        long lPriority = ConfigHandler.getInstance().lCheckDbdCommand;
+        Object OEnumField = BrachingStates.getSelectedItem();
+        EnumModel.EnumField EF = (EnumModel.EnumField) OEnumField;
+        if(((CrossingSwitch) this.Node.NodeImpl).isDKW()) {
+            handleDKW();
+            return;
+        }
+        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
+        CheckDbdCommand DbdCommandPayload =
+                new CheckDbdCommand(sEbdName, (CrossoverStatus) EF.Item, lPriority);
+        TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
+        try {
+            SmartClientHandler.getInstance().sendCommand(DbdCommand);
+        } catch (MissingInformationException missingInformationException) {
+            missingInformationException.printStackTrace();
+        }
+    }
+
+    private void handleDKW() {
+        System.out.println("DKW is currently not supported");
     }
 
     private CrossoverController controller = null;
