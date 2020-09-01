@@ -128,6 +128,7 @@
     <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
+    <module>smart_logic</module>
 <!--    <module>messageLibrary</module>-->
     <module>trainSide</module>
     <module>trackSide</module>
