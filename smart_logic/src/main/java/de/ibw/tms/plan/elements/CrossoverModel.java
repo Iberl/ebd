@@ -133,8 +133,8 @@ public class CrossoverModel {
                 if(E.TopConnectFromA.equals(TopologyConnect.RECHTS)) return true;
                 else return false;
             } else {
-                if(E.TopConnectFromB.equals(TopologyConnect.RECHTS)) return false;
-                else return true;
+                if(E.TopConnectFromB.equals(TopologyConnect.RECHTS)) return true;
+                else return false;
             }
 
 
