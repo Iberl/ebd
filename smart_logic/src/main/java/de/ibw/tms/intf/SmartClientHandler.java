@@ -2,6 +2,7 @@ package de.ibw.tms.intf;
 
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
+import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
@@ -159,6 +160,8 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
                                 if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
                                     handleMaResponse((MaRequestReturnPayload)MsgFromSL);
 
+                                } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
+                                    handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
                                 }
                             }
                             ReferenceCountUtil.release(smartServerMessage);
@@ -180,6 +183,13 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         }
 
 
+    }
+
+    private void handleDbdResponse(DbdRequestReturnPayload msgFromSL) {
+        if(msgFromSL.isDbdCommandSuccessfull()) {
+            logger.info("Dbd Command successfull on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n");
+        } else logger.info("Dbd Command failed on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n" +
+                "DBD Command failed for Reason: " + msgFromSL.getsFailreason() + "\n");
     }
 
     private void handleMaResponse(MaRequestReturnPayload msgFromSL) {

@@ -6,7 +6,6 @@ import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
-import de.ibw.smart.logic.intf.SmartServer;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SmartSafetyContinousConnectTest;
@@ -840,19 +839,19 @@ public class SmartSafety {
         for(List<BlockedArea> l :this.blockList.getAll()) {
             for(BlockedArea BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
-                    sendResponseDbdCommandToTms(false);
+                    sendResponseDbdCommandToTms(false, cdc.sCrossoverEbdName, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;
                 }
             }
         }
-        sendResponseDbdCommandToTms(true);
+        sendResponseDbdCommandToTms(true, cdc.sCrossoverEbdName,null);
     }
 
-    private void sendResponseDbdCommandToTms(boolean isSuccess) {
+    private void sendResponseDbdCommandToTms(boolean isSuccess, String sCrossoverEbdName, String sFailReason) {
         long lPrio = ConfigHandler.getInstance().lCheckDbdReturn;
-        DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload();
+        DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload(sCrossoverEbdName);
         if(isSuccess) DbdPayload.setDbdSuccessfull();
-        else DbdPayload.setErrorState();
+        else DbdPayload.setErrorState(sFailReason);
         SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);
         SmartLogic.outputQueue.offer(BlockMessage);
     }

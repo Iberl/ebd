@@ -17,6 +17,10 @@ import java.util.UUID;
  */
 public class DbdRequestReturnPayload implements ITypable {
 
+
+    public static final String BLOCK_FAIL_REASON = "is blocked";
+
+
     /**
      * Definiert Nachrichtentyp, dadurch kann die Art der Nachricht vom TMS erkannt werden
      */
@@ -38,16 +42,29 @@ public class DbdRequestReturnPayload implements ITypable {
     @Expose
     boolean dbdCommandSuccessfull;
 
+    @Expose
+    String sDbdCommandTargetName;
+
+    @Expose
+    String sFailreason;
+
+
+    public DbdRequestReturnPayload(String sCrossoverEbdName) {
+        sDbdCommandTargetName = sCrossoverEbdName;
+        sFailreason = "";
+        dbdCommandSuccessfull = true;
+    }
+
 
     /**
      * Diese Method settzt diese Nachricht auf eine Fehlerstatus, weil die DBD-Anforderung nicht erfolgreich war
      *
      */
-    public void setErrorState() {
+    public void setErrorState(String sFailreason) {
 
 
         this.dbdCommandSuccessfull = false;
-
+        this.sFailreason = sFailreason;
 
     }
 
@@ -89,5 +106,13 @@ public class DbdRequestReturnPayload implements ITypable {
 
     public boolean isDbdCommandSuccessfull() {
         return dbdCommandSuccessfull;
+    }
+
+    public String getsDbdCommandTargetName() {
+        return sDbdCommandTargetName;
+    }
+
+    public String getsFailreason() {
+        return sFailreason;
     }
 }
