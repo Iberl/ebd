@@ -357,7 +357,7 @@ public class SmartSafety {
     }
 
     /**
-     * Distans zu lrbg ist falsch Endpunkt der Route ist ausschlaggebend
+     * Distanz zu lrbg ist falsch Endpunkt der Route ist ausschlaggebend
      */
     @NotNull
     private BlockedArea handleMoveToA(TrainModel tm, int iDistance_lrbg, TopologyGraph.Edge startEL) {
