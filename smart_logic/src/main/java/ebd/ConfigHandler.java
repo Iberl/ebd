@@ -52,6 +52,10 @@ public class ConfigHandler {
       */
     public long lCheckDbdCommand = 3L;
 
+    /*
+    Priory für SL Antworten an das TMS, als Antwort zum Prüfen eines Stellbefehlt
+     */
+    public long lCheckDbdReturn = 3L;
 
     /*
     doubles

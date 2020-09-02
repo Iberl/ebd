@@ -5,7 +5,9 @@ package de.ibw.smart.logic.safety;
 import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.SmartServer;
+import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SmartSafetyContinousConnectTest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
@@ -19,6 +21,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
+import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.ETCSVariables;
@@ -837,10 +840,22 @@ public class SmartSafety {
         for(List<BlockedArea> l :this.blockList.getAll()) {
             for(BlockedArea BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
-                    SmartServerMessage BlockMessage = new SmartServerMessage()
+                    sendResponseDbdCommandToTms(false);
                     return;
                 }
             }
         }
+        sendResponseDbdCommandToTms(true);
     }
+
+    private void sendResponseDbdCommandToTms(boolean isSuccess) {
+        long lPrio = ConfigHandler.getInstance().lCheckDbdReturn;
+        DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload();
+        if(isSuccess) DbdPayload.setDbdSuccessfull();
+        else DbdPayload.setErrorState();
+        SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);
+        SmartLogic.outputQueue.offer(BlockMessage);
+    }
+
+
 }
