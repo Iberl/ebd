@@ -253,7 +253,7 @@ public class DrivingDynamics {
 
         Position curPos = this.trainDataVolatile.getCurrentPosition();
         //we need a copy of, not a referenz to, the current Position
-        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.isDirectedForward(),curPos.getLocation(),curPos.getPreviousLocations());
+        this.tripStartPosition = new Position(curPos.getIncrement(),curPos.getDirection(),curPos.getLocation(),curPos.getPreviousLocations());
         if(this.dynamicState == null){
             this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
         }
@@ -341,7 +341,7 @@ public class DrivingDynamics {
                 if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
                 switch (this.currentSil){
-                    case NO_INTERVENTION:
+                    case INDICATION:
                         /*
                         This control flow is necessary in case the train emergency breaks into RSM.
                         This control flow allows the train accelerate again until the stopping reagion is reached.

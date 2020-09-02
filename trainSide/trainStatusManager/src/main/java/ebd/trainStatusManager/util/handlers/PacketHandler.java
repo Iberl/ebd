@@ -35,11 +35,13 @@ public class PacketHandler {
     public static void p5(EventBus localBus, int nid_lrbg, Packet_5 trackPacket) {
         double scale = Math.pow(10, trackPacket.Q_DIR - 1);
         HashMap<Integer, Location> linkingMap = new HashMap<>();
-        Location tempLoc = new Location(trackPacket.link.NID_BG, nid_lrbg, trackPacket.link.D_LINK * scale );
+        int tempDirection = trackPacket.link.Q_LINKORIENTATION ? 1 : 0;
+        Location tempLoc = new Location(trackPacket.link.NID_BG, nid_lrbg, tempDirection, trackPacket.link.D_LINK * scale );
         linkingMap.put(trackPacket.link.NID_BG,tempLoc);
         int prevLoc = trackPacket.link.NID_BG;
         for(Packet_5.Packet_5_Link link : trackPacket.links){
-            tempLoc = new Location(link.NID_BG,prevLoc,link.D_LINK * scale);
+            tempDirection = link.Q_LINKORIENTATION ? 1 : 0;
+            tempLoc = new Location(link.NID_BG,prevLoc, tempDirection, link.D_LINK * scale);
             linkingMap.put(link.NID_BG, tempLoc);
             prevLoc = link.NID_BG;
         }
@@ -47,15 +49,12 @@ public class PacketHandler {
         localBus.post(new ToLogEvent("tsm", "log", "Received new Linking Information [Packet 5]"));
     }
 
-    public static void p57(EventBus localBus, Packet_57 p57){
+    public static void p57(EventBus localBus, Packet_57 p57, Location refLoc){
         //TODO: If NID_LRBG Unknown AND disance information, start calculating from current position, else from NID_LRBG!
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
-        if((curPos.isDirectedForward() && p57.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
-                || (!curPos.isDirectedForward() && p57.Q_DIR == 1)){
-            return;
-        }
+        if(refLoc.getDirection() != p57.Q_DIR)  return; //Only react to the package if it is orientated in the same direction as the train
 
         int t_mar = p57.T_MAR;
         int t_timeoutrqst = p57.T_TIMEOUTRQST;
@@ -71,15 +70,12 @@ public class PacketHandler {
 
     }
 
-    public static void p58(EventBus localBus, int nid_lrbg, Packet_58 p58){
+    public static void p58(EventBus localBus, int nid_lrbg, Packet_58 p58, Location refLoc){
         //TODO: If NID_LRBG Unknown AND disance information, start calculating from current position, else from NID_LRBG!
         TrainDataVolatile trainDataVolatile = localBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         Position curPos = trainDataVolatile.getCurrentPosition();
 
-        if((curPos.isDirectedForward() && p58.Q_DIR == 0) //Only react to the package if it is orientated in the same direction as the train
-                || (!curPos.isDirectedForward() && p58.Q_DIR == 1)){
-            return;
-        }
+        if(refLoc.getDirection() != p58.Q_DIR) return; //Only react to the package if it is orientated in the same direction as the train
 
         double scale = Math.pow(10, p58.Q_SCALE - 1); //Sets the scale to convert to [m]
         int t_cycle;

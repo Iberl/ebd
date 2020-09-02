@@ -7,87 +7,95 @@ public enum ETCSMode {
     /**
      * Null Replacement
      */
-    NO_MODE,
+    NO_MODE(16),
 
     /**
      * ETCS Mode SB
      */
-    STAND_BY,
+    STAND_BY (6),
 
     /**
      * ETCS Mode FS
      */
-    FULL_SUPERVISION,
+    FULL_SUPERVISION(0),
 
     /**
      * ETCS Mode SH
      */
-    SHUNTING,
+    SHUNTING(3),
     /**
      * ETCS Mode SF
      */
-    SYSTEM_FAILURE,
+    SYSTEM_FAILURE(9),
 
     /**
      * ETCS Mode TR
      */
-    TRIP,
+    TRIP(7),
 
     /**
      * ETCS Mode PT
      */
-    POST_TRIP,
+    POST_TRIP(8),
     ;
+
+    //Currently not used:
 
     /**
      * ETCS Mode SN
      */
-    //STM_NATIONAL,
+    //STM_NATIONAL(13),
 
     /**
      * ETCS Mode NP
      */
-    //NO_POWER,
+    //NO_POWER(17),
 
     /**
      * ETCS Mode LS
      */
-    //LIMITED_SUPERVISION,
+    //LIMITED_SUPERVISION(12),
 
     /**
      * ETCS Mode SR
      */
-    //STAFFE_RESPONSIBLE,
+    //STAFFE_RESPONSIBLE(2),
 
     /**
      * ETCS Mode OS
      */
-    //ON_SIGHT,
+    //ON_SIGHT(1),
 
     /**
      * ETCS Mode SL
      */
-    //SLEEPING,
+    //SLEEPING(5),
 
     /**
      * ETCS Mode NL
      */
-    //NON_LEADING,
+    //NON_LEADING(11),
 
     /**
      * ETCS Mode PH
      */
-    //PASSIVE_SHUNTING,
+    //PASSIVE_SHUNTING(15),
 
     /**
      * ETCS Mode UN
      */
-    //UNFFITED,
+    //UNFFITED(4),
 
     /**
      * ETCS Mode IS
      */
-    //ISOLATION,
+    //ISOLATION(10),
 
+    private final int valueForETCSPacket;
 
+    ETCSMode(int valueForETCSPacket){
+        this.valueForETCSPacket = valueForETCSPacket;
+    }
+
+    public int getValueForETCSPacket() { return valueForETCSPacket; }
 }

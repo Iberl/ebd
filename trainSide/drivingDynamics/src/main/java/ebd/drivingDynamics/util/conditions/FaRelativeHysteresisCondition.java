@@ -7,11 +7,11 @@ import org.json.simple.JSONObject;
 
 
 /**
- * A rising relative hysterese condition elevates to true on the raising leg of a hysterese curve.
+ * A rising relative hysterese condition evaluates to true on the raising leg of a hysterese curve.
  * In other words, it evaluates to false if the speed is below or equal v_Low or if it falls from a value higher then v_High
- * to a value lower then v_High. It evaluates true in all other cases.
+ * to a value lower then v_High. It evaluates to true in all other cases.
  * This condition takes relative values of a chosen curve as v_Low and v_High.<br>
- * <p>The <b>type</b> of this condition is "v_Hrel"</p>
+ * <p>The <b>type</b> of this condition is "v_Hrel_R"</p>
  * <p>The <b>v_Low</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison and
  *                      forms the lower split point of the hysteresis</p>
  * <p>The <b>v_High</b> key contains a percentage in the range of [0, 200] that modifies the maximum allowed speed before comparison and
@@ -21,18 +21,19 @@ import org.json.simple.JSONObject;
  *     Example: The condition should evaluate to true if the train is speeds up from under 65% of the current maximum speed on the trip profile
  *     to over 65%. It should evaluate to false if it slows down from over 80% to under 80%.
  *     The JSON string would look like this:<br>
- *     {"type" : "v_Hrel", "condition" : {"v_Low" : "65", "v_High" : 80, "curveBase" : "trip" }}<br>
+ *     {"type" : "v_Hrel_R", "priority": 1, "condition" : {"v_Low" : 65, "v_High" : 80, "curveBase" : "trip" }}<br>
  *     The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
-public class RisingRelativeHysteresisCondition extends RelativeHysteresisCondition {
+public class FaRelativeHysteresisCondition extends RelativeHysteresisCondition {
 
     /**
      * @param localEventBus The local {@link EventBus} of the train.
-     * @param jsonObject
+     * @param jsonObject The value of "condition" in a type "v_Hrel_R" condition
      */
-    public RisingRelativeHysteresisCondition(EventBus localEventBus, JSONObject jsonObject) throws DDBadDataException {
+    public FaRelativeHysteresisCondition(EventBus localEventBus, JSONObject jsonObject) throws DDBadDataException {
         super(localEventBus, jsonObject);
+        this.raising = true;
     }
 
     @Override

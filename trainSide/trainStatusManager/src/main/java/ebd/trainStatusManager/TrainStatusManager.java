@@ -181,7 +181,6 @@ public class TrainStatusManager implements Runnable {
         RouteDataVolatile routeDataVolatile = this.routeData.getRouteDataVolatile();
         if(routeDataVolatile.getLinkingInformation() == null) return;
 
-        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
         Location newLoc = nle.newLocation;
 
 
@@ -191,16 +190,19 @@ public class TrainStatusManager implements Runnable {
         double overshoot;
 
         if(prefLocs.size() > 0) {
-            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
-            prefLocs.put(newLoc.getId(),newLoc);}
+            Double distanceToPrev = newLoc.getDistanceToPrevious();
+            distanceToPrev = distanceToPrev != null ? distanceToPrev : 0;
+            overshoot = oldPos.getIncrement() - distanceToPrev;
+            prefLocs.put(newLoc.getId(),newLoc);
+        }
         else {
             InitalLocation initLoc = new InitalLocation();
             prefLocs.put(initLoc.getId(),initLoc);
-            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
+            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), newLoc.getDirection(), oldPos.getIncrement()));
             overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
         }
 
-        Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
+        Position newPos = new Position(overshoot, newLoc.getDirection(), newLoc, prefLocs);
         this.localEventBus.post(new TrainDataChangeEvent("tsm","td","currentPosition",newPos));
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
@@ -278,6 +280,7 @@ public class TrainStatusManager implements Runnable {
     private void setUpTrain( int trainConfigID, int infrastructureID) {
         TrainsHandler th = TrainsHandler.getInstance();
         Integer startingBalise = th.getStartingBaliseGroup(this.etcsTrainID);
+        int startingBGDir = th.getStartingMovementDir(this.etcsTrainID) ? 1 : 0;
         Boolean startingDirection = th.getStartingDirection(this.etcsTrainID);
         Integer startingIncrement = th.getStartingIncrement(this.etcsTrainID);
         if(startingBalise == null || startingDirection == null || startingIncrement == null){ //Train already removed, so we immediately kill the train
@@ -323,8 +326,8 @@ public class TrainStatusManager implements Runnable {
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
-        Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, 0d);
-        Position curPos = new Position(startingIncrement, startingDirection, newLoc);
+        Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, startingBGDir, 0d);
+        Position curPos = new Position(startingIncrement, startingBGDir, newLoc);
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);

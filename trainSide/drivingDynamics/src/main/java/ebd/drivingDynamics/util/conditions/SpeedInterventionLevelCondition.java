@@ -24,7 +24,7 @@ import java.util.function.BiFunction;
  *         </p>
  * <p>Example: The condition should evaluate to true if the train is in the speed intervention level OVERSPEED.
  * The full JSON string would look like this:<br>
- *     {"type" : "sil", "condition" : {"value" : "OVERSPEED" }}<br>
+ *     {"type" : "sil", "priority": 1, "condition" : {"value" : "OVERSPEED" }}<br>
  *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */

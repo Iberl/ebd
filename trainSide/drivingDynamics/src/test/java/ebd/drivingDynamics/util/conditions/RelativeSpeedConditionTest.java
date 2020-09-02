@@ -36,7 +36,7 @@ class RelativeSpeedConditionTest {
         assertFalse(relativeSpeedCondition.eval());
 
         EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentSpeed", 20));
-        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentProfileTargetSpeed", 40));
+        EventBus.getDefault().post(new TrainDataChangeEvent("test", "td", "currentProfileMaxSpeed", 40));
 
         assertTrue(relativeSpeedCondition.eval());
     }

@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This class represents a position for a train. It consists out of an absolut reference point, a direction and an increment.
+ * A position represents a precise place on the track. It uses fixed reference points called
+ * {@link Location} and an offset value called "increment" to represent this place.
  * 
  * @author Jan Emrich and Lars Schulze-Falck
  *
@@ -19,12 +20,12 @@ import org.jetbrains.annotations.Nullable;
 public class Position {
 	
 	/**
-	 * Current direction of travel of the train: Nominal (true) or reverse (false). Does not change the way the increment is counted.
+	 * Current direction of travel of the train in relation the current location: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
 	 */
-	private boolean direction;
+	private int direction;
 
 	/**
-     * Reference location //TODO Change according to {@link ebd.messageLibrary.util.ETCSVariables#Q_DIR}
+     * Reference location
      */
 	@NotNull
     private Location location;
@@ -42,23 +43,61 @@ public class Position {
     private Map<Integer,Location> previousLocations = new HashMap<>();
 
     /**
-     * represents a position on the track
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
      * @param increment relative to the location position
-     * @param direction true == forward, false == backward
+     * @param direction the movement direction, true for Nominal, false for Reverse
      * @param location location reference point
      */
     public Position(double increment, boolean direction, @NotNull Location location) {
         this.increment = increment;
-        this.direction = direction;
+        this.direction = direction ? 1 : 0;
         this.location = location;
     }
-    
-    public Position(double increment, boolean direction, @NotNull Location location, @NotNull Map<Integer, Location> previousLocations) {
+
+    /**
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
+     * @param increment relative to the location position
+     * @param direction the movement direction, 1 for Nominal, 0 for Reverse or 2 for unknown
+     * @param location location reference point
+     */
+    public Position(double increment, int direction, @NotNull Location location) {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
         this.previousLocations = previousLocations;
-        
+    }
+
+
+    /**
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
+     * @param increment relative to the location position
+     * @param direction the movement direction, true for Nominal, false for Reverse
+     * @param location location reference point
+     * @param previousLocations A map of previous relevant locations
+     */
+    public Position(double increment, boolean direction, @NotNull Location location, @NotNull Map<Integer, Location> previousLocations) {
+        this.increment = increment;
+        this.direction = direction ? 1 : 0;
+        this.location = location;
+        this.previousLocations = previousLocations;
+    }
+
+    /**
+     * A position represents a precise place on the track. It uses fixed reference points called
+     * {@link Location} and an offset value called "increment" to represent this place.
+     * @param increment relative to the location position
+     * @param direction the movement direction, 1 for Nominal, 0 for Reverse or 2 for unknown
+     * @param location location reference point
+     * @param previousLocations A map of previous relevant locations
+     */
+    public Position(double increment, int direction, @NotNull Location location, @NotNull Map<Integer, Location> previousLocations) {
+        this.increment = increment;
+        this.direction = direction;
+        this.location = location;
+        this.previousLocations = previousLocations;
     }
     
     /**
@@ -142,11 +181,17 @@ public class Position {
         this.increment = increment;
     }
 
-    public boolean isDirectedForward() {
+    /**
+     * Current direction of travel of the train: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
+     */
+    public int getDirection() {
         return direction;
     }
 
-    public void setDirection(boolean direction) {
+    /**
+     * Current direction of travel of the train: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
+     */
+    public void setDirection(int direction) {
         this.direction = direction;
     }
 

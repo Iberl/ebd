@@ -4,6 +4,7 @@ import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
+import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -21,7 +22,7 @@ import java.util.function.BiFunction;
  * <p>The <b>value</b> key contains a fixed time value in [s] equal or greater then 0 s. </p>
  * <p>Example: The condition should evaluate to true if the train is more 40.5 s from the start of the trip section.
  * The JSON string would look like this:<br>
- *     {"type" : "t_secStart", "condition" : {"op" : ">", "value" : 40.5 }}<br>
+ *     {"type" : "t_secStart", "priority": 1, "condition" : {"op" : ">", "value" : 40.5 }}<br>
  *         The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
@@ -60,7 +61,7 @@ public class TimeSinceTripSectionStartCondition extends Condition {
     }
 
     @Subscribe
-    public void trainData(NewTrainDataVolatileEvent ntdve){
+    public void trainData(ClockTickEvent cte){
         if(this.trainDataVolatile.getCurrentSpeed() == 0 && this.trainDataVolatile.getCurTripSectionDistance() == 0){
             this.timeAt0Speed = AppTime.currentTimeMillis();
         }
