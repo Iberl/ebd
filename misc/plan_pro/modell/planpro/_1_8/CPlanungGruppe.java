@@ -1,0 +1,257 @@
+//
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
+// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// �nderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+// Generiert: 2020.01.07 um 02:16:09 PM CET 
+//
+
+
+package modell.planpro._1_8;
+
+import modell.basisobjekte._1_8.CUrObjekt;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+
+
+/**
+ * Erm�glicht die globale Angabe und Zuordnung von Daten, die f�r alle Einzelplanungen einer Planungsgruppe gleicherma�en gelten. Dabei k�nnen in organisatorische und inhaltliche Angaben unterschieden werden. 
+ * 
+ * Erg�nzende Beschreibung zum Umgang im PlanPro-Planungsprozess
+ * 
+ * Die ~ muss vor Beginn der Erstellung nachfolgender Einzelplanungen festgelegt sein. 
+ * 
+ * Enth�lt Informationen zur Bezeichnung der Planungsgruppe, zum gesperrten Planungsbereich und zum notwendigen Betrachtungsbereich.
+ * 
+ * Beim Anlegen der ~ erfolgt keine Festlegung der Anzahl der Einzelplanungen. Der erste Bauzustand ist entweder eine Neuplanung oder baut auf einer Bestandsdokumentation (zuk�nftig Bestandsdaten in der LST-Datenbank) auf. Alle weiteren Bauzust�nde bauen auf der neutralisierten Bezugsplanung des jeweiligen Vorg�ngers auf.
+ * 
+ * Eine Planungsgruppe durchl�uft definierte Status. Sp�testens vor Abschluss einer ~ (sowie nach jeder Revision/Rev_letzte_Planung_E) werden neue Bestandsdaten erstellt und in der LST-Datenbank abgelegt.
+ * 
+ * DB-Regelwerk
+ * 
+ * Bisher nicht abgebildet.
+ * 
+ * <p>Java-Klasse f�r CPlanung_Gruppe complex type.
+ * 
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ * 
+ * <pre>
+ * &lt;complexType name="CPlanung_Gruppe">
+ *   &lt;complexContent>
+ *     &lt;extension base="{http://www.plan-pro.org/modell/Basisobjekte/1.8.0}CUr_Objekt">
+ *       &lt;sequence>
+ *         &lt;element name="Fuehrende_Oertlichkeit" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}TCFuehrende_Oertlichkeit" minOccurs="0"/>
+ *         &lt;element name="LST_Planung_Einzel" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPlanung_Einzel"/>
+ *         &lt;element name="Planung_G_Allg" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPlanung_G_Allg"/>
+ *         &lt;element name="Planung_G_Fuehrende_Strecke" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPlanung_G_Fuehrende_Strecke" minOccurs="0"/>
+ *         &lt;element name="Planung_G_Schriftfeld" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPlanung_G_Schriftfeld" minOccurs="0"/>
+ *         &lt;element name="Polygone_Betrachtungsbereich" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPolygone_Betrachtungsbereich" minOccurs="0"/>
+ *         &lt;element name="Polygone_Planungsbereich" type="{http://www.plan-pro.org/modell/PlanPro/1.8.0}CPolygone_Planungsbereich" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/extension>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ * 
+ * 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "CPlanung_Gruppe", propOrder = {
+    "fuehrendeOertlichkeit",
+    "lstPlanungEinzel",
+    "planungGAllg",
+    "planungGFuehrendeStrecke",
+    "planungGSchriftfeld",
+    "polygoneBetrachtungsbereich",
+    "polygonePlanungsbereich"
+})
+public class CPlanungGruppe
+    extends CUrObjekt
+{
+
+    @XmlElement(name = "Fuehrende_Oertlichkeit")
+    protected TCFuehrendeOertlichkeit fuehrendeOertlichkeit;
+    @XmlElement(name = "LST_Planung_Einzel", required = true)
+    protected CPlanungEinzel lstPlanungEinzel;
+    @XmlElement(name = "Planung_G_Allg", required = true)
+    protected CPlanungGAllg planungGAllg;
+    @XmlElement(name = "Planung_G_Fuehrende_Strecke")
+    protected CPlanungGFuehrendeStrecke planungGFuehrendeStrecke;
+    @XmlElement(name = "Planung_G_Schriftfeld")
+    protected CPlanungGSchriftfeld planungGSchriftfeld;
+    @XmlElement(name = "Polygone_Betrachtungsbereich")
+    protected CPolygoneBetrachtungsbereich polygoneBetrachtungsbereich;
+    @XmlElement(name = "Polygone_Planungsbereich")
+    protected CPolygonePlanungsbereich polygonePlanungsbereich;
+
+    /**
+     * Ruft den Wert der fuehrendeOertlichkeit-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TCFuehrendeOertlichkeit }
+     *     
+     */
+    public TCFuehrendeOertlichkeit getFuehrendeOertlichkeit() {
+        return fuehrendeOertlichkeit;
+    }
+
+    /**
+     * Legt den Wert der fuehrendeOertlichkeit-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TCFuehrendeOertlichkeit }
+     *     
+     */
+    public void setFuehrendeOertlichkeit(TCFuehrendeOertlichkeit value) {
+        this.fuehrendeOertlichkeit = value;
+    }
+
+    /**
+     * Ruft den Wert der lstPlanungEinzel-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPlanungEinzel }
+     *     
+     */
+    public CPlanungEinzel getLSTPlanungEinzel() {
+        return lstPlanungEinzel;
+    }
+
+    /**
+     * Legt den Wert der lstPlanungEinzel-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPlanungEinzel }
+     *     
+     */
+    public void setLSTPlanungEinzel(CPlanungEinzel value) {
+        this.lstPlanungEinzel = value;
+    }
+
+    /**
+     * Ruft den Wert der planungGAllg-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPlanungGAllg }
+     *     
+     */
+    public CPlanungGAllg getPlanungGAllg() {
+        return planungGAllg;
+    }
+
+    /**
+     * Legt den Wert der planungGAllg-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPlanungGAllg }
+     *     
+     */
+    public void setPlanungGAllg(CPlanungGAllg value) {
+        this.planungGAllg = value;
+    }
+
+    /**
+     * Ruft den Wert der planungGFuehrendeStrecke-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPlanungGFuehrendeStrecke }
+     *     
+     */
+    public CPlanungGFuehrendeStrecke getPlanungGFuehrendeStrecke() {
+        return planungGFuehrendeStrecke;
+    }
+
+    /**
+     * Legt den Wert der planungGFuehrendeStrecke-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPlanungGFuehrendeStrecke }
+     *     
+     */
+    public void setPlanungGFuehrendeStrecke(CPlanungGFuehrendeStrecke value) {
+        this.planungGFuehrendeStrecke = value;
+    }
+
+    /**
+     * Ruft den Wert der planungGSchriftfeld-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPlanungGSchriftfeld }
+     *     
+     */
+    public CPlanungGSchriftfeld getPlanungGSchriftfeld() {
+        return planungGSchriftfeld;
+    }
+
+    /**
+     * Legt den Wert der planungGSchriftfeld-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPlanungGSchriftfeld }
+     *     
+     */
+    public void setPlanungGSchriftfeld(CPlanungGSchriftfeld value) {
+        this.planungGSchriftfeld = value;
+    }
+
+    /**
+     * Ruft den Wert der polygoneBetrachtungsbereich-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPolygoneBetrachtungsbereich }
+     *     
+     */
+    public CPolygoneBetrachtungsbereich getPolygoneBetrachtungsbereich() {
+        return polygoneBetrachtungsbereich;
+    }
+
+    /**
+     * Legt den Wert der polygoneBetrachtungsbereich-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPolygoneBetrachtungsbereich }
+     *     
+     */
+    public void setPolygoneBetrachtungsbereich(CPolygoneBetrachtungsbereich value) {
+        this.polygoneBetrachtungsbereich = value;
+    }
+
+    /**
+     * Ruft den Wert der polygonePlanungsbereich-Eigenschaft ab.
+     * 
+     * @return
+     *     possible object is
+     *     {@link CPolygonePlanungsbereich }
+     *     
+     */
+    public CPolygonePlanungsbereich getPolygonePlanungsbereich() {
+        return polygonePlanungsbereich;
+    }
+
+    /**
+     * Legt den Wert der polygonePlanungsbereich-Eigenschaft fest.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link CPolygonePlanungsbereich }
+     *     
+     */
+    public void setPolygonePlanungsbereich(CPolygonePlanungsbereich value) {
+        this.polygonePlanungsbereich = value;
+    }
+
+}

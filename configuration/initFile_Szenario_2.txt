@@ -1,0 +1,13 @@
+# Initialisation file for ETCS at EBD     Stand: 28.06.2020 03:20 
+#
+# Szenarien rund um Martinstein für 'Showroom EBD' am 30.6.2020       
+#        
+# Szenario 2: Flexible D-Weg-Längen       
+#        
+# Flexible Länge des D-Wegs für TGV4090 von 31C2 nach 12N5 ermöglicht schnellstmögliche Einfahrt. 
+# Rangierfahrt rf2181 aus Gl. 33 über W36,W37,W38 nach Gl. 2 bis 12P2. 
+# SvL für TGV4090 hinter W35, SvL für rf2181 vor W35 und soweit hinter W36 wie Zuglänge erfordert. 
+#        
+# etcsID ; trainConfigID ; infrastructureID ; trainScheduleID ; rbcID ; startingBaliseGroup ; startingTrack ; startingDirection ; startingIncrement
+       1 ;          4090 ;             4090 ;        TGV4090 ;      1 ;                4731 ;      12W13CDL ;             false ;       5
+       2 ;           292 ;              292 ;          rf292 ;      1 ;               13736 ;        12W32R ;             true ;        0

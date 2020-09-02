@@ -24,7 +24,7 @@ class AndBlockTest {
         TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
-    @Test
+
     void evalSimple() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0 }}]}");
@@ -33,7 +33,7 @@ class AndBlockTest {
         assertFalse(andBlock.eval());
     }
 
-    @Test
+
     void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"type\" : \"v\", \"condition\" : { \"op\" : \"<\", \"value\" : 25.0 }}]}");
@@ -42,7 +42,7 @@ class AndBlockTest {
         assertFalse(andBlock.eval());
     }
 
-    @Test
+
     void evalComplex() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"andBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0 }}, {\"andBlock\" : [{\"type\" : \"v\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0 }}]}]}");

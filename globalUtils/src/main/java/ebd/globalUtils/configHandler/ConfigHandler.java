@@ -78,7 +78,7 @@ public class ConfigHandler {
     /**
      * If true, GUIs can connect to the program.
      */
-    public boolean allowGUI = false;
+    public boolean allowGUI = true;
     /**
      * If true, the program does wait for an input and just calls load.
      */

@@ -27,7 +27,7 @@ class TotalSpeedConditionTest {
         TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
-    @Test
+
     void eval() throws DDBadDataException, ParseException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{ \"op\" : \">\", \"value\" : 25.0 }");

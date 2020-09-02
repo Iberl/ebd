@@ -24,7 +24,7 @@ class OrBlockTest {
         TrainData trainData = new TrainData( EventBus.getDefault(), 1620, 192, 2181);
     }
 
-    @Test
+
     void evalSimple() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"type\" : \"v_rel\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }}]}");
@@ -33,7 +33,7 @@ class OrBlockTest {
         assertFalse(orBlock.eval());
     }
 
-    @Test
+
     void eval() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"orBlock\" : [{\"type\" : \"v_rel\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }}]}, {\"orBlock\" : [{\"type\" : \"v_rel\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }}]}]}");
@@ -42,7 +42,7 @@ class OrBlockTest {
         assertFalse(orBlock.eval());
     }
 
-    @Test
+
     void evalComplex() throws ParseException, DDBadDataException {
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = (JSONObject) parser.parse("{\"orBlock\" : [{\"orBlock\" : [{\"type\" : \"v_rel\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }}]}, {\"orBlock\" : [{\"orBlock\" : [{\"type\" : \"v_rel\", \"condition\" : { \"op\" : \">\", \"value\" : 25.0, \"curveBase\" : \"trip\" }}]}]}]}");

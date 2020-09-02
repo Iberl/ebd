@@ -4,6 +4,9 @@ import ebd.globalUtils.events.NormalEvent;
 
 import java.util.List;
 
+/**
+ *
+ */
 public class ToLogEvent extends NormalEvent {
 
     public String msg;

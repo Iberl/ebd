@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class SpeedSupervisorTest {
 
-    @Test
+
     public void ssmTest() throws InterruptedException {
         EventBus eventBus = new EventBus();
         TestHandler th = new TestHandler(eventBus);
