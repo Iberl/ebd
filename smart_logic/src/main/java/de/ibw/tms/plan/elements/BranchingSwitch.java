@@ -223,8 +223,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             return;
         }
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
+        String sId = this.Node.TopNodeId;
         CheckDbdCommand DbdCommandPayload =
-                new CheckDbdCommand(sEbdName, (CrossoverStatus) EF.Item, lPriority);
+                new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
         try {
             SmartClientHandler.getInstance().sendCommand(DbdCommand);

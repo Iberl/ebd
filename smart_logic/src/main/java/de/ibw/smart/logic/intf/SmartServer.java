@@ -4,6 +4,7 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
+import de.ibw.smart.logic.safety.SmartSafety;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementAuthority;
@@ -140,6 +141,13 @@ public class SmartServer extends RbcModul  {
                 }.start();
             } else if(CmdType.equals(TmsDbdCommand.class)) {
                 CheckDbdCommand CDC = (CheckDbdCommand) tmsCommand.getPayload();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        SmartSafety.getSmartSafety().checkIfDbdElementIsNotBlocked(CDC);
+                    }
+                }.start();
+
                 System.out.println("RESULT");
                 try {
                     System.out.println(CDC.parseToJson());

@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-01
+ * @since 2020-09-02
  */
 public class CheckDbdCommand extends Commands {
 
@@ -20,6 +20,12 @@ public class CheckDbdCommand extends Commands {
      */
     @Expose
     public String sCrossoverEbdName;
+
+    /**
+     * Node-ID (Topologisch) der Weiche
+     */
+    @Expose
+    public String sId;
 
     /**
      * Status der Weiche der gesetzt werden soll und von der SL gepr&uuml;ft werden soll
@@ -38,9 +44,10 @@ public class CheckDbdCommand extends Commands {
      *
      * @param lPriority long - Priority dieses Befehls im TMS Postausgang.
      */
-    public CheckDbdCommand(String sCrossoverEbdName, BranchingSwitch.CrossoverStatus Status ,long lPriority) {
+    public CheckDbdCommand(String sCrossoverEbdName, String sId, BranchingSwitch.CrossoverStatus Status ,long lPriority) {
         super(lPriority);
         this.sCrossoverEbdName = sCrossoverEbdName;
+        this.sId = sId;
         this.CrossoverStatus = Status;
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_DBD_COMMAND;
@@ -71,7 +78,7 @@ public class CheckDbdCommand extends Commands {
     }
 
     public static void main(String[] args) throws MissingInformationException {
-        CheckDbdCommand DbdCmd = new CheckDbdCommand("TestW12", BranchingSwitch.CrossoverStatus.LEFT, 1L);
+        CheckDbdCommand DbdCmd = new CheckDbdCommand("TestW12","123", BranchingSwitch.CrossoverStatus.LEFT, 1L);
         System.out.println(DbdCmd.parseToJson());
     }
 
