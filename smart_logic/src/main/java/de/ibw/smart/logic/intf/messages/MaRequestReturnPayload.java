@@ -100,7 +100,7 @@ public class MaRequestReturnPayload implements ITypable {
 
 
 
-    @Override
+
     public String getType() {
         return this.type;
     }

@@ -102,6 +102,9 @@ public class SmartServerMessage implements Comparable<SmartServerMessage>, Seria
 
             ReturnType = new TypeToken<MaRequestReturnPayload>(){}.getType();
             return (MaRequestReturnPayload) gson.fromJson(jsonString, ReturnType);
+        } else if(type.equals((DbdRequestReturnPayload.RETURN_TYPE))) {
+            ReturnType = new TypeToken<DbdRequestReturnPayload>(){}.getType();
+            return (DbdRequestReturnPayload) gson.fromJson(jsonString, ReturnType);
         }
         return null;
     }

@@ -30,6 +30,7 @@ import ebd.rbc_tms.util.TrainInfo;
 import info.dornbach.dbdclient.DBDClient;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
@@ -187,10 +188,12 @@ public class SmartSafety {
             int iRequestSize = requestedTrackElementList.size();
             Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
             Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
-            boolean bStartSafe = handleStartElement(StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
+            BlockedArea StartArea = handleStartElement(StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
                 ,iDistance_LRBG, iNID_LRBG, iQ_DirTrain, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
-            if(!bStartSafe) return false;
-            else {
+            // start Area is blocked
+            if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
+            toBlock.add(StartArea);
+
 
                 for(int i = 1; i < requestedTrackElementList.size() - 1; i++) {
                     // erstes und letztes Element wird nicht mit i referenziet letztes Element in letzter iteration
@@ -202,7 +205,12 @@ public class SmartSafety {
                     if(!Element2.equals(EndElement)) {
                         if (!Element2.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) return false;
 
-                    } else continue;
+                    } else {
+                        // Element2 ist End Element aber Element1 ist eine Weiche
+                        // also muss die Weiche als Blockiert eingetragen werden
+                        TopologyGraph.Node N = (TopologyGraph.Node) Element1.getValue();
+                        toBlock.add(new BlockedArea(N, N.TopNodeId));
+                    };
                     TopologyGraph.Node N1 = (TopologyGraph.Node) Element1.getValue();
                     TopologyGraph.Node N2 = (TopologyGraph.Node) Element2.getValue();
                     TopologyGraph.Edge E = TopologyGraph.twoTopPointBelongsToEdgeRepo.
@@ -240,7 +248,7 @@ public class SmartSafety {
                     }
 
                 }
-            }
+
 
 
 
@@ -257,8 +265,23 @@ public class SmartSafety {
         }
 
     }
+/*
+    private BlockedArea createStartBlocking(Pair<Route.TrackElementType, TrackElement> startElement, TrainModel tm) {
+        if(startElement.getLeft().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+            TopologyGraph.Node StartNode = (TopologyGraph.Node) startElement.getRight();
+            return new BlockedArea(StartNode, StartNode.TopNodeId);
+        } else {
+            BlockedArea StartEdgeBlock = null;
+            TopologyGraph.Edge StartEdge = (TopologyGraph.Edge) startElement.getRight();
+            StartEdgeBlock = new BlockedArea(StartEdge,)
+        }
 
-    private boolean handleStartElement(Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+    }
+*/
+    /**
+     * TODO: Distanz des Zielpunktes am selben Gleis ermitteln
+     */
+    private BlockedArea handleStartElement(Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
         boolean bHasIntersection = false;
 
@@ -267,8 +290,11 @@ public class SmartSafety {
         if (TET.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
             TopologyGraph.Node N = (TopologyGraph.Node) startElement.getValue();
             StartArea = new BlockedArea(N, N.TopNodeId);
+            return StartArea;
         } else if (TET.equals(Route.TrackElementType.RAIL_TYPE)) {
             //TODO Check if Train is standing on trail still
+            distanceFromTrainToNextNode.set((int) tm.getdDistanceToNodeRunningTo());
+            iSumSectionsLength.set((int) tm.getdDistanceToNodeRunningTo());
             TrackElement StartEL = (TrackElement) startElement.getValue();
             double distanceToA1 = 0;
             double distanceToA2 = 0;
@@ -276,32 +302,30 @@ public class SmartSafety {
             CDatenpunkt D = B.getPlanProDataPoint();
             double dDistanceBaliseFromA = D.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
 
-            boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
+            //boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
             String sIdOfEdgeOfTrain = tm.getEdgeTrainStandsOn().sId;
             String sIdStartEdgeOfMa = ((TopologyGraph.Edge)startElement.getValue()).sId;
+            TopologyGraph.Edge StartEdge = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
+            boolean bMovesToB = calcIsMovingToB(sIdOfEdgeOfTrain, tm);
             if (!sIdOfEdgeOfTrain.equals(sIdStartEdgeOfMa)) {
 
                 // Train stands no more on rail beeing requested
                 // reject MA
-                return false;
+                return null;
             }
             // endelement is in pair // StartEl is unpacked
             if (endElement.getValue().equals(StartEL)) {
                 // MA endet auf dem Start element
+
+
+
                 if (bMovesToB) {
                     // Train moves to B Point
-                    double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, true);
-                    distanceToA1 = dTrainFront - tm.length;
-                    distanceToA2 = dTrainFront + iSumSectionsLength.get() * Math.pow(10, iEoaQ_Scale) / 10.0d;
-                    StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
-                            Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+                    StartArea = handleMovingToB(tm, iQ_scale, iDistance_lrbg, iTrainId, (TopologyGraph.Edge) StartEL, dDistanceBaliseFromA, StartEdge);
                 } else {
                     // Train moves to A Point
-                    double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, false);
-                    distanceToA2 = dTrainFront + tm.length;
-                    distanceToA1 = dTrainFront - iSumSectionsLength.get() * Math.pow(10, iEoaQ_Scale) / 10.0d;
-                    StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
-                            Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+
+                    StartArea = handleMoveToA(tm, iDistance_lrbg, (TopologyGraph.Edge) StartEL);
                 }
 
             } else {
@@ -324,12 +348,49 @@ public class SmartSafety {
         for(BlockedArea OtherArea: blockList) {
             if(StartArea.compareIfIntersection(OtherArea)) {
                 // has intersection so SL reject
-                return false;
+                return null;
             }
         }
 
 
-        return true;
+        return StartArea;
+    }
+
+    /**
+     * Distans zu lrbg ist falsch Endpunkt der Route ist ausschlaggebend
+     */
+    @NotNull
+    private BlockedArea handleMoveToA(TrainModel tm, int iDistance_lrbg, TopologyGraph.Edge startEL) {
+        double distanceToA2;
+        double distanceToA1;
+        BlockedArea StartArea;
+        distanceToA2 = tm.getdDistanceToNodeRunningTo();
+        distanceToA1 = distanceToA2 - iDistance_lrbg;
+        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+        return StartArea;
+    }
+
+    @NotNull
+    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, int iDistance_lrbg, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+        double distanceToA2;
+        double distanceToA1;
+        BlockedArea StartArea;
+        double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, true);
+        distanceToA1 = startEdge.dTopLength - tm.getdDistanceToNodeRunningTo();
+        distanceToA2 = distanceToA1 +
+
+        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+        return StartArea;
+    }
+
+    private boolean calcIsMovingToB(String sIdOfEdgeOfTrain, TrainModel tm) {
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
+        if(E == null) throw new InvalidParameterException("Edge of Train not found");
+        if(E.A.equals(tm.getNodeTrainRunningTo())) return false;
+        if(E.B.equals(tm.getNodeTrainRunningTo())) return true;
+        throw new InvalidParameterException("Edge has not Node, which train running to.");
     }
 
     private double calcTrainFront(int iTrainId, int iQ_scale, int iDistance_lrbg, double dDistanceBaliseFromA, boolean bMovesToB) {
@@ -853,6 +914,7 @@ public class SmartSafety {
         if(isSuccess) DbdPayload.setDbdSuccessfull();
         else DbdPayload.setErrorState(sFailReason);
         SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);
+        BlockMessage.setbIsFromSL(true);
         SmartLogic.outputQueue.offer(BlockMessage);
     }
 
