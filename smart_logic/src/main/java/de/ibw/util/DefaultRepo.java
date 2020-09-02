@@ -33,6 +33,10 @@ public class DefaultRepo<K, V> {
         return this.repo.get(key);
     }
 
+    public ArrayList<K> getKeys() {
+        return new ArrayList<K>(this.repo.keySet());
+    }
+
     /**
      * Enfernt Value mit dem Key beides wird entfernt
      * @param key K - Ein Key-Object

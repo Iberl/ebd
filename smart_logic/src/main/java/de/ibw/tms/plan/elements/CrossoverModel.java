@@ -56,6 +56,10 @@ public class CrossoverModel {
     private Rail PeekRail = null;
 
 
+    public BranchingSwitch getRailWaySwitch() {
+        return RailWaySwitch;
+    }
+
     private CrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
         Node = node;
         TopConnect = topConnect;
@@ -73,6 +77,7 @@ public class CrossoverModel {
      * Verlinkt die Gleise mit dieser Weiche
      */
     public void createPositionedRelation() {
+        boolean isIndex_0_RightPosition = false;
         HashSet<TopologyGraph.Edge> edges = this.Node.inEdges;
         ArrayList<TopologyGraph.Edge> notPeekEdges = null;
         edges.addAll(this.Node.outEdges);
@@ -84,6 +89,13 @@ public class CrossoverModel {
         notPeekEdges.remove(PeekEdge);
         Rail RailA = notPeekEdges.get(0).getRail();
         Rail RailB = notPeekEdges.get(1).getRail();
+        try {
+            isIndex_0_RightPosition = checkCrossingSwitchIsFirstRight(notPeekEdges);
+        } catch (Exception e) {
+            e.printStackTrace();
+            isIndex_0_RightPosition = true;
+        }
+
 
         PosRelationA = new PositionedRelation();
         PosRelationA.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
@@ -96,13 +108,41 @@ public class CrossoverModel {
                 new TrackElementStatus()
         );
         List<PositionedRelation> list = new ArrayList<PositionedRelation>();
-        list.add(PosRelationA);
-        list.add(PosRelationB);
-        this.RailWaySlip.updatePositionedRelation(list);
+
+
+        if(isIndex_0_RightPosition) {
+
+            list.add(PosRelationA);
+            list.add(PosRelationB);
+            this.RailWaySlip.updatePositionedRelation(list);
+        } else {
+
+            list.add(PosRelationB);
+            list.add(PosRelationA);
+            this.RailWaySlip.updatePositionedRelation(list);
+        }
         this.RailWaySlip.setOutputRelation(PosRelationA);
 
 
     }
+
+    private boolean checkCrossingSwitchIsFirstRight(ArrayList<TopologyGraph.Edge> notPeekEdges) throws Exception {
+        TopologyGraph.Node N = this.Node;
+        TopologyGraph.Edge E =  notPeekEdges.get(0);
+            if(E.A.equals(N)) {
+                if(E.TopConnectFromA.equals(TopologyConnect.RECHTS)) return true;
+                else return false;
+            } else {
+                if(E.TopConnectFromB.equals(TopologyConnect.RECHTS)) return true;
+                else return false;
+            }
+
+
+
+    }
+
+
+
 
     /**
      * Gibt die Topologische Weiche wider

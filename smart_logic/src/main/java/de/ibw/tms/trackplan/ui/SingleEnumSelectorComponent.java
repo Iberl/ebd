@@ -33,7 +33,7 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
      * @param SelectionModel - Modell des Enums
      * @param C - Gibt gesetzte Werte an alle registrierten Komponenten weiter.
      */
-    public SingleEnumSelectorComponent(T SelectionModel, IController C) {
+    public SingleEnumSelectorComponent(T SelectionModel, IController C, boolean isDefaultAction) {
         super();
         // viewmodel transmitted by controller
         this.ViewModel = SelectionModel;
@@ -42,7 +42,16 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
 
         this.C = C;
 
+        if(isDefaultAction) {
+            addDefaultListener();
+        }
 
+
+    }
+
+
+
+    public void addDefaultListener() {
         this.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -55,11 +64,10 @@ public class SingleEnumSelectorComponent<T extends EnumModel> extends JComboBox 
                     SingleEnumSelectorComponent.this.publish();
 
                 }
-               // System.out.println("After enum");
+                // System.out.println("After enum");
 
             }
         });
-
     }
 
     /**

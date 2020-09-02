@@ -6,8 +6,8 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
  * Diese Klasse stellt Blockierte Gleisabschnitte dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 0.4
+ * @since 2020-09-02
  */
 public class BlockedArea {
 
@@ -34,6 +34,12 @@ public class BlockedArea {
      * it can not a track and an element be blocked in one Blocked Area
      */
     private TrackElement BlockedElement;
+
+    /**
+     * Node Id of Single Element beeing blocked
+     */
+    private String sIdOfElement;
+
     /**
      * a longer Track beeing blocked
      * it can not a track and an element be blocked in one Blocked Area
@@ -77,8 +83,19 @@ public class BlockedArea {
      * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
      * @param Element beeing Blocked
      */
-    public BlockedArea(TrackElement Element) {
+    public BlockedArea(TrackElement Element, String sId) {
         this.BlockedElement = Element;
+        this.sIdOfElement = sId;
+    }
+
+    /**
+     *
+     * @param sId
+     * @return
+     */
+    public boolean isSidBlocked(String sId) {
+        if (this.sIdOfElement == null) return false;
+        else return this.sIdOfElement.equals(sId);
     }
 
     public boolean compareIfIntersection(BlockedArea OtherArea) {

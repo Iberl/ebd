@@ -1,8 +1,8 @@
 package ebd.dbd.client.extension;
 
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 import info.dornbach.dbdclient.DBDClient;
@@ -28,22 +28,38 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
 
     /**
      * Gibt Instanz eines DBD-Client oder eines Fake wieder.
+     * Darf erst aufgerufen werden, nachdem die Weichen in PlanPro gesetzt wurden.
+     * Deshalb wird das Interface im PlanPro-Construktor über getInstance aufgerufen
      * @return IDbdClientInterface - der Client
      */
     public static IDbdClientInterface getInstance() {
         ConfigHandler ch  = ConfigHandler.getInstance();
+        DefaultRepo<String, Integer> initStateRepo = null;
         if(instance == null) {
             if (ch.isSimulatingEbd) {
-                DefaultRepo<String, Integer> fakeRepo = useSimulatedDbdClient(ch);
-                instance = new SimulateDbdClient(fakeRepo);
+                initStateRepo = prompt4InitialStateSetting(ch);
+                instance = new SimulateDbdClient(initStateRepo);
             } else {
                 instance = new RealDbdClient();
+                if(ch.initCrossoversInRealdDbdClient) {
+                    initStateRepo = prompt4InitialStateSetting(ch);
+
+                }
+
             }
+            updateUi4InitState(initStateRepo);
         }
         return instance;
     }
 
-    private static DefaultRepo<String, Integer> useSimulatedDbdClient(ConfigHandler ch) {
+    private static void updateUi4InitState(DefaultRepo<String, Integer> initStateRepo) {
+        //TODO
+
+        //PlanData.getInstance().branchingSwitchList;
+
+    }
+
+    private static DefaultRepo<String, Integer> prompt4InitialStateSetting(ConfigHandler ch) {
         final DefaultRepo<String, Integer>[] fakeRepo = new DefaultRepo[]{new DefaultRepo<>()};
         if(ch.shallUserPrompt4SimulationFile) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -54,8 +70,9 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
             });
 
         } else {
-            InputStream in = RealDbdClient.class.getResourceAsStream("DbdClient/DBD.SIM.CSV");
+            InputStream in = RealDbdClient.class.getClassLoader().getResourceAsStream("DbdClient/DBD.SIM.CSV");
             CSVReader reader = new CSVReader(new InputStreamReader(in));
+
             try {
                 fillRepoByCsv(fakeRepo[0], reader);
             } catch (CsvValidationException | IOException e) {

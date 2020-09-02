@@ -27,10 +27,17 @@ import java.util.concurrent.SynchronousQueue;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 0.4
+ * @since 2020-09-01
  */
 public class SmartLogic {
+
+    /**
+     * Gibt an ob das Modul als Smart-Logic oder als TMS gestartet wurde
+     * true :=  SmartLogic
+     * false := TMS
+     */
+    public static boolean IS_STARTED_AS_SL = true;
 
     /**
      * Name der Smart-Logic Komponente als Log-file
@@ -322,6 +329,7 @@ public class SmartLogic {
      */
     public static void main(String[] args) {
         //startSmartLogic();
+        SmartLogic.IS_STARTED_AS_SL = true;
         boolean fakeRbcReceiver = false;
         boolean sendDummyRequest = false;
         int iSendDummyPos = 0;

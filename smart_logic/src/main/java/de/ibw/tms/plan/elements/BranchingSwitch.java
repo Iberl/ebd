@@ -1,5 +1,10 @@
 package de.ibw.tms.plan.elements;
 
+import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.SmartClient;
+import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.intf.TmsDbdCommand;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
@@ -8,14 +13,19 @@ import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
+import ebd.ConfigHandler;
+import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -31,8 +41,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-08-31
  */
 public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover, ITrack, Flow.Subscriber<CrossoverMainModel> {
 
@@ -73,6 +83,15 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private String sBrachName;
 
+    public void setsBrachName(String sName) {
+        if(this.sBrachName == null || this.sBrachName.isEmpty() || this.sBrachName.equals("")) {
+            JLabel LabName = new JLabel("<HTML><b><u>".concat(sName).concat("</u></b></HTML>"));
+
+
+            uiList.add(0,LabName);
+        }
+        this.sBrachName = sName;
+    }
 
     /**
      * Bild das die Weiche darsstellt. Es wird aus einer Datei geladen
@@ -166,13 +185,57 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private ArrayList<JComponent> uiList = new ArrayList();
     private SingleEnumSelectorComponent<CrossoverEnumModel> BrachingStates = null;
+
+
+
+
+    /**
+     * Bereitet UI f&uuml;r die Weiche vor
+     * @param Model {@link CrossoverEnumModel} - Auswahlm&ouml;glichkeit von Status einer Weiche
+     */
     private void initUiList(CrossoverEnumModel Model) {
-        uiList.add(new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
-        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
-        Model.setSingleSelection(Model.getEnumMappingList()[0]);
-        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(Model, this.controller);
+
+
+        setBranchingStatesUnit(Model);
         uiList.add(BrachingStates);
 
+    }
+
+    private void setBranchingStatesUnit(CrossoverEnumModel model) {
+        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(model, this.controller,false);
+        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
+        model.setSingleSelection(model.getEnumMappingList()[0]);
+        ActionListener al = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendDbdCommandToSL();
+            }
+        };
+        BrachingStates.addActionListener(al);
+    }
+
+    public void sendDbdCommandToSL() {
+        long lPriority = ConfigHandler.getInstance().lCheckDbdCommand;
+        Object OEnumField = BrachingStates.getSelectedItem();
+        EnumModel.EnumField EF = (EnumModel.EnumField) OEnumField;
+        if(((CrossingSwitch) this.Node.NodeImpl).isDKW()) {
+            handleDKW();
+            return;
+        }
+        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
+        String sId = this.Node.TopNodeId;
+        CheckDbdCommand DbdCommandPayload =
+                new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
+        TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
+        try {
+            SmartClientHandler.getInstance().sendCommand(DbdCommand);
+        } catch (MissingInformationException missingInformationException) {
+            missingInformationException.printStackTrace();
+        }
+    }
+
+    private void handleDKW() {
+        System.out.println("DKW is currently not supported");
     }
 
     private CrossoverController controller = null;
@@ -254,43 +317,16 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         String sNodeIdOutput = "";
         Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
-        TopologyGraph.Node Ref = null;
-        if(From.getRail().equals(PeekRail)) {
-            Target = (Trail) outputRelation.getTo();
-        } else {
-            Target = (Trail) From;
-        }
+
+        Target = getTargetOfOutputChange(outputRelation, From);
 
 
         String sSrc = Node.TopNodeId;
         String sTarget;
-        try {
-            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
-            sSrc = CS.getEbdTitle();
-        }catch (Exception E){
-            sSrc =  Node.TopNodeId;
-        }
+        sSrc = getThisNode();
 
-        try {
-            Ref = Target.getRail().getEdge().B;
-            CrossingSwitch CS = null;
+        sTarget = getTargetOfOutputEdge(Target);
 
-            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-                CS = (CrossingSwitch) Target.getRail().getEdge().A.NodeImpl;
-
-            } else {
-                CS = (CrossingSwitch) Ref.NodeImpl;
-
-            }
-            sTarget = CS.getEbdTitle();
-
-        } catch ( Exception E) {
-            if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-                sTarget = Target.getRail().getEdge().A.TopNodeId;
-            } else {
-                sTarget = Ref.TopNodeId;
-            }
-        }
 
 
 
@@ -299,6 +335,52 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         ///
 
 
+    }
+
+    private String getTargetOfOutputEdge(Trail target) {
+        String sTarget;
+        try {
+
+            TopologyGraph.Node ref = target.getRail().getEdge().B;
+            CrossingSwitch CS = null;
+
+            if(ref.TopNodeId.equals(Node.TopNodeId)) {
+                CS = (CrossingSwitch) target.getRail().getEdge().A.NodeImpl;
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromB.value());
+
+            } else {
+                CS = (CrossingSwitch) ref.NodeImpl;
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromA.value());
+            }
+            sTarget = CS.getEbdTitle();
+
+        } catch ( Exception E) {
+
+                sTarget = target.getRail().getEdge().A.TopNodeId;
+
+        }
+        return sTarget;
+    }
+
+    private String getThisNode() {
+        String sSrc;
+        try {
+            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
+            sSrc = CS.getEbdTitle();
+        }catch (Exception E){
+            sSrc =  Node.TopNodeId;
+        }
+        return sSrc;
+    }
+
+    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
+        Trail Target;
+        if(from.getRail().equals(PeekRail)) {
+            Target = (Trail) outputRelation.getTo();
+        } else {
+            Target = from;
+        }
+        return Target;
     }
 
     /**

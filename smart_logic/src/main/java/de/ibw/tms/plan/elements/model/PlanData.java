@@ -1,6 +1,7 @@
 package de.ibw.tms.plan.elements.model;
 
 import de.ibw.feed.BaliseExtractor;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
@@ -24,6 +25,7 @@ import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
+import ebd.dbd.client.extension.RealDbdClient;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
@@ -81,6 +83,11 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * Bahnh&ouml;fe noch nicht vollst&auml;ndig implementiert
      */
     public static DefaultRepo<String, PlatformEdge> PlatformRepo = new DefaultRepo<>();
+
+    /**
+     * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W13 und als Value die Weiche
+     */
+    public static DefaultRepo<String, TopologyGraph.Node> SwitchRepo = new DefaultRepo<>();
 
     /**
      * Der topGraph speichert das SL-TMS-interen Topologische Modell
@@ -277,6 +284,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         //Beheim
         //createBeheimPlan();
         handleDataFromFile();
+        if(SmartLogic.IS_STARTED_AS_SL) {
+            RealDbdClient.getInstance();
+        }
 
     }
 
@@ -327,9 +337,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
+            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
+            if(CS.isDKW()) {
+                handleDKW();
+            } else {
 
+                SwitchRepo.update(CS.getEbdTitle(), N);
 
-
+            }
 
 
 
@@ -337,10 +352,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
     }
 
+    private void handleDKW() {
+    }
+
     private void linkRailsToCrossover() {
         Collection<CrossoverModel> models = CrossoverModel.CrossoverRepo.getAll();
         for(CrossoverModel M: models) {
             M.createPositionedRelation();
+
         }
 
     }
@@ -461,11 +480,16 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     }
 
     private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2, float x1, float y1, float x2, float y2) {
+        String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
-
+            try {
+                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle();
+            } catch(Exception E) {
+                sName = "";
+            }
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN2);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x2,
-                    y2,"", BranchingSwitch.ViewType.Branch_LRU);
+                    y2,sName, BranchingSwitch.ViewType.Branch_LRU);
 
 
             CrossoverModel.createCrossoverModel(n2, connectN2, RailWaySwitchSlip, RailwaySwitch);
@@ -473,9 +497,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
 
         if(connectN.equals(TopologyConnect.SPITZE)) {
+            try {
+                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle();
+            } catch(Exception E) {
+                sName = "";
+            }
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x1,
-                    y1,"", BranchingSwitch.ViewType.Branch_LRU);
+                    y1,sName, BranchingSwitch.ViewType.Branch_LRU);
 
 
             CrossoverModel.createCrossoverModel(n, connectN, RailWaySwitchSlip, RailwaySwitch);

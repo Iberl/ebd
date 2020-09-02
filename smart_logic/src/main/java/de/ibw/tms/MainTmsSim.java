@@ -1,6 +1,7 @@
 package de.ibw.tms;
 
 import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.ui.ScenarioPanel;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
@@ -26,8 +27,8 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-09-01
  */
 public class MainTmsSim {
 
@@ -104,6 +105,7 @@ public class MainTmsSim {
     }
 
     private static void startAsModul() {
+        SmartLogic.IS_STARTED_AS_SL = false;
         try {
             EventBusManager.registerOrGetBus(Integer.parseInt(S_TMS_ID), true);
         } catch (IOException e) {

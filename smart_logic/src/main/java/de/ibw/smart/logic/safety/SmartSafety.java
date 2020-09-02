@@ -5,7 +5,10 @@ package de.ibw.smart.logic.safety;
 import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.intf.SmartServer;
+import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SmartSafetyContinousConnectTest;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
@@ -15,6 +18,7 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.ETCSVariables;
@@ -58,8 +62,8 @@ import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-09-02
  */
 public class SmartSafety {
     /**
@@ -124,7 +128,8 @@ public class SmartSafety {
         }
     }
 
-    private volatile DefaultRepo<Integer, List<BlockedArea>> blockList = new DefaultRepo<>();
+    private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
+
 
     private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
         List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
@@ -200,15 +205,16 @@ public class SmartSafety {
                     TopologyGraph.Node N2 = (TopologyGraph.Node) Element2.getValue();
                     TopologyGraph.Edge E = TopologyGraph.twoTopPointBelongsToEdgeRepo.
                             getModel(N1.TopNodeId).getModel(N2.TopNodeId);
-                    toBlock.add(new BlockedArea(N1));
-                    toBlock.add(new BlockedArea(N2));
+                    toBlock.add(new BlockedArea(N1, N1.TopNodeId));
+                    toBlock.add(new BlockedArea(N2, N2.TopNodeId));
                     toBlock.add(new BlockedArea(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
                     int iSumDistance = distanceFromTrainToNextNode.get();
                     iSumDistance += Math.floor(E.dTopLength);
                     distanceFromTrainToNextNode.set(iSumDistance);
                 }
                 if(EndElement.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    toBlock.add(new BlockedArea((TrackElement) EndElement.getValue()));
+                    TopologyGraph.Node NC = (TopologyGraph.Node) EndElement.getValue();
+                    toBlock.add(new BlockedArea(NC, NC.TopNodeId));
                 } else if(EndElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                     boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
                     double dDistanceFromRecentNode = iSumSectionsLength.get() - distanceFromTrainToNextNode.get();
@@ -257,7 +263,8 @@ public class SmartSafety {
         BlockedArea StartArea = null;
         Route.TrackElementType TET = (Route.TrackElementType) startElement.getKey();
         if (TET.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-            StartArea = new BlockedArea((TrackElement) startElement.getValue());
+            TopologyGraph.Node N = (TopologyGraph.Node) startElement.getValue();
+            StartArea = new BlockedArea(N, N.TopNodeId);
         } else if (TET.equals(Route.TrackElementType.RAIL_TYPE)) {
             //TODO Check if Train is standing on trail still
             TrackElement StartEL = (TrackElement) startElement.getValue();
@@ -821,4 +828,19 @@ public class SmartSafety {
         safety.slSelfCheck(null);
     }
 
+    /**
+     * Check ob eine Weiche in der Blockierten Liste vorhanden ist.
+     * @param cdc
+     */
+    public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
+        String checkSid = cdc.sId;
+        for(List<BlockedArea> l :this.blockList.getAll()) {
+            for(BlockedArea BA : l) {
+                if(BA.isSidBlocked(checkSid)) {
+                    SmartServerMessage BlockMessage = new SmartServerMessage()
+                    return;
+                }
+            }
+        }
+    }
 }

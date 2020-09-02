@@ -4,10 +4,14 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
+import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementAuthority;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementAuthority;
 import de.ibw.tms.intf.cmd.Commands;
+import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
@@ -135,6 +139,22 @@ public class SmartServer extends RbcModul  {
                                 CMA.lPriority);
                     }
                 }.start();
+            } else if(CmdType.equals(TmsDbdCommand.class)) {
+                CheckDbdCommand CDC = (CheckDbdCommand) tmsCommand.getPayload();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        SmartSafety.getSmartSafety().checkIfDbdElementIsNotBlocked(CDC);
+                    }
+                }.start();
+
+                System.out.println("RESULT");
+                try {
+                    System.out.println(CDC.parseToJson());
+                } catch (MissingInformationException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("RESULT_END");
             }
         }
 

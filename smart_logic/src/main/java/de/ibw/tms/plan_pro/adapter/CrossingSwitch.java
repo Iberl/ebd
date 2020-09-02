@@ -26,6 +26,8 @@ import java.util.Locale;
  */
 public class CrossingSwitch implements ICompareTrackMeter {
 
+
+
     private CWKrAnlage Anlage;
     private CWKrGspElement Element;
     private CWKrGspKomponente Component;
@@ -85,14 +87,7 @@ public class CrossingSwitch implements ICompareTrackMeter {
      * @return String - der Titel
      */
     public String getEbdTitle() {
-        boolean isDKW = false;
-        try {
-            if (Anlage.getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.DKW)) {
-                isDKW = true;
-            }
-        } catch (Exception E) {
-            E.printStackTrace();
-        }
+        boolean isDKW = isDKW();
 
         CWKrGspElement Element = getElement();
         if(Element == null) return null;
@@ -109,6 +104,18 @@ public class CrossingSwitch implements ICompareTrackMeter {
         } catch(Exception E) {
             return null;
         }
+    }
+
+    public boolean isDKW() {
+        boolean isDKW = false;
+        try {
+            if (Anlage.getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.DKW)) {
+                isDKW = true;
+            }
+        } catch (Exception E) {
+            E.printStackTrace();
+        }
+        return isDKW;
     }
 
 
