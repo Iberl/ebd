@@ -98,6 +98,9 @@ public class TrainModel {
      */
     public void setNodeTrainRunningTo(TopologyGraph.Node nodeTrainRunningTo) {
         NodeTrainRunningTo = nodeTrainRunningTo;
+        if(nodeTrainRunningTo != null) {
+            this.sNodeIdTrainRunningTo = nodeTrainRunningTo.TopNodeId;
+        } else this.sNodeIdTrainRunningTo = null;
     }
 
     /**
@@ -186,6 +189,13 @@ public class TrainModel {
      */
     @Expose
     private TopologyGraph.Node NodeTrainRunningTo;
+    @Expose
+    private String sNodeIdTrainRunningTo;
+
+    public String getsNodeIdTrainRunningTo() {
+        return sNodeIdTrainRunningTo;
+    }
+
     private double dDistanceToNodeRunningTo;
     private Integer nid_lrbg = null;
 

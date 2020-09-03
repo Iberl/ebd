@@ -203,6 +203,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                 b_A_IsTarget = true;
             }
 
+            Tm.setNodeTrainRunningTo(TargetNode);
             distanceToNextTargetPoint = distanceToNextTargetPoint.abs();
             Tm.setdDistanceToNodeRunningTo(distanceToNextTargetPoint.doubleValue());
 

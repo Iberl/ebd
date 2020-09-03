@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import ebd.rbc_tms.util.LinkingProfile;
 import ebd.rbc_tms.util.MA;
 
+import java.math.BigDecimal;
+
 public class RbcMaAdapter extends MA {
 
     @Expose
@@ -58,6 +60,18 @@ public class RbcMaAdapter extends MA {
                 ", speedProfile=" + speedProfile +
                 ", linkingProfile=" + linkingProfile +
                 '}';
+    }
+
+    public BigDecimal calcLengthOfSection() {
+        BigDecimal dResult = new BigDecimal("0");
+        try {
+            for(EoaSectionAdapter EoaSection: eoa.sections) {
+                dResult = dResult.add(BigDecimal.valueOf(EoaSection.l_section));
+            }
+        } catch(Exception E) {
+            return new BigDecimal("0");
+        }
+        return dResult;
     }
 
     public MA convertToRbcMA() {

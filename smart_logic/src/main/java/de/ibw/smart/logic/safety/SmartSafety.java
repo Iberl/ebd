@@ -49,6 +49,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -166,14 +167,14 @@ public class SmartSafety {
         int iQ_Scale = -1;
         int iDistance_LRBG = 0;
         int iNID_LRBG = -1;
-        int iSumOfWholeMaTrack = 0;
+        BigDecimal dSumOfWholeMaTrack = new BigDecimal("0");
 
 
         Balise B = null;
         PositionInfo PosInfo = null;
         try {
             PosInfo = guardCheckIfPositonReportIsOk(maRequest, maAdapter, iSumSectionsLength);
-            iSumOfWholeMaTrack = maRequest.getRoute().getLocation().getEnd().chainage.iMeters;
+            dSumOfWholeMaTrack = maAdapter.calcLengthOfSection();
             int iEoaQ_Scale = maAdapter.q_scale;
             if(requestedTrackElementList.size() < 2) {
                 throw new InvalidParameterException(
@@ -191,7 +192,7 @@ public class SmartSafety {
             int iRequestSize = requestedTrackElementList.size();
             Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
             Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
-            BlockedArea StartArea = handleStartElement(iSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
+            BlockedArea StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
                 ,iDistance_LRBG, iNID_LRBG, iQ_DirTrain, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
             // start Area is blocked
             if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
@@ -242,7 +243,7 @@ public class SmartSafety {
                         double dDistanceFromRecentNode = iSumSectionsLength.get() - distanceFromTrainToNextNode.get();
                         TopologyGraph.Edge Ed = (TopologyGraph.Edge) EndElement.getValue();
 
-                        // N war der Knoten der vorher zur Kante führte somit
+                        // N war der Knoten der vorher zur Kante führte somit gilt:
                         // der Ausdruck wird true, weil A der Ursprung war
                         // false wenn B der Urspurng war
                         bMovesToB = Ed.A.equals(N);
@@ -296,7 +297,7 @@ public class SmartSafety {
     }
 */
 
-    private BlockedArea handleStartElement(int iSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+    private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
         boolean bHasIntersection = false;
 
@@ -336,11 +337,11 @@ public class SmartSafety {
 
                 if (bMovesToB) {
                     // Train moves to B Point
-                    StartArea = handleMovingToB(tm, iQ_scale, iSumOfWholeMaTrack, iTrainId, (TopologyGraph.Edge) StartEL, dDistanceBaliseFromA, StartEdge);
+                    StartArea = handleMovingToB(tm, iQ_scale, dSumOfWholeMaTrack, iTrainId, (TopologyGraph.Edge) StartEL, dDistanceBaliseFromA, StartEdge);
                 } else {
                     // Train moves to A Point
 
-                    StartArea = handleMoveToA(tm, iSumOfWholeMaTrack, (TopologyGraph.Edge) StartEL);
+                    StartArea = handleMoveToA(tm, dSumOfWholeMaTrack, (TopologyGraph.Edge) StartEL);
                 }
 
             } else {
@@ -375,12 +376,12 @@ public class SmartSafety {
 
 
     @NotNull
-    private BlockedArea handleMoveToA(TrainModel tm, int iMaTrackLength, TopologyGraph.Edge startEL) {
+    private BlockedArea handleMoveToA(TrainModel tm, BigDecimal dMaTrackLength, TopologyGraph.Edge startEL) {
         double distanceToA2;
         double distanceToA1;
         BlockedArea StartArea;
         distanceToA2 = tm.getdDistanceToNodeRunningTo();
-        distanceToA1 = distanceToA2 - iMaTrackLength;
+        distanceToA1 = distanceToA2 - dMaTrackLength.doubleValue();
 
         distanceToA2 = distanceToA2 + tm.length;
         if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;
@@ -391,13 +392,13 @@ public class SmartSafety {
     }
 
     @NotNull
-    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, int iMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, BigDecimal dMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
         double distanceToA2;
         double distanceToA1;
         BlockedArea StartArea;
         //double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iMaTrackLength, dDistanceBaliseFromA, true);
         distanceToA1 = startEdge.dTopLength - tm.getdDistanceToNodeRunningTo();
-        distanceToA2 = distanceToA1 + iMaTrackLength;
+        distanceToA2 = distanceToA1 + dMaTrackLength.doubleValue();
 
         distanceToA1 = distanceToA1 - tm.length;
         if(distanceToA1 < 0) distanceToA1 = 0;
@@ -409,9 +410,10 @@ public class SmartSafety {
 
     private boolean calcIsMovingToB(String sIdOfEdgeOfTrain, TrainModel tm) {
         TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
+        TopologyGraph.Node N = TopologyGraph.NodeRepo.get(tm.getsNodeIdTrainRunningTo());
         if(E == null) throw new InvalidParameterException("Edge of Train not found");
-        if(E.A.equals(tm.getNodeTrainRunningTo())) return false;
-        if(E.B.equals(tm.getNodeTrainRunningTo())) return true;
+        if(E.A.equals(N)) return false;
+        if(E.B.equals(N)) return true;
         throw new InvalidParameterException("Edge has not Node, which train running to.");
     }
 
