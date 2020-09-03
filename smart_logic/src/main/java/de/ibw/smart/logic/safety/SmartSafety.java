@@ -166,11 +166,14 @@ public class SmartSafety {
         int iQ_Scale = -1;
         int iDistance_LRBG = 0;
         int iNID_LRBG = -1;
+        int iSumOfWholeMaTrack = 0;
+
 
         Balise B = null;
         PositionInfo PosInfo = null;
         try {
             PosInfo = guardCheckIfPositonReportIsOk(maRequest, maAdapter, iSumSectionsLength);
+            iSumOfWholeMaTrack = maRequest.getRoute().getLocation().getEnd().chainage.iMeters;
             int iEoaQ_Scale = maAdapter.q_scale;
             if(requestedTrackElementList.size() < 2) {
                 throw new InvalidParameterException(
@@ -188,7 +191,7 @@ public class SmartSafety {
             int iRequestSize = requestedTrackElementList.size();
             Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
             Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
-            BlockedArea StartArea = handleStartElement(StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
+            BlockedArea StartArea = handleStartElement(iSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
                 ,iDistance_LRBG, iNID_LRBG, iQ_DirTrain, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
             // start Area is blocked
             if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
@@ -226,23 +229,37 @@ public class SmartSafety {
                     TopologyGraph.Node NC = (TopologyGraph.Node) EndElement.getValue();
                     toBlock.add(new BlockedArea(NC, NC.TopNodeId));
                 } else if(EndElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
-                    boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
-                    double dDistanceFromRecentNode = iSumSectionsLength.get() - distanceFromTrainToNextNode.get();
-                    TopologyGraph.Edge Ed = (TopologyGraph.Edge) EndElement.getValue();
-                    if(bMovesToB) {
+                    if (StartElement.getValue().equals(EndElement.getValue())) {
+                        // Es handelt sich um nur ein Gleisabschnitt ohne Topologischen Knoten
+                        // Dieser wird im Start-Blocked-Area gespeichert
 
-                        toBlock.add(new BlockedArea(Ed, Q_SCALE_1M,0,
-                                Q_SCALE_1M, (int) dDistanceFromRecentNode));
                     } else {
-                        toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
-                                (int) Math.ceil(Ed.dTopLength)));
+
+                        TopologyGraph.Node N = (TopologyGraph.Node) requestedTrackElementList.
+                                get(requestedTrackElementList.size() -2).getRight();
+
+                        boolean bMovesToB;
+                        double dDistanceFromRecentNode = iSumSectionsLength.get() - distanceFromTrainToNextNode.get();
+                        TopologyGraph.Edge Ed = (TopologyGraph.Edge) EndElement.getValue();
+
+                        // N war der Knoten der vorher zur Kante führte somit
+                        // der Ausdruck wird true, weil A der Ursprung war
+                        // false wenn B der Urspurng war
+                        bMovesToB = Ed.A.equals(N);
+                        if (bMovesToB) {
+
+                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, 0,
+                                    Q_SCALE_1M, (int) dDistanceFromRecentNode));
+                        } else {
+                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
+                                    (int) Math.ceil(Ed.dTopLength)));
+                        }
                     }
                 }
 
-
-                List<BlockedArea> blockList = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
+                List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
                 for(BlockedArea ThisArea : toBlock)
-                for(BlockedArea OtherArea: blockList) {
+                for(BlockedArea OtherArea: blockedAreas) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
                         return false;
                     }
@@ -278,10 +295,8 @@ public class SmartSafety {
 
     }
 */
-    /**
-     * TODO: Distanz des Zielpunktes am selben Gleis ermitteln
-     */
-    private BlockedArea handleStartElement(Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+
+    private BlockedArea handleStartElement(int iSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
         boolean bHasIntersection = false;
 
@@ -321,23 +336,25 @@ public class SmartSafety {
 
                 if (bMovesToB) {
                     // Train moves to B Point
-                    StartArea = handleMovingToB(tm, iQ_scale, iDistance_lrbg, iTrainId, (TopologyGraph.Edge) StartEL, dDistanceBaliseFromA, StartEdge);
+                    StartArea = handleMovingToB(tm, iQ_scale, iSumOfWholeMaTrack, iTrainId, (TopologyGraph.Edge) StartEL, dDistanceBaliseFromA, StartEdge);
                 } else {
                     // Train moves to A Point
 
-                    StartArea = handleMoveToA(tm, iDistance_lrbg, (TopologyGraph.Edge) StartEL);
+                    StartArea = handleMoveToA(tm, iSumOfWholeMaTrack, (TopologyGraph.Edge) StartEL);
                 }
 
             } else {
                 double dCurrentTrackLength = ((TopologyGraph.Edge) StartEL).dTopLength;
                 if (bMovesToB) {
-                    double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, true);
-                    distanceToA1 = dTrainFront - tm.length;
+                    distanceToA1 = dCurrentTrackLength - tm.getdDistanceToNodeRunningTo() - tm.length;
                     distanceToA2 = dCurrentTrackLength;
+                    if(distanceToA1 < 0) distanceToA1 = 0;
+
                 } else {
-                    double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, false);
+
                     distanceToA1 = 0;
-                    distanceToA2 = dTrainFront + tm.length;
+                    distanceToA2 = tm.getdDistanceToNodeRunningTo() + tm.length;
+                    if(distanceToA2 > dCurrentTrackLength) distanceToA2 = dCurrentTrackLength;
                 }
                 distanceFromTrainToNextNode.set((int) Math.floor(distanceToA2 - distanceToA1) + 1);
                 StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
@@ -356,29 +373,34 @@ public class SmartSafety {
         return StartArea;
     }
 
-    /**
-     * Distanz zu lrbg ist falsch Endpunkt der Route ist ausschlaggebend
-     */
+
     @NotNull
-    private BlockedArea handleMoveToA(TrainModel tm, int iDistance_lrbg, TopologyGraph.Edge startEL) {
+    private BlockedArea handleMoveToA(TrainModel tm, int iMaTrackLength, TopologyGraph.Edge startEL) {
         double distanceToA2;
         double distanceToA1;
         BlockedArea StartArea;
         distanceToA2 = tm.getdDistanceToNodeRunningTo();
-        distanceToA1 = distanceToA2 - iDistance_lrbg;
+        distanceToA1 = distanceToA2 - iMaTrackLength;
+
+        distanceToA2 = distanceToA2 + tm.length;
+        if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;
+
         StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
     }
 
     @NotNull
-    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, int iDistance_lrbg, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, int iMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
         double distanceToA2;
         double distanceToA1;
         BlockedArea StartArea;
-        double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iDistance_lrbg, dDistanceBaliseFromA, true);
+        //double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iMaTrackLength, dDistanceBaliseFromA, true);
         distanceToA1 = startEdge.dTopLength - tm.getdDistanceToNodeRunningTo();
-        distanceToA2 = distanceToA1 +
+        distanceToA2 = distanceToA1 + iMaTrackLength;
+
+        distanceToA1 = distanceToA1 - tm.length;
+        if(distanceToA1 < 0) distanceToA1 = 0;
 
         StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
