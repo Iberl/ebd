@@ -396,42 +396,44 @@ public class RbcModul extends Thread {
 
     private synchronized void serverHandleJson(ChannelHandlerContext writeCtx, String received) throws ClassNotFoundException, MissingInformationException {
         Message<Payload> msgFromRbc = Message.generateFrom(received);
-        if(msgFromRbc == null) return;
+        if (msgFromRbc == null) return;
         int iType = msgFromRbc.getHeader().type;
-        new Thread(() -> {
-            switch (iType) {
-                case (0): {
+        new Thread() {
+            @Override
+            public void run() {
+                switch (iType) {
+                    case (0): {
 
-                    TmsHandler.handleNoError(msgFromRbc);
-                    break;
-                }
-                case (1): {
-                    Message WriteBack = TmsHandler.handleRegister(msgFromRbc);
-                    SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
-                    //writeCtx.write(Unpooled.copiedBuffer(WriteBack.parseToJson(), CharsetUtil.UTF_8));
-                    break;
-                }
+                        TmsHandler.handleNoError(msgFromRbc);
+                        break;
+                    }
+                    case (1): {
+                        Message WriteBack = TmsHandler.handleRegister(msgFromRbc);
+                        SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
+                        //writeCtx.write(Unpooled.copiedBuffer(WriteBack.parseToJson(), CharsetUtil.UTF_8));
+                        break;
+                    }
 
-                case (10): {
-                    Message WriteBack = TmsHandler.handleLogin(msgFromRbc);
-                    SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
-                    break;
-                }
-                case (14): {
-                    Message WriteBack = TmsHandler.handlePositionReport(msgFromRbc);
-                    SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
-                    break;
-                }
-                case (15): {
+                    case (10): {
+                        Message WriteBack = TmsHandler.handleLogin(msgFromRbc);
+                        SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
+                        break;
+                    }
+                    case (14): {
+                        Message WriteBack = TmsHandler.handlePositionReport(msgFromRbc);
+                        SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
+                        break;
+                    }
+                    case (15): {
 
-                    Message WriteBack = TmsHandler.handleMaRequest(msgFromRbc);
-                    SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
+                        Message WriteBack = TmsHandler.handleMaRequest(msgFromRbc);
+                        SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
 
-                    break;
+                        break;
+                    }
                 }
-
             }
-        }).start();
+        }.start();
     }
 
     private void handleMaRequest(ChannelHandlerContext writeCtx, Message<Payload> msgFromRbc) throws MissingInformationException {

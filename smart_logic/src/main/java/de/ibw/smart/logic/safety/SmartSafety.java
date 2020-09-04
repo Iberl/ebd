@@ -214,7 +214,8 @@ public class SmartSafety {
                         // also muss die Weiche als Blockiert eingetragen werden
                         TopologyGraph.Node N = (TopologyGraph.Node) Element1.getValue();
                         toBlock.add(new BlockedArea(N, N.TopNodeId));
-                    };
+                        break;
+                    }
                     TopologyGraph.Node N1 = (TopologyGraph.Node) Element1.getValue();
                     TopologyGraph.Node N2 = (TopologyGraph.Node) Element2.getValue();
                     TopologyGraph.Edge E = TopologyGraph.twoTopPointBelongsToEdgeRepo.
