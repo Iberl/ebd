@@ -28,6 +28,7 @@ import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
 import info.dornbach.dbdclient.DBDClient;
+import org.apache.commons.beanutils.locale.BaseLocaleConverter;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -132,7 +133,12 @@ public class SmartSafety {
         }
     }
 
+    /**
+     * Blockierte Abschnitte
+     * Zugneutrale Abschnitte werden mit Zugnummer -1 blockiert
+     */
     private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
+
 
 
     private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
@@ -175,6 +181,7 @@ public class SmartSafety {
         try {
             PosInfo = guardCheckIfPositonReportIsOk(maRequest, maAdapter, iSumSectionsLength);
             dSumOfWholeMaTrack = maAdapter.calcLengthOfSection();
+
             int iEoaQ_Scale = maAdapter.q_scale;
             if(requestedTrackElementList.size() < 2) {
                 throw new InvalidParameterException(
@@ -213,6 +220,7 @@ public class SmartSafety {
                         // Element2 ist End Element aber Element1 ist eine Weiche
                         // also muss die Weiche als Blockiert eingetragen werden
                         TopologyGraph.Node N = (TopologyGraph.Node) Element1.getValue();
+
                         toBlock.add(new BlockedArea(N, N.TopNodeId));
                         break;
                     }
@@ -259,6 +267,8 @@ public class SmartSafety {
                     }
                 }
 
+                toBlock = calcCrossoverSignals(toBlock);
+
                 List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
                 for(BlockedArea ThisArea : toBlock)
                 for(BlockedArea OtherArea: blockedAreas) {
@@ -284,6 +294,21 @@ public class SmartSafety {
         }
 
     }
+
+    /**
+     * Berechnet Grenzzeichen, falls ein Zug sich im Grenzzeichen befindet.
+     * @param toBlock - alle bisherigen Blockaden
+     */
+    private ArrayList<BlockedArea> calcCrossoverSignals(List<BlockedArea> toBlock) {
+        ArrayList<BlockedArea> crossoverAreas = new ArrayList<>(toBlock);
+        for(BlockedArea BA : toBlock) {
+            ArrayList<BlockedArea> limitAreas = BA.getListOfEdgeLimits();
+            for(BlockedArea L_BA : limitAreas) {
+                if(!crossoverAreas.contains(L_BA)) crossoverAreas.add(L_BA);
+            }
+        }
+        return crossoverAreas;
+    }
 /*
     private BlockedArea createStartBlocking(Pair<Route.TrackElementType, TrackElement> startElement, TrainModel tm) {
         if(startElement.getLeft().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
@@ -300,7 +325,7 @@ public class SmartSafety {
 
     private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
-        boolean bHasIntersection = false;
+
 
         BlockedArea StartArea = null;
         Route.TrackElementType TET = (Route.TrackElementType) startElement.getKey();

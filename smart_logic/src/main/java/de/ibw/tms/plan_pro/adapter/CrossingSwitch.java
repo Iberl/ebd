@@ -2,10 +2,9 @@ package de.ibw.tms.plan_pro.adapter;
 
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
-import org.greenrobot.eventbus.Logger;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
-import plan_pro.modell.geodaten._1_9_0.CStrecke;
+import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
@@ -21,8 +20,8 @@ import java.util.Locale;
  * Ein Wrapper f&uuml;r Weichen aus PlanPro
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-09-07
  */
 public class CrossingSwitch implements ICompareTrackMeter {
 
@@ -31,6 +30,7 @@ public class CrossingSwitch implements ICompareTrackMeter {
     private CWKrAnlage Anlage;
     private CWKrGspElement Element;
     private CWKrGspKomponente Component;
+    private CSignal Signal;
     private ArrayList<String> supportedTracks = new ArrayList<>();
     private DefaultRepo<String, BigDecimal> TrackMeterByTrackId = new DefaultRepo<>();
 
@@ -39,12 +39,14 @@ public class CrossingSwitch implements ICompareTrackMeter {
      * @param A {@link CWKrAnlage} - Weicheanlagedaten
      * @param E {@link CWKrGspElement} - Weichenelement
      * @param C {@link CWKrGspKomponente} - Weichenkomponente
+     * @param signal {@link CSignal} - Signal
      * @throws ParseException - Falls die Streckenkilometrierung sich nicht in double konvertieren l&auml;&szlig;t
      */
-    public CrossingSwitch(CWKrAnlage A, CWKrGspElement E, CWKrGspKomponente C) throws ParseException {
+    public CrossingSwitch(CWKrAnlage A, CWKrGspElement E, CWKrGspKomponente C, CSignal signal) throws ParseException {
         this.Anlage = A;
         this.Element = E;
         this.Component = C;
+        this.Signal = signal;
         for(CPunktObjektStrecke TrackRelevantObj : C.getPunktObjektStrecke()) {
             NumberFormat format = NumberFormat.getInstance(Locale.GERMAN);
             Number number = format.parse(TrackRelevantObj.getStreckeKm().getWert());
@@ -80,6 +82,15 @@ public class CrossingSwitch implements ICompareTrackMeter {
      */
     public CWKrGspKomponente getComponent() {
         return Component;
+    }
+
+
+    /**
+     * Signal als Grenzzeichen
+     * @return CSignal - Grenzzeichen
+     */
+    public CSignal getSignal() {
+        return Signal;
     }
 
     /**

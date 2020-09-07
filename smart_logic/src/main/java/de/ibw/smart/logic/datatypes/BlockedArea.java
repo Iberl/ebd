@@ -1,15 +1,36 @@
 package de.ibw.smart.logic.datatypes;
 
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
+import plan_pro.modell.signale._1_9_0.CSignal;
+
+import javax.print.attribute.standard.MediaSize;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Objects;
+
 /**
  * Diese Klasse stellt Blockierte Gleisabschnitte dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-02
+ * @since 2020-09-07
  */
 public class BlockedArea {
+
+    public ArrayList<BlockedArea> getListOfEdgeLimits() {
+        ArrayList<BlockedArea> resultArea = new ArrayList<>();
+        if(Edge == null) return resultArea;
+        if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.A, true)) {
+            resultArea.add(new BlockedArea(Edge.A, Edge.A.TopNodeId));
+        }
+        if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.B, false)) {
+            resultArea.add(new BlockedArea(Edge.B, Edge.B.TopNodeId));
+        }
+        return resultArea;
+    }
 
     /**
      * Dieser Datentyp ist die Einheit der zugeordneten Distanzen von 10CM , 1M und 10M kann verwendet werden
@@ -89,18 +110,23 @@ public class BlockedArea {
     }
 
     /**
-     *
+     * Pr&uuml;ft ob sid blockiert ist.
      * @param sId
-     * @return
+     * @return boolean if is locked
      */
     public boolean isSidBlocked(String sId) {
         if (this.sIdOfElement == null) return false;
         else return this.sIdOfElement.equals(sId);
     }
 
+    /**
+     * Vergleicht gefahren Punkte zweier BlockedAreas
+     * @param OtherArea {@link BlockedArea} Vergleichsobjekt
+     * @return boolean - gibt an ob Gefahrenpunkte bestehen
+     */
     public boolean compareIfIntersection(BlockedArea OtherArea) {
         boolean hasSameType = check4BeeingSameTrackElementType(OtherArea);
-        if(!hasSameType) return false;
+        if(!hasSameType)  return handleNotHavingSameType(OtherArea);
         else {
             if(this.Edge == null) {
                 // both are no RailsType
@@ -117,6 +143,68 @@ public class BlockedArea {
 
             }
         }
+    }
+
+    private boolean handleNotHavingSameType(BlockedArea otherArea) {
+        BlockedArea EdgeArea = null;
+        TopologyGraph.Edge E = null;
+        TopologyGraph.Node N = null;
+        if(this.Edge == null) {
+            E = otherArea.Edge;
+            N = (TopologyGraph.Node) this.BlockedElement;
+            EdgeArea = otherArea;
+        } else {
+            E = this.Edge;
+            N = (TopologyGraph.Node) otherArea.BlockedElement;
+            EdgeArea = this;
+        }
+        // checkIf Connected By A is null if there is no connection
+        Boolean checkIfConnectedByA = checkifConnectedByA(E, N);
+        if(checkIfConnectedByA == null) return false; // no Intersection
+        try {
+            if (checkIfBlockedAreaReachingToCrossoverLimits(EdgeArea, E, N, checkIfConnectedByA))
+                return true; // Weichenabschnitt belegt intersection true
+
+        } catch(Exception Except) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Pr&uuml;ft ob die Straße zu einem Grenzsignal einer Weiche reicht
+     * @param edgeArea {@link BlockedArea} - der blockierte Bereich
+     * @param e TopologyGraph.Edge - die Kante selbst
+     * @param n TopologyGraph.Node - der Knoten der auf ein Grenzsignal gepr&uuml;ft wird
+     * @param checkIfConnectedByA - Boolean, ob a oder b geprüft wird
+     * @return boolean ob ein Grenzsignalbereich betreten wird
+     */
+    private boolean checkIfBlockedAreaReachingToCrossoverLimits(BlockedArea edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
+        CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
+        CSignal Sig = CS.getSignal();
+        BigDecimal dSigDistanceToA;
+        for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
+            if(CTopKante.getIDTOPKante().getWert().equals(e.sId)) {
+                dSigDistanceToA = CTopKante.getAbstand().getWert();
+                BlockedArea BA;
+                if(checkIfConnectedByA) {
+                    BA = new BlockedArea(e, BLOCK_Q_SCALE.Q_SCALE_1M,0,
+                            BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue() );
+                } else {
+                    BA = new BlockedArea(e, BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
+                            BLOCK_Q_SCALE.Q_SCALE_1M, (int) e.dTopLength);
+                }
+                if(BA.compareIfIntersection(edgeArea)) return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean checkifConnectedByA(TopologyGraph.Edge e, TopologyGraph.Node n) {
+        if(e.A == n) return true;
+        if(e.B == n) return false;
+        return null;
+
     }
 
     private boolean intersects(BlockedArea blockedArea, BlockedArea otherArea) {
@@ -138,4 +226,20 @@ public class BlockedArea {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BlockedArea that = (BlockedArea) o;
+        return d_from_PointA_of_GeoEdge_to_BlockStartMa == that.d_from_PointA_of_GeoEdge_to_BlockStartMa &&
+                d_from_PointA_of_GeoEdge_to_BlockEndMa == that.d_from_PointA_of_GeoEdge_to_BlockEndMa &&
+                Objects.equals(sIdOfElement, that.sIdOfElement) &&
+                q_scale_block_To_StartMa == that.q_scale_block_To_StartMa &&
+                q_scale_block_To_EndMa == that.q_scale_block_To_EndMa;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sIdOfElement, q_scale_block_To_StartMa, d_from_PointA_of_GeoEdge_to_BlockStartMa, q_scale_block_To_EndMa, d_from_PointA_of_GeoEdge_to_BlockEndMa);
+    }
 }

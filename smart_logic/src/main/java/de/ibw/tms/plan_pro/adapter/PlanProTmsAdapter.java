@@ -2,37 +2,19 @@ package de.ibw.tms.plan_pro.adapter;
 
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
-import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.speed.profile.PointComparator;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.speed.profile.model.SspRepository;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.bahnsteig._1_9_0.*;
-import plan_pro.modell.bahnuebergang._1_9_0.CBUEAnlage;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
-import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
-import plan_pro.modell.basisobjekte._1_9_0.CBereichObjektTeilbereich;
-import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
-import plan_pro.modell.block._1_9_0.CBlockElement;
-import plan_pro.modell.block._1_9_0.CBlockStrecke;
 import plan_pro.modell.geodaten._1_9_0.*;
-import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
-import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
-import java.security.InvalidParameterException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
@@ -262,7 +244,7 @@ public class PlanProTmsAdapter {
             if(sAnlageId != null) {
                 A = crossingRepo.getModel(sAnlageId);
             }
-            CrossingSwitch CS = new CrossingSwitch(A,Element,Comp);
+            CrossingSwitch CS = new CrossingSwitch(A,Element,Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }
 

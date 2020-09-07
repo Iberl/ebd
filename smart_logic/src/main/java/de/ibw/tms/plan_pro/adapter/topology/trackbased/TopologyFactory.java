@@ -16,6 +16,7 @@ import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CBearbeitungsvermerkAllg;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
+import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
@@ -66,6 +67,8 @@ public class TopologyFactory implements ITopologyFactory {
 
 
     private DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>(); // output
+
+    private DefaultRepo<String, CSignal> signalRepo = new DefaultRepo<>();
 
     private CPlanProSchnittstelle PlanProDefinition;
 
@@ -251,6 +254,7 @@ public class TopologyFactory implements ITopologyFactory {
             String sAnlageId = null;
             CWKrGspElement Element = null;
             CWKrAnlage A = null;
+            CSignal Signal = null;
             try {
                 sElementId = Comp.getIDWKrGspElement().getWert();
             } catch (Exception E) {
@@ -258,6 +262,11 @@ public class TopologyFactory implements ITopologyFactory {
             }
             if (sElementId != null) {
                 Element = (CWKrGspElement) crossingPartsRepo.getModel(sElementId);
+                try {
+                    Signal = this.signalRepo.getModel(Element.getWeicheElement().getIDGrenzzeichen().getWert());
+                } catch(Exception E) {
+                    Signal = null;
+                }
             }
             try {
                 if (Element != null) sAnlageId = Element.getIDWKrAnlage().getWert();
@@ -267,8 +276,9 @@ public class TopologyFactory implements ITopologyFactory {
             }
             if (sAnlageId != null) {
                 A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
+
             }
-            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp);
+            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }
     }
@@ -422,9 +432,18 @@ public class TopologyFactory implements ITopologyFactory {
     private void initFromFile() throws JAXBException {
         PlanProDefinition = getcPlanProSchnittstelle();
         topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
+        handleSignals();
         handleGeoData();
 
     }
+
+    private void handleSignals() {
+        List<CSignal> signalList = PlanProDefinition.getLSTZustand().getContainer().getSignal();
+        for(CSignal Signal : PlanProDefinition.getLSTZustand().getContainer().getSignal()) {
+            this.signalRepo.update(Signal.getIdentitaet().getWert(), Signal);
+        }
+    }
+
     private void handleGeoData() {
         List<CGEOPunkt> geoPoints = PlanProDefinition.getLSTZustand().getContainer().getGEOPunkt();
         geoBundle = new DefaultRepo<>();

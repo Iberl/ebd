@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Dieser Test kontrolliert ein Modul in der SmartLogic.
  * Das Modul in der Smart-Safety untersucht, ob alle Routen-Element kontinuierlich verbunden sind.
  *
- *
+ * Es stellt Uitility-Function bereit, auf die auch andere Tests zugreifen
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-09-04
  */
 public class SmartSafetyContinousConnectTest {
 
@@ -391,6 +391,49 @@ public class SmartSafetyContinousConnectTest {
 
     }
 
+    /**
+     * Generiert aus PlanPro-Daten zufällige zusammenhängende Strecken.
+     * @param iTargetAmountOfRouteElements int - Anzahl der Beteiligten Elmente (Kanten oder Knoten)
+     * @param beginnOnEdge boolean - bestimmt ob die Zufallsstrecke auf einer Kante beginnt
+     * @return Streckenlisten mit Art (Knoten oder Kante) und konkretem Element.
+     */
+    public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
+                                                                                              boolean beginnOnEdge) {
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
+        ArrayList<TrackElement> visitedElements = new ArrayList<>();
+
+        TopologyGraph.Edge NewWay = null;
+        TrackElement CurrentElement;
+        if(beginnOnEdge) {
+            CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
+        } else {
+            CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
+        }
+        for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
+            int iWayIndex;
+
+            ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
+            TopologyGraph.Node CurrentNode = (TopologyGraph.Node) CurrentElement;
+            for(TopologyGraph.Edge E: CurrentNode.inEdges) {
+                if(!visitedElements.contains(E))possibleWays.add(E);
+            }
+            for(TopologyGraph.Edge E: ((TopologyGraph.Node) CurrentElement).outEdges) {
+                if(!visitedElements.contains(E))possibleWays.add(E);
+            }
+            if(possibleWays.isEmpty()) {
+                if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
+                else return RouteResult;
+
+            } if(possibleWays.size() == 1) iWayIndex = 0;
+            else iWayIndex = Math.abs(new Random().nextInt()) % (possibleWays.size() - 1);
+            NewWay = possibleWays.get(iWayIndex);
+            if(i == iTargetAmountOfRouteElements) break;
+            CurrentElement = prepareNewIteration(RouteResult, visitedElements, NewWay);
+
+        }
+        return returnFinishedRoute(RouteResult, visitedElements, NewWay);
+    }
+
     @Nullable
     private ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements) {
         ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
@@ -404,7 +447,7 @@ public class SmartSafetyContinousConnectTest {
             CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
         }
         for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
-            Integer iWayIndex;
+            int iWayIndex;
 
             ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
             TopologyGraph.Node CurrentNode = (TopologyGraph.Node) CurrentElement;

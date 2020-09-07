@@ -1,6 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.etcs.Q_SCALE;
 import ebd.rbc_tms.util.LinkingProfile;
 import ebd.rbc_tms.util.MA;
 
@@ -64,10 +65,13 @@ public class RbcMaAdapter extends MA {
 
     public BigDecimal calcLengthOfSection() {
         BigDecimal dResult = new BigDecimal("0");
+        BigDecimal dFactor = new BigDecimal("10");
         try {
             for(EoaSectionAdapter EoaSection: eoa.sections) {
                 dResult = dResult.add(BigDecimal.valueOf(EoaSection.l_section));
             }
+            if(this.q_scale == Q_SCALE.SCALE_10_CM.flag) dResult.divide(dFactor);
+            if(this.q_scale == Q_SCALE.SCALE_10_M.flag) dResult.multiply(dFactor);
         } catch(Exception E) {
             return new BigDecimal("0");
         }
