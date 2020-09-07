@@ -123,7 +123,12 @@ public class DistanceSupervisor {
         /*
         Supervision of Overlap Timer
          */
-        if(distanceToEMA <= this.startOfOverlapTimerDistance && this.overlapMaxTime < Double.MAX_VALUE && !this.overlapTimerRunning){
+        if(curSpeed == 0 && this.overlapTimerRunning){
+            this.overlapTimerRunning = false;
+            this.startOfOverlapTimerDistance = Double.MIN_VALUE;
+            this.overlapMaxTime = Double.MAX_VALUE;
+        }
+        else if(distanceToEMA <= this.startOfOverlapTimerDistance && this.overlapMaxTime < Double.MAX_VALUE && !this.overlapTimerRunning){
             this.overlapTimerRunning = true;
             this.overlapStartTime = AppTime.currentTimeMillis();
         }
