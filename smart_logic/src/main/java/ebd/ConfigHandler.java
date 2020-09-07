@@ -65,6 +65,8 @@ public class ConfigHandler {
     boolean
      */
 
+    public boolean isInTestMode = true;
+
     public boolean isSimulatingEbd = true;
     public boolean initCrossoversInRealdDbdClient = false;
     public boolean shallUserPrompt4SimulationFile = false;

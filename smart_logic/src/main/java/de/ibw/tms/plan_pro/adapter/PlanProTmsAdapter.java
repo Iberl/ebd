@@ -207,7 +207,7 @@ public class PlanProTmsAdapter {
     }
 */
 
-
+/*
     private void handleBranchingPoints() throws ParseException {
 
         DefaultRepo<String, CWKrAnlage> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
@@ -248,7 +248,7 @@ public class PlanProTmsAdapter {
             PlanData.RailSwitchList.add(CS);
         }
 
-        /*
+
 
         for(CWKrAnlage Branching : listCweiche ) {
             ENUMWKrArt kind = Branching.getWKrAnlageAllg().getWKrArt().getWert();
@@ -315,7 +315,7 @@ public class PlanProTmsAdapter {
 
             }
         }*/
-    }
+
 /*
     private Chainage parseTrackKilometersToChainage(CPunktObjektStrecke objectTrack) throws ParseException {
         String sKilometers = objectTrack.getStreckeKm().getWert();

@@ -461,12 +461,21 @@ public class SmartSafety {
         int iQ_DirTrain;
         int iQ_DirLength;
 
+        if(maRequest == null) {
+            throw new InvalidParameterException("Ma Request is null");
+        }
+        if(maRequest.Tm == null) throw new InvalidParameterException("Trainmodel of Request is null");
+        if(maRequest.Tm.iTrainId < 0) throw new InvalidParameterException("Train Id is negative");
+        if(maAdapter == null) throw new InvalidParameterException("Ma Adapter Util is null");
+        if(maAdapter.eoa == null) throw new InvalidParameterException("Eoa of Ma is null");
+        if(maAdapter.eoa.sections.isEmpty()) throw new InvalidParameterException("Eoa Sections are empty");
+
 
         iTrainId = maRequest.Tm.iTrainId;
         // check if some elements blocked
         List<EoaSectionAdapter> sectionlist = maAdapter.eoa.sections;
         for(EoaSectionAdapter ES : sectionlist) {
-
+            if(ES.l_section < 0) throw new InvalidParameterException("Length of Eoa Section is negative");
             int iSum = iSumSectionsLength.get();
             iSum += ES.l_section;
             iSumSectionsLength.set(iSum);

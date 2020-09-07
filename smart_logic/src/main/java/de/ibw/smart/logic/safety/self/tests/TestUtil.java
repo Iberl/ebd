@@ -8,6 +8,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
+import ebd.rbc_tms.util.SpeedProfile;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -78,12 +79,16 @@ public class TestUtil {
      */
     public static RbcMaAdapter preserveMA4NonBlockedTest(EoaAdapter eoaAda, int iQScale) {
 
+        int iLength = eoaAda.sections.get(0).l_section;
+
         ArrayList<ebd.rbc_tms.util.GradientProfile.Gradient> gradients = new ArrayList<>();
-        //gradients.add(new ebd.rbc_tms.util.GradientProfile.Gradient(L_SECTION, ETCSVariables.Q_GDIR_UPHILL, 0));
-       // ebd.rbc_tms.util.GradientProfile GradProfile = new ebd.rbc_tms.util.GradientProfile(Q_DIR, EOA_Q_SCALE, gradients);
-       // MA Ma = new MA(false,0,0, iQScale, eoaAda,GradProfile, null,null,null );
-        //RbcMaAdapter Result = new RbcMaAdapter(Ma);
-        return null;
+        gradients.add(new ebd.rbc_tms.util.GradientProfile.Gradient(iLength, ETCSVariables.Q_GDIR_UPHILL, 0));
+        ebd.rbc_tms.util.GradientProfile GradProfile = new ebd.rbc_tms.util.GradientProfile(1,
+                Q_SCALE.SCALE_1_M.flag, gradients);
+        SpeedProfile SpeedProfile = new SpeedProfile(1, Q_SCALE.SCALE_1_M.flag);
+        MA Ma = new MA(false,0,0, iQScale, eoaAda,GradProfile, SpeedProfile,null,null );
+        RbcMaAdapter Result = new RbcMaAdapter(Ma);
+        return Result;
 
     }
 

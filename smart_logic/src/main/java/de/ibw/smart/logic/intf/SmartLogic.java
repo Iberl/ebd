@@ -32,18 +32,23 @@ import java.util.concurrent.SynchronousQueue;
  */
 public class SmartLogic {
 
+
+
     /**
      * Gibt an ob das Modul als Smart-Logic oder als TMS gestartet wurde
      * true :=  SmartLogic
      * false := TMS
      */
-    public static boolean IS_STARTED_AS_SL = true;
+
 
     /**
      * Name der Smart-Logic Komponente als Log-file
      */
     public static final String SMART_LOGIC = "SMART-LOGIC";
 
+    public static void shutdownSmartLogic() {
+
+    }
 
     private static RbcModul RbcClient;
 
