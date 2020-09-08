@@ -5,10 +5,8 @@ import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.message.Message_00;
-import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_00;
-import ebd.rbc_tms.payload.Payload_15;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -51,6 +49,23 @@ public class RbcModul extends Thread {
     public static final String TMS_PROXY = "TMS-PROXY";
     private ebd.rbc_tms.Message Message = null;
     private PriorityBlockingQueue<PriorityMessage> outputQueue = new PriorityBlockingQueue<>();
+    /**
+     * Kommunikationstunnel in Netty
+     */
+    private ChannelFuture channelFuture;
+
+    /**
+     * Channelverwaltung in Netty
+     */
+    private EventLoopGroup group;
+
+    public ChannelFuture getChannelFuture() {
+        return channelFuture;
+    }
+
+    public EventLoopGroup getGroup() {
+        return group;
+    }
 
     /**
      * Gibt an wer f&uuml;r dieses Modul als TMS handelt
@@ -154,8 +169,9 @@ public class RbcModul extends Thread {
         if(isClient) {
             try {
 
+
                 if(this.Message != null) {
-                   // no sensse overjump as guard
+                   // no sense overjump as guard
                 }
                 if(this.CustomHandlerTcpClient == null) {
                     // use case sl rbc
@@ -165,8 +181,8 @@ public class RbcModul extends Thread {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    while(true) {
+                    boolean isReady = !SmartLogic.IS_STARTED_AS_SL || !SmartLogic.isInShutdown;
+                    while(isReady) {
 
                         PriorityMessage PM = this.outputQueue.take();
                         Message M = PM.getMsg();
@@ -174,7 +190,7 @@ public class RbcModul extends Thread {
 
 
 
-                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(PM.getMsg());
+                        SL_To_RBC_ClientThread SlThread = new SL_To_RBC_ClientThread(PM.getMsg(), this);
 
                         SlThread.start();
                         if(EM != null) {
@@ -184,10 +200,11 @@ public class RbcModul extends Thread {
                                 e.printStackTrace();
                             }
                         }
+                        isReady = !SmartLogic.IS_STARTED_AS_SL || !SmartLogic.isInShutdown;
                     }
                 } else {
                     //unused
-                    startTcpClient(this.sHost, this.iPort, this.CustomHandlerTcpClient, null);
+                    startTcpClient(this.sHost, this.iPort, this.CustomHandlerTcpClient, null, this);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -208,15 +225,19 @@ public class RbcModul extends Thread {
         private final String sHost;
         private final int iPort;
         private final Message M;
-
+        private final RbcModul ExecutingModul;
+        
         /**
          * Instanziierrt einen Thread mit einer Nachricht an das RBC
          * @param M - Nachricht zu verschicken
+         * @param ExecutingModul - Ausf&uuml;hrendes Modul
          */
-        public SL_To_RBC_ClientThread(Message M) {
+        public SL_To_RBC_ClientThread(Message M, RbcModul ExecutingModul) {
             this.sHost = ConfigHandler.getInstance().ipOfRBCServer;
             this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfRBCServer);
             this.M = M;
+            this.ExecutingModul = ExecutingModul;
+
         }
 
         /**
@@ -226,7 +247,7 @@ public class RbcModul extends Thread {
         @Override
         public void run() {
             try {
-                startTcpClient(this.sHost, this.iPort, null,M);
+                startTcpClient(this.sHost, this.iPort, null,M, ExecutingModul);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -455,15 +476,31 @@ public class RbcModul extends Thread {
         writeCtx.write(Unpooled.copiedBuffer(SendMA.parseToJson(), CharsetUtil.UTF_8));
     }
 
+    public void shutdown() {
+        try {
+            channelFuture.channel().closeFuture().sync();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        try {
+            group.shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     /**
      * Netty TCP Client Builder Method
      * @param sHost - String of Host beeing called
      * @param iPort - int iPort
      * @param customHandlerTcpClient - std null
      * @param Msg - to be send
+     * @param executingModul
      * @throws InterruptedException - netty communication error
      */
-    public static void startTcpClient(String sHost, int iPort, SimpleChannelInboundHandler customHandlerTcpClient, Message Msg) throws InterruptedException {
+    public static void startTcpClient(String sHost, int iPort, SimpleChannelInboundHandler customHandlerTcpClient, Message Msg, RbcModul executingModul) throws InterruptedException {
         EventBusManager EM = null;
         try {
             EM = EventBusManager.registerOrGetBus(1, false);
@@ -472,11 +509,11 @@ public class RbcModul extends Thread {
         }
         if(sHost == null) sHost = "localhost";
         if(customHandlerTcpClient == null) customHandlerTcpClient = new TcpClientHandler(Msg);
-        EventLoopGroup group = new NioEventLoopGroup();
+        executingModul.group = new NioEventLoopGroup();
         try{
             Bootstrap clientBootstrap = new Bootstrap();
 
-            clientBootstrap.group(group);
+            clientBootstrap.group(executingModul.group);
             clientBootstrap.channel(NioSocketChannel.class);
             clientBootstrap.remoteAddress(new InetSocketAddress(sHost, iPort));
             SimpleChannelInboundHandler finalCustomHandlerTcpClient = customHandlerTcpClient;
@@ -489,10 +526,10 @@ public class RbcModul extends Thread {
 
                 }
             });
-            ChannelFuture channelFuture = clientBootstrap.connect().sync();
-            channelFuture.channel().closeFuture().sync();
+            executingModul.channelFuture = clientBootstrap.connect().sync();
+            executingModul.channelFuture.channel().closeFuture().sync();
         } finally {
-            group.shutdownGracefully().sync();
+            executingModul.group.shutdownGracefully().sync();
         }
     }
 
@@ -512,7 +549,7 @@ public class RbcModul extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        EventLoopGroup group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup();
 
 
         try {
@@ -530,7 +567,7 @@ public class RbcModul extends Thread {
                     SmartServer.setTmsOutChannel(socketChannel);
                 }
             }).childOption(ChannelOption.SO_KEEPALIVE, true);
-            ChannelFuture channelFuture = serverBootstrap.bind(iPort).sync();
+            channelFuture = serverBootstrap.bind(iPort).sync();
             if(channelFuture.isSuccess()) {
                 if(EM != null) EM.log("Smart Tcp Server (for TMS) started successfully","SMART-TMS-SERVER");
 
@@ -548,6 +585,8 @@ public class RbcModul extends Thread {
 
     }
 
+
+
     /**
      * SL stellt Verbindung f&uuml;r das RBC als Server bereit
      * @param sHost - netty hat eine host definition auf server std localhost
@@ -563,7 +602,7 @@ public class RbcModul extends Thread {
             e.printStackTrace();
         }
 
-        EventLoopGroup group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup();
 
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -579,12 +618,13 @@ public class RbcModul extends Thread {
                 }
             });
 
-            ChannelFuture channelFuture = serverBootstrap.bind().sync();
+            channelFuture = serverBootstrap.bind().sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             group.shutdownGracefully().sync();
+            if(EM != null) EM.log("TMS PROXY on Smart Logic ShutDown", TMS_PROXY);
         }
         /*
         @Override

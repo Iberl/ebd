@@ -8,6 +8,7 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
+import ebd.ConfigHandler;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.payload.Payload_14;
@@ -15,6 +16,7 @@ import ebd.rbc_tms.payload.Payload_15;
 import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import ebd.szenario.util.server.GUIServer;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -39,14 +41,46 @@ public class SmartLogic {
      * true :=  SmartLogic
      * false := TMS
      */
-
+    public static boolean IS_STARTED_AS_SL;
 
     /**
      * Name der Smart-Logic Komponente als Log-file
      */
     public static final String SMART_LOGIC = "SMART-LOGIC";
 
+    /**
+     * Gibt an ob die SmartLogic gerade herunterfährt
+     */
+    public static boolean isInShutdown = false;
+
     public static void shutdownSmartLogic() {
+        if(!ConfigHandler.getInstance().isInTestMode) {
+            if(SmartLogic.EM != null) EM.log("Shudown of Smart Logic only allowed in Test-Mode.", SMART_LOGIC);
+        }
+        isInShutdown = true;
+        if(RbcClient != null) {
+            RbcClient.shutdown();
+            RbcClient.interrupt();
+            RbcClient = null;
+            if(SmartLogic.EM != null) EM.log("Client to RBC is shutdown.", SMART_LOGIC);
+        }
+        if(SmartServForTms != null) {
+            SmartServForTms.shutdown();
+            SmartServForTms.interrupt();
+            SmartServForTms = null;
+            if(SmartLogic.EM != null) EM.log("SmartLogic Server for TMS Requests is shutdown.", SMART_LOGIC);
+        }
+        if(TmsReceiverProxy != null) {
+            TmsReceiverProxy.shutdown();
+            TmsReceiverProxy.interrupt();
+            TmsReceiverProxy = null;
+            if(SmartLogic.EM != null) EM.log("SmartLogic Proxy from RBC to TMS is shutdown.", SMART_LOGIC);
+
+        }
+        if(SL_UI_Server != null) {
+            SL_UI_Server.disconnect(null);
+            SL_UI_Server = null;
+        }
 
     }
 
@@ -73,6 +107,9 @@ public class SmartLogic {
 
     private static RbcModul TmsReceiverProxy;
 
+    private static GUIServer SL_UI_Server;
+
+
     private static EventBusManager EM = null;
 
     /**
@@ -92,6 +129,7 @@ public class SmartLogic {
     private static int iSmartId = 1;
 
     private static void initSmartLogic() {
+        isInShutdown = false;
         boolean bIsClient = true;
 
         PlanData.getInstance();
@@ -113,7 +151,7 @@ public class SmartLogic {
             System.out.println("Logging Bus cannot be created.");
         }
         try {
-            EventBusManager.startLogGuiServer(false);
+            SL_UI_Server = EventBusManager.startLogGuiServer(false);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Logging Gui on SL cannot be started.");
