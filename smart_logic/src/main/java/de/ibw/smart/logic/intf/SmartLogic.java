@@ -19,8 +19,10 @@ import ebd.rbc_tms.util.TrainInfo;
 import ebd.szenario.util.server.GUIServer;
 
 import javax.swing.*;
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -48,6 +50,13 @@ public class SmartLogic {
      */
     public static final String SMART_LOGIC = "SMART-LOGIC";
 
+    private static SmartLogicLifecycleController LifeCycleController = new SmartLogicLifecycleController();
+
+    public static void addLifeCycleSubscriber(Flow.Subscriber S) {
+        LifeCycleController.addSubscriber(S);
+    }
+
+
     /**
      * Gibt an ob die SmartLogic gerade herunterfährt
      */
@@ -60,27 +69,42 @@ public class SmartLogic {
         isInShutdown = true;
         if(RbcClient != null) {
             RbcClient.shutdown();
-            RbcClient.interrupt();
+            //RbcClient.interrupt();
             RbcClient = null;
             if(SmartLogic.EM != null) EM.log("Client to RBC is shutdown.", SMART_LOGIC);
         }
         if(SmartServForTms != null) {
             SmartServForTms.shutdown();
-            SmartServForTms.interrupt();
+            //SmartServForTms.interrupt();
             SmartServForTms = null;
             if(SmartLogic.EM != null) EM.log("SmartLogic Server for TMS Requests is shutdown.", SMART_LOGIC);
         }
         if(TmsReceiverProxy != null) {
-            TmsReceiverProxy.shutdown();
-            TmsReceiverProxy.interrupt();
+            try {
+                TmsReceiverProxy.getGroup().shutdownGracefully().sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //TmsReceiverProxy.interrupt();
             TmsReceiverProxy = null;
             if(SmartLogic.EM != null) EM.log("SmartLogic Proxy from RBC to TMS is shutdown.", SMART_LOGIC);
 
         }
-        if(SL_UI_Server != null) {
-            SL_UI_Server.disconnect(null);
-            SL_UI_Server = null;
+        try {
+            if (SL_UI_Server != null) {
+                try {
+                    SL_UI_Server.disconnect(null);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                SL_UI_Server = null;
+            }
+        } catch(Exception Except) {
+            Except.printStackTrace();
+          SL_UI_Server = null;
         }
+        LifeCycleController.sendMsg("Shutdown");
 
     }
 
@@ -159,6 +183,7 @@ public class SmartLogic {
         RbcClient.start();
         SmartServForTms.start();
         TmsReceiverProxy.start();
+        LifeCycleController.sendMsg("Started");
     }
 
     /**
@@ -372,13 +397,7 @@ public class SmartLogic {
      */
     public static void main(String[] args) {
         //startSmartLogic();
-        SmartLogic.IS_STARTED_AS_SL = true;
-        boolean fakeRbcReceiver = false;
-        boolean sendDummyRequest = false;
-        int iSendDummyPos = 0;
-        boolean withUI = true;
-        boolean bStartTms = false;
-        createSmartLogic(withUI, fakeRbcReceiver, sendDummyRequest, bStartTms);
+        startSmartLogicStd();
 
 
 
@@ -399,5 +418,16 @@ public class SmartLogic {
         RbcModul RbcClient = new RbcModul(RbcMaRequest, null, 22223);
         //if(b4Show)RbcClient.start();
         */
+    }
+
+    public static void startSmartLogicStd() {
+
+        SmartLogic.IS_STARTED_AS_SL = true;
+        boolean fakeRbcReceiver = false;
+        boolean sendDummyRequest = false;
+        int iSendDummyPos = 0;
+        boolean withUI = true;
+        boolean bStartTms = false;
+        createSmartLogic(withUI, fakeRbcReceiver, sendDummyRequest, bStartTms);
     }
 }

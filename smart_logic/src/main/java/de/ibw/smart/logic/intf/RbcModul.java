@@ -480,12 +480,12 @@ public class RbcModul extends Thread {
         try {
             channelFuture.channel().closeFuture().sync();
 
-        } catch (InterruptedException e) {
+        } catch (Exception e ) {
             e.printStackTrace();
         }
         try {
             group.shutdownGracefully().sync();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -621,7 +621,7 @@ public class RbcModul extends Thread {
             channelFuture = serverBootstrap.bind().sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } finally {
             group.shutdownGracefully().sync();
             if(EM != null) EM.log("TMS PROXY on Smart Logic ShutDown", TMS_PROXY);

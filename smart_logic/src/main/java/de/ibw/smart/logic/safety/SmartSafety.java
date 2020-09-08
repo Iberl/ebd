@@ -193,7 +193,7 @@ public class SmartSafety {
             iQ_Scale = PosInfo.q_scale;
             iDistance_LRBG = PosInfo.d_lrbg;
             iNID_LRBG = PosInfo.nid_lrbg;
-            B = Balise.baliseByNid_bg.getModel(iNID_LRBG);
+
 
             AtomicInteger distanceFromTrainToNextNode = new AtomicInteger(0);
             int iRequestSize = requestedTrackElementList.size();
@@ -491,9 +491,9 @@ public class SmartSafety {
             blockLastPositionReports(iTrainId);
             throw new InvalidParameterException("Balse requested not found");
         }
-        iQ_DirTrain = CurrentPosition.q_dirtrain;
+
         iQ_DirLength = CurrentPosition.q_length;
-        if(true != checkQ_Length(iQ_DirLength)) {
+        if(!checkQ_Length(iQ_DirLength)) {
             blockLastPositionReports(iTrainId);
             throw new InvalidParameterException("No Train Length information available");
         }
@@ -949,6 +949,24 @@ public class SmartSafety {
         SmartSafety safety = SmartSafety.getSmartSafety();
         safety.slSelfCheck(null);
     }
+
+    /**
+     * Methode zum Testen gegen dieses Modul.
+     * Es l&ouml;scht s&auml;mtliche Eintr&auml;ge
+     *
+     * NUR F&Uuml;r TESTZWEICKE.
+     * Kann nur in Testkonfiguration aufgerufen werden.
+     */
+    public void resetAllBlockings() {
+        if(ConfigHandler.getInstance().isInTestMode) {
+            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", TRACK_SAFETY );
+            this.blockList = new ThreadedRepo<>();
+        } else {
+            EBM.log("Reset only allowed in Test Mode", TRACK_SAFETY );
+        }
+
+    }
+
 
     /**
      * Check ob eine Weiche in der Blockierten Liste vorhanden ist.

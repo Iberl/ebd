@@ -1,5 +1,6 @@
 package de.ibw.smart.logic.safety.self.tests;
 
+import de.ibw.feed.Balise;
 import de.ibw.smart.logic.safety.SmartSafety;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
+import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -398,13 +400,16 @@ public class SmartSafetyContinousConnectTest {
      * @return Streckenlisten mit Art (Knoten oder Kante) und konkretem Element.
      */
     public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                                                                              boolean beginnOnEdge) {
+                                                                                              boolean beginnOnEdge,
+                                                                                              boolean beginnWithBalise) {
         ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
         ArrayList<TrackElement> visitedElements = new ArrayList<>();
 
         TopologyGraph.Edge NewWay = null;
         TrackElement CurrentElement;
-        if(beginnOnEdge) {
+        if(beginnWithBalise) {
+            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements);
+        } else if(beginnOnEdge) {
             CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
         } else {
             CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
@@ -432,6 +437,19 @@ public class SmartSafetyContinousConnectTest {
 
         }
         return returnFinishedRoute(RouteResult, visitedElements, NewWay);
+    }
+
+    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
+        boolean bDirectionNodeA = new Random().nextBoolean();
+        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise();
+        return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, EdgeWithBalise);
+    }
+
+    private TopologyGraph.Edge pickRandomEdgeWithBalise() {
+       ArrayList<Balise> balises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
+       Balise B = (Balise) pickRandomElement(balises);
+       TestUtil.lastRandomBalise = B;
+       return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
     }
 
     @Nullable
@@ -474,13 +492,17 @@ public class SmartSafetyContinousConnectTest {
     private TrackElement handleBeginOnEdge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
         boolean bDirectionNodeA = new Random().nextBoolean();
         TopologyGraph.Edge OldEdge = pickRandomEdge();
+        return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, OldEdge);
+    }
+
+    private TrackElement provideTrackElement4Edge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, boolean bDirectionNodeA, TopologyGraph.Edge oldEdge) {
         TrackElement currentElement = null;
-        visitedElements.add(OldEdge);
-        routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, OldEdge));
+        visitedElements.add(oldEdge);
+        routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, oldEdge));
         if(bDirectionNodeA) {
-            currentElement = OldEdge.A;
+            currentElement = oldEdge.A;
         } else {
-            currentElement = OldEdge.B;
+            currentElement = oldEdge.B;
         }
         visitedElements.add(currentElement);
         routeResult.add(new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, currentElement));
@@ -594,11 +616,11 @@ public class SmartSafetyContinousConnectTest {
         return (TopologyGraph.Edge) pickRandomElement(edgeList);
     }
 
-    private  TrackElement pickRandomElement(ArrayList pickList) {
+    private  Object pickRandomElement(ArrayList pickList) {
         if(pickList.isEmpty()) throw new InvalidParameterException("Bad Test Environment node List is empty");
         else {
             int iRandomIndex = Math.abs(new Random().nextInt()) % (pickList.size() -1 );
-            return (TrackElement) pickList.get(iRandomIndex);
+            return pickList.get(iRandomIndex);
         }
     }
 

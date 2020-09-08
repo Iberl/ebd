@@ -213,7 +213,11 @@ public class SmartServer extends RbcModul  {
      * Beendet die Socket-Communikation
      */
     public void shutdown() {
-
+        try {
+            getGroup().shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

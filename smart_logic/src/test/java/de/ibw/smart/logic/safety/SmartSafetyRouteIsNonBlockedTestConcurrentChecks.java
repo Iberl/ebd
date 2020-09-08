@@ -9,20 +9,20 @@ import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.util.DefaultRepo;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.ETCSVariables;
-import ebd.rbc_tms.util.PositionInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
+import org.junit.runners.MethodSorters;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.SynchronousQueue;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,35 +30,111 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.
  * Dieser Test stellt die funktionale Korrektheit sicher
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+
+class SmartSafetyRouteIsNonBlockedTestConcurrentChecks {
+
+    private static Flow.Subscription subscription4Test;
+    private static final SynchronousQueue<String> StartQueue = new SynchronousQueue<>();
+
+    private static boolean isInShutdown = false;
+
+    public static boolean isFirstTest = true;
+
+    private static Subscriber<String> SL_LifeCycleListener = new Subscriber<>() {
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            subscription4Test = subscription;
+            subscription4Test.request(1);
+        }
+
+        @Override
+        public void onNext(String item) {
+            if(item.equals("Started")) {
+                StartQueue.offer("Started");
+            } else if(item.equals("Shutdown")) {
+                isInShutdown = false;
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        @Override
+        public void onComplete() {
+            subscription4Test.request(1);
+        }
+    };
 
 
-class SmartSafetyRouteIsNonBlockedTest {
 
-    @Spy
-    SmartSafety Safety = SmartSafety.getSmartSafety();
+    public static void initTestEnv() throws InterruptedException {
+
+            new Thread() {
+                @Override
+                public void run() {
+                    if(!isFirstTest) {
+                        while(isInShutdown) {
+                            try {
+                                this.sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    isFirstTest = false;
+                    SmartLogic.addLifeCycleSubscriber(SL_LifeCycleListener);
+                    SmartLogic.main(null);
+                }
+            }.start();
 
 
-    @BeforeAll
-    public static void setupSL() {
-        SmartLogic.main(null);
+
+
+
+        try {
+            StartQueue.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    @BeforeEach
-    public void initTestEnv() throws InterruptedException {
-        SmartSafety.getSmartSafety().resetAllBlockings();
-        SmartSafety.lastPositionReport = new DefaultRepo<>();
+
+    public static void endTest() {
+
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        isInShutdown = true;
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    SmartLogic.shutdownSmartLogic();
+                } catch (Exception E) {
+                    E.printStackTrace();
+                }
+            }
+        }.start();
+
+
+
 
     }
-
-
-
 
     /**
      * Pr&uuml;ft ob Null-Werte als Anfrage abgefangen werden
      */
     @Test
     public void checkIfMainNullError() throws InterruptedException {
-
+        initTestEnv();
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false);
@@ -80,7 +156,7 @@ class SmartSafetyRouteIsNonBlockedTest {
             assertEquals(false, ModulUnderTest.checkIfRouteIsNonBlocked(MRW, RbcMa, null));
 
 
-
+            endTest();
     }
 
 
@@ -99,8 +175,7 @@ class SmartSafetyRouteIsNonBlockedTest {
      */
     @Test
     public void checkIfTracksAreBlockedByTwoTrainsOnSameTrack() throws InterruptedException {
-
-
+        initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke
         int iTrainOne = 1;
         int iTrainTwo = 2;
@@ -113,17 +188,12 @@ class SmartSafetyRouteIsNonBlockedTest {
 
 
 
-
-
+        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true);
         int iMaxLength = calcMaxLengthOfTrack(routenListe);
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
-
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
-        routenListeNEW4TEST.add(routenListe.get(0));
-
         int iLengthFirstTrail = (int) ((TopologyGraph.Edge) StartTrail.getRight()).dTopLength;
         dTrainToNextPointOne = new BigDecimal(iLengthFirstTrail).subtract(BigDecimal.valueOf(iLengthTrainOne)).subtract(BigDecimal.valueOf(10));
         dTrainToNextPointTwo = new BigDecimal(iLengthFirstTrail).subtract(dTrainToNextPointOne);
@@ -135,61 +205,13 @@ class SmartSafetyRouteIsNonBlockedTest {
         MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
                 sidEdgeBothTrainsStandingOn, sidNodeBothTrainsRunningTo, iLengthTrainTwo);
 
-        EoaAdapter eoaAda_Train1 = generateEoa(10);
-        EoaAdapter eoaAda_Train2 = generateEoa(7);
+        generateEoa(dTrainToNextPointOne.subtract(BigDecimal.valueOf(10)).intValue());
 
-        RbcMaAdapter RbcMa_Train1 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train1, Q_SCALE.SCALE_1_M.flag);
-        RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
-        int nid_prvlbg = -1;
-        int d_lrbg = 15;
-
-        // Orientation of the train in relation to the direction of the LRBG
-        int q_lrbg = 1; // nominal 0 would be reverse
-        // Qualifier telling on which side of the LRBG the estimated front end is
-        int q_dlrbg = 1; // 0 would be reverse
-
-        // L_DOUBTOVER is the over-reading amount plus the Q_LOCACC of the LRBG
-        int l_doubtover = 32767; // Unknown
-
-        // L_DOUBTUNDER is the under-reading amount plus the Q_LOCACC of the LRBG
-        int l_doubtunder = 32767; // Unknown
-
-        int i_Speed_5_km_per_hour = 0; // 1 would be 5 km/h 10 would be 50 km/h
-
-        //Direction of train movement in relation to the LRBG orientation
-        int q_dirtrain = 1;  // 0 would be reverse
-
-        //Full Supervision
-        int m_mode = 1;
-
-        //Current Operating Level // Level 3
-        int m_level = 4;
-
-        //National System identity
-        int nid_ntc = 1;
-
-        int nid_ref_Balise = TestUtil.lastRandomBalise.getHashcodeOfBaliseDp();
-
-        PositionInfo PosInfoTrain1 = new PositionInfo(Q_SCALE.SCALE_1_M.flag, nid_ref_Balise, nid_prvlbg, d_lrbg,
-                q_lrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
-                i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
-
-        int d_lrbg_train2 = 30;
-        PositionInfo PosInfoTrain2 = new PositionInfo(Q_SCALE.SCALE_1_M.flag, nid_ref_Balise, nid_prvlbg, d_lrbg_train2,
-                q_lrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
-                i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
-
-        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
-        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
-        assertEquals(true,Safety.checkIfRouteIsNonBlocked(MaRW_Train1, RbcMa_Train1, routenListeNEW4TEST)
-                , "The first request must not have blockage");
-        assertEquals(false,Safety.checkIfRouteIsNonBlocked(MaRW_Train2, RbcMa_Train2, routenListeNEW4TEST)
-                , "The second request have to have a blockage");
-
-
+        //ModulUnderTest.checkIfRouteIsNonBlocked()
+        endTest();
     }
 
     private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {

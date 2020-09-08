@@ -1,5 +1,6 @@
 package de.ibw.smart.logic.safety.self.tests;
 
+import de.ibw.feed.Balise;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -23,6 +24,9 @@ import java.util.concurrent.Flow;
  */
 public class TestUtil {
 
+    public static Balise lastRandomBalise = null;
+
+
     /**
      * Test-Strecke aus zuf&auml;lligen zusammenh&auuml;ngenden Strecken
      * @param iTargetAmountOfRouteElements int - Anzahl der Elemente bzw. L&auml;nge der Strecke
@@ -30,10 +34,10 @@ public class TestUtil {
      * @return Zufallsstrecke
      */
     public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                 boolean beginnOnEdge
+                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise
              ) {
         SmartSafetyContinousConnectTest Submodul = new SmartSafetyContinousConnectTest();
-        return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge);
+        return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise);
     }
 
     /**
