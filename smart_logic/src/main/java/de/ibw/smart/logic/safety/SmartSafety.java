@@ -168,7 +168,7 @@ public class SmartSafety {
     public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
-        int iQ_DirTrain = -1;
+        int iQ_DirLrbg = -1;
         int iQ_DirLength = -1;
         int iQ_Scale = -1;
         int iDistance_LRBG = 0;
@@ -188,7 +188,7 @@ public class SmartSafety {
                         "To Less Elements requested, there must be at least one End and one Start Track Element");
             }
 
-            iQ_DirTrain = PosInfo.q_dirtrain;
+            iQ_DirLrbg = PosInfo.q_dirlrbg;
             iQ_DirLength = PosInfo.q_length;
             iQ_Scale = PosInfo.q_scale;
             iDistance_LRBG = PosInfo.d_lrbg;
@@ -200,7 +200,7 @@ public class SmartSafety {
             Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
             Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
             BlockedArea StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
-                ,iDistance_LRBG, iNID_LRBG, iQ_DirTrain, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
+                ,iDistance_LRBG, iNID_LRBG, iQ_DirLrbg, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
             // start Area is blocked
             if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
             toBlock.add(StartArea);
@@ -273,6 +273,7 @@ public class SmartSafety {
                 for(BlockedArea ThisArea : toBlock)
                 for(BlockedArea OtherArea: blockedAreas) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
+
                         return false;
                     }
 
@@ -323,7 +324,7 @@ public class SmartSafety {
     }
 */
 
-    private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirTrain, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+    private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirLrbg, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
 
 
@@ -341,8 +342,8 @@ public class SmartSafety {
             double distanceToA1 = 0;
             double distanceToA2 = 0;
             Balise B = Balise.baliseByNid_bg.getModel(iNID_lrbg);
-            CDatenpunkt D = B.getPlanProDataPoint();
-            double dDistanceBaliseFromA = D.getPunktObjektTOPKante().get(0).getAbstand().getWert().doubleValue();
+
+            double dDistanceBaliseFromA = B.getBalisenPositionFromNodeA().doubleValue();
 
             //boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
             String sIdOfEdgeOfTrain = tm.getEdgeTrainStandsOn().sId;
@@ -408,6 +409,7 @@ public class SmartSafety {
         BlockedArea StartArea;
         distanceToA2 = tm.getdDistanceToNodeRunningTo();
         distanceToA1 = distanceToA2 - dMaTrackLength.doubleValue();
+        if(distanceToA1 < 0) distanceToA1 = 0;
 
         distanceToA2 = distanceToA2 + tm.length;
         if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;

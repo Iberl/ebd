@@ -61,7 +61,7 @@ public class TestUtil {
         TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdgeStandingOn);
         TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sidNodeRunnintTo);
         TrainModel Tm = new TrainModel();
-        Tm.setNid_lrbg(iTrainId);
+        Tm.setNid_lrbg(TestUtil.lastRandomBalise.getHashcodeOfBaliseDp());
         Tm.iTrainId = iTrainId;
         Tm.setdDistanceToNodeRunningTo(dDistanceToNodeRunningTo);
         Tm.setEdgeTrainStandsOn(E);

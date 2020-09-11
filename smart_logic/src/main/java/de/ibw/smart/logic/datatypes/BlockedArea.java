@@ -181,6 +181,7 @@ public class BlockedArea {
      */
     private boolean checkIfBlockedAreaReachingToCrossoverLimits(BlockedArea edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
         CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
+        if(CS == null) return false;
         CSignal Sig = CS.getSignal();
         BigDecimal dSigDistanceToA;
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
@@ -209,12 +210,20 @@ public class BlockedArea {
 
     private boolean intersects(BlockedArea blockedArea, BlockedArea otherArea) {
 
-        int iStart1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, blockedArea.q_scale_block_To_StartMa.getiScaleValue()));
-        int iEnd1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, blockedArea.q_scale_block_To_EndMa.getiScaleValue()));
-        int iStart2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, otherArea.q_scale_block_To_StartMa.getiScaleValue()));
-        int iEnd2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, otherArea.q_scale_block_To_EndMa.getiScaleValue()));
-        // one line is complet for other line
-        return (iStart1 >= iStart2 || iEnd1 >= iStart2) && (iStart2 >= iStart1 || iEnd2 >= iStart1);
+        int iStart1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, blockedArea.q_scale_block_To_StartMa.getiScaleValue()-1));
+        int iEnd1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, blockedArea.q_scale_block_To_EndMa.getiScaleValue()-1) );
+        int iStart2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, otherArea.q_scale_block_To_StartMa.getiScaleValue()-1));
+        int iEnd2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, otherArea.q_scale_block_To_EndMa.getiScaleValue()-1));
+
+        if(((iStart1 >= iStart2 || iEnd1 >= iStart2) && (iStart2 >= iStart1 || iEnd2 >= iStart1))) {
+            System.out.println("iStart1: " + iStart1);
+            System.out.println("iEnd1: " + iEnd1);
+            System.out.println("iStart2: " + iStart2);
+            System.out.println("iEnd2: " + iEnd2);
+
+            return true;
+        };
+        return false;
 
     }
 

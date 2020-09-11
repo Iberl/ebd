@@ -1,11 +1,12 @@
 package de.ibw.feed;
 
 import de.ibw.tms.plan.elements.UiTools;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ICoord;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
+import plan_pro.modell.basistypen._1_9_0.ENUMAusrichtung;
+import plan_pro.modell.basistypen._1_9_0.ENUMWirkrichtung;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
@@ -19,7 +20,7 @@ import java.util.List;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-08-07
+ * @since 2020-09-11
  */
 public class Balise implements ICoord<Double> {
     /**
@@ -65,7 +66,42 @@ public class Balise implements ICoord<Double> {
         }
     }
 
+    private boolean isDatapointNominal() {
+        return this.PlanProDataPoint.getDatenpunktAllg().getAusrichtung().getWert().equals(ENUMAusrichtung.IN);
+    }
 
+    private boolean isTopologicalNominal() {
+        return this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.IN);
+    }
+
+    /**
+     * Gibt an ob die Balise auf Knoten B triggert
+     * @return boolean - true, falls der Topologische-Knoten B in Trigger-Richtung ist
+     *                   false, wenn der Topologische-Knoten A in Trigger-Richtung ist
+     */
+    public boolean isNominalTriggered() {
+        return this.isDatapointNominal() == this.isTopologicalNominal();
+    }
+
+    private ENUMAusrichtung getDpAusrichtung(){
+        return this.getPlanProDataPoint().getDatenpunktAllg().getAusrichtung().getWert();
+    }
+
+    private BigDecimal getDpLength() {
+        return this.getPlanProDataPoint().getDatenpunktAllg().getDatenpunktLaenge().getWert();
+    }
+
+    public BigDecimal getBalisenPositionFromNodeA() {
+        BigDecimal dResult = this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert();
+        if(isNominalTriggered()) return dResult;
+        ENUMAusrichtung directionDP = getDpAusrichtung();
+
+        if(directionDP.equals(ENUMAusrichtung.GEGEN)) {
+            return dResult.subtract(this.getDpLength());
+        } else return dResult.add(this.getDpLength());
+
+
+    }
 
     /**
      * gibt die x-Koordinate dieser Balise wider
