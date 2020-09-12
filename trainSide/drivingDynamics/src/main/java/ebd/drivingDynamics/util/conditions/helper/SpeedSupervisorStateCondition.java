@@ -4,7 +4,7 @@ import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
-import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;

@@ -1,4 +1,4 @@
-package ebd.speedAndDistanceSupervisionModule.util.events;
+package ebd.globalUtils.events.speedDistanceSupervision;
 
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
