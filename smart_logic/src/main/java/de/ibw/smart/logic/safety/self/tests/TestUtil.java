@@ -34,10 +34,11 @@ public class TestUtil {
      * @return Zufallsstrecke
      */
     public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise
+                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise, boolean isBaliseNearCrossing
              ) {
         SmartSafetyContinousConnectTest Submodul = new SmartSafetyContinousConnectTest();
-        return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise);
+        return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
+                isBaliseNearCrossing);
     }
 
     /**

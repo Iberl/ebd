@@ -131,7 +131,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         boolean m_ack = true;
         RbcMaAdapter MaAdapter = null;
         Integer nid_lrbg = extractNidBaliseId(requestWrapper);
-        Double dDistanceToBalise = extractDistanceToBalise(requestWrapper);
+
         EOA.EndTimer TimerEnd = new EOA.EndTimer(ETCSVariables.T_ENDTIMER_INFINITY, ETCSVariables.D_ENDTIMERSTARTLOC);
         LinkingProfileAdapter LPA = null;
         int Q_DIR = extractQ_DIR(requestWrapper);

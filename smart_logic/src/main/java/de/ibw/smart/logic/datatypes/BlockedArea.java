@@ -16,10 +16,14 @@ import java.util.Objects;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-07
+ * @since 2020-09-17
  */
 public class BlockedArea {
 
+    /**
+     * Checkt diese Area (zum Beispiel als eine Balise mit Datenpunktbereich) ob sie sich im Grenzbereich einer Weiche sich befindet
+     * @return ArrayList - Liste von Grenzbereichbetretungen - meist nur 0 oder 1 Elemente
+     */
     public ArrayList<BlockedArea> getListOfEdgeLimits() {
         ArrayList<BlockedArea> resultArea = new ArrayList<>();
         if(Edge == null) return resultArea;

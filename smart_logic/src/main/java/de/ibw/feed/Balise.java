@@ -1,6 +1,9 @@
 package de.ibw.feed;
 
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.plan.elements.UiTools;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ICoord;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
@@ -53,6 +56,10 @@ public class Balise implements ICoord<Double> {
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         return UiTools.handleImaging(cl,"images/balise.jpg");
+    }
+
+    public BigDecimal getLengthOfTopEdge() {
+        return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert();
     }
 
     public BigDecimal getMetersOfTrack() {
@@ -228,4 +235,29 @@ public class Balise implements ICoord<Double> {
         return currentHash;
     }
 
+    /**
+     * Gibt die Ausdehnung eines Datenpunktes mit Balisen wieder
+     * @return BlockedArea - Ausdehnung als Balise - streng genommen keine BlockedArea, aber praktisch,
+     *                      bei Vergleich ob sich eine Balise mit anderen Bereichen schneidet.
+     */
+    public BlockedArea createAreaFromBalise() {
+        return createDummyArea();
+    }
+
+    private BlockedArea createDummyArea() {
+        // ausdehnung um den Datenpunkt sicherheitshalber in beiden Richtung
+        // Real abhängig vom Datenpunkt
+        PlanData.getInstance();
+        BigDecimal dDpLength = this.getDpLength();
+        BigDecimal dDistanceFromA = this.getBalisenPositionFromNodeA();
+        BigDecimal dTrackLength = this.getLengthOfTopEdge();
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
+        BlockedArea.BLOCK_Q_SCALE scale = BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
+        BigDecimal dStart = dDistanceFromA.subtract(dDpLength);
+        BigDecimal dEnd = dDistanceFromA.add(dDpLength);
+        if(dStart.compareTo(new BigDecimal(0) ) < 0) dStart = new BigDecimal(0);
+        if(dEnd.compareTo(dTrackLength) > 0) dEnd = dTrackLength;
+        return new BlockedArea(E,scale, dStart.intValue(), scale, dEnd.intValue() );
+
+    }
 }

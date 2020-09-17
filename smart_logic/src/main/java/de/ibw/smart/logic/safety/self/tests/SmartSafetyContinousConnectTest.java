@@ -1,10 +1,13 @@
 package de.ibw.smart.logic.safety.self.tests;
 
 import de.ibw.feed.Balise;
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.safety.SmartSafety;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 
+import javax.xml.crypto.Data;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +40,8 @@ public class SmartSafetyContinousConnectTest {
     private ArrayList<TopologyGraph.Node> nodeList;
     private ArrayList<TopologyGraph.Edge> edgeList;
     private final int I_TRYS_FOR_FINAL_ROUTE = 70;
+    private int I_CURRENT_TRYS = 0;
+
 
     private final int I_LOWEST_ROUTE_LENGTH = 2;
     private final int I_MAX_ROUTE_LENGTH = 12;
@@ -399,16 +405,18 @@ public class SmartSafetyContinousConnectTest {
      * @param beginnOnEdge boolean - bestimmt ob die Zufallsstrecke auf einer Kante beginnt
      * @return Streckenlisten mit Art (Knoten oder Kante) und konkretem Element.
      */
-    public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                                                                              boolean beginnOnEdge,
-                                                                                              boolean beginnWithBalise) {
+    public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(
+            int iTargetAmountOfRouteElements,
+                                                                                      boolean beginnOnEdge,
+                                                                                      boolean beginnWithBalise,
+                                                                                      boolean isBaliseNearCrossing) {
         ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
         ArrayList<TrackElement> visitedElements = new ArrayList<>();
 
         TopologyGraph.Edge NewWay = null;
         TrackElement CurrentElement;
         if(beginnWithBalise) {
-            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements);
+            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements, isBaliseNearCrossing);
         } else if(beginnOnEdge) {
             CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
         } else {
@@ -439,18 +447,47 @@ public class SmartSafetyContinousConnectTest {
         return returnFinishedRoute(RouteResult, visitedElements, NewWay);
     }
 
-    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
+    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, boolean isBaliseNearCrossing) {
+        I_CURRENT_TRYS = 0;
         boolean bDirectionNodeA = new Random().nextBoolean();
-        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise();
+        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise(isBaliseNearCrossing);
         return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, EdgeWithBalise);
     }
 
-    private TopologyGraph.Edge pickRandomEdgeWithBalise() {
+    private TopologyGraph.Edge pickRandomEdgeWithBalise(boolean isBaliseNearCrossingAllowed) {
+       if(I_CURRENT_TRYS > I_TRYS_FOR_FINAL_ROUTE) {
+           throw new InvalidParameterException("No Balise, that is beeing out of Crossover-Scpe found");
+       }
        ArrayList<Balise> balises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
        Balise B = (Balise) pickRandomElement(balises);
        TestUtil.lastRandomBalise = B;
+       if(!isBaliseNearCrossingAllowed && !checkIfBaliseIsInCrossoverArea(B) ) {
+           I_CURRENT_TRYS++;
+           return pickRandomEdgeWithBalise(true);
+       }
        return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
     }
+
+    private boolean checkIfBaliseIsInCrossoverArea(Balise B) {
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        CrossingSwitch CS = null;
+        if (edgeHavingNonPeekConnection(E)) {
+            // Weiche ist NICHT über spitze mit Kante der Balise verbunden
+
+            BlockedArea Datapointarea = B.createAreaFromBalise();
+            if(Datapointarea.getListOfEdgeLimits().size() > 0) return true;
+        }
+        return false;
+    }
+
+    private boolean edgeHavingNonPeekConnection(TopologyGraph.Edge e) {
+        return e.TopConnectFromB.equals(TopologyConnect.LINKS) || e.TopConnectFromB.equals(TopologyConnect.RECHTS)
+
+                ||
+
+                e.TopConnectFromA.equals(TopologyConnect.LINKS) || e.TopConnectFromA.equals(TopologyConnect.RECHTS);
+    }
+
 
     @Nullable
     private ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements) {

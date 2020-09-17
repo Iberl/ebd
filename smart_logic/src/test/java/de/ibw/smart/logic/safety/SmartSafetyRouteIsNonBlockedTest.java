@@ -64,7 +64,8 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-            TestUtil.generateRandomContinousRoute(3, true, false);
+            TestUtil.generateRandomContinousRoute(3, true, false
+            , false);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
         TopologyGraph.Node N = (TopologyGraph.Node) routenListe.get(1).getValue();
 
@@ -123,7 +124,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         int q_dir = 1;
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-                TestUtil.generateRandomContinousRoute(7, true, true);
+                TestUtil.generateRandomContinousRoute(7, true, true
+                ,true);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -263,7 +265,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         int q_dir = 1;
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-                TestUtil.generateRandomContinousRoute(7, true, true);
+                TestUtil.generateRandomContinousRoute(7, true, true,
+                        true);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -433,7 +436,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         int q_dir = 1;
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-                TestUtil.generateRandomContinousRoute(7, true, true);
+                TestUtil.generateRandomContinousRoute(7, true, true,
+                        true);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -576,8 +580,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         BigDecimal dTrainToNextPointTwo;
         String sidEdgeBothTrainsStandingOn;
         // Abstand zur Balise Position Report train1 andn train2
-        int d_lrbg = 7;
-        int d_lrbg_train2 = 8;
+        int d_lrbg = 15;
+        int d_lrbg_train2 = 20;
 
         //Die Entfernung der beiden Zuege ist dlrbg (7) + drbg-Train2 (8) 15
 
@@ -594,7 +598,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         int q_dir = 1;
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-                TestUtil.generateRandomContinousRoute(7, true, true);
+                TestUtil.generateRandomContinousRoute(7, true, true,
+                        false);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
