@@ -1,8 +1,11 @@
 package de.ibw.tms.plan_pro.adapter;
 
+import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
+import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
 import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
@@ -11,6 +14,7 @@ import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
 import java.math.BigDecimal;
+import java.security.InvalidParameterException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -91,6 +95,40 @@ public class CrossingSwitch implements ICompareTrackMeter {
      */
     public CSignal getSignal() {
         return Signal;
+    }
+
+    public BlockedArea getInsecureAreAtGivenEdge(TopologyGraph.Edge E) {
+        CSignal Sig = this.getSignal();
+        BigDecimal dSigDistanceToA;
+        for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
+            if (CTopKante.getIDTOPKante().getWert().equals(E.sId)) {
+                dSigDistanceToA = CTopKante.getAbstand().getWert();
+
+                BlockedArea BA;
+                if (checkIfConnectedByA(E)) {
+                    BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0,
+                            BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue());
+                } else {
+                    BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
+                            BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+                }
+                return BA;
+            }
+        }
+        throw new InvalidParameterException("Edge has for this Switch no insecure Area");
+
+    }
+
+    private boolean checkIfConnectedByA(TopologyGraph.Edge Edge) {
+        if(Edge.A.NodeImpl != null) {
+
+            if(this.equals(Edge.A.NodeImpl)) return true;
+        }
+        if(Edge.B.NodeImpl != null) {
+            if(this.equals(Edge.B.NodeImpl)) return false;
+        }
+        throw new InvalidParameterException("Edge is not connected to this Switch");
+
     }
 
     /**

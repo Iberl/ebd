@@ -13,9 +13,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
-import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 
-import javax.xml.crypto.Data;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -409,14 +407,14 @@ public class SmartSafetyContinousConnectTest {
             int iTargetAmountOfRouteElements,
                                                                                       boolean beginnOnEdge,
                                                                                       boolean beginnWithBalise,
-                                                                                      boolean isBaliseNearCrossing) {
+                                                                                      TestUtil.RouteConfig TestConfig) {
         ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
         ArrayList<TrackElement> visitedElements = new ArrayList<>();
 
         TopologyGraph.Edge NewWay = null;
         TrackElement CurrentElement;
         if(beginnWithBalise) {
-            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements, isBaliseNearCrossing);
+            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements, TestConfig);
         } else if(beginnOnEdge) {
             CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
         } else {
@@ -426,13 +424,7 @@ public class SmartSafetyContinousConnectTest {
             int iWayIndex;
 
             ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
-            TopologyGraph.Node CurrentNode = (TopologyGraph.Node) CurrentElement;
-            for(TopologyGraph.Edge E: CurrentNode.inEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
-            for(TopologyGraph.Edge E: ((TopologyGraph.Node) CurrentElement).outEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
+            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestConfig);
             if(possibleWays.isEmpty()) {
                 if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
                 else return RouteResult;
@@ -447,25 +439,91 @@ public class SmartSafetyContinousConnectTest {
         return returnFinishedRoute(RouteResult, visitedElements, NewWay);
     }
 
-    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, boolean isBaliseNearCrossing) {
+    public void fillPossibleWays(ArrayList<TrackElement> visitedElements, TopologyGraph.Node currentElement,
+                                 ArrayList<TopologyGraph.Edge> possibleWays, TestUtil.RouteConfig testConfig) {
+
+        for (TopologyGraph.Edge E : currentElement.inEdges) {
+            if (checkIfEdgeIsPossible(E, currentElement, testConfig, visitedElements)) {
+                possibleWays.add(E);
+            }
+        }
+        for (TopologyGraph.Edge E : currentElement.outEdges) {
+            if (checkIfEdgeIsPossible(E, currentElement, testConfig, visitedElements)) {
+                possibleWays.add(E);
+            }
+        }
+    }
+
+    private boolean checkIfEdgeIsPossible(TopologyGraph.Edge E, TopologyGraph.Node currentElement, TestUtil.RouteConfig testConfig, ArrayList<TrackElement> visitedElements) {
+        switch (testConfig) {
+            case BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING: {
+                if(visitedElements.size() != 1) {
+                    return checkIfVisited(E,visitedElements);
+                }
+                if(E.A.equals(currentElement)) {
+                    if(E.TopConnectFromA.equals(TopologyConnect.SPITZE)) {
+                        return false;
+                    } else return true;
+                } else if(E.B.equals(currentElement)) {
+                    if(E.TopConnectFromB.equals(TopologyConnect.SPITZE)) {
+                        return false;
+                    } return true;
+                }
+                return false;
+            }
+            default: {
+                return checkIfVisited(E, visitedElements);
+            }
+        }
+    }
+
+    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<TrackElement> visitedElements) {
+        if (!visitedElements.contains(e)) {
+            return true;
+        }
+        return false;
+    }
+
+    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, TestUtil.RouteConfig TestConfig) {
         I_CURRENT_TRYS = 0;
         boolean bDirectionNodeA = new Random().nextBoolean();
-        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise(isBaliseNearCrossing);
+        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise(TestConfig);
         return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, EdgeWithBalise);
     }
 
-    private TopologyGraph.Edge pickRandomEdgeWithBalise(boolean isBaliseNearCrossingAllowed) {
+    private TopologyGraph.Edge pickRandomEdgeWithBalise(TestUtil.RouteConfig TestConfig) {
        if(I_CURRENT_TRYS > I_TRYS_FOR_FINAL_ROUTE) {
            throw new InvalidParameterException("No Balise, that is beeing out of Crossover-Scpe found");
        }
        ArrayList<Balise> balises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
        Balise B = (Balise) pickRandomElement(balises);
        TestUtil.lastRandomBalise = B;
-       if(!isBaliseNearCrossingAllowed && !checkIfBaliseIsInCrossoverArea(B) ) {
-           I_CURRENT_TRYS++;
-           return pickRandomEdgeWithBalise(true);
+
+       switch (TestConfig) {
+           case BALISE_NEAR_CROSSING: {
+               return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+           }
+           case BALISE_NOT_NEAR_CROSSING: {
+               return retrieveBaliseNotNearCrossing(TestConfig, B);
+           }
+           case BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING: {
+               return retrieveBaliseNotNearCrossing(TestConfig, B);
+           }
+           default: {
+               throw new InvalidParameterException("Given Route Configuration not found");
+           }
        }
-       return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+
+
+
+    }
+
+    private TopologyGraph.Edge retrieveBaliseNotNearCrossing(TestUtil.RouteConfig testConfig, Balise b) {
+        if(!checkIfBaliseIsInCrossoverArea(b) ) {
+            I_CURRENT_TRYS++;
+            return pickRandomEdgeWithBalise(testConfig);
+        }
+        return PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
     }
 
     private boolean checkIfBaliseIsInCrossoverArea(Balise B) {
@@ -475,7 +533,7 @@ public class SmartSafetyContinousConnectTest {
             // Weiche ist NICHT über spitze mit Kante der Balise verbunden
 
             BlockedArea Datapointarea = B.createAreaFromBalise();
-            if(Datapointarea.getListOfEdgeLimits().size() > 0) return true;
+            return Datapointarea.getListOfEdgeLimits().size() > 0;
         }
         return false;
     }
@@ -505,13 +563,7 @@ public class SmartSafetyContinousConnectTest {
             int iWayIndex;
 
             ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
-            TopologyGraph.Node CurrentNode = (TopologyGraph.Node) CurrentElement;
-            for(TopologyGraph.Edge E: CurrentNode.inEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
-            for(TopologyGraph.Edge E: ((TopologyGraph.Node) CurrentElement).outEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
+            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
             if(possibleWays.isEmpty()) {
                 if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
                 else return RouteResult;

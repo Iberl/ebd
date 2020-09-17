@@ -9,6 +9,7 @@ import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
 import ebd.globalUtils.configHandler.TrainsHandler;
@@ -65,7 +66,7 @@ class SmartSafetyRouteIsNonBlockedTest {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false
-            , false);
+            , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
         TopologyGraph.Node N = (TopologyGraph.Node) routenListe.get(1).getValue();
 
@@ -125,7 +126,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true
-                ,true);
+                , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -266,7 +267,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
-                        true);
+                        TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -437,7 +438,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
-                        true);
+                        TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -567,7 +568,7 @@ class SmartSafetyRouteIsNonBlockedTest {
      * Das Block-Modul soll nur die beide MA-Blockaden als akzeptiert ausstellen.
      * Im Szenario stehen beide Z&uuml;ge kurz vor und nach einer Balise, die Z&uuml;ge bewegen sich aufeinander zu,
      * sodass, es zu KEINER &Uuml;berlappung kommt.
-     * Das Blockademodul, soll die beide Anfrage akzeptieren.
+     * Das Blockademodul, soll die beiden Anfragen akzeptieren.
      * @throws InterruptedException
      */
     @RepeatedTest(100)
@@ -583,7 +584,7 @@ class SmartSafetyRouteIsNonBlockedTest {
         int d_lrbg = 15;
         int d_lrbg_train2 = 20;
 
-        //Die Entfernung der beiden Zuege ist dlrbg (7) + drbg-Train2 (8) 15
+        //Die Entfernung der beiden Zuege ist dlrbg (15) + drbg-Train2 (20) 35
 
         String sidNodeOneTrainRunningTo;
         String sidNodeSecondTrainRunningTo;
@@ -599,7 +600,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
-                        false);
+                        TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
         boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
 
@@ -745,6 +746,195 @@ class SmartSafetyRouteIsNonBlockedTest {
         }
         assertTrue(isSuccess, "The is a fail, but it shall be allowed because of no Overlap");
 
+
+
+    }
+
+    /**
+     * Diese Testmethode untersucht, dass die SmartSafety erkennt, dass zwei Fahrzeuge die gleiche Weiche in der
+     * MA beanspruchen, weil ein Zug durch seine Ausdehnung sich noch im Grenzbereich der Weiche befindet muss
+     * die Logik das einfahren des Zweiten Zuges verhindern.
+     * @throws InterruptedException
+     */
+    @RepeatedTest(100)
+    public void checkIfTwoTrainsIntersectingOverCrossingDetected() throws InterruptedException {
+        this.initTestEnv();
+        int iTrainOne = 1;
+        int iTrainTwo = 2;
+        BigDecimal dTrainToNextPointOne;
+        BigDecimal dTrainToNextPointTwo;
+        String sidEdgeBothTrainsStandingOn;
+        // Abstand zur Balise Position Report train1 andn train2
+        int d_lrbg = 15;
+        int d_lrbg_train2 = 20;
+
+        //Die Entfernung der beiden Zuege ist dlrbg (15) + drbg-Train2 (20) 35
+
+        String sidNodeOneTrainRunningTo;
+        String sidNodeSecondTrainRunningTo;
+        int iLengthTrainOne = 10;
+        int iLengthTrainTwo = 20;
+        // true if Node B of Topology Edge is in trigger direction Nominal
+
+        TopologyGraph.Node FirstNodeTrain1RunningTo = null;
+        TopologyGraph.Node FirstNodeTrain2RunningTo = null;
+
+        TopologyGraph.Edge BaliseStandingOn = null;
+        int q_dir = 1;
+
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+                TestUtil.generateRandomContinousRoute(7, true, true,
+                        TestUtil.RouteConfig.BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING);
+        Balise B = TestUtil.lastRandomBalise;
+        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        FirstNodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
+
+
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        routenListeNEW4TEST.add(routenListe.get(0));
+        routenListeNEW4TEST.add(routenListe.get(1));
+        routenListeNEW4TEST.add(routenListe.get(2));
+
+        TopologyGraph.Edge EdgeTrain2IsStandinOn = (TopologyGraph.Edge) routenListe.get(2).getRight();
+        TopologyGraph.Node NodeOfCrossoverBeeingBlocked = (TopologyGraph.Node) routenListe.get(1).getRight();
+        CrossingSwitch CS = (CrossingSwitch) NodeOfCrossoverBeeingBlocked.NodeImpl;
+
+
+        double iLengthFirstTrail = (double) ((TopologyGraph.Edge) StartTrail.getRight()).dTopLength;
+        BaliseStandingOn = (TopologyGraph.Edge) StartTrail.getValue();
+        FirstNodeTrain2RunningTo = FirstNodeTrain1RunningTo;
+
+        sidEdgeBothTrainsStandingOn = BaliseStandingOn.sId;
+        sidNodeOneTrainRunningTo = FirstNodeTrain1RunningTo.TopNodeId;
+        sidNodeSecondTrainRunningTo = FirstNodeTrain2RunningTo.TopNodeId;
+
+        // untersucht ob Balise auf der Top-Kante des Zuges steht
+        if(!B.getTopPositionOfDataPoint().getIdentitaet().getWert().equals(sidEdgeBothTrainsStandingOn)) {
+            throw new InvalidParameterException("Starting Edge has not Balise given");
+        }
+        // Train b is running reverse
+        if(BaliseStandingOn.B.equals(FirstNodeTrain1RunningTo)) {
+
+            TopologyGraph.Node NodeTrain2IsLookingTo = EdgeTrain2IsStandinOn.A.equals(FirstNodeTrain1RunningTo) ?
+                    EdgeTrain2IsStandinOn.B : EdgeTrain2IsStandinOn.A;
+            BigDecimal dLengthEndTrailOfTrain2 = BigDecimal.valueOf(EdgeTrain2IsStandinOn.dTopLength);
+
+
+            // Zug 1 bewegt sich durch die Spitze zum Zweig auf dem Zug 2 sich noch im Grenzbereich befindet
+            dTrainToNextPointOne =
+                    new BigDecimal(iLengthFirstTrail).subtract(
+                            B.getBalisenPositionFromNodeA());
+
+            dTrainToNextPointTwo = dLengthEndTrailOfTrain2.subtract(BigDecimal.valueOf(iLengthTrainTwo)).add;
+            if(B.getBalisenPositionFromNodeA().compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
+                System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
+                return;
+            }
+            if(new BigDecimal(iLengthFirstTrail).subtract(B.getBalisenPositionFromNodeA()).compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0) {
+                System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
+                return;
+            }
+
+        } else if(BaliseStandingOn.A.equals(FirstNodeTrain1RunningTo)) {
+
+            dTrainToNextPointOne = B.getBalisenPositionFromNodeA().add(BigDecimal.valueOf(d_lrbg));
+            dTrainToNextPointTwo = new BigDecimal(iLengthFirstTrail).subtract(
+                    B.getBalisenPositionFromNodeA()).add(BigDecimal.valueOf(d_lrbg_train2));
+
+            if(B.getBalisenPositionFromNodeA().compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0) {
+                System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
+                return;
+            }
+            if(new BigDecimal(iLengthFirstTrail).subtract(B.getBalisenPositionFromNodeA()).compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
+                System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
+                return;
+            }
+        }
+        else {
+            throw new InvalidParameterException("Node Train is running to, is not connected with start edge");
+        }
+
+
+
+        if(dTrainToNextPointOne.compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
+            System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
+            return;
+        }
+
+
+        if(dTrainToNextPointTwo.compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0 ) {
+            System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
+            return;
+        }
+        // falls der Trigger einer Balise nicht nominal sei, muss das Q_Dir negiert werden
+        // nominale Balisen triggern auf Knoten B.
+
+
+
+
+        MaRequestWrapper MaRW_Train1 = TestUtil.preserveRequest4NonBlockedTest(iTrainOne, dTrainToNextPointOne.doubleValue(),
+                sidEdgeBothTrainsStandingOn, sidNodeOneTrainRunningTo, iLengthTrainOne);
+        MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
+                sidEdgeBothTrainsStandingOn, sidNodeSecondTrainRunningTo, iLengthTrainTwo);
+
+        int lEOATrain1 = dTrainToNextPointOne.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
+        int lEOATrain2 = dTrainToNextPointTwo.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
+
+
+
+        EoaAdapter eoaAda_Train1 = generateEoa(lEOATrain1);
+        EoaAdapter eoaAda_Train2 = generateEoa(lEOATrain2);
+
+        RbcMaAdapter RbcMa_Train1 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train1, Q_SCALE.SCALE_1_M.flag);
+        RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
+        int nid_prvlbg = -1;
+
+
+        // Orientation of the train in relation to the direction of the LRBG
+        int q_dirlrbg = 1; // nominal 0 would be reverse
+        // Qualifier telling on which side of the LRBG the estimated front end is
+        int q_dlrbg = 1; // 0 would be reverse
+
+        // L_DOUBTOVER is the over-reading amount plus the Q_LOCACC of the LRBG
+        int l_doubtover = 32767; // Unknown
+
+        // L_DOUBTUNDER is the under-reading amount plus the Q_LOCACC of the LRBG
+        int l_doubtunder = 32767; // Unknown
+
+        int i_Speed_5_km_per_hour = 0; // 1 would be 5 km/h 10 would be 50 km/h
+
+        //Direction of train movement in relation to the LRBG orientation
+        int q_dirtrain = 1;  // 0 would be reverse
+
+        //Full Supervision
+        int m_mode = 1;
+
+        //Current Operating Level // Level 3
+        int m_level = 4;
+
+        //National System identity
+        int nid_ntc = 1;
+
+        int nid_ref_Balise = TestUtil.lastRandomBalise.getHashcodeOfBaliseDp();
+
+        PositionInfo PosInfoTrain1 = new PositionInfo(Q_SCALE.SCALE_1_M.flag, nid_ref_Balise, nid_prvlbg, d_lrbg,
+                q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
+                i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
+
+
+        PositionInfo PosInfoTrain2 = new PositionInfo(Q_SCALE.SCALE_1_M.flag, nid_ref_Balise, nid_prvlbg, d_lrbg_train2,
+                q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
+                i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
+
+        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
+        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
+
+        //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
+
+        assertTrue(Safety.checkIfRouteIsNonBlocked(MaRW_Train1, RbcMa_Train1, routenListeNEW4TEST), "The first request must not have blockage");
 
 
     }

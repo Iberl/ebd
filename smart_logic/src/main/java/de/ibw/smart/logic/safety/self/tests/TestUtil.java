@@ -20,11 +20,25 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-04
+ * @since 2020-09-17
  */
 public class TestUtil {
 
     public static Balise lastRandomBalise = null;
+
+    /**
+     * Route-Configuration
+     * Gibt an wo Balisen in Teststrecken sein sollen
+     */
+    public enum RouteConfig {
+        BALISE_NEAR_CROSSING, // Im Grenzbereich einer Weiche soll sich es erlaubt sein eine Balise zu finden
+        BALISE_NOT_NEAR_CROSSING, // Im Grenzbereich darf sich keine Balise befinden
+        BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING, // Der Zug ist auf einer Balise, sodass er die Weiche an
+                                                            // der Spitze betritt UND
+                                                            // Die Balise darf sich nicht im Grenzbereich von
+                                                            // Weichen befinden.
+
+    }
 
 
     /**
@@ -34,11 +48,10 @@ public class TestUtil {
      * @return Zufallsstrecke
      */
     public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise, boolean isBaliseNearCrossing
-             ) {
+                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
         SmartSafetyContinousConnectTest Submodul = new SmartSafetyContinousConnectTest();
         return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
-                isBaliseNearCrossing);
+                TestConfig);
     }
 
     /**

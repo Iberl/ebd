@@ -186,19 +186,14 @@ public class BlockedArea {
     private boolean checkIfBlockedAreaReachingToCrossoverLimits(BlockedArea edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
         CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
         if(CS == null) return false;
+
         CSignal Sig = CS.getSignal();
         BigDecimal dSigDistanceToA;
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
             if(CTopKante.getIDTOPKante().getWert().equals(e.sId)) {
-                dSigDistanceToA = CTopKante.getAbstand().getWert();
-                BlockedArea BA;
-                if(checkIfConnectedByA) {
-                    BA = new BlockedArea(e, BLOCK_Q_SCALE.Q_SCALE_1M,0,
-                            BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue() );
-                } else {
-                    BA = new BlockedArea(e, BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
-                            BLOCK_Q_SCALE.Q_SCALE_1M, (int) e.dTopLength);
-                }
+                BlockedArea BA = CS.getInsecureAreAtGivenEdge(e);
+
+
                 if(BA.compareIfIntersection(edgeArea)) return true;
             }
         }

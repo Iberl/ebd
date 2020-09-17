@@ -138,7 +138,7 @@ class SmartSafetyRouteIsNonBlockedTestConcurrentChecks {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false,
-                    false);
+                    TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
         TopologyGraph.Node N = (TopologyGraph.Node) routenListe.get(1).getValue();
 
@@ -192,7 +192,7 @@ class SmartSafetyRouteIsNonBlockedTestConcurrentChecks {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
-                        false);
+                        TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         int iMaxLength = calcMaxLengthOfTrack(routenListe);
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
