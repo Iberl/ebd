@@ -8,7 +8,7 @@
 ######
 ###### Strings
 ######
-pathToDriverProfileJson = StrictDrivingStrategy.json
+pathToDriverStrategyJson = StrictDrivingStrategy.json
 
 pathToInitFile = initFile.txt
 pathToSzenarioJSON = szenarioAB.json

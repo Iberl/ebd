@@ -29,7 +29,7 @@ public class ConfigHandler {
     /*
     Strings
     */
-    public String pathToDriverProfileJson = "";
+    public String pathToDriverStrategyJson = "";
     public String pathToSzenarioJSON = "";
     public String pathToInitFile = "";
 

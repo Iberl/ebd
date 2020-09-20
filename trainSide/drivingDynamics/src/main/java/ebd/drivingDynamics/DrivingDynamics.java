@@ -47,7 +47,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * Driving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
+ * Driving Dynamics simulates the physical movement of the train. It uses a {@link DrivingStrategy} to represent a driver.
  * Internally, the actual state is represented by a {@link DynamicState} that holds all relevant values.
  *
  * @author LSF
@@ -67,7 +67,7 @@ public class DrivingDynamics {
     private Position tripStartPosition;
 
     private DynamicState dynamicState;
-    private DrivingProfile drivingProfile;
+    private DrivingStrategy drivingStrategy;
 
     private long time;
     private long timeOfLastAction = -1;
@@ -93,7 +93,7 @@ public class DrivingDynamics {
     private RouteDataVolatile routeDataVolatile;
 
     /**
-     * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingProfile} to represent a driver.
+     * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingStrategy} to represent a driver.
      *
      * @param localEventBus The local {@link EventBus} of the train
      */
@@ -102,7 +102,7 @@ public class DrivingDynamics {
         this.localEventBus.register(this);
         this.ch = ConfigHandler.getInstance();
         try {
-            this.drivingProfile = new DrivingProfile(this.localEventBus);
+            this.drivingStrategy = new DrivingStrategy(this.localEventBus);
         } catch (IOException | ParseException e) {
             localEventBus.post(new DrivingDynamicsExceptionEvent("td", this.exceptionTarget, new NotCausedByAEvent(), e, ExceptionEventTyp.FATAL));
         } catch (DDBadDataException e) {
@@ -120,7 +120,7 @@ public class DrivingDynamics {
     /**
      * Every clock tick event this method runs all code necessary to calculate the next dynamic state from the previous
      * one. It takes into account {@link SpeedInterventionLevel} decided by the {@link SpeedSupervisor}
-     * and the {@link Action} decided by the {@link DrivingProfile}.
+     * and the {@link Action} decided by the {@link DrivingStrategy}.
      * This method also updates {@link TrainDataVolatile} with the new values.
      *
      * @param cte A {@link ClockTickEvent}
@@ -305,7 +305,7 @@ public class DrivingDynamics {
      */
         SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
-            actionParser(this.drivingProfile.actionToTake());
+            actionParser(this.drivingStrategy.actionToTake());
         }
         else if(this.shouldHalt && this.dynamicState.getSpeed() == 0){
             sendMovementStateIfNotAlreadySend(MovementState.HALTING);
@@ -323,7 +323,7 @@ public class DrivingDynamics {
                     case OVERSPEED:
                     case WARNING:
                         sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
-                        actionParser(this.drivingProfile.actionToTake());
+                        actionParser(this.drivingStrategy.actionToTake());
                         break;
                     case APPLY_SERVICE_BREAKS:
                         sendToLogEventSpeedSupervision(MovementState.BREAKING);

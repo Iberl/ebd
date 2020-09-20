@@ -15,16 +15,15 @@ import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Driving Profile represents the driver of the train.
+ * DrivingStrategy represents the driver of the train.
  * It takes a json file and parses it into a list of {@link Action}, every action containing a list of conditions.
  * @author LSF
  */
-public class DrivingProfile {
+public class DrivingStrategy {
 
     private List<Action> actions;
     private EventBus localEventBus;
@@ -32,12 +31,12 @@ public class DrivingProfile {
     static class SortByPriority implements Comparator<Action>{
         //Note: this comparator imposes orderings that are inconsistent with equals.
         @Override
-        public int compare(Action o1, Action o2) {
-            return o1.getPriority() - o2.getPriority();
+        public int compare(Action a1, Action a2) {
+            return a1.getPriority() - a2.getPriority();
         }
     }
 
-    public DrivingProfile(EventBus localEventBus) throws DDBadDataException, IOException, ParseException {
+    public DrivingStrategy(EventBus localEventBus) throws DDBadDataException, IOException, ParseException {
         this.localEventBus = localEventBus;
         loadProfileFromFile();
     }
@@ -62,7 +61,7 @@ public class DrivingProfile {
      * @throws ParseException If the file can not parsed, indicating faulty json formatting.
      */
     private void loadProfileFromFile() throws DDBadDataException, IOException, ParseException {
-        String pathToProfile = ConfigHandler.getInstance().pathToDriverProfileJson;
+        String pathToProfile = ConfigHandler.getInstance().pathToDriverStrategyJson;
         try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToProfile)){
             try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
                 JSONParser jsonParser = new org.json.simple.parser.JSONParser();
@@ -95,7 +94,7 @@ public class DrivingProfile {
                 this.actions.add(ActionParser.parse(tempJSON, this.localEventBus));
             }
         }
-        else throw new DDBadDataException("The key 'actions' was missing from a DrivingProfile.");
+        else throw new DDBadDataException("The key 'actions' was missing from a DrivingStrategy.");
 
         actions.sort(new SortByPriority());
     }

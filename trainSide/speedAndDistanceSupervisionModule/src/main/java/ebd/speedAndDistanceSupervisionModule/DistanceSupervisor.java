@@ -29,12 +29,11 @@ import org.greenrobot.eventbus.ThreadMode;
  * This class supervises the distance the train has traveled the current trip. If the distance is close to or
  * greater than the current movement authority and the train has stopped, a end of mission is signaled.
  *<br>
- * //TODO This class can expanded to do other distance related checks.
+ * //TODO This class can be expanded to do other distance related checks.
  *
  * @author Lars Schulze-Falck
  */
 public class DistanceSupervisor {
-    //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
     private final String eventSource;
@@ -81,10 +80,10 @@ public class DistanceSupervisor {
     /**
      * This method listens to clock tick events. On every tick, this class checks the the current traveled distance
      * and if there are any related measures that have to be taken.
-     * @param cTE A {@link ClockTickEvent}
+     * @param  cte A {@link ClockTickEvent}
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void clockTick(ClockTickEvent cTE){
+    public void clockTick(ClockTickEvent cte){
         if(this.breakingCurve == null) return;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
@@ -104,9 +103,9 @@ public class DistanceSupervisor {
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
         }
-        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
+        /*else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){//TODO Check if correct: DS says DD to halt when v > 0
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
-        }
+        }*/
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
