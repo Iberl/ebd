@@ -25,7 +25,7 @@ import java.util.Locale;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-07
+ * @since 2020-09-29
  */
 public class CrossingSwitch implements ICompareTrackMeter {
 
@@ -97,6 +97,27 @@ public class CrossingSwitch implements ICompareTrackMeter {
         return Signal;
     }
 
+    /**
+     * Gibt den Grenzbereich auf der angegebenen Kante zu dieser Crossing-Switch wider
+     * @param E - {@link TopologyGraph.Edge} Die Kante zu der der Grenzbereich festgestellt werden soll
+     * @return BigDecimal - Abstand von dieser Crossing-Switch der den Grenzbereich darstellt.
+     */
+    public BigDecimal getInsecureRangeRelative(TopologyGraph.Edge E) {
+        CSignal Sig = this.getSignal();
+        BigDecimal dSigDistanceToA;
+        for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
+            if (CTopKante.getIDTOPKante().getWert().equals(E.sId)) {
+                return CTopKante.getAbstand().getWert();
+            }
+        }
+        throw new InvalidParameterException("Edge has for this Switch no insecure Area");
+    }
+
+    /**
+     * Gibt den Grenzbereich dieser Weiche wider.
+     * @param E - Grenzbereich wird zu Topologischen Kante E widergegeben
+     * @return BlockedArea - Grenzbereich als Blockierter Abschnitt
+     */
     public BlockedArea getInsecureAreAtGivenEdge(TopologyGraph.Edge E) {
         CSignal Sig = this.getSignal();
         BigDecimal dSigDistanceToA;

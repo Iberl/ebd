@@ -1,6 +1,7 @@
 package de.ibw.smart.logic.safety;
 
 import de.ibw.feed.Balise;
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.safety.self.tests.TestUtil;
 import de.ibw.tms.etcs.Q_SCALE;
@@ -801,7 +802,7 @@ class SmartSafetyRouteIsNonBlockedTest {
         TopologyGraph.Edge EdgeTrain2IsStandinOn = (TopologyGraph.Edge) routenListe.get(2).getRight();
         TopologyGraph.Node NodeOfCrossoverBeeingBlocked = (TopologyGraph.Node) routenListe.get(1).getRight();
         CrossingSwitch CS = (CrossingSwitch) NodeOfCrossoverBeeingBlocked.NodeImpl;
-
+        BlockedArea BlockedSwitchArea = CS.getInsecureAreAtGivenEdge(EdgeTrain2IsStandinOn);
 
         double iLengthFirstTrail = (double) ((TopologyGraph.Edge) StartTrail.getRight()).dTopLength;
         BaliseStandingOn = (TopologyGraph.Edge) StartTrail.getValue();
@@ -816,9 +817,13 @@ class SmartSafetyRouteIsNonBlockedTest {
             throw new InvalidParameterException("Starting Edge has not Balise given");
         }
         // Train b is running reverse
+        // Train 2 steht auf der Weiche auf die Train 1 einf&auml;hrt. Die Z&uuml;ge sehen sich an.
         if(BaliseStandingOn.B.equals(FirstNodeTrain1RunningTo)) {
 
-            TopologyGraph.Node NodeTrain2IsLookingTo = EdgeTrain2IsStandinOn.A.equals(FirstNodeTrain1RunningTo) ?
+            // blockierte Weiche ist am Knoten A der Topologischen Kante auf der der Zug 2 steht
+            boolean isTrain2OnCrossingSwitchAtNodeA = EdgeTrain2IsStandinOn.A.equals(FirstNodeTrain1RunningTo);
+
+            TopologyGraph.Node NodeTrain2IsLookingTo = isTrain2OnCrossingSwitchAtNodeA ?
                     EdgeTrain2IsStandinOn.B : EdgeTrain2IsStandinOn.A;
             BigDecimal dLengthEndTrailOfTrain2 = BigDecimal.valueOf(EdgeTrain2IsStandinOn.dTopLength);
 
@@ -828,7 +833,10 @@ class SmartSafetyRouteIsNonBlockedTest {
                     new BigDecimal(iLengthFirstTrail).subtract(
                             B.getBalisenPositionFromNodeA());
 
-            dTrainToNextPointTwo = dLengthEndTrailOfTrain2.subtract(BigDecimal.valueOf(iLengthTrainTwo)).add;
+            if(isTrain2OnCrossingSwitchAtNodeA) {
+                //TODO
+            }
+
             if(B.getBalisenPositionFromNodeA().compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
                 System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
                 return;
@@ -865,10 +873,10 @@ class SmartSafetyRouteIsNonBlockedTest {
         }
 
 
-        if(dTrainToNextPointTwo.compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0 ) {
+       /* if(dTrainToNextPointTwo.compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0 ) {
             System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
             return;
-        }
+        }*/
         // falls der Trigger einer Balise nicht nominal sei, muss das Q_Dir negiert werden
         // nominale Balisen triggern auf Knoten B.
 
@@ -877,19 +885,19 @@ class SmartSafetyRouteIsNonBlockedTest {
 
         MaRequestWrapper MaRW_Train1 = TestUtil.preserveRequest4NonBlockedTest(iTrainOne, dTrainToNextPointOne.doubleValue(),
                 sidEdgeBothTrainsStandingOn, sidNodeOneTrainRunningTo, iLengthTrainOne);
-        MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
-                sidEdgeBothTrainsStandingOn, sidNodeSecondTrainRunningTo, iLengthTrainTwo);
+        //MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
+        //        sidEdgeBothTrainsStandingOn, sidNodeSecondTrainRunningTo, iLengthTrainTwo);
 
         int lEOATrain1 = dTrainToNextPointOne.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
-        int lEOATrain2 = dTrainToNextPointTwo.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
+        //int lEOATrain2 = dTrainToNextPointTwo.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
 
 
 
         EoaAdapter eoaAda_Train1 = generateEoa(lEOATrain1);
-        EoaAdapter eoaAda_Train2 = generateEoa(lEOATrain2);
+        //EoaAdapter eoaAda_Train2 = generateEoa(lEOATrain2);
 
         RbcMaAdapter RbcMa_Train1 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train1, Q_SCALE.SCALE_1_M.flag);
-        RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
+        //RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
         int nid_prvlbg = -1;
 
 
