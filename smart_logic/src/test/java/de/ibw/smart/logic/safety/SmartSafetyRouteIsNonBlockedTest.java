@@ -774,7 +774,7 @@ class SmartSafetyRouteIsNonBlockedTest {
         String sidNodeOneTrainRunningTo;
         String sidNodeSecondTrainRunningTo;
         int iLengthTrainOne = 10;
-        int iLengthTrainTwo = 20;
+        int iLengthTrainTwo = 7;
         // true if Node B of Topology Edge is in trigger direction Nominal
 
         TopologyGraph.Node FirstNodeTrain1RunningTo = null;
@@ -802,9 +802,14 @@ class SmartSafetyRouteIsNonBlockedTest {
         TopologyGraph.Edge EdgeTrain2IsStandinOn = (TopologyGraph.Edge) routenListe.get(2).getRight();
         TopologyGraph.Node NodeOfCrossoverBeeingBlocked = (TopologyGraph.Node) routenListe.get(1).getRight();
         CrossingSwitch CS = (CrossingSwitch) NodeOfCrossoverBeeingBlocked.NodeImpl;
-        BlockedArea BlockedSwitchArea = CS.getInsecureAreAtGivenEdge(EdgeTrain2IsStandinOn);
+       // gibt die diestance von Top-Knoten A an wo der Grenzbereich Beginnt-Ende in Relation zu Switch CS
+        BigDecimal dDistanceFromAToLimitedCrossingSpace = CS.getInsecureRangeRelative(EdgeTrain2IsStandinOn);
 
+
+        //Gleisl&auml;ngen
         double iLengthFirstTrail = (double) ((TopologyGraph.Edge) StartTrail.getRight()).dTopLength;
+        BigDecimal dLengthEndTrailOfTrain2 = BigDecimal.valueOf(EdgeTrain2IsStandinOn.dTopLength);
+
         BaliseStandingOn = (TopologyGraph.Edge) StartTrail.getValue();
         FirstNodeTrain2RunningTo = FirstNodeTrain1RunningTo;
 
@@ -816,71 +821,55 @@ class SmartSafetyRouteIsNonBlockedTest {
         if(!B.getTopPositionOfDataPoint().getIdentitaet().getWert().equals(sidEdgeBothTrainsStandingOn)) {
             throw new InvalidParameterException("Starting Edge has not Balise given");
         }
+        // blockierte Weiche ist am Knoten A der Topologischen Kante auf der der Zug 2 steht
+        boolean isTrain2OnCrossingSwitchAtNodeA = EdgeTrain2IsStandinOn.A.equals(FirstNodeTrain1RunningTo);
+
+        if(dLengthEndTrailOfTrain2.compareTo(new BigDecimal("7")) > 0) {
+            // Strecke nicht nutzbar zu wenig Gleis  auf dem Blockierten Gleisstueck von Zug 2
+            System.err.println("End Trail is to short. Test skipped");
+        }
+
+
         // Train b is running reverse
         // Train 2 steht auf der Weiche auf die Train 1 einf&auml;hrt. Die Z&uuml;ge sehen sich an.
         if(BaliseStandingOn.B.equals(FirstNodeTrain1RunningTo)) {
 
-            // blockierte Weiche ist am Knoten A der Topologischen Kante auf der der Zug 2 steht
-            boolean isTrain2OnCrossingSwitchAtNodeA = EdgeTrain2IsStandinOn.A.equals(FirstNodeTrain1RunningTo);
 
-            TopologyGraph.Node NodeTrain2IsLookingTo = isTrain2OnCrossingSwitchAtNodeA ?
-                    EdgeTrain2IsStandinOn.B : EdgeTrain2IsStandinOn.A;
-            BigDecimal dLengthEndTrailOfTrain2 = BigDecimal.valueOf(EdgeTrain2IsStandinOn.dTopLength);
 
 
             // Zug 1 bewegt sich durch die Spitze zum Zweig auf dem Zug 2 sich noch im Grenzbereich befindet
             dTrainToNextPointOne =
                     new BigDecimal(iLengthFirstTrail).subtract(
-                            B.getBalisenPositionFromNodeA());
+                            B.getBalisenPositionFromNodeA()).add(new BigDecimal("2"));
 
             if(isTrain2OnCrossingSwitchAtNodeA) {
-                //TODO
-            }
+                // TOP-Knoten A ist der Knoten an den die doppelt belegte Weiche liegt
+                // Die Zug-Front ist drei Meter nach der Grenze so dass nur das Heck im Bereich ragt.
+                dTrainToNextPointTwo = dDistanceFromAToLimitedCrossingSpace.add(new BigDecimal("7"));
 
-            if(B.getBalisenPositionFromNodeA().compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
-                System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
-                return;
+            } else {
+                // Top-Knoten B ist die betroffen Weiche
+                dTrainToNextPointTwo = dLengthEndTrailOfTrain2.subtract(dDistanceFromAToLimitedCrossingSpace)
+                        .subtract(new BigDecimal("7"));
             }
-            if(new BigDecimal(iLengthFirstTrail).subtract(B.getBalisenPositionFromNodeA()).compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0) {
-                System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
-                return;
-            }
-
         } else if(BaliseStandingOn.A.equals(FirstNodeTrain1RunningTo)) {
+            // Zug 1 bewegt sich durch die Spitze zum Zweig auf dem Zug 2 sich noch im Grenzbereich befindet
+            dTrainToNextPointOne = B.getBalisenPositionFromNodeA().add(new BigDecimal("2"));
+            if(isTrain2OnCrossingSwitchAtNodeA) {
+                // TOP-Knoten A ist der Knoten an den die doppelt belegte Weiche liegt
+                // Die Zug-Front ist drei Meter nach der Grenze so dass nur das Heck im Bereich ragt.
+                dTrainToNextPointTwo = dDistanceFromAToLimitedCrossingSpace.add(new BigDecimal("7"));
 
-            dTrainToNextPointOne = B.getBalisenPositionFromNodeA().add(BigDecimal.valueOf(d_lrbg));
-            dTrainToNextPointTwo = new BigDecimal(iLengthFirstTrail).subtract(
-                    B.getBalisenPositionFromNodeA()).add(BigDecimal.valueOf(d_lrbg_train2));
+            } else {
+                // Top-Knoten B ist die betroffen Weiche
+                dTrainToNextPointTwo = (dLengthEndTrailOfTrain2.subtract(dDistanceFromAToLimitedCrossingSpace))
+                        .subtract(new BigDecimal("7"));
+            }
 
-            if(B.getBalisenPositionFromNodeA().compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0) {
-                System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
-                return;
-            }
-            if(new BigDecimal(iLengthFirstTrail).subtract(B.getBalisenPositionFromNodeA()).compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
-                System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
-                return;
-            }
         }
         else {
             throw new InvalidParameterException("Node Train is running to, is not connected with start edge");
         }
-
-
-
-        if(dTrainToNextPointOne.compareTo(BigDecimal.valueOf(d_lrbg)) <= 0) {
-            System.err.println("Train 1 is positioned on before Start of Track. Test skipped");
-            return;
-        }
-
-
-       /* if(dTrainToNextPointTwo.compareTo(BigDecimal.valueOf(d_lrbg_train2)) <= 0 ) {
-            System.err.println("Train 2 is positioned on before Start of Track. Test skipped");
-            return;
-        }*/
-        // falls der Trigger einer Balise nicht nominal sei, muss das Q_Dir negiert werden
-        // nominale Balisen triggern auf Knoten B.
-
-
 
 
         MaRequestWrapper MaRW_Train1 = TestUtil.preserveRequest4NonBlockedTest(iTrainOne, dTrainToNextPointOne.doubleValue(),

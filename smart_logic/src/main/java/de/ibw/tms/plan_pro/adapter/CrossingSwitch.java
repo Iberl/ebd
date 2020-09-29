@@ -104,7 +104,7 @@ public class CrossingSwitch implements ICompareTrackMeter {
      */
     public BigDecimal getInsecureRangeRelative(TopologyGraph.Edge E) {
         CSignal Sig = this.getSignal();
-        BigDecimal dSigDistanceToA;
+
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
             if (CTopKante.getIDTOPKante().getWert().equals(E.sId)) {
                 return CTopKante.getAbstand().getWert();
