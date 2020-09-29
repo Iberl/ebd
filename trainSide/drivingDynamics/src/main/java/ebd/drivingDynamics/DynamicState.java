@@ -52,7 +52,7 @@ public class DynamicState {
      * @param position Current position
      * @param availableAcceleration the {@link AvailableAcceleration} of the train
      */
-    public DynamicState( Position position, AvailableAcceleration availableAcceleration) {
+    public DynamicState(Position position, AvailableAcceleration availableAcceleration) {
         this.time = 0;
         this.position = position;
         this.tripDistance = 0;
