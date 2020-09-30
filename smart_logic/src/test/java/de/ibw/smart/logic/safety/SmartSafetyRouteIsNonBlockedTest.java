@@ -35,8 +35,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.
  * Dieser Test stellt die funktionale Korrektheit sicher
  */
-
-
 class SmartSafetyRouteIsNonBlockedTest {
 
     @Spy
@@ -813,12 +811,12 @@ class SmartSafetyRouteIsNonBlockedTest {
         BaliseStandingOn = (TopologyGraph.Edge) StartTrail.getValue();
         FirstNodeTrain2RunningTo = FirstNodeTrain1RunningTo;
 
-        sidEdgeBothTrainsStandingOn = BaliseStandingOn.sId;
+
         sidNodeOneTrainRunningTo = FirstNodeTrain1RunningTo.TopNodeId;
         sidNodeSecondTrainRunningTo = FirstNodeTrain2RunningTo.TopNodeId;
 
         // untersucht ob Balise auf der Top-Kante des Zuges steht
-        if(!B.getTopPositionOfDataPoint().getIdentitaet().getWert().equals(sidEdgeBothTrainsStandingOn)) {
+        if(!B.getTopPositionOfDataPoint().getIdentitaet().getWert().equals(sidNodeOneTrainRunningTo)) {
             throw new InvalidParameterException("Starting Edge has not Balise given");
         }
         // blockierte Weiche ist am Knoten A der Topologischen Kante auf der der Zug 2 steht
@@ -873,20 +871,20 @@ class SmartSafetyRouteIsNonBlockedTest {
 
 
         MaRequestWrapper MaRW_Train1 = TestUtil.preserveRequest4NonBlockedTest(iTrainOne, dTrainToNextPointOne.doubleValue(),
-                sidEdgeBothTrainsStandingOn, sidNodeOneTrainRunningTo, iLengthTrainOne);
-        //MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
-        //        sidEdgeBothTrainsStandingOn, sidNodeSecondTrainRunningTo, iLengthTrainTwo);
+                sidNodeOneTrainRunningTo, sidNodeOneTrainRunningTo, iLengthTrainOne);
+        MaRequestWrapper MaRW_Train2 = TestUtil.preserveRequest4NonBlockedTest(iTrainTwo, dTrainToNextPointTwo.doubleValue(),
+                sidNodeSecondTrainRunningTo, sidNodeSecondTrainRunningTo, iLengthTrainTwo);
 
-        int lEOATrain1 = dTrainToNextPointOne.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
-        //int lEOATrain2 = dTrainToNextPointTwo.compareTo(new BigDecimal(5)) > 0 ? 5 : 1;
+        int lEOATrain1 = dTrainToNextPointOne.intValue();
+        int lEOATrain2 = dTrainToNextPointTwo.intValue();
 
 
 
         EoaAdapter eoaAda_Train1 = generateEoa(lEOATrain1);
-        //EoaAdapter eoaAda_Train2 = generateEoa(lEOATrain2);
+        EoaAdapter eoaAda_Train2 = generateEoa(lEOATrain2);
 
         RbcMaAdapter RbcMa_Train1 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train1, Q_SCALE.SCALE_1_M.flag);
-        //RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
+        RbcMaAdapter RbcMa_Train2 = TestUtil.preserveMA4NonBlockedTest(eoaAda_Train2, Q_SCALE.SCALE_1_M.flag);
         int nid_prvlbg = -1;
 
 
