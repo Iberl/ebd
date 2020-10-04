@@ -65,7 +65,7 @@ public class DynamicState {
 
     /**
      * Calculates the next state based on the passed time
-     * @param deltaT
+     * @param deltaT passed time between two calls.
      */
     public void nextState(double deltaT){
         this.time += deltaT;

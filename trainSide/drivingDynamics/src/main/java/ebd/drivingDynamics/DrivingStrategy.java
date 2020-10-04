@@ -3,6 +3,7 @@ package ebd.drivingDynamics;
 import ebd.drivingDynamics.util.actions.Action;
 import ebd.drivingDynamics.util.actions.ActionParser;
 import ebd.drivingDynamics.util.actions.NoAction;
+import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
@@ -72,7 +73,7 @@ public class DrivingStrategy {
         }
         catch (NullPointerException npe){
             IllegalArgumentException iAE = new IllegalArgumentException("This file could not be found: " + pathToProfile);
-            this.localEventBus.post(new TrainDataExceptionEvent("td", "tsm", new NotCausedByAEvent(), iAE));
+            this.localEventBus.post(new DrivingDynamicsExceptionEvent("td", "tsm", new NotCausedByAEvent(), iAE));
             return;
         }
 
