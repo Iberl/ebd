@@ -3,6 +3,8 @@ package de.ibw.smart.logic.safety;
 
 
 import de.ibw.feed.Balise;
+import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
@@ -98,7 +100,9 @@ public class SmartSafety {
     public static DefaultRepo<Integer, TrainInfo> trainInformation = new DefaultRepo<>();
     /**
      * Ein Repository, dass durch eine ZugId, vergangene Positionsdaten speichert.
+     *
      */
+    @Deprecated
     public static DefaultRepo<Integer, CircularFifoBuffer> positionHistory  = new DefaultRepo<Integer, CircularFifoBuffer>();
     // when trespass new Trail between new Endnode save meters of passed tracks form balise on
     // if balise is not on current trail we know how far it is away
@@ -268,7 +272,7 @@ public class SmartSafety {
                 }
 
                 toBlock = calcCrossoverSignals(toBlock);
-
+                //TODO Positionsmodul auswerten
                 List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
                 for(BlockedArea ThisArea : toBlock)
                 for(BlockedArea OtherArea: blockedAreas) {
@@ -490,13 +494,13 @@ public class SmartSafety {
         iNID_LRBG = CurrentPosition.nid_lrbg;
         B = Balise.baliseByNid_bg.getModel(iNID_LRBG);
         if(B == null) {
-            blockLastPositionReports(iTrainId);
+
             throw new InvalidParameterException("Balse requested not found");
         }
 
         iQ_DirLength = CurrentPosition.q_length;
         if(!checkQ_Length(iQ_DirLength)) {
-            blockLastPositionReports(iTrainId);
+
             throw new InvalidParameterException("No Train Length information available");
         }
 
@@ -506,6 +510,8 @@ public class SmartSafety {
         return CurrentPosition;
     }
 
+
+    @Deprecated
     private synchronized void blockLastPositionReports(int iTrainId) {
         List<BlockedArea> blockedAreasById = blockList.getModel(iTrainId);
         CircularFifoBuffer lastPositions = positionHistory.getModel(iTrainId);
@@ -760,7 +766,7 @@ public class SmartSafety {
             iQ_Length = PosInf.q_length;
             trainInformation.update(iTrainId, P.trainInfo);
             lastPositionReport.update(iTrainId, PosInf);
-            handlePositionHistory(iTrainId, PosInf);
+            handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader());
             unlockPassedElements(iTrainId, PosInf);
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
@@ -804,11 +810,10 @@ public class SmartSafety {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    private void handlePositionHistory(int iTrainId, PositionInfo posInf) {
-        CircularFifoBuffer buffer = positionHistory.getModel(iTrainId);
-        if(buffer == null) buffer = new CircularFifoBuffer(100);
-        buffer.add(posInf);
-        positionHistory.update(iTrainId, buffer);
+    private void handlePositionHistory(int iTrainId, PositionInfo posInf, Message.Header header) {
+        PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
+                iTrainId, posInf);
+        PositionModul.getInstance().addPositionData(PD);
     }
 
     private boolean checkQ_Length(int iQ_Length) {

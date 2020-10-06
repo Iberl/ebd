@@ -51,6 +51,23 @@ public class PositionModul implements IPositionModul {
 
     }
 
+    private static PositionModul instance = null;
+
+    /**
+     * Singleton f&uuml;r dieses Modul
+     * @return PositionModul
+     */
+    public static PositionModul getInstance() {
+        if(instance == null) {
+            instance = new PositionModul();
+        }
+        return instance;
+    }
+
+    /**
+     * Nimmt ein Positionsdatum auf
+     * @param PD - {@link PositionData}  - Postionsangabe die aufgenommen wird
+     */
     public void addPositionData(PositionData PD) {
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
         if(NewestData == null) {
@@ -64,6 +81,10 @@ public class PositionModul implements IPositionModul {
         positionModuls.add(PD);
     }
 
+    /**
+     * Gibt aktuelle Positionsangaben aller Z&uuml;ge wider
+     * @return Collection - Positionsangaben
+     */
     @Override
     public Collection<PositionData> getCurrentPositions() {
 
@@ -71,6 +92,11 @@ public class PositionModul implements IPositionModul {
 
     }
 
+    /**
+     * Gibt aktuelle Position des angeforderten Zuges wider
+     * @param iNidEngine - Id des angeforderten Zuges
+     * @return PositionData
+     */
     @Override
     public PositionData getCurrentPosition(int iNidEngine) {
         PositionData PD =  CurrentPositionsByNidId.getModel(iNidEngine);
