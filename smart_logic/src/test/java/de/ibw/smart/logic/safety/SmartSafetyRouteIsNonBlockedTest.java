@@ -111,8 +111,8 @@ class SmartSafetyRouteIsNonBlockedTest {
         BigDecimal dTrainToNextPointTwo;
         String sidEdgeBothTrainsStandingOn;
         // Abstand zur Balise Position Report train1 andn train2
-        int d_lrbg = 15;
-        int d_lrbg_train2 = 20;
+        int d_lrbg = 20;
+        int d_lrbg_train2 = 15;
 
         String sidNodeBothTrainsRunningTo;
         int iLengthTrainOne = 1;
@@ -149,7 +149,7 @@ class SmartSafetyRouteIsNonBlockedTest {
         }
 
         if(TrainStandingOn.B.equals(NodeRunningTo)) {
-            q_dir = 1;
+
             dTrainToNextPointOne =
                     new BigDecimal(iLengthFirstTrail).subtract(
                             B.getBalisenPositionFromNodeA().add(BigDecimal.valueOf(d_lrbg))
@@ -158,18 +158,14 @@ class SmartSafetyRouteIsNonBlockedTest {
                     B.getBalisenPositionFromNodeA().add(BigDecimal.valueOf(d_lrbg_train2))
             );
         } else if(TrainStandingOn.A.equals(NodeRunningTo)) {
-            q_dir = 0;
+
             dTrainToNextPointOne = B.getBalisenPositionFromNodeA().subtract(BigDecimal.valueOf(d_lrbg));
             dTrainToNextPointTwo = B.getBalisenPositionFromNodeA().subtract(BigDecimal.valueOf(d_lrbg_train2));
         }
         else {
             throw new InvalidParameterException("Node Train is running to, is not connected with start edge");
         }
-        // falls der Trigger einer Balise nicht nominal sei, muss das Q_Dir negiert werden
-        // nominale Balisen triggern auf Knoten B.
-        if(!isNominalBalise) {
-            q_dir = (q_dir == 1) ? 0 : 1;
-        }
+
 
 
 
@@ -378,7 +374,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
 
         PositionInfo PosInfoTrain2 = new PositionInfo(Q_SCALE.SCALE_1_M.flag, nid_ref_Balise, nid_prvlbg, d_lrbg_train2,
-                q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
+                q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainTwo,
                 i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
 
         SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
@@ -564,7 +560,7 @@ class SmartSafetyRouteIsNonBlockedTest {
 
     /**
      * Diese TestMethode pr&uuml;ft, ob zwei Z&uuml;ge Erlaubnis erhalten auf der gleichen Strecke zu fahren.
-     * Das Block-Modul soll nur die beide MA-Blockaden als akzeptiert ausstellen.
+     * Das Block-Modul soll nun die beide MA-Blockaden als akzeptiert ausstellen.
      * Im Szenario stehen beide Z&uuml;ge kurz vor und nach einer Balise, die Z&uuml;ge bewegen sich aufeinander zu,
      * sodass, es zu KEINER &Uuml;berlappung kommt.
      * Das Blockademodul, soll die beiden Anfragen akzeptieren.

@@ -1,7 +1,6 @@
 package de.ibw.history;
 
 import de.ibw.util.ThreadedRepo;
-import ebd.globalUtils.position.Position;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
@@ -40,11 +39,11 @@ public class PositionModul implements IPositionModul {
     private boolean posDataIsAccepted(PositionData posDat) {
         if(isRbcTimeFiltering == null) return true;
         if(isRbcTimeFiltering) {
-            if(lFrom < posDat.getRbc_timestamp() && posDat.getRbc_timestamp() < lTo) {
+            if(lFrom <= posDat.getRbc_timestamp() && posDat.getRbc_timestamp() <= lTo) {
                 return true;
             }
         } else {
-            if(lFrom < posDat.getReceived_timestamp() && posDat.getReceived_timestamp() < lTo) {
+            if(lFrom <= posDat.getReceived_timestamp() && posDat.getReceived_timestamp() <= lTo) {
                 return true;
             }
         }

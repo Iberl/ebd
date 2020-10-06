@@ -6,10 +6,12 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 import info.dornbach.dbdclient.DBDClient;
+import info.dornbach.dbdclient.DBDListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.net.UnknownHostException;
 
 /**
  * Wrapper-Classe, sie benutzt den Anlagen-Client und dient nicht zur Simulation der Anlage
@@ -24,7 +26,43 @@ import java.io.*;
  */
 public class RealDbdClient extends DBDClient implements IDbdClientInterface {
 
+
+
+
+
+
+
     private static IDbdClientInterface instance = null;
+
+    @Override
+    public synchronized void connect(String host, int port) throws IOException, UnknownHostException {
+        super.connect(host, port);
+    }
+
+    @Override
+    public void addDBDListener(DBDListener l) {
+        super.addDBDListener(l);
+    }
+
+    @Override
+    public void addDBDListener(String name, DBDListener l) {
+        super.addDBDListener(name, l);
+    }
+
+    @Override
+    public int getValue(String name) {
+        return super.getValue(name);
+    }
+
+    @Override
+    public int getValue(String name, int defaultValue) {
+        return super.getValue(name, defaultValue);
+    }
+
+    @Override
+    public void subscribeAndQuery(String name) {
+        super.subscribeAndQuery(name);
+    }
 
     /**
      * Gibt Instanz eines DBD-Client oder eines Fake wieder.

@@ -1,7 +1,9 @@
 package de.ibw.history;
 
+import com.sun.xml.bind.v2.model.annotation.RuntimeAnnotationReader;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.util.DefaultRepo;
 import ebd.globalUtils.position.Position;
 import ebd.rbc_tms.util.PositionInfo;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,12 +28,21 @@ class PositionModulTest {
     private ArrayList<String> testTrackName = new ArrayList<>();
 
 
+
+    private DefaultRepo<Integer, ArrayList<PositionData>> nidRepo  = new DefaultRepo<>();
+
+    private PositionData Current3 = null;
+
+
+
     @BeforeEach
     public void initFunction() {
         MUT = new PositionModul();
         iDataAmount = 0;
         testNid = new ArrayList<>();
         testTrackName = new ArrayList<>();
+        nidRepo = new DefaultRepo<>();
+        Current3 = null;
     }
     private void generatePositionData(int iMin, int iMax) {
 
@@ -49,6 +60,7 @@ class PositionModulTest {
             testTrackName.add("String" + iStringIndex);
         }
 
+        int iDistanceUsedCounter = 0;
 
         for(int i = 0; i < iDataAmount; i++) {
             int iNidEngine = (int) pickRandom(testNid);
@@ -56,9 +68,25 @@ class PositionModulTest {
             PositionInfo PI = new PositionInfo(Q_SCALE.SCALE_1_M.flag, iNidEngine,null,1,-1,
                     -1,-1,-1, -1, -1, -1, -1 ,-1,
                     -1, -1);
-            PositionData PD = new PositionData(1,1,iNidEngine, PI);
+            PositionData PD = new PositionData(i,i,iNidEngine, PI);
             PD.setsIdTopEdge(sTrackId);
+            if(iNidEngine == 3 && iDistanceUsedCounter < 3) {
+                iDistanceUsedCounter++;
+                PD.setdDistanceToTopNodeA(new BigDecimal("12"));
+            } else {
+                BigDecimal dDistance = new BigDecimal(new Random().nextDouble()).abs().remainder(new BigDecimal(122))
+                        .add(new BigDecimal(12));
+                PD.setdDistanceToTopNodeA(dDistance);
+            }
+
             MUT.addPositionData(PD);
+            ArrayList<PositionData> data = nidRepo.getModel(iNidEngine);
+            if(data == null) data = new ArrayList<>();
+            data.add(PD);
+            nidRepo.update(iNidEngine, data);
+            if(iNidEngine == 3) {
+                this.Current3 = PD;
+            }
         }
     }
 
@@ -121,13 +149,35 @@ class PositionModulTest {
         generatePositionData(7,10000);
         assertEquals(iDataAmount, MUT.getAllPositions().size(), "Amount not hit");
         assertEquals(7, MUT.getAllPositions(3).size(), "Nid ID 3 have to be 7 times");
-        assertEquals(10, MUT.getAllPositions(null,"String3", null,null).size());
+        assertEquals(10, MUT.getAllPositions(null,"String3", null,null).size(), "Sring3 not found 10 times");
+        assertEquals(7, MUT.getAllPositions(3, null, new BigDecimal(1), new BigDecimal(150)).size(), "Range test a not found 7 times");
+        assertEquals(nidRepo.getKeys().size(),MUT.getCurrentPositions().size(), "keys not beeing CurrentPosition size");
+        assertEquals(this.Current3, MUT.getCurrentPosition(3), "Position for nid engine 3 is not as expected.");
+        MUT.getCurrentPositions();
     }
 
 
 
-    @Test
+    @RepeatedTest(100)
     void testWithFilter() {
+        initFunction();
+        generatePositionData(7, 10000);
+
+        int i1 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;
+        int i2 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;
+
+        if(i2 < i1) {
+            int temp = i1;
+            i1 = i2;
+            i2 = temp;
+        }
+
+        MUT.setTimeFilter(true,i1, i2 );
+        assertEquals(i2 -i1 + 1, MUT.getAllPositions().size(), "i2:" + i2 + "i1" + i1);
+
+
+
+
     }
 
 }
