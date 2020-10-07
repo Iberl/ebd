@@ -1,13 +1,12 @@
 package ebd.breakingCurveCalculator;
 
-import java.util.ArrayList;
+import java.util.TreeMap;
 
-import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
+import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
+import ebd.globalUtils.breakingCurveType.BreakingCurveType;
 import ebd.globalUtils.location.Location;
-import ebd.globalUtils.position.Position;
-import ebd.globalUtils.position.exceptions.PositionReferenzException;
+import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
-import ebd.globalUtils.spline.Knot;
 
 /**
  * <p>
@@ -44,188 +43,95 @@ import ebd.globalUtils.spline.Knot;
  * @author Lars Schulze-Falck
  *
  */
-public class BreakingCurve extends BackwardSpline {
+public class BreakingCurve {
 	
 	/**
-	 * 
+	 * Reference location of the breaking curve
 	 */
 	private Location refLocation;
-	
-	public BreakingCurve(Location refLocation) {
-		super(1);
-		setRefLocation(refLocation);
-	}
-	
-	public BreakingCurve(Location refLocation, String id) {
-		super(1, id);
-		
-		setRefLocation(refLocation);
-	}
-	
-	
-	/**
-	 * This function finds any point on the breaking curve
-	 * 
-	 * @param relativeDistance Any position inside the bounds of the breaking curve
-	 * 
-	 * @return Returns an ArrayList<double>, the first entry being the given position and the second entry 
-	 * 			being speed at this position
-	 * 
-	 * @throws BreakingCurveOutOfRangeException Is being thrown when the given position is outside
-	 * 			the bounds of the breaking curve, either < 0 or greater than curve.lastKey()
-	 */
-	@Override
-	public Double getPointOnCurve(Double relativeDistance) throws BreakingCurveOutOfRangeException{
-		
-		if (relativeDistance < 0) {
-			throw new BreakingCurveOutOfRangeException("Given position was smaller then 0");
-		}
-				
-		Double knotPosition = curve.higherKey(relativeDistance);
-		
-		if (knotPosition == null) {
-			
-			if (relativeDistance.equals(curve.lastKey())) {
-				knotPosition = curve.lastKey();
-			}
-			else throw new BreakingCurveOutOfRangeException("Given position was greater than the range of this breaking curve");
-		}
-		
-		ArrayList<Double> knotValue = curve.get(knotPosition);
-			
-		
-		return (relativeDistance - knotPosition) * knotValue.get(1) + knotValue.get(0);
-	}
-	
-	/**
-	 * This function returns the interval boundary for a given position. In case the position is equal to a interval
-	 * boundary, it will become the higher boundary, because the interval is left open, right closed.
-	 * 
-	 * @param relativeDistance Any position greater 0 inside the bounds of the breaking curve
-	 * @return Returns an ArrayList<Double>(2), first entry being the lower limit, second entry the higher limit
-	 * @throws BreakingCurveOutOfRangeException Is being thrown when the given position is outside
-	 * 			the bounds of the breaking curve, either <= 0 or greater than curve.lastKey()
-	 */
-	@Override
-	public ArrayList<Double> getIntervallBoundariesOfPoint(Double relativeDistance) throws BreakingCurveOutOfRangeException {
-	
-		if (relativeDistance <= 0) {
-			throw new BreakingCurveOutOfRangeException("Given position was smaller or equal 0");
-		}
-			
-		Double lowerBoundary = curve.lowerKey(relativeDistance);
-		if (lowerBoundary == null) {
-			lowerBoundary = (double) 0;
-		}
-		
-		Double higherBoundary = curve.ceilingKey(relativeDistance);
-		if (higherBoundary == null) {
-			throw new BreakingCurveOutOfRangeException("Given position was greater than the range of this breaking curve"); 
-		}
-		
-		ArrayList<Double> intervalBoundarys = new ArrayList<>(2);
-		intervalBoundarys.add(lowerBoundary);
-		intervalBoundarys.add(higherBoundary);
-		
-		return intervalBoundarys;	
-	}
 
-	
-	
 	/**
-	 * 
-	 * This function returns the maximum allowed Speed at a given Position. This position must either reference the same location
-	 * or have the location in its list of previous locations and must be at least at far in the direction of travel.
-	 * In other  words, the asked position can not lay before the reference location in direction of travel.
-	 * 
-	 * @param position The asked for {@link Position}
-	 * @return Double The maximum allowed speed at the asked for Position in [m/s]
-	 * @throws PositionReferenzException Thrown should the given position can not resolve the distance to the reference location
-	 * @throws BreakingCurveOutOfRangeException If the position lays outside the range of the breaking curve
-
+	 * If true, this is a Emergency Breaking Deceleration (EBD) Curve, if false, a Service Breaking Deceleration SBD curve.
 	 */
-	public Double getMaxSpeedAtRelativePosition(Position position) throws PositionReferenzException{
-		
-		Double distanceToReferenceLocation = position.totalDistanceToPastLocation(refLocation.getId());
-		
-		return getPointOnCurve(distanceToReferenceLocation);
+	private boolean ebd;
+
+	private StaticSpeedProfil ssp;
+
+	private TreeMap<Double, CurveGroup> curveMap;
+
+	/**
+	 * Creates a BreakingCurve that includes all speed restriction data.
+	 * @param refLocation Reference {@link Location} for the curve, in other words the start point of the curve.
+	 * @param ssp The connected {@link StaticSpeedProfil}
+	 * @param curveMap A {@link TreeMap} of type {@code TreeMap<Double, BackwardSpline>},
+	 *                 connecting deceleration with distances in [m] between refLocation and the food of the curve.
+	 */
+	public BreakingCurve(Location refLocation, StaticSpeedProfil ssp, TreeMap<Double, CurveGroup> curveMap) {
+		this.refLocation = refLocation;
+		this.ssp = ssp;
+		this.curveMap = curveMap;
 	}
 
 	/**
-	 * This function returns the maximum allowed Speed at a given Position. This position must either reference the same location
-	 * or have the location in its list of previous locations and must be at least at far in the direction of travel.
-	 * In other  words, the asked position can not lay before the reference location in direction of travel.
+	 * Returns the current allowed speed at a given distance. The kind of speed depends on the given {@link BreakingCurveType}.
+	 * If for example, given {@link BreakingCurveType#EMERGENCY_INTERVENTION_CURVE}, the current maximum speed before an emergency break
+	 * intervention will be returned. <br>
+	 *     This will return the correct value in either  {@link SpeedSupervisionState#CEILING_SPEED_SUPERVISION}
+	 *     or {@link SpeedSupervisionState#TARGET_SPEED_SUPERVISION}<br>
 	 *
-	 * @param position The asked for {@link Position}
-	 * @param offset offset of the position in [m]
-	 * @return The maximum allowed speed at the asked for Position in [m/s]
-	 * @throws PositionReferenzException Thrown should the given position can not resolve the distance to the reference location
-	 * @throws BreakingCurveOutOfRangeException If the position + offset lays outside the range of the breaking curve
+	 * @param distance Distance from reference location in [m]
+	 * @param breakingCurveType The type of curve that is queried.
+	 * @return Speed in [m/s]
 	 */
-	public Double getMaxSpeedAtRelativePositionAndOffset(Position position, double offset) throws PositionReferenzException{
-		Double distanceToReferenceLocation = position.totalDistanceToPastLocation(refLocation.getId());
-
-		return getPointOnCurve(distanceToReferenceLocation + offset);
+	public double getSpeedAtDistance(double distance, BreakingCurveType breakingCurveType){
+		double sspSpeed = this.ssp.getSpeedAtDistance(distance, breakingCurveType);
+		double bcSpeed = getSpeedFromBCCurve(distance,breakingCurveType);
+		return Math.min(sspSpeed,bcSpeed);
 	}
 
-	/**
-	 * Returns the distance after which the maximum speed of the breaking curve is always lower or equal then the given speed
-	 * @param testSpeed in [m/s]
-	 * @return In [m]. Returns {@link Double#MAX_VALUE} if no part of the breaking curve is lower then the given speed
-	 */
-	//TODO Tests
-	public Double getDistanceSpeedAlwaysLower(double testSpeed){
-
-		Double lastDist = this.curve.lastKey();
-		double lastSpeed = this.curve.lastEntry().getValue().get(0);
-		if(lastSpeed > testSpeed){
-			return Double.MAX_VALUE;
+	public SpeedSupervisionState getSpeedSupervisionState(double distance){
+		double sspSpeed = this.ssp.getSpeedAtDistance(distance,BreakingCurveType.EMERGENCY_INTERVENTION_CURVE);
+		double indiSpeed = getSpeedFromBCCurve(distance,BreakingCurveType.INDICATION_CURVE);
+		if( sspSpeed > indiSpeed){
+			return SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 		}
-		if(lastSpeed == testSpeed){
-			return lastDist;
-		}
-		//Iterating of the tree map to find the highest key with a lower value then testSpeed
-		while(true){
-			Double nextDist = this.curve.lowerKey(lastDist);
-			if (nextDist == null) return 0d;
-
-			double nextSpeed = this.curve.get(nextDist).get(0);
-			if(nextSpeed >= testSpeed){
-				return calculatePreciseIntersection(lastDist,testSpeed);
-			}
-
-			lastDist = nextDist;
-		}
-
+		else return SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
 	}
 
-	/**
-	 * Calculates the precise point at which the curve takes a certain value bas on the knowledge of the next higher key.
-	 *
-	 * @param nextHigherKey The next higher key to the precise point
-	 * @param yValue The value that the curve should be equal to
-	 * @return the precise X-value at which the curve is equal to yValue
-	 */
-	private Double calculatePreciseIntersection(Double nextHigherKey, double yValue) {
-
-		double knotSpeed = this.curve.get(nextHigherKey).get(0);
-		double knotConstant = this.curve.get(nextHigherKey).get(1);
-
-		return (yValue - knotSpeed) / knotConstant + nextHigherKey;
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("BreakingCurve{" +
+				"refLocation=" + refLocation.getId() +
+				", ebd=" + ebd +
+				'}');
+		return sb.toString();
 	}
 
-	/**
-	 * @return the reference position
+	private double getSpeedFromBCCurve(double distance, BreakingCurveType curveType) {
+		CurveGroup cg = this.curveMap.ceilingEntry(distance).getValue();
+		BackwardSpline bs = switch (curveType){
+			case C30_CURVE -> cg.getC30Curve();
+			case NORMAL_CURVE -> cg.getNormalBreakingCurve();
+			case INDICATION_CURVE -> cg.getIndicationCurve();
+			case PERMITTED_SPEED -> cg.getPermittedSpeedCurve();
+			case WARNING_CURVE -> cg.getWarningCurve();
+			case SERVICE_INTERVENTION_CURVE -> cg.getServiceInterventionCurve();
+			case EMERGENCY_INTERVENTION_CURVE -> cg.getEmergencyInterventionCurve();
+			default -> throw new IllegalStateException("Curve type not known: " + curveType);
+		};
+
+		return bs.getPointOnCurve(distance);
+	}
+
+	/*
+	Getter
 	 */
 	public Location getRefLocation() {
 		return refLocation;
 	}
 
-	/**
-	 * @param refLocation the reference position to set
-	 */
-	private void setRefLocation(Location refLocation) {
-		this.refLocation = refLocation;
+	public boolean isEbd() {
+		return ebd;
 	}
-	
+
 }

@@ -1,8 +1,6 @@
 package ebd.breakingCurveCalculator.utils.events;
 
-import java.util.List;
-
-import ebd.breakingCurveCalculator.BreakingCurveGroup;
+import ebd.breakingCurveCalculator.CurveGroup;
 import ebd.globalUtils.events.NormalEvent;
 
 /**
@@ -12,7 +10,7 @@ import ebd.globalUtils.events.NormalEvent;
 public class NewBreakingCurveEvent extends NormalEvent {
 	
 
-	public BreakingCurveGroup breakingCurveGroup;
+	public CurveGroup curveGroup;
 
 	public boolean lastMovementAuthorityMessage;
 	/**
@@ -21,11 +19,11 @@ public class NewBreakingCurveEvent extends NormalEvent {
 	  *          TODO: Define Format for IDs
 	  * @param target
 	  *          ID from all modules the event is adressed to
-	 * @param breakingCurveGroup
+	 * @param curveGroup
 	 * 			The breaking curve group, containing all breaking curves
 	 */
-	public NewBreakingCurveEvent(String source, String target, BreakingCurveGroup breakingCurveGroup) {
+	public NewBreakingCurveEvent(String source, String target, CurveGroup curveGroup) {
 		super(source, target);
-		this.breakingCurveGroup = breakingCurveGroup;
+		this.curveGroup = curveGroup;
 	}
 }

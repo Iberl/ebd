@@ -1,7 +1,7 @@
 package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.breakingCurveCalculator.BreakingCurveGroup;
+import ebd.breakingCurveCalculator.CurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
@@ -39,7 +39,7 @@ public class SpeedSupervisor {
     private TrainDataVolatile trainDataVolatile;
     private ConfigHandler ch;
 
-    private BreakingCurveGroup breakingCurveGroup = null;
+    private CurveGroup curveGroup = null;
     private boolean inRSM = false;
     private SpeedInterventionLevel curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     private SpeedSupervisionState curSupervisionState = SpeedSupervisionState.NOT_SET;
@@ -83,7 +83,7 @@ public class SpeedSupervisor {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
-        if (this.breakingCurveGroup == null){
+        if (this.curveGroup == null){
 
 
             return;
@@ -102,7 +102,7 @@ public class SpeedSupervisor {
             return;
         }
 
-        double tripDistance = curPosition.totalDistanceToPastLocation(this.breakingCurveGroup.getServiceDecelerationCurve().getRefLocation().getId());
+        double tripDistance = curPosition.totalDistanceToPastLocation(this.curveGroup.getNormalBreakingCurve().getRefLocation().getId());
 
         if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
         else updateMaxSpeeds(tripDistance, curSpeed);
@@ -161,10 +161,10 @@ public class SpeedSupervisor {
     @Subscribe
     public void setBreakingCurveGroup(NewBreakingCurveEvent nbce){
 
-        this.breakingCurveGroup = nbce.breakingCurveGroup;
-        this.maxServiceDistance = this.breakingCurveGroup.getServiceDecelerationCurve().getHighestXValue();
-        this.maxEmergencyDistance = this.breakingCurveGroup.getEmergencyDecelerationCurve().getHighestXValue();
-        this.targetSpeed = this.breakingCurveGroup.getPermittedSpeedCurve().getPointOnCurve(0d);
+        this.curveGroup = nbce.curveGroup;
+        this.maxServiceDistance = this.curveGroup.getNormalBreakingCurve().getHighestXValue();
+        this.maxEmergencyDistance = this.curveGroup.getEmergencyDecelerationCurve().getHighestXValue();
+        this.targetSpeed = this.curveGroup.getPermittedSpeedCurve().getPointOnCurve(0d);
         this.targetSpeedDistance = 0d;
     }
 
@@ -188,26 +188,26 @@ public class SpeedSupervisor {
         this.maxCoastingPhaseSpeed = 0d;
 
         if(tripDistance < this.maxServiceDistance){
-            this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
+            this.maxEmergencyInterventionSpeed = this.curveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
 
-            this.maxServiceInterventionSpeed = Math.min(this.breakingCurveGroup.getServiceInterventionCurve().getPointOnCurve(tripDistance),
+            this.maxServiceInterventionSpeed = Math.min(this.curveGroup.getServiceInterventionCurve().getPointOnCurve(tripDistance),
                                                 this.maxEmergencyInterventionSpeed - 1);
-            this.maxWarningSpeed = Math.min(this.breakingCurveGroup.getServiceWarningCurve().getPointOnCurve(tripDistance),
+            this.maxWarningSpeed = Math.min(this.curveGroup.getWarningCurve().getPointOnCurve(tripDistance),
                                                 this.maxServiceInterventionSpeed - 1);
-            this.maxPermittedSpeed = Math.min(this.breakingCurveGroup.getPermittedSpeedCurve().getPointOnCurve(tripDistance),
+            this.maxPermittedSpeed = Math.min(this.curveGroup.getPermittedSpeedCurve().getPointOnCurve(tripDistance),
                                                 this.maxWarningSpeed - 1);
-            this.maxIndicationSpeed = Math.min(this.breakingCurveGroup.getServiceIndicationCurve().getPointOnCurve(tripDistance),
+            this.maxIndicationSpeed = Math.min(this.curveGroup.getIndicationCurve().getPointOnCurve(tripDistance),
                                                 this.maxEmergencyInterventionSpeed);
-            this.maxCoastingPhaseSpeed = Math.min(this.breakingCurveGroup.getServiceCoastingPhaseCurve().getPointOnCurve(tripDistance),
+            this.maxCoastingPhaseSpeed = Math.min(this.curveGroup.getC30Curve().getPointOnCurve(tripDistance),
                                                 this.maxPermittedSpeed);
 
             if(tripDistance >= this.targetSpeedDistance){
-                BreakingCurve bc = this.breakingCurveGroup.getPermittedSpeedCurve(); //TODO Get Trip Profile somehow
+                BreakingCurve bc = this.curveGroup.getPermittedSpeedCurve(); //TODO Get Trip Profile somehow
                 findNewTargetSpeedAndDistance(bc,tripDistance);
             }
         }
         else if (tripDistance < this.maxEmergencyDistance){
-            this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
+            this.maxEmergencyInterventionSpeed = this.curveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
             this.targetSpeed = 0d;
         }
 
@@ -227,7 +227,7 @@ public class SpeedSupervisor {
         this.targetSpeed = 0d;
 
         if (tripDistance < this.maxEmergencyDistance) {
-            this.maxEmergencyInterventionSpeed = this.breakingCurveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
+            this.maxEmergencyInterventionSpeed = this.curveGroup.getEmergencyInterventionCurve().getPointOnCurve(tripDistance);
         }
     }
 

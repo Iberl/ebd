@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
+import ebd.globalUtils.breakingCurveType.BreakingCurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -216,27 +217,20 @@ public class StaticSpeedProfil extends ForwardSpline{
 	 * @param xValue
 	 * 			Distance in [m] on the speed profile
 	 * @param curveType
-	 * 			{@link ebd.breakingCurveCalculator.BreakingCurveCalculator.CurveType}
+	 * 			{@link ebd.globalUtils.breakingCurveType.BreakingCurveType}
 	 * @return Speed in [m/s]
 	 */
-	public Double getSpeedAtDistance(Double xValue, BreakingCurveCalculator.CurveType curveType) {
+	public Double getSpeedAtDistance(Double xValue, BreakingCurveType curveType) {
 		Double speed = super.getPointOnCurve(xValue);
 		if(speed <= 0.1){
 			return 0.0;
 		}
-		switch (curveType){
-			case PERMITTED_SPEED:
-				return speed;
-			case WARNING_CURVE:
-				return speed + warningCeiling(speed);
-			case SERVICE_CURVE:
-				return speed + serviceInterventionCeiling(speed);
-			case INDICATION_CURVE:
-			case EMERGENCY_CURVE:
-				return speed + emergencyInterventionCeiling(speed);
-			default:
-				throw new SSPInvalidInputException("CurveType was not caught");
-		}
+		return switch (curveType) {
+			case WARNING_CURVE -> speed + warningCeiling(speed);
+			case SERVICE_INTERVENTION_CURVE -> speed + serviceInterventionCeiling(speed);
+			case EMERGENCY_INTERVENTION_CURVE -> speed + emergencyInterventionCeiling(speed);
+			default -> speed;
+		};
 	}
 
 	/**
