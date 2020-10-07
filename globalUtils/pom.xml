@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+    <artifactId>etcs</artifactId>
+    <groupId>ebd</groupId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+
+    <artifactId>globalUtils</artifactId>
+    <version>0.1-SNAPSHOT</version>
+
     <dependencies>
         <dependency>
             <groupId>ebd</groupId>
@@ -8,16 +18,14 @@
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>messageLibrary</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
-    <parent>
-    <artifactId>etcs</artifactId>
-    <groupId>ebd</groupId>
-    <version>0.1-SNAPSHOT</version>
-  </parent>
 
-  <groupId>ebd</groupId>
-  <artifactId>globalUtils</artifactId>
-  <version>0.1-SNAPSHOT</version>
 
   <name>Global Utilities</name>
 
