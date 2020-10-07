@@ -150,7 +150,7 @@ public class DistanceSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurveGroup.getPermittedSpeedCurve();
+        this.breakingCurve = bce.curveGroup.getPermittedSpeedCurve();
         this.curReleaseSpeed = calculateReleaseSpeed();
         this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
 

@@ -1,7 +1,7 @@
 package ebd.drivingDynamics.util;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.breakingCurveCalculator.BreakingCurveGroup;
+import ebd.breakingCurveCalculator.CurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -16,7 +16,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TripProfileProvider {
@@ -58,10 +57,10 @@ public class TripProfileProvider {
     @Subscribe
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
-            getProfilefromSource(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+            getProfilefromSource(nbce.curveGroup.getPermittedSpeedCurve());
         }
         else {
-            getProfileFromBreakingCurveGroup(nbce.breakingCurveGroup);
+            getProfileFromBreakingCurveGroup(nbce.curveGroup);
         }
 
 
@@ -77,14 +76,14 @@ public class TripProfileProvider {
      * speeds then the service intervention breaks.
      * This leads to an undesirable behavior of the driving dynamic class. This method takes numeric
      * approach to produce the minimum curve of both by sampling both curves with a 0.5 m resolution and taking the minimal value.
-     * @param breakingCurveGroup A {@link BreakingCurveGroup} from a {@link NewBreakingCurveEvent}
+     * @param curveGroup A {@link CurveGroup} from a {@link NewBreakingCurveEvent}
      */
-    private void getProfileFromBreakingCurveGroup(BreakingCurveGroup breakingCurveGroup) {
+    private void getProfileFromBreakingCurveGroup(CurveGroup curveGroup) {
         //TODO Check Performance inpact. Should be low (only done once per MA)
-        BreakingCurve psc = breakingCurveGroup.getPermittedSpeedCurve();
+        BreakingCurve psc = curveGroup.getPermittedSpeedCurve();
         this.refLocation = psc.getRefLocation();
 
-        BreakingCurve sic = breakingCurveGroup.getServiceInterventionCurve();
+        BreakingCurve sic = curveGroup.getServiceInterventionCurve();
 
         final double maxX = Math.min(psc.getHighestXValue(),sic.getHighestXValue());
         final int xSteps = (int)maxX * 2;

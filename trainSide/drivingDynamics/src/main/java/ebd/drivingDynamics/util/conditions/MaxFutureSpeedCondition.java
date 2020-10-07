@@ -127,7 +127,7 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
     @Subscribe
     public void newBreakingCurveGroup(NewBreakingCurveEvent nbce){
         if(!vaildEventTarget(nbce.target)) return;
-        this.c30Curve = nbce.breakingCurveGroup.getServiceCoastingPhaseCurve();
+        this.c30Curve = nbce.curveGroup.getC30Curve();
         this.maxBreakinCurveDistance = this.c30Curve.getHighestXValue();
 
     }
