@@ -9,7 +9,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;
 
 /**
- * This compares the current {@link ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel} to a given one.<br>
+ * This compares the current {@link SpeedInterventionLevel} to a given one.<br>
  * <p>The <b>type</b> of this condition is "sil"</p>
  * <p>The <b>value</b> key contains one of the following values: <br>
  *     "NO_INTERVENTION"<br>
