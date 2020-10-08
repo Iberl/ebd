@@ -1,9 +1,10 @@
-package ebd.globalUtils.etcsPacketToProfileConverters;
+package ebd.globalUtils.etcsPacketConverters;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.util.ETCSVariables;
+
+import java.util.List;
 
 /**
  * Converts a {@link Packet_15} into a double value representing the total distance to the End of Authority.<br>
@@ -145,9 +146,4 @@ public class MovementAuthorityConverter {
         }
         return p15.V_RELEASEOL * 5 / 3.6;
     }
-
-
-
-
-
 }

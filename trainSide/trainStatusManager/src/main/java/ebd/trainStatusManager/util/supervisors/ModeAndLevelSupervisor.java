@@ -113,7 +113,7 @@ public class ModeAndLevelSupervisor {
 
     @Subscribe
     public void breakinCurve(NewBreakingCurveEvent nbce){
-        this.bc = nbce.curveGroup.getPermittedSpeedCurve();
+        this.bc = nbce.breakingCurve.getPermittedSpeedCurve();
         Packet_80 p80 = routeDataVolatile.getPacket_80();
         this.modeProfil = makeModeProfil(p80);
     }

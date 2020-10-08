@@ -1,6 +1,7 @@
 package ebd.breakingCurveCalculator;
 
 
+import ebd.globalUtils.breakingCurveType.BreakingCurveType;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.Knot;
 
@@ -9,7 +10,17 @@ public class CurveGroup {
     private final String id;
 
     private BackwardSpline emergencyInterventionCurve;
-    private BackwardSpline serviceInterventionCurve;
+    /**
+     * From EBD
+     */
+    private BackwardSpline serviceInterventionCurve2;
+    /**
+     * From SBD
+     */
+    private BackwardSpline serviceInterventionCurve1;
+    /**
+     * Also called GUI (guidance) Curve
+     */
     private BackwardSpline normalBreakingCurve;
     private BackwardSpline warningCurve;
     private BackwardSpline permittedSpeedCurve;
@@ -29,13 +40,28 @@ public class CurveGroup {
         initCurves();
     }
 
+    public BackwardSpline getCurveFromType(BreakingCurveType bct){
+        return switch (bct){
+            case C30_CURVE -> getC30Curve();
+            case NORMAL_CURVE -> getNormalBreakingCurve();
+            case INDICATION_CURVE -> getIndicationCurve();
+            case PERMITTED_SPEED -> getPermittedSpeedCurve();
+            case WARNING_CURVE -> getWarningCurve();
+            case SERVICE_INTERVENTION_CURVE_1 -> getServiceInterventionCurve1();
+            case SERVICE_INTERVENTION_CURVE_2 -> getServiceInterventionCurve2();
+            case EMERGENCY_INTERVENTION_CURVE -> getEmergencyInterventionCurve();
+            default -> throw new IllegalStateException("Curve type not known: " + bct);
+        };
+    }
+
     private void initCurves() {
         BackwardSpline nullCurve = new BackwardSpline(1, "ERROR");
         nullCurve.addKnotToCurve(new Knot(0d, new double[]{0d,0d}));
         nullCurve.addKnotToCurve(new Knot(Double.MAX_VALUE, new double[]{0d,0d}));
 
         this.emergencyInterventionCurve = nullCurve;
-        this.serviceInterventionCurve = nullCurve;
+        this.serviceInterventionCurve2 = nullCurve;
+        this.serviceInterventionCurve1 = nullCurve;
         this.normalBreakingCurve = nullCurve;
         this.warningCurve = nullCurve;
         this.permittedSpeedCurve = nullCurve;
@@ -55,8 +81,18 @@ public class CurveGroup {
         return emergencyInterventionCurve;
     }
 
-    public BackwardSpline getServiceInterventionCurve() {
-        return serviceInterventionCurve;
+    /**
+     * ServiceInterventionCurve2 is based on the EmergencyDecelerationCurve
+     * @return BackwardSpline
+     */
+    public BackwardSpline getServiceInterventionCurve2() { return serviceInterventionCurve2; }
+
+    /**
+     * ServiceInterventionCurve1 is based on the ServiceDecelerationCurve
+     * @return BackwardSpline
+     */
+    public BackwardSpline getServiceInterventionCurve1() {
+        return serviceInterventionCurve1;
     }
 
     public BackwardSpline getNormalBreakingCurve() {
@@ -89,8 +125,12 @@ public class CurveGroup {
         this.normalBreakingCurve = normalBreakingCurve;
     }
 
-    void setServiceInterventionCurve(BackwardSpline serviceInterventionCurve) {
-        this.serviceInterventionCurve = serviceInterventionCurve;
+    void setServiceInterventionCurve2(BackwardSpline serviceInterventionCurve) {
+        this.serviceInterventionCurve2 = serviceInterventionCurve;
+    }
+
+    void setServiceInterventionCurve1(BackwardSpline serviceInterventionCurve) {
+        this.serviceInterventionCurve1 = serviceInterventionCurve;
     }
 
     void setWarningCurve(BackwardSpline warningCurve) {

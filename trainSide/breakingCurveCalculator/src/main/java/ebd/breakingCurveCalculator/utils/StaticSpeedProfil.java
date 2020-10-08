@@ -1,9 +1,6 @@
 package ebd.breakingCurveCalculator.utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
@@ -76,7 +73,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 	 * 		If Array is not even
 	 * 
 	 */
-	public StaticSpeedProfil(ArrayList<Double> inputArray) throws SSPInvalidInputException{
+	public StaticSpeedProfil(List<Double> inputArray) throws SSPInvalidInputException{
 		super(0);
 		if ((inputArray.size() % 2 != 0)) {	throw new SSPInvalidInputException(String.format("The input array needs to be of even size, size was %d",inputArray.size()));}
 		
@@ -97,7 +94,7 @@ public class StaticSpeedProfil extends ForwardSpline{
 	 * @throws SSPInvalidInputException 
 	 * 		If Array is not even
 	 */
-	public StaticSpeedProfil(ArrayList<Double> inputArray, String id) throws SSPInvalidInputException {
+	public StaticSpeedProfil(List<Double> inputArray, String id) throws SSPInvalidInputException {
 		super(0, id);
 		if (inputArray.size() % 2 != 0) {throw new SSPInvalidInputException(String.format("The input array needs to be of even size, size was %d",inputArray.size()));}
 		
@@ -227,10 +224,29 @@ public class StaticSpeedProfil extends ForwardSpline{
 		}
 		return switch (curveType) {
 			case WARNING_CURVE -> speed + warningCeiling(speed);
-			case SERVICE_INTERVENTION_CURVE -> speed + serviceInterventionCeiling(speed);
+			case SERVICE_INTERVENTION_CURVE_1,SERVICE_INTERVENTION_CURVE_2 -> speed + serviceInterventionCeiling(speed);
 			case EMERGENCY_INTERVENTION_CURVE -> speed + emergencyInterventionCeiling(speed);
 			default -> speed;
 		};
+	}
+
+	/**
+	 * This function searches for all points in the speed profile where the where the maximum allowed speed drops.
+	 *
+	 * @return A {@code List<Double>} containing points in [m].
+	 */
+	public List<Double> listOfSlowDowns(){
+		ArrayList<Double> slowDownList = new ArrayList<>();
+		Double[] knotList = this.curve.keySet().toArray(Double[]::new);
+		for(int i = 1; i < knotList.length; i++){
+			double prevSpeed = this.curve.get(knotList[i-1]).get(0);
+			double curSpeed = this.curve.get(knotList[i]).get(0);
+			if(curSpeed < prevSpeed){
+				slowDownList.add(knotList[i]);
+			}
+		}
+
+		return slowDownList;
 	}
 
 	/**

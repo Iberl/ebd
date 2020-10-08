@@ -1,9 +1,12 @@
 package ebd.breakingCurveCalculator;
 
+
+import java.util.Arrays;
 import java.util.TreeMap;
 
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
@@ -48,16 +51,19 @@ public class BreakingCurve {
 	/**
 	 * Reference location of the breaking curve
 	 */
-	private Location refLocation;
+	private final Location refLocation;
 
-	/**
-	 * If true, this is a Emergency Breaking Deceleration (EBD) Curve, if false, a Service Breaking Deceleration SBD curve.
-	 */
-	private boolean ebd;
+	private final StaticSpeedProfil ssp;
 
-	private StaticSpeedProfil ssp;
+	private final TreeMap<Double, CurveGroup> curveMap;
 
-	private TreeMap<Double, CurveGroup> curveMap;
+	public BreakingCurve(){
+		this.refLocation = new InitalLocation();
+		this.ssp = new StaticSpeedProfil(Arrays.asList(0d,0d));
+		TreeMap<Double,CurveGroup> cm = new TreeMap<>();
+		cm.put(0d,new CurveGroup());
+		this.curveMap = cm;
+	}
 
 	/**
 	 * Creates a BreakingCurve that includes all speed restriction data.
@@ -85,14 +91,37 @@ public class BreakingCurve {
 	 */
 	public double getSpeedAtDistance(double distance, BreakingCurveType breakingCurveType){
 		double sspSpeed = this.ssp.getSpeedAtDistance(distance, breakingCurveType);
-		double bcSpeed = getSpeedFromBCCurve(distance,breakingCurveType);
+		double bcSpeed = getSpeedFromBCCurveMap(distance,breakingCurveType);
 		return Math.min(sspSpeed,bcSpeed);
 	}
 
-	public SpeedSupervisionState getSpeedSupervisionState(double distance){
-		double sspSpeed = this.ssp.getSpeedAtDistance(distance,BreakingCurveType.EMERGENCY_INTERVENTION_CURVE);
-		double indiSpeed = getSpeedFromBCCurve(distance,BreakingCurveType.INDICATION_CURVE);
-		if( sspSpeed > indiSpeed){
+	/**
+	 * Returns the distance between the reference location and the next target in [m]
+	 * @param distance current distance of the train in [m]
+	 * @return Distance in [m]
+	 */
+	public double nextTargetDistance(double distance){
+		Double distanceAtTarget = this.curveMap.higherKey(distance);
+		if(distanceAtTarget == null) return this.curveMap.lastKey();
+
+		double targetSpeed = this.curveMap.get(distanceAtTarget).getPermittedSpeedCurve().getPointOnCurve(distanceAtTarget);
+		double lowestSpeed = getSpeedAtDistance(distanceAtTarget,BreakingCurveType.PERMITTED_SPEED);
+
+		if(lowestSpeed < targetSpeed){
+			return nextTargetDistance(distanceAtTarget);
+		}
+		else return distanceAtTarget;
+	}
+
+	/**
+	 *
+	 * @param curDistance Current distance in [m]
+	 * @param curSpeed Current Speed in [m/s]
+	 * @return Either {@link SpeedSupervisionState#CEILING_SPEED_SUPERVISION} or {@link SpeedSupervisionState#TARGET_SPEED_SUPERVISION}
+	 */
+	public SpeedSupervisionState getSpeedSupervisionState(double curDistance, double curSpeed){
+		double indiSpeed = getSpeedFromBCCurveMap(curDistance,BreakingCurveType.INDICATION_CURVE);
+		if( curSpeed > indiSpeed){
 			return SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 		}
 		else return SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
@@ -102,25 +131,26 @@ public class BreakingCurve {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("BreakingCurve{" +
 				"refLocation=" + refLocation.getId() +
-				", ebd=" + ebd +
 				'}');
 		return sb.toString();
 	}
 
-	private double getSpeedFromBCCurve(double distance, BreakingCurveType curveType) {
-		CurveGroup cg = this.curveMap.ceilingEntry(distance).getValue();
-		BackwardSpline bs = switch (curveType){
-			case C30_CURVE -> cg.getC30Curve();
-			case NORMAL_CURVE -> cg.getNormalBreakingCurve();
-			case INDICATION_CURVE -> cg.getIndicationCurve();
-			case PERMITTED_SPEED -> cg.getPermittedSpeedCurve();
-			case WARNING_CURVE -> cg.getWarningCurve();
-			case SERVICE_INTERVENTION_CURVE -> cg.getServiceInterventionCurve();
-			case EMERGENCY_INTERVENTION_CURVE -> cg.getEmergencyInterventionCurve();
-			default -> throw new IllegalStateException("Curve type not known: " + curveType);
-		};
+	/**
+	 * Returns the lowest speed of a given Type at a given distance.
+	 * @param distance Distance in [m]
+	 * @param curveType {@link BreakingCurveType}
+	 * @return speed in [m/s]
+	 */
+	private double getSpeedFromBCCurveMap(double distance, BreakingCurveType curveType) {
+		Double minimumSpeed = Double.MAX_VALUE;
+		for(Double point : this.curveMap.keySet()){
+			if(point < distance) continue;
 
-		return bs.getPointOnCurve(distance);
+			CurveGroup cg = this.curveMap.get(point);
+			BackwardSpline bs = cg.getCurveFromType(curveType);
+			minimumSpeed = Math.min(bs.getPointOnCurve(distance),minimumSpeed);
+		}
+		return minimumSpeed;
 	}
 
 	/*
@@ -128,10 +158,6 @@ public class BreakingCurve {
 	 */
 	public Location getRefLocation() {
 		return refLocation;
-	}
-
-	public boolean isEbd() {
-		return ebd;
 	}
 
 }
