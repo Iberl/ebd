@@ -13,11 +13,6 @@ class RealDbdClientTest {
 
     @Test
     public void testConnection() throws JAXBException, ParseException, IOException {
-        RealDbdClient client = new RealDbdClient();
-        client.connect("localhost");
-        client.setValue("TEST", 25);
-        System.out.println(client.getValue("TEST"));
-        client.setValue("13W2S", 2);
-        System.out.println(client.getValue("13W2I"));
+
     }
 }

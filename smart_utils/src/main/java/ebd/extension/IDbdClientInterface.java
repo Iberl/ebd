@@ -1,6 +1,8 @@
-package ebd.dbd.client.extension;
+package ebd.extension;
 
-
+import info.dornbach.dbdclient.DBDClient;
+import info.dornbach.dbdclient.DBDListener;
+import info.dornbach.dbdclient.Datagram;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -25,7 +27,9 @@ public interface IDbdClientInterface {
 
 
 
+    void addDBDListener(DBDListener l);
 
+    void addDBDListener(String name, DBDListener l);
 
 
     default void defaultEbdConect() throws IOException {

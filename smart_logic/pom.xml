@@ -102,12 +102,6 @@
         <version>1.6.0</version>
     </dependency>
         <dependency>
-            <groupId>de.tms_simulator</groupId>
-            <artifactId>dbdclient-ebd</artifactId>
-            <version>1.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>5.2</version>

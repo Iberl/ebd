@@ -1,10 +1,13 @@
 package de.ibw.history;
 
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.util.ThreadedRepo;
 import ebd.rbc_tms.util.PositionInfo;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Speichert Positionsdaten aus Positionreport mit Gleis-Id und Topologischen Abstand zum Knoten A
@@ -14,7 +17,7 @@ import java.util.Date;
  * @version 0.4
  * @since 2020-09-30
  */
-public class PositionData {
+public class PositionData extends ArrayList<BlockedArea> implements List<BlockedArea> {
     /** Timestamp Of Message Creation */
     private long rbc_timestamp;
 

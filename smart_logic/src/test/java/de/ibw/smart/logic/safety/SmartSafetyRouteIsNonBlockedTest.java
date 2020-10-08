@@ -127,7 +127,7 @@ class SmartSafetyRouteIsNonBlockedTest {
                 TestUtil.generateRandomContinousRoute(7, true, true
                 , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
-        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
@@ -264,7 +264,7 @@ class SmartSafetyRouteIsNonBlockedTest {
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
-        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
@@ -435,7 +435,7 @@ class SmartSafetyRouteIsNonBlockedTest {
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
-        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
@@ -597,7 +597,7 @@ class SmartSafetyRouteIsNonBlockedTest {
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
-        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
@@ -781,7 +781,7 @@ class SmartSafetyRouteIsNonBlockedTest {
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
-        boolean isNominalBalise = TestUtil.lastRandomBalise.isNominalTriggered();
+
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);

@@ -22,6 +22,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
+import de.ibw.util.UtilFunction;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
@@ -29,8 +30,6 @@ import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import info.dornbach.dbdclient.DBDClient;
-import org.apache.commons.beanutils.locale.BaseLocaleConverter;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +69,7 @@ import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-02
+ * @since 2020-10-07
  */
 public class SmartSafety {
     /**
@@ -143,7 +142,14 @@ public class SmartSafety {
      */
     private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
 
-
+    /**
+     * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
+     * @param iTrainId - nid-engineId des angeforderten Zuges
+     * @return List - liste der belegten Abschnitte durch den Zug
+     */
+    public synchronized List<BlockedArea> getAllAreaBlockedByOwn(int iTrainId) {
+        return blockList.getModel(iTrainId);
+    }
 
     private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
         List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
@@ -270,9 +276,9 @@ public class SmartSafety {
                         }
                     }
                 }
-
+                // TODO PositionData usage
                 toBlock = calcCrossoverSignals(toBlock);
-                //TODO Positionsmodul auswerten
+
                 List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
                 for(BlockedArea ThisArea : toBlock)
                 for(BlockedArea OtherArea: blockedAreas) {
@@ -741,7 +747,7 @@ public class SmartSafety {
      * @return boolean
      */
     public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
-        DBDClient dbdclient = new DBDClient();
+        //DBDClient dbdclient = new DBDClient();
         return true;
     }
 
@@ -813,6 +819,8 @@ public class SmartSafety {
     private void handlePositionHistory(int iTrainId, PositionInfo posInf, Message.Header header) {
         PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
                 iTrainId, posInf);
+        BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
+
         PositionModul.getInstance().addPositionData(PD);
     }
 

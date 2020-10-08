@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-11
+ * @since 2020-10-07
  */
 public class Balise implements ICoord<Double> {
     /**
@@ -82,12 +82,13 @@ public class Balise implements ICoord<Double> {
     }
 
     /**
-     * Gibt an ob die Balise auf Knoten B triggert
+     * Gibt an ob die Balise auf Knoten B in nominaler Richtung zeigt
+     * Das heisst von Balis 1 zu Balise 2 geht der Weg in richtung Knoten B
      * @return boolean - true, falls der Topologische-Knoten B in Trigger-Richtung ist
      *                   false, wenn der Topologische-Knoten A in Trigger-Richtung ist
      */
-    public boolean isNominalTriggered() {
-        return this.isDatapointNominal() == this.isTopologicalNominal();
+    public boolean isNominalTriggeredToNodeB() {
+        return this.isDatapointNominal();
     }
 
     private ENUMAusrichtung getDpAusrichtung(){
@@ -100,15 +101,31 @@ public class Balise implements ICoord<Double> {
 
     public BigDecimal getBalisenPositionFromNodeA() {
         BigDecimal dResult = this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert();
-        if(isNominalTriggered()) return dResult;
-        ENUMAusrichtung directionDP = getDpAusrichtung();
-
-        if(directionDP.equals(ENUMAusrichtung.GEGEN)) {
-            return dResult.subtract(this.getDpLength());
-        } else return dResult.add(this.getDpLength());
-
-
+        if(isNominalTriggeredToNodeB()) return dResult;
+        else return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert().subtract(dResult);
     }
+
+
+    /**
+     * Gibt den angefragten Knoten der Balisengruppe wieder. Es wird der Knoten der in angegebenr Richtung angefragt
+     * wiedergegeben.
+     * @param isNominalDirectionOfBg - true bedeutet es wird der Knoten wiedergegeben, der von von Balise 1 &uuml;ber
+     *                               Balise 2 durchfahren wird.
+     *                               - false bedeutet es wird der Knoten wiedergegeben, der von Balise 2 &uumL;ber
+     *                               Balise 1 durchfahren wird.
+     * @return Node - der Knoten, der der angegebenen Richtung entspricht.
+     */
+    public TopologyGraph.Node getNodeInDirectionOfBaliseGroup(boolean isNominalDirectionOfBg ) {
+        String sNodeId = null;
+        if(isDatapointNominal() == isNominalDirectionOfBg) {
+            sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenB().getWert();
+        } else {
+            sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenA().getWert();
+        }
+        return TopologyGraph.NodeRepo.get(sNodeId);
+    }
+
+
 
     /**
      * gibt die x-Koordinate dieser Balise wider

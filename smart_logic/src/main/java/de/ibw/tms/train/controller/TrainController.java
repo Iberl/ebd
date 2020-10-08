@@ -446,14 +446,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         return ETCSVariables.Q_DIR_BOTH;
     }
 
-    private Double extractDistanceToBalise(MaRequestWrapper requestWrapper) {
-        try {
-            return requestWrapper.Tm.getdDistanceToBalise();
-        } catch (Exception E ) {
-            E.printStackTrace();
-        }
-        return null;
-    }
+
 
     private Integer extractNidBaliseId(MaRequestWrapper requestWrapper) {
         try {

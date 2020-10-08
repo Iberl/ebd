@@ -1,6 +1,7 @@
-package ebd.dbd.client.extension;
+package ebd.extension;
 
 import de.ibw.util.DefaultRepo;
+import info.dornbach.dbdclient.DBDListener;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -73,5 +74,19 @@ public class SimulateDbdClient implements IDbdClientInterface {
      * unused
      * @param l
      */
+    @Override
+    public void addDBDListener(DBDListener l) {
 
+    }
+
+    /**
+     * unused
+     * @param name
+     * @param l
+     */
+
+    @Override
+    public void addDBDListener(String name, DBDListener l) {
+
+    }
 }

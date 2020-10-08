@@ -61,6 +61,11 @@ public class ConfigHandler {
     doubles
      */
 
+    /**
+     * Die L&auml;nge des Zuges in Meter, falls das RBC keine Angabe gemacht hat.
+     */
+    public double D_DEFAULT_MIN_LENGTH = 10d;
+
     /*
     boolean
      */

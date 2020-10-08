@@ -5,8 +5,6 @@ import com.opencsv.exceptions.CsvValidationException;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
-import info.dornbach.dbdclient.DBDClient;
-import info.dornbach.dbdclient.DBDListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +22,7 @@ import java.net.UnknownHostException;
  * @version 0.4
  * @since 2020-08
  */
-public class RealDbdClient extends DBDClient implements IDbdClientInterface {
+public abstract class RealDbdClient implements IDbdClientInterface {
 
 
 
@@ -34,35 +32,6 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
 
     private static IDbdClientInterface instance = null;
 
-    @Override
-    public synchronized void connect(String host, int port) throws IOException, UnknownHostException {
-        super.connect(host, port);
-    }
-
-    @Override
-    public void addDBDListener(DBDListener l) {
-        super.addDBDListener(l);
-    }
-
-    @Override
-    public void addDBDListener(String name, DBDListener l) {
-        super.addDBDListener(name, l);
-    }
-
-    @Override
-    public int getValue(String name) {
-        return super.getValue(name);
-    }
-
-    @Override
-    public int getValue(String name, int defaultValue) {
-        return super.getValue(name, defaultValue);
-    }
-
-    @Override
-    public void subscribeAndQuery(String name) {
-        super.subscribeAndQuery(name);
-    }
 
     /**
      * Gibt Instanz eines DBD-Client oder eines Fake wieder.
@@ -78,7 +47,7 @@ public class RealDbdClient extends DBDClient implements IDbdClientInterface {
                 initStateRepo = prompt4InitialStateSetting(ch);
                 instance = new SimulateDbdClient(initStateRepo);
             } else {
-                instance = new RealDbdClient();
+                instance = null;
                 if(ch.initCrossoversInRealdDbdClient) {
                     initStateRepo = prompt4InitialStateSetting(ch);
 

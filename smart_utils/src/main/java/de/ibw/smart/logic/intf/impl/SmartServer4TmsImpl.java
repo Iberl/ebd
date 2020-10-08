@@ -298,7 +298,6 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
             MaReturnPayload.setMaSuccessfull(uuid);
-
             sendMaResponseToTMS(MaReturnPayload, 3L);
         } else {
             MaReturnPayload.setErrorState(uuid,true, NO_ACK);
