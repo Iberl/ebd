@@ -64,14 +64,14 @@ public class TestEventHandler{
 		}
 
 		List<BreakingCurve> lobc = new ArrayList<>();
-		lobc.add(nbce.curveGroup.getEmergencyDecelerationCurve());
-		lobc.add(nbce.curveGroup.getEmergencyInterventionCurve());
-		lobc.add(nbce.curveGroup.getNormalBreakingCurve());
-		lobc.add(nbce.curveGroup.getServiceInterventionCurve());
-		lobc.add(nbce.curveGroup.getWarningCurve());
-		lobc.add(nbce.curveGroup.getPermittedSpeedCurve());
-		lobc.add(nbce.curveGroup.getIndicationCurve());
-		lobc.add(nbce.curveGroup.getC30Curve());
+		lobc.add(nbce.breakingCurve.getEmergencyDecelerationCurve());
+		lobc.add(nbce.breakingCurve.getEmergencyInterventionCurve());
+		lobc.add(nbce.breakingCurve.getNormalBreakingCurve());
+		lobc.add(nbce.breakingCurve.getServiceInterventionCurve());
+		lobc.add(nbce.breakingCurve.getWarningCurve());
+		lobc.add(nbce.breakingCurve.getPermittedSpeedCurve());
+		lobc.add(nbce.breakingCurve.getIndicationCurve());
+		lobc.add(nbce.breakingCurve.getC30Curve());
 
 		for(BreakingCurve bCurve : lobc) {
 			double xPosition = 0d;

@@ -1,6 +1,6 @@
 package ebd.trainData.util.availableAcceleration;
 
-import ebd.globalUtils.etcsPacketToProfileConverters.GradientProfileConverter;
+import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.routeData.RouteDataVolatile;

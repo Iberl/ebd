@@ -57,10 +57,10 @@ public class TripProfileProvider {
     @Subscribe
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
-            getProfilefromSource(nbce.curveGroup.getPermittedSpeedCurve());
+            getProfilefromSource(nbce.breakingCurve.getPermittedSpeedCurve());
         }
         else {
-            getProfileFromBreakingCurveGroup(nbce.curveGroup);
+            getProfileFromBreakingCurveGroup(nbce.breakingCurve);
         }
 
 

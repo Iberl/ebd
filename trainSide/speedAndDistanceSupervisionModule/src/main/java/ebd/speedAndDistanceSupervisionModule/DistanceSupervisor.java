@@ -4,7 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.etcsPacketToProfileConverters.MovementAuthorityConverter;
+import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -150,7 +150,7 @@ public class DistanceSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.curveGroup.getPermittedSpeedCurve();
+        this.breakingCurve = bce.breakingCurve.getPermittedSpeedCurve();
         this.curReleaseSpeed = calculateReleaseSpeed();
         this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
 
