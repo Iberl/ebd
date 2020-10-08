@@ -161,7 +161,7 @@ public class SpeedSupervisor {
     @Subscribe
     public void setBreakingCurveGroup(NewBreakingCurveEvent nbce){
 
-        this.curveGroup = nbce.curveGroup;
+        this.curveGroup = nbce.breakingCurve;
         this.maxServiceDistance = this.curveGroup.getNormalBreakingCurve().getHighestXValue();
         this.maxEmergencyDistance = this.curveGroup.getEmergencyDecelerationCurve().getHighestXValue();
         this.targetSpeed = this.curveGroup.getPermittedSpeedCurve().getPointOnCurve(0d);

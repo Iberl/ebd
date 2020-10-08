@@ -117,7 +117,7 @@ public class ConfigHandler {
     /**
      * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
      */
-    public long timeBase = 1593522000000l;
+    public long timeBase = 1593522000000L;
 
     //############# Train Variables #############
 
