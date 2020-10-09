@@ -1,8 +1,13 @@
 package de.ibw.history;
 
+import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
+import org.apache.log4j.lf5.PassingLogRecordFilter;
 
 import java.math.BigDecimal;
+import java.security.DrbgParameters;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +114,7 @@ public class PositionModul implements IPositionModul {
 
     @Override
     public Collection<PositionData> getCurrentPositions(Integer iNidEngine, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
-        if(dFromRangeStart != null && dToRangeEnd != null) {
+        if(hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
             if (dFromRangeStart.compareTo(dToRangeEnd) > 0)
                 throw new InvalidParameterException("Start after End Range");
         }
@@ -123,18 +128,54 @@ public class PositionModul implements IPositionModul {
                results.add(PD);
             }
         }
-        if(sIdTopEdge != null) {
-            results.removeIf(PD -> !PD.getsIdTopEdge().equals(sIdTopEdge));
+        if(sIdTopEdge != null && !hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
+            // Positionsdatum entfernene wenn die Kante nicht gefunden wurde
+            // filtert alle Position, die die Kante mit der Id sIdTopEdge nicht beinhalten
+            results.removeIf(PD -> !checkIfPositionContainsTopEdge(PD,sIdTopEdge));
         }
-        if(dFromRangeStart != null && dToRangeEnd != null) {
+        if(hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
             if(dFromRangeStart.compareTo(dToRangeEnd) > 0) throw new InvalidParameterException("Start after End Range");
-            // entfernt alle daten nach range End
-            results.removeIf(PD -> dToRangeEnd.compareTo(PD.getdDistanceToTopNodeA()) < 0);
-            // entfernt alle daten vor range beginn
-            results.removeIf(PD -> PD.getdDistanceToTopNodeA().compareTo(dFromRangeStart) < 0);
+            // entfernt alle daten, die keine Schnittfläche zwischen Anfrage und Tatsächlichen Positionsangabe haben
+            results.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge, dFromRangeStart, dToRangeEnd));
+
+
         }
         return results;
 
+    }
+
+
+
+    public boolean hasRangeFilter(BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
+        return dFromRangeStart != null && dToRangeEnd != null;
+    }
+    private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
+        if(E == null) return false;
+        BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                dFromRangeStart.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dToRangeEnd.intValue());
+        Iterator PosIterate = pd.iterator(); {
+            while(PosIterate.hasNext()) {
+                BlockedArea BA = (BlockedArea) PosIterate.next();
+                if(BA.compareIfIntersection(RequestArea)) return true;
+            }
+
+        }
+        return false;
+    }
+    private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge) {
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
+        if(E == null) return false;
+        BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+        Iterator PosIterate = pd.iterator(); {
+            while(PosIterate.hasNext()) {
+                BlockedArea BA = (BlockedArea) PosIterate.next();
+                if(BA.compareIfIntersection(RequestArea)) return true;
+            }
+
+        }
+        return false;
     }
 
     @Override
@@ -159,15 +200,13 @@ public class PositionModul implements IPositionModul {
         if(iNidEngine != null) {
             data = getAllPositions(iNidEngine);
         }
-        if(sIdTopEdge != null) {
-            data.removeIf(PD -> !PD.getsIdTopEdge().equals(sIdTopEdge));
+        if(sIdTopEdge != null && !hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
+            data.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge));
         }
-        if(dFromRangeStart != null && dToRangeEnd != null) {
+        if(hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
             if(dFromRangeStart.compareTo(dToRangeEnd) > 0) throw new InvalidParameterException("Start after End Range");
             // entfernt alle daten nach range End
-            data.removeIf(PD -> dToRangeEnd.compareTo(PD.getdDistanceToTopNodeA()) < 0);
-            // entfernt alle daten vor range beginn
-            data.removeIf(PD -> PD.getdDistanceToTopNodeA().compareTo(dFromRangeStart) < 0);
+            data.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge, dFromRangeStart, dToRangeEnd));
         }
         return data;
     }

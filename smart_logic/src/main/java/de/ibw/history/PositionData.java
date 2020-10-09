@@ -1,7 +1,7 @@
 package de.ibw.history;
 
 import de.ibw.smart.logic.datatypes.BlockedArea;
-import de.ibw.util.ThreadedRepo;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
 import ebd.rbc_tms.util.PositionInfo;
 
 import java.math.BigDecimal;
@@ -32,15 +32,13 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
      */
     private PositionInfo Pos;
 
-    /**
-     * PlanPro-String-Id der Topologischen Kante
-     */
-    private String sIdTopEdge;
 
-    /**
-     * Distanz zum A Knoten der Topologischen Kante mit Id sIdTopEdge
-     */
-    private BigDecimal dDistanceToTopNodeA;
+    private TopologicalPosition TrainHeadPosition;
+
+    private TopologicalPosition TrainEndPosition;
+
+
+
 
     public long getRbc_timestamp() {
         return rbc_timestamp;
@@ -58,17 +56,18 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
     }
 
 
+    public void setTrainHeadPosition(TopologicalPosition trainHeadPosition) {
+        TrainHeadPosition = trainHeadPosition;
+    }
+
+    public void setTrainEndPosition(TopologicalPosition trainEndPosition) {
+        TrainEndPosition = trainEndPosition;
+    }
+
     public void setRbc_timestamp(long rbc_timestamp) {
         this.rbc_timestamp = rbc_timestamp;
     }
 
-    public void setsIdTopEdge(String sIdTopEdge) {
-        this.sIdTopEdge = sIdTopEdge;
-    }
-
-    public void setdDistanceToTopNodeA(BigDecimal dDistanceToTopNodeA) {
-        this.dDistanceToTopNodeA = dDistanceToTopNodeA;
-    }
 
     public Date getRbcTimestamp() {
         return new Date(rbc_timestamp);
@@ -86,11 +85,11 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
         return Pos;
     }
 
-    public String getsIdTopEdge() {
-        return sIdTopEdge;
+    public TopologicalPosition getTrainHeadPosition() {
+        return TrainHeadPosition;
     }
 
-    public BigDecimal getdDistanceToTopNodeA() {
-        return dDistanceToTopNodeA;
+    public TopologicalPosition getTrainEndPosition() {
+        return TrainEndPosition;
     }
 }
