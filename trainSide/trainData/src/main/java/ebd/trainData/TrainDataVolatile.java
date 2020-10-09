@@ -171,10 +171,16 @@ public class TrainDataVolatile {
     protected volatile String currentBreakingMode = null;
 
     /**
-     * The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     * The current normal breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
     @NotNull
-    protected volatile ForwardSpline currentBreakingPower;
+    protected volatile ForwardSpline currentNormalBreakingPower;
+
+    /**
+     * The current service breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    protected volatile ForwardSpline currentServiceBreakingPower;
 
     /**
      * The current emergency breaking power b(v), b in [m/(s^2)], v in [m/s]
@@ -267,7 +273,8 @@ public class TrainDataVolatile {
         this.etcsID = etcsID;
         this.trainConfigID = trainConfigID;
         this.infrastructureID = infrastructureID;
-        this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
+        this.currentNormalBreakingPower = BreakingPowerCurveCalculator.calculateNormalBreakingPower(localBus);
+        this.currentServiceBreakingPower = BreakingPowerCurveCalculator.calculateServiceBreakingPower(localBus);
         this.currentEmergencyBreakingPower = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(localBus);
         this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
         this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
@@ -441,11 +448,19 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     * @return The current normal breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
     @NotNull
-    public ForwardSpline getCurrentBreakingPower() {
-        return currentBreakingPower;
+    public ForwardSpline getCurrentNormalBreakingPower() {
+        return currentNormalBreakingPower;
+    }
+
+    /**
+     * @return The current service breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    public ForwardSpline getCurrentServiceBreakingPower() {
+        return currentServiceBreakingPower;
     }
 
     /**

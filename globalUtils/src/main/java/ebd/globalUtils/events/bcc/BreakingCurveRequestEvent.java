@@ -23,7 +23,7 @@ import ebd.messageLibrary.util.ETCSVariables;
  *
  */
 public class BreakingCurveRequestEvent extends NormalEvent {
-	
+
 
 	/**
 	 * Constructor setting all required fields
@@ -35,15 +35,17 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 *
 	 * @param id
 	 * 			String to identify the breaking curve
-	 * @param breakingPower
+	 * @param normalBreakingPower
 	 * 			Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * @param serviceBreakingPower
+	 * 	  		Service Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param emergencyBreakingPower
 	 * 			Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param packet15
 	 * 			{@link Packet_15}
 	 * @param packet21
 	 * 			{@link Packet_21}
-	 * @param currentGradient 
+	 * @param currentGradient
 	 * 			Current gradient from an existing gradient profile or default value. In [0/00] (also called per mille).
 	 * @param referencePosition
 	 * 			Reference {@link Position} to the data (given by the RBG)
@@ -61,14 +63,25 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 
 	 */
-	public BreakingCurveRequestEvent(String source, String target, String id, ForwardSpline breakingPower,
-									 ForwardSpline emergencyBreakingPower, Packet_15 packet15, Packet_21 packet21,
-									 double currentGradient, Position referencePosition, Packet_27 packet27,
-									 int NC_CDTRAIN, double L_TRAIN,
-									 double currentSpeedLimit, int maxSpeedofTrain) {
+	public BreakingCurveRequestEvent(String source,
+									 String target,
+									 String id,
+									 ForwardSpline normalBreakingPower,
+									 ForwardSpline serviceBreakingPower,
+									 ForwardSpline emergencyBreakingPower,
+									 Packet_15 packet15,
+									 Packet_21 packet21,
+									 double currentGradient,
+									 Position referencePosition,
+									 Packet_27 packet27,
+									 int NC_CDTRAIN,
+									 double L_TRAIN,
+									 double currentSpeedLimit,
+									 int maxSpeedofTrain) {
 		super(source, target);
 		this.id = id;
-		this.breakingPower = breakingPower;
+		this.normalBreakingPower = normalBreakingPower;
+		this.serviceBreakingPower = serviceBreakingPower;
 		this.emergencyBreakingPower = emergencyBreakingPower;
 		this.packet15 = packet15;
 		this.packet21 = packet21;
@@ -79,9 +92,9 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 		this.L_TRAIN = L_TRAIN;
 		this.currentSpeedLimit = currentSpeedLimit;
 		this.maxSpeedofTrain = maxSpeedofTrain / 5;
-		
+
 	}
-	
+
 	/**
 	 * Constructor setting all fields
 	 * @param source
@@ -90,15 +103,17 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 *          ID from from the target module or "all" if more then one target should be reached.
 	 * @param id
 	 * 			String to identify the breaking curve
-	 * @param breakingPower
-	 * 			Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * @param normalBreakingPower
+	 * 			Normal Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * @param serviceBreakingPower
+	 * 	  		Service Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param emergencyBreakingPower
 	 * 			Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
 	 * @param packet15
 	 * 			{@link Packet_15}
 	 * @param packet21
 	 * 			{@link Packet_21}
-	 * @param currentGradient 
+	 * @param currentGradient
 	 * 			Current gradient from an existing gradient profile or default value. In [0/00] (also called per mille).
 	 * @param referencePosition
 	 * 			Reference {@link Position} to the data (given by the RBG)
@@ -112,20 +127,34 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	 * 			{@link ETCSVariables#NC_TRAIN}
 	 * @param L_TRAIN
 	 * 			{@link ETCSVariables#L_TRAIN}
-	 * @param currentSpeedLimit 
+	 * @param currentSpeedLimit
 	 * 			Current allowed speed of the train. Either out of previous SSP or from current mode.<br>
 	 * 			NOTE: In [m/s]
 	 * @param maxSpeedofTrain
 	 * 			The maximum Speed of the train in [km/h]. This value will be divided by 5 in the constructor,
 	 * 			so it the same unit as speed values provided by the ETCS Message System.
 	 */
-	public BreakingCurveRequestEvent(String source, String target, String id,ForwardSpline breakingPower, ForwardSpline emergencyBreakingPower,
-									 Packet_15 packet15, Packet_21 packet21, double currentGradient,
-									 Position referencePosition, Packet_27 packet27, List<Packet_65> listPacket65,
-									 int NC_CDTRAIN, int NC_TRAIN, double L_TRAIN, double currentSpeedLimit, int maxSpeedofTrain) {
+	public BreakingCurveRequestEvent(String source,
+									 String target,
+									 String id,
+									 ForwardSpline normalBreakingPower,
+									 ForwardSpline serviceBreakingPower,
+									 ForwardSpline emergencyBreakingPower,
+									 Packet_15 packet15,
+									 Packet_21 packet21,
+									 double currentGradient,
+									 Position referencePosition,
+									 Packet_27 packet27,
+									 List<Packet_65> listPacket65,
+									 int NC_CDTRAIN,
+									 int NC_TRAIN,
+									 double L_TRAIN,
+									 double currentSpeedLimit,
+									 int maxSpeedofTrain) {
 		super(source,target);
 		this.id = id;
-		this.breakingPower = breakingPower;
+		this.normalBreakingPower = normalBreakingPower;
+		this.serviceBreakingPower = serviceBreakingPower;
 		this.emergencyBreakingPower = emergencyBreakingPower;
 		this.packet15 = packet15;
 		this.packet21 = packet21;
@@ -147,12 +176,17 @@ public class BreakingCurveRequestEvent extends NormalEvent {
 	
 	//Information for BCC
 	/**
-	 * Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * Normal Power as {@link ForwardSpline} in the units [m] and [m/s^2]
 	 */
-	public ForwardSpline breakingPower;
+	public ForwardSpline normalBreakingPower;
 
 	/**
-	 * Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s�]
+	 * Service Breaking Power as {@link ForwardSpline} in the units [m] and [m/s^2]
+	 */
+	public ForwardSpline serviceBreakingPower;
+
+	/**
+	 * Emergency Breaking Power as {@link ForwardSpline} in the units [m] and [m/s^2]
 	 */
 	public ForwardSpline emergencyBreakingPower;
 
