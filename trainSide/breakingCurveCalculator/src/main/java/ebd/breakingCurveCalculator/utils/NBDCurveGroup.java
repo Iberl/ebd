@@ -1,6 +1,6 @@
 package ebd.breakingCurveCalculator.utils;
 
-import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.Knot;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +21,7 @@ public class NBDCurveGroup extends CurveGroup {
     }
 
     @Override
-    public @Nullable BackwardSpline getCurveFromType(BreakingCurveType curveType) {
+    public @Nullable BackwardSpline getCurveFromType(CurveType curveType) {
         return switch (curveType){
             case NORMAL_INTERVENTION_CURVE -> normalInterventionBreakingCurve;
             case PERMITTED_SPEED -> permittedSpeedCurve;

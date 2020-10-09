@@ -49,9 +49,9 @@ public abstract class Spline {
 	public String toString() {
 		StringBuilder sb = new StringBuilder("Id: " + id + ", Degree: " + degree + "\n");
 		for (Map.Entry<Double,ArrayList<Double>> entry : curve.entrySet()){
-			sb.append("Key: " + entry.getKey() + "; Coefficients: ");
+			sb.append("Key: ").append(entry.getKey()).append("; Coefficients: ");
 			for(double coef : entry.getValue()){
-				sb.append(coef + ", ");
+				sb.append(coef).append(", ");
 			}
 			sb.delete(sb.length() - 2, sb.length());
 			sb.append("\n");

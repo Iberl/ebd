@@ -1,14 +1,13 @@
 package ebd.breakingCurveCalculator;
 
 
-import java.util.Arrays;
-import java.util.TreeMap;
+import java.util.*;
 
 import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.EmptyCurveGroup;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
-import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
@@ -54,6 +53,8 @@ public class BreakingCurve {
 	/**
 	 * Reference location of the breaking curve
 	 */
+	private final String id;
+
 	private final Location refLocation;
 
 	private final StaticSpeedProfil ssp;
@@ -61,6 +62,7 @@ public class BreakingCurve {
 	private final TreeMap<Double, CurveGroup> curveMap;
 
 	public BreakingCurve(){
+		this.id = "emptyBreakingCurve";
 		this.refLocation = new InitalLocation();
 		this.ssp = new StaticSpeedProfil(Arrays.asList(0d,0d));
 		TreeMap<Double,CurveGroup> cm = new TreeMap<>();
@@ -75,27 +77,30 @@ public class BreakingCurve {
 	 * @param curveMap A {@link TreeMap} of type {@code TreeMap<Double, BackwardSpline>},
 	 *                 connecting deceleration with distances in [m] between refLocation and the food of the curve.
 	 */
-	public BreakingCurve(Location refLocation, StaticSpeedProfil ssp, TreeMap<Double, CurveGroup> curveMap) {
+	public BreakingCurve(String id, Location refLocation, StaticSpeedProfil ssp, TreeMap<Double, CurveGroup> curveMap) {
+		this.id = id;
 		this.refLocation = refLocation;
 		this.ssp = ssp;
 		this.curveMap = curveMap;
 	}
 
 	/**
-	 * Returns the current allowed speed at a given distance. The kind of speed depends on the given {@link BreakingCurveType}.
-	 * If for example, given {@link BreakingCurveType#EMERGENCY_INTERVENTION_CURVE}, the current maximum speed before an emergency break
+	 * Returns the current allowed speed at a given distance. The kind of speed depends on the given {@link CurveType}.
+	 * If for example, given {@link CurveType#EMERGENCY_INTERVENTION_CURVE}, the current maximum speed before an emergency break
 	 * intervention will be returned. <br>
-	 *     This will return the correct value in either  {@link SpeedSupervisionState#CEILING_SPEED_SUPERVISION}
-	 *     or {@link SpeedSupervisionState#TARGET_SPEED_SUPERVISION}<br>
+	 *     For this, both the breaking curve and the ssp will be checked and the lost value found returned.<br>
+	 * The value of the parameter {@code distance} has to be between 0 and the greatest defined distance as
+	 * returned by {@link BreakingCurve#greatestDefinedDistance()} inklusive.
 	 *
-	 * @param distance Distance from reference location in [m]
-	 * @param breakingCurveType The type of curve that is queried.
+	 *
+	 * @param distance Distance from reference location in [m], has to be >= 0 and <= the last key.
+	 * @param curveType The type of curve that is queried.
 	 * @return Speed in [m/s]
 	 */
-	public double getSpeedAtDistance(double distance, BreakingCurveType breakingCurveType){
-		if(distance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + distance);
-		double sspSpeed = this.ssp.getSpeedAtDistance(distance, breakingCurveType);
-		double bcSpeed = getSpeedFromBCCurveMap(distance,breakingCurveType);
+	public double getSpeedAtDistance(double distance, CurveType curveType){
+		if(distance < 0 || distance > this.curveMap.lastKey()) throw new BreakingCurveOutOfRangeException("Distance value out of range, was: " + distance);
+		double sspSpeed = this.ssp.getSpeedAtDistance(distance, curveType);
+		double bcSpeed = getSpeedFromBCCurveMap(distance, curveType);
 		return Math.min(sspSpeed,bcSpeed);
 	}
 
@@ -107,12 +112,12 @@ public class BreakingCurve {
 	public double nextTargetDistance(double distance){
 		if(distance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + distance);
 		Double distanceAtTarget = this.curveMap.higherKey(distance);
-		BackwardSpline permittedSpeedCurve = this.curveMap.get(distanceAtTarget).getCurveFromType(BreakingCurveType.PERMITTED_SPEED);
+		BackwardSpline permittedSpeedCurve = this.curveMap.get(distanceAtTarget).getCurveFromType(CurveType.PERMITTED_SPEED);
 
 		if(distanceAtTarget == null || permittedSpeedCurve == null) return this.curveMap.lastKey();
 
 		double targetSpeed = permittedSpeedCurve.getPointOnCurve(distanceAtTarget);
-		double lowestSpeed = getSpeedAtDistance(distanceAtTarget,BreakingCurveType.PERMITTED_SPEED);
+		double lowestSpeed = getSpeedAtDistance(distanceAtTarget, CurveType.PERMITTED_SPEED);
 
 		if(lowestSpeed < targetSpeed){
 			return nextTargetDistance(distanceAtTarget);
@@ -128,34 +133,85 @@ public class BreakingCurve {
 	 */
 	public SpeedSupervisionState getSpeedSupervisionState(double curDistance, double curSpeed){
 		if(curDistance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + curDistance);
-		double indiSpeed = getSpeedFromBCCurveMap(curDistance,BreakingCurveType.INDICATION_CURVE);
+		double indiSpeed = getSpeedFromBCCurveMap(curDistance, CurveType.INDICATION_CURVE);
 		if( curSpeed > indiSpeed){
 			return SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 		}
 		else return SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
 	}
 
+	/**
+	 * Returns the greatest defined distance.
+	 * @return Distance in [m].
+	 */
+	public double greatestDefinedDistance(){
+		return this.curveMap.lastKey();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("BreakingCurve{" +
+				"string=" + id + " " +
 				"refLocation=" + refLocation.getId() +
 				'}');
 		return sb.toString();
 	}
 
 	/**
-	 * Returns the lowest speed of a given Type at a given distance.
-	 * @param distance Distance in [m]
-	 * @param curveType {@link BreakingCurveType}
-	 * @return speed in [m/s]
+	 * Returns a String containing a description on the first line and a data point per line after the first line.
+	 * Every data point has the format of value1 | value2 | ... | value9.<br>
+	 *     In order, these are distance and then the speeds of the different curves in order of their ranking (s. {@link CurveType}).<br>
+	 * If there is no associated speed, the value will be set to -1<br>
+	 * @return A {@link String}
 	 */
-	private double getSpeedFromBCCurveMap(double distance, BreakingCurveType curveType) {
-		Double minimumSpeed = Double.MAX_VALUE;
+	public String toStringMinimumSpeed(){
+		double maxDistance = this.curveMap.lastKey();
+		String firstLine = String.format("%s | %s | %s | %s | %s | %s | %s | %s | %s %n",
+				"x",
+				"v_" + CurveType.EMERGENCY_INTERVENTION_CURVE.toString(),
+				"v_" + CurveType.SERVICE_INTERVENTION_CURVE_2.toString(),
+				"v_" + CurveType.SERVICE_INTERVENTION_CURVE_1.toString(),
+				"v_" + CurveType.NORMAL_INTERVENTION_CURVE.toString(),
+				"v_" + CurveType.WARNING_CURVE.toString(),
+				"v_" + CurveType.PERMITTED_SPEED.toString(),
+				"v_" + CurveType.INDICATION_CURVE.toString(),
+				"v_" + CurveType.C30_CURVE.toString()
+				);
+		String line = "%8.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f %n" ;
+
+		StringBuilder sb = new StringBuilder(firstLine);
+
+		for (double d = 0d; d <= maxDistance; d += 0.5){
+			double[] values = new double[9];
+			values[0] = d;
+			for(CurveType type : CurveType.values()){
+				double speed = getSpeedAtDistance(d, type);
+				values[type.getRanking() + 1] = Double.isInfinite(speed) ? -1 : speed;
+			}
+			sb.append(String.format(line, values));
+		}
+
+		return sb.toString();
+	}
+
+
+
+
+	/**
+	 * Returns the lowest speed of a given Type at a given distance. If that type has no speed at that distance,
+	 * {@link Double#POSITIVE_INFINITY} is returned instead.
+	 * @param distance Distance in [m]
+	 * @param curveType {@link CurveType}
+	 * @return speed in [m/s] of {@link Double#POSITIVE_INFINITY}
+	 */
+	private double getSpeedFromBCCurveMap(double distance, CurveType curveType) {
+		double minimumSpeed = Double.POSITIVE_INFINITY;
 		for(Double point : this.curveMap.keySet()){
 			if(point < distance) continue;
 
 			CurveGroup cg = this.curveMap.get(point);
 			BackwardSpline bs = cg.getCurveFromType(curveType);
+			if(bs == null) return minimumSpeed;
 			minimumSpeed = Math.min(bs.getPointOnCurve(distance),minimumSpeed);
 		}
 		return minimumSpeed;

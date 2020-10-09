@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 import ebd.breakingCurveCalculator.utils.*;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
-import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
@@ -194,15 +194,15 @@ public class BreakingCurveCalculator {
 
 		for(Double slowDown : slowDownList){
 			List<Knot> emergencyDecelerationCurve = calculateKnotList(slowDown,
-					this.ssp.getSpeedAtDistance(slowDown,BreakingCurveType.EMERGENCY_INTERVENTION_CURVE),
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.EMERGENCY_INTERVENTION_CURVE),
 					true,
 					this.emergencyBreakingPower);
 			List<Knot> serviceDecelerationCurve = calculateKnotList(slowDown,
-					this.ssp.getSpeedAtDistance(slowDown,BreakingCurveType.SERVICE_INTERVENTION_CURVE_1),
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.SERVICE_INTERVENTION_CURVE_1),
 					false,
 					this.serviceBreakingPower);
 			List<Knot> normalDecelerationCurve = calculateKnotList(slowDown,
-					this.ssp.getSpeedAtDistance(slowDown,BreakingCurveType.NORMAL_INTERVENTION_CURVE),
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.NORMAL_INTERVENTION_CURVE),
 					false,
 					this.normalBreakingPower);
 
@@ -235,9 +235,9 @@ public class BreakingCurveCalculator {
 		ebdCurveMap.put(distanceToSVL, ebd);
 
 		Location refLoc = this.referencePosition.getLocation();
-		BreakingCurve ebc = new BreakingCurve(refLoc, this.ssp, ebdCurveMap);
-		BreakingCurve sbc = new BreakingCurve(refLoc, this.ssp, sbdCurveMap);
-		BreakingCurve nbc = new BreakingCurve(refLoc, this.ssp, nbdCurveMap);
+		BreakingCurve ebc = new BreakingCurve("ebc", refLoc, this.ssp, ebdCurveMap);
+		BreakingCurve sbc = new BreakingCurve("sbc", refLoc, this.ssp, sbdCurveMap);
+		BreakingCurve nbc = new BreakingCurve("nbc", refLoc, this.ssp, nbdCurveMap);
 
 		return Arrays.asList(ebc, sbc, nbc);
 	}
@@ -262,21 +262,21 @@ public class BreakingCurveCalculator {
 	private List<Knot> calculateKnotList(double distanceToEnd, double speedAtEnd, boolean ebd, ForwardSpline breakingPower)
 			throws IllegalArgumentException, IndexOutOfBoundsException {
 		List<Knot> knotList = new ArrayList<>();
-		BreakingCurveType breakingCurveType;
+		CurveType curveType;
 
 		if(ebd){
-			breakingCurveType = BreakingCurveType.EMERGENCY_INTERVENTION_CURVE;
+			curveType = CurveType.EMERGENCY_INTERVENTION_CURVE;
 		}
 		else {
-			breakingCurveType = BreakingCurveType.SERVICE_INTERVENTION_CURVE_1;
+			curveType = CurveType.SERVICE_INTERVENTION_CURVE_1;
 		}
 
 		double deltaV = 0.2;
 
 		double speed_EMA = speedAtEnd;
 
-		if (speed_EMA > this.ssp.getSpeedAtDistance(distanceToEnd, breakingCurveType)) {
-			speed_EMA = this.ssp.getSpeedAtDistance(distanceToEnd, breakingCurveType);
+		if (speed_EMA > this.ssp.getSpeedAtDistance(distanceToEnd, curveType)) {
+			speed_EMA = this.ssp.getSpeedAtDistance(distanceToEnd, curveType);
 		}
 		//s_EAP (see description of algorithm by Boltz) is in this calculation always 0,
 		// because we work relative to the current position
