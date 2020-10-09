@@ -214,7 +214,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(!bIsOccupatonFree) {
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
             return;
         } else {
             if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
@@ -298,6 +298,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
             MaReturnPayload.setMaSuccessfull(uuid);
+
             sendMaResponseToTMS(MaReturnPayload, 3L);
         } else {
             MaReturnPayload.setErrorState(uuid,true, NO_ACK);
