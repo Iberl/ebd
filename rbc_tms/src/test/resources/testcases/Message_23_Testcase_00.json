@@ -1,0 +1,18 @@
+{
+  "header": {
+    "type": 23,
+    "hash": -2058739071,
+    "tms_id": "tms_123",
+    "rbc_id": "rbc_123"
+  },
+  "payload": {
+    "nid_engine": 0,
+    "nid_em": 0,
+    "m_ack": false,
+    "nid_lrbg": 0,
+    "q_dir": 0,
+    "q_scale": 0,
+    "d_ref": 0,
+    "d_emergencystop": 0
+  }
+}

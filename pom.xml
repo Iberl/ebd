@@ -118,6 +118,7 @@
     </plugin>
     </plugins>
   </reporting>
+
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
