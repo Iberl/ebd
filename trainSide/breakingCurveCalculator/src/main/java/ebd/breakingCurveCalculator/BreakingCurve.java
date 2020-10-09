@@ -4,7 +4,10 @@ package ebd.breakingCurveCalculator;
 import java.util.Arrays;
 import java.util.TreeMap;
 
+import ebd.breakingCurveCalculator.utils.CurveGroup;
+import ebd.breakingCurveCalculator.utils.EmptyCurveGroup;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
+import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
 import ebd.globalUtils.breakingCurveType.BreakingCurveType;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
@@ -61,7 +64,7 @@ public class BreakingCurve {
 		this.refLocation = new InitalLocation();
 		this.ssp = new StaticSpeedProfil(Arrays.asList(0d,0d));
 		TreeMap<Double,CurveGroup> cm = new TreeMap<>();
-		cm.put(0d,new CurveGroup());
+		cm.put(0d, new EmptyCurveGroup());
 		this.curveMap = cm;
 	}
 
@@ -90,6 +93,7 @@ public class BreakingCurve {
 	 * @return Speed in [m/s]
 	 */
 	public double getSpeedAtDistance(double distance, BreakingCurveType breakingCurveType){
+		if(distance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + distance);
 		double sspSpeed = this.ssp.getSpeedAtDistance(distance, breakingCurveType);
 		double bcSpeed = getSpeedFromBCCurveMap(distance,breakingCurveType);
 		return Math.min(sspSpeed,bcSpeed);
@@ -101,10 +105,13 @@ public class BreakingCurve {
 	 * @return Distance in [m]
 	 */
 	public double nextTargetDistance(double distance){
+		if(distance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + distance);
 		Double distanceAtTarget = this.curveMap.higherKey(distance);
-		if(distanceAtTarget == null) return this.curveMap.lastKey();
+		BackwardSpline permittedSpeedCurve = this.curveMap.get(distanceAtTarget).getCurveFromType(BreakingCurveType.PERMITTED_SPEED);
 
-		double targetSpeed = this.curveMap.get(distanceAtTarget).getPermittedSpeedCurve().getPointOnCurve(distanceAtTarget);
+		if(distanceAtTarget == null || permittedSpeedCurve == null) return this.curveMap.lastKey();
+
+		double targetSpeed = permittedSpeedCurve.getPointOnCurve(distanceAtTarget);
 		double lowestSpeed = getSpeedAtDistance(distanceAtTarget,BreakingCurveType.PERMITTED_SPEED);
 
 		if(lowestSpeed < targetSpeed){
@@ -120,6 +127,7 @@ public class BreakingCurve {
 	 * @return Either {@link SpeedSupervisionState#CEILING_SPEED_SUPERVISION} or {@link SpeedSupervisionState#TARGET_SPEED_SUPERVISION}
 	 */
 	public SpeedSupervisionState getSpeedSupervisionState(double curDistance, double curSpeed){
+		if(curDistance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + curDistance);
 		double indiSpeed = getSpeedFromBCCurveMap(curDistance,BreakingCurveType.INDICATION_CURVE);
 		if( curSpeed > indiSpeed){
 			return SpeedSupervisionState.CEILING_SPEED_SUPERVISION;

@@ -486,7 +486,7 @@ public class DrivingDynamics {
      */
     private void calculateModifier() {
         double currentSpeed = this.dynamicState.getSpeed();
-        double maxBreakingAcc = this.trainDataVolatile.getCurrentBreakingPower().getPointOnCurve(currentSpeed);
+        double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
 
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;

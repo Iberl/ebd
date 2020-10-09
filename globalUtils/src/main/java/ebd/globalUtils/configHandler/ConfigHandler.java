@@ -172,22 +172,22 @@ public class ConfigHandler {
     /**
      * Service break warning curve offset in [s]
      */
-    public double serviceWarningOffset = 3;
+    public double warningOffset = 3;
 
     /**
      * Service break permitted speed curve offset in [s]
      */
-    public double servicePermittedOffset = 7;
+    public double permittedOffset = 7;
 
     /**
      * Service break indication curve offset in [s]
      */
-    public double serviceIndicationOffset = 12;
+    public double indicationOffset = 12;
 
     /**
      * Service coasting curve that allows for a coasting phase before breaking is needed
      */
-    public double serviceCoastingPhaseOffset = 37;
+    public double coastingPhaseOffset = 37;
 
     /**
      * Speed difference between Permitted speed
