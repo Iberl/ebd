@@ -1,5 +1,7 @@
 package de.ibw.smart.logic.intf.impl;
 
+import de.ibw.history.PositionModul;
+import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.intf.*;
@@ -188,7 +190,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bRouteCriteriaCheck = false;
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList = new ArrayList<>();
+        RouteDataSL requestedTrackElementList = null;
         bCheckOk = Safety.slSelfCheck(MaAdapter);
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
@@ -298,7 +300,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
             MaReturnPayload.setMaSuccessfull(uuid);
-
+            PositionModul.getInstance().updateCurrentRoute(nid_engine_Id, requestedTrackElementList);
             sendMaResponseToTMS(MaReturnPayload, 3L);
         } else {
             MaReturnPayload.setErrorState(uuid,true, NO_ACK);
@@ -326,7 +328,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * @param requestedTrackElementList
      * @return ArrayList of Pair with TrackElement and Element Type
      */
-    private ArrayList<Pair<Route.TrackElementType, TrackElement>> identifyRouteElements(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    private RouteDataSL identifyRouteElements(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
         try{
 
             int iListCount = 0;

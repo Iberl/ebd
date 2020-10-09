@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 
-class SmartSafetyRouteIsNonBlockedTestConcurrentChecks {
+class SmartSafetyRouteDataSLIsNonBlockedTestConcurrentChecks {
 
     private static Flow.Subscription subscription4Test;
     private static final SynchronousQueue<String> StartQueue = new SynchronousQueue<>();

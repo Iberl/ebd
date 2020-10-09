@@ -1,15 +1,14 @@
 package de.ibw.history;
 
+import de.ibw.history.data.RouteDataSL;
+import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
-import org.apache.log4j.lf5.PassingLogRecordFilter;
 
 import java.math.BigDecimal;
-import java.security.DrbgParameters;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -25,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PositionModul implements IPositionModul {
      private CopyOnWriteArrayList<PositionData> positionModuls = new CopyOnWriteArrayList<>();
      private ThreadedRepo<Integer, PositionData> CurrentPositionsByNidId = new ThreadedRepo<>();
+     private RouteMap routeByNidId = new RouteMap();
      private Boolean isRbcTimeFiltering = null;
 
      long lFrom = 0L;
@@ -84,6 +84,14 @@ public class PositionModul implements IPositionModul {
             }
         }
         positionModuls.add(PD);
+    }
+
+    public void updateCurrentRoute(int iNidEngineId, RouteDataSL R) {
+        this.routeByNidId.update(iNidEngineId, R);
+    }
+
+    public RouteDataSL getRouteOfNidEngine(int iNidEngineId) {
+        return this.routeByNidId.getModel(iNidEngineId);
     }
 
     /**

@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.
  * Dieser Test stellt die funktionale Korrektheit sicher
  */
-class SmartSafetyRouteIsNonBlockedTest {
+class SmartSafetyRouteDataSLIsNonBlockedTest {
 
     @Spy
     SmartSafety Safety = SmartSafety.getSmartSafety();
