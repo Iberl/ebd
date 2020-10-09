@@ -2,7 +2,7 @@ package ebd.globalUtils.breakingCurveType;
 
 public enum BreakingCurveType {
     C30_CURVE,
-    NORMAL_CURVE,
+    NORMAL_INTERVENTION_CURVE,
     INDICATION_CURVE,
     PERMITTED_SPEED,
     WARNING_CURVE,
