@@ -87,10 +87,11 @@ public class GUIServer implements Runnable {
      * @param de {@link DisconnectEvent}
      */
     @Subscribe
-    public void disconnect(DisconnectEvent de){
+    public void disconnect(DisconnectEvent de) throws IOException {
         this.running = false;
         this.guiPipeDistribution.stop();
         this.globalBus.unregister(this);
+        this.serverSocket.close();
     }
 
     /**

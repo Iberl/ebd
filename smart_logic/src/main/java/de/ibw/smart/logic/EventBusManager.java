@@ -88,7 +88,7 @@ public class EventBusManager {
      * @param bIsTMS boolean - ist der Server innerhalb des TMS
      * @throws Exception - wirft eine Exception wenn der GUIServer nicht generiert werden kann
      */
-    public static void startLogGuiServer(boolean bIsTMS) throws Exception {
+    public static GUIServer startLogGuiServer(boolean bIsTMS) throws Exception {
         Integer iServerPort = null;
         EventBusManager BusManager = null;
         if(bIsTMS) {
@@ -98,7 +98,7 @@ public class EventBusManager {
             iServerPort = Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer4SL);
         }
         BusManager = EventBusManager.registerOrGetBus(1, bIsTMS);
-        GUIServer UiServer = new GUIServer(BusManager.LocalBus, iServerPort);
+        return new GUIServer(BusManager.LocalBus, iServerPort);
     }
 
     /**

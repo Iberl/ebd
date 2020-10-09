@@ -28,8 +28,8 @@ import java.io.IOException;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 0.4
+ * @since 2020-09-08
  */
 public class SmartServer extends RbcModul  {
 
@@ -207,6 +207,17 @@ public class SmartServer extends RbcModul  {
                 e.printStackTrace();
             }
 
+    }
+
+    /**
+     * Beendet die Socket-Communikation
+     */
+    public void shutdown() {
+        try {
+            getGroup().shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

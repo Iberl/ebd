@@ -98,6 +98,9 @@ public class TrainModel {
      */
     public void setNodeTrainRunningTo(TopologyGraph.Node nodeTrainRunningTo) {
         NodeTrainRunningTo = nodeTrainRunningTo;
+        if(nodeTrainRunningTo != null) {
+            this.sNodeIdTrainRunningTo = nodeTrainRunningTo.TopNodeId;
+        } else this.sNodeIdTrainRunningTo = null;
     }
 
     /**
@@ -186,6 +189,24 @@ public class TrainModel {
      */
     @Expose
     private TopologyGraph.Node NodeTrainRunningTo;
+
+    /**
+     * Topologischer Knoten in nominaler Richtung
+     * Gleichzeitg der erste Knoten der von der Balise angefahren wird, wenn der Zug nominal fahren soll.
+     *
+     * Durch diesen Knoten findet die Smart-Logic heraus, ob der Zug mit Front oder Heck dem Knoten nahe ist.
+     *
+     */
+    @Expose
+    private TopologyGraph.Node IntialNominalNodeInDirectionFromStartBalise;
+
+    @Expose
+    private String sNodeIdTrainRunningTo;
+
+    public String getsNodeIdTrainRunningTo() {
+        return sNodeIdTrainRunningTo;
+    }
+
     private double dDistanceToNodeRunningTo;
     private Integer nid_lrbg = null;
 
