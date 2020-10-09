@@ -1,14 +1,15 @@
 package de.ibw.util;
 
-import java.util.Collection;
+import java.util.*;
+
 /**
  * Ein Threadsicheres DefaultRepo
  * Ein Repository
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.4
+ * @since 2020-09-30
  */
 public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
 
@@ -59,4 +60,14 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
     public synchronized Collection<V> getAll() {
         return repo.getAll();
     }
+
+
+    /**
+     * Sortiert dieses Reposiotry nach den Keys der Hashmap
+     */
+    @Override
+    public synchronized List<V> sortValues() {
+        return repo.sortValues();
+    }
+
 }

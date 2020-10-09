@@ -52,14 +52,25 @@ public class ConfigHandler {
       */
     public long lCheckDbdCommand = 3L;
 
+    /*
+    Priory für SL Antworten an das TMS, als Antwort zum Prüfen eines Stellbefehlt
+     */
+    public long lCheckDbdReturn = 3L;
 
     /*
     doubles
      */
 
+    /**
+     * Die L&auml;nge des Zuges in Meter, falls das RBC keine Angabe gemacht hat.
+     */
+    public double D_DEFAULT_MIN_LENGTH = 10d;
+
     /*
     boolean
      */
+
+    public boolean isInTestMode = true;
 
     public boolean isSimulatingEbd = true;
     public boolean initCrossoversInRealdDbdClient = false;

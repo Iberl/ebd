@@ -131,7 +131,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         boolean m_ack = true;
         RbcMaAdapter MaAdapter = null;
         Integer nid_lrbg = extractNidBaliseId(requestWrapper);
-        Double dDistanceToBalise = extractDistanceToBalise(requestWrapper);
+
         EOA.EndTimer TimerEnd = new EOA.EndTimer(ETCSVariables.T_ENDTIMER_INFINITY, ETCSVariables.D_ENDTIMERSTARTLOC);
         LinkingProfileAdapter LPA = null;
         int Q_DIR = extractQ_DIR(requestWrapper);
@@ -446,14 +446,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         return ETCSVariables.Q_DIR_BOTH;
     }
 
-    private Double extractDistanceToBalise(MaRequestWrapper requestWrapper) {
-        try {
-            return requestWrapper.Tm.getdDistanceToBalise();
-        } catch (Exception E ) {
-            E.printStackTrace();
-        }
-        return null;
-    }
+
 
     private Integer extractNidBaliseId(MaRequestWrapper requestWrapper) {
         try {
