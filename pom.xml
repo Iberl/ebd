@@ -39,11 +39,6 @@
       <artifactId>json-simple</artifactId>
       <version>1.1.1</version>
     </dependency>
-    <dependency>
-      <groupId>ebd</groupId>
-      <artifactId>messageLibrary</artifactId>
-      <version>2.0</version>
-    </dependency>
 
   </dependencies>
 
@@ -123,16 +118,18 @@
     </plugin>
     </plugins>
   </reporting>
+
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
     <module>smart_logic</module>
-<!--    <module>messageLibrary</module>-->
+    <module>messageLibrary</module>
     <module>trainSide</module>
     <module>trackSide</module>
     <module>szenario</module>
+    <module>rbc_tms</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

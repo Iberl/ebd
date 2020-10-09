@@ -1,0 +1,15 @@
+{
+  "header": {
+    "type": 10,
+    "hash": 31062,
+    "tms_id": "tms_123",
+    "rbc_id": "rbc_123"
+  },
+  "payload": {
+    "trainInfo": {
+      "nid_engine": 0,
+      "nid_operational": 0,
+      "t_train": 0
+    }
+  }
+}
