@@ -63,41 +63,7 @@ public class TestEventHandler{
 			System.exit(-1); //TODO Make better and Event
 		}
 
-		List<BreakingCurve> lobc = new ArrayList<>();
-		lobc.add(nbce.breakingCurve.getEmergencyDecelerationCurve());
-		lobc.add(nbce.breakingCurve.getEmergencyInterventionCurve());
-		lobc.add(nbce.breakingCurve.getNormalBreakingCurve());
-		lobc.add(nbce.breakingCurve.getServiceInterventionCurve());
-		lobc.add(nbce.breakingCurve.getWarningCurve());
-		lobc.add(nbce.breakingCurve.getPermittedSpeedCurve());
-		lobc.add(nbce.breakingCurve.getIndicationCurve());
-		lobc.add(nbce.breakingCurve.getC30Curve());
-
-		for(BreakingCurve bCurve : lobc) {
-			double xPosition = 0d;
-			double step = bCurve.getHighestXValue() / 100000d;
-			FileWriter fW;
-			String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
-			String fileName = String.format("ETCS_ID_%d-%s-%s",6485,bCurve.getID(),dateString);
-
-			try {
-				fW = new FileWriter(dirPathString + fileName);
-				BufferedWriter writer = new BufferedWriter(fW);
-				writer.write("");
-
-				while (xPosition <= bCurve.getHighestXValue()) {
-
-					Double yValue = bCurve.getPointOnCurve(xPosition);
-					writer.append(String.format("%f:%f%n", xPosition, yValue));
-					xPosition += step;
-				}
-				writer.flush();
-				writer.close();
-
-			} catch (IOException e1) {
-				eventBus.post(new BreakingCurveExceptionEvent("bcc", "tsm", nbce, e1));
-			}
-		}
+		//TODO Saving
 	}
 
 }

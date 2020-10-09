@@ -4,7 +4,7 @@ import java.util.*;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
-import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -214,10 +214,10 @@ public class StaticSpeedProfil extends ForwardSpline{
 	 * @param xValue
 	 * 			Distance in [m] on the speed profile
 	 * @param curveType
-	 * 			{@link ebd.globalUtils.breakingCurveType.BreakingCurveType}
+	 * 			{@link CurveType}
 	 * @return Speed in [m/s]
 	 */
-	public Double getSpeedAtDistance(Double xValue, BreakingCurveType curveType) {
+	public Double getSpeedAtDistance(Double xValue, CurveType curveType) {
 		Double speed = super.getPointOnCurve(xValue);
 		if(speed <= 0.1){
 			return 0.0;

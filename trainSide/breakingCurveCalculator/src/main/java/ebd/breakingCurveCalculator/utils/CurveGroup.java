@@ -2,7 +2,7 @@ package ebd.breakingCurveCalculator.utils;
 
 
 import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.globalUtils.breakingCurveType.BreakingCurveType;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.Knot;
@@ -22,10 +22,10 @@ abstract public class CurveGroup {
 
     /**
      * Returns the @{@link BackwardSpline} that is appropriate to the curve type or {@code null} if no such type exists.
-     * @param curveType A {@link BreakingCurveType}
+     * @param curveType A {@link CurveType}
      * @return BackwardSpline or {@code null}
      */
-    abstract public @Nullable BackwardSpline getCurveFromType(BreakingCurveType curveType);
+    abstract public @Nullable BackwardSpline getCurveFromType(CurveType curveType);
 
 
     public String getId() {

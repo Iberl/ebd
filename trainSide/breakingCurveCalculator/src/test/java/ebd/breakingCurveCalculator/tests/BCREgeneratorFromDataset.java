@@ -47,16 +47,22 @@ public class BCREgeneratorFromDataset{
 		//setting ID
 		String id = "test_BCRE_Dataset";
 
-		//breaking Power
+		//service breaking Power
 		ForwardSpline breakingPower  = new ForwardSpline(0);
 		for (int i = 0; i < bp.length; i+=2) {
-			breakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
+			breakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.3));
 		}
 
 		//emergency breaking Power
 		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0);
 		for (int i = 0; i < bp.length; i+=2) {
-			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.1));
+			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.2));
+		}
+
+		//normal breaking Power
+		ForwardSpline normalBreakingPower  = new ForwardSpline(0);
+		for (int i = 0; i < bp.length; i+=2) {
+			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
 		}
 
 		//generating packet15
@@ -149,8 +155,23 @@ public class BCREgeneratorFromDataset{
 		//setting V_MAX
 		int V_MAXTRAIN = 200;
 
-		return new BreakingCurveRequestEvent("devTests", target,id,breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
-				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);
+		return new BreakingCurveRequestEvent("devTests",
+				target,
+				id,
+				normalBreakingPower,
+				breakingPower,
+				emergencyBreakingPower,
+				packet15,
+				packet21,
+				currentGradient,
+				currentPosition,
+				packet27,
+				listPacket65,
+				NC_CDTRAIN,
+				NC_TRAIN,
+				L_TRAIN,
+				currentSpeedLimit,
+				V_MAXTRAIN);
 	}
 
 }
