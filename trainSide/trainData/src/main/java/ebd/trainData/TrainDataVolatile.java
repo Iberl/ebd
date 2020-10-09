@@ -1,6 +1,5 @@
 package ebd.trainData;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.location.Location;
@@ -84,10 +83,10 @@ public class TrainDataVolatile {
     protected volatile Spline currentTripProfile = null;
 
     /**
-     * The target speed of the train in [m/s] based on the trip profile.
+     * The maximum speed of the train in [m/s] based on the trip profile.
      * Updated trough driving dynamics.
      */
-    protected volatile double currentProfileTargetSpeed = 0d;
+    protected volatile double currentProfileMaxSpeed = 0d;
 
     /**
      * The current speed of the train in [m/s].
@@ -97,7 +96,7 @@ public class TrainDataVolatile {
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the permitted speed curve.
+     * the permitted curve.
      * Updated by the speed supervision module.
      */
     protected volatile double currentMaximumSpeed = 0d;
@@ -274,46 +273,6 @@ public class TrainDataVolatile {
         this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
     }
 
-    /**
-     * only for testing!
-     * @param etcsID
-     * @param currentPosition
-     * @param currentSpeed
-     * @param currentProfileTargetSpeed
-     * @param m_MODE
-     * @param previousLocations
-     * @param currentBreakingMode
-     * @param currentBreakingPower
-     * @param currentAcceleratingPower
-     * @param currentResistanceCurve
-     * @param availableAcceleration
-     */
-    @SuppressWarnings({"JavaDoc", "ConstantConditions"})
-    public TrainDataVolatile(int etcsID, int trainConfigID, int infrastructureID, @Nullable Position currentPosition,
-                             @Nullable Double currentSpeed, @Nullable Double currentProfileTargetSpeed, @Nullable Integer m_MODE,
-                             @Nullable List<Location> previousLocations, @Nullable String currentBreakingMode,
-                             @Nullable ForwardSpline currentBreakingPower,
-                             @Nullable ForwardSpline currentAcceleratingPower, @Nullable ForwardSpline currentResistanceCurve,
-                             @Nullable AvailableAcceleration availableAcceleration) {
-        this.etcsID = etcsID;
-        this.trainConfigID = trainConfigID;
-        this.infrastructureID = infrastructureID;
-        if(!ConfigHandler.getInstance().useTrainConfiguratorTool){
-            throw new RuntimeException("This Constructor is only for use in tests");
-        }
-
-        this.currentPosition = currentPosition;
-        this.currentSpeed = currentSpeed;
-        this.currentProfileTargetSpeed = currentProfileTargetSpeed;
-        M_MODE = m_MODE;
-        this.previousLocations = previousLocations;
-        this.currentBreakingMode = currentBreakingMode;
-        this.currentBreakingPower = currentBreakingPower;
-        this.currentAcceleratingPower = currentAcceleratingPower;
-        this.currentResistanceCurve = currentResistanceCurve;
-        this.availableAcceleration = availableAcceleration;
-    }
-
     //Getter and setter
 
     /**
@@ -375,8 +334,8 @@ public class TrainDataVolatile {
      * @return current maximum allowed speed in [m/s] based on the trip profile
      */
     @NotNull
-    public Double getCurrentProfileTargetSpeed() {
-        return currentProfileTargetSpeed;
+    public Double getCurrentProfileMaxSpeed() {
+        return currentProfileMaxSpeed;
     }
 
     /**

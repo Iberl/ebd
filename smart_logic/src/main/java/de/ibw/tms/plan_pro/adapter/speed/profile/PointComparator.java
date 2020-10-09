@@ -4,6 +4,9 @@ import plan_pro.modell.geodaten._1_9_0.CStreckePunkt;
 
 import java.util.Comparator;
 
+/**
+ * Not used now belongs to SSP
+ */
 public class PointComparator implements Comparator<CStreckePunkt> {
 
     @Override

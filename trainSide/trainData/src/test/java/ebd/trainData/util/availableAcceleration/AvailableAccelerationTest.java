@@ -26,7 +26,7 @@ class AvailableAccelerationTest {
         TDTestHandler th = new TDTestHandler();
     }
 
-    @Test
+
     void aaTest() throws IOException {
         EventBus eb = EventBus.getDefault();
         String target = "all";

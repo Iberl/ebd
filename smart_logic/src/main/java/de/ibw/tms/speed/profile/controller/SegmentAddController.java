@@ -8,7 +8,15 @@ import de.ibw.util.UtilFunction;
 
 import javax.swing.*;
 import java.util.ArrayList;
-
+/**
+ * Ein Controller f&uuml;r SpeedSegmente. Wenn ein neues Segment zu einem Profil hinzugeordnet wird,
+ * werden Komponenten benachrichtigt, sich zu aktualisieren.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SegmentAddController {
     private SpeedSegmentViewModel Model;
     private AddSegmentDialog View;
@@ -17,14 +25,28 @@ public class SegmentAddController {
     private Integer iTempBeginMeter;
     private Integer iTempEndMeter;
 
+    /**
+     * Model der Speed-Ansicht in der sich neue Segmente in das Wunschprofil anordnen lassen.
+     * @param model {@link SpeedSegmentViewModel} - View Model
+     */
     public void setModel(SpeedSegmentViewModel model) {
         Model = model;
     }
 
+    /**
+     * Setzt den konkreten Dialog in Bezug zu dem Controller
+     * @param view - eine konkrete Ansicht zum Wunschprofil
+     */
     public void setView(AddSegmentDialog view) {
         View = view;
     }
 
+    /**
+     * Controller verarbeitet ein neues Segment
+     * @param sBeginMeter - Segment Beginn in Meter
+     * @param sEndMeter - Segment Ende in Meter
+     * @param stringSpeed - speed in (km per h)
+     */
     public void submitSegment(String sBeginMeter, String sEndMeter, String stringSpeed) {
         iTempBeginMeter = null;
         iTempEndMeter = null;

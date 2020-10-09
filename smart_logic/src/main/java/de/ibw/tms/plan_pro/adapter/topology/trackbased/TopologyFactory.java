@@ -10,11 +10,13 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
+import ebd.ConfigHandler;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CBearbeitungsvermerkAllg;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
+import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
@@ -23,6 +25,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -30,15 +33,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Diese Klasse dient zur Erzeugung eines Topologieschen Graphen
+ */
 public class TopologyFactory implements ITopologyFactory {
 
 
     private static final boolean B_PRINT_BALISE_LIST = false;
+    /**
+     * Dieses Feld gibt an, ob der erzeugte Graph in PlanData gespeichert werden soll
+     */
     public static boolean shallAssignToActivePlanData = true;
 
 
     private List<CTOPKante> topLines; // input
     private DefaultRepo<Class<?>,DefaultRepo<String, CBasisObjekt>> geoBundle; // input
+
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() {
+        return geoBundle;
+    }
 
     private DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo = new DefaultRepo<>(); // output
     private DefaultRepo<String, CTOPKnoten> geoNodeToTopNodeRepo = new DefaultRepo<>(); // output
@@ -55,16 +68,31 @@ public class TopologyFactory implements ITopologyFactory {
 
     private DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>(); // output
 
+    private DefaultRepo<String, CSignal> signalRepo = new DefaultRepo<>();
+
     private CPlanProSchnittstelle PlanProDefinition;
 
+    /**
+     * Diese Getter Methode gibt ein Repository zur&uuml;ck, das die String-Id eine Geo-Knoten als key besitzt.
+     * Als Wertebreich werden Topologische Knoten zur&uuml;ckgegeben
+     * @return Ein Repository mit Geo-Key und Value eine {@link CTOPKnoten}
+     */
     public DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo() {
         return geoNodeToTopNodeRepo;
     }
-
+    /**
+     * Diese Getter Methode gibt ein Repository zurück, das die String-Id eine Top-Knoten als key besitzt.
+     * Als Wertebreich werden Geographisch Knoten zurückgegeben
+     * @return Ein Repository mit top-Key und Value eine {@link CGEOKnoten}
+     */
     public DefaultRepo<String, CGEOKnoten> getTopNodeToGeoNodeRepo() {
         return topNodeToGeoNodeRepo;
     }
 
+    /**
+     *
+     * @return Ein Repository, das die CStrecken key-StringIds zur {@link CStrecke} zuordnet
+     */
     public DefaultRepo<String, CStrecke> getTrackRepo() {
         return trackRepo;
     }
@@ -81,6 +109,10 @@ public class TopologyFactory implements ITopologyFactory {
         this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
     }
 
+    /**
+     * Construktor das die Factory intialisiert
+     * @throws JAXBException - wenn die PlanPro Datei nicht verarbeitet werde konnte
+     */
     public TopologyFactory() throws JAXBException {
         aCrossingKeys = new Class[]  {
                 CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
@@ -90,22 +122,9 @@ public class TopologyFactory implements ITopologyFactory {
 
 
     /**
-     * @Deprecated
-     * @param topLines
-     * @param geoBundle
-     * @param geoNodeToGeoEdgesRepo
+     * Diese Methode generiert den {@link TopologyGraph}
+     * @return TopologyGraph
      */
-    public TopologyFactory(List<CTOPKante> topLines, DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle, DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo) {
-        aCrossingKeys = new Class[]  {
-                CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
-        };
-        this.topLines = topLines;
-        this.geoBundle = geoBundle;
-        this.geoNodeToGeoEdgesRepo = geoNodeToGeoEdgesRepo;
-
-    }
-
-
     public TopologyGraph connectTopology() {
         if(this.topLines == null || this.geoBundle == null || this.geoNodeToGeoEdgesRepo == null) {
             throw new NullPointerException("Topology Factory Parameters must not be null");
@@ -211,6 +230,10 @@ public class TopologyFactory implements ITopologyFactory {
 
     }
 
+    /**
+     * Diese Methode generiert Weichen {@link CrossingSwitch} und speichert sie in eine Liste in {@link PlanData}
+     * @throws ParseException - Wenn undefinierte Werte vorhanden sind, diese aber benötigt werden.
+     */
     public void handleBranchingPoints() throws ParseException {
         initBranchingPoints();
         DefaultRepo<String, CBasisObjekt> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
@@ -231,6 +254,7 @@ public class TopologyFactory implements ITopologyFactory {
             String sAnlageId = null;
             CWKrGspElement Element = null;
             CWKrAnlage A = null;
+            CSignal Signal = null;
             try {
                 sElementId = Comp.getIDWKrGspElement().getWert();
             } catch (Exception E) {
@@ -238,6 +262,11 @@ public class TopologyFactory implements ITopologyFactory {
             }
             if (sElementId != null) {
                 Element = (CWKrGspElement) crossingPartsRepo.getModel(sElementId);
+                try {
+                    Signal = this.signalRepo.getModel(Element.getWeicheElement().getIDGrenzzeichen().getWert());
+                } catch(Exception E) {
+                    Signal = null;
+                }
             }
             try {
                 if (Element != null) sAnlageId = Element.getIDWKrAnlage().getWert();
@@ -247,11 +276,16 @@ public class TopologyFactory implements ITopologyFactory {
             }
             if (sAnlageId != null) {
                 A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
+
             }
-            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp);
+            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }
     }
+
+    /**
+     * List - gibt eine Liste von Balisen aus der PlanProDatei wider
+     */
 
     @Override
     public List<Balise> getBalises() {
@@ -259,12 +293,19 @@ public class TopologyFactory implements ITopologyFactory {
     }
 
     @Override
+    /**
+     * Versieht die Balisen mit Koordinaten und speichert sie nach einem selbst entworfenen Hashcode statisch in die
+     * Klasse {@link Balise}
+     */
     public void mapBalisesToCoordinate() {
         DefaultRepo<Integer, Balise> baliseByBg = Balise.baliseByNid_bg;
         DefaultRepo<Integer, Balise> tempBalises = new DefaultRepo();
         Collection<Balise> balisesList = baliseByBg.getAll();
         DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
         DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
+
+        ConfigHandler CH = ConfigHandler.getInstance();
+
 
         if(B_PRINT_BALISE_LIST) System.out.println("----Balise-List---");
         for(Balise B : balisesList) {
@@ -280,8 +321,89 @@ public class TopologyFactory implements ITopologyFactory {
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
+            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(TopKante.getIdentitaet().getWert());
+
+
+            GeoCoordinates geoCoordinate;
+            try {
+                boolean isAMissing;
+                boolean isBMissing;
+                BigDecimal decBalise = B.getMetersOfTrack();
+                isAMissing = E.TopConnectFromA.equals(TopologyConnect.ENDE) || E.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG);
+                isBMissing = E.TopConnectFromB.equals(TopologyConnect.ENDE) || E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG);
+                if(isAMissing && isBMissing) {
+                    throw new InvalidParameterException("Both Topology Nodes are End-Nodes");
+                } else if (!isAMissing && !isBMissing) {
+                    CrossingSwitch CSA = (CrossingSwitch) E.A.NodeImpl;
+                    CrossingSwitch CSB = (CrossingSwitch) E.B.NodeImpl;
+                    BigDecimal decA = CSA.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+                    BigDecimal decB = CSB.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+
+                    BigDecimal decDistanceFromA = null;
+
+
+                    if(decA.compareTo(decB) < 0) {
+
+                        // not beachten die Balise befindet sich nicht zwischen a und b
+                        if(!(decA.compareTo(decBalise) < 0 && decBalise.compareTo(decB) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+                        decDistanceFromA = decBalise.subtract(decA);
+
+
+
+                    } else {
+                        // not beachten die Balise befindet sich nicht zwischen a und b
+                        if(!(decB.compareTo(decBalise) < 0 && decBalise.compareTo(decA) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+                        decDistanceFromA = decA.subtract(decBalise);
+
+
+
+                    }
+
+                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
+
+
+
+                } else {
+                    Boolean isUpwardToEdge = null;
+                    CrossingSwitch CS = null;
+                    BigDecimal decResult = null;
+                    if(isAMissing) {
+                        CS = (CrossingSwitch) E.B.NodeImpl;
+
+                    } else {
+                        CS = (CrossingSwitch) E.A.NodeImpl;
+
+
+                    }
+                    BigDecimal dec = CS.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+                    if(B.getPlanProTrack().getBezeichnung().getBezeichnungStrecke().getWert().equals("2000")) {
+                        if(B.getHashcodeOfBaliseDp() == 4731) {
+                            isUpwardToEdge = CH.isTrackPosition_2000_4731_Upward;
+                        }
+                    }
+
+                    if(isUpwardToEdge == null) throw new InvalidParameterException("No Setting for Balise prepared.");
+                    if(isUpwardToEdge) {
+
+                        decResult = dec.add(decBalise);
+
+                    } else {
+                        decResult = dec.subtract(decBalise);
+                    }
+                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), !isAMissing, decResult.doubleValue());
+                }
+
+
+            } catch(Exception Ex) {
+                geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+            }
+
+
+
             // getGeoCoordinate()
-            GeoCoordinates geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+
 
             B.setX(geoCoordinate.getX());
             B.setY(geoCoordinate.getY());
@@ -310,9 +432,18 @@ public class TopologyFactory implements ITopologyFactory {
     private void initFromFile() throws JAXBException {
         PlanProDefinition = getcPlanProSchnittstelle();
         topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
+        handleSignals();
         handleGeoData();
 
     }
+
+    private void handleSignals() {
+        List<CSignal> signalList = PlanProDefinition.getLSTZustand().getContainer().getSignal();
+        for(CSignal Signal : PlanProDefinition.getLSTZustand().getContainer().getSignal()) {
+            this.signalRepo.update(Signal.getIdentitaet().getWert(), Signal);
+        }
+    }
+
     private void handleGeoData() {
         List<CGEOPunkt> geoPoints = PlanProDefinition.getLSTZustand().getContainer().getGEOPunkt();
         geoBundle = new DefaultRepo<>();
@@ -526,7 +657,8 @@ public class TopologyFactory implements ITopologyFactory {
         }
     }
 
-    public static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
+
+    private static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
         CTOPKnoten TopNode = (CTOPKnoten) nodeRepo.getModel(sNodeA);
         String sGeoNodeId = TopNode.getIDGEOKnoten().getWert();
         //CGEOKnoten geoPointOfNode = geoPointRepo.getModel(sGeoNodeId);

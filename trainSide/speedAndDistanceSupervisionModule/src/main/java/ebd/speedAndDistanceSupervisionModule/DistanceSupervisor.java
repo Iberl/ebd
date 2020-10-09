@@ -2,13 +2,18 @@ package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsPacketToProfileConverters.MovementAuthorityConverter;
+import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -24,12 +29,11 @@ import org.greenrobot.eventbus.ThreadMode;
  * This class supervises the distance the train has traveled the current trip. If the distance is close to or
  * greater than the current movement authority and the train has stopped, a end of mission is signaled.
  *<br>
- * //TODO This class can expanded to do other distance related checks.
+ * //TODO This class can be expanded to do other distance related checks.
  *
  * @author Lars Schulze-Falck
  */
 public class DistanceSupervisor {
-    //TODO Respect Dangerpoint, Overlaps etc.
     //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
     private final String eventSource;
@@ -48,7 +52,11 @@ public class DistanceSupervisor {
     private double curReleaseSpeedDistance = 0; // in [m]
     private boolean inRSM;
 
-    private double dangerPointDistance; // in [m]
+    private double emergencyBreakingCurveEndOffset = 0; // in [m]
+    private double startOfOverlapTimerDistance = 0;
+    private double overlapMaxTime = Double.MAX_VALUE;
+    private boolean overlapTimerRunning = false;
+    private long overlapStartTime = 0;
 
     /**
      * Constructor
@@ -63,7 +71,6 @@ public class DistanceSupervisor {
 
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-        this.dangerPointDistance = ch.minimumDangerPoint;
 
         this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
         this.eventTarget = "all";
@@ -73,15 +80,17 @@ public class DistanceSupervisor {
     /**
      * This method listens to clock tick events. On every tick, this class checks the the current traveled distance
      * and if there are any related measures that have to be taken.
-     * @param cTE A {@link ClockTickEvent}
+     * @param  cte A {@link ClockTickEvent}
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void clockTick(ClockTickEvent cTE){
+    public void clockTick(ClockTickEvent cte){
         if(this.breakingCurve == null) return;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
         double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
+
+
 
         if(!this.inRSM
                 && distanceToEMA <= this.curReleaseSpeedDistance
@@ -90,9 +99,13 @@ public class DistanceSupervisor {
             this.inRSM = true;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true, this.curReleaseSpeed));
         }
-        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
-            this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
+        else if(this.inRSM && distanceToEMA > this.curReleaseSpeedDistance){ //This endes the release speed mode if a new movement authority message is received
+            this.inRSM = false;
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
         }
+        /*else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){//TODO Check if correct: DS says DD to halt when v > 0
+            this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
+        }*/
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
@@ -102,10 +115,34 @@ public class DistanceSupervisor {
                 sendEndOfMission();
             }
         }
-        else if(distanceToEMA < (0 - this.dangerPointDistance)){
+        else if(distanceToEMA < (0 - this.emergencyBreakingCurveEndOffset)){
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
         }
+
+        /*
+        Supervision of Overlap Timer
+         */
+        if(curSpeed == 0 && this.overlapTimerRunning){
+            this.overlapTimerRunning = false;
+            this.startOfOverlapTimerDistance = Double.MIN_VALUE;
+            this.overlapMaxTime = Double.MAX_VALUE;
+        }
+        else if(distanceToEMA <= this.startOfOverlapTimerDistance && this.overlapMaxTime < Double.MAX_VALUE && !this.overlapTimerRunning){
+            this.overlapTimerRunning = true;
+            this.overlapStartTime = AppTime.currentTimeMillis();
+        }
+        if(this.overlapTimerRunning){
+            long runningTime = AppTime.currentTimeMillis() - this.overlapStartTime;
+            if(runningTime > this.overlapMaxTime){
+                this.overlapTimerRunning = false;
+                this.startOfOverlapTimerDistance = Double.MIN_VALUE;
+                this.overlapMaxTime = Double.MAX_VALUE;
+
+                revokeOverlap(); //Timeout of overlap revokes overlap, the train falls back on the danger point.
+            }
+        }
     }
+
 
     /**
      * This method updates the breaking curve.
@@ -116,6 +153,24 @@ public class DistanceSupervisor {
         this.breakingCurve = bce.breakingCurveGroup.getPermittedSpeedCurve();
         this.curReleaseSpeed = calculateReleaseSpeed();
         this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
+
+        /*
+        Setting up Overlap Timer supervision
+         */
+        Packet_15 p15 = routeDataVolatile.getPacket_15();
+        if(p15 != null){
+            if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+                this.startOfOverlapTimerDistance = Double.MIN_VALUE;
+                this.overlapMaxTime = Double.MAX_VALUE;
+                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetDangerPointDistance(p15);
+            }
+            else {
+                this.startOfOverlapTimerDistance = MovementAuthorityConverter.p15GetStartTimerDistance(p15);
+                this.overlapMaxTime = MovementAuthorityConverter.p15GetOverlapTime(p15);
+                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetOverlapDistance(p15);
+            }
+        }
+        this.overlapTimerRunning = false;
     }
 
     /**
@@ -152,5 +207,26 @@ public class DistanceSupervisor {
             return breakingCurve.getHighestXValue() - distance;
         }
         return ch.releaseSpeedDistance;
+    }
+
+    /*
+    Revokes the Overlap. This modifies the current Packet_15 by setting Q_Overlap to {@link ETCSVariables#Q_OVERLAP_NO_INFO}
+    and requesting a new breaking curve calculation, which then will not include an overlap.
+     */
+    private void revokeOverlap() {
+        Packet_15 p15 = routeDataVolatile.getPacket_15();
+        if(p15 == null) return;
+        p15.Q_OVERLAP = ETCSVariables.Q_OVERLAP_NO_INFO;
+
+        BreakingCurveLimitedRequestEvent bclre = new BreakingCurveLimitedRequestEvent("sds",
+                "bc",
+                "Overlap Revoked",
+                p15,
+                trainDataVolatile.getCurrentPosition()
+                );
+
+        this.localBus.post(new RouteDataChangeEvent("sds", "rd", "packet_15", p15));
+        this.localBus.post(bclre);
+
     }
 }

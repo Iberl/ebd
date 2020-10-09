@@ -15,7 +15,11 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Dieses Interface gibt den Rahmen vor, was einen Topologiegenerator ausmacht.
+ */
 public interface ITopologyFactory {
+
     DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo();
 
     DefaultRepo<String, CGEOKnoten> getTopNodeToGeoNodeRepo();
@@ -23,11 +27,17 @@ public interface ITopologyFactory {
     DefaultRepo<String, CStrecke> getTrackRepo();
     void setTopLines(List<CTOPKante> topLines);
 
-     void setGeoBundle(DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle);
+    DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle();
+    void setGeoBundle(DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> geoBundle);
+
+
 
      void setGeoNodeToGeoEdgesRepo(DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo);
      TopologyGraph connectTopology();
      void handleBranchingPoints() throws ParseException;
+    /**
+     * @return List - eine Liste von Balisen aus der PlanProDatei
+     */
      List<Balise> getBalises();
      void mapBalisesToCoordinate();
 

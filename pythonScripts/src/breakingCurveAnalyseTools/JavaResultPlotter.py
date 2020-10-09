@@ -6,7 +6,6 @@ with open(r"C:\intellij-workspace\etcs\results\breakingCurves\ServicePermittedSp
     
 xL = []
 yL = []
-y2L = []
 
 for line in lines:
     

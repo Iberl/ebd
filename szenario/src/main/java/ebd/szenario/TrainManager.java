@@ -27,7 +27,7 @@ public class TrainManager {
     }
 
     /**
-    * @see TrainsHandler#addTrain(int, int, int, String, int, int, String, boolean, int)
+    * @see TrainsHandler#addTrain(int, int, int, String, int, int, boolean, String, boolean, int)
     *
     * @param etcsID The etcs ID of the train
     * @param trainConfigID The train config ID used to communicate with the TrainConfig tool
@@ -44,6 +44,7 @@ public class TrainManager {
                          String trainScheduleID,
                          int rbcID,
                          int startingBaliseGroup,
+                         boolean startingDirectionDir,
                          String startingTrack,
                          boolean startingDirection,
                          int startingIncrement){
@@ -53,6 +54,7 @@ public class TrainManager {
                 trainScheduleID,
                 rbcID,
                 startingBaliseGroup,
+                startingDirectionDir,
                 startingTrack,
                 startingDirection,
                 startingIncrement);

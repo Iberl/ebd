@@ -1,8 +1,12 @@
+import matplotlib
+matplotlib.use('TkAgg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-06-29T22-21-33.040494"
+
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-07-07T15-41-40.4924262"
 path = path + "/"
 pathList = [(path + f) for f in os.listdir(path)]
             
@@ -13,21 +17,19 @@ for path in pathList:
         
     xL = []
     yL = []
-    
+
+    firstLine = lines.pop(0)
     for line in lines:
-        
-        xysplit = line.split(":")
-        x = xysplit[0].replace(",", ".")
-        y = xysplit[1].replace(",", ".")
-        
-        x = float(x)
-        y = float(y)
-        
-        xL.append(x)
-        yL.append(y)
+
+        firstSplit = line.split(";")
+
+        xL.append(float(firstSplit[0][4:]))
+
+        secondSplit = firstSplit[1][14:].split(",")
+        yL.append(float(secondSplit[0]))
         
     xArray = np.array(xL)
-    yArray = np.array(yL) - 1
+    yArray = np.array(yL)
     labelList = path.split("/")
     name = labelList[-1].replace(".txt", "")
     name = name[13:-14]

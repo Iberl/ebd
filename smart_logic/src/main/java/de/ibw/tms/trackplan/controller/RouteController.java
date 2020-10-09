@@ -9,27 +9,47 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
+/**
+ * Verwaltet beantragte Routen
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public class RouteController extends SubmissionPublisher<Route> implements IController<Route> {
 
     private RouteViewPort RoutePort = null;
 
+    /**
+     * Die verwaltete Route
+     * @return Route
+     */
     public Route getRouteData() {
         return RoutePort.getRouteModel();
     }
 
+    /**
+     * setzt die vom Controller verwaltete Route
+     * @param R {@link Route} - Route zur Verwaltung
+     */
     public void setRouteData(Route R) {
         this.RoutePort.setRouteModel(R);
     }
 
-
+    /**
+     * Instanziiert diesen Kontroller
+     * @param routePort - Vermittlung zur Route
+     */
     public RouteController(RouteViewPort routePort) {
 
         RoutePort = routePort;
 
     }
 
-
+    /**
+     * Benachrichtig alle Komponenten die sich registriert haben, dass eine Route ge&auml;ndert wurde.
+     */
 
     @Override
     public void publish() {
@@ -43,10 +63,14 @@ public class RouteController extends SubmissionPublisher<Route> implements ICont
         } catch(IllegalStateException Ex) {
             Ex.printStackTrace();
         }
-        TrackWindow.closeAllTrackWindows();
+
 
     }
 
+    /**
+     * Liste aller Nachrichten-Empf&auml;nger
+     * @return List Empf&auml;nger
+     */
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         ArrayList<Flow.Subscriber> result = new ArrayList<Flow.Subscriber>();

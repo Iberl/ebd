@@ -31,33 +31,76 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Diese Klasse verwaltet die Serverroutine des SL Servers.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServerFromTmsIntf, TmsIntf {
 
+    /**
+     * Modulbezeichnung von der MA-Verwaltung dieses Servers f&uuml;r das Logging
+     */
     public static final String SMART_SERVER_MA_MODUL = "SMART-SERVER-MA-MODUL";
+    /**
+     * Modulbezeichnung der Checkroutine welche Routen-Elemente vorliegen f&uuml;r das Logging
+     */
     public static final String ROUTE_COMPONENTS_IDENTIFY = "ROUTE-COMPONENTS-IDENTIFY";
 
+    /**
+     * Instanz dieses Servers
+     */
     public static SmartServer4TmsImpl instance;
 
-    public static TopologyGraph Topology;
 
-
+    /**
+     * Dieser Mapper verwaltet Warteschlangen f&uuml;r Acknowledges vom RBC
+     */
     public static QueueUuidMapper ackQueues = new QueueUuidMapper();
 
+    /**
+     * Selbstcheck der Smartlogic bereitet Fehler
+     */
     public static final String SL_SELF_CHECK_ERROR = "001";
+    /**
+     * TMS konnte nicht von der SL identifiziert werden
+     */
     public static final String TMS_NOT_IDENTIFIED_ERROR = "002";
+    /**
+     * Zug-Id konnte nicht verifiziert werden
+     */
     public static final String TRAIN_ID_NOT_VERIFIED_ERROR = "003";
-    // some necessary elements are blocked by other train
+    /**
+     * Einige Routen-Elemente f&uuml;r das Freigaben einer MA durch die SmartLogic sind belegt
+     */
     public static final String ELEMENT_RESERVATION_ERROR = "004";
-    // some elements of route are not listed
+    /**
+     * Die Liste der Routen Elemente ist nicht durchg&auml;nig definiert. Im Pfad fehlt ein anzugebendes Element
+     */
     public static final String NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR = "009";
+    /**
+     * Ein Element hat einen Status, sodass die Route nicht von der SL freigegeben werden kann
+     */
     public static final String STATUS_OF_ELEMENT_IS_WRONG_ERROR = "010";
+    /**
+     * Gefahrzonen konnten nicht abgerufen werden
+     */
     public static final String NO_DANGERZONE_RETRIEVAL_ERROR = "011";
 
-
+    /**
+     * Der Zug in seinem Status kann die Anforderung nicht ausf&uuml;hren
+     */
     public static final String TRAIN_NOT_FULFIL_ROUTE_CRITERIA_ERROR  = "015";
-
+    /**
+     * Das Geschwindigkeitsprofil ist nicht zul&auml;ssig
+     */
     public static final String SSP_CHECK_ERROR  = "015";
-
+    /**
+     * Die weitergegebene MA wurde vom RBC nicht bes&auml;igt
+     */
     public static final String NO_ACK = "NO_ACK";
 
 
@@ -76,12 +119,18 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     private EventBusManager EBM = null;
 
+    /**
+     * Diese Implementierung des SmartServers hat ein Modul zum Empfangen von Nachrichten des RBC als RBD Modul
+     * Diese Implementierung hat eine Serverkomponente, die mit dem TMS kommuniziert.
+     * @param rbcCl - RBC Nachrichten Empfangs Modul
+     * @param smartServer - Server der Anfragen des TMS verwaltet
+     */
     public SmartServer4TmsImpl(RbcModul rbcCl, SmartServer smartServer) {
         super(smartServer);
         this.RbcClient = rbcCl;
         this.smartServ = smartServer;
         instance = this;
-        Topology = createTopology();
+
 
         try {
             EBM = EventBusManager.registerOrGetBus(1,false);
@@ -113,7 +162,15 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
 
-
+    /**
+     * Diese Methode checkt die Eingegangen MA vom TMS
+     * @param MaRequest - ein Request aus TMS
+     * @param Ma - eien MA zum RBC
+     * @param uuid - KommunikationsId mit RBC
+     * @param tms_id - Id des TMS
+     * @param rbc_id - Id des angesprochenen RBCs
+     * @param lPriority - Priority
+     */
 
     @Override
     public synchronized void checkMovementAuthority(MaRequestWrapper MaRequest, MA Ma, UUID uuid, String tms_id, String rbc_id,
@@ -157,7 +214,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(!bIsOccupatonFree) {
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
             return;
         } else {
             if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
@@ -241,6 +298,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
             MaReturnPayload.setMaSuccessfull(uuid);
+
             sendMaResponseToTMS(MaReturnPayload, 3L);
         } else {
             MaReturnPayload.setErrorState(uuid,true, NO_ACK);
@@ -394,7 +452,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
 
-    public Message_21 getDummyMessage(UUID uuid, String tms_id, String rbc_id, int nid_engine_Id) {
+    private Message_21 getDummyMessage(UUID uuid, String tms_id, String rbc_id, int nid_engine_Id) {
         EOA.Section Sec = new EOA.Section(0, false, null,null);
         List<EOA.Section> sectionList = new ArrayList<>();
         sectionList.add(Sec);

@@ -10,26 +10,39 @@ import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.trackplan.controller.RouteController;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
-
+/**
+ * Panel das innerhalb eines Rechts-Click Dialogs verwendet wird.
+ * Betrifft genau ein Element in der Kartenansicht, das sich im Clickbereich befand.
+ *
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TrackPanel extends javax.swing.JPanel {
 
-    Iinteractable TrackElementModel = null;
+    private Iinteractable TrackElementModel = null;
 
     private static int windowWidth = 150;
 
 
 
-    public void setLocationPopUp(int x, int y) {
-        this.setLocation(x,y);
-    }
-    public void setModel(Iinteractable Model) {
+
+    private void setModel(Iinteractable Model) {
         this.TrackElementModel = Model;
     }
     private RouteController RouteCntrl;
 
-    public TrackPanel(Iinteractable Model, Point P, RouteViewPort RoutePort, boolean isMainWindow) {
+    /**
+     * Erstellt das Panel zu einem Element das sich in der Kartenansicht in der n&auml;he des Rechtsclick befand.
+     * @param Model {@link Iinteractable} - Model des Elments das in diesem Panel verarbeitet wird.
+     * @param RoutePort {@link RouteViewPort} - Port um in dieser Komponente Routeninformation der Ma anzupassen
+     * @param isMainWindow boolean - ist dieses Panel im Hauptfenster des TMS angesteuer worden
+     */
+    public TrackPanel(Iinteractable Model, RouteViewPort RoutePort, boolean isMainWindow) {
         super();
 
 
@@ -56,7 +69,7 @@ public class TrackPanel extends javax.swing.JPanel {
             if(SlipPoint instanceof SingleSlip) {
                 String desc = "Single Slip";
                 if(!isMainWindow) {
-                    this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl, P));
+                    this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl));
                 }
             } else {
                 if(SlipPoint instanceof DoubleSlip) {
@@ -68,15 +81,15 @@ public class TrackPanel extends javax.swing.JPanel {
                     String sDescB = DSlip.getSecondSlipB().getViewName();
                     if(!isMainWindow) {
                         this.add(new RouteComponent(sDescA, TeA,
-                                this.RouteCntrl, P));
+                                this.RouteCntrl));
                         this.add(new RouteComponent(sDescB, TeB,
-                                this.RouteCntrl, P));
+                                this.RouteCntrl));
                     }
                 }
             }
         } else {
             if(!isMainWindow) {
-                this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl, P));
+                this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl));
             }
         }
 

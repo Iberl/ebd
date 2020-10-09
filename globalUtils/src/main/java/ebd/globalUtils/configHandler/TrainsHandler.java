@@ -20,6 +20,7 @@ public class TrainsHandler {
         public int rbcID;
 
         public int startingBaliseGroup;
+        private boolean startingMovementDir;
         public String startingTrack;
 
         public boolean startingDirection;
@@ -32,8 +33,9 @@ public class TrainsHandler {
          * @param trainScheduleID The train schedule ID
          * @param rbcID The ID of the RBC commanding this train
          * @param startingBaliseGroup The Balise Group at starting position.
+         * @param startingMovementDir The direction of the starting balise group, true for nominal, false for reverse
          * @param startingTrack The starting Track on the ModelInfrastructure
-         * @param startingDirection The direction on the track (true means forward)
+         * @param startingDirection The direction of the train in relation to the starting balise group,
          * @param startingIncrement The starting increment (distance from the balise group) in [m]
          */
         public Train(int etcsID,
@@ -42,7 +44,7 @@ public class TrainsHandler {
                      String trainScheduleID,
                      int rbcID,
                      int startingBaliseGroup,
-                     String startingTrack,
+                     boolean startingMovementDir, String startingTrack,
                      boolean startingDirection,
                      int startingIncrement) {
             this.etcsID = etcsID;
@@ -51,6 +53,7 @@ public class TrainsHandler {
             this.trainScheduleID = trainScheduleID;
             this.rbcID = rbcID;
             this.startingBaliseGroup = startingBaliseGroup;
+            this.startingMovementDir = startingMovementDir;
             this.startingTrack = startingTrack;
             this.startingDirection = startingDirection;
             this.startingIncrement = startingIncrement;
@@ -85,13 +88,13 @@ public class TrainsHandler {
     }
 
     /**
-     *
-     * @param etcsID The etcs ID of the train
+     *  @param etcsID The etcs ID of the train
      * @param trainConfigID The train config ID used to communicate with the TrainConfig tool
      * @param infrastructureID The infrastructure ID used to communicate with the model train
      * @param trainScheduleID The train schedule ID
      * @param rbcID The ID of the RBC commanding this train
      * @param startingBaliseGroup The Balise Group at starting position.
+     * @param startingMovementDir
      * @param startingTrack The starting Track on the ModelInfrastructure
      * @param startingDirection The direction on the track (true means forward)
      */
@@ -101,6 +104,7 @@ public class TrainsHandler {
                                       String trainScheduleID,
                                       int rbcID,
                                       int startingBaliseGroup,
+                                      boolean startingMovementDir,
                                       String startingTrack,
                                       boolean startingDirection,
                                       int startingIncrement){
@@ -110,6 +114,7 @@ public class TrainsHandler {
                 trainScheduleID,
                 rbcID,
                 startingBaliseGroup,
+                startingMovementDir,
                 startingTrack,
                 startingDirection,
                 startingIncrement
@@ -182,6 +187,16 @@ public class TrainsHandler {
     }
 
     /**
+     * The direction of train movement at start in relation to the orientation of the starting balise, true for nominal, false for reverse
+     * @param etcsID The etcsID
+     * @return The direction of the starting balise group or {@code null} if the ETCS ID is not fond
+     */
+    public synchronized Boolean getStartingMovementDir(int etcsID){
+        Train train = this.map.get(etcsID);
+        return (train != null) ? train.startingMovementDir : null;
+    }
+
+    /**
      * The starting track is the first track that the train is positioned on.
      * Used to initialize the train on the EBD infrastructure.
      * Has to be a valid starting track on the EBD infrastructure.
@@ -238,6 +253,7 @@ public class TrainsHandler {
             String trainScheduleID = "";
             int rbcID = 0;
             int startingBaliseGroup = 0;
+            boolean startingMovementDir = true;
             String startingTrack = "";
             boolean startingDirection = true;
             int startingIncrement = 0;
@@ -248,6 +264,7 @@ public class TrainsHandler {
                 trainScheduleID = split[3];
                 rbcID = Integer.parseInt(split[4]);
                 startingBaliseGroup = Integer.parseInt(split[5]);
+                //startingMovementDir = Boolean.parseBoolean(split[6]);
                 startingTrack = split[6];
                 startingDirection = Boolean.parseBoolean(split[7]);
                 startingIncrement = Integer.parseInt(split[8]);
@@ -269,6 +286,7 @@ public class TrainsHandler {
                     trainScheduleID,
                     rbcID,
                     startingBaliseGroup,
+                    startingMovementDir,
                     startingTrack,
                     startingDirection,
                     startingIncrement);

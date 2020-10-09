@@ -1,20 +1,31 @@
 package de.ibw.tms.plan.elements;
 
+import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.SmartClient;
+import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.intf.TmsDbdCommand;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
+import ebd.ConfigHandler;
+import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -25,43 +36,68 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Flow;
 
+/**
+ * Branching Switch ein Modell einer Weiche Geographischer und Logischer Art
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-08-31
+ */
 public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover, ITrack, Flow.Subscriber<CrossoverMainModel> {
 
 
     private static Logger logger = Logger.getLogger( BranchingSwitch.class );
-    Flow.Subscription CrossoverSubscription = null;
+    private Flow.Subscription CrossoverSubscription = null;
     private Rail PeekRail = null;
     private TopologyGraph.Node Node = null;
+
+    /**
+     * Setzt das Gleis an der Weichenspitze
+     * @param PeekRail {@link Rail} - Gleis der Weichenspitze, das gesetzt wird
+     */
     public void setPeekRail(Rail PeekRail) {
         this.PeekRail = PeekRail;
     }
 
+    /**
+     * Setzt Bezug zum Topologischen Knoten-Kanten-Listen-Modell
+     * @param node {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Node} - Der Topologische Knoten
+     */
     public void setNode(TopologyGraph.Node node) {
         Node = node;
     }
 
+    /**
+     * Enum das definiert welches Bild f&uuml;r die Weiche benutzt werden soll
+     */
     public enum ViewType {
         Branch_RLO, Branch_LRU, Branch_ORL, Branch_ULR
     }
-
-    public class ViewTypeConverter {
-
-    }
-
 
     private static BufferedImage img = null;
 
     private ViewType BranchViewTypeCurrent;
     private CrossoverStatus LastState = CrossoverStatus.RIGHT;
 
-    public void setBranchViewTypeCurrent(ViewType branchViewTypeCurrent) {
-        BranchViewTypeCurrent = branchViewTypeCurrent;
-    }
 
     private String sBrachName;
 
+    public void setsBrachName(String sName) {
+        if(this.sBrachName == null || this.sBrachName.isEmpty() || this.sBrachName.equals("")) {
+            JLabel LabName = new JLabel("<HTML><b><u>".concat(sName).concat("</u></b></HTML>"));
 
 
+            uiList.add(0,LabName);
+        }
+        this.sBrachName = sName;
+    }
+
+    /**
+     * Bild das die Weiche darsstellt. Es wird aus einer Datei geladen
+     * @return BufferedImage - Bild
+     * @throws IOException - Falls Datei nicht geladen werden konnte
+     */
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         CrossoverStatus CurrentStatus = this.getStatus();
@@ -139,37 +175,101 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private SlipConnectionPoint BranchingPoint = null;
 
+    /**
+     * Gibt den Schlupf der Weiche wider. Dort ist abgelegt welche Enden der Weichen gerade verbunden sind.
+     * @return SlipConnectionPoint - Schlupf der Weiche
+     */
     public SlipConnectionPoint getBranchingPoint() {
         return BranchingPoint;
     }
 
     private ArrayList<JComponent> uiList = new ArrayList();
     private SingleEnumSelectorComponent<CrossoverEnumModel> BrachingStates = null;
+
+
+
+
+    /**
+     * Bereitet UI f&uuml;r die Weiche vor
+     * @param Model {@link CrossoverEnumModel} - Auswahlm&ouml;glichkeit von Status einer Weiche
+     */
     private void initUiList(CrossoverEnumModel Model) {
-        uiList.add(new JLabel("<HTML><b><u>".concat(this.sBrachName).concat("</u></b></HTML>")));
-        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
-        Model.setSingleSelection(Model.getEnumMappingList()[0]);
-        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(Model, this.controller);
+
+
+        setBranchingStatesUnit(Model);
         uiList.add(BrachingStates);
 
     }
 
+    private void setBranchingStatesUnit(CrossoverEnumModel model) {
+        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(model, this.controller,false);
+        uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
+        model.setSingleSelection(model.getEnumMappingList()[0]);
+        ActionListener al = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendDbdCommandToSL();
+            }
+        };
+        BrachingStates.addActionListener(al);
+    }
+
+    public void sendDbdCommandToSL() {
+        long lPriority = ConfigHandler.getInstance().lCheckDbdCommand;
+        Object OEnumField = BrachingStates.getSelectedItem();
+        EnumModel.EnumField EF = (EnumModel.EnumField) OEnumField;
+        if(((CrossingSwitch) this.Node.NodeImpl).isDKW()) {
+            handleDKW();
+            return;
+        }
+        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
+        String sId = this.Node.TopNodeId;
+        CheckDbdCommand DbdCommandPayload =
+                new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
+        TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
+        try {
+            SmartClientHandler.getInstance().sendCommand(DbdCommand);
+        } catch (MissingInformationException missingInformationException) {
+            missingInformationException.printStackTrace();
+        }
+    }
+
+    private void handleDKW() {
+        System.out.println("DKW is currently not supported");
+    }
+
     private CrossoverController controller = null;
 
+    /**
+     * Gibt Controller, der das Kontextmenu, bei Userinteraktion, nach Auswahl, die entsprechende Aktion ausf&uuml;hrt wieder
+     * @return CrossoverController - Der Controller zum Weichen-Kontextmenu
+     */
     public CrossoverController getController() {
         return controller;
     }
 
+    /**
+     * Definiert die Ui-Elemente im Kontextmenu der Weiche
+     * @return java.util.List - UI Elemente der Weiche
+     */
     @Override
     public ArrayList<JComponent> getViewElements() {
         return uiList;
     }
 
+    /**
+     * Bezeichnung der Weiche im Menu und auch auf dem Trackplan
+     * @return String - Bezeichnung der Weiche
+     */
     @Override
     public String getViewName() {
         return this.sBrachName;
     }
 
+    /**
+     * Weichenmodel&auml;nderungen dieser Weiche, werden hier als bewacht angemeldet
+     * @param subscription - Anmeldungsobject bei &Auml;nderungen
+     */
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.CrossoverSubscription = subscription;
@@ -177,8 +277,10 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
 
-
-
+    /**
+     * Eine Weichenmodel wurde ge&auml;ndert
+     * @param item {@link CrossoverMainModel} Neues Model der Weiche
+     */
 
     @Override
     public void onNext(CrossoverMainModel item) {
@@ -206,38 +308,106 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         this.CrossoverSubscription.request(1);
     }
 
+    /**
+     * Setzt die angegebene Output Relation als aktiv
+     * @param outputRelation - neue Verbindung der drei Enden einer Weiche
+     * @param remotePoint - der Schlupf der Weiche - speichert umschaltzeit noch unbenutzt
+     */
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
         Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
-        TopologyGraph.Node Ref = null;
-        if(From.getRail().equals(PeekRail)) {
-            Target = (Trail) outputRelation.getTo();
-        } else {
-            Target = (Trail) From;
-        }
-        Ref = Target.getRail().getEdge().B;
-        if(Ref.TopNodeId.equals(Node.TopNodeId)) {
-            sNodeIdOutput = Target.getRail().getEdge().A.TopNodeId;
-        } else sNodeIdOutput = Ref.TopNodeId;
 
-        logger.info("Switch: " + Node.TopNodeId + " points to " + sNodeIdOutput + " now.\n");
+        Target = getTargetOfOutputChange(outputRelation, From);
+
+
+        String sSrc = Node.TopNodeId;
+        String sTarget;
+        sSrc = getThisNode();
+
+        sTarget = getTargetOfOutputEdge(Target);
+
+
+
+
+        logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
 
         ///
 
 
     }
 
+    private String getTargetOfOutputEdge(Trail target) {
+        String sTarget;
+        try {
+
+            TopologyGraph.Node ref = target.getRail().getEdge().B;
+            CrossingSwitch CS = null;
+
+            if(ref.TopNodeId.equals(Node.TopNodeId)) {
+                CS = (CrossingSwitch) target.getRail().getEdge().A.NodeImpl;
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromB.value());
+
+            } else {
+                CS = (CrossingSwitch) ref.NodeImpl;
+                logger.info("Switched to " + target.getRail().getEdge().TopConnectFromA.value());
+            }
+            sTarget = CS.getEbdTitle();
+
+        } catch ( Exception E) {
+
+                sTarget = target.getRail().getEdge().A.TopNodeId;
+
+        }
+        return sTarget;
+    }
+
+    private String getThisNode() {
+        String sSrc;
+        try {
+            CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
+            sSrc = CS.getEbdTitle();
+        }catch (Exception E){
+            sSrc =  Node.TopNodeId;
+        }
+        return sSrc;
+    }
+
+    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
+        Trail Target;
+        if(from.getRail().equals(PeekRail)) {
+            Target = (Trail) outputRelation.getTo();
+        } else {
+            Target = from;
+        }
+        return Target;
+    }
+
+    /**
+     * neues Weichenmodel wirft Fehler
+     * Bisher wird nur der Fehler in der Konsole angezeigt
+     * @param throwable - Fehler der geworfen wird
+     */
 
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
 
+    /**
+     * neues Weichenmodel wurde in onNext behandelt. Hier wird beschrieben was dann passiert.
+     * Bisher keien Folgeaktionen
+     */
     @Override
     public void onComplete() {
 
     }
+
+    /**
+     * Gibt einen Recheckbereich der GUI-Clickbaren-Gr&ouml;&szlig;e der Weiche an.
+     * In diesem Rechteck wird das Kontextmenu aufrufbar
+     * @return Rectangle - Clickausma&szlig; der Weiche
+     */
 
     @Override
     public Rectangle getBounds() {
@@ -250,65 +420,108 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         return new Rectangle(ix, iy, iWidth, iHeight);
     }
 
+    /**
+     * Gibt einen 2-D-Recheckbereich der GUI-Clickbaren-Gr&ouml;&szlig;e der Weiche an.
+     * In diesem 2D-Rechteck wird das Kontextmenu aufrufbar
+     * @return Rectangle - Clickausma&szlig; der Weiche
+     */
     @Override
     public Rectangle2D getBounds2D() {
         return this.getBounds();
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean contains(double x, double y) {
         return this.getBounds2D().contains(x,y);
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean contains(Point2D p) {
         return this.getBounds2D().contains(p);
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean intersects(double x, double y, double w, double h) {
         return false;
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean intersects(Rectangle2D r) {
         return false;
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean contains(double x, double y, double w, double h) {
         return this.contains(x,y);
     }
 
+    /**
+     * unused
+     */
     @Override
     public boolean contains(Rectangle2D r) {
         return r.contains(this.dX, this.dY);
     }
 
+    /**
+     * unused
+     */
     @Override
     public PathIterator getPathIterator(AffineTransform at) {
         return null;
     }
 
+    /**
+     * unused
+     */
     @Override
     public PathIterator getPathIterator(AffineTransform at, double flatness) {
         return null;
     }
 
+    /**
+     * Gibt Schlupf der Weiche wider
+     * @return TrackElement - {@link SlipConnectionPoint} Gipt Schlupf wider
+     */
     @Override
     public TrackElement getTrackReference() {
         return this.BranchingPoint;
     }
 
 
-
+    /**
+     * Status die eine Weiche haben kann
+     */
     public enum CrossoverStatus {
         RIGHT, LEFT, BUSY, UNSAFE, UNSAFE_RIGHT, UNSAFE_LEFT
     }
 
 
-
-
+    /**
+     * Factory Methode generiert ein Weichenmodell einer einzelnen Weiche
+     * @param fLinkTime - {@link java.lang.Float} - dauer der Weichenstellung in ms
+     * @param BranchPoint - {@link SingleSlip} - Schlupf der Weiche
+     * @param dx double - X-Position auf geographischen Fenstern
+     * @param dy double - Y-Position auf geographischen Fenstern
+     * @param sName {@link String} - Name der Weiche
+     * @param ViewType {@link ViewType} - Bild der Weiche
+     * @return BranchingSwitch - Gibt Weichenmodell mit den Parametern wider.
+     */
     public static BranchingSwitch createCrossover( java.lang.Float fLinkTime, SingleSlip BranchPoint,
                                                   double dx, double dy, String sName, ViewType ViewType) {
 
@@ -318,6 +531,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
 
     }
+    /*
     public static BranchingSwitch createCrossover( java.lang.Float fLinkTime, DoubleSlip BranchPoint,
         double dx, double dy, String sName) {
 
@@ -326,7 +540,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
 
 
-    }
+    }*/
 
 
     private CrossoverStatus Status = CrossoverStatus.RIGHT;
@@ -334,7 +548,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private float fLinkageTimeInMs = 1000.0f;
 
-    public BranchingSwitch(float fLinkTime, SingleSlip BrachningPoint, double dx, double dy, String sName,
+    private BranchingSwitch(float fLinkTime, SingleSlip BrachningPoint, double dx, double dy, String sName,
                            ViewType BranchType) {
         super(dx,dy);
         this.sBrachName = sName;
@@ -343,20 +557,6 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         this.BranchViewTypeCurrent = BranchType;
 
         init(fLinkTime);
-
-
-
-
-    }
-    public BranchingSwitch( float fLinkTime, DoubleSlip BrachningPoint, double dx, double dy, String sName
-
-        ) {
-        super(dx,dy);
-        this.sBrachName = sName;
-        this.BranchingPoint = BrachningPoint;
-        init(fLinkTime);
-
-
 
 
 
@@ -375,14 +575,26 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         initUiList(StatusModel);
     }
 
+    /**
+     * Setzt die Umschaltdauer des Weichenmodells
+     * @param fLinkageTimeInMs float - Umschaltzeit in ms
+     */
     public void setfLinkageTimeInMs(float fLinkageTimeInMs) {
         this.fLinkageTimeInMs = fLinkageTimeInMs;
     }
 
+    /**
+     * Setzt den Weichenstatus
+     * @param status - {@link CrossoverStatus} der neue Status der Weiche
+     */
     public void setStatus(CrossoverStatus status) {
         Status = status;
     }
 
+    /**
+     * Hold den aktuellen Status der Weiche
+     * @return CrossoverStatus - Weichenstatus der widergegeben wird
+     */
     public CrossoverStatus getStatus() {
         return this.Status;
     }

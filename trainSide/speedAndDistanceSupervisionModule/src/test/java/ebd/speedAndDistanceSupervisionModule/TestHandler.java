@@ -3,7 +3,7 @@ package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
-import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 

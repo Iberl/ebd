@@ -2,56 +2,49 @@ package de.ibw.tms.plan_pro.adapter;
 
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
-import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.speed.profile.PointComparator;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.speed.profile.model.SspRepository;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.bahnsteig._1_9_0.*;
-import plan_pro.modell.bahnuebergang._1_9_0.CBUEAnlage;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
-import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
-import plan_pro.modell.basisobjekte._1_9_0.CBereichObjektTeilbereich;
-import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
-import plan_pro.modell.block._1_9_0.CBlockElement;
-import plan_pro.modell.block._1_9_0.CBlockStrecke;
 import plan_pro.modell.geodaten._1_9_0.*;
-import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
-import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
-import java.security.InvalidParameterException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.*;
 
+
+/**
+ * Ein Adapter der PlanPro Daten speichert.
+ *
+ * @Deprecated by TopologyFactory
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class PlanProTmsAdapter {
 
     private static PlanProTmsAdapter instance;
+
+    /**
+     * Singleton stellt diesen Adapter bereit.
+     * @return PlanProTmsAdapter - diese Instanz
+     */
     public static PlanProTmsAdapter getPlanAdapter() {
         return instance;
     }
     private static final boolean B_PRINT_BALISE_LIST = true;
 
 
-
-    plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle PlanProDefinition = null;
-
-    public void setPlanProDefinition(CPlanProSchnittstelle planProDefinition) {
-        PlanProDefinition = planProDefinition;
-    }
-
+    /**
+     * Verwaltet unterschiedliche PlanProVersionen
+     */
     public enum PlanProVersion {
         V1_9_0_PATCHED
     }
@@ -59,71 +52,17 @@ public class PlanProTmsAdapter {
     private Class[] aPlattformKeys;
     private Class[] aCrossingKeys;
     private Class[] aSpeedKeys;
+    /**
+     * Reposiotry das für Bahnh&ouml;fe Unterklassen bereitstellt.
+     */
     public DefaultRepo<Class, DefaultRepo> platformBundle = new DefaultRepo<>();
     public DefaultRepo<Class, DefaultRepo> geoBundle = new DefaultRepo<>();
     public DefaultRepo<Class, DefaultRepo> crossingBundle = new DefaultRepo<>();
     public DefaultRepo<Class, DefaultRepo> speedBundle = new DefaultRepo<>();
 
 
-    public DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>();
-    public DefaultRepo<String, CTOPKnoten> geoNodeToTopNodeRepo = new DefaultRepo<>();
-    public DefaultRepo<String, CGEOKnoten> topNodeToGeoNodeRepo = new DefaultRepo<>();
-    public DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo = new DefaultRepo<>();
-    public DefaultRepo<String, List<CGEOKante>> geoEdgesToTopNodeRepo = new DefaultRepo<>();
-    public DefaultRepo<String, List<CGEOKante>> geoEdgesToTopEdgesRepo = new DefaultRepo<>();
 
-
-    public boolean bCheckAllNodesBeeingLeftmost = true;
-
-
-
-    // An Crossing can have more components
-    // W_Kr_Anlage with Crossing components
-    public DefaultRepo<String, ArrayList<String>> crossingPartRelation = new DefaultRepo<>();
-    // Relation between Crossing elements to crossing component
-    // On crossing element can have many components
-    public DefaultRepo<String, ArrayList<String>> crossingComponentRelation = new DefaultRepo<>();
-
-    public DefaultRepo<String, ArrayList<CStreckePunkt>> pointsByTrackId = new DefaultRepo<>();
-
-
-
-    public PlanProTmsAdapter(PlanProVersion Version, CPlanProSchnittstelle planProDefinition) throws ParseException {
-        instance = this;
-        if(Version == PlanProVersion.V1_9_0_PATCHED) {
-            createTopology(planProDefinition);
-            //handleSpeedProfile();
-
-            //handlePlatformData();
-
-            initBranchingPoints();
-            handleBranchingPoints();
-            initLevelCrossings();
-            //TODO:
-          //  handleLevelCrossings();
-
-
-        }
-    }
-
-    public void createTopology(CPlanProSchnittstelle planProDefinition) {
-        this.setPlanProDefinition(planProDefinition);
-        aPlattformKeys = new Class[] {
-                CBahnsteigAnlage.class, CBahnsteigKante.class, CBahnsteigZugang.class,
-
-        };
-        aCrossingKeys = new Class[]  {
-                CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
-        };
-        aSpeedKeys = new Class[] {
-                CBlockStrecke.class, CStrecke.class, CBlockElement.class, CStreckePunkt.class
-        };
-
-        handleGeoData();
-
-        handleRailTopology();
-    }
-
+    /*
     private void handleSpeedProfile() {
         List<CBlockStrecke> listBlockStrecke = PlanProDefinition.getLSTZustand().getContainer().getBlockStrecke();
         List<CStrecke> listStrecke = PlanProDefinition.getLSTZustand().getContainer().getStrecke();
@@ -194,7 +133,7 @@ public class PlanProTmsAdapter {
         }
 
     }
-
+*/
     public void mapBalisesToCoordinate() {
         DefaultRepo<Integer, Balise> baliseByBg = Balise.baliseByNid_bg;
         DefaultRepo<Integer, Balise> tempBalises = new DefaultRepo();
@@ -246,12 +185,13 @@ public class PlanProTmsAdapter {
         System.out.println("Geo_B_x: " + geo_B.getX() + " Geo_B_y: " + geo_B.getY());
     }
 
-
+/*
     private void initLevelCrossings() {
         List<CBUEAnlage> listBueAnlage = PlanProDefinition.getLSTZustand().getContainer().getBUEAnlage();
 
     }
-
+*/
+    /*
     private void initBranchingPoints() {
         //List<CGleisAbschnitt> listCtrails =  PlanProDefinition.getLSTZustand().getContainer().getGleisAbschnitt();
         List<CWKrAnlage> listCrossings = PlanProDefinition.getLSTZustand().getContainer().getWKrAnlage();
@@ -265,9 +205,9 @@ public class PlanProTmsAdapter {
 
         handlePlanProIndexing(aCrossingKeys, crossingContents, crossingBundle);
     }
+*/
 
-
-
+/*
     private void handleBranchingPoints() throws ParseException {
 
         DefaultRepo<String, CWKrAnlage> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
@@ -304,11 +244,11 @@ public class PlanProTmsAdapter {
             if(sAnlageId != null) {
                 A = crossingRepo.getModel(sAnlageId);
             }
-            CrossingSwitch CS = new CrossingSwitch(A,Element,Comp);
+            CrossingSwitch CS = new CrossingSwitch(A,Element,Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }
 
-        /*
+
 
         for(CWKrAnlage Branching : listCweiche ) {
             ENUMWKrArt kind = Branching.getWKrAnlageAllg().getWKrArt().getWert();
@@ -375,8 +315,8 @@ public class PlanProTmsAdapter {
 
             }
         }*/
-    }
 
+/*
     private Chainage parseTrackKilometersToChainage(CPunktObjektStrecke objectTrack) throws ParseException {
         String sKilometers = objectTrack.getStreckeKm().getWert();
         Number numKilometers = NumberFormat.getInstance(Locale.GERMAN).parse(sKilometers);
@@ -400,6 +340,7 @@ public class PlanProTmsAdapter {
 
     }
 
+
     private void coordinatePartsToCrossing(Collection<CWKrGspElement> listCrossingMovement) {
         for(CWKrGspElement CrossingPart: listCrossingMovement) {
             String sBaseCrossingId = CrossingPart.getIDWKrAnlage().getWert();
@@ -416,16 +357,16 @@ public class PlanProTmsAdapter {
     private void handleRailTopology() {
 
     }
-
-    private void handlePlatformData() {
+*/
+    /*private void handlePlatformData() {
         List<CBahnsteigAnlage> platforms =  PlanProDefinition.getLSTZustand().getContainer().getBahnsteigAnlage();
         List<CBahnsteigKante> platformLines = PlanProDefinition.getLSTZustand().getContainer().getBahnsteigKante();
         List<CBahnsteigZugang> platformEntrance = PlanProDefinition.getLSTZustand().getContainer().getBahnsteigZugang();
         List[] plattformContents = new List[] { platforms, platformLines, platformEntrance};
         handlePlanProIndexing(aPlattformKeys, plattformContents, platformBundle);
         buildTmsPlatformModel(platformBundle);
-    }
-
+    }*/
+/*
     private void handleGeoData() {
         List<CGEOPunkt> geoPoints = PlanProDefinition.getLSTZustand().getContainer().getGEOPunkt();
         geoBundle = new DefaultRepo<>();
@@ -587,7 +528,8 @@ public class PlanProTmsAdapter {
 
 
     }
-
+*/
+    /*
     private void handleGeoEdges(TopologyGraph.Node StartNode, CGEOKnoten CurrentGeo, CGEOKnoten NextGeoNode, DefaultRepo<String, CGEOKnoten> geoPointRepo, HashMap<String, TopologyGraph.Edge> edgeRepo) {
         // return value
         ArrayList<CGEOKante> resultEdges = new ArrayList<>();
@@ -770,9 +712,9 @@ public class PlanProTmsAdapter {
             //EdgeData.
 
         }
-        */
-    }
 
+    }
+     */
     @Deprecated
     private void setPlatformCoordination() {
         DefaultRepo bahnhofZugangRepo = platformBundle.getModel(CBahnsteigZugang.class);
@@ -852,7 +794,7 @@ public class PlanProTmsAdapter {
 
         }
     }
-
+    /*
     private void handlePlatformEntrances(Collection zugangList) {
         for(Object ObjectPlatformEntrance : zugangList) {
             CBahnsteigZugang PlatformEntrance = (CBahnsteigZugang) ObjectPlatformEntrance;
@@ -913,6 +855,6 @@ public class PlanProTmsAdapter {
             }
         }
     }
-
+*/
 
 }

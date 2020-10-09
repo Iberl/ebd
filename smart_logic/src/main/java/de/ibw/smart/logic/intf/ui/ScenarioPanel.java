@@ -7,7 +7,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
-
+/**
+ * Inzwischen nicht mehr verwendet deswegen nicht weiter dokumentiert.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
+ */
 public class ScenarioPanel extends JPanel {
     JComboBox<Scenario> ScenarioSelectorBox = new JComboBox<Scenario>();
     JTextField PortField = new JTextField("22223");

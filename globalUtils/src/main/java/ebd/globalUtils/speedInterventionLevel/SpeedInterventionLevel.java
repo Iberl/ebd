@@ -7,41 +7,49 @@ public enum SpeedInterventionLevel {
     /**
      * Null replacement
      */
-    NOT_SET,
+    NOT_SET(0),
 
     /**
      * Speed is uncritical
      */
-    NO_INTERVENTION,
+    NO_INTERVENTION(1),
 
     /**
      * Permitted Speed is nearly reached
      */
-    INDICATION,
+    INDICATION(2),
 
     /**
      * Permitted speed is exceeded
      */
-    PERMITTED_SPEED,
+    OVERSPEED(3),
 
     /**
      * Service breaks will intervene if speed is not reduced
      */
-    WARNING,
-
-    /**
-     * As required by SRS 3.13
-     * Signals the need to cut of traction.
-     */
-    CUT_OFF_TRACTION,
+    WARNING(4),
 
     /**
      * Service break intervention is necessary, service breaks will be applied automatically
      */
-    APPLY_SERVICE_BREAKS,
+    APPLY_SERVICE_BREAKS(5),
 
     /**
      * Speed is to far to high, danger point is passed, etc., emergency breaks will be applied automatically
       */
-    APPLY_EMERGENCY_BREAKS
+    APPLY_EMERGENCY_BREAKS(6);
+
+    private Integer severity;
+
+    SpeedInterventionLevel(int severity) {
+        this.severity = severity;
+    }
+
+    public boolean isHigherThan(SpeedInterventionLevel other) {
+        return this.severity > other.severity;
+    }
+
+    public boolean isLowerThan(SpeedInterventionLevel other) {
+        return this.severity < other.severity;
+    }
 }

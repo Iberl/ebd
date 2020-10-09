@@ -4,14 +4,13 @@ import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
-import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.CrossedBaliseGroupEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewLocationEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
+import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.location.InitalLocation;
+import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_136;
 import ebd.messageLibrary.packet.trainpackets.Packet_0;
+import ebd.messageLibrary.packet.trainpackets.Packet_1;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.TrainDataVolatile;
@@ -83,7 +82,6 @@ public class PositionReportSupervisor {
             //double curCycleNumber = curTime / t_cycle;
             if(curTime > t_cycle){
                 //this.t_cycleNumber = (int)curCycleNumber + 1;
-                System.out.println("reason1");
                 sendPositionReport();
             }
         }
@@ -151,6 +149,39 @@ public class PositionReportSupervisor {
         this.tripTimeAtCycleStart = this.curFullTripTime;
     }
 
+    @Subscribe
+    public void singleBaliseGroup(SingleBaliseGroupEvent sbge){
+        Position curPos = trainDataVolatile.getCurrentPosition();
+        Location prevLoc;
+        if(curPos.getLocation().getId() == sbge.newLoc.getIdOfPrevious()) prevLoc = curPos.getLocation();
+        else prevLoc = curPos.getPreviousLocations().get(sbge.newLoc.getIdOfPrevious());
+
+        Message_136 message136 = new Message_136();
+        message136.NID_ENGINE = Integer.parseInt(this.etcsTrainID);
+        long curTime = AppTime.currentTimeMillis() / 10L;
+        message136.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
+
+        Packet_1 packet1 = new Packet_1();
+        packet1.NID_LRBG =curPos.getLocation().getId();
+        packet1.NID_PRVLRBG = prevLoc.getId();
+        packet1.NID_NTC = ETCSVariables.NID_NTC;
+        packet1.D_LRBG = (int)curPos.getIncrement() + 1;
+        packet1.Q_SCALE = 1; //All length values have to be in the resolution of [m]!
+        packet1.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
+        packet1.Q_DIRTRAIN = curPos.getDirection();
+        packet1.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
+        packet1.L_TRAININT = (int)this.lengthTrain + 1;
+        packet1.L_DOUBTOVER = 10; //TODO Get this value, in fact, remember this value in the first hand
+        packet1.L_DOUBTUNDER = 10; //TODO Get this value, in fact, remember this value in the first hand
+        packet1.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
+        packet1.M_LEVEL = trainDataVolatile.getCurrentETCSLevel().getValueForETCSPacket();
+        packet1.M_MODE = trainDataVolatile.getCurrentETCSMode().getValueForETCSPacket();
+
+        message136.positionPacket = packet1;
+        this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work
+        this.localBus.post(new ToLogEvent("tsm", "log", "Sending Position Report"));
+    }
+
     /**
      * Builds a position report message ({@link Message_136}) and places it on the local {@link EventBus}
      * in a {@link SendETCSMessageEvent} so the local {@link ebd.messageReceiver.MessageReceiver} can send it to the RBC
@@ -164,19 +195,19 @@ public class PositionReportSupervisor {
         message136.T_TRAIN = curTime % ETCSVariables.T_TRAIN_UNKNOWN;
 
         Packet_0 packet0 = new Packet_0();
-        packet0.NID_LRBG = curPos.getLocation() != null ? curPos.getLocation().getId() : 0;
+        packet0.NID_LRBG = curPos != null ? curPos.getLocation().getId() : 0;
         packet0.NID_NTC = ETCSVariables.NID_NTC;
         packet0.D_LRBG = (int)curPos.getIncrement() + 1;
         packet0.Q_SCALE = 1; //All length values have to be in the resolution of [m]!
         packet0.Q_DIRLRBG = 1; //TODO Get this value, in fact, remember this value in the first hand
-        packet0.Q_DIRTRAIN = curPos.isDirectedForward() ? 1 : 0;
+        packet0.Q_DIRTRAIN = curPos.getDirection();
         packet0.Q_LENGTH = ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER; //TODO Get this value!
         packet0.L_TRAININT = (int)this.lengthTrain + 1;
         packet0.L_DOUBTOVER = 10; //TODO Get this value, in fact, remember this value in the first hand
         packet0.L_DOUBTUNDER = 10; //TODO Get this value, in fact, remember this value in the first hand
         packet0.V_TRAIN = (int)(trainDataVolatile.getCurrentSpeed() * 3.6) / 5;
-        packet0.M_LEVEL = ETCSVariables.M_LEVEL_2;
-        packet0.M_MODE = ETCSVariables.M_MODE_FULL_SUPERVISION; //TODO Get this value, in fact, remember this value in the first hand
+        packet0.M_LEVEL = trainDataVolatile.getCurrentETCSLevel().getValueForETCSPacket();
+        packet0.M_MODE = trainDataVolatile.getCurrentETCSMode().getValueForETCSPacket();
 
         message136.positionPacket = packet0;
         this.localBus.post(new SendETCSMessageEvent("tsm", "ms", message136, "mr;R=" + this.rbcID)); //TODO Message136 has to work

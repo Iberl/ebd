@@ -13,7 +13,9 @@ import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
+import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.viewmodel.DijkstraAffineRoute;
@@ -22,6 +24,7 @@ import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
+import ebd.ConfigHandler;
 import org.apache.log4j.Logger;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
 
@@ -33,22 +36,32 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.Flow;
 
-
+/**
+ * Das Panel des Hauptfensters
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-08-24
+ */
 public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private static Logger logger = Logger.getLogger( MainGraphicPanel.class );
 
     private static double TrainStroke = 7d;
-    TrackController TrackControl = null;
+    private TrackController TrackControl = null;
 
     private Flow.Subscription subscription = null;
 
 
-
+    /**
+     * Erstellt Komponenten des Hauptfensters
+     */
     public MainGraphicPanel() {
         super();
         new GraphicMoveByMouse(this);
@@ -83,6 +96,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
+    /**
+     * Zeichnet Z&uuml;ge in das Fenster
+     * @param g2d {@link Graphics2D} - Zeichenutil
+     */
     public static void paintTrains(Graphics2D g2d) {
         ZoomModel Zoom = ZoomModel.getInstance();
         double strokeFactor = Math.max(Zoom.getdZoomX(), Zoom.getdZoomY());
@@ -108,7 +125,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 }
                 g2d.setPaint(TM.RepresentedColor);
                 System.out.println(sId + " - D1: " + d1 + " - D2" + TD.getdDistance2());
-                paintGeo(g2d, sId,TD.isB_fromA(), d1, TD.getdDistance2(), TM.RepresentedColor,
+                paintGeo(g2d, sId,TD.isIsfromA(), d1, TD.getdDistance2(), TM.RepresentedColor,
                         BS);
             } catch(Exception E) {
                 E.printStackTrace();
@@ -132,7 +149,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         toPaint.x2 = toPaint.x2 * -1;
     }
 
-
+    /**
+     * Zeichnte die Karte im Hauptfenster
+     * @param g - Zeichenutil
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         ZoomModel Zoom = TranslationModel.TrackplanEnvironment.CurrentEnvironment.Zoom;
@@ -178,6 +198,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
             // diese Liste zeichenen
@@ -189,6 +210,9 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
                 GeoCoordinates nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
                 GeoCoordinates nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+
+
+
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
                 g2d.draw(line);
 //                Ellipse2D.Double circle = new Ellipse2D.Double(nodeA.getX(), nodeA.getY(), 10, 10);
@@ -220,12 +244,20 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
     }
 
+    /**
+     * Zeichnet alle Weichen
+     * @param t_Model {@link TranslationModel} - Nachberechnung der Position.
+     * @param zoom {@link ZoomModel }
+     * @param g2d {@link Graphics2D}
+     */
     public static void paintCrossroad(TranslationModel t_Model, ZoomModel zoom, Graphics2D g2d) {
 
 
         //g2d.translate(t_Model.getdMoveX(), t_Model.getdMoveY());
         
         g2d.setPaint(Color.cyan);
+        ConfigHandler CH = ConfigHandler.getInstance();
+
         for(Object OCrossover: PlanData.getInstance().branchingSwitchList) {
             BranchingSwitch C = (BranchingSwitch) OCrossover;
 
@@ -233,7 +265,20 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             SingleSlip SiBranch = (SingleSlip) C.getTrackReference();
 
             CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) SiBranch.getRemotePoint());
-            String sTopId = TargetCrossoverModel.getNode().TopNodeId;
+            String sTopId;
+            String sTrackKilometers = "";
+            try {
+                CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
+                sTopId = CS.getEbdTitle();
+                if(sTopId == null) {
+                    sTopId = TargetCrossoverModel.getNode().TopNodeId;
+                }
+
+                if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
+            } catch (Exception E) {
+                sTopId = TargetCrossoverModel.getNode().TopNodeId;
+            }
+
 
 
             int x = (int) ((int) (C.x + t_Model.getdMoveX()) * zoom.getdZoomX());
@@ -255,7 +300,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(C.getViewName() + sTopId.substring(0, 3) + "..." + sTopId.substring(sTopId.length() - 3), (float) (x - 5.0f), (float) y);
+                g2d.drawString(sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -265,6 +310,40 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         // g2d.translate(-t_Model.getdMoveX(), -t_Model.getdMoveY());
     }
 
+    private static String retrieveTrackInfo(CrossingSwitch cs, boolean inShort) {
+        StringBuilder result = new StringBuilder();
+        for(String sTrackId : cs.getSupportedTracks()) {
+            BigDecimal dKilo = cs.getTrackMeterByTrackId(sTrackId);
+            if(!inShort)retrieveTrackInfoLong(result, sTrackId, dKilo);
+            else {
+                retrieveTrackInfoShort(result, sTrackId, dKilo);
+            }
+        }
+        return result.toString();
+    }
+
+    private static void retrieveTrackInfoShort(StringBuilder result, String sTrackId, BigDecimal dKilo) {
+        if(dKilo == null) {
+            result.append("TId: ").append(sTrackId, 0, 3).append(" m: ").append("na");
+        } else {
+            result.append("TId: ").append(sTrackId, 0, 3).append(" m: ").append(dKilo);
+        }
+    }
+
+    private static void retrieveTrackInfoLong(StringBuilder result, String sTrackId, BigDecimal dKilo) {
+        if(dKilo == null) {
+            result.append("TrackId: ").append(sTrackId, 0, 3).append(" has meter: ").append("na");
+        } else {
+            result.append("TrackId: ").append(sTrackId, 0, 3).append(" has meter: ").append(dKilo);
+        }
+    }
+
+    /**
+     * Zeichnet Balisen
+     * @param t_Model {@link TranslationModel} - Nachberechnung der Position.
+     * @param zoom {@link ZoomModel }
+     * @param g2d {@link Graphics2D}
+     */
     public static void paintBalises(TranslationModel t_Model, ZoomModel zoom, Graphics2D g2d) {
         Collection<Balise> balises = Balise.baliseByNid_bg.getAll();
         int iStepper = 0;
@@ -331,12 +410,24 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
-    public static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) {
+    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
         if(edge.dTopLength < distanceA1 || edge.dTopLength < distanceA2) throw new IllegalArgumentException("The desired point must lay on the top edge.");
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
+
+        double lengthOfGeoEdges = 0;
+        for(CGEOKante geoEdge : geoEdgeList) {
+            lengthOfGeoEdges += geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+        }
+        LinkedGeo linkedGeo = null;
+        try {
+            linkedGeo = new LinkedGeo(geoEdgeList,b_fromA, edge);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
 
         double prevDistance = 0;
         double geoEdgeLength = 0;
@@ -350,31 +441,53 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setColor(color);
         g2d.setStroke(stroke);
 
+        /*if(!b_fromA) {
+            double dTemp = distanceA1;
+            distanceA1 = distanceA2;
+            distanceA2 = dTemp;
+            distanceA1 = edge.dTopLength - distanceA1;
+            distanceA2 = edge.dTopLength - distanceA2;
+        }*/
+
+
+        if(Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
+            distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+            distanceA2 = distanceA2 * lengthOfGeoEdges / edge.dTopLength;
+        }
+
         int i = b_fromA ? 0 : geoEdgeList.size() - 1;
         boolean first = true;
-        for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
-            geoEdge = geoEdgeList.get(i);
+        for(i = 0; i < linkedGeo.getUsedEdgesSorted().size(); i++) {
+            geoEdge = linkedGeo.getUsedEdgesSorted().get(i);
             geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
             GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
             GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
+
+
             // First node
-            if(prevDistance + geoEdgeLength < distanceA1) continue;
+            if(prevDistance + geoEdgeLength < distanceA1) {
+                prevDistance += geoEdgeLength;
+                continue;
+            }
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
-                nodeA = getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+                nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
             }
 
             // Last node
             if(prevDistance + geoEdgeLength > distanceA2) {
-                nodeB = getGeoCoordinate(geoEdge, b_fromA, distanceA2 - prevDistance);
+                nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
             // Draw Line
             Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
             g2d.draw(line);
-
+            /*
+                g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
+                g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
+            */
             prevDistance += geoEdgeLength;
             if(prevDistance > distanceA2) break;
         }
@@ -383,6 +496,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setStroke(prevStroke);
     }
 
+    /**
+     * Berechnet die GeoCoordinate zu einer Topologischen Kante mit Bezug zu einem Knoten mit distanz.
+     * @param TopKanteId {@link String} - Knoten Id PlanPro
+     * @param b_fromA boolean - ist von A gemessen worden
+     * @param distanceA1 double - Abstand zum Referenzknoten
+     * @return GeoCoordinates - Geographischer Punkt
+     */
     public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
@@ -399,8 +519,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             GeoCoordinates nodeA = edge.A.getGeoCoordinates();
             GeoCoordinates nodeB = edge.B.getGeoCoordinates();
 
-            // Create a new Coordinates instance
-            return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            else {
+                distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+            }
+
+
         }
 
             double    prevDistance  = 0;
@@ -479,25 +603,42 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.fill(arrowHead);
     }
 
+    /**
+     * Schreibt sich ein als Impuls wann neugezeichnet werden soll
+     * @param subscription
+     */
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.subscription = subscription;
         this.subscription.request(1);
     }
 
+    /**
+     * Andere Komponente ruft neuzeichnen herfor
+     * @param planData - unused
+     */
     @Override
     public void onNext(Object planData) {
         this.repaint();
         this.subscription.request(1);
     }
 
+    /**
+     * Fehler beim Neuzeichnen
+     * @param throwable - Fehler
+     */
+
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();
     }
 
+    /**
+     * definiert was in Zusatz getan wird wenn neuzeichnen ankommt.
+     */
     @Override
     public void onComplete() {
-        this.repaint();
+
     }
 }

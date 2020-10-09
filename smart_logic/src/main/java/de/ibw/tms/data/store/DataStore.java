@@ -5,7 +5,15 @@ import de.ibw.util.ThreadedRepo;
 import ebd.rbc_tms.payload.Payload_14;
 
 import java.security.InvalidParameterException;
-
+/**
+ * Noch nicht implementiert
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class DataStore {
     private static DataStore instance;
     public static DataStore getInstance() {

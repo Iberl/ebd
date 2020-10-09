@@ -1,26 +1,41 @@
 package de.ibw.feed;
 
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.plan.elements.UiTools;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ICoord;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
+import plan_pro.modell.basistypen._1_9_0.ENUMAusrichtung;
+import plan_pro.modell.basistypen._1_9_0.ENUMWirkrichtung;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Diese Klasse stellt eine Balise mit deren Koordinaten dar.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-10-07
+ */
 public class Balise implements ICoord<Double> {
     /**
-     * This repository stores first Balise of Balisegroup(PlanProDataPoint) by its nid_bg
-     * The nid_bg is the hash of the String ID from Plan Pro of PlanProDataPoint
+     * Dieses Repository speichert die erste Baise einer Balisengruppe &uuml;ber einem Hashwert der PlanPro Datei
      */
     public static DefaultRepo<Integer, Balise> baliseByNid_bg = new DefaultRepo<>();
+    /**
+     * Dieses Repository gibt f&uuml;r eine Balise als Objekt-Schl&uuml;ssel den Hashwert zur&uuml;ck
+     */
     public static DefaultRepo<Balise, Integer> hashOfBalise = new DefaultRepo<>();
     /**
-     * This repository stores all Balises for this Datapoint
+     * Dieses Repository speichert f&uuml;r eine Datenpunkt eine Liste von Balisen ab
      */
     public static DefaultRepo<CDatenpunkt, List<Balise>> balisesByBaliseGroup = new DefaultRepo<>();
 
@@ -33,12 +48,88 @@ public class Balise implements ICoord<Double> {
     private double x;
     private double y;
 
-
+    /**
+     * Die Darstelung als Bild dieser Balise
+     * @return BufferedImage - Ein Bild
+     * @throws IOException - Falls die Bilddatei nicht gefunden wurde
+     */
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
         return UiTools.handleImaging(cl,"images/balise.jpg");
     }
 
+    public BigDecimal getLengthOfTopEdge() {
+        return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert();
+    }
+
+    public BigDecimal getMetersOfTrack() {
+        try {
+            String sKM = PlanProDataPoint.getPunktObjektStrecke().get(0).getStreckeKm().getWert();
+            String sMeter = sKM.replace(".", "");
+            return new BigDecimal(sMeter);
+        } catch (Exception E) {
+            E.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean isDatapointNominal() {
+        return this.PlanProDataPoint.getDatenpunktAllg().getAusrichtung().getWert().equals(ENUMAusrichtung.IN);
+    }
+
+    private boolean isTopologicalNominal() {
+        return this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getWirkrichtung().getWert().equals(ENUMWirkrichtung.IN);
+    }
+
+    /**
+     * Gibt an ob die Balise auf Knoten B in nominaler Richtung zeigt
+     * Das heisst von Balis 1 zu Balise 2 geht der Weg in richtung Knoten B
+     * @return boolean - true, falls der Topologische-Knoten B in Trigger-Richtung ist
+     *                   false, wenn der Topologische-Knoten A in Trigger-Richtung ist
+     */
+    public boolean isNominalTriggeredToNodeB() {
+        return this.isDatapointNominal();
+    }
+
+    private ENUMAusrichtung getDpAusrichtung(){
+        return this.getPlanProDataPoint().getDatenpunktAllg().getAusrichtung().getWert();
+    }
+
+    private BigDecimal getDpLength() {
+        return this.getPlanProDataPoint().getDatenpunktAllg().getDatenpunktLaenge().getWert();
+    }
+
+    public BigDecimal getBalisenPositionFromNodeA() {
+        BigDecimal dResult = this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert();
+        if(isNominalTriggeredToNodeB()) return dResult;
+        else return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert().subtract(dResult);
+    }
+
+
+    /**
+     * Gibt den angefragten Knoten der Balisengruppe wieder. Es wird der Knoten der in angegebenr Richtung angefragt
+     * wiedergegeben.
+     * @param isNominalDirectionOfBg - true bedeutet es wird der Knoten wiedergegeben, der von von Balise 1 &uuml;ber
+     *                               Balise 2 durchfahren wird.
+     *                               - false bedeutet es wird der Knoten wiedergegeben, der von Balise 2 &uumL;ber
+     *                               Balise 1 durchfahren wird.
+     * @return Node - der Knoten, der der angegebenen Richtung entspricht.
+     */
+    public TopologyGraph.Node getNodeInDirectionOfBaliseGroup(boolean isNominalDirectionOfBg ) {
+        String sNodeId = null;
+        if(isDatapointNominal() == isNominalDirectionOfBg) {
+            sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenB().getWert();
+        } else {
+            sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenA().getWert();
+        }
+        return TopologyGraph.NodeRepo.get(sNodeId);
+    }
+
+
+
+    /**
+     * gibt die x-Koordinate dieser Balise wider
+     */
     public Double getX() {
         return x;
     }
@@ -47,6 +138,9 @@ public class Balise implements ICoord<Double> {
         this.x = x;
     }
 
+    /**
+     * Gibt die Y-Koordinate dieser Balise zur wider
+     */
     public Double getY() {
         return y;
     }
@@ -55,6 +149,10 @@ public class Balise implements ICoord<Double> {
         this.y = y;
     }
 
+    /**
+     * gibt eine definierte Balise, wie sie aus der PlanPro Datei gelesen wird wider
+     * @return CBalise
+     */
     public CBalise getPlanProBalise() {
         return PlanProBalise;
     }
@@ -63,6 +161,10 @@ public class Balise implements ICoord<Double> {
         PlanProBalise = planProBalise;
     }
 
+    /**
+     * gibt den Datenpunkt wie im PlanProFormat wider
+     * @return CDatenpunkt
+     */
     public CDatenpunkt getPlanProDataPoint() {
         return PlanProDataPoint;
     }
@@ -71,6 +173,10 @@ public class Balise implements ICoord<Double> {
         PlanProDataPoint = planProDataPoint;
     }
 
+    /**
+     * gibt eine Topologische Kante wider
+     * @return CTOPKante
+     */
     public CTOPKante getTopPositionOfDataPoint() {
         return TopPositionOfDataPoint;
     }
@@ -79,6 +185,10 @@ public class Balise implements ICoord<Double> {
         TopPositionOfDataPoint = topPositionOfDataPoint;
     }
 
+    /**
+     * gibt die Strecke auf die die Balise liegt wider
+     * @return CStrecke
+     */
     public CStrecke getPlanProTrack() {
         return PlanProTrack;
     }
@@ -97,7 +207,10 @@ public class Balise implements ICoord<Double> {
         return !(BaliseOfHash == null || BaliseOfHash == this);
     }
 
-
+    /**
+     * generiert Hashcode der noch nicht vergeben wurde
+     * @return int - generierter 14 bit Hashcode
+     */
     public int getHashcodeOfBaliseDp() {
         int bitmask = 16383;//14 bit‬;
         Integer currentHash = Balise.hashOfBalise.getModel(this);
@@ -115,20 +228,20 @@ public class Balise implements ICoord<Double> {
      * @param bitmask - bitmask 14 Bit
      * @return hash of 14 bit
      */
-    public Integer calculateNewHash(int bitmask) {
+    private Integer calculateNewHash(int bitmask) {
         Integer currentHash;
         String sId = this.PlanProDataPoint.getIdentitaet().getWert();
         currentHash = sId.hashCode() & bitmask;
 
         Balise BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);
-        // bei eins starten für neuen hash
-        // vermeidet überlauf der 14 bits
+        // bei eins starten f&uuml;r neuen hash
+        // vermeidet &uuml;berlauf der 14 bits
         if(checkifHashOfBaliseIsAlreadyUsed(BaliseOfHash)) {
             currentHash = 1;
             BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);
 
         }
-        // von eins aus prüfen ob ein hash frei ist
+        // von eins aus pr&uuml;fen ob ein hash frei ist
         while (checkifHashOfBaliseIsAlreadyUsed(BaliseOfHash)) {
             currentHash++;
             BaliseOfHash = Balise.baliseByNid_bg.getModel(currentHash);
@@ -139,4 +252,29 @@ public class Balise implements ICoord<Double> {
         return currentHash;
     }
 
+    /**
+     * Gibt die Ausdehnung eines Datenpunktes mit Balisen wieder
+     * @return BlockedArea - Ausdehnung als Balise - streng genommen keine BlockedArea, aber praktisch,
+     *                      bei Vergleich ob sich eine Balise mit anderen Bereichen schneidet.
+     */
+    public BlockedArea createAreaFromBalise() {
+        return createDummyArea();
+    }
+
+    private BlockedArea createDummyArea() {
+        // ausdehnung um den Datenpunkt sicherheitshalber in beiden Richtung
+        // Real abhängig vom Datenpunkt
+        PlanData.getInstance();
+        BigDecimal dDpLength = this.getDpLength();
+        BigDecimal dDistanceFromA = this.getBalisenPositionFromNodeA();
+        BigDecimal dTrackLength = this.getLengthOfTopEdge();
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
+        BlockedArea.BLOCK_Q_SCALE scale = BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
+        BigDecimal dStart = dDistanceFromA.subtract(dDpLength);
+        BigDecimal dEnd = dDistanceFromA.add(dDpLength);
+        if(dStart.compareTo(new BigDecimal(0) ) < 0) dStart = new BigDecimal(0);
+        if(dEnd.compareTo(dTrackLength) > 0) dEnd = dTrackLength;
+        return new BlockedArea(E,scale, dStart.intValue(), scale, dEnd.intValue() );
+
+    }
 }

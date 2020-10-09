@@ -19,13 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * veralteter Code
+ */
 public class Scenario {
 
     public static String sTrainName = null;
 
     public static void main(String[] args) {
 
-            MainTmsSim.MainFrame = MainTmsSim.createTmsFrame(MainTmsSim.TmsMode.EBD);
+
 
 
     }

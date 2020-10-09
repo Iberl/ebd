@@ -19,7 +19,8 @@ import java.util.function.BiFunction;
  *     Example: The condition should evaluate to true if the trains current  maximum speed on the trip
  *     profile is slower than 50 km/h.
  *      The JSON string would look like this:<br>
- *     {"type" : "v_m", "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}</p>
+ *     {"type" : "v_m", "priority": 1, "condition" : {"op" : "<", "value" : 50, "curveBase" : "trip" }}<br>
+ *         The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */
 public class MaxSpeedCondition extends CurveBasedCondition {
@@ -44,7 +45,7 @@ public class MaxSpeedCondition extends CurveBasedCondition {
                 maxSpeed = this.trainDataVolatile.getCurrentCoastingPhaseSpeed();
                 break;
             case TRIP_PROFILE:
-                maxSpeed = this.trainDataVolatile.getCurrentProfileTargetSpeed();
+                maxSpeed = this.trainDataVolatile.getCurrentProfileMaxSpeed();
                 break;
             default:
                 maxSpeed = 0d;

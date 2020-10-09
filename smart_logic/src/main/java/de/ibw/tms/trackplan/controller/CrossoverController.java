@@ -9,7 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
+/**
+ * Verwaltet den Status einer Weiche
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public class CrossoverController extends SubmissionPublisher<CrossoverMainModel> implements IController<CrossoverMainModel> {
 
     private CrossoverMainModel Model;
@@ -18,7 +25,12 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
 
     private ArrayList<Flow.Subscriber> subscribers;
 
-
+    /**
+     * Dieser Konstruktor hat ein Weiche als Model, den Status und die geographische Weiche
+     * @param Model {@link de.ibw.tms.plan.elements.CrossoverModel} - Modell der Weiche
+     * @param CrossStatModel - {@link CrossoverEnumModel} - Status der Weiche
+     * @param C {@link BranchingSwitch} - Position der Weiche
+     */
     public CrossoverController(CrossoverMainModel Model, CrossoverEnumModel CrossStatModel, BranchingSwitch C) {
         this.subscribers = new ArrayList<Flow.Subscriber>();
         this.Model = Model;
@@ -28,6 +40,12 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
 
     }
 
+    /**
+     * Schreibt sich eine Komponente ein, werden Information bei Statuswechsel gesendet.
+     * Das ist die Methode zum einschreiben.
+     * @param toSubscribe - Komponente die sich einschreibt
+     */
+
     @Override
     public void addSubscriber(Flow.Subscriber toSubscribe) {
         if(!this.subscribers.contains(toSubscribe)) {
@@ -35,11 +53,18 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
         }
     }
 
+    /**
+     * gibt alle eingeschriebenen Komponenten wider
+     * @return List - Komponentenliste
+     */
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         return this.subscribers;
     }
 
+    /**
+     * Benachrichtigt alle eingeschriebenen Komponenten
+     */
     @Override
     public void publish() {
         try {
@@ -51,7 +76,8 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
             Ex.printStackTrace();
         }
 
-            TrackController.getInstance(null).publish();
+
+        TrackController.getInstance(null).publish();
 
 
     }

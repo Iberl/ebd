@@ -52,7 +52,7 @@ class BackwardSplineTest {
         bs1.addKnotToCurve(cc);
     }
 
-    @Test
+
     void addKnotToCurve() {
         BackwardSpline bs01 = new BackwardSpline(0);
         bs01.addKnotToCurve(a);
@@ -62,7 +62,7 @@ class BackwardSplineTest {
         assertEquals(3d,bs01.getHighestXValue());
     }
 
-    @Test
+
     void getPointOnCurve() {
 
         assertEquals(1d,bs0.getPointOnCurve(0d));
@@ -78,7 +78,7 @@ class BackwardSplineTest {
 
 
 
-    @Test
+
     void getIntervallBoundariesOfPoint() {
 
         ArrayList result = bs0.getIntervallBoundariesOfPoint(0.5);
@@ -90,18 +90,26 @@ class BackwardSplineTest {
         assertEquals(1d, result.get(1));
     }
 
-    @Test
+
     void getHighestXValue() {
 
         assertEquals(2d,bs0.getHighestXValue());
         assertEquals(2d,bs1.getHighestXValue());
     }
 
-    @Test
+
     void getHigherOrLastKnotXValue() {
 
         assertEquals(2d,bs1.getHigherOrLastKnotXValue(1d));
         assertEquals(2d,bs1.getHigherOrLastKnotXValue(2d));
 
+    }
+
+    @Test
+    void tostring(){
+        assertEquals("Id: noID, Degree: 1\n" +
+                "Key: 0.0; Coefficients: 0.0, 0.0\n" +
+                "Key: 1.0; Coefficients: 1.0, 1.0\n" +
+                "Key: 2.0; Coefficients: 2.0, 2.0", bs1.toString());
     }
 }

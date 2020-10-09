@@ -1,6 +1,7 @@
 package ebd.globalUtils.spline;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import ebd.globalUtils.spline.util.KnotCoefficientException;
@@ -44,6 +45,20 @@ public abstract class Spline {
 	 */	
 	abstract public void addKnotToCurve(Knot knot);
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("Id: " + id + ", Degree: " + degree + "\n");
+		for (Map.Entry<Double,ArrayList<Double>> entry : curve.entrySet()){
+			sb.append("Key: " + entry.getKey() + "; Coefficients: ");
+			for(double coef : entry.getValue()){
+				sb.append(coef + ", ");
+			}
+			sb.delete(sb.length() - 2, sb.length());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Returns the ID of this curve
 	 * @return String
@@ -51,7 +66,15 @@ public abstract class Spline {
 	public String getID() {
 		return id;
 	}
-	
+
+	/**
+	 * Returns the degree of the spline. A spline as degree + 1 coefficients.
+	 * @return int
+	 */
+	public int getDegree() {
+		return degree;
+	}
+
 	/**
 	 * Sets the ID of this curve
 	 * @param id String
@@ -59,13 +82,6 @@ public abstract class Spline {
 	protected void setID(String id) {
 		this.id = id;
 	}
-
-
-
-	public int getDegree() {
-		return degree;
-	}
-
 
 	protected void setDegree(int degree) {
 		this.degree = degree;

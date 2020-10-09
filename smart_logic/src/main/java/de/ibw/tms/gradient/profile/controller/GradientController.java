@@ -5,10 +5,20 @@ import de.ibw.tms.gradient.profile.ui.GradientFrame;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
+/**
+ * Noch nicht implementiert
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class GradientController extends SubmissionPublisher<GradientProfile> implements IController<GradientProfile> {
 
     private static GradientController GC;
@@ -63,7 +73,14 @@ public class GradientController extends SubmissionPublisher<GradientProfile> imp
     public GradientController() {
 
         if(Frame == null) {
-            Frame = new GradientFrame("Set Gradient Profile");
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    Frame = new GradientFrame("Set Gradient Profile");
+                }
+            });
+
+
         }
 
     }

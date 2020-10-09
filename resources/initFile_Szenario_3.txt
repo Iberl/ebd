@@ -1,0 +1,10 @@
+# Initialisation file for ETCS at EBD     Stand: 30.06.2020 10:40
+#
+# Szenarien rund um Martinstein für 'Showroom EBD' am 30.6.2020       
+#        
+# Szenario 3: Dynamische Durchrutschwege 
+#        
+# etcsID ; trainConfigID ; infrastructureID ; trainScheduleID ; rbcID ; startingBaliseGroup ; startingTrack ; startingDirection ; startingIncrement
+       1 ;          4090 ;             4090 ;        TGV4090 ;      1 ;                4738 ;        10W3L ;             false ;      2368 
+       2 ;          4240 ;             4240 ;         RE4240 ;      1 ;               13736 ;       12W32R ;             false ;       813 
+       3 ;          1013 ;             1013 ;         IC1013 ;      1 ;                4762 ;        10W1S ;             false ;         0  

@@ -29,8 +29,9 @@ import java.util.function.BiFunction;
  *      Example: The condition should evaluate to true if the train is currently slower than 50% of maximum speed in 120 seconds on the
  *      trip profil.
  *      The JSON string would look like this:<br>
- *           {"type" : "v_t_rel", "condition" : {"op" : "<", "value" : 50, "value_t" : 120, "curveBase" : "trip" }}<br>
- *       The value of "condition" is passed to this function<br>
+ *           {"type" : "v_t_rel", "priority": 1, "condition" : {"op" : "<", "value" : 50, "value_t" : 120, "curveBase" : "trip" }}<br>
+ *       The value of "condition" is passed to the constructor<br>
+ *
  * </p>
  *
  * @author Lars Schulze-Falck

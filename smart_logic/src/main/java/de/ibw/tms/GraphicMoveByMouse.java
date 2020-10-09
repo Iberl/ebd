@@ -10,10 +10,22 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-
+/**
+ * Verwaltet Mousclicks in einer Zeichenfl&auml;che.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class GraphicMoveByMouse {
     private Point mousePt;
     private boolean pressed;
+
+    /**
+     * Registriert das Panel um Mouseclicks auf diesem zu verwalten.
+     * @param jPanel {@link JPanel}
+     */
     public GraphicMoveByMouse(JPanel jPanel) {
         jPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         MouseListener mouseListener = new MouseListener(jPanel);

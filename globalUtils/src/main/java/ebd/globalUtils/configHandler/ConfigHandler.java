@@ -29,7 +29,7 @@ public class ConfigHandler {
     /*
     Strings
     */
-    public String pathToDriverProfileJson = "";
+    public String pathToDriverStrategyJson = "";
     public String pathToSzenarioJSON = "";
     public String pathToInitFile = "";
 
@@ -78,7 +78,7 @@ public class ConfigHandler {
     /**
      * If true, GUIs can connect to the program.
      */
-    public boolean allowGUI = false;
+    public boolean allowGUI = true;
     /**
      * If true, the program does wait for an input and just calls load.
      */
@@ -132,10 +132,7 @@ public class ConfigHandler {
     /*
     ints
      */
-    /**
-     * minimum distance between end of movement authority and danger point in [m]
-     */
-    public int minimumDangerPoint = 200;
+
 
     /*
     doubles

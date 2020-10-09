@@ -11,7 +11,12 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Class im RBC
+ * Inzwischen nicht mehr verwendet deswegen nicht weiter dokumentiert.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-07
  */
 public class MaServer {
     private static int iPort = 22222;

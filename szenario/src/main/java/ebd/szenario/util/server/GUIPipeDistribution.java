@@ -75,7 +75,7 @@ public class GUIPipeDistribution implements Runnable {
             lineSplit[2] = "0";
         }
         else {
-            handleSL(line, lineSplit[2]);
+            handleSL(line, lineSplit[1]);
             lineSplit[1] = lineSplit[1].replaceAll("[^a-bA-Z]", "");
         }
         switch (lineSplit[1].toLowerCase()){

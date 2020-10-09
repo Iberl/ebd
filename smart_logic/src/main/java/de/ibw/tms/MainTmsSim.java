@@ -1,6 +1,7 @@
 package de.ibw.tms;
 
 import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.ui.ScenarioPanel;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
@@ -21,18 +22,40 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Flow;
-
+/**
+ * Diese Klasse ist der Main-Entry-Point des TMS.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.4
+ * @since 2020-09-01
+ */
 public class MainTmsSim {
 
+    /**
+     * Status von Modus bisher nur Normal
+     */
     public enum TmsMode {
-        Normal, EBD
+        Normal
     }
 
+    /**
+     * Id dieses TMS
+     */
     public static String S_TMS_ID = "1";
+    /**
+     * Das Haupfenster
+     */
     public static JFrame MainFrame = null;
-    public static ZoomFrame zoomFrame = null;
+    private static ZoomFrame zoomFrame = null;
+    /**
+     * Panels von UIs beantragter MAs
+     */
     public static ArrayList<JPanel> trackPanelRepository = new ArrayList<>();
-    public static Flow.Subscriber<PlanData> MainSubscriber = new Flow.Subscriber<PlanData>() {
+    /**
+     * Horcht auf Befehl neuzuzeichnen
+     */
+    public static Flow.Subscriber<String> MainSubscriber = new Flow.Subscriber<String>() {
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
             MainTmsSim.MaSubscription = subscription;
@@ -40,9 +63,9 @@ public class MainTmsSim {
         }
 
         @Override
-        public void onNext(PlanData planData) {
-            PlanData.setData(planData);
-            System.out.println("onNext called");
+        public void onNext(String planData) {
+
+
 
             MainTmsSim.MaSubscription.request(1);
             MainTmsSim.MainFrame.revalidate();
@@ -69,6 +92,10 @@ public class MainTmsSim {
     private static boolean bSendRbcRequest = false;
     private static int iSendDummyPos = 3;
 
+    /**
+     * Main-Entry-Point
+     * @param args
+     */
     public static void main(String[] args) {
         //SmartLogic.createTestSend(true,bFakeReceiver, bSendRbcRequest, iSendDummyPos);
         startAsModul();
@@ -78,6 +105,7 @@ public class MainTmsSim {
     }
 
     private static void startAsModul() {
+        SmartLogic.IS_STARTED_AS_SL = false;
         try {
             EventBusManager.registerOrGetBus(Integer.parseInt(S_TMS_ID), true);
         } catch (IOException e) {
@@ -106,16 +134,11 @@ public class MainTmsSim {
         });
     }
 
-    public static CheckMovementAuthority generateMovementAuthority(MaRequestWrapper mar, RbcMaAdapter Ma4Rbc , long lPriority) {
-        /*CheckMovementAuthority resultMa = new CheckMovementAuthority(lPriority, Ma4Rbc);
-        resultMa.MaRequest = mar;
-
-        return resultMa;
-        */
-         return null;
-    }
-
-
+    /**
+     * Erstellt das Hauptfenster des TMS
+     * @param Mode {@link TmsMode}
+     * @return JFrame
+     */
     public static JFrame createTmsFrame(TmsMode Mode) {
         JFrame frame = new JFrame("TMS SIM");
         frame.getContentPane().setLayout(new BorderLayout());
@@ -125,8 +148,6 @@ public class MainTmsSim {
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             addCommandPanel();
             zoomFrame = ZoomFrame.getZoomFrame();
-        } else if(Mode.equals(TmsMode.EBD)) {
-            addSzenarioPanel();
         }
         String className = UIManager.getSystemLookAndFeelClassName();
         try {
@@ -201,22 +222,14 @@ public class MainTmsSim {
         return CommandPanel;
     }
 
-    public static JButton genCloseButton(JWindow CurrentWindow, String sButtonName) {
-        JButton CloseButton = new JButton(sButtonName);
-        CloseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                CurrentWindow.dispose();
 
-            }
-        });
-        return CloseButton;
-    }
+    private static Flow.Subscription MaSubscription;
 
-    public static Flow.Subscription MaSubscription;
+    private static MainGraphicPanel TrackPanel = null;
 
-    public static MainGraphicPanel TrackPanel = null;
-
+    /**
+     * Zeichnet Ma-Beantragunsfenster neu.
+     */
     public static void updateSubViews() {
         if(TrackPanel != null) TrackPanel.repaint();
     }

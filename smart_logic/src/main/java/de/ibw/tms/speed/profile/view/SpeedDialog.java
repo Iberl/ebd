@@ -12,15 +12,32 @@ import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
+/**
+ * Der Dailog der ein neues Segment per Click in die Zeichnung anzeigt.
+ * Es wird das gesamte zubeantragene Profil definiert
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-11
+ */
 public class SpeedDialog extends CartesianDialog {
-    public static JFrame Parent = null;
+    /**
+     * Speichert Momentanen Dialog
+     */
     public static SpeedDialog SpDialog = null;
-    CartesianPanel panel;
+    private CartesianPanel panel;
     private CartesianSpeedModel CSM;
 
+    /**
+     * Zeigt den SSP Dialog an
+     * @param CSM - ein Wrapper eines SSP
+     * @param RouteData - die beanzutragenden Routen
+     */
     public static void displaySpeedDialog(CartesianSpeedModel CSM, Route RouteData) {
         JFrame MaFrame =  MaCreatingFrame.CurrentMaCreatingFrame;
+
+
         SpDialog = new SpeedDialog(CSM, MaFrame, RouteData);
         SpDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         SpDialog.addWindowListener(new WindowAdapter() {
@@ -36,10 +53,10 @@ public class SpeedDialog extends CartesianDialog {
     }
 
 
-    public SpeedDialog(CartesianSpeedModel CSM, JFrame parentFrame, Route RouteData) {
+    private SpeedDialog(CartesianSpeedModel CSM, JFrame parentFrame, Route RouteData) {
         super(parentFrame, "Speed Dialog");
         this.CSM = CSM;
-        Parent = parentFrame;
+
         SpDialog = this;
         panel = new SpeedPanel(CSM, RouteData);
         this.getContentPane().add(panel);
@@ -53,13 +70,14 @@ public class SpeedDialog extends CartesianDialog {
 
 
 
-
-    public void showUI() {
+    /*
+    private void showUI() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("Speed Profile");
         setSize(700, 700);
         setVisible(true);
-    }
+    }*/
+    /*
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
 
@@ -70,5 +88,5 @@ public class SpeedDialog extends CartesianDialog {
 
             }
         });
-    }
+    }*/
 }

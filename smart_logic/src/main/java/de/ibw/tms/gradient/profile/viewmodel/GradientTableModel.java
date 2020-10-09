@@ -9,7 +9,15 @@ import de.ibw.tms.plan.elements.model.PlanData;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
-
+/**
+ * Noch nicht implementiert
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class GradientTableModel {
 
     private DefaultTableModel TableModel;

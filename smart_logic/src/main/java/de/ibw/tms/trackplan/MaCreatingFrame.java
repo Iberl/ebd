@@ -7,14 +7,31 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
+/**
+ * Fenster in dem Ma Beantragt werden.
+ * Es hat ein eigene Kartenasnicht.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class MaCreatingFrame extends JFrame {
 
+    /**
+     * Es sollte nur eine Instanz offen sein. Sie wird hier gespeichert.
+     */
     public static MaCreatingFrame CurrentMaCreatingFrame = null;
     private MaRequestWrapper Request;
     private TrackplanGraphicPanel TrackPanel;
     private JFrame MainFrame;
 
+    /**
+     * Konstruktor diesers Ma-Erstellungsfensters
+     * @param MovementAuthRequest - Zu bearbeitende MA
+     * @param MainFrame - Zugeordnetes Vaterfenster
+     */
     public MaCreatingFrame(MaRequestWrapper MovementAuthRequest, JFrame MainFrame) {
         super("MA beantragen");
         this.MainFrame = MainFrame;
@@ -42,7 +59,7 @@ public class MaCreatingFrame extends JFrame {
         this.setVisible(true);
     }
 
-    protected void addCloseHandler() {
+    private void addCloseHandler() {
         this.addWindowListener( new WindowAdapter()
         {
             public void windowClosing(WindowEvent e) {
@@ -51,9 +68,7 @@ public class MaCreatingFrame extends JFrame {
         });
     }
 
-    public static void main(String args[]) {
-        new MaCreatingFrame(new MaRequestWrapper(null), new JFrame());
-    }
+
 
 
 }

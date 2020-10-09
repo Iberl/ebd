@@ -7,16 +7,30 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
+/**
+ * Das Panel beinhaltet die Kartenansicht einer neuen MA Erstellung.
+ * Und auch das Panel darunter, dass Zugdaten verwaltet.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.3
+ * @since 2020-08-12
+ */
 public class TrainPanel extends JPanel {
 
-    ArrayList<SingleTrainSubPanel> subPanelList = new ArrayList();
-    BoxLayout SubPanelLayout;
-    JFrame ParentFrame;
-    SingleTrainSubPanel TrainSubPanel;
-    TrackplanGraphicPanel TrackPanel;
-    MaRequestWrapper R;
 
+
+    private JFrame ParentFrame;
+    private SingleTrainSubPanel TrainSubPanel;
+    private TrackplanGraphicPanel TrackPanel;
+    private MaRequestWrapper R;
+
+    /**
+     * Erstellt vom Hauptfenster zum Editiieren einer MA ein neues Fenster.
+     * @param frame {@link JFrame} -  Der Frame des Hauptfensters
+     * @param trackPanel {@link TrackplanGraphicPanel} - Die Zeichenfl&auml;che oder Karte.
+     * @param Request {@link MaRequestWrapper} - Der Request der durch diese UI vom Nutzer erstellt wird.
+     */
     public TrainPanel(JFrame frame, TrackplanGraphicPanel trackPanel, MaRequestWrapper Request) {
         super();
         this.ParentFrame = frame;

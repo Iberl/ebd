@@ -1,9 +1,13 @@
 package de.ibw.smart.logic.safety.self.tests;
 
+import de.ibw.feed.Balise;
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.safety.SmartSafety;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,12 +21,25 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Dieser Test kontrolliert ein Modul in der SmartLogic.
+ * Das Modul in der Smart-Safety untersucht, ob alle Routen-Element kontinuierlich verbunden sind.
+ *
+ * Es stellt Uitility-Function bereit, auf die auch andere Tests zugreifen
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-09-04
+ */
 public class SmartSafetyContinousConnectTest {
 
-    PlanData PD = PlanData.getInstance();
+
+    private PlanData PD = PlanData.getInstance();
     private ArrayList<TopologyGraph.Node> nodeList;
     private ArrayList<TopologyGraph.Edge> edgeList;
     private final int I_TRYS_FOR_FINAL_ROUTE = 70;
+    private int I_CURRENT_TRYS = 0;
+
 
     private final int I_LOWEST_ROUTE_LENGTH = 2;
     private final int I_MAX_ROUTE_LENGTH = 12;
@@ -36,10 +53,11 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
-
-    // all tests of check if route is connected
+    /**
+     * Kontrolliert, dass die Routenliste nicht null sein darf
+     */
     @Test
-    void checkIfMainNullError() {
+    public void checkIfMainNullError() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
 
         try {
@@ -51,8 +69,11 @@ public class SmartSafetyContinousConnectTest {
         }
     }
 
+    /**
+     * Kontrolliert, dass die Routenliste nicht leer sein darf
+     */
     @Test
-    void checkIfRouteIsContinuousWithEmptyTrackList() {
+    public void checkIfRouteIsContinuousWithEmptyTrackList() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         try {
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, new ArrayList<>());
@@ -62,8 +83,12 @@ public class SmartSafetyContinousConnectTest {
             assertTrue(true);
         }
     }
+
+    /**
+     * Kontrolliert das sie SmartSafty erkennt, dass zu wenig Routenelemente gegeben sind.
+     */
     @Test
-    void checkIfRouteIsContinuousWithToLessItems() {
+    public void checkIfRouteIsContinuousWithToLessItems() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         Pair<Route.TrackElementType, TrackElement> test1 = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, this.pickRandomNode());
         TopologyGraph.Node N = pickRandomNode();
@@ -87,8 +112,11 @@ public class SmartSafetyContinousConnectTest {
         }
     }
 
+    /**
+     * Kontrolliert, ob SmartSafety erkennt, dass ein Routen-Element in der Liste null ist.
+     */
     @Test
-    void checkIfSmartSaftyRecogniseInvalidNullValues() {
+    public void checkIfSmartSaftyRecogniseInvalidNullValues() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
@@ -112,10 +140,11 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
-
-
+    /**
+     * Kontrolliert, ob SmartSafety erkennt, dass die Route in Ordnung ist
+     */
     @Test
-    void checkIfRouteContinousShallReturnTrue() {
+    public void checkIfRouteContinousShallReturnTrue() {
         SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
@@ -134,19 +163,32 @@ public class SmartSafetyContinousConnectTest {
     }
 
 
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das Start-Element nicht in Ordnung ist
+     */
+
     @Test
-    void checkRouteHavingWrongStart() {
+    public void checkRouteHavingWrongStart() {
 
         checkRouteHavingWrongConnection(MalifyRouteWithWrongValues.MALIFY_START);
 
     }
 
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das End-Element nicht in Ordnung ist
+     */
+
     @Test
-    void checkRouteHavingWrongEnd() {
+    public void checkRouteHavingWrongEnd() {
 
         checkRouteHavingWrongConnection(MalifyRouteWithWrongValues.MALIFY_END);
 
     }
+
+    /**
+     * Kontrolliert, dass die SmartSafety erkennt, dass das Element in der Mitte nicht in Ordnung ist
+     */
+
     @Test
     void checkRouteHavingWrongMiddle() {
 
@@ -185,17 +227,17 @@ public class SmartSafetyContinousConnectTest {
         int iMaliciousIndex =  Math.abs(new Random().nextInt()) % (route.size() - 1);
         Pair<Route.TrackElementType, TrackElement> BadItem = null;
         switch (malifyPosition) {
-            case MALIFY_START -> {
+            case MALIFY_START: {
                 iMaliciousIndex = 0;
 
                 Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
-                    case(0) -> {
+                    case(0): {
                         //invert type of start element
                         return invertType(route, newMalicousRoute, iMaliciousIndex, maliciosItem, OriginalElementType);
                     }
-                    case(1) -> {
+                    case(1): {
                         //replace current start with other
                         return replaceElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex, OriginalElementType, true);
 
@@ -204,10 +246,10 @@ public class SmartSafetyContinousConnectTest {
                 }
 
             }
-            case MALIFY_MIDDLE -> {
-                if(route.size() <= 2) {
+            case MALIFY_MIDDLE: {
+                while(route.size() <= 2) {
                     route =  generateRandomContinousRoute(calcRouteElementAmountWithLowLimit(3));
-                    if(route.size() <= 2) throw new IndexOutOfBoundsException("Track long enough is not able to be created");
+
                 }
                 int iStartIndex = 1; // first element is not releveant for malify middle
                 int iEndIndex = route.size() - 2; // last element is not relevant for malify middle
@@ -215,17 +257,18 @@ public class SmartSafetyContinousConnectTest {
                 else iMaliciousIndex = Math.abs(new Random().nextInt()) % (iEndIndex - iStartIndex) + iStartIndex;
                 return replaceMiddleElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex);
             }
-            case MALIFY_END -> {
+            case MALIFY_END: {
                 iMaliciousIndex = route.size() - 1;
 
                 Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
-                    case(0) -> {
+                    case(0): {
                         //invert type of start element
                         return invertType(route, newMalicousRoute, iMaliciousIndex, maliciosItem, OriginalElementType);
+
                     }
-                    case(1) -> {
+                    case(1): {
                         //replace current start with other
                         return replaceElementWithOtherOne(route, newMalicousRoute, iMaliciousIndex, OriginalElementType, false);
 
@@ -233,12 +276,10 @@ public class SmartSafetyContinousConnectTest {
                     }
                 }
             }
-            default -> {
+            default: {
                 return null;
             }
         }
-
-        return null;
 
     }
 
@@ -356,6 +397,156 @@ public class SmartSafetyContinousConnectTest {
 
     }
 
+    /**
+     * Generiert aus PlanPro-Daten zufällige zusammenhängende Strecken.
+     * @param iTargetAmountOfRouteElements int - Anzahl der Beteiligten Elmente (Kanten oder Knoten)
+     * @param beginnOnEdge boolean - bestimmt ob die Zufallsstrecke auf einer Kante beginnt
+     * @return Streckenlisten mit Art (Knoten oder Kante) und konkretem Element.
+     */
+    public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(
+            int iTargetAmountOfRouteElements,
+                                                                                      boolean beginnOnEdge,
+                                                                                      boolean beginnWithBalise,
+                                                                                      TestUtil.RouteConfig TestConfig) {
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
+        ArrayList<TrackElement> visitedElements = new ArrayList<>();
+
+        TopologyGraph.Edge NewWay = null;
+        TrackElement CurrentElement;
+        if(beginnWithBalise) {
+            CurrentElement = handleBeginOnBalise(RouteResult,visitedElements, TestConfig);
+        } else if(beginnOnEdge) {
+            CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
+        } else {
+            CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
+        }
+        for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
+            int iWayIndex;
+
+            ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
+            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestConfig);
+            if(possibleWays.isEmpty()) {
+                if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
+                else return RouteResult;
+
+            } if(possibleWays.size() == 1) iWayIndex = 0;
+            else iWayIndex = Math.abs(new Random().nextInt()) % (possibleWays.size() - 1);
+            NewWay = possibleWays.get(iWayIndex);
+            if(i == iTargetAmountOfRouteElements) break;
+            CurrentElement = prepareNewIteration(RouteResult, visitedElements, NewWay);
+
+        }
+        return returnFinishedRoute(RouteResult, visitedElements, NewWay);
+    }
+
+    public void fillPossibleWays(ArrayList<TrackElement> visitedElements, TopologyGraph.Node currentElement,
+                                 ArrayList<TopologyGraph.Edge> possibleWays, TestUtil.RouteConfig testConfig) {
+
+        for (TopologyGraph.Edge E : currentElement.inEdges) {
+            if (checkIfEdgeIsPossible(E, currentElement, testConfig, visitedElements)) {
+                possibleWays.add(E);
+            }
+        }
+        for (TopologyGraph.Edge E : currentElement.outEdges) {
+            if (checkIfEdgeIsPossible(E, currentElement, testConfig, visitedElements)) {
+                possibleWays.add(E);
+            }
+        }
+    }
+
+    private boolean checkIfEdgeIsPossible(TopologyGraph.Edge E, TopologyGraph.Node currentElement, TestUtil.RouteConfig testConfig, ArrayList<TrackElement> visitedElements) {
+        switch (testConfig) {
+            case BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING: {
+                if(visitedElements.size() != 1) {
+                    return checkIfVisited(E,visitedElements);
+                }
+                if(E.A.equals(currentElement)) {
+                    if(E.TopConnectFromA.equals(TopologyConnect.SPITZE)) {
+                        return false;
+                    } else return true;
+                } else if(E.B.equals(currentElement)) {
+                    if(E.TopConnectFromB.equals(TopologyConnect.SPITZE)) {
+                        return false;
+                    } return true;
+                }
+                return false;
+            }
+            default: {
+                return checkIfVisited(E, visitedElements);
+            }
+        }
+    }
+
+    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<TrackElement> visitedElements) {
+        if (!visitedElements.contains(e)) {
+            return true;
+        }
+        return false;
+    }
+
+    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, TestUtil.RouteConfig TestConfig) {
+        I_CURRENT_TRYS = 0;
+        boolean bDirectionNodeA = new Random().nextBoolean();
+        TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise(TestConfig);
+        return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, EdgeWithBalise);
+    }
+
+    private TopologyGraph.Edge pickRandomEdgeWithBalise(TestUtil.RouteConfig TestConfig) {
+       if(I_CURRENT_TRYS > I_TRYS_FOR_FINAL_ROUTE) {
+           throw new InvalidParameterException("No Balise, that is beeing out of Crossover-Scpe found");
+       }
+       ArrayList<Balise> balises = new ArrayList<>(Balise.baliseByNid_bg.getAll());
+       Balise B = (Balise) pickRandomElement(balises);
+       TestUtil.lastRandomBalise = B;
+
+       switch (TestConfig) {
+           case BALISE_NEAR_CROSSING: {
+               return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+           }
+           case BALISE_NOT_NEAR_CROSSING: {
+               return retrieveBaliseNotNearCrossing(TestConfig, B);
+           }
+           case BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING: {
+               return retrieveBaliseNotNearCrossing(TestConfig, B);
+           }
+           default: {
+               throw new InvalidParameterException("Given Route Configuration not found");
+           }
+       }
+
+
+
+    }
+
+    private TopologyGraph.Edge retrieveBaliseNotNearCrossing(TestUtil.RouteConfig testConfig, Balise b) {
+        if(!checkIfBaliseIsInCrossoverArea(b) ) {
+            I_CURRENT_TRYS++;
+            return pickRandomEdgeWithBalise(testConfig);
+        }
+        return PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
+    }
+
+    private boolean checkIfBaliseIsInCrossoverArea(Balise B) {
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        CrossingSwitch CS = null;
+        if (edgeHavingNonPeekConnection(E)) {
+            // Weiche ist NICHT über spitze mit Kante der Balise verbunden
+
+            BlockedArea Datapointarea = B.createAreaFromBalise();
+            return Datapointarea.getListOfEdgeLimits().size() > 0;
+        }
+        return false;
+    }
+
+    private boolean edgeHavingNonPeekConnection(TopologyGraph.Edge e) {
+        return e.TopConnectFromB.equals(TopologyConnect.LINKS) || e.TopConnectFromB.equals(TopologyConnect.RECHTS)
+
+                ||
+
+                e.TopConnectFromA.equals(TopologyConnect.LINKS) || e.TopConnectFromA.equals(TopologyConnect.RECHTS);
+    }
+
+
     @Nullable
     private ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements) {
         ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
@@ -369,16 +560,10 @@ public class SmartSafetyContinousConnectTest {
             CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
         }
         for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
-            Integer iWayIndex;
+            int iWayIndex;
 
             ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
-            TopologyGraph.Node CurrentNode = (TopologyGraph.Node) CurrentElement;
-            for(TopologyGraph.Edge E: CurrentNode.inEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
-            for(TopologyGraph.Edge E: ((TopologyGraph.Node) CurrentElement).outEdges) {
-                if(!visitedElements.contains(E))possibleWays.add(E);
-            }
+            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
             if(possibleWays.isEmpty()) {
                 if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
                 else return RouteResult;
@@ -396,13 +581,17 @@ public class SmartSafetyContinousConnectTest {
     private TrackElement handleBeginOnEdge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
         boolean bDirectionNodeA = new Random().nextBoolean();
         TopologyGraph.Edge OldEdge = pickRandomEdge();
+        return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, OldEdge);
+    }
+
+    private TrackElement provideTrackElement4Edge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, boolean bDirectionNodeA, TopologyGraph.Edge oldEdge) {
         TrackElement currentElement = null;
-        visitedElements.add(OldEdge);
-        routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, OldEdge));
+        visitedElements.add(oldEdge);
+        routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, oldEdge));
         if(bDirectionNodeA) {
-            currentElement = OldEdge.A;
+            currentElement = oldEdge.A;
         } else {
-            currentElement = OldEdge.B;
+            currentElement = oldEdge.B;
         }
         visitedElements.add(currentElement);
         routeResult.add(new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, currentElement));
@@ -516,11 +705,11 @@ public class SmartSafetyContinousConnectTest {
         return (TopologyGraph.Edge) pickRandomElement(edgeList);
     }
 
-    private  TrackElement pickRandomElement(ArrayList pickList) {
+    private  Object pickRandomElement(ArrayList pickList) {
         if(pickList.isEmpty()) throw new InvalidParameterException("Bad Test Environment node List is empty");
         else {
             int iRandomIndex = Math.abs(new Random().nextInt()) % (pickList.size() -1 );
-            return (TrackElement) pickList.get(iRandomIndex);
+            return pickList.get(iRandomIndex);
         }
     }
 

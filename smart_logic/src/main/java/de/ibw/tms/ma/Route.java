@@ -43,11 +43,11 @@ public class Route implements Cloneable, Serializable {
         return elemetTypes;
     }
 
-    public void saveWaypointIForTransmission() {
+    public void saveWaypointsForProcessing(boolean withEndpoint) {
         elemetTypes = new ArrayList<>();
         elementListIds = new ArrayList<>();
         int iCountWaypoints = 0;
-        ArrayList<Waypoint> waypoints = getAllWaypointsInOrder();
+        ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
         WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);
         WaypointDecorator WayEnd = (WaypointDecorator) waypoints.get(waypoints.size() -1);
         TrackElement TrackElementOfEnd = WayEnd.getTrackElement();
@@ -55,18 +55,28 @@ public class Route implements Cloneable, Serializable {
         TypeOfWaypoint = TrackElementType.RAIL_TYPE;
         CrossoverModel EndModel = null;
         handleRailWaypoint(WayBeginn.getTrackElement());
-        iCountWaypoints = waypoints.size();
-        for(int i = 1; i < iCountWaypoints -1; i++) {
+        iCountWaypoints = waypoints.size() - 1;
+
+
+        // lastElement is regular BranchingPoint
+        if(!withEndpoint) iCountWaypoints++;
+
+
+        handleAllCrossoverWaypoints(iCountWaypoints, waypoints);
+        if(withEndpoint) handleEndWaypoint(TrackElementOfEnd);
+
+
+    }
+
+    private void handleAllCrossoverWaypoints(int iCountWaypoints, ArrayList<Waypoint> waypoints) {
+        for(int i = 1; i < iCountWaypoints; i++) {
             Waypoint W = waypoints.get(i);
-            String sId = null;
+
 
 
             TrackElement CTE = W.getTrackElement();
             handleCrossoverWaypoint(CTE);
         }
-        handleEndWaypoint(TrackElementOfEnd);
-
-
     }
 
     public void handleEndWaypoint(TrackElement trackElementOfEnd) {
@@ -122,18 +132,21 @@ public class Route implements Cloneable, Serializable {
         return resultMap;
     }
 
-    private ArrayList<Waypoint> getAllWaypointsInOrder() {
+    private ArrayList<Waypoint> getAllWaypointsInOrder(boolean withEndpoint) {
         ArrayList<Waypoint> resultList = new ArrayList<>();
         SpotLocation BeginPoint = location.getBegin();
         SpotLocation EndPoint = location.getEnd();
         WaypointDecorator BeginWayPoint =
-                new WaypointDecorator(BeginPoint.getTrackElement(), new TrackElementStatus(), -1,-1);
-        WaypointDecorator EndWayPoint =
-                new WaypointDecorator(EndPoint.getTrackElement(), new TrackElementStatus(), -1,-1);
+                new WaypointDecorator(BeginPoint.getTrackElement(), new TrackElementStatus(), -1, -1);
+        WaypointDecorator EndWayPoint = null;
+        if (withEndpoint) {
+            EndWayPoint =
+                new WaypointDecorator(EndPoint.getTrackElement(), new TrackElementStatus(), -1, -1);
+        }
         resultList.add(BeginWayPoint);
         resultList.addAll(this.waypointsList);
 
-        resultList.add(EndWayPoint);
+        if(withEndpoint) resultList.add(EndWayPoint);
         return resultList;
 
     }

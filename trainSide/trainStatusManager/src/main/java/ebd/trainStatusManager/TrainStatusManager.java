@@ -58,15 +58,15 @@ import java.util.*;
 
 public class TrainStatusManager implements Runnable {
 
-    private EventBus localEventBus = new EventBus();
-    private EventBus globalEventBus = EventBus.getDefault();
-    ConfigHandler ch;
+    private final EventBus localEventBus = new EventBus();
+    private final EventBus globalEventBus = EventBus.getDefault();
+    private ConfigHandler ch;
 
-    private int etcsTrainID;
-    private int rbcID;
-    private Thread tsmThread = new Thread(this);
+    private final int etcsTrainID;
+    private final int rbcID;
+    private final Thread tsmThread = new Thread(this);
 
-    private String source;
+    private final String source;
 
     /*
     Handlers
@@ -101,7 +101,13 @@ public class TrainStatusManager implements Runnable {
 
     private Clock clock;
 
-
+    /**
+     * Initializes a train.
+     * @param etcsTrainID The ETCS ID of the train.
+     * @param trainConfigID The ID of the train in the TrainConfigurator tool
+     * @param infrastructureID The ID of the train in the EBD Infrastructure
+     * @param rbcID The ID of the RBC the train should connect to
+     */
     public TrainStatusManager(int etcsTrainID, int trainConfigID, int infrastructureID, int rbcID){
         this.localEventBus.register(this);
         this.ch = ConfigHandler.getInstance();
@@ -114,6 +120,9 @@ public class TrainStatusManager implements Runnable {
         connectToRBC(this.rbcID);
     }
 
+    /**
+     * Will be called inside TSM.
+     */
     @Override
     public void run() {
         try {
@@ -128,6 +137,9 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
+    /**
+     * Calls join on the TSM thread. This will block until the TSM thread is closed.
+     */
     public void join(){
         try {
             this.tsmThread.join();
@@ -174,14 +186,13 @@ public class TrainStatusManager implements Runnable {
 
     /**
      * This function checks if a new location was reached and if so, updates the position of the train to
-     * reflect this.
+     * reflect this. //TODO Move to TrackSupervisor?
      */
     @Subscribe
     public void reactToNewLocation(NewLocationEvent nle) {
         RouteDataVolatile routeDataVolatile = this.routeData.getRouteDataVolatile();
         if(routeDataVolatile.getLinkingInformation() == null) return;
 
-        Map<Integer, Location> linkingInfo = routeDataVolatile.getLinkingInformation();
         Location newLoc = nle.newLocation;
 
 
@@ -191,20 +202,24 @@ public class TrainStatusManager implements Runnable {
         double overshoot;
 
         if(prefLocs.size() > 0) {
-            overshoot = oldPos.getIncrement() - linkingInfo.get(newLoc.getId()).getDistanceToPrevious();
-            prefLocs.put(newLoc.getId(),newLoc);}
+            Double distanceToPrev = newLoc.getDistanceToPrevious();
+            distanceToPrev = distanceToPrev != null ? distanceToPrev : 0;
+            overshoot = oldPos.getIncrement() - distanceToPrev;
+            prefLocs.put(newLoc.getId(),newLoc);
+        }
         else {
             InitalLocation initLoc = new InitalLocation();
             prefLocs.put(initLoc.getId(),initLoc);
-            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), oldPos.getIncrement()));
+            prefLocs.put(newLoc.getId(),new Location(newLoc.getId(), initLoc.getId(), newLoc.getDirection(), oldPos.getIncrement()));
             overshoot = oldPos.getIncrement(); //Assumption: We always start at a location!
         }
 
-        Position newPos = new Position(overshoot, oldPos.isDirectedForward(), newLoc, prefLocs);
+        Position newPos = new Position(overshoot, newLoc.getDirection(), newLoc, prefLocs);
         this.localEventBus.post(new TrainDataChangeEvent("tsm","td","currentPosition",newPos));
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
 
+    /* //TODO move to SpeedSupervisor or Distance Supervisor
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void reactToTripMode(ModeReportEvent mre){
         if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
@@ -212,6 +227,7 @@ public class TrainStatusManager implements Runnable {
         //TODO fill with logic
 
     }
+    */
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
@@ -259,7 +275,7 @@ public class TrainStatusManager implements Runnable {
 
     /**
      * Connects this train to the RBC specified by sending a {@link Message_155}
-     * @param rbcID The RBC identification
+     * @param rbcID The RBC identification //TODO Noch Notwendig?
      */
     private void connectToRBC(int rbcID) {
         Position curPos = new Position(0,true, new InitalLocation());
@@ -278,6 +294,7 @@ public class TrainStatusManager implements Runnable {
     private void setUpTrain( int trainConfigID, int infrastructureID) {
         TrainsHandler th = TrainsHandler.getInstance();
         Integer startingBalise = th.getStartingBaliseGroup(this.etcsTrainID);
+        int startingBGDir = th.getStartingMovementDir(this.etcsTrainID) ? 1 : 0;
         Boolean startingDirection = th.getStartingDirection(this.etcsTrainID);
         Integer startingIncrement = th.getStartingIncrement(this.etcsTrainID);
         if(startingBalise == null || startingDirection == null || startingIncrement == null){ //Train already removed, so we immediately kill the train
@@ -323,8 +340,8 @@ public class TrainStatusManager implements Runnable {
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
-        Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, 0d);
-        Position curPos = new Position(startingIncrement, startingDirection, newLoc);
+        Location newLoc = new Location(startingBalise, ETCSVariables.NID_LRBG_UNKNOWN, startingBGDir, 0d);
+        Position curPos = new Position(startingIncrement, startingBGDir, newLoc);
         Map<String,Object> changesForTD = new HashMap<>();
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);
@@ -336,18 +353,6 @@ public class TrainStatusManager implements Runnable {
         this.clock.start(ConfigHandler.getInstance().clockTickInMS);
 
         this.localEventBus.post(new ToLogEvent("tsm", "log", "TSM initialized"));
-    }
-
-    private void connectToRBC() {
-        Position curPos = new Position(0,true, new InitalLocation());
-        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, "all",curPos));
-
-        Message_155 msg155 = new Message_155();
-        long curTime = AppTime.currentTimeMillis();
-        msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
-        msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendETCSMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
-        this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + this.rbcID));
     }
 
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
@@ -371,23 +376,14 @@ public class TrainStatusManager implements Runnable {
         lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
 
         for(BreakingCurve bCurve : lobc) {
-            double xPosition = 0d;
-            double step = bCurve.getHighestXValue() / 100000d;
-            FileWriter fW;
             String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
             String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),dateString);
 
             try {
+                FileWriter fW;
                 fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
-                writer.write("");
-
-                while (xPosition <= bCurve.getHighestXValue()) {
-
-                    Double yValue = bCurve.getPointOnCurve(xPosition);
-                    writer.append(String.format("%f:%f%n", xPosition, yValue));
-                    xPosition += step;
-                }
+                writer.write(bCurve.toString());
                 writer.flush();
                 writer.close();
 
@@ -408,9 +404,7 @@ public class TrainStatusManager implements Runnable {
             if(!target.contains(";")){
                 return true;
             }
-            else if (target.contains(";T=" + this.etcsTrainID)){
-                return true;
-            }
+            else return target.contains(";T=" + this.etcsTrainID);
         }
 
         return false;

@@ -24,6 +24,13 @@ public class ConfigHandler {
     public String ipToGUIServer4TMS = "127.0.0.1";
     public String portOfGUIServer4TMS = "11114";
 
+    public String ipOfRBCServer = "127.0.0.1";
+
+    //External Port for RBC
+    public String portOfTMSServer = "22223";
+    // External Port To RBC
+    public String portOfRBCServer = "22224";
+
     //Name of the entity to be observed (rbc, trn, gb, all)
     public String entityName = "all";
 
@@ -33,14 +40,59 @@ public class ConfigHandler {
     //ID of the entity to be observed
     public int entityID = 0;
 
+    /*
+    longs
+     */
+    /*
+    Message Priorities in Transmission Queues
+    lowest value is send first
+     */
+     /*
+     Priority for Check a CrossingSwitchCommand from TMS to SL
+      */
+    public long lCheckDbdCommand = 3L;
+
+    /*
+    Priory für SL Antworten an das TMS, als Antwort zum Prüfen eines Stellbefehlt
+     */
+    public long lCheckDbdReturn = 3L;
 
     /*
     doubles
      */
 
+    /**
+     * Die L&auml;nge des Zuges in Meter, falls das RBC keine Angabe gemacht hat.
+     */
+    public double D_DEFAULT_MIN_LENGTH = 10d;
+
     /*
     boolean
      */
+
+    public boolean isInTestMode = true;
+
+    public boolean isSimulatingEbd = true;
+    public boolean initCrossoversInRealdDbdClient = false;
+    public boolean shallUserPrompt4SimulationFile = false;
+    /*
+    Scenario 2
+     */
+    public boolean train1StartingInTrackDirection = false;
+    public boolean train2StartingInTrackDirection = false;
+
+
+    /*
+     show kilometrierung
+     */
+    public boolean showMeter = false;
+
+
+    /*
+    streckenkilometrierung Strecke 2000 Balise 4731 ist Absteigend vom Rand gesehen
+     */
+
+    public boolean isTrackPosition_2000_4731_Upward = false;
 
     /*
     other
@@ -88,7 +140,7 @@ public class ConfigHandler {
                 System.err.println("First try of loading config did fail");
                 try(FileInputStream inputStream = new FileInputStream("config-default")) {
 
-                    try (FileOutputStream outputStream = new FileOutputStream("configuration/config.txt")) {
+                    try (FileOutputStream outputStream = new FileOutputStream("configuration/sl_config.txt")) {
                         int length;
                         byte[] buffer = new byte[1024];
                         while ((length = inputStream.read(buffer)) != -1){
@@ -164,7 +216,7 @@ public class ConfigHandler {
         }
 
         try {
-            File file = new File("configuration/config.txt");
+            File file = new File("configuration/sl_config.txt");
             try (PrintStream out = new PrintStream(new FileOutputStream(file))) {
                 for (String line : lines) {
                     out.println(line);
@@ -195,7 +247,7 @@ public class ConfigHandler {
         if(!fromDefault) {
 
             try{
-                BufferedReader reader = new BufferedReader(new FileReader("configuration/config.txt"));
+                BufferedReader reader = new BufferedReader(new FileReader("configuration/sl_config.txt"));
                 stringArray = reader.lines().toArray(String[]::new);
             } catch (IOException e) {
                 IOException ioe = new IOException("The config file could not be opened. " + e.getMessage());

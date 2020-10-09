@@ -4,7 +4,14 @@ import de.ibw.tms.ma.SpeedSegment;
 import de.ibw.util.DefaultRepo;
 
 import java.util.List;
-
+/**
+ * unused
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class SspRepository {
 
 

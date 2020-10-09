@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ForwardSplineTest {
 
-    static ForwardSpline bs0;
-    static ForwardSpline bs1;
+    static ForwardSpline fs0;
+    static ForwardSpline fs1;
 
     static Knot a = new Knot (0,0);
     static Knot b = new Knot (1,1);
@@ -24,8 +24,8 @@ class ForwardSplineTest {
 
     @BeforeAll
     static void newSpline(){
-        bs0 = new ForwardSpline(0);
-        bs1 = new ForwardSpline(1);
+        fs0 = new ForwardSpline(0);
+        fs1 = new ForwardSpline(1);
         ArrayList<Double> coefflist = new ArrayList<>(2);
         coefflist.add(0d);
         coefflist.add(0d);
@@ -44,65 +44,73 @@ class ForwardSplineTest {
 
         cc = new Knot(2d, coefflist);
 
-        bs0.addKnotToCurve(a);
-        bs0.addKnotToCurve(b);
-        bs0.addKnotToCurve(c);
+        fs0.addKnotToCurve(a);
+        fs0.addKnotToCurve(b);
+        fs0.addKnotToCurve(c);
 
-        bs1.addKnotToCurve(aa);
-        bs1.addKnotToCurve(bb);
-        bs1.addKnotToCurve(cc);
+        fs1.addKnotToCurve(aa);
+        fs1.addKnotToCurve(bb);
+        fs1.addKnotToCurve(cc);
     }
 
-    @Test
+
     void addKnotToCurve() {
         ForwardSpline bs01 = new ForwardSpline(0);
         bs01.addKnotToCurve(a);
         bs01.addKnotToCurve(new Knot(3d,2d));
 
-        assertEquals(0d,bs0.getLowestXValue());
+        assertEquals(0d, fs0.getLowestXValue());
         assertEquals(0d,bs01.getLowestXValue());
     }
 
-    @Test
+
     void getPointOnCurve() {
 
-        assertEquals(0d,bs0.getPointOnCurve(0d));
-        assertEquals(0d,bs0.getPointOnCurve(0.5));
-        assertEquals(0d,bs0.getPointOnCurve(1d));
-        assertEquals(1d,bs0.getPointOnCurve(2d));
-        assertEquals(2d,bs0.getPointOnCurve(3d));
+        assertEquals(0d, fs0.getPointOnCurve(0d));
+        assertEquals(0d, fs0.getPointOnCurve(0.5));
+        assertEquals(0d, fs0.getPointOnCurve(1d));
+        assertEquals(1d, fs0.getPointOnCurve(2d));
+        assertEquals(2d, fs0.getPointOnCurve(3d));
 
-        assertEquals(0d,bs1.getPointOnCurve(0.5));
-        assertEquals(1.5,bs1.getPointOnCurve(1.5));
+        assertEquals(0d, fs1.getPointOnCurve(0.5));
+        assertEquals(1.5, fs1.getPointOnCurve(1.5));
 
     }
 
 
 
-    @Test
+
     void getIntervallBoundariesOfPoint() {
 
-        ArrayList result = bs0.getIntervallBoundariesOfPoint(0.5);
+        ArrayList result = fs0.getIntervallBoundariesOfPoint(0.5);
         assertEquals(0d, result.get(0));
         assertEquals(1d, result.get(1));
 
-        result = bs0.getIntervallBoundariesOfPoint(1d);
+        result = fs0.getIntervallBoundariesOfPoint(1d);
         assertEquals(1d, result.get(0));
         assertEquals(2d, result.get(1));
     }
 
-    @Test
+
     void getHighestXValue() {
 
-        assertEquals(0d,bs0.getLowestXValue());
-        assertEquals(0d,bs1.getLowestXValue());
+        assertEquals(0d, fs0.getLowestXValue());
+        assertEquals(0d, fs1.getLowestXValue());
+    }
+
+
+    void getHigherOrLastKnotXValue() {
+
+        assertEquals(0d, fs1.getLowerOrFirstKnotXValue(1d));
+        assertEquals(0d, fs1.getLowerOrFirstKnotXValue(0d));
+
     }
 
     @Test
-    void getHigherOrLastKnotXValue() {
-
-        assertEquals(0d,bs1.getLowerOrFirstKnotXValue(1d));
-        assertEquals(0d,bs1.getLowerOrFirstKnotXValue(0d));
-
+    void tostring(){
+        assertEquals("Id: noID, Degree: 0\n" +
+        "Key: 0.0; Coefficients: 0.0\n" +
+        "Key: 1.0; Coefficients: 1.0\n" +
+        "Key: 2.0; Coefficients: 2.0\n",fs0.toString());
     }
 }

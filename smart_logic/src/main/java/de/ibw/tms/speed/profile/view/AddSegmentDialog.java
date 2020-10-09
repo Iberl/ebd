@@ -8,7 +8,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/**
+ * Der Dailog der ein einzelnes Segment nachbearbeitbar macht.
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.3
+ * @since 2020-08-10
+ */
 public class AddSegmentDialog extends JDialog {
     private JPanel AddPanel;
 
@@ -19,6 +26,11 @@ public class AddSegmentDialog extends JDialog {
     private final JTextField endField;
     private final JTextField speedField;
 
+    /**
+     * Dieser Konstruktor intiiert den Dialog
+     * @param SegmentViewModel {@link SpeedSegmentViewModel} - Model der Werte in der Ansicht
+     * @param Ctrl {@link SegmentAddController} - Controller der Aktionen ausf&uuml;hrt
+     */
     public AddSegmentDialog(SpeedSegmentViewModel SegmentViewModel, SegmentAddController Ctrl) {
         super(new JFrame(), "Add Segment", true);
         this.AddController = Ctrl;
@@ -60,7 +72,7 @@ public class AddSegmentDialog extends JDialog {
         SubmitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                SpeedSegmentViewModel ViewModel = AddSegmentDialog.this.SegmentViewModel;
+
                 AddSegmentDialog ThisDialog = AddSegmentDialog.this;
                 String sBeginMeter = ThisDialog.beginField.getText();
                 String sEndMeter = ThisDialog.endField.getText();
@@ -92,10 +104,8 @@ public class AddSegmentDialog extends JDialog {
 
     }
 
-    public JPanel getAddPanel() {
-        return AddPanel;
-    }
 
+    /*
     protected void initUI(JLabel beginLabel, JLabel endLabel, JLabel speedLabel, JLabel placeholder, JTextField beginField, JTextField endField, JTextField speedField, JButton submitButton) {
         getContentPane().add(beginLabel);
         getContentPane().add(beginField);
@@ -108,6 +118,6 @@ public class AddSegmentDialog extends JDialog {
 
         this.setVisible(true);
     }
-
+*/
 
 }

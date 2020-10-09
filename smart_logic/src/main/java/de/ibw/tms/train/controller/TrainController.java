@@ -1,6 +1,8 @@
 package de.ibw.tms.train.controller;
 
+import de.ibw.feed.Balise;
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsMovementAuthority;
@@ -9,11 +11,13 @@ import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
+import de.ibw.util.DefaultRepo;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.ModeProfile.Mode;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -21,12 +25,22 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
+/**
+ * Controller der die Metadaten zu dem Zug verwaltet
+ * Das kann im MA-Beantragungsfenster unterhalb der Karte editiert werden.
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 0.4
+ * @since 2020-08-25
+ */
 public class TrainController extends SubmissionPublisher implements IController {
 
 
@@ -36,16 +50,26 @@ public class TrainController extends SubmissionPublisher implements IController 
 
     private boolean isSubscribed = false;
 
+    /**
+     * Gibt Auskunft, dass ein Zug editiert wurde. Benachrichtigt als eingetragenen Empf&auml;nger
+     */
+
     @Override
     public void publish() {
 
         this.standardSubscription();
 
 
-        this.submit(PlanData.getInstance());
+        this.submit("");
 
 
     }
+
+    /**
+     * Definert welche Komponenten benachrichtigt werden.
+     * Bisher ein UnterModul der Hauptklasse des TMS
+     * @return List
+     */
 
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
@@ -54,11 +78,20 @@ public class TrainController extends SubmissionPublisher implements IController 
         return result;
     }
 
+    /**
+     * Instanziert Controller zu einem Zugmodell und der Gui die Daten zum Zug &auml;ndern kann.
+     * @param Tm
+     * @param Tsp
+     */
     public TrainController(TrainModel Tm, SingleTrainSubPanel Tsp) {
         this.Model = Tm;
         this.TrainSubPanel = Tsp;
     }
 
+    /**
+     * &Auml;ndert Name eines Zuges
+     * @param sLabel
+     */
     public void changeLabel(String sLabel) {
         if(TrainModel.usedLabelList.contains(sLabel)) {
             JOptionPane.showMessageDialog(null, "The trainid has to be unique.");
@@ -68,6 +101,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
+    /**
+     * &Auml;ndert Farbe eines Zuges.
+     * @param RepresentedColor {@link Color} Zielfarbe des Zuges
+     */
     public void changeTraincolor(Color RepresentedColor) {
         Color TrainColor = JColorChooser.showDialog(
                 this.TrainSubPanel, "Choose Train Color", RepresentedColor);
@@ -80,11 +117,21 @@ public class TrainController extends SubmissionPublisher implements IController 
 
     }
 
+    /**
+     * Schicht MA zur SmartLogic
+     * @param requestWrapper {@link MaRequestWrapper} - Die Anfrage einer MA an die SL
+     * @param R {@link Route} - die angeforderte Route
+     * @param sRbcId {@link String} - Ziel RBC Id
+     * @param sTmsId {@link String} - Eigene TMS Id
+     * @param uuid - {@link UUID} - Kommunikations Id
+     * @param bIsShunting boolean - Entscheidet ob Shunting am Schluss der SpotLocation der MA
+     * @throws IOException - Fehler beim Senden an die SmartLogic
+     */
     public void requestMovementAuthority(MaRequestWrapper requestWrapper, Route R, String sRbcId, String sTmsId, UUID uuid, boolean bIsShunting) throws IOException {
         boolean m_ack = true;
         RbcMaAdapter MaAdapter = null;
         Integer nid_lrbg = extractNidBaliseId(requestWrapper);
-        Double dDistanceToBalise = extractDistanceToBalise(requestWrapper);
+
         EOA.EndTimer TimerEnd = new EOA.EndTimer(ETCSVariables.T_ENDTIMER_INFINITY, ETCSVariables.D_ENDTIMERSTARTLOC);
         LinkingProfileAdapter LPA = null;
         int Q_DIR = extractQ_DIR(requestWrapper);
@@ -101,7 +148,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         ArrayList<EOA.Section> eoaSections = new ArrayList<>();
         SpeedProfile RbcSpeedProfil = null;
         try {
-            double dLengthOfEoaSectionsAsOnce = extractDistanceOfSelectedTrack(R);
+            double dLengthOfEoaSectionsAsOnce = R.getLocation().getEnd().chainage.iMeters;
             if (dLengthOfEoaSectionsAsOnce > 32000) {
                 EOA_Q_SCALE = ETCSVariables.Q_SCALE_10M;
                 L_SECTION = (int) (dLengthOfEoaSectionsAsOnce / 10);
@@ -178,10 +225,16 @@ public class TrainController extends SubmissionPublisher implements IController 
             // 0 vmax
             SvL SuperVL = RouteComponent.svl;
             if(SuperVL == null) {
-                JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this.TrainSubPanel);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(TrainController.this.TrainSubPanel);
 
-                JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
-                return;
+                        JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
+                        return;
+                    }
+                });
+
             }
 
             SuperVL.setMovementAuthority(Ma);
@@ -219,6 +272,7 @@ public class TrainController extends SubmissionPublisher implements IController 
             CheckMoveAuthCommand.uuid = uuid;
             TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
+
                 SmartClientHandler.getInstance().sendCommand(Msg);
             } catch (MissingInformationException e) {
                 e.printStackTrace();
@@ -227,6 +281,12 @@ public class TrainController extends SubmissionPublisher implements IController 
         }
     }
 
+    /**
+     * TODO
+     * Linking in der MA
+     * @param R
+     * @return
+     */
     public LinkingProfileAdapter extractLinkingProfile(Route R) {
         int q_dir = 0;
         int q_scale = 0;
@@ -306,10 +366,51 @@ public class TrainController extends SubmissionPublisher implements IController 
         return iQ_SCALE;
     }
 
-    private double extractDistanceOfSelectedTrack(Route R) {
-        double resultDistance = 0d;
+    /**
+     * Extrahiert distanz von Referenzbalise Topologischen End-Knoten ACHTUNG nicht für letztes Wegst&uuml;ck gedacht.
+     * Deshalb ohne letzten Gleisabschnitt
+     * @param R {@link Route} - die angeforderte Route
+     * @param TM {@link TrainModel} - der Zug auf der Route
+     * @return BigDecimal - Entfernung
+     */
+    public static BigDecimal extractDistanceOfSelectedTrack(Route R, TrainModel TM) {
+        BigDecimal resultDistance = new BigDecimal(0d);
         try {
-            return R.getLocation().getEnd().chainage.iMeters;
+            int iLastIndex = -1;
+            if(TM == null || R == null) return resultDistance;
+
+            Integer iNid_Lrbg = TM.getNid_lrbg();
+
+            Balise B = Balise.baliseByNid_bg.getModel(iNid_Lrbg);
+            if(B == null) return resultDistance;
+            R.saveWaypointsForProcessing(false);
+
+            if(R.getElemetTypes().size() < 2) return resultDistance;
+            iLastIndex = R.getElemetTypes().size() -1;
+
+            if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
+            resultDistance = resultDistance.add(PositionReportController.calcDistanceToFirstNodeOfTrainViaBalise(TM));
+
+            for(int i = 2; i < R.getElemetTypes().size(); i++) {
+                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.CROSSOVER_TYPE) &&
+                R.getElemetTypes().get(i - 1).equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+                    String s1NodeId = R.getElementListIds().get(i);
+                    String s2NodeId = R.getElementListIds().get(i-1);
+
+
+                    DefaultRepo<String, TopologyGraph.Edge> drEdge = TopologyGraph.twoTopPointBelongsToEdgeRepo.getModel(s1NodeId);
+
+
+
+                    TopologyGraph.Edge E = drEdge.getModel(s2NodeId);
+
+                        // Start distanz wurde schon in result distanz gespeichert
+                    resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
+                    }
+                }
+
+
+            return resultDistance;
         } catch(Exception E) {
             E.printStackTrace();
         }
@@ -345,14 +446,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         return ETCSVariables.Q_DIR_BOTH;
     }
 
-    private Double extractDistanceToBalise(MaRequestWrapper requestWrapper) {
-        try {
-            return requestWrapper.Tm.getdDistanceToBalise();
-        } catch (Exception E ) {
-            E.printStackTrace();
-        }
-        return null;
-    }
+
 
     private Integer extractNidBaliseId(MaRequestWrapper requestWrapper) {
         try {
@@ -365,11 +459,18 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
 
-
+    /**
+     * Setzt Art des Zuges auf den angegebenen Wert
+     * @param sCategory {@link String}
+     */
     public void changeCategory(String sCategory) {
         this.Model.category = sCategory;
     }
 
+    /**
+     * Setzt L&auml;nge des Zuges auf angebenen Wert in Meter
+     * @param sLength {@link String} - neue L&auml;nge in Meter
+     */
     public void changeLength(String sLength) {
         try {
             Double dLength = Double.parseDouble(sLength);
@@ -380,7 +481,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
-
+    /**
+     * Setzt die maximale Geschwindigkeit des Zuges
+     * @param sSpeed {@link String} - Speed in (km per h)
+     */
     public void changeSpeed(String sSpeed) {
         try {
             int iSpeed = Integer.parseInt(sSpeed);
@@ -391,10 +495,10 @@ public class TrainController extends SubmissionPublisher implements IController 
         this.publish();
     }
 
-    public CartesianSpeedModel getCSM() {
-        return CSM;
-    }
-
+    /**
+     * Setzt das Static Speed Profile des Zuges
+     * @param CSM {@link CartesianSpeedModel} - Wrapper f&uuml;r SSP
+     */
     public void setCSM(CartesianSpeedModel CSM) {
         this.CSM = CSM;
     }

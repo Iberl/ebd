@@ -11,7 +11,7 @@ import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
-import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -107,49 +107,49 @@ public class SpeedSupervisor {
         if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
         else updateMaxSpeeds(tripDistance, curSpeed);
 
-        SpeedInterventionLevel speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
-        SpeedSupervisionState supervisionState = SpeedSupervisionState.NOT_SET;
         if(this.inRSM && this.releaseSpeed > 0){//Release speed monitoring
-            supervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
             if(curSpeed > this.releaseSpeed + ch.dV_ebi_min){
-                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else if(this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed > 0){
-                speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
             else {
-                speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+                this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
             }
         }
         else if(this.maxIndicationSpeed >= curSpeed
                 && this.maxIndicationSpeed == this.maxEmergencyInterventionSpeed) { //Ceiling speed monitoring regime
             //Based on SRS 026-3 Table 17
-            supervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 
-            if (csmP1Emergency(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
-            else if (csmP1Service(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
-            else if (csmP1NoIntervention(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
-            else if (csmP2(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.WARNING;
-            else if (csmP3(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
-            else speedInterventionLevel = this.curSpeedInterventionLevel;
+            switch (this.curSpeedInterventionLevel){
+
+                case NOT_SET, NO_INTERVENTION, INDICATION -> csmIndicationAndNoIntervention(curSpeed);
+                case OVERSPEED -> csmOverspeed(curSpeed);
+                case WARNING -> csmWarning(curSpeed);
+                case APPLY_SERVICE_BREAKS -> csmServiceBreakIntervention(curSpeed);
+                case APPLY_EMERGENCY_BREAKS -> csmEmergencyBreakIntervention(curSpeed);
+            }
 
 
 
         }
         else{ //Target speed monitoring regime
-            supervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
+            this.curSupervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
             //Based on SRS 026-3 Table 12
-            if (tsmP1Emergency(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
-            else if (tsmP1Service(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
-            else if (tsmP1Indication(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.INDICATION;
-            else if (tsmP2(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.WARNING;
-            else if (tsmP3(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.PERMITTED_SPEED;
-            else if (tsmP4(curSpeed)) speedInterventionLevel = SpeedInterventionLevel.INDICATION;
-            else speedInterventionLevel = this.curSpeedInterventionLevel;
+            switch (this.curSpeedInterventionLevel){
+
+                case NOT_SET, NO_INTERVENTION -> this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
+                case INDICATION -> tmsIndication(curSpeed);
+                case OVERSPEED -> tmsOverspeed(curSpeed,tripDistance);
+                case WARNING -> tmsWarning(curSpeed,tripDistance);
+                case APPLY_SERVICE_BREAKS -> tmsServiceBreakIntervention(curSpeed, tripDistance);
+                case APPLY_EMERGENCY_BREAKS -> tsmEmergencyBreakIntervention(curSpeed);
+            }
         }
-        this.curSpeedInterventionLevel = speedInterventionLevel;
-        this.curSupervisionState = supervisionState;
-        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, speedInterventionLevel, supervisionState));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, this.curSpeedInterventionLevel, this.curSupervisionState));
         sendCurrentMaxSpeed();
     }
 
@@ -286,164 +286,153 @@ public class SpeedSupervisor {
         this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTarget, updateMap));
     }
 
-    /**
-     * See SRS 026 3.13.10.4 Table 12 and Table 8
-     * @param curSpeed current Speed
-     * @return true if triggering condition [13] or [15] is fulfilled
+    /*
+    Target Speed Supervision Conditions
      */
-    private boolean tsmP1Emergency(double curSpeed) {
-        //Checking if d_maxsafefront > d_ebi ([13]) happens in updateMaxSpeeds
-        //Checking if d_maxsafefront > d_I ([15]) happens in clockTick
-        if(curSpeed > this.maxEmergencyInterventionSpeed) return true;
-        return false;
-    }
 
     /**
-     * See SRS 026 3.13.10.4 Table 12 and Table 8
-     * //TODO add ability to check for condition [10]
-     * @param curSpeed current Speed
-     * @return true if triggering condition [12] is fulfilled
+     * See SRS 026 3.13.10.4 Table 12 and Table 10
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#INDICATION} if revocation condition [0]
+     * is fulfilled
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean tsmP1Service(double curSpeed) {
-        //Checks concerning distances are ignored
-        if(curSpeed > this.maxServiceInterventionSpeed) return true;
-        return false;
+    private void tsmEmergencyBreakIntervention(double curSpeed){
+        if(curSpeed == 0) this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
     }
 
     /**
      * See SRS 026 3.13.10.4 Table 12 and Table 10
-     * //TODO Add ability for [3]
-     * @param curSpeed current Speed
-     * @return true if revocation condition [0] or [1] is fulfilled
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#INDICATION} if revocation condition [1] or [3]
+     * are fulfilled
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean tsmP1Indication(double curSpeed) {
-        //Checks concerning distances are ignored
-        if(this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed == 0){ //[0]
-            return true;
+    private void tmsServiceBreakIntervention(double curSpeed, double tripDistance){
+        if(tripDistance > this.targetSpeedDistance && curSpeed < this.targetSpeed ||
+            tripDistance < this.targetSpeedDistance && curSpeed < this.maxPermittedSpeed) {
+            this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
         }
-        if (this.curSpeedInterventionLevel != SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed <= this.targetSpeed){ //[1]
-            return true;
-        }
-
-        return false;
     }
 
     /**
-     * See SRS 026 3.13.10.4 Table 12 and Table 8
-     * //TODO add ability to check for condition [7]
-     * @param curSpeed current Speed
-     * @return true if triggering condition [9] is fulfilled
+     * See SRS 026 3.13.10.4 Table 12 and Table 10 and 8
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#INDICATION} if revocation condition [1] or [3]
+     * are fulfilled.<br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#APPLY_SERVICE_BREAKS} or {@link SpeedInterventionLevel#APPLY_EMERGENCY_BREAKS}
+     * if triggering condition [12] or [15] are fulfilled, respectively. <br>
+     * Distance considerations are mostly ignored.
+     * //TODO Add distance considerations
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean tsmP2(double curSpeed) {
-        //Checks concerning distances are ignored
-        if (this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_SERVICE_BREAKS){
-            return false;
+    private void tmsWarning(double curSpeed, double tripDistance){
+        if(tripDistance > this.targetSpeedDistance && curSpeed < this.targetSpeed ||
+                tripDistance < this.targetSpeedDistance && curSpeed < this.maxPermittedSpeed) {
+            this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
         }
-        if(curSpeed > this.maxWarningSpeed){
-            return true;
-        }
-        return false;
+        else if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
     }
 
     /**
-     * See SRS 026 3.13.10.4 Table 12 and Table 8
-     * //TODO add ability to check for condition [4]
-     * @param curSpeed current Speed
-     * @return true if triggering condition [6] is fulfilled
+     * See SRS 026 3.13.10.4 Table 12 and Table 10 and 8
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#INDICATION} if revocation condition [1] or [3]
+     * are fulfilled.<br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#WARNING} if triggering condition [9] is
+     * fulfilled. <br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#APPLY_SERVICE_BREAKS} or {@link SpeedInterventionLevel#APPLY_EMERGENCY_BREAKS}
+     * if triggering condition [12] or [15] are fulfilled, respectively. <br>
+     * Distance considerations are mostly ignored.
+     * //TODO Add distance considerations
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean tsmP3(double curSpeed) {
-        //Checks concerning distances are ignored
-        if (this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_SERVICE_BREAKS){
-            return false;
+    private void tmsOverspeed(double curSpeed, double tripDistance){
+        if(tripDistance > this.targetSpeedDistance && curSpeed < this.targetSpeed ||
+                tripDistance < this.targetSpeedDistance && curSpeed < this.maxPermittedSpeed) {
+            this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
         }
-        if(curSpeed > this.maxPermittedSpeed){
-            return true;
-        }
-        return false;
+        else if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        else if(curSpeed > this.maxWarningSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.WARNING;
     }
 
     /**
-     * See SRS 026 3.13.10.4 Table 12 and Table 8
-     * @param curSpeed current Speed
-     * @return true if triggering condition [3] is fulfilled
+     * See SRS 026 3.13.10.4 Table 12 and Table 10 and 8
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#OVERSPEED} if triggering condition [6] is
+     * fulfilled. <br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#WARNING} if triggering condition [9] is
+     * fulfilled. <br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#APPLY_SERVICE_BREAKS} or {@link SpeedInterventionLevel#APPLY_EMERGENCY_BREAKS}
+     * if triggering condition [12] or [15] are fulfilled, respectively. <br>
+     * Distance considerations are mostly ignored.
+     * //TODO Add distance considerations
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean tsmP4(double curSpeed) {
-        if (this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_SERVICE_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.WARNING){
-            return false;
-        }
-        return true; //We already know that we are in TSM, so this is the default condition
+    private void tmsIndication(double curSpeed){
+        if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        else if(curSpeed > this.maxWarningSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.WARNING;
+        else if(curSpeed > this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.OVERSPEED;
     }
 
-    /**
-     * See SRS 026 3.13.10.4 Table 7 and Table 5
-     * @param curSpeed current Speed
-     * @return true if triggering condition [5] is fulfilled
+    /*
+    Ceiling Speed Supervision
      */
-    private boolean csmP1Emergency(double curSpeed) {
-        if(curSpeed > this.maxEmergencyInterventionSpeed) return true;
-        return false;
-    }
 
     /**
-     * See SRS 026 3.13.10.4 Table 7 and Table 5
-     * @param curSpeed current Speed
-     * @return true if triggering condition [4] is fulfilled
+     * See SRS 026 3.13.10.4 Table 7 and Table 6
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#NO_INTERVENTION} if revocation condition [0]
+     * is fulfilled
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean csmP1Service(double curSpeed) {
-        if(curSpeed > this.maxServiceInterventionSpeed) return true;
-        return false;
+    private void csmEmergencyBreakIntervention(double curSpeed){
+        if(curSpeed == 0) this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     }
 
     /**
      * See SRS 026 3.13.10.4 Table 7 and Table 6
-     * @param curSpeed current Speed
-     * @return true if revocation condition [0] or [1] is fulfilled
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#NO_INTERVENTION} if revocation condition [1]
+     * is fulfilled
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean csmP1NoIntervention(double curSpeed) {
-        if(this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed == 0){
-            return true;
-        }
-        if(this.curSpeedInterventionLevel != SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS && curSpeed < this.maxPermittedSpeed){
-            return true;
-        }
-        return false;
+    private void csmServiceBreakIntervention(double curSpeed){
+        if(curSpeed <= this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     }
 
     /**
-     * See SRS 026 3.13.10.4 Table 7 and Table 5
-     * @param curSpeed current Speed
-     * @return true if triggering condition [3] is fulfilled
+     * See SRS 026 3.13.10.4 Table 7 and Table 6
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#NO_INTERVENTION} if revocation condition [1]
+     * is fulfilled<br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#APPLY_SERVICE_BREAKS} or {@link SpeedInterventionLevel#APPLY_EMERGENCY_BREAKS}
+     * if triggering condition [4] or [5] are fulfilled, respectively. <br>
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean csmP2(double curSpeed) {
-        if (this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_SERVICE_BREAKS){
-            return false;
-        }
-        if (curSpeed > this.maxWarningSpeed){
-            return true;
-        }
-        return false;
+    private void csmWarning(double curSpeed){
+        if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        else if(curSpeed <= this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     }
 
     /**
-     * See SRS 026 3.13.10.4 Table 7 and Table 5
-     * @param curSpeed current Speed
-     * @return true if triggering condition [2] is fulfilled
+     * See SRS 026 3.13.10.4 Table 7 and Table 6
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#NO_INTERVENTION} if revocation condition [1]
+     * is fulfilled<br>
+     * Sets curSpeedInterventionLevel to {@link SpeedInterventionLevel#APPLY_SERVICE_BREAKS} or {@link SpeedInterventionLevel#APPLY_EMERGENCY_BREAKS}
+     * if triggering condition [4] or [5] are fulfilled, respectively. <br>
+     * Sets urSpeedInterventionLevel to {@link SpeedInterventionLevel#WARNING} if triggering condition [3] is fulfilled. <br>
+     * @param curSpeed current Speed in [m/s]
      */
-    private boolean csmP3(double curSpeed) {
-        if (this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.APPLY_SERVICE_BREAKS
-                || this.curSpeedInterventionLevel == SpeedInterventionLevel.WARNING){
-            return false;
-        }
-        if (curSpeed > this.maxWarningSpeed){
-            return true;
-        }
-        return false;
+    private void csmOverspeed(double curSpeed){
+        if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        else if(curSpeed > this.maxWarningSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.WARNING;
+        else if(curSpeed <= this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
+    }
+
+    private void csmIndicationAndNoIntervention(double curSpeed){
+        if(curSpeed > this.maxEmergencyInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        else if(curSpeed > this.maxServiceInterventionSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        else if(curSpeed > this.maxWarningSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.WARNING;
+        else if(curSpeed > this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.OVERSPEED;
+        else if(curSpeed <= this.maxPermittedSpeed) this.curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     }
 
 }
