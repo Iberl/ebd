@@ -49,14 +49,24 @@ abstract public class CurveGroup {
         tempKnotList.add(formerKnot);
 
         for(Knot knot : knotListCopy){
-            double newX = knot.xValue - (knot.coefficients.get(0) * offset);
-            double newSlope = (formerKnot.coefficients.get(0) - knot.coefficients.get(0)) / (formerKnot.xValue - newX);;
             double speed = knot.coefficients.get(0);
+            double newX = knot.xValue - (speed * offset);
+            double newSlope;
+            if(speed == 0) newSlope = knot.coefficients.get(1);
+            else newSlope = (formerKnot.coefficients.get(0) - knot.coefficients.get(0)) / (formerKnot.xValue - newX);
+
             Knot newKnot = new Knot(newX, new double[]{speed, newSlope});
             tempKnotList.add(newKnot);
 
             formerKnot = knot;
         }
+
+        //Fixing first knot
+        Knot firstKnot = tempKnotList.remove(0);
+        double deltaX = firstKnot.xValue - tempKnotList.get(0).xValue;
+        double deltaV = firstKnot.coefficients.get(0) - tempKnotList.get(0).coefficients.get(0);
+        double newSlope = deltaV/deltaX;
+        tempKnotList.add(0, new Knot(firstKnot.xValue, new double[]{firstKnot.coefficients.get(0), newSlope}));
 
         BackwardSpline curve = new BackwardSpline(1, id);
         for(Knot knot : tempKnotList){

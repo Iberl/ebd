@@ -74,8 +74,8 @@ public class TestEventHandler{
 			fW = new FileWriter(dirPathString + fileName);
 			BufferedWriter writer = new BufferedWriter(fW);
 			//System.out.println(bCurve.toStringMinimumSpeed());
-			//writer.write(bCurve.toStringAllKnots());
-			writer.write(bCurve.toStringMinimumSpeed());
+			writer.write(bCurve.toStringAllKnots());
+			//writer.write(bCurve.toStringMinimumSpeed());
 			writer.flush();
 			writer.close();
 
