@@ -5,6 +5,7 @@ package de.ibw.smart.logic.safety;
 import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
+import de.ibw.history.data.PositionEnterType;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
@@ -821,7 +822,9 @@ public class SmartSafety {
                 iTrainId, posInf);
         BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
 
-        PositionModul.getInstance().addPositionData(PD);
+
+
+        PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
     }
 
     private boolean checkQ_Length(int iQ_Length) {

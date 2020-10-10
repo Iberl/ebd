@@ -1,14 +1,19 @@
 package de.ibw.history;
 
+import de.ibw.feed.Balise;
+import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
+import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -73,7 +78,9 @@ public class PositionModul implements IPositionModul {
      * Nimmt ein Positionsdatum auf
      * @param PD - {@link PositionData}  - Postionsangabe die aufgenommen wird
      */
-    public void addPositionData(PositionData PD) {
+    public void addPositionData(PositionData PD, PositionEnterType EnterType) {
+        if(PD == null) throw new NullPointerException("Position Data must not be Null");
+        PD = handleMovementAuthorities(PD, EnterType);
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
         if(NewestData == null) {
             CurrentPositionsByNidId.update(PD.getNid_engine(), PD);
@@ -84,6 +91,119 @@ public class PositionModul implements IPositionModul {
             }
         }
         positionModuls.add(PD);
+    }
+
+    private PositionData handleMovementAuthorities(PositionData pd, PositionEnterType enterType) {
+        RouteDataSL Route = this.getRouteOfNidEngine(pd.getNid_engine());
+        if(enterType == null) {
+            return pd;
+        }
+        if(enterType.equals(PositionEnterType.OTHER_ENTERING_TYPE)) {
+            return pd;
+        } else if(enterType.equals(PositionEnterType.ENTERED_VIA_POSITION_REPORT)) {
+            return evaluatePositionReport(Route, pd);
+        } else return pd;
+
+
+    }
+
+    private PositionData evaluatePositionReport(RouteDataSL route, PositionData PD) {
+        Boolean isTrainMovingNominal = null;
+        int iDistanceToBalise = PD.getPos().d_lrbg;
+
+        int iNidLrbg = PD.getPos().nid_lrbg;
+        Balise B = Balise.baliseByNid_bg.getModel(iDistanceToBalise);
+        if(B == null) throw new InvalidParameterException("Balise of Position Report not found");
+
+
+        if(route == null) {
+            // keine MA zum Zug der Position-Data
+            // sicherheitshalber sämtliche Gleise sperren
+            ArrayList<TopologyGraph.Edge> visitedEdgesList = new ArrayList<>();
+            ArrayList<TopologyGraph.Edge> toVisitEdgesList = new ArrayList<>();
+            ArrayList<BigDecimal> toVisitMeters = new ArrayList<>();
+            switch (PD.getPos().q_dirtrain) {
+                case 0: {
+                    isTrainMovingNominal = false;
+                    return blockPossiblePosOfTrain(PD, isTrainMovingNominal, iDistanceToBalise, B, visitedEdgesList, toVisitEdgesList, toVisitMeters);
+
+                }
+                case 1: {
+                    isTrainMovingNominal = true;
+                    return blockPossiblePosOfTrain(PD, isTrainMovingNominal, iDistanceToBalise, B, visitedEdgesList, toVisitEdgesList, toVisitMeters);
+                }
+                default: {
+                    PD = blockPossiblePosOfTrain(PD, true, iDistanceToBalise, B, visitedEdgesList, toVisitEdgesList, toVisitMeters);
+                    return blockPossiblePosOfTrain(PD, isTrainMovingNominal, iDistanceToBalise, B, visitedEdgesList, toVisitEdgesList, toVisitMeters);
+
+                }
+            }
+
+
+        } else {
+            throw new NotImplementedException("");
+        }
+
+    }
+
+    @NotNull
+    private PositionData blockPossiblePosOfTrain(PositionData PD, Boolean isTrainMovingNominal, int iDistanceToBalise, Balise b, ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, ArrayList<BigDecimal> toVisitMeters) {
+        TopologyGraph.Node N1;
+        BigDecimal iToReserve = new BigDecimal(iDistanceToBalise);
+        N1 = b.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
+        BigDecimal dDistanceFromA = b.getBalisenPositionFromNodeA();
+        TopologyGraph.Edge E =
+                PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        if(E.B.equals(N1)) {
+            BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+            iToReserve = iToReserve.subtract(new BigDecimal(E.dTopLength).subtract(dDistanceFromA));
+            PD.add(StartArea);
+            if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
+            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve);
+        } else {
+            BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                    0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
+            iToReserve = iToReserve.subtract(dDistanceFromA);
+            PD.add(StartArea);
+            if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
+
+            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve);
+        }
+
+        while(!toVisitEdgesList.isEmpty()) {
+            E = toVisitEdgesList.get(0);
+            toVisitEdgesList.remove(0);
+            BigDecimal tempToReserve = toVisitMeters.get(0);
+            toVisitMeters.remove(0);
+            tempToReserve.subtract(new BigDecimal(E.dTopLength));
+            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0 ,
+                    BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength));
+            if(tempToReserve.compareTo(new BigDecimal("0")) <= 0) continue;
+            else {
+                visitEdge(visitedEdgesList, toVisitEdgesList, E.A, E, tempToReserve);
+                visitEdge(visitedEdgesList, toVisitEdgesList, E.B, E, tempToReserve);
+            }
+        }
+        return PD;
+    }
+
+    private void visitEdge(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, TopologyGraph.Node n1, TopologyGraph.Edge e, BigDecimal iToReserve) {
+        visitedEdgesList.add(e);
+        Iterator<TopologyGraph.Edge> itEdges = n1.inEdges.iterator();
+        Iterator<TopologyGraph.Edge> itEdges2 = n1.outEdges.iterator();
+        // sucht Kanten, die noch nicht besucht wurden
+        searchPath(visitedEdgesList, toVisitEdgesList, itEdges, iToReserve);
+        searchPath(visitedEdgesList, toVisitEdgesList, itEdges2, iToReserve);
+    }
+
+    private void searchPath(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, Iterator<TopologyGraph.Edge> itEdges, BigDecimal iToReserve) {
+        while(itEdges.hasNext()) {
+            TopologyGraph.Edge tempEdge = itEdges.next();
+            if(!visitedEdgesList.contains(tempEdge)) {
+                toVisitEdgesList.add(tempEdge);
+            }
+        }
     }
 
     public void updateCurrentRoute(int iNidEngineId, RouteDataSL R) {
