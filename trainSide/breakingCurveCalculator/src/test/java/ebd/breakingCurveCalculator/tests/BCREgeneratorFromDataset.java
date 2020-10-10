@@ -47,22 +47,23 @@ public class BCREgeneratorFromDataset{
 		//setting ID
 		String id = "test_BCRE_Dataset";
 
-		//service breaking Power
-		ForwardSpline breakingPower  = new ForwardSpline(0);
-		for (int i = 0; i < bp.length; i+=2) {
-			breakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.3));
-		}
-
 		//emergency breaking Power
-		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0);
+		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0, "EBP");
 		for (int i = 0; i < bp.length; i+=2) {
 			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.2));
 		}
 
-		//normal breaking Power
-		ForwardSpline normalBreakingPower  = new ForwardSpline(0);
+		//service breaking Power
+		ForwardSpline serviceBreakingPower  = new ForwardSpline(0, "SBP");
 		for (int i = 0; i < bp.length; i+=2) {
-			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
+			serviceBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.3));
+		}
+
+
+		//normal breaking Power
+		ForwardSpline normalBreakingPower  = new ForwardSpline(0, "NBP");
+		for (int i = 0; i < bp.length; i+=2) {
+			normalBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
 		}
 
 		//generating packet15
@@ -159,7 +160,7 @@ public class BCREgeneratorFromDataset{
 				target,
 				id,
 				normalBreakingPower,
-				breakingPower,
+				serviceBreakingPower,
 				emergencyBreakingPower,
 				packet15,
 				packet21,

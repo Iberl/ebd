@@ -12,8 +12,7 @@ import java.util.List;
  */
 public class SBDCurveGroup extends CurveGroup{
 
-    private BackwardSpline emergencyBreakingInterventionCurve;
-    private BackwardSpline serviceBreakingIntervention2Curve;
+    private BackwardSpline serviceBreakingIntervention1Curve;
     private BackwardSpline warningCurve;
     private BackwardSpline permittedSpeedCurve;
     private BackwardSpline indicationCurve;
@@ -27,22 +26,20 @@ public class SBDCurveGroup extends CurveGroup{
     @Override
     public @Nullable BackwardSpline getCurveFromType(CurveType curveType) {
         return switch (curveType){
-            case EMERGENCY_INTERVENTION_CURVE -> emergencyBreakingInterventionCurve;
-            case SERVICE_INTERVENTION_CURVE_2 -> serviceBreakingIntervention2Curve;
-            case WARNING_CURVE -> warningCurve;
-            case PERMITTED_SPEED -> permittedSpeedCurve;
-            case INDICATION_CURVE -> indicationCurve;
-            case C30_CURVE -> c30Curve;
+            case SERVICE_INTERVENTION_CURVE_1 -> this.serviceBreakingIntervention1Curve;
+            case WARNING_CURVE -> this.warningCurve;
+            case PERMITTED_SPEED -> this.permittedSpeedCurve;
+            case INDICATION_CURVE -> this.indicationCurve;
+            case C30_CURVE -> this.c30Curve;
             default -> null;
         };
     }
 
     private void getCurves(List<Knot> sbdKnotList) {
-        this.emergencyBreakingInterventionCurve = getCurveFromListAndOffset(sbdKnotList, ch.emergencyInterventionOffset);
-        this.serviceBreakingIntervention2Curve = getCurveFromListAndOffset(sbdKnotList, ch.serviceInterventionOffset);
-        this.warningCurve = getCurveFromListAndOffset(sbdKnotList, ch.warningOffset);
-        this.permittedSpeedCurve = getCurveFromListAndOffset(sbdKnotList, ch.permittedOffset);
-        this.indicationCurve = getCurveFromListAndOffset(sbdKnotList, ch.indicationOffset);
-        this.c30Curve = getCurveFromListAndOffset(sbdKnotList, ch.coastingPhaseOffset);
+        this.serviceBreakingIntervention1Curve = getCurveFromListAndOffset("sbi1", sbdKnotList, ch.serviceInterventionOffset);
+        this.warningCurve = getCurveFromListAndOffset("sbd_w", sbdKnotList, ch.warningOffset);
+        this.permittedSpeedCurve = getCurveFromListAndOffset("sbd_p", sbdKnotList, ch.permittedOffset);
+        this.indicationCurve = getCurveFromListAndOffset("sbd_i", sbdKnotList, ch.indicationOffset);
+        this.c30Curve = getCurveFromListAndOffset("sbd_c30", sbdKnotList, ch.coastingPhaseOffset);
     }
 }
