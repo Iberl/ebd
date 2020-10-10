@@ -7,6 +7,10 @@ import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * @author Lars Schulze-Falck
  *
@@ -67,8 +71,18 @@ public class BreakingCurveCalculatorTest {
 		
 		eventBus.post(bcre);
 		
-		
-		Thread.sleep(5000);
+		Thread.sleep(3000);
+
+		/*while (true){
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			try {
+				if(br.readLine().equals("q")){
+					break;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}*/
 		/*BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
 		System.out.printf("New distance to end of movement authority: %f%n", MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
 		eventBus.post(bclre);*/
