@@ -6,11 +6,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\2020-10-10T13-11-36.3557675"
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-10-10T18-01-58.2544423"
 
 def getPlotDir(allLines):
     highX = 0.0
-    counter = 0
     newPlotDir = {}
     curName = ""
     curDegree = 0
@@ -19,8 +18,6 @@ def getPlotDir(allLines):
         line = line.rstrip()
         if line.startswith("START"):
             curName = line.split(" ")[1]
-            curName += str(counter)
-            counter += 1
         elif line.startswith("Id"):
             curDegree = int(line[-1])
         elif line.startswith("Key:"):
@@ -63,13 +60,15 @@ pathList = [(path + f) for f in os.listdir(path)]
 
 i = 0
 fig, axs = plt.subplots(len(pathList), 1, sharex="all")
+highestX = 0
 
 for path in pathList:
 
     with open(path) as file:
         lines = file.readlines()
 
-    plotDir, highestX = getPlotDir(lines)
+    plotDir, maxX = getPlotDir(lines)
+    highestX = max(highestX, maxX)
     lableCounter = 0
 
     for key in plotDir:
@@ -84,15 +83,18 @@ for path in pathList:
         yList = pointList[1]
         xArray = np.array(xList)
         yArray = np.array(yList)
-        axs[i].plot(xArray, yArray, label=name[:3] + "..." + name[-3:])
+        axs[i].plot(xArray, yArray, label=name[:3] + ".." + name.split(":")[1])
         lableCounter += 1
+
+    axsTitel = path.split("/")[-1].split("-")[1]
+    axsTitel = axsTitel.upper()
     axs[i].legend(loc="upper left",
                   bbox_to_anchor=(1, 1.05),
                   fontsize=8,
                   labelspacing=0,
                   ncol=int(lableCounter/12) + 1,
                   columnspacing=0)
-    axs[i].set_ylabel("Speed [m/s]")
+    axs[i].set_ylabel(axsTitel + "\nSpeed [m/s]")
 
     i += 1
 axs[i-1].set_xlabel("Distance [m]")
