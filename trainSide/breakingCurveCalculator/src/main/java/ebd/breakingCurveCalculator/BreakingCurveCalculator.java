@@ -284,8 +284,6 @@ public class BreakingCurveCalculator {
 		double vNow = speed_EMA;
 		double vNext;
 		double sNow = distanceToEnd;
-		double sNext = sNow;
-
 		//Begin of logic
 		while(sNow > 0){
 
@@ -296,8 +294,8 @@ public class BreakingCurveCalculator {
 			double deltaT = - deltaV / breakAcc;
 			double deltaS = vMidpoint * deltaT;
 
-			double sMidpoint = 0.5 * deltaS * sNow;
-
+			double sMidpoint = (0.5 * deltaS) + sNow;
+			if(sMidpoint < 0) sMidpoint = 0.5 * sNow;
 			breakAcc += gradientProfil.getPointOnCurve(sMidpoint);
 			if (breakAcc <= 0) {
 				if (this.gradientProfil.getPointOnCurve(sMidpoint).equals(-Double.MAX_VALUE)) {
@@ -315,7 +313,7 @@ public class BreakingCurveCalculator {
 			deltaS = vMidpoint * deltaT;
 
 			knotList.add(new Knot(sNow, new double[]{ vNow, deltaV/deltaS})); //Add KNOT
-			sNow =+ deltaS;
+			sNow += deltaS;
 		}
 
 		return knotList;

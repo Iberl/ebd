@@ -29,10 +29,10 @@ public class BreakingCurveCalculatorTest {
 		//SETUP
 		//Datasets
 
-		int[] tsp = {0,160,1800,60,2200,160,2600,80,3000,160};
+		int[] tsp = {0,160,1800,60};
 		double[] bp = {0,0.4,100,0.2};
 		int[] gp = {0,0};
-		int eoa = 4323;
+		int eoa = 3000;
 		
 		
 /*		int[] tsp = {0,160 , 350,140 , 500,100 , 600,160 , 1075,140 , 1250,120 , 1900,80 , 2000,200};
@@ -67,8 +67,8 @@ public class BreakingCurveCalculatorTest {
 		eventBus.post(bcre);
 		
 		
-		/*Thread.sleep(2000);
-		BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
+		Thread.sleep(5000);
+		/*BreakingCurveLimitedRequestEvent bclre = bclreGenRandom.generate();
 		System.out.printf("New distance to end of movement authority: %f%n", MovementAuthorityConverter.p15ToD_EMA(bclre.packet15));
 		eventBus.post(bclre);*/
 	}

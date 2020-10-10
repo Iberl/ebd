@@ -185,12 +185,34 @@ public class BreakingCurve {
 			double[] values = new double[9];
 			values[0] = d;
 			for(CurveType type : CurveType.values()){
-				double speed = getSpeedAtDistance(d, type);
-				values[type.getRanking() + 1] = Double.isInfinite(speed) ? -1 : speed;
+				values[type.getRanking() + 1] = getSpeedAtDistance(d, type);
 			}
-			sb.append(String.format(line, values));
+			sb.append(String.format(line, values[0],values[1],values[2],values[3],values[4],values[5],values[6],values[7],values[8]));
 		}
 
+		return sb.toString();
+	}
+
+	/**
+	 * A String containing all knots from all curves in curveMap.
+	 * @return A {@link String}
+	 */
+	public String toStringAllKnots(){
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("START SSP\n");
+		sb.append(this.ssp.toString());
+		sb.append("END\n");
+		for(Map.Entry<Double,CurveGroup> entry : this.curveMap.entrySet()) {
+			for (CurveType type : CurveType.values()) {
+				BackwardSpline curve = entry.getValue().getCurveFromType(type);
+				if(curve == null) continue;
+				sb.append("START ").append(type.toString()).append("\n");
+				sb.append(curve.toString());
+				sb.append("END\n");
+			}
+		}
 		return sb.toString();
 	}
 
@@ -221,7 +243,10 @@ public class BreakingCurve {
 	Getter
 	 */
 	public Location getRefLocation() {
-		return refLocation;
+		return this.refLocation;
 	}
 
+	public String getID() {
+		return this.id;
+	}
 }

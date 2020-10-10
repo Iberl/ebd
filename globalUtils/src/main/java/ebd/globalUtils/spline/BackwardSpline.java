@@ -111,8 +111,7 @@ public class BackwardSpline extends Spline {
 	}
 		
 	/**
-	 * Returns the x-value of the next higher knot, unless the specified x-value is equal
-	 * to the x-value of the last knot, at which the x-value of the last knot is returned.
+	 * Returns the x-value of the next higher or equal knot.
 	 * 
 	 * 
 	 * 
@@ -125,15 +124,8 @@ public class BackwardSpline extends Spline {
 	
 	public Double getHigherOrLastKnotXValue(Double xValue) throws IndexOutOfBoundsException{
 		if (curve.ceilingKey(xValue) == null) {
-			
 			throw new IndexOutOfBoundsException(String.format("Input value (%f) is higher then the higest point (%f) in this curve",xValue,curve.lastKey()));	
 		}
-		
-		else if (this.curve.lastKey().equals(xValue)) {
-			return curve.lastKey();
-		}
-		else {
-			return curve.higherKey(xValue);
-		}
+		return curve.ceilingKey(xValue);
 	}
 }

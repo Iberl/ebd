@@ -15,7 +15,7 @@ import java.util.List;
 public class BreakingPowerCurveCalculator {
 
     public static ForwardSpline calculateNormalBreakingPower(EventBus eventBus){
-        ForwardSpline breakingPowerCurve = new ForwardSpline(3);
+        ForwardSpline breakingPowerCurve = new ForwardSpline(3, "NormalBreakingPower");
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
 
         //TODO fill with math
@@ -58,7 +58,7 @@ public class BreakingPowerCurveCalculator {
     }
 
     public static ForwardSpline calculateServiceBreakingPower(EventBus eventBus){
-        ForwardSpline breakingPowerCurve = new ForwardSpline(3);
+        ForwardSpline breakingPowerCurve = new ForwardSpline(3, "ServiceBreakingPower");
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
 
         //TODO fill with math
@@ -101,7 +101,7 @@ public class BreakingPowerCurveCalculator {
     }
 
     public static ForwardSpline calculateEmergencyBreakingPower(EventBus eventBus){
-        ForwardSpline breakingPowerCurve = new ForwardSpline(3);
+        ForwardSpline breakingPowerCurve = new ForwardSpline(3, "EmergencyBreakingPower");
         TrainDataPerma trainDataPerma = eventBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
 
         //TODO fill with math
