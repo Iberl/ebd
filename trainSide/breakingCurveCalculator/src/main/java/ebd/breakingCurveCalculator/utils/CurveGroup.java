@@ -41,7 +41,7 @@ abstract public class CurveGroup {
      * @return
      * 		A breaking curve made from the shifted knots
      */
-    protected BackwardSpline getCurveFromListAndOffset(List<Knot> knotList, double offset){
+    protected BackwardSpline getCurveFromListAndOffset(String id, List<Knot> knotList, double offset){
         List<Knot> knotListCopy = new ArrayList<>(knotList);
         List<Knot> tempKnotList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ abstract public class CurveGroup {
             formerKnot = knot;
         }
 
-        BackwardSpline curve = new BackwardSpline(1);
+        BackwardSpline curve = new BackwardSpline(1, id);
         for(Knot knot : tempKnotList){
             curve.addKnotToCurve(knot);
         }

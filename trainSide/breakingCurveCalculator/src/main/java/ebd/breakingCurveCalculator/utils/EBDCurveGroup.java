@@ -36,10 +36,10 @@ public class EBDCurveGroup extends CurveGroup{
     }
 
     private void getCurves(List<Knot> ebdKnotList) {
-        this.emergencyBreakingInterventionCurve = getCurveFromListAndOffset(ebdKnotList, ch.emergencyInterventionOffset);
-        this.serviceBreakingIntervention2Curve = getCurveFromListAndOffset(ebdKnotList, ch.serviceInterventionOffset);
-        this.warningCurve = getCurveFromListAndOffset(ebdKnotList, ch.warningOffset);
-        this.permittedSpeedCurve = getCurveFromListAndOffset(ebdKnotList, ch.permittedOffset);
-        this.indicationCurve = getCurveFromListAndOffset(ebdKnotList, ch.indicationOffset);
+        this.emergencyBreakingInterventionCurve = getCurveFromListAndOffset("ebi", ebdKnotList, ch.emergencyInterventionOffset);
+        this.serviceBreakingIntervention2Curve = getCurveFromListAndOffset("sbi2", ebdKnotList, ch.serviceInterventionOffset);
+        this.warningCurve = getCurveFromListAndOffset("ebd_w", ebdKnotList, ch.warningOffset);
+        this.permittedSpeedCurve = getCurveFromListAndOffset("ebd_p", ebdKnotList, ch.permittedOffset);
+        this.indicationCurve = getCurveFromListAndOffset("ebd_i", ebdKnotList, ch.indicationOffset);
     }
 }

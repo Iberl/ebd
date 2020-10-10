@@ -30,7 +30,7 @@ public class NBDCurveGroup extends CurveGroup {
     }
 
     private void getCurves(List<Knot> nbdKnotList) {
-        this.normalInterventionBreakingCurve = getCurveFromListAndOffset(nbdKnotList, 0d);
-        this.permittedSpeedCurve = getCurveFromListAndOffset(nbdKnotList, ch.permittedOffset);
+        this.normalInterventionBreakingCurve = getCurveFromListAndOffset("nc", nbdKnotList, 0d);
+        this.permittedSpeedCurve = getCurveFromListAndOffset("nbd_p", nbdKnotList, ch.permittedOffset);
     }
 }
