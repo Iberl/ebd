@@ -166,7 +166,8 @@ public class BreakingCurve {
 	 */
 	public String toStringMinimumSpeed(){
 		double maxDistance = this.curveMap.lastKey();
-		String firstLine = String.format("%s | %s | %s | %s | %s | %s | %s | %s | %s %n",
+		String firstLine = "x in [m], v in [m/s] \n";
+		String secondLine = String.format("%s | %s | %s | %s | %s | %s | %s | %s | %s %n",
 				"x",
 				"v_" + CurveType.EMERGENCY_INTERVENTION_CURVE.toString(),
 				"v_" + CurveType.SERVICE_INTERVENTION_CURVE_2.toString(),
@@ -179,7 +180,7 @@ public class BreakingCurve {
 				);
 		String line = "%8.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f | %4.2f %n" ;
 
-		StringBuilder sb = new StringBuilder(firstLine);
+		StringBuilder sb = new StringBuilder(firstLine).append(secondLine);
 
 		for (double d = 0d; d <= maxDistance; d += 0.5){
 			double[] values = new double[9];
@@ -187,7 +188,7 @@ public class BreakingCurve {
 			for(CurveType type : CurveType.values()){
 				values[type.getRanking() + 1] = getSpeedAtDistance(d, type);
 			}
-			sb.append(String.format(line, values[0],values[1],values[2],values[3],values[4],values[5],values[6],values[7],values[8]));
+			sb.append(String.format(Locale.ROOT, line, values[0],values[1],values[2],values[3],values[4],values[5],values[6],values[7],values[8]));
 		}
 
 		return sb.toString();
