@@ -314,6 +314,7 @@ public class BreakingCurveCalculator {
 
 			knotList.add(new Knot(sNow, new double[]{ vNow, deltaV/deltaS})); //Add KNOT
 			sNow += deltaS;
+			vNow = vNext;
 		}
 
 		return knotList;
