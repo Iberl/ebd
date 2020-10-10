@@ -201,17 +201,19 @@ public class BreakingCurve {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("START SSP\n");
+		sb.append("START SSP:0\n");
 		sb.append(this.ssp.toString());
 		sb.append("END\n");
+		int counter = 0;
 		for(Map.Entry<Double,CurveGroup> entry : this.curveMap.entrySet()) {
 			for (CurveType type : CurveType.values()) {
 				BackwardSpline curve = entry.getValue().getCurveFromType(type);
 				if(curve == null) continue;
-				sb.append("START ").append(type.toString()).append("\n");
+				sb.append("START ").append(type.toString()).append(":").append(counter).append("\n");
 				sb.append(curve.toString());
 				sb.append("END\n");
 			}
+			counter++;
 		}
 		return sb.toString();
 	}

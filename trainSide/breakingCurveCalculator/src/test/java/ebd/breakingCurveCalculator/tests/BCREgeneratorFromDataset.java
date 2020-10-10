@@ -78,7 +78,10 @@ public class BCREgeneratorFromDataset{
 		packet15.endsection = endsection;
 		packet15.sections = sections;
 		packet15.V_LOA = 0;
-
+		packet15.Q_OVERLAP = ETCSVariables.Q_OVERLAP_INFO;
+		packet15.D_OL = 200;
+		packet15.Q_DANGERPOINT = ETCSVariables.Q_DANGERPOINT_INFO;
+		packet15.D_DP = 100;
 
 		//generating packet21
 		int totalDistance = gp[0];
