@@ -90,7 +90,7 @@ public class BreakingCurve {
 	 * intervention will be returned. <br>
 	 *     For this, both the breaking curve and the ssp will be checked and the lost value found returned.<br>
 	 * The value of the parameter {@code distance} has to be between 0 and the greatest defined distance as
-	 * returned by {@link BreakingCurve#greatestDefinedDistance()} inklusive.
+	 * returned by {@link BreakingCurve#endOfDefinedDistance()} inklusive.
 	 *
 	 *
 	 * @param distance Distance from reference location in [m], has to be >= 0 and <= the last key.
@@ -141,11 +141,63 @@ public class BreakingCurve {
 	}
 
 	/**
-	 * Returns the greatest defined distance.
+	 * The {@link BreakingCurve} is defined between 0 and end of defined distance.
 	 * @return Distance in [m].
 	 */
-	public double greatestDefinedDistance(){
+	public double endOfDefinedDistance(){
 		return this.curveMap.lastKey();
+	}
+
+	/**
+	 * Returns the distance after which the maximum speed of the curve with the given type is always lower or equal then the given speed
+	 * @param testSpeed in [m/s]
+	 * @return In [m]. Returns {@link Double#MAX_VALUE} if no part of the breaking curve is lower then the given speed
+	 */
+	//TODO Tests
+	public Double getDistanceSpeedAlwaysLower(double testSpeed, CurveType type){
+
+		BackwardSpline curve = this.curveMap.lastEntry().getValue().getCurveFromType(type);
+		if(curve == null) return Double.MAX_VALUE;
+		double lastDist = curve.getHighestXValue();
+		double lastSpeed = curve.getPointOnCurve(lastDist);
+		if(lastSpeed > testSpeed){
+			return Double.MAX_VALUE;
+		}
+		if(lastSpeed == testSpeed){
+			return lastDist;
+		}
+		//Iterate over curveMap to find the correct CurveGroup
+		while(true){
+			BackwardSpline nextCurve = this.curveMap.lowerEntry(lastDist).getValue().getCurveFromType(type);
+			if(nextCurve == null) return Double.MAX_VALUE;
+			double nextDistance = nextCurve.getHighestXValue();
+			double nextSpeed = curve.getPointOnCurve(nextDistance);
+			if(nextSpeed == testSpeed){
+				return testSpeed;
+			}
+			else if(nextSpeed > testSpeed){
+				break;
+			}
+
+			lastDist = nextDistance;
+			curve = nextCurve;
+		}
+
+		//Numeric search for the exact distance
+		double startDistance = 0;
+		double endDistance = lastDist;
+
+		while(true){
+			double curDistance = (startDistance + endDistance) / 2;
+			double searchSpeed = curve.getPointOnCurve(curDistance);
+			if(Math.abs(testSpeed - searchSpeed) < 0.001){
+				return searchSpeed;
+			}
+			else if(testSpeed > searchSpeed){
+				endDistance = curDistance;
+			}
+			else startDistance = curDistance;
+		}
 	}
 
 	@Override

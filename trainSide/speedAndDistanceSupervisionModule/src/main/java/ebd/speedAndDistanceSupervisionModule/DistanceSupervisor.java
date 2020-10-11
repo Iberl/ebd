@@ -3,6 +3,7 @@ package ebd.speedAndDistanceSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
@@ -43,7 +44,9 @@ public class DistanceSupervisor {
     private final ConfigHandler ch;
     private final double L_TRAIN; //in [m]
 
-    private BreakingCurve breakingCurve = null;
+    private BreakingCurve emergencyBreakingCurve = null;
+    private double maxEmergencyDistance;
+    private BreakingCurve serviceBreakingCurve = null;
 
     /**
      * If release speed == 0, handel it as if there was no release speed
@@ -84,10 +87,11 @@ public class DistanceSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-        if(this.breakingCurve == null) return;
+        if(this.emergencyBreakingCurve == null) return;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
-        double distanceToEMA = this.breakingCurve.getHighestXValue() - curPos.totalDistanceToPastLocation(this.breakingCurve.getRefLocation().getId());
+        double distanceToEMA = this.serviceBreakingCurve.endOfDefinedDistance()
+                                - curPos.totalDistanceToPastLocation(this.serviceBreakingCurve.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
 
@@ -97,18 +101,31 @@ public class DistanceSupervisor {
                 && curSpeed <= this.curReleaseSpeed
                 && curSpeed > 0  ){ //If release speed == 0, handel it as if there was no release speed
             this.inRSM = true;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,true, this.curReleaseSpeed));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
+                    this.eventTarget,
+                    true,
+                    this.curReleaseSpeed,
+                    this.curReleaseSpeedDistance));
         }
         else if(this.inRSM && distanceToEMA > this.curReleaseSpeedDistance){ //This endes the release speed mode if a new movement authority message is received
             this.inRSM = false;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
+                    this.eventTarget,
+                    false,
+                    0d,
+                    this.maxEmergencyDistance
+                    ));
         }
         /*else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){//TODO Check if correct: DS says DD to halt when v > 0
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
         }*/
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
+                    this.eventTarget,
+                    false,
+                    0d,
+                    this.maxEmergencyDistance));
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
 
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
@@ -116,7 +133,11 @@ public class DistanceSupervisor {
             }
         }
         else if(distanceToEMA < (0 - this.emergencyBreakingCurveEndOffset)){
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource, this.eventTarget,false, 0d));
+            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
+                    this.eventTarget,
+                    false,
+                    0d,
+                    this.maxEmergencyDistance));
         }
 
         /*
@@ -150,7 +171,9 @@ public class DistanceSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurve.getPermittedSpeedCurve();
+        this.emergencyBreakingCurve = bce.emergencyBreakingCurve;
+        this.serviceBreakingCurve = bce.serviceBreakingCurve;
+        this.maxEmergencyDistance = this.emergencyBreakingCurve.endOfDefinedDistance();
         this.curReleaseSpeed = calculateReleaseSpeed();
         this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
 
@@ -202,9 +225,9 @@ public class DistanceSupervisor {
      * @return The calculated release speed
      */
     private double calculateReleaseSpeedDistance() {
-        double distance = this.breakingCurve.getDistanceSpeedAlwaysLower(this.curReleaseSpeed);
+        double distance = this.serviceBreakingCurve.getDistanceSpeedAlwaysLower(this.curReleaseSpeed, CurveType.PERMITTED_SPEED);
         if(distance < Double.MAX_VALUE){
-            return breakingCurve.getHighestXValue() - distance;
+            return serviceBreakingCurve.endOfDefinedDistance() - distance;
         }
         return ch.releaseSpeedDistance;
     }
