@@ -8,6 +8,7 @@ public class ReleaseSpeedModeStateEvent extends NormalEvent {
 
     public boolean inRSM;
     public final double curReleaseSpeed;
+    public double releaseDistance;
 
     /**
      * Constructs an Event
@@ -16,9 +17,14 @@ public class ReleaseSpeedModeStateEvent extends NormalEvent {
      * @param inReleaseSpeedSupervision If the trains speed supervision should be in ReleaseSpeedMode
      * @param curReleaseSpeed
      */
-    public ReleaseSpeedModeStateEvent(String source, String target, boolean inReleaseSpeedSupervision, double curReleaseSpeed) {
+    public ReleaseSpeedModeStateEvent(String source,
+                                      String target,
+                                      boolean inReleaseSpeedSupervision,
+                                      double curReleaseSpeed,
+                                      double releaseDistance) {
         super(source, target);
         this.inRSM = inReleaseSpeedSupervision;
         this.curReleaseSpeed = curReleaseSpeed;
+        this.releaseDistance = releaseDistance;
     }
 }
