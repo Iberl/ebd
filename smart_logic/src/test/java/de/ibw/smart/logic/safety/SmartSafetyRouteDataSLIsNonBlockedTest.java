@@ -751,7 +751,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
      * die Logik das einfahren des Zweiten Zuges verhindern.
      * @throws InterruptedException
      */
-    @RepeatedTest(100)
+
     public void checkIfTwoTrainsIntersectingOverCrossingDetected() throws InterruptedException {
         this.initTestEnv();
         int iTrainOne = 1;
