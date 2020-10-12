@@ -40,6 +40,9 @@ public class ConfigHandler {
     //ID of the entity to be observed
     public int entityID = 0;
 
+    // Das Base Interface aller topologischer Modelle hat eine G&uuml;ltigkeit bis zu X-Monaten
+    public int defaultAmountOfMonthBaseObjectIsValidTo = 3;
+
     /*
     longs
      */

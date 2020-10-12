@@ -1,12 +1,11 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.physical.*;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;

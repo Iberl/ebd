@@ -2,26 +2,27 @@ package de.ibw.tms.ma.physical;
 
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.EntityLocation;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.ma.net.elements.ILocatedNetEntity;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocatedNetEntity implements Serializable {
+public class LocatedNetEntity implements ILocatedNetEntity, Serializable {
     private Chainage chainageBeginn;
     private Chainage chainageEnd;
-    private GeoCoordinates geoCoordinates;
+    private GeometricCoordinate geoCoordinates;
 
     private EntityLocation MainLocation;
     private List<EntityLocation> locationList = new ArrayList<>();
 
 
-    public GeoCoordinates getGeoCoordinates() {
+    public GeometricCoordinate getGeoCoordinates() {
         return geoCoordinates;
     }
 
-    public void setGeoCoordinates(GeoCoordinates geoCoordinates) {
+    public void setGeoCoordinates(GeometricCoordinate geoCoordinates) {
         this.geoCoordinates = geoCoordinates;
     }
 
@@ -41,15 +42,5 @@ public class LocatedNetEntity implements Serializable {
         this.chainageEnd = chainageEnd;
     }
 
-    public EntityLocation getMainLocation() {
-        return MainLocation;
-    }
 
-    public void setMainLocation(EntityLocation mainLocation) {
-
-        MainLocation = mainLocation;
-        if(!locationList.contains(MainLocation)) {
-            locationList.add(mainLocation);
-        }
-    }
 }

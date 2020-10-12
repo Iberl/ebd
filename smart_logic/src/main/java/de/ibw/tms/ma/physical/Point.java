@@ -1,6 +1,6 @@
 package de.ibw.tms.ma.physical;
 
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 
 public class Point extends BranchingElement {
     private PointType type;

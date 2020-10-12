@@ -1,12 +1,11 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
@@ -51,7 +50,7 @@ public class TopologyGraph {
         if(LeftmostNode == null) {
             return null;
         }
-        GeoCoordinates xy = LeftmostNode.getGeoCoordinates();
+        GeometricCoordinate xy = LeftmostNode.getGeoCoordinates();
         if(xy == null) return null;
         return xy.getX();
     }
@@ -110,9 +109,9 @@ public class TopologyGraph {
          * Konstruktur zur instanziierung eines Knoten
          * @param name {@link String} - Bezeichnung des Knoten
          * @param topNodeId {@link String} - PlanPro Id des Knoten
-         * @param GeoCo {@link GeoCoordinates} - Coordinaten des Knotens
+         * @param GeoCo {@link GeometricCoordinate} - Coordinaten des Knotens
          */
-        public Node(String name, String topNodeId, GeoCoordinates GeoCo) {
+        public Node(String name, String topNodeId, GeometricCoordinate GeoCo) {
                 this.name = name;
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
@@ -231,7 +230,7 @@ public class TopologyGraph {
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
-                GeoCoordinates reference = A.getGeoCoordinates();
+                GeometricCoordinate reference = A.getGeoCoordinates();
 
                 /*boolean b_fromA;
                 CGEOKante firstEdge = paintListGeo.get(0);
@@ -249,8 +248,8 @@ public class TopologyGraph {
                 for(int i = 0; i < paintListGeo.size(); i++) {
                     CGEOKante edge = getNextGeoEdge(remainingGeoEdges, reference);
                     remainingGeoEdges.remove(edge);
-                    GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
-                    GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
+                    GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
+                    GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
 
                     if(reference.equals(nodeA)) {
                         sortedPaintListGeo.add(edge);
@@ -295,7 +294,7 @@ public class TopologyGraph {
                 this.paintListGeo = sortedPaintListGeo;
             }
 
-            private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeoCoordinates reference) {
+            private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeometricCoordinate reference) {
                 for(CGEOKante geoEdge : geoEdges) {
                     if(pointLaysOnEdge(geoEdge, reference)) {
                         return geoEdge;
@@ -304,13 +303,13 @@ public class TopologyGraph {
                 throw new IllegalArgumentException("No geo edge in given list starts at the reference point");
             }
 
-            private boolean pointLaysOnEdge(CGEOKante edge, GeoCoordinates point) {
-                GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
-                GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
+            private boolean pointLaysOnEdge(CGEOKante edge, GeometricCoordinate point) {
+                GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
+                GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
                 return point.equals(nodeA) || point.equals(nodeB);
             }
 
-            private double getDistanceBetween(GeoCoordinates nodeA, GeoCoordinates nodeB) {
+            private double getDistanceBetween(GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
                 double dx = Math.abs(nodeA.getX() - nodeB.getX());
                 double dy = Math.abs(nodeA.getY() - nodeB.getY());
                 return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));

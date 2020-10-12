@@ -1,10 +1,14 @@
 package de.ibw.tms.ma;
 
+import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.common.IBaseObject;
+import de.ibw.tms.ma.net.elements.CompositedNetElement;
 
-public class PositioningNetElement implements IBaseObject {
+public class PositioningNetElement extends CompositedNetElement {
     private EntityLocation entityLocation;
     private SectionOfLine sectionOfLine;
+
+
 
 
     public EntityLocation getEntityLocation() {

@@ -13,6 +13,6 @@ import java.util.Date;
  * @version 0.4
  * @since 2020-10-12
  */
-public class NetworkResource extends DefaultObject {
+public class NetworkResource extends DefaultObject implements INetResource {
 
 }

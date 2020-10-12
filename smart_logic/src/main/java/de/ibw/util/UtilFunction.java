@@ -1,12 +1,10 @@
 package de.ibw.util;
 
 import de.ibw.feed.Balise;
-import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.data.store.DataStore;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -248,8 +246,8 @@ public class UtilFunction {
             CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
             CGEOKnoten GeoNodeA = (CGEOKnoten) geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
             CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
-            GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
-            GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+            GeometricCoordinate Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
+            GeometricCoordinate Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
 
             Tm.setEdgeTrainStandsOn(NewTrainPositionEdge);
@@ -381,11 +379,11 @@ public class UtilFunction {
      * Gegeben sind zwei Coordinaten. In der Linie auf den beiden Coordinate wird der Punkt widergegeben der den Abstand dA von Coordinate A hat.
      * @param CalcTarget {@link ICoord} Die ZielCoordinate, das Ergebnis
      * @param dA - Abstand zu Coordinate A
-     * @param geo_A - {@link GeoCoordinates} A
-     * @param geo_B {@link GeoCoordinates} B
+     * @param geo_A - {@link GeometricCoordinate} A
+     * @param geo_B {@link GeometricCoordinate} B
      * @return ICoord - Ergebnis
      */
-    public static ICoord<Double> calcTargetGeoByStartPoint(ICoord<Double> CalcTarget, double dA, GeoCoordinates geo_A, GeoCoordinates geo_B) {
+    public static ICoord<Double> calcTargetGeoByStartPoint(ICoord<Double> CalcTarget, double dA, GeometricCoordinate geo_A, GeometricCoordinate geo_B) {
         double dx_diff = geo_B.getX() - geo_A.getX();
         if(dx_diff == 0d) {
             double dYnew = geo_A.getY() + dA;

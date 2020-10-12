@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.ibw.tms.ma.DangerZone;
 import de.ibw.tms.ma.Occupation;
 import de.ibw.tms.ma.SpotLocation;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 
 import java.util.ArrayList;

@@ -1,11 +1,11 @@
-package de.ibw.tms.ma;
+package de.ibw.tms.ma.positioned;
 
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-public class GeoCoordinates implements Serializable {
+public class GeometricCoordinate extends de.ibw.tms.ma.positioning.GeometricCoordinate implements Serializable {
     private double x;
     private double y;
     private double height;
@@ -79,7 +79,7 @@ public class GeoCoordinates implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GeoCoordinates that = (GeoCoordinates) o;
+        GeometricCoordinate that = (GeometricCoordinate) o;
         return Double.compare(that.x, x) == 0 &&
                 Double.compare(that.y, y) == 0 /*&&
                 Double.compare(that.height, height) == 0*/;

@@ -1,7 +1,7 @@
 package de.ibw.tms.ma.physical;
 
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 
 import java.util.List;
 
