@@ -3,6 +3,7 @@ package ebd.drivingDynamics.util;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -57,10 +58,10 @@ public class TripProfileProvider {
     @Subscribe
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
-            getProfilefromSource(nbce.breakingCurve.getPermittedSpeedCurve());
+            getProfilefromSource(nbce.serviceBreakingCurve);
         }
         else {
-            getProfileFromBreakingCurveGroup(nbce.breakingCurve);
+            getProfileFromBreakingCurveGroup(nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve);
         }
 
 
@@ -72,29 +73,28 @@ public class TripProfileProvider {
     }
 
     /**
-     * Because the way breaking curves are calculated, the permitted speed curve have higher
-     * speeds then the service intervention breaks.
-     * This leads to an undesirable behavior of the driving dynamic class. This method takes numeric
-     * approach to produce the minimum curve of both by sampling both curves with a 0.5 m resolution and taking the minimal value.
-     * @param curveGroup A {@link CurveGroup} from a {@link NewBreakingCurveEvent}
+     *
      */
-    private void getProfileFromBreakingCurveGroup(CurveGroup curveGroup) {
+    private void getProfileFromBreakingCurveGroup(BreakingCurve emerCurve, BreakingCurve serCurve) {
         //TODO Check Performance inpact. Should be low (only done once per MA)
-        BreakingCurve psc = curveGroup.getPermittedSpeedCurve();
-        this.refLocation = psc.getRefLocation();
+        this.refLocation = emerCurve.getRefLocation();
 
-        BreakingCurve sic = curveGroup.getServiceInterventionCurve();
-
-        final double maxX = Math.min(psc.getHighestXValue(),sic.getHighestXValue());
+        final double maxX = serCurve.endOfDefinedDistance();
         final int xSteps = (int)maxX * 2;
         final double deltaX = maxX / xSteps;
 
         List<double[]> pointList = new ArrayList<>();
-        pointList.add(new double[]{0,Math.min(psc.getPointOnCurve(0d),sic.getPointOnCurve(0d))});
+
+        double emerSpeed = emerCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+        double servSpeed = serCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+        pointList.add(new double[]{0,Math.min(emerSpeed,servSpeed)});
         double [] carryPoint = {-1,-1}; //Needed to preserve areas of constant speed on the curve, will be used to mark the endpoint of such an area
 
         for(double x = deltaX; x<=maxX; x += deltaX){
-            double y = Math.min(psc.getPointOnCurve(x),sic.getPointOnCurve(x));
+            emerSpeed = emerCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+            servSpeed = serCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+
+            double y = Math.min(emerSpeed,servSpeed);
 
             if(y == pointList.get(pointList.size() - 1)[1]) {
                 carryPoint = new double[]{x,y};

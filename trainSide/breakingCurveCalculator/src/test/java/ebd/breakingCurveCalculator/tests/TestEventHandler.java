@@ -79,9 +79,9 @@ public class TestEventHandler{
 			writer.flush();
 			writer.close();
 
-		} catch (IOException e1) {
-			eventBus.post(new BreakingCurveExceptionEvent("bcc", "tsm", nbce, e1));
-		}
+			} catch (IOException e1) {
+				eventBus.post(new BreakingCurveExceptionEvent("bcc", "tsm", nbce, e1));
+			}
 		}
 	}
 }

@@ -41,7 +41,7 @@ class SpeedSupervisorTest {
 
         Thread.sleep(3000);
 
-        BCREgeneratorFromDataset generator = new BCREgeneratorFromDataset(tsp,bp,gp);
+        BCREgeneratorFromDataset generator = new BCREgeneratorFromDataset(tsp,bp,gp, tsp[tsp.length - 2]);
         BreakingCurveRequestEvent bcre = generator.generate();
         bcre.referencePosition = startPos;
         bcre.source = "test";

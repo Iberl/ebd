@@ -149,7 +149,6 @@ public class SpeedSupervisor {
             }
         }
         this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, this.curSpeedInterventionLevel, this.curSupervisionState));
-        sendCurrentMaxSpeed();
     }
 
     private void findTargetSpeedAndDistance(double curTripDistance) {
@@ -223,23 +222,6 @@ public class SpeedSupervisor {
             this.maxServiceInterventionSpeed = this.emergencyBreakingCurve.getSpeedAtDistance(tripDistance,CurveType.SERVICE_INTERVENTION_CURVE_2);
             this.maxServiceInterventionSpeed = Math.min(this.maxServiceInterventionSpeed, this.releaseSpeed + ch.dV_sbi_min);
         }
-    }
-
-    /**
-     * Send current max speeds of all curves to {@link TrainDataVolatile}
-     */
-    private void sendCurrentMaxSpeed() {
-
-        HashMap<String, Object> updateMap = new HashMap<>();
-        updateMap.put("currentMaximumSpeed", this.maxPermittedSpeed);
-        updateMap.put("currentEmergencyInterventionSpeed", this.maxEmergencyInterventionSpeed);
-        updateMap.put("currentServiceInterventionSpeed", this.maxServiceInterventionSpeed);
-        updateMap.put("currentWarningSpeed", this.maxWarningSpeed);
-        updateMap.put("currentIndicationSpeed", this.maxIndicationSpeed);
-        updateMap.put("targetSpeed", this.targetSpeed);
-        updateMap.put("currentApplicableReleaseSpeed",this.releaseSpeed);
-
-        this.localEventBus.post(new TrainDataMultiChangeEvent("ssm", this.tdTarget, updateMap));
     }
 
     /*

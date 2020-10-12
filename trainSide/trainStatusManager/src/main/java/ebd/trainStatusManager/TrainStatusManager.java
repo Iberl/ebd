@@ -38,11 +38,8 @@ import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
 import ebd.trainStatusManager.util.handlers.TelegramHandler;
 import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
-import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
-import ebd.trainStatusManager.util.supervisors.ModeAndLevelSupervisor;
-import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
+import ebd.trainStatusManager.util.supervisors.*;
 import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
-import ebd.trainStatusManager.util.supervisors.TrackSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -95,6 +92,7 @@ public class TrainStatusManager implements Runnable {
     private MessageAuthorityRequestSupervisor messageAuthorityRequestSupervisor;
     private PositionReportSupervisor positionReportSupervisor;
     private TrackSupervisor trackSupervisor;
+    private SpeedUpdateSupervisor speedUpdateSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -336,6 +334,7 @@ public class TrainStatusManager implements Runnable {
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.trackSupervisor = new TrackSupervisor(this.localEventBus);
+        this.speedUpdateSupervisor = new SpeedUpdateSupervisor(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
@@ -357,32 +356,24 @@ public class TrainStatusManager implements Runnable {
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
+        String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
         String dirPathString = "results/breakingCurves/" + timeString.replaceAll(":", "-") + "/";
+        BreakingCurve[] lobc = {nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve, nbce.normalBreakingCurve};
 
         if(!new File(dirPathString).mkdirs()){
             System.err.println("Could not create necessary directories");
             System.exit(-1); //TODO Make better and Event
         }
 
-        List<BreakingCurve> lobc = new ArrayList<>();
-        lobc.add(nbce.breakingCurve.getEmergencyDecelerationCurve());
-        lobc.add(nbce.breakingCurve.getEmergencyInterventionCurve());
-        lobc.add(nbce.breakingCurve.getNormalBreakingCurve());
-        lobc.add(nbce.breakingCurve.getServiceInterventionCurve());
-        lobc.add(nbce.breakingCurve.getWarningCurve());
-        lobc.add(nbce.breakingCurve.getPermittedSpeedCurve());
-        lobc.add(nbce.breakingCurve.getIndicationCurve());
-        lobc.add(nbce.breakingCurve.getC30Curve());
-
         for(BreakingCurve bCurve : lobc) {
-            String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
-            String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),dateString);
+            FileWriter fW;
+            String fileName = String.format("ETCS_ID_%d-%s-%s", 6485, bCurve.getID(), dateString);
 
             try {
-                FileWriter fW;
                 fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
-                writer.write(bCurve.toString());
+                writer.write(bCurve.toStringAllKnots());
+                //writer.write(bCurve.toStringMinimumSpeed());
                 writer.flush();
                 writer.close();
 
