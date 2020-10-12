@@ -1,6 +1,8 @@
 package de.ibw.history;
 
 
+import de.ibw.history.data.PositionEnterType;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +29,7 @@ public interface IPositionModul {
 
     Collection<PositionData> getAllPositions(Integer iNidEngine, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd);
 
-    void addPositionData(PositionData PD);
+    void addPositionData(PositionData PD, PositionEnterType EnterType);
 
     void setTimeFilter(boolean bIsRbc, long lFrom, long lTo);
     void resetTimeFilter();

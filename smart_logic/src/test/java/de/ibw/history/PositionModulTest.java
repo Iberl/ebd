@@ -44,7 +44,8 @@ class PositionModulTest {
         nidRepo = new DefaultRepo<>();
         Current3 = null;
     }
-    private void generatePositionData(int iMin, int iMax) {
+
+    /*private void generatePositionData(int iMin, int iMax) {
 
         iDataAmount = Math.abs(new Random().nextInt()) % (iMax - iMin) + iMin;
         for(int i = 0 ; i < 7; i++) testNid.add(3);
@@ -79,7 +80,7 @@ class PositionModulTest {
                 PD.setdDistanceToTopNodeA(dDistance);
             }
 
-            MUT.addPositionData(PD);
+            MUT.addPositionData(PD, );
             ArrayList<PositionData> data = nidRepo.getModel(iNidEngine);
             if(data == null) data = new ArrayList<>();
             data.add(PD);
@@ -89,7 +90,7 @@ class PositionModulTest {
             }
         }
     }
-
+*/
     private Object pickRandom(ArrayList testNid) {
         int iR = Math.abs(new Random().nextInt()) % testNid.size();
         Object result = testNid.get(iR);
@@ -138,7 +139,7 @@ class PositionModulTest {
     @RepeatedTest(100)
     void testWithDataPositions() {
         initFunction();
-        generatePositionData(1,10000);
+        //generatePositionData(1,10000);
         assertEquals(iDataAmount, MUT.getAllPositions().size(), "Amount not hit");
 
 
@@ -146,7 +147,7 @@ class PositionModulTest {
     @RepeatedTest(100)
     void testWithExtendedDataPositions() {
         initFunction();
-        generatePositionData(7,10000);
+        //generatePositionData(7,10000);
         assertEquals(iDataAmount, MUT.getAllPositions().size(), "Amount not hit");
         assertEquals(7, MUT.getAllPositions(3).size(), "Nid ID 3 have to be 7 times");
         assertEquals(10, MUT.getAllPositions(null,"String3", null,null).size(), "Sring3 not found 10 times");
@@ -161,7 +162,7 @@ class PositionModulTest {
     @RepeatedTest(100)
     void testWithFilter() {
         initFunction();
-        generatePositionData(7, 10000);
+        //generatePositionData(7, 10000);
 
         int i1 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;
         int i2 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;

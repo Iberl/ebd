@@ -5,11 +5,16 @@ import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
+import de.ibw.util.UtilFunction;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
@@ -78,7 +83,7 @@ public class PositionModul implements IPositionModul {
      * Nimmt ein Positionsdatum auf
      * @param PD - {@link PositionData}  - Postionsangabe die aufgenommen wird
      */
-    public void addPositionData(PositionData PD, PositionEnterType EnterType) {
+    public synchronized void addPositionData(PositionData PD, PositionEnterType EnterType) {
         if(PD == null) throw new NullPointerException("Position Data must not be Null");
         PD = handleMovementAuthorities(PD, EnterType);
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
@@ -112,9 +117,9 @@ public class PositionModul implements IPositionModul {
         int iDistanceToBalise = PD.getPos().d_lrbg;
 
         int iNidLrbg = PD.getPos().nid_lrbg;
-        Balise B = Balise.baliseByNid_bg.getModel(iDistanceToBalise);
+        Balise B = Balise.baliseByNid_bg.getModel(iNidLrbg);
         if(B == null) throw new InvalidParameterException("Balise of Position Report not found");
-
+        BigDecimal dTrainLength = UtilFunction.getTrainLength(PD.getPos());
 
         if(route == null) {
             // keine MA zum Zug der Position-Data
@@ -122,6 +127,7 @@ public class PositionModul implements IPositionModul {
             ArrayList<TopologyGraph.Edge> visitedEdgesList = new ArrayList<>();
             ArrayList<TopologyGraph.Edge> toVisitEdgesList = new ArrayList<>();
             ArrayList<BigDecimal> toVisitMeters = new ArrayList<>();
+
             switch (PD.getPos().q_dirtrain) {
                 case 0: {
                     isTrainMovingNominal = false;
@@ -141,13 +147,150 @@ public class PositionModul implements IPositionModul {
 
 
         } else {
-            throw new NotImplementedException("");
+            if(route.getRouteLength().compareTo(dTrainLength) < 0) {
+                return evaluatePositionReport(null, PD);
+            }
+            Iterator<Pair<Route.TrackElementType, TrackElement>> it = route.iterator();
+            try {
+                TopologyGraph.Edge E =
+                        PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+                if (it.hasNext()) {
+                    TopologyGraph.Edge Ed = (TopologyGraph.Edge) it.next().getValue();
+                    // Routenbeginn passt nicht zur Balise => ohne Route auswerten
+                    if (Ed == null || E == null) return evaluatePositionReport(null, PD);
+                    if(!E.equals(Ed)) return evaluatePositionReport(null, PD);
+                }
+                switch (PD.getPos().q_dirtrain) {
+                    case 0: {
+                        isTrainMovingNominal = false;
+                        BigDecimal tempDistance = new BigDecimal("0");
+                        BigDecimal StartDistance = new BigDecimal(iDistanceToBalise).subtract(dTrainLength);
+                        BigDecimal EndDistance = new BigDecimal(iDistanceToBalise);
+                        TopologyGraph.Node N = B.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
+                        if (it.hasNext()) {
+                            Pair<Route.TrackElementType, TrackElement> RouteNode = it.next();
+                            if(RouteNode.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+                                if(N.equals(RouteNode.getValue())) {
+                                    if(route.getRouteLength().compareTo(BigDecimal.valueOf(iDistanceToBalise))>= 0) {
+                                        BigDecimal CurrentDistance = new
+                                                BigDecimal(E.dTopLength).subtract(B.getBalisenPositionFromNodeA());
+
+                                        while(StartDistance.compareTo(CurrentDistance) >= 0) {
+                                            tempDistance = new BigDecimal(CurrentDistance.doubleValue());
+
+                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
+                                                E = (TopologyGraph.Edge) Element.getValue();
+                                                CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
+                                            }
+
+                                        }
+                                        TopologyGraph.Edge StartEdge = E;
+                                        BigDecimal dDistanceFromA = StartDistance.subtract(tempDistance);
+                                        CurrentDistance = CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
+                                        while(CurrentDistance.compareTo(EndDistance) < 0) {
+                                            tempDistance = new BigDecimal(CurrentDistance.doubleValue());
+                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    (int) E.dTopLength));
+                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
+                                                E = (TopologyGraph.Edge) Element.getValue();
+                                                CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
+                                            }
+
+
+                                        }
+                                        BigDecimal dEndDistance = EndDistance.subtract(tempDistance);
+                                        if(E.equals(StartEdge)) {
+                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dEndDistance.intValue()));
+                                        } else {
+                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dEndDistance.intValue()));
+                                        }
+                                        return PD;
+
+
+                                    } else return evaluatePositionReport(null, PD);
+                                } else return evaluatePositionReport(null, PD);
+                            } else {
+                                return evaluatePositionReport(null, PD);
+                            }
+                        } else {
+                            BigDecimal endDistanceFromA = B.getBalisenPositionFromNodeA().add(
+                                    new BigDecimal(iDistanceToBalise)
+                            );
+                            if(new BigDecimal(E.dTopLength).compareTo(endDistanceFromA) >= 0) {
+                                PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                        B.getBalisenPositionFromNodeA().intValue(),
+                                        BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, endDistanceFromA.intValue()));
+                                return PD;
+                            } else return evaluatePositionReport(null, PD);
+                        }
+
+                    }
+                    case 1: {
+                        isTrainMovingNominal = true;
+                        TopologyGraph.Node N = B.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
+                    }
+                    default: {
+                        // Beweungsrichtung unbekannt => ohne Route auswerten
+                        return evaluatePositionReport(null, PD);
+                    }
+                }
+            } catch(Exception E) {
+                return evaluatePositionReport(null, PD);
+            }
+
+            //TopologyGraph.Node N1 =
+
+
+            //if(E.B.equals(N1)) {
+
+
+
+            /*
+            while(it.hasNext()) {
+                Pair<Route.TrackElementType, TrackElement> OneElement = it.next();
+                if(OneElement.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+                    continue;
+                } else if(OneElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
+
+                } else throw new NotImplementedException("TrackElementType not supported yet.");
+
+            }*/
         }
 
     }
 
     @NotNull
     private PositionData blockPossiblePosOfTrain(PositionData PD, Boolean isTrainMovingNominal, int iDistanceToBalise, Balise b, ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, ArrayList<BigDecimal> toVisitMeters) {
+        PositionData PD1 = handleBaliseEdge(PD, isTrainMovingNominal, iDistanceToBalise, b, visitedEdgesList, toVisitEdgesList, toVisitMeters);
+        if (PD1 != null) return PD1;
+        TopologyGraph.Edge E;
+
+        while(!toVisitEdgesList.isEmpty()) {
+            E = toVisitEdgesList.get(0);
+            toVisitEdgesList.remove(0);
+            BigDecimal tempToReserve = toVisitMeters.get(0);
+            toVisitMeters.remove(0);
+            tempToReserve.subtract(new BigDecimal(E.dTopLength));
+            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0 ,
+                    BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength));
+            if(tempToReserve.compareTo(new BigDecimal("0")) <= 0) continue;
+            else {
+                visitEdge(visitedEdgesList, toVisitEdgesList, E.A, E, tempToReserve, toVisitMeters);
+                visitEdge(visitedEdgesList, toVisitEdgesList, E.B, E, tempToReserve, toVisitMeters);
+            }
+        }
+        return PD;
+    }
+
+    @Nullable
+    private PositionData handleBaliseEdge(PositionData PD, Boolean isTrainMovingNominal, int iDistanceToBalise, Balise b, ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, ArrayList<BigDecimal> toVisitMeters) {
         TopologyGraph.Node N1;
         BigDecimal iToReserve = new BigDecimal(iDistanceToBalise);
         N1 = b.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
@@ -160,48 +303,35 @@ public class PositionModul implements IPositionModul {
             iToReserve = iToReserve.subtract(new BigDecimal(E.dTopLength).subtract(dDistanceFromA));
             PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
-            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve);
+
+            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve, toVisitMeters);
         } else {
             BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                     0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
             iToReserve = iToReserve.subtract(dDistanceFromA);
             PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
-
-            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve);
+            toVisitMeters.add(iToReserve);
+            visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve, toVisitMeters);
         }
-
-        while(!toVisitEdgesList.isEmpty()) {
-            E = toVisitEdgesList.get(0);
-            toVisitEdgesList.remove(0);
-            BigDecimal tempToReserve = toVisitMeters.get(0);
-            toVisitMeters.remove(0);
-            tempToReserve.subtract(new BigDecimal(E.dTopLength));
-            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0 ,
-                    BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength));
-            if(tempToReserve.compareTo(new BigDecimal("0")) <= 0) continue;
-            else {
-                visitEdge(visitedEdgesList, toVisitEdgesList, E.A, E, tempToReserve);
-                visitEdge(visitedEdgesList, toVisitEdgesList, E.B, E, tempToReserve);
-            }
-        }
-        return PD;
+        return null;
     }
 
-    private void visitEdge(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, TopologyGraph.Node n1, TopologyGraph.Edge e, BigDecimal iToReserve) {
+    private void visitEdge(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, TopologyGraph.Node n1, TopologyGraph.Edge e, BigDecimal iToReserve, ArrayList<BigDecimal> toVisitMeters) {
         visitedEdgesList.add(e);
         Iterator<TopologyGraph.Edge> itEdges = n1.inEdges.iterator();
         Iterator<TopologyGraph.Edge> itEdges2 = n1.outEdges.iterator();
         // sucht Kanten, die noch nicht besucht wurden
-        searchPath(visitedEdgesList, toVisitEdgesList, itEdges, iToReserve);
-        searchPath(visitedEdgesList, toVisitEdgesList, itEdges2, iToReserve);
+        searchPath(visitedEdgesList, toVisitEdgesList, itEdges, iToReserve , toVisitMeters);
+        searchPath(visitedEdgesList, toVisitEdgesList, itEdges2, iToReserve, toVisitMeters);
     }
 
-    private void searchPath(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, Iterator<TopologyGraph.Edge> itEdges, BigDecimal iToReserve) {
+    private void searchPath(ArrayList<TopologyGraph.Edge> visitedEdgesList, ArrayList<TopologyGraph.Edge> toVisitEdgesList, Iterator<TopologyGraph.Edge> itEdges, BigDecimal iToReserve, ArrayList<BigDecimal> toVisitMeters) {
         while(itEdges.hasNext()) {
             TopologyGraph.Edge tempEdge = itEdges.next();
             if(!visitedEdgesList.contains(tempEdge)) {
                 toVisitEdgesList.add(tempEdge);
+                toVisitMeters.add(iToReserve);
             }
         }
     }

@@ -350,7 +350,7 @@ public class UtilFunction {
         } else {
             BigDecimal dLength = new BigDecimal(ConfigHandler.getInstance().D_DEFAULT_MIN_LENGTH);
             if(dLength.compareTo(new BigDecimal("0")) < 0)
-                throw new InvalidParameterException("The default length of trains must not be null");
+                throw new InvalidParameterException("The default length of trains must not be negative");
             return dLength;
         }
 

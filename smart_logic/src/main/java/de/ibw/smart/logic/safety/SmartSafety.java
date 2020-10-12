@@ -773,7 +773,7 @@ public class SmartSafety {
             iQ_Length = PosInf.q_length;
             trainInformation.update(iTrainId, P.trainInfo);
             lastPositionReport.update(iTrainId, PosInf);
-            handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader());
+            new Thread(() -> handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader())).start();
             unlockPassedElements(iTrainId, PosInf);
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
