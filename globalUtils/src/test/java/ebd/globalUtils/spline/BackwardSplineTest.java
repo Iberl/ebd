@@ -105,7 +105,7 @@ class BackwardSplineTest {
 
     }
 
-    @Test
+
     void tostring(){
         assertEquals("Id: noID, Degree: 1\n" +
                 "Key: 0.0; Coefficients: 0.0, 0.0\n" +
