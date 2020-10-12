@@ -750,7 +750,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
      * MA beanspruchen, weil ein Zug durch seine Ausdehnung sich noch im Grenzbereich der Weiche befindet muss
      * die Logik das einfahren des Zweiten Zuges verhindern.
      * @throws InterruptedException
-     */
+
 
     public void checkIfTwoTrainsIntersectingOverCrossingDetected() throws InterruptedException {
         this.initTestEnv();
@@ -929,7 +929,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
 
 
     }
-
+    */
     private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {
         int iResultLength = 0;
         Pair<Route.TrackElementType, TrackElement> StartKomposition = routenListe.get(0);
