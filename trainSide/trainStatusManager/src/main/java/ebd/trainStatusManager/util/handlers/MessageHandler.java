@@ -238,18 +238,11 @@ public class MessageHandler {
 
         for (TrackPacket packet : msg3.packets){ //TODO Check LRBG reference consistency
             String pName = packet.getClass().getSimpleName();
-            switch (pName){
-                case "Packet_21":
-                    packet21 = (Packet_21)packet;
-                    break;
-                case "Packet_27":
-                    packet27 = (Packet_27)packet;
-                    break;
-                case "Packet_65":
-                    listOfPacket65s.add((Packet_65)packet);
-                    break;
-                default:
-                    handleOptionalTrackPacket(rme, packet, refLoc);
+            switch (pName) {
+                case "Packet_21" -> packet21 = (Packet_21) packet;
+                case "Packet_27" -> packet27 = (Packet_27) packet;
+                case "Packet_65" -> listOfPacket65s.add((Packet_65) packet);
+                default -> handleOptionalTrackPacket(rme, packet, refLoc);
             }
         }
 

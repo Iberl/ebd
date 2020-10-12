@@ -86,7 +86,7 @@ public class SpeedUpdateSupervisor {
         updateMap.put("currentEmergencyInterventionSpeed", maxEmergencyInterventionSpeed);
         updateMap.put("currentServiceIntervention2Speed", maxServiceIntervention2Speed);
         updateMap.put("currentServiceIntervention1Speed", maxServiceIntervention1Speed);
-        updateMap.put("currentNormalSpeed", maxNormalSpeed);
+        updateMap.put("currentNormalInterventionSpeed", maxNormalSpeed);
         updateMap.put("currentWarningSpeed", maxWarningSpeed);
         updateMap.put("currentIndicationSpeed", maxIndicationSpeed);
         updateMap.put("currentCoastingPhaseSpeed", maxC30Speed);
