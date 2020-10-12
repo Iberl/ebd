@@ -25,14 +25,16 @@ public class BCREgeneratorFromDataset{
 	int[] tsp;
 	double[] bp;
 	int[] gp;
+	int eoa;
 
 	/**
 	 * Creates an instance with the provided data
 	 */
-	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp) {
+	public BCREgeneratorFromDataset(int[] tsp, double[] bp, int [] gp, int eoa) {
 		this.tsp = tsp;
 		this.bp = bp;
 		this.gp = gp;
+		this.eoa = eoa;
 	}
 
 	/**
@@ -45,16 +47,23 @@ public class BCREgeneratorFromDataset{
 		//setting ID
 		String id = "test_BCRE_Dataset";
 
-		//breaking Power
-		ForwardSpline breakingPower  = new ForwardSpline(0);
+		//emergency breaking Power
+		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0, "EBP");
 		for (int i = 0; i < bp.length; i+=2) {
-			breakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
+			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.2));
 		}
 
-		//emergency breaking Power
-		ForwardSpline emergencyBreakingPower  = new ForwardSpline(0);
+		//service breaking Power
+		ForwardSpline serviceBreakingPower  = new ForwardSpline(0, "SBP");
 		for (int i = 0; i < bp.length; i+=2) {
-			emergencyBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.1));
+			serviceBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1] + 0.3));
+		}
+
+
+		//normal breaking Power
+		ForwardSpline normalBreakingPower  = new ForwardSpline(0, "NBP");
+		for (int i = 0; i < bp.length; i+=2) {
+			normalBreakingPower.addKnotToCurve(new Knot(bp[i] * 10d/36d, bp[i+1]));
 		}
 
 		//generating packet15
@@ -62,14 +71,17 @@ public class BCREgeneratorFromDataset{
 		Packet_15 packet15 = new Packet_15();
 
 		Packet_15_Section endsection = new Packet_15_Section();
-		endsection.L_SECTION = 1800;
+		endsection.L_SECTION = eoa;
 		ArrayList<Packet_15_Section> sections = new ArrayList<>();
 
 		packet15.Q_SCALE = 1;
 		packet15.endsection = endsection;
 		packet15.sections = sections;
 		packet15.V_LOA = 0;
-
+		packet15.Q_OVERLAP = ETCSVariables.Q_OVERLAP_INFO;
+		packet15.D_OL = 200;
+		packet15.Q_DANGERPOINT = ETCSVariables.Q_DANGERPOINT_INFO;
+		packet15.D_DP = 100;
 
 		//generating packet21
 		int totalDistance = gp[0];
@@ -147,8 +159,23 @@ public class BCREgeneratorFromDataset{
 		//setting V_MAX
 		int V_MAXTRAIN = 200;
 
-		return new BreakingCurveRequestEvent("devTests", target, id, breakingPower, emergencyBreakingPower, packet15, packet21, currentGradient, currentPosition, packet27,
-				listPacket65, NC_CDTRAIN, NC_TRAIN, L_TRAIN, currentSpeedLimit, V_MAXTRAIN);
+		return new BreakingCurveRequestEvent("devTests",
+				target,
+				id,
+				normalBreakingPower,
+				serviceBreakingPower,
+				emergencyBreakingPower,
+				packet15,
+				packet21,
+				currentGradient,
+				currentPosition,
+				packet27,
+				listPacket65,
+				NC_CDTRAIN,
+				NC_TRAIN,
+				L_TRAIN,
+				currentSpeedLimit,
+				V_MAXTRAIN);
 	}
 
 }
