@@ -4,7 +4,7 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementAuthority;
@@ -19,7 +19,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
-import javax.swing.tree.ExpandVetoException;
 import java.io.IOException;
 
 /**
@@ -144,7 +143,7 @@ public class SmartServer extends RbcModul  {
                 new Thread() {
                     @Override
                     public void run() {
-                        SmartSafety.getSmartSafety().checkIfDbdElementIsNotBlocked(CDC);
+                        SafetyLogic.getSmartSafety().checkIfDbdElementIsNotBlocked(CDC);
                     }
                 }.start();
 

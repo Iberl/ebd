@@ -7,7 +7,7 @@ import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.intf.*;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
@@ -15,7 +15,6 @@ import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.util.ThreadedRepo;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
@@ -28,10 +27,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.Logger;
 
 /**
  * Diese Klasse verwaltet die Serverroutine des SL Servers.
@@ -179,7 +174,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                                        Long lPriority) {
         RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
         MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
-        SmartSafety Safety = SmartSafety.getSmartSafety();
+        SafetyLogic Safety = SafetyLogic.getSmartSafety();
         boolean bCheckOk = true;
         boolean bTmsIdentified = false;
         boolean bTrainIdIsVerified = false;
@@ -230,11 +225,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(MaRequest, requestedTrackElementList);
         if(!bRouteElementAreTheRightOnes) {
-            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SmartSafety.TRACK_SAFETY );
+            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
             MaReturnPayload.setErrorState(uuid, true,NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
             return;
-        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SmartSafety.TRACK_SAFETY );
+        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
 
         bRouteElementStatusIsRight = Safety.checkIfRouteElementStatusIsCorrect(MaRequest, requestedTrackElementList);
         if(!bRouteElementStatusIsRight) {
@@ -312,7 +307,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
     private boolean handleDangerZones(UUID uuid) {
-        SmartSafety Safety = SmartSafety.getSmartSafety();
+        SafetyLogic Safety = SafetyLogic.getSmartSafety();
         if(!Safety.dangerZonesAreReceivable()) {
             MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
             MaReturnPayload.setErrorState(uuid, true,NO_DANGERZONE_RETRIEVAL_ERROR );

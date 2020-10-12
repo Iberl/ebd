@@ -3,19 +3,16 @@ package de.ibw.smart.logic.intf;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.payload.Payload_00;
 import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.TrainInfo;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
-import java.io.IOException;
 import java.util.UUID;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
+
 /**
  * Die Smart Logic simuliert das TMS als Proxy. Diese Komponente stellt den Proxy auf ein TMS innerhalb der SL dar.
  *
@@ -175,7 +172,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
         boolean is4TMS;
 
         TrainInfo TI = null;
-        is4TMS = SmartSafety.getSmartSafety().handlePositionReport(msgFromRbc);
+        is4TMS = SafetyLogic.getSmartSafety().handlePositionReport(msgFromRbc);
         if(is4TMS) return handleMessageAsProxy(msgFromRbc); // sends also to tms
 
         // send not to tms but generate an error

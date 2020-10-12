@@ -2,7 +2,7 @@ package de.ibw.smart.logic.safety.self.tests;
 
 import de.ibw.feed.Balise;
 import de.ibw.smart.logic.datatypes.BlockedArea;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 0.4
  * @since 2020-09-04
  */
-public class SmartSafetyContinousConnectTest {
+public class SafetyLogicContinousConnectTest {
 
 
     private PlanData PD = PlanData.getInstance();
@@ -58,7 +58,7 @@ public class SmartSafetyContinousConnectTest {
      */
     @Test
     public void checkIfMainNullError() {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
 
         try {
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, null);
@@ -74,7 +74,7 @@ public class SmartSafetyContinousConnectTest {
      */
     @Test
     public void checkIfRouteIsContinuousWithEmptyTrackList() {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         try {
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, new ArrayList<>());
             // this assert shall not be called, since code above thorws Nullpointer
@@ -89,7 +89,7 @@ public class SmartSafetyContinousConnectTest {
      */
     @Test
     public void checkIfRouteIsContinuousWithToLessItems() {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         Pair<Route.TrackElementType, TrackElement> test1 = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, this.pickRandomNode());
         TopologyGraph.Node N = pickRandomNode();
         try {
@@ -117,7 +117,7 @@ public class SmartSafetyContinousConnectTest {
      */
     @Test
     public void checkIfSmartSaftyRecogniseInvalidNullValues() {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
             if(testRoutes.size() <= this.I_AMOUNT_OF_TESTS_4_ACCEPTED_ROUTE_TESTS) {
@@ -145,7 +145,7 @@ public class SmartSafetyContinousConnectTest {
      */
     @Test
     public void checkIfRouteContinousShallReturnTrue() {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
             if(testRoutes.size() <= this.I_AMOUNT_OF_TESTS_4_ACCEPTED_ROUTE_TESTS) {
@@ -198,7 +198,7 @@ public class SmartSafetyContinousConnectTest {
 
 
     private void checkRouteHavingWrongConnection(MalifyRouteWithWrongValues malification) {
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = prepareWorkingRoutes(new ArrayList<>());
 
         for(ArrayList<Pair<Route.TrackElementType, TrackElement>> Route : testRoutes) {

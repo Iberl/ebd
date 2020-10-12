@@ -11,7 +11,7 @@ import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.self.tests.SmartSafetyContinousConnectTest;
+import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
@@ -34,7 +34,6 @@ import ebd.rbc_tms.util.TrainInfo;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
-import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -70,9 +69,9 @@ import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-07
+ * @since 2020-10-12
  */
-public class SmartSafety {
+public class SafetyLogic {
     /**
      * Modulname der Smart-Safety im Logging
      */
@@ -89,7 +88,7 @@ public class SmartSafety {
      * Nachricht, wenn ein noch nicht definiertes Routen-Element besteht.
      */
     public static final String UNKNOWN_TRACK_ELEMENT_GIVEN = "Input Track Element Is Unknowed (Only Edges and Nodes allowed)";
-    private static SmartSafety instance;
+    private static SafetyLogic instance;
     /**
      * Ein Repository, dass durch eine ZugId die Positionsdaten des Zuges speichert.
      */
@@ -118,16 +117,16 @@ public class SmartSafety {
      * Ein Singleton, dass Sicherheitslogic der SmartLogic widergibt.
      * @return SmartSafety - Die Sicherheitsanalyse der SmartLogic
      */
-    public static SmartSafety getSmartSafety() {
+    public static SafetyLogic getSmartSafety() {
         if(instance == null) {
-            instance = new SmartSafety();
+            instance = new SafetyLogic();
 
         }
 
         return instance;
     }
 
-    private SmartSafety() {
+    private SafetyLogic() {
         if(EBM == null) {
             try {
                 EBM = EventBusManager.registerOrGetBus(1, false);
@@ -840,7 +839,7 @@ public class SmartSafety {
         final LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
                 .selectors(
                         selectPackage("de.ibw.smart.logic.safety.self.tests"),
-                        selectClass(SmartSafetyContinousConnectTest.class)
+                        selectClass(SafetyLogicContinousConnectTest.class)
                 )
                 .build();
 
@@ -964,7 +963,7 @@ public class SmartSafety {
     }
 
     public static void main(String[] args) {
-        SmartSafety safety = SmartSafety.getSmartSafety();
+        SafetyLogic safety = SafetyLogic.getSmartSafety();
         safety.slSelfCheck(null);
     }
 

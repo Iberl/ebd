@@ -13,7 +13,6 @@ import ebd.rbc_tms.util.SpeedProfile;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
-import java.util.concurrent.Flow;
 
 /**
  * Test Werkzeuge, die zum Testen der Smart-Logic eingesetzt werden
@@ -49,7 +48,7 @@ public class TestUtil {
      */
     public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
                                  boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
-        SmartSafetyContinousConnectTest Submodul = new SmartSafetyContinousConnectTest();
+        SafetyLogicContinousConnectTest Submodul = new SafetyLogicContinousConnectTest();
         return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
                 TestConfig);
     }

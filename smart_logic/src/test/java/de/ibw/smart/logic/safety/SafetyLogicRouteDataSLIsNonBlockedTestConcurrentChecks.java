@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 
-class SmartSafetyRouteDataSLIsNonBlockedTestConcurrentChecks {
+class SafetyLogicRouteDataSLIsNonBlockedTestConcurrentChecks {
 
     private static Flow.Subscription subscription4Test;
     private static final SynchronousQueue<String> StartQueue = new SynchronousQueue<>();
@@ -135,7 +135,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTestConcurrentChecks {
     @Test
     public void checkIfMainNullError() throws InterruptedException {
         initTestEnv();
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false,
                     TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
@@ -189,7 +189,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTestConcurrentChecks {
 
 
 
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
