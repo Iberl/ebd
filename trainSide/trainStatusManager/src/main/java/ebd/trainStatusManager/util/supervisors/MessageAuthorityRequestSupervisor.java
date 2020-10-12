@@ -43,7 +43,7 @@ public class MessageAuthorityRequestSupervisor {
      */
     private double timeAtRequest = -1;
     private int lastQ_MARQSTREASON;
-    private BreakingCurve breakingCurve = null;
+    private BreakingCurve serviceBreakingCurve = null;
 
     /**
      * Constructor
@@ -73,8 +73,8 @@ public class MessageAuthorityRequestSupervisor {
         double t_cycrqst = trainDataVolatile.getT_CYCRQST();
         //TODO Do the calculation of time to EOL with higher precision
         double distanceToEOL = 0;
-        if(this.breakingCurve != null){
-            distanceToEOL = this.breakingCurve.getHighestXValue();
+        if(this.serviceBreakingCurve != null){
+            distanceToEOL = this.serviceBreakingCurve.endOfDefinedDistance();
             distanceToEOL -= trainDataVolatile.getCurTripSectionDistance();
         }
 
@@ -113,7 +113,7 @@ public class MessageAuthorityRequestSupervisor {
 
     @Subscribe
     public void newBC(NewBreakingCurveEvent bce){
-        this.breakingCurve = bce.breakingCurve.getNormalBreakingCurve();
+        this.serviceBreakingCurve = bce.serviceBreakingCurve;
         this.waitingOnMA = false;
     }
 

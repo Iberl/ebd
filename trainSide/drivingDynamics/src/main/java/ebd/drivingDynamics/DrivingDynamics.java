@@ -401,7 +401,7 @@ public class DrivingDynamics {
         double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
         double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
         double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
-        double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceInterventionSpeed();
+        double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceIntervention2Speed();
         double curApplReleaseSpeed = this.trainDataVolatile.getCurrentApplicableReleaseSpeed();
 
         String source = "dd;T=" + this.etcsTrainID;

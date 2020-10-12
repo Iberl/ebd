@@ -70,7 +70,7 @@ public class ModeAndLevelSupervisor {
     /*
     Control Booleans
      */
-    private BreakingCurve bc = null;
+    private BreakingCurve serviceBC = null;
     private boolean errorDetected = false;
     private boolean unconEStop = false; //TODO Implement unconditional emergency stop message
 
@@ -113,7 +113,7 @@ public class ModeAndLevelSupervisor {
 
     @Subscribe
     public void breakinCurve(NewBreakingCurveEvent nbce){
-        this.bc = nbce.breakingCurve.getPermittedSpeedCurve();
+        this.serviceBC = nbce.serviceBreakingCurve;
         Packet_80 p80 = routeDataVolatile.getPacket_80();
         this.modeProfil = makeModeProfil(p80);
     }
@@ -238,11 +238,11 @@ public class ModeAndLevelSupervisor {
     private boolean checkModeCondition12(){
         boolean etcsLevelOneOrTwoOrThree = this.curLevel != ETCSLevel.LEVEL_ZERO && this.curLevel != ETCSLevel.NTC_PZBLZB;
         Position curPos = this.trainDataVolatile.getCurrentPosition();
-        if(this.routeDataVolatile.getRefLocation() == null || this.bc == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
             return false;
         }
 
-        double distanceToEoaLoa = this.bc.getHighestXValue() - curPos.totalDistanceToPastLocation(this.bc.getRefLocation().getId());
+        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance() - curPos.totalDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
         boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
 
         if(loaOrEoaPassed && etcsLevelOneOrTwoOrThree){//SRS-026 4.6.3 [12]
