@@ -144,8 +144,8 @@ class PositionModulTest {
 
 
     }
-    @RepeatedTest(100)
-    void testWithExtendedDataPositions() {
+
+    void WithExtendedDataPositions() {
         initFunction();
         //generatePositionData(7,10000);
         assertEquals(iDataAmount, MUT.getAllPositions().size(), "Amount not hit");
@@ -159,26 +159,6 @@ class PositionModulTest {
 
 
 
-    @RepeatedTest(100)
-    void testWithFilter() {
-        initFunction();
-        //generatePositionData(7, 10000);
-
-        int i1 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;
-        int i2 = Math.abs(new Random().nextInt()) % (iDataAmount - 3) +3;
-
-        if(i2 < i1) {
-            int temp = i1;
-            i1 = i2;
-            i2 = temp;
-        }
-
-        MUT.setTimeFilter(true,i1, i2 );
-        assertEquals(i2 -i1 + 1, MUT.getAllPositions().size(), "i2:" + i2 + "i1" + i1);
-
-
-
-
-    }
+    //TODO TEST with filter
 
 }

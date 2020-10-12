@@ -593,11 +593,15 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
-                TestUtil.generateRandomContinousRoute(7, true, true,
-                        TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
-        Balise B = TestUtil.lastRandomBalise;
-
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe;
+        Balise B;
+        try {
+            routenListe = TestUtil.generateRandomContinousRoute(7, true, true,
+                    TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
+            B = TestUtil.lastRandomBalise;
+        } catch(InvalidParameterException ipe) {
+            return;
+        }
 
         Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
         Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
