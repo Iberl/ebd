@@ -166,10 +166,15 @@ public class BreakingCurve {
 		if(lastSpeed == testSpeed){
 			return lastDist;
 		}
-		//Iterate over curveMap to find the correct CurveGroup
+		//Iterate over curveMap to find the correct CurveGroup which contains the point we search
 		while(true){
-			BackwardSpline nextCurve = this.curveMap.lowerEntry(lastDist).getValue().getCurveFromType(type);
-			if(nextCurve == null) return Double.MAX_VALUE;
+			Map.Entry<Double, CurveGroup> lowerEntry = this.curveMap.lowerEntry(lastDist);
+			if(lowerEntry == null) { //We are in the lowest curveGroup
+				if(curve.getPointOnCurve(0d) < testSpeed) return 0d; //All speeds are lower
+				else break; //We continue with the next step
+			}
+
+			BackwardSpline nextCurve = lowerEntry.getValue().getCurveFromType(type);
 			double nextDistance = nextCurve.getHighestXValue();
 			double nextSpeed = curve.getPointOnCurve(nextDistance);
 			if(nextSpeed == testSpeed){
