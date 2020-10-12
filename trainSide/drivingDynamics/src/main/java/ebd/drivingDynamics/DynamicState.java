@@ -52,7 +52,7 @@ public class DynamicState {
      * @param position Current position
      * @param availableAcceleration the {@link AvailableAcceleration} of the train
      */
-    public DynamicState( Position position, AvailableAcceleration availableAcceleration) {
+    public DynamicState(Position position, AvailableAcceleration availableAcceleration) {
         this.time = 0;
         this.position = position;
         this.tripDistance = 0;
@@ -65,7 +65,7 @@ public class DynamicState {
 
     /**
      * Calculates the next state based on the passed time
-     * @param deltaT
+     * @param deltaT passed time between two calls.
      */
     public void nextState(double deltaT){
         this.time += deltaT;

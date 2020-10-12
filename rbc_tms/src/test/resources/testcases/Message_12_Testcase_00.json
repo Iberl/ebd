@@ -1,0 +1,12 @@
+{
+  "header": {
+    "type": 12,
+    "hash": 41323,
+    "tms_id": "tms_123",
+    "rbc_id": "rbc_123"
+  },
+  "payload": {
+    "time_base": 0,
+    "time_factor": 0
+  }
+}

@@ -6,7 +6,6 @@ import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.NewMaRequest;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.message.trainmessages.Message_132;
 import ebd.messageLibrary.packet.trainpackets.Packet_0;
@@ -116,12 +115,6 @@ public class MessageAuthorityRequestSupervisor {
     public void newBC(NewBreakingCurveEvent bce){
         this.breakingCurve = bce.breakingCurveGroup.getServiceDecelerationCurve();
         this.waitingOnMA = false;
-    }
-
-    @Subscribe
-    public void newMaRequest(NewMaRequest nmr){
-        this.timeAtRequest = AppTime.currentTimeMillis() / 1000d;
-        this.lastQ_MARQSTREASON = nmr.Q_MARQSTREASON;
     }
 
     private void sendMaRequest(){

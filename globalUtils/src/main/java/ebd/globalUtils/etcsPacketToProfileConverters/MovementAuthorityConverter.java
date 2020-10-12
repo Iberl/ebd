@@ -80,10 +80,74 @@ public class MovementAuthorityConverter {
         return offset + (d_ema * Math.pow(10, p15.Q_SCALE - 1));
     }
 
-    public static double p15ToDangerPointDistance(Packet_15 p15){
-        if(p15.D_DP == ETCSVariables.INTEGER_NOVALUE || p15.D_DP < ConfigHandler.getInstance().minimumDangerPoint){
-            return ConfigHandler.getInstance().minimumDangerPoint;
+    public static double p15GetDangerPointDistance(Packet_15 p15){
+        if(p15.Q_DANGERPOINT == ETCSVariables.Q_DANGERPOINT_NO_INFO){
+            return 0;
         }
         return p15.D_DP * Math.pow(10, p15.Q_SCALE - 1);
     }
+
+    /**
+     * @param p15 A {@link Packet_15}
+     * @return The danger point release speed in m/s or 0 if there is no such value.
+     */
+    public static double p15GetDangerPointReleaseSpeed(Packet_15 p15){
+        if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+            return 0;
+        }
+        return p15.V_RELEASEDP * 5 / 3.6;
+    }
+
+    /**
+     * @param p15 A {@link Packet_15}
+     * @return The overlap distance in [m] or 0 if there is no overlap
+     */
+    public static double p15GetOverlapDistance(Packet_15 p15){
+        if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+            return 0;
+        }
+        return p15.D_OL * Math.pow(10, p15.Q_SCALE - 1);
+    }
+
+    /**
+     * @param p15 A {@link Packet_15}
+     * @return The distance to EOA in [m] at which the overlap timer starts or 0 if there is no such distance.
+     */
+    public static double p15GetStartTimerDistance(Packet_15 p15){
+        if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+            return 0;
+        }
+        return p15.D_STARTOL * Math.pow(10, p15.Q_SCALE - 1);
+    }
+
+    /**
+     * @param p15 A {@link Packet_15}
+     * @return The time from crossing D_STARTOL until the overlap is no longer valid in [s]. <br>
+     *     Returns if there is no such value or Double.MAX_VALUE if the time is infinit.
+     */
+    public static double p15GetOverlapTime(Packet_15 p15){
+        if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+            return 0;
+        }
+        else if(p15.T_OL == ETCSVariables.T_OL_INFINITY){
+            return Double.MAX_VALUE;
+        }
+        return p15.T_OL;
+    }
+
+    /**
+     * @param p15 A {@link Packet_15}
+     * @return The overlap release speed in m/s or 0 if there is no such value.
+     */
+    public static double p15GetOverlapReleaseSpeed(Packet_15 p15){
+        if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
+            return 0;
+        }
+        return p15.V_RELEASEOL * 5 / 3.6;
+    }
+
+
+
+
+
 }

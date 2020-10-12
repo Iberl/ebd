@@ -3,12 +3,10 @@ package ebd.drivingDynamics.util.conditions;
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.speedAndDistanceSupervisionModule.util.events.SsmReportEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.json.simple.JSONObject;
-
-import java.util.function.BiFunction;
 
 /**
  * This compares the current {@link ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel} to a given one.<br>

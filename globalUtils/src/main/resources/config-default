@@ -8,7 +8,7 @@
 ######
 ###### Strings
 ######
-pathToDriverProfileJson = StrictDrivingStrategy.json
+pathToDriverStrategyJson = StrictDrivingStrategy.json
 
 pathToInitFile = initFile.txt
 pathToSzenarioJSON = szenarioAB.json
@@ -102,8 +102,6 @@ timeBase = 1593522000000
 ######
 ###### Integers
 ######
-# minimum Dangerpoint Distance in [m]
-minimumDangerPoint = 200
 
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).

@@ -29,7 +29,7 @@ public class ConfigHandler {
     /*
     Strings
     */
-    public String pathToDriverProfileJson = "";
+    public String pathToDriverStrategyJson = "";
     public String pathToSzenarioJSON = "";
     public String pathToInitFile = "";
 
@@ -132,10 +132,7 @@ public class ConfigHandler {
     /*
     ints
      */
-    /**
-     * minimum distance between end of movement authority and danger point in [m]
-     */
-    public int minimumDangerPoint = 200;
+
 
     /*
     doubles

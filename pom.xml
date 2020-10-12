@@ -13,8 +13,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>14</maven.compiler.source>
-    <maven.compiler.target>14</maven.compiler.target>
+    <maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -38,11 +38,6 @@
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>ebd</groupId>
-      <artifactId>messageLibrary</artifactId>
-      <version>2.0</version>
     </dependency>
 
   </dependencies>
@@ -74,8 +69,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
           <configuration>
-            <source>14</source>
-            <target>14</target>
+            <source>15</source>
+            <target>15</target>
           </configuration>
         </plugin>
         <plugin>
@@ -123,16 +118,18 @@
     </plugin>
     </plugins>
   </reporting>
+
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
     <module>messageReceiver</module>
     <module>messageSender</module>
     <module>smart_logic</module>
-<!--    <module>messageLibrary</module>-->
+    <module>messageLibrary</module>
     <module>trainSide</module>
     <module>trackSide</module>
     <module>szenario</module>
+    <module>rbc_tms</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

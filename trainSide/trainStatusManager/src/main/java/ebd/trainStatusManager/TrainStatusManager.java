@@ -58,15 +58,15 @@ import java.util.*;
 
 public class TrainStatusManager implements Runnable {
 
-    private EventBus localEventBus = new EventBus();
-    private EventBus globalEventBus = EventBus.getDefault();
-    ConfigHandler ch;
+    private final EventBus localEventBus = new EventBus();
+    private final EventBus globalEventBus = EventBus.getDefault();
+    private ConfigHandler ch;
 
-    private int etcsTrainID;
-    private int rbcID;
-    private Thread tsmThread = new Thread(this);
+    private final int etcsTrainID;
+    private final int rbcID;
+    private final Thread tsmThread = new Thread(this);
 
-    private String source;
+    private final String source;
 
     /*
     Handlers
@@ -101,7 +101,13 @@ public class TrainStatusManager implements Runnable {
 
     private Clock clock;
 
-
+    /**
+     * Initializes a train.
+     * @param etcsTrainID The ETCS ID of the train.
+     * @param trainConfigID The ID of the train in the TrainConfigurator tool
+     * @param infrastructureID The ID of the train in the EBD Infrastructure
+     * @param rbcID The ID of the RBC the train should connect to
+     */
     public TrainStatusManager(int etcsTrainID, int trainConfigID, int infrastructureID, int rbcID){
         this.localEventBus.register(this);
         this.ch = ConfigHandler.getInstance();
@@ -114,6 +120,9 @@ public class TrainStatusManager implements Runnable {
         connectToRBC(this.rbcID);
     }
 
+    /**
+     * Will be called inside TSM.
+     */
     @Override
     public void run() {
         try {
@@ -128,6 +137,9 @@ public class TrainStatusManager implements Runnable {
         }
     }
 
+    /**
+     * Calls join on the TSM thread. This will block until the TSM thread is closed.
+     */
     public void join(){
         try {
             this.tsmThread.join();
@@ -174,7 +186,7 @@ public class TrainStatusManager implements Runnable {
 
     /**
      * This function checks if a new location was reached and if so, updates the position of the train to
-     * reflect this.
+     * reflect this. //TODO Move to TrackSupervisor?
      */
     @Subscribe
     public void reactToNewLocation(NewLocationEvent nle) {
@@ -207,6 +219,7 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
 
+    /* //TODO move to SpeedSupervisor or Distance Supervisor
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void reactToTripMode(ModeReportEvent mre){
         if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
@@ -214,6 +227,7 @@ public class TrainStatusManager implements Runnable {
         //TODO fill with logic
 
     }
+    */
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
@@ -261,7 +275,7 @@ public class TrainStatusManager implements Runnable {
 
     /**
      * Connects this train to the RBC specified by sending a {@link Message_155}
-     * @param rbcID The RBC identification
+     * @param rbcID The RBC identification //TODO Noch Notwendig?
      */
     private void connectToRBC(int rbcID) {
         Position curPos = new Position(0,true, new InitalLocation());
@@ -341,18 +355,6 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new ToLogEvent("tsm", "log", "TSM initialized"));
     }
 
-    private void connectToRBC() {
-        Position curPos = new Position(0,true, new InitalLocation());
-        EventBus.getDefault().post(new PositionEvent("tsm;T=" + this.etcsTrainID, "all",curPos));
-
-        Message_155 msg155 = new Message_155();
-        long curTime = AppTime.currentTimeMillis();
-        msg155.T_TRAIN = (curTime / 10) % ETCSVariables.T_TRAIN_UNKNOWN;
-        msg155.NID_ENGINE = this.etcsTrainID;
-        this.localEventBus.post(new SendETCSMessageEvent("tsm", "ms", msg155, "mr;R=" + this.rbcID));
-        this.localEventBus.post(new ToLogEvent("tsm", "log", "Send communication initiation to RBC " + this.rbcID));
-    }
-
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
@@ -402,9 +404,7 @@ public class TrainStatusManager implements Runnable {
             if(!target.contains(";")){
                 return true;
             }
-            else if (target.contains(";T=" + this.etcsTrainID)){
-                return true;
-            }
+            else return target.contains(";T=" + this.etcsTrainID);
         }
 
         return false;

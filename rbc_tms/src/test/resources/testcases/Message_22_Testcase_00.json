@@ -1,0 +1,73 @@
+{
+  "header": {
+    "type": 22,
+    "hash": -1108678059,
+    "tms_id": "tms_123",
+    "rbc_id": "rbc_123"
+  },
+  "payload": {
+    "nid_engine": 0,
+    "ma": {
+      "m_ack": false,
+      "nid_lrbg": 0,
+      "q_dir": 0,
+      "q_scale": 0,
+      "eoa": {
+        "q_dir": 0,
+        "q_scale": 0,
+        "v_loa": 0,
+        "t_loa": 0,
+        "sections": [
+          {
+            "l_section": 0,
+            "q_sectiontimer": false,
+            "t_sectiontimer": 0,
+            "d_sectiontimerstoploc": 0
+          }
+        ],
+        "endTimer": {
+          "t_endtimer": 0,
+          "d_endtimerstartloc": 0
+        },
+        "dangerPoint": {
+          "d_dp": 0,
+          "v_releasedp": 0
+        },
+        "overlap": {
+          "d_startol": 0,
+          "t_ol": 0,
+          "d_ol": 0,
+          "v_releaseol": 0
+        }
+      },
+      "modeProfile": {
+        "q_dir": 0,
+        "q_scale": 0,
+        "modes": [
+          {
+            "d_mamode": 0,
+            "m_mamode": 0,
+            "v_mamode": 0,
+            "l_mamode": 0,
+            "l_ackmamode": 0,
+            "q_mamode": false
+          }
+        ]
+      },
+      "linkingProfile": {
+        "q_dir": 0,
+        "q_scale": 0,
+        "links": [
+          {
+            "d_link": 0,
+            "nid_c": 0,
+            "nid_bg": 0,
+            "q_linkorientation": false,
+            "q_linkreaction": 0,
+            "q_locacc": 0
+          }
+        ]
+      }
+    }
+  }
+}
