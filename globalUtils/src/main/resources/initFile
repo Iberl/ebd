@@ -27,4 +27,4 @@
 #Every variable is divided by a ; and any number of white spaces (" "). Variables are not allowed to contain white spaces.
 
 # etcsID | trainConfigID | infrastructureID | trainScheduleID | rbcID | startingBaliseGroup | startingMovementDir| startingTrack | startingDirection | startingIncrement
-     1;       4060;             4060;           RB5775;          1;          4703;                     true;               W2;              true;          0;
+     1;       4060;             4060;           RB5775;          1;          4703;                     true;               W2;              true;          0

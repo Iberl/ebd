@@ -248,8 +248,8 @@ public class TrainsHandler {
             string = string.replaceAll(" ", "");
             String[] split = string.split(";");
             int etcsID = 0;
-            int infrastructureID = 0;
             int trainConfigID = 0;
+            int infrastructureID = 0;
             String trainScheduleID = "";
             int rbcID = 0;
             int startingBaliseGroup = 0;
@@ -259,15 +259,15 @@ public class TrainsHandler {
             int startingIncrement = 0;
             try{
                 etcsID = Integer.parseInt(split[0]);
-                infrastructureID = Integer.parseInt(split[1]);
-                trainConfigID = Integer.parseInt(split[2]);
+                trainConfigID = Integer.parseInt(split[1]);
+                infrastructureID = Integer.parseInt(split[2]);
                 trainScheduleID = split[3];
                 rbcID = Integer.parseInt(split[4]);
                 startingBaliseGroup = Integer.parseInt(split[5]);
-                //startingMovementDir = Boolean.parseBoolean(split[6]);
-                startingTrack = split[6];
-                startingDirection = Boolean.parseBoolean(split[7]);
-                startingIncrement = Integer.parseInt(split[8]);
+                startingMovementDir = Boolean.parseBoolean(split[6]);
+                startingTrack = split[7];
+                startingDirection = Boolean.parseBoolean(split[8]);
+                startingIncrement = Integer.parseInt(split[9]);
 
             }
             catch (NumberFormatException nfe){
