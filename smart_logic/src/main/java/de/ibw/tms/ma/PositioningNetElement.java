@@ -1,6 +1,8 @@
 package de.ibw.tms.ma;
 
-public class PositioningNetElement implements BaseObject {
+import de.ibw.tms.ma.common.IBaseObject;
+
+public class PositioningNetElement implements IBaseObject {
     private EntityLocation entityLocation;
     private SectionOfLine sectionOfLine;
 

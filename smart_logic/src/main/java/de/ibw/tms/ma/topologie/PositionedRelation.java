@@ -1,5 +1,6 @@
 package de.ibw.tms.ma.topologie;
 
+import de.ibw.tms.ma.net.elements.Relation;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 
