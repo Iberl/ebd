@@ -18,13 +18,13 @@ import java.util.List;
  * @since 2020-10-12
  */
 public class Relation extends NetworkResource implements Serializable {
-    private List<NetElement> neighbourElements;
+    private List<INetElement> neighbourElements;
 
     /**
      * Relation muss mindestens ein Element enhalten
      * @param elements - Liste mit mindestens einem Element
      */
-    public Relation(List<NetElement> elements) {
+    public Relation(List<INetElement> elements) {
 
         if(elements.size() <= 1) {
             throw new InvalidParameterException("Relations size must be greather than 0");

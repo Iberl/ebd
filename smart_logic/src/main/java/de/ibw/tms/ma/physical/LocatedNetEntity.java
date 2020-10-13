@@ -3,13 +3,14 @@ package de.ibw.tms.ma.physical;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.EntityLocation;
 import de.ibw.tms.ma.net.elements.ILocatedNetEntity;
+import de.ibw.tms.ma.positioned.elements.NetEntity;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocatedNetEntity implements ILocatedNetEntity, Serializable {
+public class LocatedNetEntity extends NetEntity implements ILocatedNetEntity, Serializable {
     private Chainage chainageBeginn;
     private Chainage chainageEnd;
     private GeometricCoordinate geoCoordinates;

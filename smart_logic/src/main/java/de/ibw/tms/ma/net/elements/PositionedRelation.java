@@ -1,8 +1,6 @@
 package de.ibw.tms.ma.net.elements;
 
 import de.ibw.tms.ma.common.INetResource;
-import de.ibw.tms.ma.net.elements.Relation;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
@@ -36,8 +34,9 @@ public class PositionedRelation extends Relation implements IPositionedRelation 
      *
      * @param elements - Liste mit mindestens einem Element
      */
-    public PositionedRelation(List<NetElement> elements) {
+    public PositionedRelation(List<INetElement> elements) {
         super(elements);
+        defaultInit("PositionedRelation");
     }
 
     @Deprecated

@@ -1,6 +1,8 @@
 package de.ibw.tms.ma.physical;
 
 import de.ibw.tms.ma.Chainage;
+import de.ibw.tms.ma.common.NetworkResource;
+import de.ibw.tms.ma.net.elements.NetElement;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.Rail;
@@ -17,7 +19,12 @@ public class Trail extends FlankAreaElement {
 
     private PositionedRelation createRelation(TrackElement FromElement, TrackElement ToElement, boolean bNavigable, int vmax,
                                 ApplicationDirection Direction, TrackElementStatus Status) {
+
+        ArrayList<NetworkResource> relationsElements = new ArrayList<>();
+        relationsElements.add(FromElement);
+        relationsElements.add(ToElement);
         PositionedRelation Relation = new PositionedRelation();
+
         Relation.createPositionedRelation(this, FromElement, ToElement, bNavigable, vmax,
                 Direction, Status);
         return Relation;

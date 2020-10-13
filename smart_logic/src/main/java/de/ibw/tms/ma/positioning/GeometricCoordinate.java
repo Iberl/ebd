@@ -79,8 +79,8 @@ public class GeometricCoordinate extends PositioningSystemCoordinate {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         de.ibw.tms.ma.positioned.GeometricCoordinate that = (de.ibw.tms.ma.positioned.GeometricCoordinate) o;
-        return Double.compare(that.x, x) == 0 &&
-                Double.compare(that.y, y) == 0 /*&&
+        return Double.compare(that.getX(), x) == 0 &&
+                Double.compare(that.getY(), y) == 0 /*&&
                 Double.compare(that.height, height) == 0*/;
     }
 

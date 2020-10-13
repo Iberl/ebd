@@ -10,5 +10,5 @@ import de.ibw.tms.ma.common.NetworkResource;
  * @version 0.4
  * @since 2020-10-12
  */
-public class NetElement extends NetworkResource {
+public class NetElement extends NetworkResource implements INetElement {
 }
