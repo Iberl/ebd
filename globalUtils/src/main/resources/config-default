@@ -122,19 +122,19 @@ targetReachedDistance = 5
 emergencyInterventionOffset = 2
 
 # Service break intervention curve offset in [s]
-serviceInterventionOffset = 1
+serviceInterventionOffset = 4
 
 # Service break warning curve offset in [s]
-warningOffset = 3
+warningOffset = 6
 
 # Service break permitted speed curve offset in [s]
-permittedOffset = 7
+permittedOffset = 10
 
 # Service break indication curve offset in [s]
-indicationOffset = 12
+indicationOffset = 15
 
 # Service break coasting phase offset in [s]
-coastingPhaseOffset = 37
+coastingPhaseOffset = 30
 
 # Speed difference between Permitted speed and Emergency Brake Intervention supervision limits, minimum value in [m/s]
 dV_ebi_min = 2.08

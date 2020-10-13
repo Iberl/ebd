@@ -165,7 +165,7 @@ public class TrainStatusManager implements Runnable {
      * Listens to
      * @param nbce
      */
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
         if(!validTarget(nbce.target)){
             return;
@@ -174,7 +174,6 @@ public class TrainStatusManager implements Runnable {
         //this.localEventBus.post(new DDUnlockEvent("tsm", "dd"));
         this.localEventBus.post(new ToLogEvent("tsm", "log",
                 "Calculated a new breaking curve"));
-
 
         if(ch.debug){
             saveBreakingCurvesToFile(nbce);

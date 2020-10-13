@@ -111,10 +111,13 @@ public class BreakingCurve {
 	 */
 	public double nextTargetDistance(double distance){
 		if(distance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + distance);
-		Double distanceAtTarget = this.curveMap.higherKey(distance);
-		BackwardSpline permittedSpeedCurve = this.curveMap.get(distanceAtTarget).getCurveFromType(CurveType.PERMITTED_SPEED);
 
-		if(distanceAtTarget == null || permittedSpeedCurve == null) return this.curveMap.lastKey();
+		Double distanceAtTarget = this.curveMap.higherKey(distance);
+		if(distanceAtTarget == null) distanceAtTarget = endOfDefinedDistance();
+
+		BackwardSpline permittedSpeedCurve = this.curveMap.get(distanceAtTarget).getCurveFromType(CurveType.PERMITTED_SPEED);
+		if(permittedSpeedCurve == null) return 0;
+
 
 		double targetSpeed = permittedSpeedCurve.getPointOnCurve(distanceAtTarget);
 		double lowestSpeed = getSpeedAtDistance(distanceAtTarget, CurveType.PERMITTED_SPEED);
@@ -134,7 +137,7 @@ public class BreakingCurve {
 	public SpeedSupervisionState getSpeedSupervisionState(double curDistance, double curSpeed){
 		if(curDistance < 0) throw new BreakingCurveOutOfRangeException("Distance value has to be > 0, was: " + curDistance);
 		double indiSpeed = getSpeedFromBCCurveMap(curDistance, CurveType.INDICATION_CURVE);
-		if( curSpeed > indiSpeed){
+		if( curSpeed < indiSpeed){
 			return SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
 		}
 		else return SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
@@ -151,58 +154,14 @@ public class BreakingCurve {
 	/**
 	 * Returns the distance after which the maximum speed of the curve with the given type is always lower or equal then the given speed
 	 * @param testSpeed in [m/s]
-	 * @return In [m]. Returns {@link Double#MAX_VALUE} if no part of the breaking curve is lower then the given speed
+	 * @return In [m]. Returns {@link Double#POSITIVE_INFINITY} if no part of the breaking curve is lower then the given speed
 	 */
 	//TODO Tests
 	public Double getDistanceSpeedAlwaysLower(double testSpeed, CurveType type){
 
 		BackwardSpline curve = this.curveMap.lastEntry().getValue().getCurveFromType(type);
-		if(curve == null) return Double.MAX_VALUE;
-		double lastDist = curve.getHighestXValue();
-		double lastSpeed = curve.getPointOnCurve(lastDist);
-		if(lastSpeed > testSpeed){
-			return Double.MAX_VALUE;
-		}
-		if(lastSpeed == testSpeed){
-			return lastDist;
-		}
-		//Iterate over curveMap to find the correct CurveGroup which contains the point we search
-		while(true){
-			Map.Entry<Double, CurveGroup> lowerEntry = this.curveMap.lowerEntry(lastDist);
-			if(lowerEntry == null) { //We are in the lowest curveGroup
-				if(curve.getPointOnCurve(0d) < testSpeed) return 0d; //All speeds are lower
-				else break; //We continue with the next step
-			}
-
-			BackwardSpline nextCurve = lowerEntry.getValue().getCurveFromType(type);
-			double nextDistance = nextCurve.getHighestXValue();
-			double nextSpeed = curve.getPointOnCurve(nextDistance);
-			if(nextSpeed == testSpeed){
-				return testSpeed;
-			}
-			else if(nextSpeed > testSpeed){
-				break;
-			}
-
-			lastDist = nextDistance;
-			curve = nextCurve;
-		}
-
-		//Numeric search for the exact distance
-		double startDistance = 0;
-		double endDistance = lastDist;
-
-		while(true){
-			double curDistance = (startDistance + endDistance) / 2;
-			double searchSpeed = curve.getPointOnCurve(curDistance);
-			if(Math.abs(testSpeed - searchSpeed) < 0.001){
-				return searchSpeed;
-			}
-			else if(testSpeed > searchSpeed){
-				endDistance = curDistance;
-			}
-			else startDistance = curDistance;
-		}
+		if(curve == null) return Double.POSITIVE_INFINITY;
+		return curve.xValueAfterWhichYValueIsAlwaysLowerThen(testSpeed);
 	}
 
 	@Override
