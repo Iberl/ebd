@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-10-10T18-01-58.2544423"
+path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-10-13T14-53-15.5537037"
 
 def getPlotDir(allLines):
     highX = 0.0
+    highY = 0.0
     newPlotDir = {}
     curName = ""
     curDegree = 0
@@ -26,12 +27,13 @@ def getPlotDir(allLines):
             highX = max(x,highX)
             yPart = lineSplit[1].split(",")[0]
             y = float(yPart.replace("Coefficients: ", ""))
+            highY = max(y,highY)
             curPointList[0].append(x)
             curPointList[1].append(y)
         elif line.startswith("END"):
             newPlotDir[curName + " " + str(curDegree)] = curPointList
             curPointList = [[], []]
-    return newPlotDir, highX
+    return newPlotDir, highX, highY
 
 
 def getDegree0PointList(pointList, maxX):
@@ -59,16 +61,18 @@ path = path + "/"
 pathList = [(path + f) for f in os.listdir(path)]
 
 i = 0
-fig, axs = plt.subplots(len(pathList), 1, sharex="all")
+fig, axs = plt.subplots(len(pathList), 1, sharex="all", sharey="all")
 highestX = 0
-
+highestY = 0
 for path in pathList:
 
+    highestY = 0
     with open(path) as file:
         lines = file.readlines()
 
-    plotDir, maxX = getPlotDir(lines)
+    plotDir, maxX, maxY = getPlotDir(lines)
     highestX = max(highestX, maxX)
+    highestY = max(highestY, maxY)
     lableCounter = 0
 
     for key in plotDir:
@@ -99,5 +103,6 @@ for path in pathList:
     i += 1
 axs[i-1].set_xlabel("Distance [m]")
 plt.xlim(0,highestX)
+plt.ylim(0,highestY)
 fig.tight_layout()
 plt.show()

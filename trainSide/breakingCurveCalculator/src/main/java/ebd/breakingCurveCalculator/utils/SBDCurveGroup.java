@@ -18,9 +18,9 @@ public class SBDCurveGroup extends CurveGroup{
     private BackwardSpline indicationCurve;
     private BackwardSpline c30Curve;
 
-    public SBDCurveGroup(List<Knot> sbdKnotList) {
+    public SBDCurveGroup(List<Knot> sbdSBI1, List<Knot> sbdW, List<Knot> sbdPS) {
         super("SBD");
-        getCurves(sbdKnotList);
+        getCurves(sbdSBI1, sbdW, sbdPS);
     }
 
     @Override
@@ -35,11 +35,11 @@ public class SBDCurveGroup extends CurveGroup{
         };
     }
 
-    private void getCurves(List<Knot> sbdKnotList) {
-        this.serviceBreakingIntervention1Curve = getCurveFromListAndOffset("sbi1", sbdKnotList, ch.serviceInterventionOffset);
-        this.warningCurve = getCurveFromListAndOffset("sbd_w", sbdKnotList, ch.warningOffset);
-        this.permittedSpeedCurve = getCurveFromListAndOffset("sbd_p", sbdKnotList, ch.permittedOffset);
-        this.indicationCurve = getCurveFromListAndOffset("sbd_i", sbdKnotList, ch.indicationOffset);
-        this.c30Curve = getCurveFromListAndOffset("sbd_c30", sbdKnotList, ch.coastingPhaseOffset);
+    private void getCurves(List<Knot> sbdSBI1, List<Knot> sbdW, List<Knot> sbdPS) {
+        this.serviceBreakingIntervention1Curve = getCurveFromListAndOffset("sbi1", sbdSBI1, ch.serviceInterventionOffset);
+        this.warningCurve = getCurveFromListAndOffset("sbd_w", sbdW, ch.warningOffset);
+        this.permittedSpeedCurve = getCurveFromListAndOffset("sbd_p", sbdPS, ch.permittedOffset);
+        this.indicationCurve = getCurveFromListAndOffset("sbd_i", sbdPS, ch.indicationOffset);
+        this.c30Curve = getCurveFromListAndOffset("sbd_c30", sbdPS, ch.coastingPhaseOffset);
     }
 }
