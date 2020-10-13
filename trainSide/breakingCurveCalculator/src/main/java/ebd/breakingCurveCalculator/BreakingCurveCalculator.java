@@ -172,6 +172,21 @@ public class BreakingCurveCalculator {
     	}
     }
 
+	/**
+	 * For Testing Only
+	 */
+	public List<BreakingCurve> getBreakingCurve(BreakingCurveRequestEvent bcre){
+		this.normalBreakingPower = bcre.normalBreakingPower;
+		this.serviceBreakingPower = bcre.serviceBreakingPower;
+		this.emergencyBreakingPower = bcre.emergencyBreakingPower;
+		this.referencePosition = bcre.referencePosition;
+		this.ssp = new StaticSpeedProfil(bcre);
+		this.gradientProfil = GradientProfileConverter.packet21ToAccGP(bcre.packet21, bcre.currentGradient);
+
+		this.breakingCurveList = calculateBreakingCurveList(bcre.packet15);
+    	return this.breakingCurveList;
+	}
+
 
     private List<BreakingCurve> calculateBreakingCurveList(Packet_15 packet15){
 		return calculateBreakingCurveListWIthShiftedPosition(packet15, this.referencePosition);
@@ -193,46 +208,72 @@ public class BreakingCurveCalculator {
 
 
 		for(Double slowDown : slowDownList){
-			List<Knot> emergencyDecelerationCurve = calculateKnotList(slowDown,
+			//Curves for EBDCurveGroup
+			List<Knot> ebdEBI = calculateKnotList(slowDown,
 					this.ssp.getSpeedAtDistance(slowDown, CurveType.EMERGENCY_INTERVENTION_CURVE),
 					true,
 					this.emergencyBreakingPower);
-			List<Knot> serviceDecelerationCurve = calculateKnotList(slowDown,
+			List<Knot> ebdSBI2 = calculateKnotList(slowDown,
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.SERVICE_INTERVENTION_CURVE_2),
+					true,
+					this.emergencyBreakingPower);
+			List<Knot> ebdW = calculateKnotList(slowDown,
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.WARNING_CURVE),
+					true,
+					this.emergencyBreakingPower);
+			List<Knot> ebdPS = calculateKnotList(slowDown,
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.PERMITTED_SPEED),
+					true,
+					this.emergencyBreakingPower);
+			EBDCurveGroup ebd = new EBDCurveGroup(ebdEBI, ebdSBI2, ebdW, ebdPS);
+			ebdCurveMap.put(slowDown, ebd);
+
+			//Curves for SBDCurveGroup
+			List<Knot> sbdSBI1 = calculateKnotList(slowDown,
 					this.ssp.getSpeedAtDistance(slowDown, CurveType.SERVICE_INTERVENTION_CURVE_1),
 					false,
 					this.serviceBreakingPower);
-			List<Knot> normalDecelerationCurve = calculateKnotList(slowDown,
+			List<Knot> sbdW = calculateKnotList(slowDown,
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.WARNING_CURVE),
+					false,
+					this.serviceBreakingPower);
+			List<Knot> sbdPS = calculateKnotList(slowDown,
+					this.ssp.getSpeedAtDistance(slowDown, CurveType.PERMITTED_SPEED),
+					false,
+					this.serviceBreakingPower);
+
+			SBDCurveGroup sbd = new SBDCurveGroup(sbdSBI1, sbdW, sbdPS);
+			sbdCurveMap.put(slowDown, sbd);
+
+			//Curves for NBD CurveGroup
+			List<Knot> nbdNBI = calculateKnotList(slowDown,
 					this.ssp.getSpeedAtDistance(slowDown, CurveType.NORMAL_INTERVENTION_CURVE),
 					false,
 					this.normalBreakingPower);
 
-
-			EBDCurveGroup ebd = new EBDCurveGroup(emergencyDecelerationCurve);
-			ebdCurveMap.put(slowDown,ebd);
-
-			SBDCurveGroup sbd = new SBDCurveGroup(serviceDecelerationCurve);
-			sbdCurveMap.put(slowDown,sbd);
-
-			NBDCurveGroup nbd = new NBDCurveGroup(normalDecelerationCurve);
-			nbdCurveMap.put(slowDown,nbd);
+			NBDCurveGroup nbd = new NBDCurveGroup(nbdNBI);
+			nbdCurveMap.put(slowDown, nbd);
 		}
 
 		double distanceToEOA = MovementAuthorityConverter.p15ToD_EMA(packet15);
-		double speedAtEOA = packet15.V_LOA * ETCS_VALUE_TO_MS;
-		List<Knot> serviceDecelerationCurve = calculateKnotList(distanceToEOA, speedAtEOA, false, this.serviceBreakingPower);
-		List<Knot> normalDecelerationCurve = calculateKnotList(distanceToEOA, speedAtEOA, false, this.normalBreakingPower);
-		SBDCurveGroup sbd = new SBDCurveGroup(serviceDecelerationCurve);
-		sbdCurveMap.put(distanceToEOA,sbd);
-		NBDCurveGroup nbd = new NBDCurveGroup(normalDecelerationCurve);
-		nbdCurveMap.put(distanceToEOA,nbd);
-
 
 		double overlap = MovementAuthorityConverter.p15GetOverlapDistance(packet15);
 		double dangerpoint = MovementAuthorityConverter.p15GetOverlapDistance(packet15);
 		double distanceToSVL = distanceToEOA + (Math.max(overlap, dangerpoint));
-		List<Knot> emergencyDecelerationCurve = calculateKnotList(distanceToSVL, 0d, true, this.emergencyBreakingPower);
-		EBDCurveGroup ebd = new EBDCurveGroup(emergencyDecelerationCurve);
+		List<Knot> ebdEBI = calculateKnotList(distanceToSVL, 0d, true, this.emergencyBreakingPower);
+		EBDCurveGroup ebd = new EBDCurveGroup(ebdEBI, ebdEBI, ebdEBI, ebdEBI);
 		ebdCurveMap.put(distanceToSVL, ebd);
+
+		double speedAtEOA = packet15.V_LOA * ETCS_VALUE_TO_MS;
+		List<Knot> sbdSBI1 = calculateKnotList(distanceToEOA, speedAtEOA, false, this.serviceBreakingPower);
+		SBDCurveGroup sbd = new SBDCurveGroup(sbdSBI1, sbdSBI1, sbdSBI1);
+		sbdCurveMap.put(distanceToEOA, sbd);
+
+
+		List<Knot> normalDecelerationCurve = calculateKnotList(distanceToEOA, speedAtEOA, false, this.normalBreakingPower);
+		NBDCurveGroup nbd = new NBDCurveGroup(normalDecelerationCurve);
+		nbdCurveMap.put(distanceToEOA, nbd);
+
 
 		Location refLoc = this.referencePosition.getLocation();
 		BreakingCurve ebc = new BreakingCurve("ebc", refLoc, this.ssp, ebdCurveMap);

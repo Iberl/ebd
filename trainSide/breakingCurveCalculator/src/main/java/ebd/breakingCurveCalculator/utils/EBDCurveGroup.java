@@ -18,9 +18,9 @@ public class EBDCurveGroup extends CurveGroup{
     private BackwardSpline permittedSpeedCurve;
     private BackwardSpline indicationCurve;
 
-    public EBDCurveGroup(List<Knot> ebdKnotList) {
+    public EBDCurveGroup(List<Knot> ebdEBI, List<Knot> ebdSBI, List<Knot> ebdW, List<Knot> ebdPS) {
         super("EBD");
-        getCurves(ebdKnotList);
+        getCurves(ebdEBI, ebdSBI, ebdW, ebdPS);
     }
 
     @Override
@@ -35,11 +35,11 @@ public class EBDCurveGroup extends CurveGroup{
         };
     }
 
-    private void getCurves(List<Knot> ebdKnotList) {
-        this.emergencyBreakingInterventionCurve = getCurveFromListAndOffset("ebi", ebdKnotList, ch.emergencyInterventionOffset);
-        this.serviceBreakingIntervention2Curve = getCurveFromListAndOffset("sbi2", ebdKnotList, ch.serviceInterventionOffset);
-        this.warningCurve = getCurveFromListAndOffset("ebd_w", ebdKnotList, ch.warningOffset);
-        this.permittedSpeedCurve = getCurveFromListAndOffset("ebd_p", ebdKnotList, ch.permittedOffset);
-        this.indicationCurve = getCurveFromListAndOffset("ebd_i", ebdKnotList, ch.indicationOffset);
+    private void getCurves(List<Knot> ebdEBI, List<Knot> ebdSBI, List<Knot> ebdW, List<Knot> ebdPS) {
+        this.emergencyBreakingInterventionCurve = getCurveFromListAndOffset("ebi", ebdEBI, ch.emergencyInterventionOffset);
+        this.serviceBreakingIntervention2Curve = getCurveFromListAndOffset("sbi2", ebdSBI, ch.serviceInterventionOffset);
+        this.warningCurve = getCurveFromListAndOffset("ebd_w", ebdW, ch.warningOffset);
+        this.permittedSpeedCurve = getCurveFromListAndOffset("ebd_p", ebdPS, ch.permittedOffset);
+        this.indicationCurve = getCurveFromListAndOffset("ebd_i", ebdPS, ch.indicationOffset);
     }
 }

@@ -55,11 +55,12 @@ import java.util.*;
  */
 public class DrivingDynamics {
 
-    private EventBus localEventBus;
-    private TrainDataVolatile trainDataVolatile;
-    private TripProfileProvider tripProfileProvider;
-    private int etcsTrainID;
-    private ConfigHandler ch;
+    private final EventBus localEventBus;
+    private final TrainDataVolatile trainDataVolatile;
+    private final RouteDataVolatile routeDataVolatile;
+    private final TripProfileProvider tripProfileProvider;
+    private final int etcsTrainID;
+    private final ConfigHandler ch;
 
     boolean shouldHalt = false;
 
@@ -71,10 +72,10 @@ public class DrivingDynamics {
 
     private long time;
     private long timeOfLastAction = -1;
-    private double timeBetweenActions;
+    private final double timeBetweenActions;
 
-    private String tdTarget = "td";
-    private String exceptionTarget = "tsm";
+    private final String tdTarget = "td";
+    private final String exceptionTarget = "tsm";
     private double maxTripSectionDistance;
 
     private double profileTargetSpeed = 0d;
@@ -90,7 +91,6 @@ public class DrivingDynamics {
     private SpeedSupervisionState lastSendState = SpeedSupervisionState.NOT_SET;
     private ETCSMode currentMode= ETCSMode.NO_MODE;
     private ETCSLevel currentLevel = ETCSLevel.NO_LEVEL;
-    private RouteDataVolatile routeDataVolatile;
 
     /**
      * Drving Dynamics simulates the physical movement of the train. It uses a {@link DrivingStrategy} to represent a driver.
@@ -237,7 +237,6 @@ public class DrivingDynamics {
             return;
         }
         this.tripProfile = utpe.tripProfile;
-
         if(this.tripProfile instanceof BackwardSpline){
             BackwardSpline backwardSpline = (BackwardSpline)this.tripProfile;
             this.maxTripSectionDistance = backwardSpline.getHighestXValue();
@@ -268,17 +267,6 @@ public class DrivingDynamics {
             saveTripProfileToFile(utpe);
         }
     }
-
-    /**
-     * Performance some clean up tasks at the end of a trip.
-     * @param ttee A {@link TsmTripEndEvent}
-     *//*
-    @Subscribe
-    public void atTripEnd(TsmTripEndEvent ttee){
-        dynamicState.setMovementState(MovementState.HALTING);
-        dynamicState.setAcceleration(0d);
-        sendToLogEventSpeedSupervisionMovementState(MovementState.HALTING);
-    }*/
 
     /**
      * Movement decision tree should the current {@link ETCSMode} forbid movement.
@@ -316,58 +304,53 @@ public class DrivingDynamics {
             this.currentSil = speedSupervisionReport.interventionLevel;
             if(speedSupervisionReport.supervisionState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
                 this.inRSM = false;
-                switch (this.currentSil){
-                    case NOT_SET:
-                    case NO_INTERVENTION:
-                    case INDICATION:
-                    case OVERSPEED:
-                    case WARNING:
+                switch (this.currentSil) {
+                    case NOT_SET, NO_INTERVENTION, INDICATION, OVERSPEED, WARNING -> {
                         sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
                         actionParser(this.drivingStrategy.actionToTake());
-                        break;
-                    case APPLY_SERVICE_BREAKS:
+                    }
+                    case APPLY_SERVICE_BREAKS -> {
                         sendToLogEventSpeedSupervision(MovementState.BREAKING);
                         this.dynamicState.setMovementState(MovementState.BREAKING);
                         this.dynamicState.setBreakingModification(1d);
-                        break;
-                    case APPLY_EMERGENCY_BREAKS:
-                    default:
+                    }
+                    default -> {
                         sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                         this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                         this.dynamicState.setBreakingModification(1d);
+                    }
                 }
             }
             else {
                 if(!this.inRSM) calculateModifier();
                 this.inRSM = true;
-                switch (this.currentSil){
-                    case INDICATION:
-                        /*
+                /*
                         This control flow is necessary in case the train emergency breaks into RSM.
                         This control flow allows the train accelerate again until the stopping reagion is reached.
                         */
-                        if(!shouldHalt && this.dynamicState.getSpeed() == 0){
+                switch (this.currentSil) {
+                    case INDICATION -> {
+                        if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
                             sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
                             this.dynamicState.setMovementState(MovementState.ACCELERATING);
                             this.dynamicState.setAccelerationModification(1d);
                             calculateModifier();
                         }
-                        if(!shouldHalt && this.dynamicState.getSpeed() <= 1){
+                        if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
                             sendToLogEventSpeedSupervision(MovementState.CRUISE);
                             this.dynamicState.setMovementState(MovementState.CRUISE);
                             calculateModifier();
-                        }
-                        else {
+                        } else {
                             sendToLogEventSpeedSupervision(MovementState.BREAKING);
                             this.dynamicState.setMovementState(MovementState.BREAKING);
                             this.dynamicState.setBreakingModification(this.breakModifierForRSM);
                         }
-                        break;
-                    case APPLY_EMERGENCY_BREAKS:
-                    default:
+                    }
+                    default -> {
                         sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                         this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
                         this.dynamicState.setBreakingModification(1d);
+                    }
                 }
             }
             this.currentSsState = speedSupervisionReport.supervisionState;

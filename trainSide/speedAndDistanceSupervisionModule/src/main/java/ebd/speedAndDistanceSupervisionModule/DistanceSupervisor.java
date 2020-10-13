@@ -116,9 +116,9 @@ public class DistanceSupervisor {
                     this.maxEmergencyDistance
                     ));
         }
-        /*else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){//TODO Check if correct: DS says DD to halt when v > 0
+        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
-        }*/
+        }
         else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             this.inRSM = false;
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,

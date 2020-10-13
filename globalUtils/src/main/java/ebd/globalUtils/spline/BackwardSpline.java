@@ -57,7 +57,7 @@ public class BackwardSpline extends Spline {
 	@Override
 	public Double getPointOnCurve(Double xValue) {
 
-		Double key = getHigherOrLastKnotXValue(xValue);
+		Double key = getCeilingKnotXValue(xValue);
 		ArrayList<Double> coefficents = curve.get(key);
 		Double deltaX = xValue - key;
 		Double result = 0d;
@@ -112,9 +112,7 @@ public class BackwardSpline extends Spline {
 		
 	/**
 	 * Returns the x-value of the next higher or equal knot.
-	 * 
-	 * 
-	 * 
+	 *
 	 * @param xValue The specified x-Value
 	 * @return Double
 	 * @throws IndexOutOfBoundsException Thrown when the specified x-value is higher than the x-value of the last knot
@@ -122,10 +120,86 @@ public class BackwardSpline extends Spline {
 	 * @author Lars Schulze-Falck
 	 */
 	
-	public Double getHigherOrLastKnotXValue(Double xValue) throws IndexOutOfBoundsException{
+	public Double getCeilingKnotXValue(Double xValue) throws IndexOutOfBoundsException{
 		if (curve.ceilingKey(xValue) == null) {
 			throw new IndexOutOfBoundsException(String.format("Input value (%f) is higher then the higest point (%f) in this curve",xValue,curve.lastKey()));	
 		}
 		return curve.ceilingKey(xValue);
+	}
+
+	/**
+	 * Returns the distance after which the maximum speed of the breaking curve is always lower or equal then the given speed
+	 * @param yThreshold Y value no part of the curve can be greater then after the returned x value.
+	 * @return X value after which the curve is consistently lower then yThreshold.
+	 * 			Returns {@link Double#POSITIVE_INFINITY} if no such value exists.
+	 */
+	//TODO Tests
+	public double xValueAfterWhichYValueIsAlwaysLowerThen(double yThreshold){
+		Double lastDist = this.curve.lastKey();
+		double lastSpeed = this.curve.lastEntry().getValue().get(0);
+		if(lastSpeed > yThreshold){
+			return Double.POSITIVE_INFINITY;
+		}
+		if(lastSpeed == yThreshold){
+			return lastDist;
+		}
+		//Iterating of the tree map to find the highest key with a lower value then yThreshold
+		while(true){
+			Double nextDist = this.curve.lowerKey(lastDist);
+			if (nextDist == null) return 0d;
+
+			double nextSpeed = this.curve.get(nextDist).get(0);
+			if(nextSpeed >= yThreshold){
+				return calculatePreciseIntersection(lastDist,yThreshold);
+			}
+
+			lastDist = nextDist;
+		}
+
+	}
+
+	/**
+	 * Calculates the precise point at which the curve takes a certain value bas on the knowledge of the next higher key.
+	 * If the degree of the curve is greater than 1, it will use an numerical approach
+	 *
+	 * @param nextHigherKey The next higher key to the precise point
+	 * @param yValue The value that the curve should be equal to
+	 * @return the precise X-value at which the curve is equal to yValue
+	 */
+	private double calculatePreciseIntersection(double nextHigherKey, double yValue) {
+		if(degree == 0) return nextHigherKey;
+		else if(degree == 1){
+			double knotSpeed = this.curve.get(nextHigherKey).get(0);
+			double knotConstant = this.curve.get(nextHigherKey).get(1);
+
+			return (yValue - knotSpeed) / knotConstant + nextHigherKey;
+		}
+		else{
+			return calculateNumericalIntersection(nextHigherKey, yValue);
+		}
+
+	}
+
+	/**
+	 * Calculates the point at which the curve takes a certain value bas on the knowledge of the next higher key.
+	 *
+	 * @param nextHigherKey The next higher key to the precise point
+	 * @param yValue The value that the curve should be equal to
+	 * @return the precise X-value at which the curve is equal to yValue
+	 */
+	private double calculateNumericalIntersection(double nextHigherKey, double yValue){
+		Double startXValue = this.curve.lowerKey(nextHigherKey);
+		startXValue = (startXValue == null) ? 0 : startXValue;
+		double endXValue = nextHigherKey;
+		double curYValue = 0;
+
+		while(true){
+			double curXValue = (startXValue + endXValue) - 2;
+			curYValue = getPointOnCurve(curXValue);
+
+			if(Math.abs(curYValue - yValue) > 0.001) return curXValue;
+			else if(curYValue > yValue) startXValue = curXValue;
+			else endXValue = curXValue;
+		}
 	}
 }

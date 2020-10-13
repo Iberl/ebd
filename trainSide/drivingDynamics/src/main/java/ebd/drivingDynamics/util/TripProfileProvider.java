@@ -15,6 +15,7 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class TripProfileProvider {
     ConfigHandler ch = ConfigHandler.getInstance();
     TrainDataVolatile trainDataVolatile;
 
-    private Mode mode;
+    private final Mode mode;
     private Spline profile = null;
     private Location refLocation = new InitalLocation();
 
@@ -40,22 +41,15 @@ public class TripProfileProvider {
         this.localEventBus = localBus;
         this.localEventBus.register(this);
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        switch(ch.tripProfileMode){
-            case("breakkingcurve"):
-                this.mode = Mode.FROM_BREAKINGCURVE;
-                break;
-            case("file"):
-                this.mode = Mode.FROM_FILE;
-                break;
-            case("socket"):
-                this.mode = Mode.FROM_SOCKET;
-                break;
-            default:
-                this.mode = Mode.FROM_BREAKINGCURVE;
+        switch (ch.tripProfileMode) {
+            case ("breakkingcurve") -> this.mode = Mode.FROM_BREAKINGCURVE;
+            case ("file") -> this.mode = Mode.FROM_FILE;
+            case ("socket") -> this.mode = Mode.FROM_SOCKET;
+            default -> this.mode = Mode.FROM_BREAKINGCURVE;
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
             getProfilefromSource(nbce.serviceBreakingCurve);
@@ -69,7 +63,6 @@ public class TripProfileProvider {
                                 "dd",
                                 this.profile,
                                 refLocation.getId()));
-
     }
 
     /**
@@ -91,8 +84,8 @@ public class TripProfileProvider {
         double [] carryPoint = {-1,-1}; //Needed to preserve areas of constant speed on the curve, will be used to mark the endpoint of such an area
 
         for(double x = deltaX; x<=maxX; x += deltaX){
-            emerSpeed = emerCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
-            servSpeed = serCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+            emerSpeed = emerCurve.getSpeedAtDistance(x, CurveType.PERMITTED_SPEED);
+            servSpeed = serCurve.getSpeedAtDistance(x, CurveType.PERMITTED_SPEED);
 
             double y = Math.min(emerSpeed,servSpeed);
 
