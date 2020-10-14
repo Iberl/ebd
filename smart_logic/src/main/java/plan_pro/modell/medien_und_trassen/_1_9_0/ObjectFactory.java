@@ -8,7 +8,7 @@
 
 package plan_pro.modell.medien_und_trassen._1_9_0;
 
-import javax.xml.bind.annotation.XmlRegistry;
+import jakarta.xml.bind.annotation.XmlRegistry;
 
 
 /**

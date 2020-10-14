@@ -5,5 +5,5 @@
 // Generiert: 2020.01.16 um 04:27:51 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.plan-pro.org/modell/Bedienung/1.9.0.2")
+@jakarta.xml.bind.annotation.XmlSchema(namespace = "http://www.plan-pro.org/modell/Bedienung/1.9.0.2")
 package plan_pro.modell.bedienung._1_9_0;

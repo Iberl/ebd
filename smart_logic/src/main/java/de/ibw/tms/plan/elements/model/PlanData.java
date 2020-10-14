@@ -25,7 +25,7 @@ import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.text.ParseException;
@@ -296,7 +296,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
             setNodeToBranchingPoints();
             System.out.println("Test");
-        } catch (JAXBException | ParseException e) {
+        } catch (ParseException e) {
             e.printStackTrace();
         }
     }

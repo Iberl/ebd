@@ -1,7 +1,7 @@
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+// Ã„nderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
 // Generiert: 2020.10.13 um 12:06:07 PM CEST 
 //
 
@@ -18,7 +18,7 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * This is the top level element for various company definitions regarding the railway services referred to in this file
  * 
- * <p>Java-Klasse für OrganizationalUnits complex type.
+ * <p>Java-Klasse fÃ¼r OrganizationalUnits complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 

@@ -1,7 +1,7 @@
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+// Ã„nderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
 // Generiert: 2020.10.13 um 12:06:07 PM CEST 
 //
 
@@ -17,7 +17,7 @@ import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java-Klasse für GenericTimePeriod complex type.
+ * <p>Java-Klasse fÃ¼r GenericTimePeriod complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
@@ -39,9 +39,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(name = "GenericTimePeriod", propOrder = {
     "containedSituation"
 })
-public class GenericTimePeriod
-    extends TimePeriod
-{
+public class GenericTimePeriod {
 
     @XmlElement(required = true)
     protected List<TimePeriodRuleSituation> containedSituation;

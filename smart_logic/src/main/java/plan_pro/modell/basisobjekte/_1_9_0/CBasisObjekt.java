@@ -47,7 +47,7 @@ import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWeichenlaufketteZuordnun
 import plan_pro.modell.zuglenkung._1_9_0.*;
 import plan_pro.modell.zugnummernmeldeanlage._1_9_0.*;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 

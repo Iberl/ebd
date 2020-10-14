@@ -25,7 +25,7 @@ import plan_pro.modell.signale._1_9_0.CSignalBefestigung;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CGleisAbschluss;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 

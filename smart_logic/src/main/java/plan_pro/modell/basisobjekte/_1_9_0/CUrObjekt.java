@@ -10,7 +10,7 @@ package plan_pro.modell.basisobjekte._1_9_0;
 
 import plan_pro.modell.planpro._1_9_0.*;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 
 /**

@@ -10,7 +10,7 @@ package plan_pro.modell.geodaten._1_9_0;
 
 import plan_pro.modell.basistypen._1_9_0.CBasisAttribut;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 
 /**

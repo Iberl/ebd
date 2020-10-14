@@ -5,5 +5,5 @@
 // Generiert: 2020.01.16 um 04:27:51 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://www.plan-pro.org/modell/Signalbegriffe_Struktur/1.6.0.1")
+@jakarta.xml.bind.annotation.XmlSchema(namespace = "http://www.plan-pro.org/modell/Signalbegriffe_Struktur/1.6.0.1")
 package plan_pro.modell.signalbegriffe_struktur._1_6_0;

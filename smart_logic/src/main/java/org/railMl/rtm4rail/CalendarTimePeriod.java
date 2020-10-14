@@ -1,7 +1,7 @@
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
+// Ã„nderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
 // Generiert: 2020.10.13 um 12:06:07 PM CEST 
 //
 
@@ -17,7 +17,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * <p>Java-Klasse für CalendarTimePeriod complex type.
+ * <p>Java-Klasse fÃ¼r CalendarTimePeriod complex type.
  * 
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
@@ -38,9 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "CalendarTimePeriod")
-public class CalendarTimePeriod
-    extends TimePeriod
-{
+public class CalendarTimePeriod {
 
     @XmlAttribute(name = "from")
     @XmlSchemaType(name = "dateTime")

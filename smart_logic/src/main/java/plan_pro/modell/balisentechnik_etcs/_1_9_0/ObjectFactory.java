@@ -8,7 +8,7 @@
 
 package plan_pro.modell.balisentechnik_etcs._1_9_0;
 
-import javax.xml.bind.annotation.XmlRegistry;
+import jakarta.xml.bind.annotation.XmlRegistry;
 
 
 /**

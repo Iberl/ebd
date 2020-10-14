@@ -8,8 +8,8 @@
 
 package plan_pro.modell.signalbegriffe_ril_301._1_9;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
