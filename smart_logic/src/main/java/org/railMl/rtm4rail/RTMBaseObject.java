@@ -14,7 +14,6 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 import jakarta.xml.bind.annotation.XmlType;
 
-
 /**
  * Base object for railML model entities
  * 
@@ -47,7 +46,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMNamedResource.class,
     RTMElementPartCollection.class
 })
-public abstract class RTMBaseObject {
+public abstract class RTMBaseObject implements de.ibw.rtm.intf.IRTMBaseObject {
 
     @XmlAttribute(name = "id", required = true)
     protected String id;
@@ -60,6 +59,7 @@ public abstract class RTMBaseObject {
      *     {@link String }
      *     
      */
+    @Override
     public String getId() {
         return id;
     }
@@ -72,6 +72,7 @@ public abstract class RTMBaseObject {
      *     {@link String }
      *     
      */
+    @Override
     public void setId(String value) {
         this.id = value;
     }

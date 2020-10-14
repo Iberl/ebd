@@ -1,7 +1,9 @@
 package de.ibw.tms.ma.common;
 
+import de.ibw.rtm.intf.IRTMBaseObject;
 import ebd.ConfigHandler;
 import org.apache.commons.lang3.time.DateUtils;
+
 
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -10,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
-public interface IBaseObject {
+public interface IBaseObject extends IRTMBaseObject {
     UUID id = UUID.randomUUID();
     String sName = "Base";
     Timestamp lastUpdated = new Timestamp(System.currentTimeMillis());

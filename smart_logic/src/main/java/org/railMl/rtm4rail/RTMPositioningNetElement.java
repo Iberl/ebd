@@ -10,6 +10,8 @@ package org.railMl.rtm4rail;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -45,8 +47,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMLinearNetElement.class
 })
 public class RTMPositioningNetElement
-    extends RTMCompositionNetElement
-{
+    extends RTMCompositionNetElement implements IRTMPositioningNetElement {
 
     @XmlElement(required = true)
     protected List<RTMAssociatedPositioningSystem> associatedPositioningSystem;
@@ -73,6 +74,7 @@ public class RTMPositioningNetElement
      * 
      * 
      */
+    @Override
     public List<RTMAssociatedPositioningSystem> getAssociatedPositioningSystem() {
         if (associatedPositioningSystem == null) {
             associatedPositioningSystem = new ArrayList<RTMAssociatedPositioningSystem>();

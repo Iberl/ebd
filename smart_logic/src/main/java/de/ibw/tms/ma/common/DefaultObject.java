@@ -1,7 +1,11 @@
 package de.ibw.tms.ma.common;
 
+import de.ibw.util.ThreadedRepo;
+
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.UUID;
+
 /**
  *
  * Grundlegendes Objekt
@@ -9,9 +13,13 @@ import java.util.Date;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-12
+ * @since 2020-10-14
  */
 public abstract class DefaultObject implements IBaseObject {
+    public static ThreadedRepo<UUID, DefaultObject> topologyRepository = new ThreadedRepo<>();
+
+
+
     private String sSystemName = IBaseObject.sName;
     private Timestamp lastUpdated = IBaseObject.lastUpdated;
     private String sComment = IBaseObject.sComment;
@@ -21,6 +29,11 @@ public abstract class DefaultObject implements IBaseObject {
     public void defaultInit(String sName) {
         this.sSystemName = sName;
         this.lastUpdated = new Timestamp(System.currentTimeMillis());
+    }
+
+    @Override
+    public UUID getUuid() {
+        return this.getUuid();
     }
 
     @Override

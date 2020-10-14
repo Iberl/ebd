@@ -10,6 +10,8 @@ package org.railMl.rtm4rail;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.ibw.rtm.intf.IRTMNetworkResource;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
@@ -45,7 +47,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMNetElement.class
 })
 public class RTMNetworkResource
-    extends RTMNamedResource
+    extends RTMNamedResource implements IRTMNetworkResource
 {
 
     protected List<RTMValidity> isValid;

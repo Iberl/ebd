@@ -38,7 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RTM_Validity")
-public class RTMValidity {
+public class RTMValidity implements de.ibw.rtm.intf.IRTMValidity {
 
     @XmlAttribute(name = "from")
     @XmlSchemaType(name = "date")
@@ -55,6 +55,7 @@ public class RTMValidity {
      *     {@link XMLGregorianCalendar }
      *     
      */
+    @Override
     public XMLGregorianCalendar getFrom() {
         return from;
     }
@@ -67,6 +68,7 @@ public class RTMValidity {
      *     {@link XMLGregorianCalendar }
      *     
      */
+    @Override
     public void setFrom(XMLGregorianCalendar value) {
         this.from = value;
     }
@@ -79,6 +81,7 @@ public class RTMValidity {
      *     {@link XMLGregorianCalendar }
      *     
      */
+    @Override
     public XMLGregorianCalendar getTo() {
         return to;
     }
@@ -91,6 +94,7 @@ public class RTMValidity {
      *     {@link XMLGregorianCalendar }
      *     
      */
+    @Override
     public void setTo(XMLGregorianCalendar value) {
         this.to = value;
     }

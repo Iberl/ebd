@@ -407,12 +407,12 @@ public class Scenario {
         EoA eoa = NextMA.getEndOfAuthority();
         TrackElement TRC = eoa.getTrackElement();
         if(TRC instanceof RailConnector) {
-            TrackElement Trail = TRC.getPositionedRelations().get(0).getFrom();
+            TrackElement Trail = null; //TRC.getPositionedRelations().get(0).getFrom();
             ArrayList<TrackElement> markOccupiedList = new ArrayList<TrackElement>();
             markOccupiedList.add(Trail);
             PlanData.trainOccupiedList = (ArrayList<TrackElement>) markOccupiedList;
         }  else if(TRC instanceof EdgeOfMap) {
-            TrackElement Trail = TRC.getPositionedRelations().get(0).getFrom();
+            TrackElement Trail = null; //TRC.getPositionedRelations().get(0).getFrom();
             ArrayList<TrackElement> markOccupiedList = new ArrayList<TrackElement>();
             markOccupiedList.add(Trail);
             PlanData.trainOccupiedList = (ArrayList<TrackElement>) markOccupiedList;

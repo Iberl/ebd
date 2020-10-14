@@ -43,8 +43,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMCompositionNetElement.class
 })
 public class RTMNetElement
-    extends RTMNetworkResource
-{
+    extends RTMNetworkResource {
 
     protected List<TElementWithIDref> relation;
 

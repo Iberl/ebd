@@ -9,6 +9,9 @@
 package org.railMl.rtm4rail;
 
 import java.math.BigInteger;
+
+import de.ibw.rtm.intf.IRTMNetworkResource;
+import de.ibw.rtm.intf.IRTMRelation;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -45,8 +48,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "elementB"
 })
 public class RTMRelation
-    extends RTMNetworkResource
-{
+    extends RTMNetworkResource implements IRTMRelation {
 
     @XmlElement(required = true)
     protected TElementWithIDref elementA;
@@ -67,6 +69,7 @@ public class RTMRelation
      *     {@link TElementWithIDref }
      *     
      */
+    @Override
     public TElementWithIDref getElementA() {
         return elementA;
     }
@@ -79,6 +82,7 @@ public class RTMRelation
      *     {@link TElementWithIDref }
      *     
      */
+    @Override
     public void setElementA(TElementWithIDref value) {
         this.elementA = value;
     }
@@ -91,6 +95,7 @@ public class RTMRelation
      *     {@link TElementWithIDref }
      *     
      */
+    @Override
     public TElementWithIDref getElementB() {
         return elementB;
     }
@@ -103,6 +108,7 @@ public class RTMRelation
      *     {@link TElementWithIDref }
      *     
      */
+    @Override
     public void setElementB(TElementWithIDref value) {
         this.elementB = value;
     }
@@ -115,6 +121,7 @@ public class RTMRelation
      *     {@link TNavigability }
      *     
      */
+    @Override
     public TNavigability getNavigability() {
         return navigability;
     }
@@ -127,6 +134,7 @@ public class RTMRelation
      *     {@link TNavigability }
      *     
      */
+    @Override
     public void setNavigability(TNavigability value) {
         this.navigability = value;
     }
@@ -139,6 +147,7 @@ public class RTMRelation
      *     {@link BigInteger }
      *     
      */
+    @Override
     public BigInteger getPositionOnA() {
         return positionOnA;
     }
@@ -151,6 +160,7 @@ public class RTMRelation
      *     {@link BigInteger }
      *     
      */
+    @Override
     public void setPositionOnA(BigInteger value) {
         this.positionOnA = value;
     }
@@ -163,6 +173,7 @@ public class RTMRelation
      *     {@link BigInteger }
      *     
      */
+    @Override
     public BigInteger getPositionOnB() {
         return positionOnB;
     }
@@ -175,6 +186,7 @@ public class RTMRelation
      *     {@link BigInteger }
      *     
      */
+    @Override
     public void setPositionOnB(BigInteger value) {
         this.positionOnB = value;
     }

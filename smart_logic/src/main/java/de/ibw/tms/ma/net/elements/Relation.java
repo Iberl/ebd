@@ -10,13 +10,14 @@ import java.util.List;
 
 /**
  * Nachbarschaftsbeziehung
- *
+ * Im railMl gibt es nur Positioned Relation
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
  * @since 2020-10-12
  */
+@Deprecated
 public class Relation extends NetworkResource implements Serializable {
     private List<INetElement> neighbourElements;
 
