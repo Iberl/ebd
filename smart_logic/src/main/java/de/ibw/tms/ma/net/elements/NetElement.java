@@ -16,7 +16,11 @@ import java.util.UUID;
  * @version 0.4
  * @since 2020-10-14
  */
-public class NetElement extends NetworkResource implements IRTMNetElement {
+public abstract class NetElement extends NetworkResource implements IRTMNetElement {
+
+    public NetElement(String sName) {
+        super(sName);
+    }
 
     @Override
     public List<TElementWithIDref> getRelation() {

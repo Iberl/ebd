@@ -1,15 +1,24 @@
 package de.ibw.tms.ma.positioning;
 
+import de.ibw.rtm.intf.IRTMGeometricCoordinate;
+import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 
 import java.util.Objects;
 
-public class GeometricCoordinate extends PositioningSystemCoordinate {
+public class GeometricCoordinate extends PositioningSystemCoordinate implements IRTMGeometricCoordinate {
+    public static final String CLASS_IDENTIFIER = "Geometric_Coordinate";
+
+
     private double x;
     private double y;
-    private double height;
+    private double z;
     private Double track_meter;
     private CStrecke Track;
+
+    public GeometricCoordinate() {
+        super(CLASS_IDENTIFIER);
+    }
 
 
     public double getX() {
@@ -36,13 +45,16 @@ public class GeometricCoordinate extends PositioningSystemCoordinate {
         this.y = y;
     }
 
-    public double getHeight() {
-        return height;
+    @Override
+    public Double getZ() {
+        return z;
     }
 
-    public void setHeight(double height) {
-        this.height = height;
+    @Override
+    public void setZ(Double value) {
+        z = value;
     }
+
 
     public Double getTrack_meter() {
         return track_meter;
@@ -86,6 +98,16 @@ public class GeometricCoordinate extends PositioningSystemCoordinate {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, height);
+        return Objects.hash(x, y, z);
+    }
+
+    @Override
+    public String getPositioningSystemRef() {
+        return this.getId();
+    }
+
+    @Override
+    public void setPositioningSystemRef(String value) {
+        throw new NotImplementedException("UUID is set automatically and not setable.");
     }
 }

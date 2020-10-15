@@ -26,9 +26,14 @@ public abstract class DefaultObject implements IBaseObject {
     private Date validFromDate = IBaseObject.validFrom;
     private Date validToDate = IBaseObject.validTo;
 
+    public DefaultObject(String sName) {
+        defaultInit(sName);
+    }
+
     public void defaultInit(String sName) {
         this.sSystemName = sName;
         this.lastUpdated = new Timestamp(System.currentTimeMillis());
+        topologyRepository.update(this.getUuid(), this);
     }
 
     @Override

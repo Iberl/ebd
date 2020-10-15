@@ -38,8 +38,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RTM_GeometricCoordinate")
 public class RTMGeometricCoordinate
-    extends RTMPositioningSystemCoordinate
-{
+    extends RTMPositioningSystemCoordinate implements de.ibw.rtm.intf.IRTMGeometricCoordinate {
 
     @XmlAttribute(name = "x", required = true)
     protected double x;
@@ -52,6 +51,7 @@ public class RTMGeometricCoordinate
      * Ruft den Wert der x-Eigenschaft ab.
      * 
      */
+    @Override
     public double getX() {
         return x;
     }
@@ -60,6 +60,7 @@ public class RTMGeometricCoordinate
      * Legt den Wert der x-Eigenschaft fest.
      * 
      */
+    @Override
     public void setX(double value) {
         this.x = value;
     }
@@ -68,6 +69,7 @@ public class RTMGeometricCoordinate
      * Ruft den Wert der y-Eigenschaft ab.
      * 
      */
+    @Override
     public double getY() {
         return y;
     }
@@ -76,6 +78,7 @@ public class RTMGeometricCoordinate
      * Legt den Wert der y-Eigenschaft fest.
      * 
      */
+    @Override
     public void setY(double value) {
         this.y = value;
     }
@@ -88,6 +91,7 @@ public class RTMGeometricCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public Double getZ() {
         return z;
     }
@@ -100,6 +104,7 @@ public class RTMGeometricCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public void setZ(Double value) {
         this.z = value;
     }

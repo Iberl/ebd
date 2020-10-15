@@ -40,7 +40,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMGeometricCoordinate.class,
     RTMLinearCoordinate.class
 })
-public class RTMPositioningSystemCoordinate {
+public class RTMPositioningSystemCoordinate implements de.ibw.rtm.intf.IRTMPositioningSystemCoordinate {
 
     @XmlAttribute(name = "positioningSystemRef", required = true)
     protected String positioningSystemRef;
@@ -53,6 +53,7 @@ public class RTMPositioningSystemCoordinate {
      *     {@link String }
      *     
      */
+    @Override
     public String getPositioningSystemRef() {
         return positioningSystemRef;
     }
@@ -65,6 +66,7 @@ public class RTMPositioningSystemCoordinate {
      *     {@link String }
      *     
      */
+    @Override
     public void setPositioningSystemRef(String value) {
         this.positioningSystemRef = value;
     }

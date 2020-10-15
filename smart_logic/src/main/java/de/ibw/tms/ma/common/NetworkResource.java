@@ -24,17 +24,31 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @version 0.4
  * @since 2020-10-12
  */
-public class NetworkResource extends DefaultObject implements IRTMNetworkResource {
+public abstract class NetworkResource extends DefaultObject implements IRTMNetworkResource {
+
+    public NetworkResource(String sName) {
+        super(sName);
+    }
 
     @Override
-    public List<RTMValidity> getIsValid() throws DatatypeConfigurationException {
+    public List<RTMValidity> getIsValid()  {
         RTMValidity ValidTime = new RTMValidity();
         GregorianCalendar from = new GregorianCalendar();
         from.setTimeInMillis(this.getValidFrom().getTime());
         GregorianCalendar to = new GregorianCalendar();
         to.setTimeInMillis(this.getValidTo().getTime());
-        XMLGregorianCalendar fromValidCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(from);
-        XMLGregorianCalendar toValidCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(to);
+        XMLGregorianCalendar fromValidCalendar = null;
+        try {
+            fromValidCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(from);
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        XMLGregorianCalendar toValidCalendar = null;
+        try {
+            toValidCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(to);
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
         ValidTime.setFrom(fromValidCalendar);
         ValidTime.setTo(toValidCalendar);
         ArrayList<RTMValidity> result = new ArrayList<>();

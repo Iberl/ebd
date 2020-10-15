@@ -1,5 +1,6 @@
 package de.ibw.tms.ma.positioned.elements;
 
+import de.ibw.rtm.intf.IRTMNetEntity;
 import de.ibw.tms.ma.common.NetworkResource;
 
 /**
@@ -11,5 +12,9 @@ import de.ibw.tms.ma.common.NetworkResource;
  * @version 0.4
  * @since 2020-10-12
  */
-public class NetEntity extends NetworkResource {
+public abstract class NetEntity extends NetworkResource implements IRTMNetEntity {
+    public NetEntity(String sName) {
+        super(sName);
+    }
+
 }

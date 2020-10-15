@@ -43,7 +43,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "spotLocation"
 })
 public class RTMLocatedNetEntity
-    extends RTMNetworkResource {
+    extends RTMNetworkResource implements de.ibw.rtm.intf.IRTMLocatedNetEntity {
 
     protected List<RTMAreaLocation> areaLocation;
     protected List<RTMLinearLocation> linearLocation;
@@ -71,6 +71,7 @@ public class RTMLocatedNetEntity
      * 
      * 
      */
+    @Override
     public List<RTMAreaLocation> getAreaLocation() {
         if (areaLocation == null) {
             areaLocation = new ArrayList<RTMAreaLocation>();
@@ -100,6 +101,7 @@ public class RTMLocatedNetEntity
      * 
      * 
      */
+    @Override
     public List<RTMLinearLocation> getLinearLocation() {
         if (linearLocation == null) {
             linearLocation = new ArrayList<RTMLinearLocation>();
@@ -129,6 +131,7 @@ public class RTMLocatedNetEntity
      * 
      * 
      */
+    @Override
     public List<RTMSpotLocation> getSpotLocation() {
         if (spotLocation == null) {
             spotLocation = new ArrayList<RTMSpotLocation>();

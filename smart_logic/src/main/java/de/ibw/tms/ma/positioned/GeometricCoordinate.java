@@ -37,12 +37,10 @@ public class GeometricCoordinate extends de.ibw.tms.ma.positioning.GeometricCoor
         this.y = y;
     }
 
-    public double getHeight() {
-        return height;
-    }
 
-    public void setHeight(double height) {
-        this.height = height;
+
+    public void setZ(double z) {
+        this.height = z;
     }
 
     public Double getTrack_meter() {

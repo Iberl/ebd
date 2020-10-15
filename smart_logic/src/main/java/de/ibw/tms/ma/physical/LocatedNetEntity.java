@@ -1,29 +1,34 @@
 package de.ibw.tms.ma.physical;
 
+import de.ibw.rtm.intf.IRTMEntityLocation;
+import de.ibw.rtm.intf.IRTMLocatedNetEntity;
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.EntityLocation;
-import de.ibw.tms.ma.net.elements.ILocatedNetEntity;
 import de.ibw.tms.ma.positioned.elements.NetEntity;
-import de.ibw.tms.ma.positioning.GeometricCoordinate;
+import org.railMl.rtm4rail.RTMAreaLocation;
+import org.railMl.rtm4rail.RTMLinearLocation;
+import org.railMl.rtm4rail.RTMSpotLocation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocatedNetEntity extends NetEntity implements ILocatedNetEntity, Serializable {
+public class LocatedNetEntity extends NetEntity implements IRTMLocatedNetEntity, Serializable {
     private Chainage chainageBeginn;
     private Chainage chainageEnd;
-    private GeometricCoordinate geoCoordinates;
+    private IRTMGeometricCoordinate geoCoordinates;
 
-    private EntityLocation MainLocation;
-    private List<EntityLocation> locationList = new ArrayList<>();
+    private IRTMEntityLocation MainLocation;
+    private List<IRTMLocatedNetEntity> locationList = new ArrayList<>();
 
+    public LocatedNetEntity(String sName) {
+        super(sName);
+    }
 
-    public GeometricCoordinate getGeoCoordinates() {
+    public IRTMGeometricCoordinate getGeoCoordinates() {
         return geoCoordinates;
     }
 
-    public void setGeoCoordinates(GeometricCoordinate geoCoordinates) {
+    public void setGeoCoordinates(IRTMGeometricCoordinate geoCoordinates) {
         this.geoCoordinates = geoCoordinates;
     }
 
@@ -44,4 +49,22 @@ public class LocatedNetEntity extends NetEntity implements ILocatedNetEntity, Se
     }
 
 
+    @Override
+    public List<RTMAreaLocation> getAreaLocation() {
+        return null;
+    }
+
+    @Override
+    public List<RTMLinearLocation> getLinearLocation() {
+        return null;
+    }
+
+    @Override
+    public List<RTMSpotLocation> getSpotLocation() {
+        return null;
+    }
+
+    public List<IRTMLocatedNetEntity> getLocationList() {
+        return locationList;
+    }
 }

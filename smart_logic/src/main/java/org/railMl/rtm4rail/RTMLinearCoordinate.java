@@ -40,8 +40,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RTM_LinearCoordinate")
 public class RTMLinearCoordinate
-    extends RTMPositioningSystemCoordinate
-{
+    extends RTMPositioningSystemCoordinate implements de.ibw.rtm.intf.IRTMLinearCoordinate {
 
     @XmlAttribute(name = "lateralDistance")
     protected Double lateralDistance;
@@ -62,6 +61,7 @@ public class RTMLinearCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public Double getLateralDistance() {
         return lateralDistance;
     }
@@ -74,6 +74,7 @@ public class RTMLinearCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public void setLateralDistance(Double value) {
         this.lateralDistance = value;
     }
@@ -82,6 +83,7 @@ public class RTMLinearCoordinate
      * Ruft den Wert der measure-Eigenschaft ab.
      * 
      */
+    @Override
     public double getMeasure() {
         return measure;
     }
@@ -90,6 +92,7 @@ public class RTMLinearCoordinate
      * Legt den Wert der measure-Eigenschaft fest.
      * 
      */
+    @Override
     public void setMeasure(double value) {
         this.measure = value;
     }
@@ -102,6 +105,7 @@ public class RTMLinearCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public Double getVerticalDistance() {
         return verticalDistance;
     }
@@ -114,6 +118,7 @@ public class RTMLinearCoordinate
      *     {@link Double }
      *     
      */
+    @Override
     public void setVerticalDistance(Double value) {
         this.verticalDistance = value;
     }
@@ -126,6 +131,7 @@ public class RTMLinearCoordinate
      *     {@link TLateralSide }
      *     
      */
+    @Override
     public TLateralSide getLateralSide() {
         return lateralSide;
     }
@@ -138,6 +144,7 @@ public class RTMLinearCoordinate
      *     {@link TLateralSide }
      *     
      */
+    @Override
     public void setLateralSide(TLateralSide value) {
         this.lateralSide = value;
     }
@@ -150,6 +157,7 @@ public class RTMLinearCoordinate
      *     {@link TVerticalSide }
      *     
      */
+    @Override
     public TVerticalSide getVerticalSide() {
         return verticalSide;
     }
@@ -162,6 +170,7 @@ public class RTMLinearCoordinate
      *     {@link TVerticalSide }
      *     
      */
+    @Override
     public void setVerticalSide(TVerticalSide value) {
         this.verticalSide = value;
     }

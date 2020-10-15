@@ -46,8 +46,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMLinearPositioningSystem.class
 })
 public class RTMPositioningSystem
-    extends RTMNamedResource
-{
+    extends RTMNamedResource implements de.ibw.rtm.intf.IRTMPositioningSystem {
 
     @XmlElement(required = true)
     protected List<RTMValidity> isValid;
@@ -74,6 +73,7 @@ public class RTMPositioningSystem
      * 
      * 
      */
+    @Override
     public List<RTMValidity> getIsValid() {
         if (isValid == null) {
             isValid = new ArrayList<RTMValidity>();

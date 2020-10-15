@@ -38,8 +38,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMLocatedNetEntity.class
 })
 public class RTMNetEntity
-    extends RTMNetworkResource
-{
+    extends RTMNetworkResource implements de.ibw.rtm.intf.IRTMNetEntity {
 
 
 }

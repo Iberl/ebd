@@ -1,28 +1,36 @@
 package de.ibw.tms.ma;
 
+import de.ibw.rtm.intf.IRTMEntityLocation;
+import de.ibw.rtm.intf.IRTMLocatedNetEntity;
+import de.ibw.rtm.intf.IRTMPositioningNetElement;
+import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.physical.LocatedNetEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntityLocation {
-    private LocatedNetEntity locatedNetEntity;
-    private PositioningNetElement MainNetElement;
-    private List<PositioningNetElement> positioningNetElementList = new ArrayList<>();
+public abstract class EntityLocation extends NetworkResource implements IRTMEntityLocation {
+    private IRTMLocatedNetEntity locatedNetEntity;
+    private IRTMPositioningNetElement MainNetElement;
+    private List<IRTMPositioningNetElement> positioningNetElementList = new ArrayList<>();
 
-    public LocatedNetEntity getLocatedNetEntity() {
+    public EntityLocation(String sName) {
+        super(sName);
+    }
+
+    public IRTMLocatedNetEntity getLocatedNetEntity() {
         return locatedNetEntity;
     }
 
-    public void setLocatedNetEntity(LocatedNetEntity locatedNetEntity) {
+    public void setLocatedNetEntity(IRTMLocatedNetEntity locatedNetEntity) {
         this.locatedNetEntity = locatedNetEntity;
     }
 
-    public PositioningNetElement getMainNetElement() {
+    public IRTMPositioningNetElement getMainNetElement() {
         return MainNetElement;
     }
 
-    public void setMainNetElement(PositioningNetElement mainNetElement) {
+    public void setMainNetElement(IRTMPositioningNetElement mainNetElement) {
         MainNetElement = mainNetElement;
         if(!positioningNetElementList.contains(MainNetElement)) {
             positioningNetElementList.add(MainNetElement);

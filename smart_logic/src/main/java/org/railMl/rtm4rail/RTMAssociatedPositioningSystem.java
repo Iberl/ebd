@@ -11,7 +11,6 @@ package org.railMl.rtm4rail;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ibw.rtm.intf.IRTMAssociatedPositioningSystem;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -46,7 +45,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "isValid"
 })
 public class RTMAssociatedPositioningSystem
-    extends RTMBaseObject implements IRTMAssociatedPositioningSystem {
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMAssociatedPositioningSystem {
 
     @XmlElement(required = true)
     protected List<RTMIntrinsicCoordinate> intrinsicCoordinate;
@@ -76,6 +75,7 @@ public class RTMAssociatedPositioningSystem
      * 
      * 
      */
+    @Override
     public List<RTMIntrinsicCoordinate> getIntrinsicCoordinate() {
         if (intrinsicCoordinate == null) {
             intrinsicCoordinate = new ArrayList<RTMIntrinsicCoordinate>();
@@ -105,6 +105,7 @@ public class RTMAssociatedPositioningSystem
      * 
      * 
      */
+    @Override
     public List<RTMValidity> getIsValid() {
         if (isValid == null) {
             isValid = new ArrayList<RTMValidity>();
@@ -120,6 +121,7 @@ public class RTMAssociatedPositioningSystem
      *     {@link String }
      *     
      */
+    @Override
     public String getPositioningSystemRef() {
         return positioningSystemRef;
     }
@@ -132,6 +134,7 @@ public class RTMAssociatedPositioningSystem
      *     {@link String }
      *     
      */
+    @Override
     public void setPositioningSystemRef(String value) {
         this.positioningSystemRef = value;
     }

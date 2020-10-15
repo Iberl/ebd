@@ -43,8 +43,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "geometricCoordinate"
 })
 public class RTMIntrinsicCoordinate
-    extends RTMBaseObject
-{
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMIntrinsicCoordinate {
 
     protected List<RTMLinearCoordinate> linearCoordinate;
     protected List<RTMGeometricCoordinate> geometricCoordinate;
@@ -73,6 +72,7 @@ public class RTMIntrinsicCoordinate
      * 
      * 
      */
+    @Override
     public List<RTMLinearCoordinate> getLinearCoordinate() {
         if (linearCoordinate == null) {
             linearCoordinate = new ArrayList<RTMLinearCoordinate>();
@@ -102,6 +102,7 @@ public class RTMIntrinsicCoordinate
      * 
      * 
      */
+    @Override
     public List<RTMGeometricCoordinate> getGeometricCoordinate() {
         if (geometricCoordinate == null) {
             geometricCoordinate = new ArrayList<RTMGeometricCoordinate>();
@@ -113,6 +114,7 @@ public class RTMIntrinsicCoordinate
      * Ruft den Wert der intrinsicCoord-Eigenschaft ab.
      * 
      */
+    @Override
     public double getIntrinsicCoord() {
         return intrinsicCoord;
     }
@@ -121,6 +123,7 @@ public class RTMIntrinsicCoordinate
      * Legt den Wert der intrinsicCoord-Eigenschaft fest.
      * 
      */
+    @Override
     public void setIntrinsicCoord(double value) {
         this.intrinsicCoord = value;
     }

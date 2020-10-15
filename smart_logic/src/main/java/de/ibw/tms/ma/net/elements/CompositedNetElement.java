@@ -15,7 +15,12 @@ import java.util.List;
  * @version 0.4
  * @since 2020-10-12
  */
-public class CompositedNetElement extends NetElement implements IRTMCompositionNetElement {
+public abstract class CompositedNetElement extends NetElement implements IRTMCompositionNetElement {
+
+   public CompositedNetElement(String sName) {
+       super(sName);
+   }
+
     @Override
     public List<RTMUnorderedCollection> getElementCollectionUnordered() {
         return new ArrayList<>();

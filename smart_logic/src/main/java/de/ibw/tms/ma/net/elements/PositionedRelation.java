@@ -44,7 +44,7 @@ public class PositionedRelation extends NetworkResource implements IRTMRelation 
      * @param elements - Liste mit mindestens einem Element
      */
     public PositionedRelation(List<INetElement> elements) {
-
+        super();
         defaultInit("PositionedRelation");
     }
 

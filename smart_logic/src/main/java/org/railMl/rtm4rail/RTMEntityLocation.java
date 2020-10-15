@@ -40,8 +40,7 @@ import jakarta.xml.bind.annotation.XmlType;
     RTMAreaLocation.class
 })
 public abstract class RTMEntityLocation
-    extends RTMBaseObject
-{
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMEntityLocation {
 
 
 }
