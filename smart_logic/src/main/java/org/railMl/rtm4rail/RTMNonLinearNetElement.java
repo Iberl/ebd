@@ -34,8 +34,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RTM_NonLinearNetElement")
 public class RTMNonLinearNetElement
-    extends RTMPositioningNetElement
-{
+    extends RTMPositioningNetElement implements de.ibw.rtm.intf.IRTMNonLinearNetElement {
 
 
 }

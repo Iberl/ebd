@@ -45,7 +45,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "geometricCoordinate"
 })
 public class RTMSpotLocation
-    extends RTMBaseObject {
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMSpotLocation {
 
     protected RTMLinearCoordinate linearCoordinate;
     protected RTMGeometricCoordinate geometricCoordinate;
@@ -66,6 +66,7 @@ public class RTMSpotLocation
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public RTMLinearCoordinate getLinearCoordinate() {
         return linearCoordinate;
     }
@@ -78,6 +79,7 @@ public class RTMSpotLocation
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public void setLinearCoordinate(RTMLinearCoordinate value) {
         this.linearCoordinate = value;
     }
@@ -90,6 +92,7 @@ public class RTMSpotLocation
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public RTMGeometricCoordinate getGeometricCoordinate() {
         return geometricCoordinate;
     }
@@ -102,6 +105,7 @@ public class RTMSpotLocation
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public void setGeometricCoordinate(RTMGeometricCoordinate value) {
         this.geometricCoordinate = value;
     }
@@ -114,6 +118,7 @@ public class RTMSpotLocation
      *     {@link String }
      *     
      */
+    @Override
     public String getNetElementRef() {
         return netElementRef;
     }
@@ -126,6 +131,7 @@ public class RTMSpotLocation
      *     {@link String }
      *     
      */
+    @Override
     public void setNetElementRef(String value) {
         this.netElementRef = value;
     }
@@ -138,6 +144,7 @@ public class RTMSpotLocation
      *     {@link Double }
      *     
      */
+    @Override
     public Double getIntrinsicCoord() {
         return intrinsicCoord;
     }
@@ -150,6 +157,7 @@ public class RTMSpotLocation
      *     {@link Double }
      *     
      */
+    @Override
     public void setIntrinsicCoord(Double value) {
         this.intrinsicCoord = value;
     }
@@ -162,6 +170,7 @@ public class RTMSpotLocation
      *     {@link TApplicationDirection }
      *     
      */
+    @Override
     public TApplicationDirection getApplicationDirection() {
         return applicationDirection;
     }
@@ -174,6 +183,7 @@ public class RTMSpotLocation
      *     {@link TApplicationDirection }
      *     
      */
+    @Override
     public void setApplicationDirection(TApplicationDirection value) {
         this.applicationDirection = value;
     }
@@ -186,6 +196,7 @@ public class RTMSpotLocation
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public BigDecimal getPos() {
         return pos;
     }
@@ -198,6 +209,7 @@ public class RTMSpotLocation
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public void setPos(BigDecimal value) {
         this.pos = value;
     }

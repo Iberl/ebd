@@ -34,8 +34,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "RTM_LinearNetElement")
 public class RTMLinearNetElement
-    extends RTMPositioningNetElement
-{
+    extends RTMPositioningNetElement implements de.ibw.rtm.intf.IRTMLinearNetElement {
 
 
 }
