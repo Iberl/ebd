@@ -13,6 +13,9 @@ import java.util.List;
 public class IntrinsicCoordinate extends DefaultObject implements IRTMIntrinsicCoordinate {
     public static String CLASS_IDENTIFIER = "Intrinsic_Coordnate";
 
+    /**
+     * Prozentuale Position auf der Kante als Wert zwischen 0 und 1.
+     */
     private double intrinsicCoord;
     private List<IRTMPositioningSystemCoordinate> coordinates = new ArrayList<>();
 

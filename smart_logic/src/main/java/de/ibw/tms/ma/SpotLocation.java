@@ -2,19 +2,36 @@ package de.ibw.tms.ma;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
+import de.ibw.rtm.intf.IRTMGeometricCoordinate;
+import de.ibw.rtm.intf.IRTMLinearCoordinate;
+import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.rtm.intf.IRTMSpotLocation;
+import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.TrackElement;
+import jdk.jshell.spi.ExecutionControl;
+import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMGeometricCoordinate;
 import org.railMl.rtm4rail.RTMLinearCoordinate;
 import org.railMl.rtm4rail.TApplicationDirection;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.UUID;
 
 
 public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Serializable {
 
-    public static final String CLASS_IDENTIFIER = "Sport_Location";
+    public static final String CLASS_IDENTIFIER = "Spot_Location";
+
+    protected TApplicationDirection applicationDirection;
+    protected IRTMPositioningNetElement NetElement;
+
+    protected IRTMLinearCoordinate LinearCoordinateSlSide;
+    protected IRTMGeometricCoordinate GeometricCoordinateSlSide;
+
+
+    protected double intrinsicCoord;
+    protected BigDecimal pos;
 
     @Override
     public String toString() {
@@ -65,61 +82,82 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
 
     @Override
     public RTMLinearCoordinate getLinearCoordinate() {
-        return null;
+        throw new NotImplementedException("Converter needed");
     }
 
     @Override
     public void setLinearCoordinate(RTMLinearCoordinate value) {
-
+        throw new NotImplementedException("Converter needed");
     }
 
     @Override
     public RTMGeometricCoordinate getGeometricCoordinate() {
-        return null;
+        throw new NotImplementedException("Converter needed");
     }
 
     @Override
     public void setGeometricCoordinate(RTMGeometricCoordinate value) {
-
+        throw new NotImplementedException("Converter needed");
     }
 
     @Override
     public String getNetElementRef() {
-        return null;
+        return this.NetElement.getId();
     }
 
     @Override
     public void setNetElementRef(String value) {
-
+        IRTMPositioningNetElement PosElement =
+                (IRTMPositioningNetElement) DefaultObject.topologyRepository.getModel(UUID.fromString(value));
+        NetElement = PosElement;
     }
 
     @Override
     public Double getIntrinsicCoord() {
-        return null;
+
+        return intrinsicCoord;
     }
 
     @Override
     public void setIntrinsicCoord(Double value) {
-
+        this.intrinsicCoord = value;
     }
 
     @Override
     public TApplicationDirection getApplicationDirection() {
-        return null;
+        return this.applicationDirection;
     }
 
     @Override
     public void setApplicationDirection(TApplicationDirection value) {
-
+        this.applicationDirection = value;
     }
 
     @Override
     public BigDecimal getPos() {
-        return null;
+
+        return this.pos;
     }
 
     @Override
     public void setPos(BigDecimal value) {
+        this.pos = value;
 
+    }
+
+    public IRTMLinearCoordinate getLinearCoordinateSlSide() {
+        return LinearCoordinateSlSide;
+    }
+
+    public void setLinearCoordinateSlSide(IRTMLinearCoordinate linearCoordinateSlSide) {
+        LinearCoordinateSlSide = linearCoordinateSlSide;
+    }
+
+    public IRTMGeometricCoordinate getGeometricCoordinateSlSide() {
+        return GeometricCoordinateSlSide;
+    }
+
+    public void setGeometricCoordinateSlSide(IRTMGeometricCoordinate geometricCoordinateSlSide) {
+        GeometricCoordinateSlSide = geometricCoordinateSlSide;
     }
 }

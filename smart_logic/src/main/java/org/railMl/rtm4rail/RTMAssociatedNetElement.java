@@ -9,6 +9,8 @@
 package org.railMl.rtm4rail;
 
 import java.math.BigDecimal;
+
+import de.ibw.rtm.intf.IRTMAssociatedNetElement;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -51,7 +53,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "geometricCoordinateEnd",
     "linearCoordinateEnd"
 })
-public class RTMAssociatedNetElement {
+public class RTMAssociatedNetElement implements IRTMAssociatedNetElement {
 
     protected RTMGeometricCoordinate geometricCoordinateBegin;
     protected RTMLinearCoordinate linearCoordinateBegin;
@@ -80,6 +82,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public RTMGeometricCoordinate getGeometricCoordinateBegin() {
         return geometricCoordinateBegin;
     }
@@ -92,6 +95,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public void setGeometricCoordinateBegin(RTMGeometricCoordinate value) {
         this.geometricCoordinateBegin = value;
     }
@@ -104,6 +108,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public RTMLinearCoordinate getLinearCoordinateBegin() {
         return linearCoordinateBegin;
     }
@@ -116,6 +121,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public void setLinearCoordinateBegin(RTMLinearCoordinate value) {
         this.linearCoordinateBegin = value;
     }
@@ -128,6 +134,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public RTMGeometricCoordinate getGeometricCoordinateEnd() {
         return geometricCoordinateEnd;
     }
@@ -140,6 +147,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMGeometricCoordinate }
      *     
      */
+    @Override
     public void setGeometricCoordinateEnd(RTMGeometricCoordinate value) {
         this.geometricCoordinateEnd = value;
     }
@@ -152,6 +160,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public RTMLinearCoordinate getLinearCoordinateEnd() {
         return linearCoordinateEnd;
     }
@@ -164,6 +173,7 @@ public class RTMAssociatedNetElement {
      *     {@link RTMLinearCoordinate }
      *     
      */
+    @Override
     public void setLinearCoordinateEnd(RTMLinearCoordinate value) {
         this.linearCoordinateEnd = value;
     }
@@ -176,6 +186,7 @@ public class RTMAssociatedNetElement {
      *     {@link String }
      *     
      */
+    @Override
     public String getNetElementRef() {
         return netElementRef;
     }
@@ -188,6 +199,7 @@ public class RTMAssociatedNetElement {
      *     {@link String }
      *     
      */
+    @Override
     public void setNetElementRef(String value) {
         this.netElementRef = value;
     }
@@ -200,6 +212,7 @@ public class RTMAssociatedNetElement {
      *     {@link Double }
      *     
      */
+    @Override
     public Double getIntrinsicCoordBegin() {
         return intrinsicCoordBegin;
     }
@@ -212,6 +225,7 @@ public class RTMAssociatedNetElement {
      *     {@link Double }
      *     
      */
+    @Override
     public void setIntrinsicCoordBegin(Double value) {
         this.intrinsicCoordBegin = value;
     }
@@ -224,6 +238,7 @@ public class RTMAssociatedNetElement {
      *     {@link Double }
      *     
      */
+    @Override
     public Double getIntrinsicCoordEnd() {
         return intrinsicCoordEnd;
     }
@@ -236,6 +251,7 @@ public class RTMAssociatedNetElement {
      *     {@link Double }
      *     
      */
+    @Override
     public void setIntrinsicCoordEnd(Double value) {
         this.intrinsicCoordEnd = value;
     }
@@ -244,6 +260,7 @@ public class RTMAssociatedNetElement {
      * Ruft den Wert der keepsOrientation-Eigenschaft ab.
      * 
      */
+    @Override
     public boolean isKeepsOrientation() {
         return keepsOrientation;
     }
@@ -252,6 +269,7 @@ public class RTMAssociatedNetElement {
      * Legt den Wert der keepsOrientation-Eigenschaft fest.
      * 
      */
+    @Override
     public void setKeepsOrientation(boolean value) {
         this.keepsOrientation = value;
     }
@@ -264,6 +282,7 @@ public class RTMAssociatedNetElement {
      *     {@link Integer }
      *     
      */
+    @Override
     public Integer getSequence() {
         return sequence;
     }
@@ -276,6 +295,7 @@ public class RTMAssociatedNetElement {
      *     {@link Integer }
      *     
      */
+    @Override
     public void setSequence(Integer value) {
         this.sequence = value;
     }
@@ -288,6 +308,7 @@ public class RTMAssociatedNetElement {
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public BigDecimal getPosBegin() {
         return posBegin;
     }
@@ -300,6 +321,7 @@ public class RTMAssociatedNetElement {
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public void setPosBegin(BigDecimal value) {
         this.posBegin = value;
     }
@@ -312,6 +334,7 @@ public class RTMAssociatedNetElement {
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public BigDecimal getPosEnd() {
         return posEnd;
     }
@@ -324,6 +347,7 @@ public class RTMAssociatedNetElement {
      *     {@link BigDecimal }
      *     
      */
+    @Override
     public void setPosEnd(BigDecimal value) {
         this.posEnd = value;
     }

@@ -1,9 +1,12 @@
 package de.ibw.tms.ma.physical;
 
 import de.ibw.rtm.intf.IRTMEntityLocation;
+import de.ibw.rtm.intf.IRTMGeometricCoordinate;
 import de.ibw.rtm.intf.IRTMLocatedNetEntity;
 import de.ibw.tms.ma.Chainage;
+import de.ibw.tms.ma.physical.intf.IPixelPosition;
 import de.ibw.tms.ma.positioned.elements.NetEntity;
+import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMAreaLocation;
 import org.railMl.rtm4rail.RTMLinearLocation;
 import org.railMl.rtm4rail.RTMSpotLocation;
@@ -16,9 +19,9 @@ public class LocatedNetEntity extends NetEntity implements IRTMLocatedNetEntity,
     private Chainage chainageBeginn;
     private Chainage chainageEnd;
     private IRTMGeometricCoordinate geoCoordinates;
+    private IPixelPosition PixelPosition;
 
-    private IRTMEntityLocation MainLocation;
-    private List<IRTMLocatedNetEntity> locationList = new ArrayList<>();
+    private List<IRTMEntityLocation> locationList = new ArrayList<>();
 
     public LocatedNetEntity(String sName) {
         super(sName);
@@ -51,20 +54,22 @@ public class LocatedNetEntity extends NetEntity implements IRTMLocatedNetEntity,
 
     @Override
     public List<RTMAreaLocation> getAreaLocation() {
-        return null;
+        throw new NotImplementedException("Converter has to be developed");
     }
 
     @Override
     public List<RTMLinearLocation> getLinearLocation() {
-        return null;
+        throw new NotImplementedException("Converter has to be developed");
     }
 
     @Override
     public List<RTMSpotLocation> getSpotLocation() {
-        return null;
+        throw new NotImplementedException("Converter has to be developed");
     }
 
-    public List<IRTMLocatedNetEntity> getLocationList() {
+    public List<IRTMEntityLocation> getLocationList() {
         return locationList;
     }
+
+
 }

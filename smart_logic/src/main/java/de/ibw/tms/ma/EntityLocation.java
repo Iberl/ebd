@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class EntityLocation extends NetworkResource implements IRTMEntityLocation {
     private IRTMLocatedNetEntity locatedNetEntity;
-    private IRTMPositioningNetElement MainNetElement;
+
     private List<IRTMPositioningNetElement> positioningNetElementList = new ArrayList<>();
 
     public EntityLocation(String sName) {
@@ -26,14 +26,4 @@ public abstract class EntityLocation extends NetworkResource implements IRTMEnti
         this.locatedNetEntity = locatedNetEntity;
     }
 
-    public IRTMPositioningNetElement getMainNetElement() {
-        return MainNetElement;
-    }
-
-    public void setMainNetElement(IRTMPositioningNetElement mainNetElement) {
-        MainNetElement = mainNetElement;
-        if(!positioningNetElementList.contains(MainNetElement)) {
-            positioningNetElementList.add(MainNetElement);
-        }
-    }
 }
