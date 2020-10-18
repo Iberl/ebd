@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os.path
 
-path = r"C:\intellij-workspace\etcs\results\breakingCurves\2020-10-13T14-53-15.5537037"
+path = r"C:\intellij-workspace\etcs\trainSide\breakingCurveCalculator\results\breakingCurves\2020-10-12T19-26-12.433047"
 
 def getPlotDir(allLines):
     highX = 0.0
