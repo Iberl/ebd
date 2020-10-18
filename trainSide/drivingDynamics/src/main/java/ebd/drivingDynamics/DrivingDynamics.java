@@ -465,13 +465,14 @@ public class DrivingDynamics {
 
     /**
      * Calculates the necessary modifier to break gracefully to the signal
-     * @return Modifier
      */
     private void calculateModifier() {
         double currentSpeed = this.dynamicState.getSpeed();
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-
+        System.out.println("curSpeed" + currentSpeed);
+        System.out.println("maxBreakingAcc: " + maxBreakingAcc);
+        System.out.println("distanceToEOA: " + distanceToEOA);
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
         neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
         double modifier = -neededBreakingACC/maxBreakingAcc;
@@ -479,6 +480,7 @@ public class DrivingDynamics {
             modifier = 1;
         }
         this.breakModifierForRSM = modifier;
+        System.out.println("modifier: " + modifier);
     }
 
     /**
