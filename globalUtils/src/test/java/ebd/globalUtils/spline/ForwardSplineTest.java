@@ -101,8 +101,8 @@ class ForwardSplineTest {
 
     void getHigherOrLastKnotXValue() {
 
-        assertEquals(0d, fs1.getLowerOrFirstKnotXValue(1d));
-        assertEquals(0d, fs1.getLowerOrFirstKnotXValue(0d));
+        assertEquals(0d, fs1.getFloorKnotXValue(1d));
+        assertEquals(0d, fs1.getFloorKnotXValue(0d));
 
     }
 

@@ -6,6 +6,7 @@ import ebd.drivingDynamics.util.conditions.abstracts.CurveBasedCondition;
 import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -55,7 +56,7 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
      */
     private double maxBreakinCurveDistance;
     private double maxTripSectionDistance;
-    private BreakingCurve c30Curve;
+    private BreakingCurve serviceBreakingCurve;
 
 
     /**
@@ -75,22 +76,23 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
         double maxSpeed;
         double curSpeed = trainDataVolatile.getCurrentSpeed();
         double curSecDis = trainDataVolatile.getCurTripSectionDistance();
+        double testDistance = (curSecDis + curSpeed * this.time);
         switch (this.curveBase){
 
             case C30:
-                if((curSecDis + curSpeed * this.time) > this.maxBreakinCurveDistance){
+                if(testDistance > this.maxBreakinCurveDistance){
                     maxSpeed = 0;
                 }
                 else {
-                    maxSpeed = this.c30Curve.getPointOnCurve((curSecDis + curSpeed * this.time));
+                    maxSpeed = this.serviceBreakingCurve.getSpeedAtDistance(testDistance, CurveType.C30_CURVE);
                 }
                 break;
             case TRIP_PROFILE:
-                if((curSecDis + curSpeed * this.time) > this.maxTripSectionDistance){
+                if(testDistance > this.maxTripSectionDistance){
                     maxSpeed = 0;
                 }
                 else {
-                    maxSpeed = this.tripProfile.getPointOnCurve((curSecDis + curSpeed * this.time));
+                    maxSpeed = this.tripProfile.getPointOnCurve(testDistance);
                 }
                 break;
             default:
@@ -127,8 +129,8 @@ public class MaxFutureSpeedCondition extends CurveBasedCondition {
     @Subscribe
     public void newBreakingCurveGroup(NewBreakingCurveEvent nbce){
         if(!vaildEventTarget(nbce.target)) return;
-        this.c30Curve = nbce.breakingCurveGroup.getServiceCoastingPhaseCurve();
-        this.maxBreakinCurveDistance = this.c30Curve.getHighestXValue();
+        this.serviceBreakingCurve = nbce.serviceBreakingCurve;
+        this.maxBreakinCurveDistance = this.serviceBreakingCurve.endOfDefinedDistance();
 
     }
 

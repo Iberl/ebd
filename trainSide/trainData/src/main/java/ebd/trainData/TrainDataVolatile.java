@@ -96,51 +96,65 @@ public class TrainDataVolatile {
 
     /**
      * The current max speed of the train in [m/s] based on
-     * the permitted curve.
-     * Updated by the speed supervision module.
+     * the permitted speed curve of the emergency deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentMaximumSpeed = 0d;
 
 
     /**
      * The current emergency intervention speed of the train in [m/s] based on
-     * the service intervention curve.
-     * Updated by the speed supervision module.
+     * the emergency deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentEmergencyInterventionSpeed = 0d;
 
     /**
      * The current service intervention speed of the train in [m/s] based on
-     * the service intervention curve.
-     * Updated by the speed supervision module.
+     * the emergency deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
-    protected volatile double currentServiceInterventionSpeed = 0d;
+    protected volatile double currentServiceIntervention2Speed = 0d;
+
+    /**
+     * The current service intervention speed of the train in [m/s] based on
+     * the service deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
+     */
+    protected volatile double currentServiceIntervention1Speed = 0d;
+
+    /**
+     * The current normal intervention speed of the train in [m/s] based on
+     * the normal deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
+     */
+    protected volatile double currentNormalInterventionSpeed = 0d;
 
     /**
      * The current service warning speed of the train in [m/s] based on
-     * the service warning curve.
-     * Updated by the speed supervision module.
+     * the emergency deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentWarningSpeed = 0d;
 
     /**
      * The current service indication speed of the train in [m/s] based on
-     * the service indication curve.
-     * Updated by the speed supervision module.
+     * the emergency deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentIndicationSpeed = 0d;
 
     /**
      * The current service coasting phase speed of the train in [m/s] based on
-     * the service coasting phase curve.
-     * Updated by the speed supervision module.
+     * the service deceleration curve.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentCoastingPhaseSpeed = 0d;
 
 
     /**
      * Target speed of the next breaking phase of the train in [m/s].
-     * Updated by the speed supervision module.
+     * Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double targetSpeed = 0d;
 
@@ -148,7 +162,7 @@ public class TrainDataVolatile {
      * Current release speed of the next breaking phase of the train in [m/s].<br>
      *     <b>0</b> if there is no release speed at the end of the next breaking phase <br>
      *     <b> Greater 0</b> if there is a release speed.<br>
-     *     Updated by the speed supervision module.
+     *     Updated by the speed update supervisor in the TSM module.
      */
     protected volatile double currentApplicableReleaseSpeed = 0d;
 
@@ -171,10 +185,16 @@ public class TrainDataVolatile {
     protected volatile String currentBreakingMode = null;
 
     /**
-     * The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     * The current normal breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
     @NotNull
-    protected volatile ForwardSpline currentBreakingPower;
+    protected volatile ForwardSpline currentNormalBreakingPower;
+
+    /**
+     * The current service breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    protected volatile ForwardSpline currentServiceBreakingPower;
 
     /**
      * The current emergency breaking power b(v), b in [m/(s^2)], v in [m/s]
@@ -267,7 +287,8 @@ public class TrainDataVolatile {
         this.etcsID = etcsID;
         this.trainConfigID = trainConfigID;
         this.infrastructureID = infrastructureID;
-        this.currentBreakingPower = BreakingPowerCurveCalculator.calculateBreakingPower(localBus);
+        this.currentNormalBreakingPower = BreakingPowerCurveCalculator.calculateNormalBreakingPower(localBus);
+        this.currentServiceBreakingPower = BreakingPowerCurveCalculator.calculateServiceBreakingPower(localBus);
         this.currentEmergencyBreakingPower = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(localBus);
         this.currentAcceleratingPower = AccelerationPowerCurveCalculator.calculate(localBus);
         this.currentResistanceCurve = ResistanceCurveCalculator.calculate(localBus);
@@ -367,8 +388,8 @@ public class TrainDataVolatile {
      * the service intervention curve
      * Updated from the speed supervision module
      */
-    public double getCurrentServiceInterventionSpeed() {
-        return currentServiceInterventionSpeed;
+    public double getCurrentServiceIntervention2Speed() {
+        return currentServiceIntervention2Speed;
     }
 
     /**
@@ -441,11 +462,19 @@ public class TrainDataVolatile {
     }
 
     /**
-     * @return The current breaking power b(v), b in [m/(s^2)], v in [m/s]
+     * @return The current normal breaking power b(v), b in [m/(s^2)], v in [m/s]
      */
     @NotNull
-    public ForwardSpline getCurrentBreakingPower() {
-        return currentBreakingPower;
+    public ForwardSpline getCurrentNormalBreakingPower() {
+        return currentNormalBreakingPower;
+    }
+
+    /**
+     * @return The current service breaking power b(v), b in [m/(s^2)], v in [m/s]
+     */
+    @NotNull
+    public ForwardSpline getCurrentServiceBreakingPower() {
+        return currentServiceBreakingPower;
     }
 
     /**

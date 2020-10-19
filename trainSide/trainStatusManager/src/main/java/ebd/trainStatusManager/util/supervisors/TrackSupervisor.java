@@ -1,6 +1,6 @@
 package ebd.trainStatusManager.util.supervisors;
 
-import ebd.globalUtils.etcsPacketToProfileConverters.GradientProfileConverter;
+import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.spline.ForwardSpline;

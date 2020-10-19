@@ -238,18 +238,11 @@ public class MessageHandler {
 
         for (TrackPacket packet : msg3.packets){ //TODO Check LRBG reference consistency
             String pName = packet.getClass().getSimpleName();
-            switch (pName){
-                case "Packet_21":
-                    packet21 = (Packet_21)packet;
-                    break;
-                case "Packet_27":
-                    packet27 = (Packet_27)packet;
-                    break;
-                case "Packet_65":
-                    listOfPacket65s.add((Packet_65)packet);
-                    break;
-                default:
-                    handleOptionalTrackPacket(rme, packet, refLoc);
+            switch (pName) {
+                case "Packet_21" -> packet21 = (Packet_21) packet;
+                case "Packet_27" -> packet27 = (Packet_27) packet;
+                case "Packet_65" -> listOfPacket65s.add((Packet_65) packet);
+                default -> handleOptionalTrackPacket(rme, packet, refLoc);
             }
         }
 
@@ -267,7 +260,8 @@ public class MessageHandler {
         changesForRouteData_2.put("packet_65", listOfPacket65s);
         localBus.post(new RouteDataMultiChangeEvent("rsm", "rd", changesForRouteData_2));
 
-        ForwardSpline breakingPower = trainDataVolatile.getCurrentBreakingPower();
+        ForwardSpline normalBreakingPower = trainDataVolatile.getCurrentServiceBreakingPower();
+        ForwardSpline serviceBreakingPower = trainDataVolatile.getCurrentServiceBreakingPower();
         ForwardSpline emergencyBreakingPower = trainDataVolatile.getCurrentEmergencyBreakingPower();
         double currentGradient = routeDataVolatile.getCurrentGradient();
         int nc_cdtrain = ETCSVariables.NC_CDTRAIN; //Not available in MVP TODO Add NC values to TrainDataPerma
@@ -279,10 +273,23 @@ public class MessageHandler {
         AvailableAcceleration availableAcceleration = new AvailableAcceleration(localBus);
         localBus.post(new TrainDataChangeEvent("rsm","td", "availableAcceleration", availableAcceleration));
 
-        BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm", "bcc",
-                id,breakingPower, emergencyBreakingPower,
-                packet15,packet21,currentGradient,refPosition, packet27,listOfPacket65s,nc_cdtrain,nc_train,
-                l_train,currentMaxSpeed,maxTrainSpeed);
+        BreakingCurveRequestEvent bcre = new BreakingCurveRequestEvent("tsm",
+                "bcc",
+                id,
+                normalBreakingPower,
+                serviceBreakingPower,
+                emergencyBreakingPower,
+                packet15,
+                packet21,
+                currentGradient,
+                refPosition,
+                packet27,
+                listOfPacket65s,
+                nc_cdtrain,
+                nc_train,
+                l_train,
+                currentMaxSpeed,
+                maxTrainSpeed);
         this.localBus.post(bcre);
 
         if(msg3.M_ACK){

@@ -54,7 +54,7 @@ public class ForwardSpline extends Spline {
 	@Override
 	public Double getPointOnCurve(Double xValue) {
 		
-		Double key = getLowerOrFirstKnotXValue(xValue);
+		Double key = getFloorKnotXValue(xValue);
 		ArrayList<Double> coefficents = curve.get(key);
 		Double deltaX = xValue - key;
 		Double result = 0d;
@@ -109,9 +109,8 @@ public class ForwardSpline extends Spline {
 	}
 	
 	/**
-	 * Returns the x-value of the next lower knot, unless the specified x-value is equal
-	 * to the x-value of the first knot, at which the x-value of the first knot is returned.
-	 * 
+	 * Returns the x-value of the next lower or equal knot.
+	 * //TODO Spline Documentation
 	 * 
 	 * 
 	 * @param xValue The specifid x-Value
@@ -121,16 +120,11 @@ public class ForwardSpline extends Spline {
 	 * @author Lars Schulze-Falck
 	 */
 	
-	public Double getLowerOrFirstKnotXValue(Double xValue) throws IndexOutOfBoundsException{
+	public Double getFloorKnotXValue(Double xValue) throws IndexOutOfBoundsException{
 		if (curve.floorKey(xValue) == null) {			
-			throw new IndexOutOfBoundsException(String.format("Input value (%f) is lower then the lowest point (%f) in this curve",xValue,curve.firstKey()));	
+
+			throw new IndexOutOfBoundsException(String.format("Input value (%f) is lower then the lowest point (%f) in this curve",xValue,curve.firstKey()));
 		}
-		
-		else if (curve.firstKey().equals(xValue)) {
-			return curve.firstKey();
-		}
-		else {
-			return curve.lowerKey(xValue);
-		}
+		return curve.floorKey(xValue);
 	}
 }

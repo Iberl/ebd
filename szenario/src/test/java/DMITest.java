@@ -1,14 +1,3 @@
-import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
-import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
-import ebd.szenario.util.server.DMIServer;
-import org.greenrobot.eventbus.EventBus;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
 public class DMITest {
 
 //    private EventBus globalEventBus;

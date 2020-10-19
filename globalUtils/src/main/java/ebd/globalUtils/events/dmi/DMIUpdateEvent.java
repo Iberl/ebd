@@ -4,8 +4,6 @@ import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 
-import java.util.List;
-
 public class DMIUpdateEvent extends NormalEvent {
 
     private double currentSpeed;
