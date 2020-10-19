@@ -2,6 +2,7 @@ package ebd.etcsCore.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.szenario.StopTrainEvent;
 import ebd.globalUtils.events.szenario.TerminateTrainEvent;
 import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
@@ -23,19 +24,19 @@ import java.util.List;
  * socket connection to the server.
  */
 public class InfrastructureClient {
-    private EventBus globalEventBus;
+    private final EventBus globalEventBus;
 
-    private String ip;
-    private int port;
+    private final String ip;
+    private final int port;
     private Socket socket;
     private PrintWriter out;
 
-    private List<Integer> registeredTrains = new ArrayList();
+    private final List<Integer> registeredTrains = new ArrayList();
 
     /**
      * If simulated, do not connect to any servers
      */
-    private boolean useInfrastructureServer;
+    private final boolean useInfrastructureServer;
 
     /**
      * Constructs this class. Only connects to the infrastructure server if useInfrastructureServer in {@link ConfigHandler} is
@@ -73,9 +74,13 @@ public class InfrastructureClient {
             from 0 to 10 km/h and starts with two at 10 km/h.
             */
             go(trainID, 1);
+            String msg = "Send: go " + trainID + " " + "1";
+            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
         }
         else {
             gok(trainID, uie.speedInKmh);
+            String msg = "Send: gok " + trainID + " " + uie.speedInKmh;
+            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
         }
     }
 
