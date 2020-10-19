@@ -1,7 +1,6 @@
-package ebd.szenario.util.handler;
+package ebd.etcsCore.util.handler;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import org.greenrobot.eventbus.EventBus;

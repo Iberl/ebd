@@ -1,4 +1,4 @@
-package ebd.szenario.util.clients;
+package ebd.etcsCore.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;

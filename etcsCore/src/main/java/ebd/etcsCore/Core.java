@@ -1,4 +1,4 @@
-package ebd.szenario;
+package ebd.etcsCore;
 
 
 import ebd.globalUtils.appTime.AppTime;
@@ -13,13 +13,13 @@ import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.szenario.util.clients.InfrastructureClient;
-import ebd.szenario.util.handler.InputHandler;
-import ebd.szenario.util.handler.SzenarioEventHandler;
-import ebd.szenario.util.events.LoadEvent;
-import ebd.szenario.util.events.SzenarioExceptionEvent;
-import ebd.szenario.util.server.DMIServer;
-import ebd.szenario.util.server.GUIServer;
+import ebd.etcsCore.util.clients.InfrastructureClient;
+import ebd.etcsCore.util.handler.InputHandler;
+import ebd.etcsCore.util.handler.SzenarioEventHandler;
+import ebd.etcsCore.util.events.LoadEvent;
+import ebd.etcsCore.util.events.SzenarioExceptionEvent;
+import ebd.etcsCore.util.server.DMIServer;
+import ebd.etcsCore.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -28,7 +28,7 @@ import java.io.IOException;
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 
-public class Szenario implements Runnable {
+public class Core implements Runnable {
 
     static class btgGenerator {
         public static void sendLinkingInformation(MessageSender ms) {
@@ -85,7 +85,7 @@ public class Szenario implements Runnable {
      */
     private TrainManager tm = null;
 
-    public Szenario() {
+    public Core() {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
         this.szenarioEventHandler = new SzenarioEventHandler();
@@ -119,7 +119,7 @@ public class Szenario implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Szenario",
+            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -130,7 +130,7 @@ public class Szenario implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Szenario",
+            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }

@@ -1,4 +1,4 @@
-package ebd.szenario.util.server;
+package ebd.etcsCore.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;

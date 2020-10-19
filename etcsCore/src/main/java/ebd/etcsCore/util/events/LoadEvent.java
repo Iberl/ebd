@@ -1,8 +1,6 @@
-package ebd.szenario.util.events;
+package ebd.etcsCore.util.events;
 
 import ebd.globalUtils.events.NormalEvent;
-
-import java.util.List;
 
 public class LoadEvent extends NormalEvent {
     /**
