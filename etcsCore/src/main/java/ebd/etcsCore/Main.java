@@ -1,4 +1,4 @@
-package ebd.szenario;
+package ebd.etcsCore;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 
@@ -9,6 +9,6 @@ public class Main {
             System.out.println("Config Handler could not be opened");
             System.exit(0);
         }
-        Szenario szenario = new Szenario();
+        Core core = new Core();
     }
 }

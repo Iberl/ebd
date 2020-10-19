@@ -16,10 +16,9 @@ import ebd.rbc_tms.payload.Payload_15;
 import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import ebd.szenario.util.server.GUIServer;
+import ebd.etcsCore.util.server.GUIServer;
 
 import javax.swing.*;
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Flow;

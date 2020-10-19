@@ -1,15 +1,14 @@
-package ebd.szenario.util.server;
+package ebd.etcsCore.util.server;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /**
  * This class manages socket connected to {@link GUIServer}
  */
-public class DMIClientWorker implements Runnable{
+public class GUIClientWorker implements Runnable{
 
-    private Thread dmiClientWorker;
+    private Thread guiClientWorker;
     private Socket client;
     private PrintWriter out;
 
@@ -18,11 +17,11 @@ public class DMIClientWorker implements Runnable{
      * @param client The client socket.
      * @throws IOException
      */
-    public DMIClientWorker(Socket client) throws IOException {
-        this.dmiClientWorker = new Thread(this);
+    public GUIClientWorker(Socket client) throws IOException {
+        this.guiClientWorker = new Thread(this);
         this.client = client;
         this.out = new PrintWriter(client.getOutputStream(), true);
-        this.dmiClientWorker.start();
+        this.guiClientWorker.start();
     }
 
     /**
@@ -43,7 +42,7 @@ public class DMIClientWorker implements Runnable{
      * Sends a string to the client
      * @param string String to send.
      */
-    public synchronized void sendString(String string){
+    public void sendString(String string){
         if(!this.client.isClosed()) this.out.println(string);
     }
 }
