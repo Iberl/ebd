@@ -1,8 +1,7 @@
-package ebd.szenario.util.server;
+package ebd.etcsCore.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
-import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;

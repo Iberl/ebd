@@ -1,14 +1,12 @@
-package ebd.szenario.util.handler;
+package ebd.etcsCore.util.handler;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
-import ebd.szenario.util.events.LoadEvent;
+import ebd.etcsCore.util.events.LoadEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Scanner;
 
 public class InputHandler implements Runnable {

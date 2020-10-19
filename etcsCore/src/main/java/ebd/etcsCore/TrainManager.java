@@ -1,4 +1,4 @@
-package ebd.szenario;
+package ebd.etcsCore;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;

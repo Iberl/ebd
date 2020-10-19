@@ -1,10 +1,8 @@
-package ebd.szenario.util.events;
+package ebd.etcsCore.util.events;
 
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
-
-import java.util.List;
 
 public class SzenarioExceptionEvent extends ExceptionEvent {
 

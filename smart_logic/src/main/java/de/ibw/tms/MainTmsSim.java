@@ -5,15 +5,9 @@ import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.ui.ScenarioPanel;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
-import ebd.rbc_tms.util.ETCSVariables;
-import ebd.szenario.util.server.GUIServer;
 
 import javax.swing.*;
 import java.awt.*;
