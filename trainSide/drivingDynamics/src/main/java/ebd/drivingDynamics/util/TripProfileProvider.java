@@ -1,8 +1,9 @@
 package ebd.drivingDynamics.util;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.breakingCurveCalculator.BreakingCurveGroup;
+import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -14,9 +15,9 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class TripProfileProvider {
@@ -32,7 +33,7 @@ public class TripProfileProvider {
     ConfigHandler ch = ConfigHandler.getInstance();
     TrainDataVolatile trainDataVolatile;
 
-    private Mode mode;
+    private final Mode mode;
     private Spline profile = null;
     private Location refLocation = new InitalLocation();
 
@@ -40,28 +41,21 @@ public class TripProfileProvider {
         this.localEventBus = localBus;
         this.localEventBus.register(this);
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
-        switch(ch.tripProfileMode){
-            case("breakkingcurve"):
-                this.mode = Mode.FROM_BREAKINGCURVE;
-                break;
-            case("file"):
-                this.mode = Mode.FROM_FILE;
-                break;
-            case("socket"):
-                this.mode = Mode.FROM_SOCKET;
-                break;
-            default:
-                this.mode = Mode.FROM_BREAKINGCURVE;
+        switch (ch.tripProfileMode) {
+            case ("breakkingcurve") -> this.mode = Mode.FROM_BREAKINGCURVE;
+            case ("file") -> this.mode = Mode.FROM_FILE;
+            case ("socket") -> this.mode = Mode.FROM_SOCKET;
+            default -> this.mode = Mode.FROM_BREAKINGCURVE;
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newBreakingCurveEvent(NewBreakingCurveEvent nbce){
         if(this.mode != Mode.FROM_BREAKINGCURVE) {
-            getProfilefromSource(nbce.breakingCurveGroup.getPermittedSpeedCurve());
+            getProfilefromSource(nbce.serviceBreakingCurve);
         }
         else {
-            getProfileFromBreakingCurveGroup(nbce.breakingCurveGroup);
+            getProfileFromBreakingCurveGroup(nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve);
         }
 
 
@@ -69,33 +63,31 @@ public class TripProfileProvider {
                                 "dd",
                                 this.profile,
                                 refLocation.getId()));
-
     }
 
     /**
-     * Because the way breaking curves are calculated, the permitted speed curve have higher
-     * speeds then the service intervention breaks.
-     * This leads to an undesirable behavior of the driving dynamic class. This method takes numeric
-     * approach to produce the minimum curve of both by sampling both curves with a 0.5 m resolution and taking the minimal value.
-     * @param breakingCurveGroup A {@link BreakingCurveGroup} from a {@link NewBreakingCurveEvent}
+     *
      */
-    private void getProfileFromBreakingCurveGroup(BreakingCurveGroup breakingCurveGroup) {
+    private void getProfileFromBreakingCurveGroup(BreakingCurve emerCurve, BreakingCurve serCurve) {
         //TODO Check Performance inpact. Should be low (only done once per MA)
-        BreakingCurve psc = breakingCurveGroup.getPermittedSpeedCurve();
-        this.refLocation = psc.getRefLocation();
+        this.refLocation = emerCurve.getRefLocation();
 
-        BreakingCurve sic = breakingCurveGroup.getServiceInterventionCurve();
-
-        final double maxX = Math.min(psc.getHighestXValue(),sic.getHighestXValue());
+        final double maxX = serCurve.endOfDefinedDistance();
         final int xSteps = (int)maxX * 2;
         final double deltaX = maxX / xSteps;
 
         List<double[]> pointList = new ArrayList<>();
-        pointList.add(new double[]{0,Math.min(psc.getPointOnCurve(0d),sic.getPointOnCurve(0d))});
+
+        double emerSpeed = emerCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+        double servSpeed = serCurve.getSpeedAtDistance(0, CurveType.PERMITTED_SPEED);
+        pointList.add(new double[]{0,Math.min(emerSpeed,servSpeed)});
         double [] carryPoint = {-1,-1}; //Needed to preserve areas of constant speed on the curve, will be used to mark the endpoint of such an area
 
         for(double x = deltaX; x<=maxX; x += deltaX){
-            double y = Math.min(psc.getPointOnCurve(x),sic.getPointOnCurve(x));
+            emerSpeed = emerCurve.getSpeedAtDistance(x, CurveType.PERMITTED_SPEED);
+            servSpeed = serCurve.getSpeedAtDistance(x, CurveType.PERMITTED_SPEED);
+
+            double y = Math.min(emerSpeed,servSpeed);
 
             if(y == pointList.get(pointList.size() - 1)[1]) {
                 carryPoint = new double[]{x,y};

@@ -54,6 +54,10 @@ public class BCLREgeneratorFromRandom{
 		packet15.endsection = endsection;
 		packet15.sections = sections;
 		packet15.V_LOA = rng.nextInt(9);
+		packet15.Q_OVERLAP = ETCSVariables.Q_OVERLAP_INFO;
+		packet15.D_OL = 200;
+		packet15.Q_DANGERPOINT = ETCSVariables.Q_DANGERPOINT_INFO;
+		packet15.D_DP = 100;
 			
 		//setting currentPosition
 		Position currentPosition = new Position(0, true, new Location(2, 1, ETCSVariables.Q_DIR_NOMINAL, 20d));

@@ -1,10 +1,10 @@
-package ebd.globalUtils.etcsPacketToProfileConverters;
+package ebd.globalUtils.etcsPacketConverters;
 
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.util.ETCSVariables;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;

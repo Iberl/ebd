@@ -117,7 +117,7 @@ public class ConfigHandler {
     /**
      * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
      */
-    public long timeBase = 1593522000000l;
+    public long timeBase = 1593522000000L;
 
     //############# Train Variables #############
 
@@ -167,27 +167,27 @@ public class ConfigHandler {
     /**
      * Service break intervention curve offset in [s]
      */
-    public double serviceInterventionOffset = 1;
+    public double serviceInterventionOffset = 4;
 
     /**
      * Service break warning curve offset in [s]
      */
-    public double serviceWarningOffset = 3;
+    public double warningOffset = 6;
 
     /**
      * Service break permitted speed curve offset in [s]
      */
-    public double servicePermittedOffset = 7;
+    public double permittedOffset = 10;
 
     /**
      * Service break indication curve offset in [s]
      */
-    public double serviceIndicationOffset = 12;
+    public double indicationOffset = 15;
 
     /**
      * Service coasting curve that allows for a coasting phase before breaking is needed
      */
-    public double serviceCoastingPhaseOffset = 37;
+    public double coastingPhaseOffset = 34;
 
     /**
      * Speed difference between Permitted speed

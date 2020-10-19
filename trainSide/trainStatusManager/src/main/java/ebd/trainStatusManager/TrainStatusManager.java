@@ -8,7 +8,6 @@ import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
-import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
@@ -39,11 +38,8 @@ import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
 import ebd.trainStatusManager.util.handlers.TelegramHandler;
 import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
-import ebd.trainStatusManager.util.supervisors.MessageAuthorityRequestSupervisor;
-import ebd.trainStatusManager.util.supervisors.ModeAndLevelSupervisor;
-import ebd.trainStatusManager.util.supervisors.PositionReportSupervisor;
+import ebd.trainStatusManager.util.supervisors.*;
 import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
-import ebd.trainStatusManager.util.supervisors.TrackSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -96,6 +92,7 @@ public class TrainStatusManager implements Runnable {
     private MessageAuthorityRequestSupervisor messageAuthorityRequestSupervisor;
     private PositionReportSupervisor positionReportSupervisor;
     private TrackSupervisor trackSupervisor;
+    private SpeedUpdateSupervisor speedUpdateSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -168,7 +165,7 @@ public class TrainStatusManager implements Runnable {
      * Listens to
      * @param nbce
      */
-    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void newBreakingCurve(NewBreakingCurveEvent nbce){
         if(!validTarget(nbce.target)){
             return;
@@ -177,7 +174,6 @@ public class TrainStatusManager implements Runnable {
         //this.localEventBus.post(new DDUnlockEvent("tsm", "dd"));
         this.localEventBus.post(new ToLogEvent("tsm", "log",
                 "Calculated a new breaking curve"));
-
 
         if(ch.debug){
             saveBreakingCurvesToFile(nbce);
@@ -337,6 +333,7 @@ public class TrainStatusManager implements Runnable {
         this.messageAuthorityRequestSupervisor = new MessageAuthorityRequestSupervisor(this.localEventBus, String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.trackSupervisor = new TrackSupervisor(this.localEventBus);
+        this.speedUpdateSupervisor = new SpeedUpdateSupervisor(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 
@@ -358,32 +355,24 @@ public class TrainStatusManager implements Runnable {
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
+        String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
         String dirPathString = "results/breakingCurves/" + timeString.replaceAll(":", "-") + "/";
+        BreakingCurve[] lobc = {nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve, nbce.normalBreakingCurve};
 
         if(!new File(dirPathString).mkdirs()){
             System.err.println("Could not create necessary directories");
             System.exit(-1); //TODO Make better and Event
         }
 
-        List<BreakingCurve> lobc = new ArrayList<>();
-        lobc.add(nbce.breakingCurveGroup.getEmergencyDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getEmergencyInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceDecelerationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceInterventionCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceWarningCurve());
-        lobc.add(nbce.breakingCurveGroup.getPermittedSpeedCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceIndicationCurve());
-        lobc.add(nbce.breakingCurveGroup.getServiceCoastingPhaseCurve());
-
         for(BreakingCurve bCurve : lobc) {
-            String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
-            String fileName = String.format("ETCS_ID_%d-%s-%s",this.etcsTrainID,bCurve.getID(),dateString);
+            FileWriter fW;
+            String fileName = String.format("ETCS_ID_%d-%s-%s", 6485, bCurve.getID(), dateString);
 
             try {
-                FileWriter fW;
                 fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
-                writer.write(bCurve.toString());
+                writer.write(bCurve.toStringAllKnots());
+                //writer.write(bCurve.toStringMinimumSpeed());
                 writer.flush();
                 writer.close();
 

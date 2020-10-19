@@ -1,6 +1,6 @@
 package ebd.trainData.util.availableAcceleration;
 
-import ebd.globalUtils.etcsPacketToProfileConverters.GradientProfileConverter;
+import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.routeData.RouteDataVolatile;
@@ -79,7 +79,7 @@ public class AvailableAcceleration {
 
     public void updateCurves() {
         this.speedUpCurve = AccelerationPowerCurveCalculator.calculate(this.eventBus);
-        this.breakingPowerCurve = BreakingPowerCurveCalculator.calculateBreakingPower(this.eventBus);
+        this.breakingPowerCurve = BreakingPowerCurveCalculator.calculateServiceBreakingPower(this.eventBus);
         this.emergencyBreakingPowerCurve = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(this.eventBus);
         this.resistanceCurve = ResistanceCurveCalculator.calculate(this.eventBus);
     }

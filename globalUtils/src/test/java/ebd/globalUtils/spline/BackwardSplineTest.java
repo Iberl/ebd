@@ -100,8 +100,8 @@ class BackwardSplineTest {
 
     void getHigherOrLastKnotXValue() {
 
-        assertEquals(2d,bs1.getHigherOrLastKnotXValue(1d));
-        assertEquals(2d,bs1.getHigherOrLastKnotXValue(2d));
+        assertEquals(2d,bs1.getCeilingKnotXValue(1d));
+        assertEquals(2d,bs1.getCeilingKnotXValue(2d));
 
     }
 
