@@ -128,7 +128,7 @@
     <module>messageLibrary</module>
     <module>trainSide</module>
     <module>trackSide</module>
-    <module>szenario</module>
+    <module>etcsCore</module>
     <module>rbc_tms</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
