@@ -355,8 +355,7 @@ public class TrainStatusManager implements Runnable {
     private void saveBreakingCurvesToFile(NewBreakingCurveEvent nbce){
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);
-        String dateString = DateTimeFormatter.BASIC_ISO_DATE.format(ldt);
-        String dirPathString = "results/breakingCurves/" + timeString.replaceAll(":", "-") + "/";
+        String dirPathString = "results/breakingCurves/ID" + this.etcsTrainID + "_" + timeString.replaceAll(":", "-") + "/";
         BreakingCurve[] lobc = {nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve, nbce.normalBreakingCurve};
 
         if(!new File(dirPathString).mkdirs()){
@@ -366,13 +365,12 @@ public class TrainStatusManager implements Runnable {
 
         for(BreakingCurve bCurve : lobc) {
             FileWriter fW;
-            String fileName = String.format("ETCS_ID_%d-%s-%s", 6485, bCurve.getID(), dateString);
+            String fileName = String.format("ID%d-%s", this.etcsTrainID, bCurve.getID());
 
             try {
                 fW = new FileWriter(dirPathString + fileName);
                 BufferedWriter writer = new BufferedWriter(fW);
                 writer.write(bCurve.toStringAllKnots());
-                //writer.write(bCurve.toStringMinimumSpeed());
                 writer.flush();
                 writer.close();
 
