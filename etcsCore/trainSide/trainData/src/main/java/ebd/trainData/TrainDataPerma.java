@@ -9,10 +9,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -184,9 +181,13 @@ public class TrainDataPerma {
      * @throws TDBadDataException Thrown if there is missing data in the file.
      */
     private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
-        String pathToTrainJSON = this.trainConfigID + ".json";
-        try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToTrainJSON)){
-            try(BufferedReader input = new BufferedReader(new InputStreamReader(inputStream))){
+        String fileName = this.trainConfigID + ".json";
+        String pathToTrainJSON = "configuration/trains/" + fileName;
+
+        fileSetup(pathToTrainJSON, fileName);
+
+        try(FileReader fileReader = new FileReader(pathToTrainJSON)){
+            try(BufferedReader input = new BufferedReader(fileReader)){
 
             /*
             Reading the input data into the variables
@@ -202,8 +203,55 @@ public class TrainDataPerma {
             npe.printStackTrace();
             throw npe;
         }
+    }
 
+    private void fileSetup(String path, String filename) throws IOException {
+        /*
+        Setting up .json file if it does not already exists
+         */
+        System.out.println(path);
+        File file = new File(path);
 
+        if (file.length() == 0) {
+            boolean createdDir = file.getParentFile().mkdir();
+            boolean createdFile = file.createNewFile();
+            if(!createdFile && !file.exists()){
+                throw new IOException(path + " could not be created");
+            }
+
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)) {
+
+                if(inputStream == null) {
+                    throw new IOException("The train file stream could not be found");
+                }
+
+                try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                    int length;
+                    byte[] buffer = new byte[1024];
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                }catch (IOException ioe){
+                    throw new IOException("Train file could not be created. " + ioe.getMessage());
+                }
+            }catch (IOException ioe){
+                ioe.printStackTrace();
+                try(FileInputStream inputStream = new FileInputStream(filename)) {
+
+                    try (FileOutputStream outputStream = new FileOutputStream(path)) {
+                        int length;
+                        byte[] buffer = new byte[1024];
+                        while ((length = inputStream.read(buffer)) != -1){
+                            outputStream.write(buffer,0,length);
+                        }
+                    }catch (IOException ioe3){
+                        throw new IOException("Train file could not be created: " + ioe3.getMessage());
+                    }
+                }catch (IOException ioe2){
+                    throw new IOException(ioe2.getMessage());
+                }
+            }
+        }
     }
 
     /**
