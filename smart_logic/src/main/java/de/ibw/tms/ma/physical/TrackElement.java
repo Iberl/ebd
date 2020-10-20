@@ -7,6 +7,7 @@ import de.ibw.tms.ma.SpotLocation;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,21 +17,26 @@ import java.util.List;
         "dangerZones",
         "occupations"
 })
-public abstract class TrackElement extends LocatedNetEntity implements IConnectable {
+
+public abstract class TrackElement extends LocatedNetEntity implements ITrackElement {
 
 
 
     private List<PositionedRelation> positionedRelations = new ArrayList<PositionedRelation>();
+
     private List<SpotLocation> spotLocationList = new ArrayList<SpotLocation>();
+
     List<DangerZone> dangerZones;
     List<Occupation> occupations;
     boolean isSyncState;
     //TODO Positioned Relation Update
 
+    @Override
     public void updatePositionedRelation(List<PositionedRelation> relationList) {
         this.positionedRelations = relationList;
     }
 
+    @Override
     public List<PositionedRelation> getPositionedRelations() {
         return positionedRelations;
     }

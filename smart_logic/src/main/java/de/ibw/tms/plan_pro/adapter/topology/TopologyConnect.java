@@ -1,4 +1,9 @@
 package de.ibw.tms.plan_pro.adapter.topology;
+
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * Dieses Enum beschreibt welche Knoten-Konnektoren es geben kann
  *
@@ -6,6 +11,7 @@ package de.ibw.tms.plan_pro.adapter.topology;
  * @version 0.3
  * @since 2020-08-10
  */
+@XmlEnum
 public enum TopologyConnect {
 
     ENDE("Ende"),
@@ -16,6 +22,7 @@ public enum TopologyConnect {
     SONSTIGE("sonstige"),
     SPITZE("Spitze"),
     VERBINDUNG("Verbindung");
+    @XmlTransient
     private final String value;
 
     TopologyConnect(String v) {

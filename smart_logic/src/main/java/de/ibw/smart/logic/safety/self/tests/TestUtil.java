@@ -71,7 +71,7 @@ public class TestUtil {
     ) {
         PlanData.getInstance();
 
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdgeStandingOn);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdgeStandingOn);
         TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sidNodeRunnintTo);
         TrainModel Tm = new TrainModel();
         Tm.setNid_lrbg(TestUtil.lastRandomBalise.getHashcodeOfBaliseDp());

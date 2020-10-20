@@ -1,20 +1,16 @@
 package de.ibw.tms.plan.elements.model;
 
-import de.ibw.feed.BaliseExtractor;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.TopRailReturn;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.DummyChainageSupply;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -22,19 +18,13 @@ import de.ibw.tms.plan_pro.adapter.topology.intf.ChainageSupplyInterface;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ITopologyFactory;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
-import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import ebd.dbd.client.extension.RealDbdClient;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
-import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.text.ParseException;
@@ -325,8 +315,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(planProEdges.size() < 2) continue;
             sEdgeId1 = planProEdges.get(0).getIDTOPKante().getWert();
             sEdgeId2 = planProEdges.get(1).getIDTOPKante().getWert();
-            E1 = topGraph.EdgeRepo.get(sEdgeId1);
-            E2 = topGraph.EdgeRepo.get(sEdgeId2);
+            E1 = topGraph.edgeRepo.get(sEdgeId1);
+            E2 = topGraph.edgeRepo.get(sEdgeId2);
             if(E1 == null || E2 == null) continue;
             TopologyGraph.Node N = null;
             if(E2.A.equals(E1.A) || E2.B.equals(E1.A)) {

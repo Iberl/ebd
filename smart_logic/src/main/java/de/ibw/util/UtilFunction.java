@@ -1,8 +1,6 @@
 package de.ibw.util;
 
 import de.ibw.feed.Balise;
-import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.data.store.DataStore;
 import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -160,7 +158,7 @@ public class UtilFunction {
             TopologyGraph topologyGraph = PlanData.topGraph;
             TopologyGraph.Node TargetNode = null;
 
-            TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.EdgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
+            TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.edgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
             if(NewTrainPositionEdge == null) {
                 throw new NullPointerException("Balise Not on Track in TopologyGraph");
             }
