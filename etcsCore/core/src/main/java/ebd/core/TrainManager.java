@@ -1,4 +1,4 @@
-package ebd.Core;
+package ebd.core;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;

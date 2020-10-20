@@ -1,9 +1,9 @@
-package ebd.Core.util.handler;
+package ebd.core.util.handler;
 
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
-import ebd.Core.util.events.LoadEvent;
+import ebd.core.util.events.LoadEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 

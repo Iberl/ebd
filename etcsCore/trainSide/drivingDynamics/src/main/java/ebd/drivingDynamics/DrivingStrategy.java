@@ -93,7 +93,6 @@ public class DrivingStrategy {
         /*
         Setting up .json file if it does not already exists
          */
-        System.out.println(path);
         File file = new File(path);
 
         if (file.length() == 0) {

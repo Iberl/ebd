@@ -1,4 +1,4 @@
-package ebd.Core.util.handler;
+package ebd.core.util.handler;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;

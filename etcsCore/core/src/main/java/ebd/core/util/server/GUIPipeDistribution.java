@@ -1,8 +1,8 @@
-package ebd.Core.util.server;
+package ebd.core.util.server;
 
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.Core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.events.SzenarioExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;

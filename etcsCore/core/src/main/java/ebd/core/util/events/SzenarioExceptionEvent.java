@@ -1,4 +1,4 @@
-package ebd.Core.util.events;
+package ebd.core.util.events;
 
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;

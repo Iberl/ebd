@@ -1,4 +1,4 @@
-package ebd.Core.util.clients;
+package ebd.core.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;

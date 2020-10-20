@@ -1,4 +1,4 @@
-package ebd.Core;
+package ebd.core;
 
 
 import ebd.globalUtils.appTime.AppTime;
@@ -13,13 +13,13 @@ import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.Core.util.clients.InfrastructureClient;
-import ebd.Core.util.handler.InputHandler;
-import ebd.Core.util.handler.SzenarioEventHandler;
-import ebd.Core.util.events.LoadEvent;
-import ebd.Core.util.events.SzenarioExceptionEvent;
-import ebd.Core.util.server.DMIServer;
-import ebd.Core.util.server.GUIServer;
+import ebd.core.util.clients.InfrastructureClient;
+import ebd.core.util.handler.InputHandler;
+import ebd.core.util.handler.SzenarioEventHandler;
+import ebd.core.util.events.LoadEvent;
+import ebd.core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.server.DMIServer;
+import ebd.core.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
