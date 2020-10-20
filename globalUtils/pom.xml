@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>globalUtils</artifactId>
-
+    <version>0.1-SNAPSHOT</version>
     <name>Global Utilities</name>
 
     <dependencies>

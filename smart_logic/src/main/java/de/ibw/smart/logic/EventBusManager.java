@@ -5,7 +5,7 @@ import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.Logging;
-import ebd.etcsCore.util.server.GUIServer;
+import ebd.Core.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
