@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>logging</artifactId>
+    <version>0.1-SNAPSHOT</version>
     <name>Logging</name>
 
     <dependencies>

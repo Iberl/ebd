@@ -13,7 +13,7 @@ import ebd.rbc_tms.payload.Payload_15;
 import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import ebd.etcsCore.util.server.GUIServer;
+import ebd.Core.util.server.GUIServer;
 
 import javax.swing.*;
 import java.io.IOException;
