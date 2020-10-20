@@ -3,7 +3,7 @@ package de.ibw.tms.speed.profile.model;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SpeedSegment;
-import de.ibw.tms.ma.SpotLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.speed.profile.controller.SegmentAddController;
 /**
  * Ein Modell eines Speed-Segmentes einer Anzeige.

@@ -3,6 +3,8 @@ package de.ibw.tms.speed.profile.view;
 import de.ibw.tms.co.CartesianPanel;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.LinearLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.speed.profile.controller.SegmentAddController;
@@ -147,7 +149,7 @@ public class SpeedPanel extends CartesianPanel {
             if(EndConnectSegment == null) {
                 System.out.println("New Segment is whole track");
             } else {
-                SpotLocation BeginOfSegment = EndConnectSegment.getBegin();
+                de.ibw.tms.ma.location.SpotLocation BeginOfSegment = EndConnectSegment.getBegin();
                 BeginOfSegment.setChainage(InsertSegment.getSpeedChangeEnd().getChainage());
                 EndConnectSegment.setSpeedChangeBegin(BeginOfSegment);
                 newSegmentList.add(EndConnectSegment);
@@ -156,7 +158,7 @@ public class SpeedPanel extends CartesianPanel {
         } else if(EndConnectSegment == null) {
             addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
 
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
+            de.ibw.tms.ma.location.SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
             EndOfSegment.setChainage(InsertSegment.getBegin().getChainage());
             BeginConnectSegment.setSpeedChangeEnd(EndOfSegment);
 
@@ -171,7 +173,7 @@ public class SpeedPanel extends CartesianPanel {
             if(iStart != iMin) {
                 addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
             }
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
+            de.ibw.tms.ma.location.SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
             SpeedChange ScBeginLocation = new SpeedChange(new Chainage(iStart), EndOfSegment.getTrackElement(),
                     new SectionOfLine());
             SpeedSegment NewBeginSegment = new SpeedSegment(ScBeginLocation, InsertSegment.getBegin(), ApplicationDirection.BOTH);
@@ -195,7 +197,7 @@ public class SpeedPanel extends CartesianPanel {
         } else {
 
             addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
+            de.ibw.tms.ma.location.SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
             EndOfSegment.setChainage(InsertSegment.getBegin().getChainage());
             BeginConnectSegment.setSpeedChangeEnd(EndOfSegment);
 

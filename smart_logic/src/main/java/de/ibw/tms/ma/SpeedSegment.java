@@ -5,6 +5,8 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.etcs.NC_DIFF;
+import de.ibw.tms.ma.location.LinearLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
 import java.io.Serializable;
@@ -15,9 +17,9 @@ public class SpeedSegment extends LinearLocation implements Serializable {
     private SSP ssp;
     //vorerst true
     @Expose
-    public SpotLocation speedChangeBegin;
+    public de.ibw.tms.ma.location.SpotLocation speedChangeBegin;
     @Expose
-    public SpotLocation speedChangeEnd;
+    public de.ibw.tms.ma.location.SpotLocation speedChangeEnd;
     @Expose
     public ApplicationDirection direction;
     @Expose
@@ -28,7 +30,7 @@ public class SpeedSegment extends LinearLocation implements Serializable {
     @Expose
     public NC_DIFF nc_DIFF;
 
-    public SpeedSegment(SpotLocation begin, SpotLocation end, ApplicationDirection direction) {
+    public SpeedSegment(de.ibw.tms.ma.location.SpotLocation begin, de.ibw.tms.ma.location.SpotLocation end, ApplicationDirection direction) {
         super(begin, end, direction);
         speedChangeBegin = begin;
         speedChangeEnd = end;
@@ -36,7 +38,7 @@ public class SpeedSegment extends LinearLocation implements Serializable {
 
     }
 
-    public void setSpeedChangeBegin(SpotLocation speedChangeBegin) {
+    public void setSpeedChangeBegin(de.ibw.tms.ma.location.SpotLocation speedChangeBegin) {
         this.speedChangeBegin = speedChangeBegin;
     }
 
@@ -50,11 +52,11 @@ public class SpeedSegment extends LinearLocation implements Serializable {
 
 
     @Override
-    public SpotLocation getBegin() {
+    public de.ibw.tms.ma.location.SpotLocation getBegin() {
         return super.getBegin();
     }
 
-    public SpotLocation getSpeedChangeEnd() {
+    public de.ibw.tms.ma.location.SpotLocation getSpeedChangeEnd() {
         return speedChangeEnd;
     }
 

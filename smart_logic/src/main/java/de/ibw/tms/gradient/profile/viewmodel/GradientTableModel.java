@@ -4,7 +4,7 @@ import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.GradientSegment;
-import de.ibw.tms.ma.SpotLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.plan.elements.model.PlanData;
 
 import javax.swing.table.DefaultTableModel;

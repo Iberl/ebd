@@ -1,9 +1,8 @@
 package de.ibw.tms.intf.cmd;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.train.model.TrainModel;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -135,7 +134,7 @@ public class CheckMovementAuthority extends Commands {
 
         SSP ssp = new SSP();
         List<SpeedSegment> speedSegmentList = new ArrayList<>();
-        SpotLocation sl = new SpotLocation(new Chainage(100), null,null);
+        de.ibw.tms.ma.location.SpotLocation sl = new SpotLocation(new Chainage(100), null,null);
         SpeedSegment speedSegment = new SpeedSegment(sl,sl, ApplicationDirection.BOTH);
         speedSegmentList.add(speedSegment);
         ssp.setSpeedSegments(speedSegmentList);

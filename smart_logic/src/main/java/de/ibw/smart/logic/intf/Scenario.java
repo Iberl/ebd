@@ -7,6 +7,7 @@ import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.ETCS_TIMER;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.EdgeOfMap;
 import de.ibw.tms.ma.physical.RailConnector;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -96,17 +97,17 @@ public class Scenario {
         EoA Eoa3Sz2 = new EoA(RightCh, PlanData.RightEnd, new SectionOfLine());
         setDefaultAuthority(Eoa3Sz2,0);
 
-        SpotLocation SLBegin = new SpotLocation(LeftCh, PlanData.connectorList.get(0), new SectionOfLine());
-        SpotLocation SL2 = new SpotLocation(Balise2Ch, PlanData.connectorList.get(2), new SectionOfLine());
-        SpotLocation SL4 = new SpotLocation(Balise4Ch, PlanData.connectorList.get(4), new SectionOfLine());
-        SpotLocation SL5 = new SpotLocation(Balise5Ch, PlanData.connectorList.get(5), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SLBegin = new de.ibw.tms.ma.location.SpotLocation(LeftCh, PlanData.connectorList.get(0), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL2 = new de.ibw.tms.ma.location.SpotLocation(Balise2Ch, PlanData.connectorList.get(2), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL4 = new de.ibw.tms.ma.location.SpotLocation(Balise4Ch, PlanData.connectorList.get(4), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL5 = new de.ibw.tms.ma.location.SpotLocation(Balise5Ch, PlanData.connectorList.get(5), new SectionOfLine());
         //Between 5 and 6
-        SpotLocation SL5Half = new SpotLocation(Between5To6Ch, PlanData.ConnectorBetween5To6, new SectionOfLine());
-        SpotLocation SL6 = new SpotLocation(Unused, PlanData.connectorList.get(6),new SectionOfLine());
-        SpotLocation SL7 = new SpotLocation(Balise7, PlanData.connectorList.get(7), new SectionOfLine());
-        SpotLocation SL8 = new SpotLocation(Balise8, PlanData.connectorList.get(8), new SectionOfLine());
-        SpotLocation SL9Half = new SpotLocation(Between9To10, PlanData.ConnectorBetween9To10, new SectionOfLine());
-        SpotLocation SLEnd = new SpotLocation(RightCh, PlanData.RightEnd, new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL5Half = new de.ibw.tms.ma.location.SpotLocation(Between5To6Ch, PlanData.ConnectorBetween5To6, new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL6 = new de.ibw.tms.ma.location.SpotLocation(Unused, PlanData.connectorList.get(6),new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL7 = new de.ibw.tms.ma.location.SpotLocation(Balise7, PlanData.connectorList.get(7), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL8 = new de.ibw.tms.ma.location.SpotLocation(Balise8, PlanData.connectorList.get(8), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SL9Half = new de.ibw.tms.ma.location.SpotLocation(Between9To10, PlanData.ConnectorBetween9To10, new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation SLEnd = new de.ibw.tms.ma.location.SpotLocation(RightCh, PlanData.RightEnd, new SectionOfLine());
 
         SpeedSegment Segment0To2 = new SpeedSegment(SLBegin, SL2, ApplicationDirection.BOTH);
         Segment0To2.setV_STATIC(Speed120);
@@ -184,7 +185,7 @@ public class Scenario {
         allSzenarios.add(S1);
         //-----------------------------------------------------------------------------------
         //SpotLocation location4 = new SpotLocation(Balise4Ch, PlanData.connectorList.get(4), new SectionOfLine());
-        SpotLocation location5 = new SpotLocation(Balise5Ch, PlanData.connectorList.get(5), new SectionOfLine());
+        de.ibw.tms.ma.location.SpotLocation location5 = new SpotLocation(Balise5Ch, PlanData.connectorList.get(5), new SectionOfLine());
         SpeedSegment Speed4To5Between6 = new SpeedSegment(SL4, location5, ApplicationDirection.BOTH);
 
         Scenario S2 = new Scenario("2 A-C");

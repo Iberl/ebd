@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
-public enum Q_SCALE implements Serializable {
+public enum SQ_SCALE implements Serializable {
     SCALE_10_CM,
     SCALE_1_M,
     SCALE_10_M,

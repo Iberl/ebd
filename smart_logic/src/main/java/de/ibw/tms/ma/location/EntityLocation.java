@@ -1,4 +1,4 @@
-package de.ibw.tms.ma;
+package de.ibw.tms.ma.location;
 
 import de.ibw.rtm.intf.IRTMEntityLocation;
 import de.ibw.rtm.intf.IRTMLocatedNetEntity;

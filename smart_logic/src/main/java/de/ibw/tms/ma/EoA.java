@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_TIMER;
 import de.ibw.tms.etcs.Q_SCALE;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.TrackElement;
 
 import java.io.Serializable;

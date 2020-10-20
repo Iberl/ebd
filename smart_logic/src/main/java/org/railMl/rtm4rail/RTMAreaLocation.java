@@ -40,7 +40,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "associatedNetElement"
 })
 public class RTMAreaLocation
-    extends RTMBaseObject {
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMAreaLocation {
 
     @XmlElement(required = true)
     protected List<RTMAssociatedNetElement> associatedNetElement;
@@ -67,6 +67,7 @@ public class RTMAreaLocation
      * 
      * 
      */
+    @Override
     public List<RTMAssociatedNetElement> getAssociatedNetElement() {
         if (associatedNetElement == null) {
             associatedNetElement = new ArrayList<RTMAssociatedNetElement>();

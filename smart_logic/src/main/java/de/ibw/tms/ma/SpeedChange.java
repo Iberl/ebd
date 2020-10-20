@@ -1,5 +1,6 @@
 package de.ibw.tms.ma;
 
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.TrackElement;
 
 import java.io.Serializable;

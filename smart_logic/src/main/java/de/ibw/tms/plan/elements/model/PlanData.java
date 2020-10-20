@@ -4,6 +4,7 @@ import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
@@ -525,13 +526,13 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         Chainage B9Chainage = new Chainage(2650);
         Chainage B10Chainage = new Chainage(2848);
 
-        SpotLocation LeftLocation = new SpotLocation(LeftChainage, null, BeheimWholeSection);
-        SpotLocation B2Location = new SpotLocation(B2Chainage, null, BeheimWholeSection);
-        SpotLocation B4Location = new SpotLocation(B4Chainage, null, BeheimWholeSection);
-        SpotLocation B5Location = new SpotLocation(B5Chainage, null, BeheimWholeSection);
-        SpotLocation B8Location = new SpotLocation(B8Chainage, null, BeheimWholeSection);
-        SpotLocation B9Location = new SpotLocation(B9Chainage, null, BeheimWholeSection);
-        SpotLocation B10Location = new SpotLocation(B10Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation LeftLocation = new de.ibw.tms.ma.location.SpotLocation(LeftChainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B2Location = new de.ibw.tms.ma.location.SpotLocation(B2Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B4Location = new de.ibw.tms.ma.location.SpotLocation(B4Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B5Location = new de.ibw.tms.ma.location.SpotLocation(B5Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B8Location = new de.ibw.tms.ma.location.SpotLocation(B8Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B9Location = new de.ibw.tms.ma.location.SpotLocation(B9Chainage, null, BeheimWholeSection);
+        de.ibw.tms.ma.location.SpotLocation B10Location = new SpotLocation(B10Chainage, null, BeheimWholeSection);
 
 
         GradientSegment GS_0_1000_8 = new GradientSegment(LeftLocation, B2Location, ApplicationDirection.BOTH);

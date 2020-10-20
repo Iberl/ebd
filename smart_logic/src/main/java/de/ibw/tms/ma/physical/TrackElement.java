@@ -3,7 +3,7 @@ package de.ibw.tms.ma.physical;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.ibw.tms.ma.DangerZone;
 import de.ibw.tms.ma.Occupation;
-import de.ibw.tms.ma.SpotLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.net.elements.INetElement;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;

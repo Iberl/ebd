@@ -1,4 +1,4 @@
-package de.ibw.tms.ma;
+package de.ibw.tms.ma.location;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
@@ -6,6 +6,8 @@ import de.ibw.rtm.intf.IRTMGeometricCoordinate;
 import de.ibw.rtm.intf.IRTMLinearCoordinate;
 import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.rtm.intf.IRTMSpotLocation;
+import de.ibw.tms.ma.Chainage;
+import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.TrackElement;
 import jdk.jshell.spi.ExecutionControl;

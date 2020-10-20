@@ -3,6 +3,8 @@ package de.ibw.tms.ma;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
+import de.ibw.tms.ma.location.LinearLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
 import java.io.Serializable;
@@ -31,7 +33,7 @@ public class GradientSegment extends LinearLocation implements Serializable {
     private List<GradientProfile> profileList = new ArrayList<GradientProfile>();
 
 
-    public GradientSegment(SpotLocation begin, SpotLocation end, ApplicationDirection direction) {
+    public GradientSegment(de.ibw.tms.ma.location.SpotLocation begin, de.ibw.tms.ma.location.SpotLocation end, ApplicationDirection direction) {
         super(begin, end, direction);
         this.iBeginMeter = begin.getChainage().getiMeters();
         this.iEndMeter = end.getChainage().getiMeters();
@@ -52,7 +54,7 @@ public class GradientSegment extends LinearLocation implements Serializable {
     }
 
     @Override
-    public void setBegin(SpotLocation begin) {
+    public void setBegin(de.ibw.tms.ma.location.SpotLocation begin) {
         super.setBegin(begin);
         this.iBeginMeter = begin.getChainage().getiMeters();
     }

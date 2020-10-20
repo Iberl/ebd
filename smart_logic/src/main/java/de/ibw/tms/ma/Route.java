@@ -1,6 +1,8 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.location.LinearLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
@@ -114,14 +116,14 @@ public class Route implements Cloneable, Serializable {
 
     private HashMap<TrackElement, IWaypoint> generateWaypointOnTrackMap() {
         HashMap<TrackElement, IWaypoint> resultMap = new HashMap<TrackElement, IWaypoint>();
-        SpotLocation BeginPoint = location.getBegin();
+        de.ibw.tms.ma.location.SpotLocation BeginPoint = location.getBegin();
 
 
         if(BeginPoint != null) {
             resultMap.put(BeginPoint.getTrackElement(), (IWaypoint) BeginPoint);
 
         }
-        SpotLocation EndPoint =  location.getEnd();
+        de.ibw.tms.ma.location.SpotLocation EndPoint =  location.getEnd();
         if(EndPoint != null) {
             resultMap.put(EndPoint.getTrackElement(), (IWaypoint) EndPoint);
         }
@@ -134,7 +136,7 @@ public class Route implements Cloneable, Serializable {
 
     private ArrayList<Waypoint> getAllWaypointsInOrder(boolean withEndpoint) {
         ArrayList<Waypoint> resultList = new ArrayList<>();
-        SpotLocation BeginPoint = location.getBegin();
+        de.ibw.tms.ma.location.SpotLocation BeginPoint = location.getBegin();
         SpotLocation EndPoint = location.getEnd();
         WaypointDecorator BeginWayPoint =
                 new WaypointDecorator(BeginPoint.getTrackElement(), new TrackElementStatus(), -1, -1);

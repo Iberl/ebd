@@ -6,7 +6,7 @@ import de.ibw.tms.gradient.profile.controller.GradientController;
 import de.ibw.tms.gradient.profile.viewmodel.GradientTableModel;
 import de.ibw.tms.ma.GradientSegment;
 import de.ibw.tms.ma.SectionOfLine;
-import de.ibw.tms.ma.SpotLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.Rail;

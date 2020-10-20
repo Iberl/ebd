@@ -2,6 +2,7 @@ package de.ibw.smart.logic.intf;
 
 import de.ibw.tms.etcs.*;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.EdgeOfMap;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.physical.Trail;
@@ -23,9 +24,9 @@ public class EbdAuthorities {
     private static Chainage DrivingChainage = new Chainage(300);
     private static Trail T;
 
-    private static SpotLocation BeginLocation;
-    private static SpotLocation EndLocation;
-    private static SpotLocation EndOfAuthorityLocation;
+    private static de.ibw.tms.ma.location.SpotLocation BeginLocation;
+    private static de.ibw.tms.ma.location.SpotLocation EndLocation;
+    private static de.ibw.tms.ma.location.SpotLocation EndOfAuthorityLocation;
 
     private static EoA eoa;
     private static SectionOfLine Section = new SectionOfLine();
@@ -36,8 +37,8 @@ public class EbdAuthorities {
         EbdMa = new RbcMA("7733");
 
         generateTrack();
-        BeginLocation = new SpotLocation(LeftChainage,T, Section);
-        EndLocation = new SpotLocation(ChTrail, T, Section);
+        BeginLocation = new de.ibw.tms.ma.location.SpotLocation(LeftChainage,T, Section);
+        EndLocation = new de.ibw.tms.ma.location.SpotLocation(ChTrail, T, Section);
         EndOfAuthorityLocation = new SpotLocation(DrivingChainage, T, Section);
 
         generateEoA();

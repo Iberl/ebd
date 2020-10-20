@@ -5,6 +5,7 @@ import de.ibw.rtm.intf.IRTMIntrinsicCoordinate;
 import de.ibw.rtm.intf.IRTMPositioningSystem;
 import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.common.NetworkResource;
+import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMAssociatedPositioningSystem;
 import org.railMl.rtm4rail.RTMIntrinsicCoordinate;
 
@@ -24,9 +25,15 @@ public class AssociatedPositioningSystem extends NetworkResource implements IRTM
         this.PositioningSystem = System;
     }
 
+
+    public List<IRTMIntrinsicCoordinate> getCoordinates() {
+        return this.coordinateList;
+    }
+
+
     @Override
     public List<RTMIntrinsicCoordinate> getIntrinsicCoordinate() {
-        return null;
+        throw new NotImplementedException("ConverterNeeded");
     }
 
     @Override

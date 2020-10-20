@@ -46,7 +46,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "geometricCoordinate"
 })
 public class RTMLinearLocation
-    extends RTMBaseObject {
+    extends RTMBaseObject implements de.ibw.rtm.intf.IRTMLinearLocation {
 
     @XmlElement(required = true)
     protected List<RTMAssociatedNetElement> associatedNetElement;
@@ -54,6 +54,9 @@ public class RTMLinearLocation
     protected List<RTMGeometricCoordinate> geometricCoordinate;
     @XmlAttribute(name = "applicationDirection")
     protected TApplicationDirection applicationDirection;
+
+
+
 
     /**
      * Gets the value of the associatedNetElement property.
@@ -77,6 +80,7 @@ public class RTMLinearLocation
      * 
      * 
      */
+    @Override
     public List<RTMAssociatedNetElement> getAssociatedNetElement() {
         if (associatedNetElement == null) {
             associatedNetElement = new ArrayList<RTMAssociatedNetElement>();
@@ -106,6 +110,7 @@ public class RTMLinearLocation
      * 
      * 
      */
+    @Override
     public List<RTMLinearCoordinate> getLinearCoordinate() {
         if (linearCoordinate == null) {
             linearCoordinate = new ArrayList<RTMLinearCoordinate>();
@@ -135,6 +140,7 @@ public class RTMLinearLocation
      * 
      * 
      */
+    @Override
     public List<RTMGeometricCoordinate> getGeometricCoordinate() {
         if (geometricCoordinate == null) {
             geometricCoordinate = new ArrayList<RTMGeometricCoordinate>();
@@ -150,6 +156,7 @@ public class RTMLinearLocation
      *     {@link TApplicationDirection }
      *     
      */
+    @Override
     public TApplicationDirection getApplicationDirection() {
         return applicationDirection;
     }
@@ -162,6 +169,7 @@ public class RTMLinearLocation
      *     {@link TApplicationDirection }
      *     
      */
+    @Override
     public void setApplicationDirection(TApplicationDirection value) {
         this.applicationDirection = value;
     }

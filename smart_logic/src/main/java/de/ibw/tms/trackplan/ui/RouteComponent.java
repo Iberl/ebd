@@ -2,6 +2,7 @@ package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
@@ -287,8 +288,8 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
                                 CSM = new CartesianSpeedModel();
                                 SSP SpeedProfile = new SSP();
-                                SpotLocation SlEnd = R.getLocation().getEnd();
-                                SpotLocation SlStart = R.getLocation().getBegin();
+                                de.ibw.tms.ma.location.SpotLocation SlEnd = R.getLocation().getEnd();
+                                de.ibw.tms.ma.location.SpotLocation SlStart = R.getLocation().getBegin();
                                 SpeedChange SpeedBegin = new SpeedChange(new Chainage(0), SlStart.getTrackElement(), new SectionOfLine());
                                 SpeedChange SpeedEnd = new SpeedChange(SlEnd.getChainage(), SlEnd.getTrackElement(), new SectionOfLine());
                                 SpeedSegment SpeedSeg = new SpeedSegment(SpeedBegin, SpeedEnd, ApplicationDirection.BOTH);
