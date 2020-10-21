@@ -1,6 +1,7 @@
 package ebd.drivingDynamics;
 
 import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
+import ebd.drivingDynamics.util.ATOServerConnector;
 import ebd.drivingDynamics.util.TripProfileProvider;
 import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.actions.Action;
@@ -56,11 +57,12 @@ import java.util.*;
 public class DrivingDynamics {
 
     private final EventBus localEventBus;
+    private final int etcsTrainID;
+    private final ConfigHandler ch;
     private final TrainDataVolatile trainDataVolatile;
     private final RouteDataVolatile routeDataVolatile;
     private final TripProfileProvider tripProfileProvider;
-    private final int etcsTrainID;
-    private final ConfigHandler ch;
+    private final ATOServerConnector atoServerConnector;
 
     boolean shouldHalt = false;
 
@@ -100,6 +102,8 @@ public class DrivingDynamics {
     public DrivingDynamics(EventBus localEventBus, int etcsTrainID){
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
+        this.etcsTrainID = etcsTrainID;
+
         this.ch = ConfigHandler.getInstance();
         try {
             this.drivingStrategy = new DrivingStrategy(this.localEventBus);
@@ -112,7 +116,7 @@ public class DrivingDynamics {
         this.trainDataVolatile = localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.routeDataVolatile = localEventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         this.tripProfileProvider = new TripProfileProvider(this.localEventBus);
-        this.etcsTrainID = etcsTrainID;
+        this.atoServerConnector = new ATOServerConnector(this.localEventBus, this.etcsTrainID);
 
         this.timeBetweenActions = this.ch.timeBetweenActions;
     }
@@ -137,7 +141,7 @@ public class DrivingDynamics {
         /*
         If driving dynamics is locked, nothing will be done.
          */
-        if(this.dynamicState == null || this.tripProfile == null || this.currentMode == ETCSMode.NO_MODE){
+        if(this.dynamicState == null || (this.tripProfile == null && !this.atoServerConnector.isAtoOn()) || this.currentMode == ETCSMode.NO_MODE){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
             EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, (int)0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
@@ -151,8 +155,10 @@ public class DrivingDynamics {
          */
         updateCurrentMaxTripProfileSpeed();
 
-
-        if(this.currentMode == ETCSMode.STAND_BY){
+        if(this.atoServerConnector.isAtoOn()){
+            drivingInATO();
+        }
+        else if(this.currentMode == ETCSMode.STAND_BY){
             drivingIllegal();
         }
         else {
@@ -269,6 +275,43 @@ public class DrivingDynamics {
     }
 
     /**
+     * Movement decision tree should ATO be turned on.
+     */
+    private void drivingInATO() {
+        MovementState ms = MovementState.UNCHANGED;
+        double modifier = 1;
+
+        SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
+        if(speedSupervisionReport == null ){
+            ms = this.atoServerConnector.getCurMovementState();
+            modifier = this.atoServerConnector.getCurModifier();
+        }
+        else {
+            this.currentSil = speedSupervisionReport.interventionLevel;
+            this.currentSsState = speedSupervisionReport.supervisionState;
+            switch (this.currentSil){
+                case NOT_SET, NO_INTERVENTION, INDICATION, OVERSPEED, WARNING -> {
+                    sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
+                    ms = this.atoServerConnector.getCurMovementState();
+                    modifier = this.atoServerConnector.getCurModifier();
+                }
+                case APPLY_SERVICE_BREAKS -> {
+                    sendToLogEventSpeedSupervision(MovementState.BREAKING);
+                    ms = MovementState.BREAKING;
+                }
+                default -> {
+                    sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
+                    ms = MovementState.EMERGENCY_BREAKING;
+                }
+            }
+        }
+        this.dynamicState.setMovementState(ms);
+        this.dynamicState.setAccelerationModification(modifier);
+        this.dynamicState.setBreakingModification(modifier);
+        sendToLogEventSpeedState();
+    }
+
+    /**
      * Movement decision tree should the current {@link ETCSMode} forbid movement.
      */
     private void drivingIllegal(){
@@ -287,10 +330,10 @@ public class DrivingDynamics {
      * Movement decision tree should the current {@link ETCSMode} allow movement.
      */
     private void drivingAllowed() {
-    /*
-    Checks the current SsmReportEvent for the status of the train
-    Getting next action that should be taken and parsing that action
-     */
+        /*
+        Checks the current SsmReportEvent for the status of the train
+        Getting next action that should be taken and parsing that action
+         */
         SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
             actionParser(this.drivingStrategy.actionToTake());
@@ -302,7 +345,8 @@ public class DrivingDynamics {
         }
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
-            if(speedSupervisionReport.supervisionState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
+            this.currentSsState = speedSupervisionReport.supervisionState;
+            if(this.currentSsState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
                 this.inRSM = false;
                 switch (this.currentSil) {
                     case NOT_SET, NO_INTERVENTION, INDICATION, OVERSPEED, WARNING -> {
@@ -353,7 +397,6 @@ public class DrivingDynamics {
                     }
                 }
             }
-            this.currentSsState = speedSupervisionReport.supervisionState;
             sendToLogEventSpeedState();
         }
     }
