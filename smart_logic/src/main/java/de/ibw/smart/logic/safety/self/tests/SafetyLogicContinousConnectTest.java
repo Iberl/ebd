@@ -478,7 +478,7 @@ public class SafetyLogicContinousConnectTest {
         }
     }
 
-    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<TrackElement> visitedElements) {
+    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<ITrackElement> visitedElements) {
         if (!visitedElements.contains(e)) {
             return true;
         }
@@ -619,7 +619,7 @@ public class SafetyLogicContinousConnectTest {
     }
 
     private ITrackElement prepareNewIteration(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements, TopologyGraph.Edge newWay) {
-        TrackElement CurrentElement;
+        ITrackElement CurrentElement;
         visitedElements.add(newWay);
         CurrentElement = getNodeNotVisited(visitedElements, newWay);
         visitedElements.add(CurrentElement);

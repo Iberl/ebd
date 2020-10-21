@@ -3,6 +3,7 @@ package de.ibw.smart.logic.safety.self.tests;
 import de.ibw.feed.Balise;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -46,8 +47,8 @@ public class TestUtil {
      * @param beginnOnEdge boolean - true Teststrecke beginnt auf Kante
      * @return Zufallsstrecke
      */
-    public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
+    public static ArrayList<Pair<Route.TrackElementType, ITrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
+                                                                                                      boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
         SafetyLogicContinousConnectTest Submodul = new SafetyLogicContinousConnectTest();
         return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
                 TestConfig);

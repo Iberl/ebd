@@ -429,10 +429,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 Chainage ChainageN = ChainageSupply.getModel(N);
                 Chainage ChainageN2 = ChainageSupply.getModel(N2);
 
-                float x1 = N.getGeoCoordinates().getFloatX();
-                float y1 = N.getGeoCoordinates().getFloatY();
-                float x2 = N2.getGeoCoordinates().getFloatX();
-                float y2 = N2.getGeoCoordinates().getFloatY();
+                float x1 = N.TE.getGeoCoordinates().getFloatX();
+                float y1 = N.TE.getGeoCoordinates().getFloatY();
+                float x2 = N2.TE.getGeoCoordinates().getFloatX();
+                float y2 = N2.TE.getGeoCoordinates().getFloatY();
 
                 handleCrossoverInput(N, N2, ConnectN2, ConnectN, ChainageN, ChainageN2, x1, y1, x2, y2);
 

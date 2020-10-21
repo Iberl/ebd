@@ -515,8 +515,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
 
         if (geoEdgeList.isEmpty() || Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
-            GeoCoordinates nodeA = edge.A.getGeoCoordinates();
-            GeoCoordinates nodeB = edge.B.getGeoCoordinates();
+            GeoCoordinates nodeA = edge.A.TE.getGeoCoordinates();
+            GeoCoordinates nodeB = edge.B.TE.getGeoCoordinates();
 
             if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
             else {

@@ -747,7 +747,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
      * @return boolean
      */
-    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
         //DBDClient dbdclient = new DBDClient();
         return true;
     }
@@ -947,7 +947,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert
@@ -959,7 +959,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
 
     }
 

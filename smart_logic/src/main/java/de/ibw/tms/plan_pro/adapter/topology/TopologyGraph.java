@@ -94,7 +94,7 @@ public class TopologyGraph {
     public static class Node implements ITrackElement {
 
         @XmlTransient
-        TrackElement TE = new TrackElement() {
+        public TrackElement TE = new TrackElement() {
             @Override
             public String getViewName() {
                 return name;
