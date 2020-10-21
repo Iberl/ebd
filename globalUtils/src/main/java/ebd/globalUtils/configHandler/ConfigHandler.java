@@ -82,7 +82,7 @@ public class ConfigHandler {
      */
     public boolean allowGUI = true;
     /**
-     * If true, ATO controll can connect to the program
+     * If true, ATO control can connect to the program
      */
     public boolean allowATO = false;
     /**

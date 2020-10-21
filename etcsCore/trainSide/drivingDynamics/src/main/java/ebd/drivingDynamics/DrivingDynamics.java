@@ -179,6 +179,9 @@ public class DrivingDynamics {
          */
         this.dynamicState.nextState(deltaT);
 
+        if(this.atoOn){
+            this.atoServerConnector.sendDynamicStateToATO(this.dynamicState);
+        }
         /*
         Sends global PositionEvent
          */
@@ -523,9 +526,6 @@ public class DrivingDynamics {
         double currentSpeed = this.dynamicState.getSpeed();
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-        System.out.println("curSpeed" + currentSpeed);
-        System.out.println("maxBreakingAcc: " + maxBreakingAcc);
-        System.out.println("distanceToEOA: " + distanceToEOA);
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
         neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
         double modifier = -neededBreakingACC/maxBreakingAcc;

@@ -9,6 +9,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class ATOClientWorker implements Runnable{
                 receiveString(input);
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
         }
         for(String train : connectedTrains){

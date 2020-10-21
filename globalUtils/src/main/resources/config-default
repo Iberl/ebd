@@ -57,8 +57,8 @@ useTSMServer = false
 # If true, GUIs can connect to the program.
 allowGUI = true
 
-# If true, ATO controll can connect to the program
-allowATO = false;
+# If true, ATO control can connect to the program
+allowATO = false
 
 # If true, the program does wait for an input and just calls load.
 autoStart = false
