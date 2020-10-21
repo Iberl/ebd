@@ -1,6 +1,7 @@
 package ebd.core;
 
 
+import ebd.core.util.server.ATOServer;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
@@ -54,13 +55,13 @@ public class Core implements Runnable {
     }
 
 
-    private EventBus globalEventBus;
-    private Thread szenarioThread = new Thread(this);
+    private final EventBus globalEventBus;
+    private final Thread szenarioThread = new Thread(this);
     private ConfigHandler ch;
     private TrainsHandler iFH;
 
-    private SzenarioEventHandler szenarioEventHandler;
-    private InputHandler inputHandler;
+    private final SzenarioEventHandler szenarioEventHandler;
+    private final InputHandler inputHandler;
     private Logging logger;
     private MessageSender messageSenderTrack;
 
@@ -74,6 +75,7 @@ public class Core implements Runnable {
      */
     private GUIServer guiServer;
     private DMIServer dmiServer;
+    private ATOServer atoServer;
 
     /*
     TrackSide
@@ -95,8 +97,9 @@ public class Core implements Runnable {
         try {
             this.logger = new Logging();
             this.infrastructureClient = new InfrastructureClient();
-            if(ch.allowGUI) this.guiServer = new GUIServer();
             this.dmiServer = new DMIServer();
+            if(ch.allowGUI) this.guiServer = new GUIServer();
+            if(ch.allowATO) this.atoServer = new ATOServer();
         } catch (IOException e) {
             e.printStackTrace();
         }
