@@ -278,8 +278,8 @@ public class DrivingDynamics {
      * Movement decision tree should ATO be turned on.
      */
     private void drivingInATO() {
-        MovementState ms = MovementState.UNCHANGED;
-        double modifier = 1;
+        MovementState ms;
+        double modifier;
 
         SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
@@ -298,10 +298,12 @@ public class DrivingDynamics {
                 case APPLY_SERVICE_BREAKS -> {
                     sendToLogEventSpeedSupervision(MovementState.BREAKING);
                     ms = MovementState.BREAKING;
+                    modifier = 1;
                 }
                 default -> {
                     sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                     ms = MovementState.EMERGENCY_BREAKING;
+                    modifier = 1;
                 }
             }
         }
