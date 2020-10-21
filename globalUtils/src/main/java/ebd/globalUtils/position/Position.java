@@ -14,13 +14,13 @@ import org.jetbrains.annotations.Nullable;
  * A position represents a precise place on the track. It uses fixed reference points called
  * {@link Location} and an offset value called "increment" to represent this place.
  * 
- * @author Jan Emrich and Lars Schulze-Falck
+ * @author Lars Schulze-Falck
  *
  */
 public class Position {
 	
 	/**
-	 * Current direction of travel of the train in relation the current location: 0 for Reverse, 1 for Nominal and 2 for Unknown, s. {@link ETCSVariables#Q_DIRTRAIN}.
+	 * Direction of the increment in relation the current location: 0 for Reverse, 1 for Nominal s. {@link ETCSVariables#Q_DLRBG}.
 	 */
 	private int direction;
 
@@ -171,8 +171,20 @@ public class Position {
     }
 
     public boolean previousLocationsContainsID(int locID){ return this.previousLocations.containsKey(locID); }
-    
-    
+
+
+    @Override
+    public String toString() {
+        return "Position={" +
+                "direction=" + direction +
+                ",locationID=" + location.getId() +
+                ",incrementInM=" + increment +
+                '}';
+    }
+
+    /*
+        Getter
+         */
     public double getIncrement() {
         return increment;
     }
@@ -195,11 +207,11 @@ public class Position {
         this.direction = direction;
     }
 
-    public Location getLocation() {
+    public @NotNull Location getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(@NotNull Location location) {
         this.location = location;
     }
 
