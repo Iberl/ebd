@@ -9,6 +9,8 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class manages socket connected to {@link GUIServer}
@@ -21,6 +23,8 @@ public class ATOClientWorker implements Runnable{
     private final PrintWriter out;
     private final BufferedReader in;
 
+    private final List<String> connectedTrains;
+
     /**
      * Constructs and starts a thread of itself.
      * @param client The client socket.
@@ -32,6 +36,8 @@ public class ATOClientWorker implements Runnable{
         this.client = client;
         this.out = new PrintWriter(client.getOutputStream(), true);
         this.in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        this.connectedTrains = new ArrayList<String>();
+
         this.atoClientWorker = new Thread(this);
         this.atoClientWorker.start();
     }
@@ -48,6 +54,10 @@ public class ATOClientWorker implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        for(String train : connectedTrains){
+            String target = "dd;T=" + train;
+            this.globalEventBus.post(new ATOEndEvent("core", target));
         }
     }
 
@@ -86,8 +96,14 @@ public class ATOClientWorker implements Runnable{
         String target = "dd;T=" + split[0];
         String action = split[1];
         switch (action){
-            case "START" -> this.globalEventBus.post(new ATOStartEvent("core", target));
-            case "STOP" -> this.globalEventBus.post(new ATOEndEvent("core", target));
+            case "START" -> {
+                this.connectedTrains.add(split[0]);
+                this.globalEventBus.post(new ATOStartEvent("core", target));
+            }
+            case "STOP" -> {
+                this.connectedTrains.remove(split[0]);
+                this.globalEventBus.post(new ATOEndEvent("core", target));
+            }
             default -> this.globalEventBus.post(new ATOToTrainUpdateEvent("core", target, string));
         }
     }

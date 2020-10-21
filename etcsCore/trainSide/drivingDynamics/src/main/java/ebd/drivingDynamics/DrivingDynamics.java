@@ -64,6 +64,7 @@ public class DrivingDynamics {
     private final TripProfileProvider tripProfileProvider;
     private final ATOServerConnector atoServerConnector;
 
+    boolean atoOn = false;
     boolean shouldHalt = false;
 
     private Spline tripProfile;
@@ -155,7 +156,14 @@ public class DrivingDynamics {
          */
         updateCurrentMaxTripProfileSpeed();
 
-        if(this.atoServerConnector.isAtoOn()){
+        if(!this.atoOn) this.atoOn = this.atoServerConnector.isAtoOn();
+        else if(!this.atoServerConnector.isAtoOn()){
+            this.dynamicState.setMovementState(MovementState.BREAKING);
+            this.dynamicState.setBreakingModification(1);
+            this.atoOn = false;
+        }
+
+        if(this.atoOn){
             drivingInATO();
         }
         else if(this.currentMode == ETCSMode.STAND_BY){
