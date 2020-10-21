@@ -1,4 +1,4 @@
-package ebd.globalUtils.events.szenario;
+package ebd.globalUtils.events.core;
 
 import ebd.globalUtils.events.NormalEvent;
 

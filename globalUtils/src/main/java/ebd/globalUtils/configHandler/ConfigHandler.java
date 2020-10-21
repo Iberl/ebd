@@ -45,6 +45,8 @@ public class ConfigHandler {
 
     public String dmiServerPort = "";
 
+    public String atoServerPort = "";
+
     /**
      * Determines the source of the trip profile.
      * Allowed values are 'breakingcurve', 'file' and 'socket'.
@@ -79,6 +81,10 @@ public class ConfigHandler {
      * If true, GUIs can connect to the program.
      */
     public boolean allowGUI = true;
+    /**
+     * If true, ATO controll can connect to the program
+     */
+    public boolean allowATO = false;
     /**
      * If true, the program does wait for an input and just calls load.
      */

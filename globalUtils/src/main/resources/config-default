@@ -22,14 +22,17 @@ portOfInfrastructureServer = 25555
 
 ipToTMSServer = 127.0.0.1
 
-ipToTripProfileServer = 127.0.0.1
-portToTripProfileServer = 22227
-
 # Internal RBC Server
 portOfRBCServer = 22224
 
 #Internal DMI Server
 dmiServerPort = 22225
+
+#Internal ATO Server
+atoServerPort = 22227
+
+ipToTripProfileServer = 127.0.0.1
+portToTripProfileServer = 22228
 
 #Determines the source of the trip profile. Allowed values are 'breakingcurve', 'file' and 'socket'.
 #'file', 'socket' are not implemented yet.
@@ -53,6 +56,9 @@ useTSMServer = false
 
 # If true, GUIs can connect to the program.
 allowGUI = true
+
+# If true, ATO controll can connect to the program
+allowATO = false;
 
 # If true, the program does wait for an input and just calls load.
 autoStart = false
