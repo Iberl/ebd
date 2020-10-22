@@ -44,9 +44,9 @@ public class DistanceSupervisor {
     private final ConfigHandler ch;
     private final double L_TRAIN; //in [m]
 
-    private BreakingCurve emergencyBreakingCurve = null;
+    private BreakingCurve emergencyBC = null;
     private double maxEmergencyDistance;
-    private BreakingCurve serviceBreakingCurve = null;
+    private BreakingCurve serviceBC = null;
 
     /**
      * If release speed == 0, handel it as if there was no release speed
@@ -55,7 +55,7 @@ public class DistanceSupervisor {
     private double curReleaseSpeedDistance = 0; // in [m]
     private boolean inRSM;
 
-    private double emergencyBreakingCurveEndOffset = 0; // in [m]
+    private double emergencyBCEndOffset = 0; // in [m]
     private double startOfOverlapTimerDistance = 0;
     private double overlapMaxTime = Double.MAX_VALUE;
     private boolean overlapTimerRunning = false;
@@ -87,11 +87,11 @@ public class DistanceSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-        if(this.emergencyBreakingCurve == null) return;
+        if(this.emergencyBC == null) return;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
-        double distanceToEMA = this.serviceBreakingCurve.endOfDefinedDistance()
-                                - curPos.totalDistanceToPastLocation(this.serviceBreakingCurve.getRefLocation().getId());
+        double distanceToEMA = this.serviceBC.endOfDefinedDistance()
+                                - curPos.totalDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
 
@@ -132,7 +132,7 @@ public class DistanceSupervisor {
                 sendEndOfMission();
             }
         }
-        else if(distanceToEMA < (0 - this.emergencyBreakingCurveEndOffset)){
+        else if(distanceToEMA < (0)){
             this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
                     this.eventTarget,
                     false,
@@ -171,26 +171,25 @@ public class DistanceSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.emergencyBreakingCurve = bce.emergencyBreakingCurve;
-        this.serviceBreakingCurve = bce.serviceBreakingCurve;
-        this.maxEmergencyDistance = this.emergencyBreakingCurve.endOfDefinedDistance();
+        this.emergencyBC = bce.emergencyBreakingCurve;
+        this.serviceBC = bce.serviceBreakingCurve;
+        this.maxEmergencyDistance = this.emergencyBC.endOfDefinedDistance();
         this.curReleaseSpeed = calculateReleaseSpeed();
         this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
 
         /*
         Setting up Overlap Timer supervision
          */
+        this.emergencyBCEndOffset = this.emergencyBC.endOfDefinedDistance() - this.serviceBC.endOfDefinedDistance();
         Packet_15 p15 = routeDataVolatile.getPacket_15();
         if(p15 != null){
             if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
                 this.startOfOverlapTimerDistance = Double.MIN_VALUE;
                 this.overlapMaxTime = Double.MAX_VALUE;
-                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetDangerPointDistance(p15);
             }
             else {
                 this.startOfOverlapTimerDistance = MovementAuthorityConverter.p15GetStartTimerDistance(p15);
                 this.overlapMaxTime = MovementAuthorityConverter.p15GetOverlapTime(p15);
-                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetOverlapDistance(p15);
             }
         }
         this.overlapTimerRunning = false;
@@ -225,9 +224,9 @@ public class DistanceSupervisor {
      * @return The calculated release speed
      */
     private double calculateReleaseSpeedDistance() {
-        double distance = this.serviceBreakingCurve.getDistanceSpeedAlwaysLower(this.curReleaseSpeed, CurveType.PERMITTED_SPEED);
+        double distance = this.serviceBC.getDistanceSpeedAlwaysLower(this.curReleaseSpeed, CurveType.PERMITTED_SPEED);
         if(distance < Double.MAX_VALUE){
-            return serviceBreakingCurve.endOfDefinedDistance() - distance;
+            return serviceBC.endOfDefinedDistance() - distance;
         }
         return ch.releaseSpeedDistance;
     }
