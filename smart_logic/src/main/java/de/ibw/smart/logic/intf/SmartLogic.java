@@ -21,6 +21,8 @@ import ebd.Core.util.server.GUIServer;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 
@@ -144,6 +146,7 @@ public class SmartLogic {
      * Ausgangswarteschlange der SL an das TMS
      */
     public static SynchronousQueue<SmartServerMessage> outputQueue = new SynchronousQueue<SmartServerMessage>();
+
 
 
 

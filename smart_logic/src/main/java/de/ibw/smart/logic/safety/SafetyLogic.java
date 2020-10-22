@@ -1010,7 +1010,11 @@ public class SafetyLogic {
         else DbdPayload.setErrorState(sFailReason);
         SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);
         BlockMessage.setbIsFromSL(true);
-        SmartLogic.outputQueue.offer(BlockMessage);
+        try {
+            SmartLogic.outputQueue.put(BlockMessage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
