@@ -31,8 +31,7 @@ public class ATOServer implements Runnable {
     }
 
     /**
-     * At first the server waits until a pipe to {@link ebd.logging.Logging} is established.
-     * After that, it allows clients to connect.
+     * Accepts one incoming connection at a time.
      */
     @Override
     public void run() {
@@ -42,8 +41,22 @@ public class ATOServer implements Runnable {
                 if (clientWorker == null || !this.clientWorker.isAlive()){
                     this.clientWorker = new ATOClientWorker(client);
                 }
+                else if(!this.clientWorker.isConnected()){
+                    this.clientWorker.stop();
+                    this.clientWorker = new ATOClientWorker(client);
+                }
+                else {
+                    client.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace(); //TODO Error Handeling
+            }
+        }
+        if(clientWorker != null && this.clientWorker.isAlive()){
+            try {
+                this.clientWorker.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

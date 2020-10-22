@@ -230,6 +230,32 @@ public class TrainsHandler {
         return (train != null) ? train.startingIncrement : null;
     }
 
+
+
+
+    /**
+     * Checks if a train under that etcsID is registered in {@link TrainsHandler}.
+     * @param etcsID The etcsID
+     * @return {@code true} if a ID is registered, {@code false} if not
+     */
+    public synchronized boolean isRegistered(int etcsID){
+        return map.containsKey(etcsID);
+    }
+
+    /**
+     * Checks if a train under that etcsID is registered in {@link TrainsHandler}.
+     * @param etcsID The etcsID
+     * @return {@code true} if a ID is registered, {@code false} if not, or if the String was not a number
+     */
+    public synchronized boolean isRegistered(String etcsID){
+        try {
+            return map.containsKey(Integer.valueOf(etcsID));
+        }
+        catch (NumberFormatException e){
+            return false;
+        }
+    }
+
     /**
      * Reads and parses the initFile.txt
      *

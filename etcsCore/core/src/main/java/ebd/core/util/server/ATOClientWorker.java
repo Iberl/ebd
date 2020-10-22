@@ -1,5 +1,6 @@
 package ebd.core.util.server;
 
+import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.core.ATOEndEvent;
 import ebd.globalUtils.events.core.ATOStartEvent;
 import ebd.globalUtils.events.core.ATOToTrainUpdateEvent;
@@ -24,6 +25,7 @@ public class ATOClientWorker implements Runnable{
     private final PrintWriter out;
     private final BufferedReader in;
 
+    private final TrainsHandler th = TrainsHandler.getInstance();
     private final List<String> connectedTrains;
 
     /**
@@ -106,7 +108,19 @@ public class ATOClientWorker implements Runnable{
                 this.connectedTrains.remove(split[0]);
                 this.globalEventBus.post(new ATOEndEvent("core", target));
             }
+            case "EXISTS" -> {
+                boolean exists = !this.connectedTrains.contains(split[0]) && th.isRegistered(split[0]);
+                sendString(split[0] + " " + exists);
+            }
             default -> this.globalEventBus.post(new ATOToTrainUpdateEvent("core", target, string));
         }
+    }
+
+    public boolean isConnected() {
+        return this.client.isConnected() || this.client.isClosed() || this.out.checkError();
+    }
+
+    public void stop() throws IOException {
+        this.client.close();
     }
 }
