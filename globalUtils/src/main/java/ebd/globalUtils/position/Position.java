@@ -12,7 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A position represents a precise place on the track. It uses fixed reference points called
- * {@link Location} and an offset value called "increment" to represent this place.
+ * {@link Location} and an offset value called "increment" to represent this place.<br>
+ * The increment points to the Estimated Front End (s. SRS-026-3 3.6.4).
+ * From the increment, combined with the relative confidence intervall (s. {@link ConfigHandler#d_Confidence}) and the absolute
+ * location confidence (s. {@link ConfigHandler#d_LocCon}), Max and Min Safe Front End are calculated.
  * 
  * @author Lars Schulze-Falck
  *
