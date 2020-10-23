@@ -91,7 +91,7 @@ public class DistanceSupervisor {
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
         double distanceToEMA = this.serviceBC.endOfDefinedDistance()
-                                - curPos.totalDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
+                                - curPos.estimatedDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
 

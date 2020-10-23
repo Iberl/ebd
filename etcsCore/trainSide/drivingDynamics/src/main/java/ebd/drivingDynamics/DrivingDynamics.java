@@ -215,7 +215,7 @@ public class DrivingDynamics {
         if (this.dynamicState == null) return;
         Position newPos = npe.newPosition;
         Position oldPos = this.dynamicState.getPosition();
-        double offset = oldPos.getIncrement() -  newPos.totalDistanceToPastLocation(oldPos.getLocation().getId());
+        double offset = oldPos.getIncrement() -  newPos.estimatedDistanceToPastLocation(oldPos.getLocation().getId());
         newPos.setIncrement(newPos.getIncrement() + offset);
         this.dynamicState.setPosition(newPos);
 
@@ -274,7 +274,7 @@ public class DrivingDynamics {
             this.dynamicState = new DynamicState(trainDataVolatile.getCurrentPosition(), trainDataVolatile.getAvailableAcceleration());
         }
         else {
-            this.dynamicState.setDistanceToStartOfProfile(curPos.totalDistanceToPastLocation(utpe.refLocID));
+            this.dynamicState.setDistanceToStartOfProfile(curPos.estimatedDistanceToPastLocation(utpe.refLocID));
         }
         this.time = AppTime.nanoTime();
         this.shouldHalt = false;

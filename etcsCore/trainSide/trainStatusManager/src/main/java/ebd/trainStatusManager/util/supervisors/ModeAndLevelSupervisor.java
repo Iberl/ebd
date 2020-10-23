@@ -242,7 +242,7 @@ public class ModeAndLevelSupervisor {
             return false;
         }
 
-        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance() - curPos.totalDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
+        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance() - curPos.estimatedDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
         boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
 
         if(loaOrEoaPassed && etcsLevelOneOrTwoOrThree){//SRS-026 4.6.3 [12]

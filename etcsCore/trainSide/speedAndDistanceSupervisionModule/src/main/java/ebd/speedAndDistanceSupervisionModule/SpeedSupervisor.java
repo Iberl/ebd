@@ -1,11 +1,9 @@
 package ebd.speedAndDistanceSupervisionModule;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.location.InitalLocation;
@@ -18,8 +16,6 @@ import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.HashMap;
 
 /**
  * This class supervises the speed of the train and to some extend the distance traveled.
@@ -99,7 +95,7 @@ public class SpeedSupervisor {
             return;
         }
 
-        double tripDistance = curPosition.totalDistanceToPastLocation(this.emergencyBreakingCurve.getRefLocation().getId());
+        double tripDistance = curPosition.estimatedDistanceToPastLocation(this.emergencyBreakingCurve.getRefLocation().getId());
 
         findTargetSpeedAndDistance(tripDistance);
 

@@ -273,6 +273,20 @@ public class ConfigHandler {
      */
     public double V_warning_max = 58.33;
 
+
+
+
+    /**
+     * Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
+     */
+    public double d_Confidence = 0.01;
+
+    /**
+     *  Absolut location confidence intervall in [m]
+     */
+    public double d_LocCon = 1;
+
+
     /*
     longs
      */

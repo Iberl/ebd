@@ -178,6 +178,12 @@ V_warning_min = 38.89
 # Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
 V_warning_max = 58.33
 
+# Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
+d_Confidence = 0.01
+
+# Absolut location confidence intervall in [m]
+d_LocCon = 1
+
 ######
 ###### Longs
 ######
