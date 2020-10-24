@@ -28,6 +28,13 @@ public class LinearLocation extends EntityLocation implements IRTMLinearLocation
     private List<OrderedAssociatedNetElement> associatedElements;
 
 
+    public LinearLocation() {
+        super(CLASS_IDENTIFIER);
+    }
+
+    public LinearLocation(String sName) {
+        super(sName);
+    }
 
     public LinearLocation(SpotLocation begin, SpotLocation end, TApplicationDirection direction) {
         super(CLASS_IDENTIFIER);

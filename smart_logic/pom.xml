@@ -143,12 +143,7 @@
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>topology</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>topology</artifactId>

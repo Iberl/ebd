@@ -7,6 +7,8 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.ma.positioned.elements.NetEntity;
+import de.ibw.tms.ma.positioned.elements.SmartLogicArea;
 import de.ibw.tms.plan.elements.model.PlanData;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.message.Message_14;
@@ -19,7 +21,6 @@ import ebd.rbc_tms.util.TrainInfo;
 import ebd.szenario.util.server.GUIServer;
 
 import javax.swing.*;
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Flow;
@@ -34,7 +35,12 @@ import java.util.concurrent.SynchronousQueue;
  * @version 0.4
  * @since 2020-09-01
  */
-public class SmartLogic {
+public class SmartLogic extends NetEntity {
+    public static final String CLASS_IDENTIFIER = "smartLogic";
+
+    private SmartLogicArea smartLogicArea;
+
+
 
 
 
@@ -51,6 +57,10 @@ public class SmartLogic {
     public static final String SMART_LOGIC = "SMART-LOGIC";
 
     private static SmartLogicLifecycleController LifeCycleController = new SmartLogicLifecycleController();
+
+    public SmartLogic() {
+        super(CLASS_IDENTIFIER);
+    }
 
     public static void addLifeCycleSubscriber(Flow.Subscriber S) {
         LifeCycleController.addSubscriber(S);

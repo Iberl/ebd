@@ -49,6 +49,10 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
 
     private SectionOfLine lineSection;
 
+    public SpotLocation(String sName) {
+        super(sName);
+    }
+
     public SpotLocation(Chainage chainage, TrackElement trackElement, SectionOfLine lineSection) {
         super(CLASS_IDENTIFIER);
         this.chainage = chainage;
