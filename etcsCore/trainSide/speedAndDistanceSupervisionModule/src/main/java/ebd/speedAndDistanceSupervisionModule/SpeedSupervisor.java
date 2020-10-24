@@ -4,7 +4,9 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
+import ebd.globalUtils.events.trainStatusMananger.ModeReportEvent;
 import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
@@ -35,6 +37,8 @@ public class SpeedSupervisor {
     private String allTarget = "all";
     private TrainDataVolatile trainDataVolatile;
     private ConfigHandler ch;
+
+    private ETCSMode curMode = ETCSMode.NO_MODE;
 
     private BreakingCurve emergencyBreakingCurve = null;
     private boolean inRSM = false;
@@ -78,25 +82,23 @@ public class SpeedSupervisor {
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
 
-        if (this.emergencyBreakingCurve == null){
-            return;
-        }
-        double curSpeed;
-        Position curPosition;
+        if (this.emergencyBreakingCurve == null) return;
 
-        curSpeed = trainDataVolatile.getCurrentSpeed();
+        double curSpeed = trainDataVolatile.getCurrentSpeed();
+        Position curPosition = trainDataVolatile.getCurrentPosition();
+        if (curPosition == null || curPosition.getLocation().getId() == (new InitalLocation()).getId()) return;
 
-        if(trainDataVolatile.getCurrentPosition() != null){
-            curPosition = trainDataVolatile.getCurrentPosition();
-        }
-        else return;
-
-        if (curPosition.getLocation().getId() == (new InitalLocation()).getId()) {
-            return;
+        switch (curMode) {
+            case NO_MODE, STAND_BY, SHUNTING, POST_TRIP -> forceHalt(curSpeed);
+            case FULL_SUPERVISION -> fullSupervision(curSpeed, curPosition);
+            case SYSTEM_FAILURE, TRIP -> forceEmergencyStop();
         }
 
+        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, this.curSpeedInterventionLevel, this.curSupervisionState));
+    }
+
+    private void fullSupervision(double curSpeed, Position curPosition) {
         double tripDistance = curPosition.estimatedDistanceToPastLocation(this.emergencyBreakingCurve.getRefLocation().getId());
-
         findTargetSpeedAndDistance(tripDistance);
 
         if(this.inRSM) updateMaxSpeedsToRSM(tripDistance);
@@ -144,7 +146,21 @@ public class SpeedSupervisor {
                 case APPLY_EMERGENCY_BREAKS -> tsmEmergencyBreakIntervention(curSpeed);
             }
         }
-        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, this.curSpeedInterventionLevel, this.curSupervisionState));
+    }
+
+    private void forceHalt(double curSpeed){
+        this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+        if(curSpeed == 0){
+            this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_SERVICE_BREAKS;
+        }
+        else {
+            this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        }
+    }
+
+    private void forceEmergencyStop(){
+        this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
+        this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
     }
 
     private void findTargetSpeedAndDistance(double curTripDistance) {
@@ -173,6 +189,11 @@ public class SpeedSupervisor {
         this.inRSM = rsmse.inRSM;
         this.releaseSpeed = rsmse.curReleaseSpeed;
         this.releaseDistance = rsmse.releaseDistance;
+    }
+
+    @Subscribe
+    public void curMode(ModeReportEvent mre){
+        this.curMode = mre.curMode;
     }
 
     /**
