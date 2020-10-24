@@ -577,8 +577,7 @@ public class DrivingDynamics {
 
         this.timeOfLastAction = this.time;
 
-        if (action instanceof NoAction) { /*For clarity*/}
-        else if (action instanceof AccelerationAction) {
+        if (action instanceof AccelerationAction) {
             this.dynamicState.setMovementState(MovementState.ACCELERATING);
             this.dynamicState.setAccelerationModification(((AccelerationAction) action).getAccelerationPercentage());
             sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
@@ -600,7 +599,7 @@ public class DrivingDynamics {
             this.dynamicState.setMovementState(MovementState.HALTING);
             sendMovementStateIfNotAlreadySend(MovementState.HALTING);
         }
-        else {
+        else if(!(action instanceof NoAction)) {
             IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
             localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
