@@ -3,9 +3,7 @@ package ebd.drivingDynamics;
 import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
 import ebd.drivingDynamics.util.ATOServerConnector;
 import ebd.drivingDynamics.util.TripProfileProvider;
-import ebd.drivingDynamics.util.actions.AccelerationAction;
-import ebd.drivingDynamics.util.actions.Action;
-import ebd.drivingDynamics.util.actions.BreakAction;
+import ebd.drivingDynamics.util.actions.*;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
@@ -579,34 +577,32 @@ public class DrivingDynamics {
 
         this.timeOfLastAction = this.time;
 
-        switch(action.getClass().getSimpleName()){
-            case "NoAction":
-                break;
-            case "AccelerationAction":
-                this.dynamicState.setMovementState(MovementState.ACCELERATING);
-                this.dynamicState.setAccelerationModification(((AccelerationAction)action).getAccelerationPercentage());
-                sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
-                break;
-            case "BreakAction":
-                this.dynamicState.setMovementState(MovementState.BREAKING);
-                this.dynamicState.setBreakingModification(((BreakAction)action).getBreakPercentage());
-                sendMovementStateIfNotAlreadySend(MovementState.BREAKING);
-                break;
-            case "CruiseAction":
-                this.dynamicState.setMovementState(MovementState.CRUISE);
-                sendMovementStateIfNotAlreadySend(MovementState.CRUISE);
-                break;
-            case "CoastAction":
-                this.dynamicState.setMovementState(MovementState.COASTING);
-                sendMovementStateIfNotAlreadySend(MovementState.COASTING);
-                break;
-            case "HaltAction":
-                this.dynamicState.setMovementState(MovementState.HALTING);
-                sendMovementStateIfNotAlreadySend(MovementState.HALTING);
-                break;
-            default:
-                IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
-                localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
+        if (action instanceof NoAction) { /*For clarity*/}
+        else if (action instanceof AccelerationAction) {
+            this.dynamicState.setMovementState(MovementState.ACCELERATING);
+            this.dynamicState.setAccelerationModification(((AccelerationAction) action).getAccelerationPercentage());
+            sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
+        }
+        else if (action instanceof BreakAction) {
+            this.dynamicState.setMovementState(MovementState.BREAKING);
+            this.dynamicState.setBreakingModification(((BreakAction) action).getBreakPercentage());
+            sendMovementStateIfNotAlreadySend(MovementState.BREAKING);
+        }
+        else if (action instanceof CruiseAction) {
+            this.dynamicState.setMovementState(MovementState.CRUISE);
+            sendMovementStateIfNotAlreadySend(MovementState.CRUISE);
+        }
+        else if (action instanceof CoastAction) {
+            this.dynamicState.setMovementState(MovementState.COASTING);
+            sendMovementStateIfNotAlreadySend(MovementState.COASTING);
+        }
+        else if (action instanceof HaltAction) {
+            this.dynamicState.setMovementState(MovementState.HALTING);
+            sendMovementStateIfNotAlreadySend(MovementState.HALTING);
+        }
+        else {
+            IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
+            localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
     }
 
