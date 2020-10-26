@@ -5,9 +5,9 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -74,9 +74,9 @@ public class SpeedUpdateSupervisor {
     }
 
     @Subscribe
-    public void releaseSpeedEvent(ReleaseSpeedModeStateEvent rsmse){
-        this.releaseSpeed = rsmse.curReleaseSpeed;
-        this.releaseDistance = rsmse.releaseDistance;
+    public void releaseSpeedEvent(SsmReportEvent sre){
+        this.releaseSpeed = sre.releaseSpeed;
+        this.releaseDistance = sre.releaseDistance;
     }
 
     /**

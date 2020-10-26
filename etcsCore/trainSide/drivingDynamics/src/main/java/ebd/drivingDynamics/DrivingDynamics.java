@@ -377,11 +377,11 @@ public class DrivingDynamics {
                 }
             }
             else {
-                if(!this.inRSM) calculateModifier();
+                if(!this.inRSM || breakModifierForRSM == 0) calculateModifier();
                 this.inRSM = true;
                 /*
                         This control flow is necessary in case the train emergency breaks into RSM.
-                        This control flow allows the train accelerate again until the stopping reagion is reached.
+                        This control flow allows the train accelerate again until the stopping region is reached.
                         */
                 switch (this.currentSil) {
                     case INDICATION -> {
@@ -527,11 +527,13 @@ public class DrivingDynamics {
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
         neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
         double modifier = -neededBreakingACC/maxBreakingAcc;
-        if(modifier <= 0 || modifier > 1){
+        if(modifier > 1){
             modifier = 1;
         }
+        else if(modifier < 0.5){
+            modifier = 0;
+        }
         this.breakModifierForRSM = modifier;
-        System.out.println("modifier: " + modifier);
     }
 
     /**

@@ -7,12 +7,15 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.ModeReportEvent;
-import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
 import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
+import ebd.messageLibrary.util.ETCSVariables;
+import ebd.routeData.RouteDataVolatile;
+import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -36,23 +39,26 @@ public class SpeedSupervisor {
     private final String tdTarget = "td";
     private final String allTarget = "all";
     private final TrainDataVolatile trainDataVolatile;
+    private final RouteDataVolatile routeDataVolatile;
     private final ConfigHandler ch;
 
     private ETCSMode curMode = ETCSMode.NO_MODE;
 
     private BreakingCurve emergencyBreakingCurve = null;
     private BreakingCurve serviceBreakingCurve = null;
-    private boolean inRSM = false;
     private SpeedInterventionLevel curSpeedInterventionLevel = SpeedInterventionLevel.NO_INTERVENTION;
     private SpeedSupervisionState curSupervisionState = SpeedSupervisionState.NOT_SET;
 
     private double targetSpeed = 0d; //in [m/s]
     private double targetDistance = 0d; //in [m]
-    private Object serviceTargetDistance;
+    private double serviceTargetDistance;
     /**
      * If release speed == 0, handel it as no release speed applicable!
      */
     private double releaseSpeed = 0d; //in [m/s]
+    /**
+     * Distance relative to the reference location at which train can switch into RSM mode
+     */
     private double releaseDistance;
 
     /**
@@ -62,6 +68,7 @@ public class SpeedSupervisor {
     public SpeedSupervisor(EventBus localEventBus){
         this.localEventBus = localEventBus;
         localEventBus.register(this);
+        this.routeDataVolatile = this.localEventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         this.trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
         this.ch = ConfigHandler.getInstance();
     }
@@ -89,26 +96,29 @@ public class SpeedSupervisor {
             case SYSTEM_FAILURE, TRIP -> forceEmergencyStop();
         }
 
-        this.localEventBus.postSticky(new SsmReportEvent("ssm", this.allTarget, this.curSpeedInterventionLevel, this.curSupervisionState));
+        this.localEventBus.postSticky(new SsmReportEvent("ssm",
+                this.allTarget,
+                this.curSpeedInterventionLevel,
+                this.curSupervisionState,
+                this.releaseDistance,
+                this.releaseSpeed));
     }
 
 
     /**
-     * This method updates the breaking curve.
+     * This method updates the breaking curve and related values
      * @param nbce A {@link NewBreakingCurveEvent}
      */
     @Subscribe
     public void setBreakingCurves(NewBreakingCurveEvent nbce){
         this.emergencyBreakingCurve = nbce.emergencyBreakingCurve;
-
         this.serviceBreakingCurve = nbce.serviceBreakingCurve;
-    }
 
-    @Subscribe
-    public void setInRSM(ReleaseSpeedModeStateEvent rsmse){
-        this.inRSM = rsmse.inRSM;
-        this.releaseSpeed = rsmse.curReleaseSpeed;
-        this.releaseDistance = rsmse.releaseDistance;
+        this.releaseSpeed = calculateReleaseSpeed();
+        this.releaseDistance = calculateReleaseSpeedDistance(this.releaseSpeed);
+        if(curSupervisionState == SpeedSupervisionState.RELEASE_SPEED_SUPERVISION) {
+            this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION; //Pulls train out of RSM
+        }
     }
 
     @Subscribe
@@ -149,19 +159,19 @@ public class SpeedSupervisor {
     private void fullSupervision(double curSpeed, Position curPosition) {
         double estimatedFrontEnd = curPosition.estimatedDistanceToPastLocation(this.emergencyBreakingCurve.getRefLocation().getId());
         double maxSafeFrontEnd = curPosition.maxSafeFrontDistanceToPastLocation(this.emergencyBreakingCurve.getRefLocation().getId());
-        double serviceTargetDistance = this.serviceBreakingCurve.nextTargetDistance(estimatedFrontEnd);
-
-        SpeedSupervisionState eState = this.emergencyBreakingCurve.getSpeedSupervisionState(estimatedFrontEnd,curSpeed);
-        SpeedSupervisionState sState = this.serviceBreakingCurve.getSpeedSupervisionState(estimatedFrontEnd,curSpeed);
-
-
-        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
-                this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
 
         findTargetSpeedAndDistance(estimatedFrontEnd);
 
-        if(this.inRSM && this.releaseSpeed > 0){//Release speed monitoring
+        SpeedSupervisionState eState = this.emergencyBreakingCurve.getSpeedSupervisionState(estimatedFrontEnd,curSpeed);
+        SpeedSupervisionState sState = this.serviceBreakingCurve.getSpeedSupervisionState(estimatedFrontEnd,curSpeed);
+        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
+                this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
+
+        if(this.curSupervisionState == SpeedSupervisionState.RELEASE_SPEED_SUPERVISION ||
+            (this.releaseSpeed > 0 && curSpeed < this.releaseSpeed && maxSafeFrontEnd > this.releaseDistance)){//Release speed monitoring
+
             this.curSupervisionState = SpeedSupervisionState.RELEASE_SPEED_SUPERVISION;
+
             if(curSpeed > this.releaseSpeed){
                 this.curSpeedInterventionLevel = SpeedInterventionLevel.APPLY_EMERGENCY_BREAKS;
             }
@@ -172,23 +182,8 @@ public class SpeedSupervisor {
                 this.curSpeedInterventionLevel = SpeedInterventionLevel.INDICATION;
             }
         }
-        else if(eState == SpeedSupervisionState.CEILING_SPEED_SUPERVISION && sState == SpeedSupervisionState.CEILING_SPEED_SUPERVISION) { //Ceiling speed monitoring regime
-            //Based on SRS 026-3 Table 17
-            this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
-
-            switch (this.curSpeedInterventionLevel){
-
-                case NOT_SET, NO_INTERVENTION, INDICATION -> csmIndicationAndNoIntervention(curSpeed, estimatedFrontEnd);
-                case OVERSPEED -> csmOverspeed(curSpeed, estimatedFrontEnd);
-                case WARNING -> csmWarning(curSpeed, estimatedFrontEnd);
-                case APPLY_SERVICE_BREAKS -> csmServiceBreakIntervention(curSpeed, estimatedFrontEnd);
-                case APPLY_EMERGENCY_BREAKS -> csmEmergencyBreakIntervention(curSpeed);
-            }
-
-
-
-        }
-        else{ //Target speed monitoring regime
+        else if(eState == SpeedSupervisionState.TARGET_SPEED_SUPERVISION ||
+                (sState == SpeedSupervisionState.TARGET_SPEED_SUPERVISION && eoaTarget)){ //Target speed monitoring regime
             this.curSupervisionState = SpeedSupervisionState.TARGET_SPEED_SUPERVISION;
             //Based on SRS 026-3 Table 12
             switch (this.curSpeedInterventionLevel){
@@ -199,6 +194,19 @@ public class SpeedSupervisor {
                 case WARNING -> tmsWarning(curSpeed,estimatedFrontEnd,maxSafeFrontEnd);
                 case APPLY_SERVICE_BREAKS -> tmsServiceBreakIntervention(curSpeed, estimatedFrontEnd, maxSafeFrontEnd);
                 case APPLY_EMERGENCY_BREAKS -> tsmEmergencyBreakIntervention(curSpeed);
+            }
+        }
+        else { //Ceiling speed monitoring regime
+            //Based on SRS 026-3 Table 17
+            this.curSupervisionState = SpeedSupervisionState.CEILING_SPEED_SUPERVISION;
+
+            switch (this.curSpeedInterventionLevel){
+
+                case NOT_SET, NO_INTERVENTION, INDICATION -> csmIndicationAndNoIntervention(curSpeed, estimatedFrontEnd);
+                case OVERSPEED -> csmOverspeed(curSpeed, estimatedFrontEnd);
+                case WARNING -> csmWarning(curSpeed, estimatedFrontEnd);
+                case APPLY_SERVICE_BREAKS -> csmServiceBreakIntervention(curSpeed, estimatedFrontEnd);
+                case APPLY_EMERGENCY_BREAKS -> csmEmergencyBreakIntervention(curSpeed);
             }
         }
     }
@@ -213,6 +221,32 @@ public class SpeedSupervisor {
 
         this.targetSpeed = this.emergencyBreakingCurve.getSpeedAtDistance(this.targetDistance,CurveType.PERMITTED_SPEED);
     }
+
+    /**
+     * Calculates the release speed based on the danger point distance in {@link ConfigHandler}. <br>
+     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
+     * @return The calculated release speed
+     */
+    private double calculateReleaseSpeed() {
+        Packet_15 p15 = this.routeDataVolatile.getPacket_15();
+        if(p15 == null) return 0;
+        else if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_INFO) return p15.V_RELEASEOL * 5 / 3.6;
+        return p15.V_RELEASEDP * 5 / 3.6;
+    }
+
+    /**
+     * Calculates based on the release speed the distance to EOA at which the train should switch in to release speed. <br>
+     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
+     * @return The calculated release speed
+     */
+    private double calculateReleaseSpeedDistance(double releaseSpeed) {
+        double distance = this.serviceBreakingCurve.getDistanceSpeedAlwaysLower(releaseSpeed, CurveType.PERMITTED_SPEED);
+        if(distance < Double.POSITIVE_INFINITY){
+            return distance;
+        }
+        return this.serviceBreakingCurve.endOfDefinedDistance();
+    }
+
 
     /*
     Target Speed Supervision Conditions
@@ -238,11 +272,8 @@ public class SpeedSupervisor {
      */
     private void tmsServiceBreakIntervention(double curSpeed, double estimatedFrontEnd, double maxSafeFrontEnd){
 
-
-        double serviceTargetDistance = this.serviceBreakingCurve.nextTargetDistance(estimatedFrontEnd);
-
         //TODO Test this
-        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
+        boolean eoaTarget = this.serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
                                 this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
         boolean svlTarget = this.targetDistance == this.emergencyBreakingCurve.endOfDefinedDistance();
 
@@ -263,22 +294,14 @@ public class SpeedSupervisor {
      * @param maxSafeFrontEnd in [m]
      */
     private void tmsWarning(double curSpeed, double estimatedFrontEnd, double maxSafeFrontEnd){
-        double serviceTargetDistance = this.serviceBreakingCurve.nextTargetDistance(estimatedFrontEnd);
 
-        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
+        boolean eoaTarget = this.serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
                 this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
         boolean svlTarget = this.targetDistance == this.emergencyBreakingCurve.endOfDefinedDistance();
 
-        /*
-        Revocation conditions
-         */
         tsmRevocationCondition1_3(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, eoaTarget || svlTarget);
 
-
-        /*
-        Trigger Conditions
-         */
-        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
     }
 
     /**
@@ -295,17 +318,16 @@ public class SpeedSupervisor {
      * @param maxSafeFrontEnd in [m]
      */
     private void tmsOverspeed(double curSpeed, double estimatedFrontEnd, double maxSafeFrontEnd){
-        double serviceTargetDistance = this.serviceBreakingCurve.nextTargetDistance(estimatedFrontEnd);
 
-        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
+        boolean eoaTarget = this.serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
                 this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
         boolean svlTarget = this.targetDistance == this.emergencyBreakingCurve.endOfDefinedDistance();
 
         tsmRevocationCondition1_3(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, eoaTarget || svlTarget);
 
-        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
 
-        tmsTriggerCondition7_9(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tmsTriggerCondition7_9(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
 
     }
 
@@ -324,17 +346,16 @@ public class SpeedSupervisor {
      * @param maxSafeFrontEnd in [m]
      */
     private void tmsIndication(double curSpeed, double estimatedFrontEnd, double maxSafeFrontEnd){
-        double serviceTargetDistance = this.serviceBreakingCurve.nextTargetDistance(estimatedFrontEnd);
 
-        boolean eoaTarget = serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
+        boolean eoaTarget = this.serviceTargetDistance == this.serviceBreakingCurve.endOfDefinedDistance() &&
                 this.serviceBreakingCurve.getSpeedAtDistance(serviceTargetDistance, CurveType.PERMITTED_SPEED) == 0;
         boolean svlTarget = this.targetDistance == this.emergencyBreakingCurve.endOfDefinedDistance();
 
-        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tsmTriggerConditions10_12_13_15(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
 
-        tmsTriggerCondition7_9(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tmsTriggerCondition7_9(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
 
-        tsmTriggerCondition4_6(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, serviceTargetDistance, eoaTarget, svlTarget);
+        tsmTriggerCondition4_6(curSpeed, estimatedFrontEnd, maxSafeFrontEnd, this.serviceTargetDistance, eoaTarget, svlTarget);
     }
 
     /**
@@ -387,6 +408,7 @@ public class SpeedSupervisor {
                                                  boolean eoaTarget,
                                                  boolean svlTarget) {
         if(!(eoaTarget || svlTarget) || this.releaseSpeed == 0){//Table 8 in effect
+            System.out.println(this.targetDistance);
             double dEBI = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.EMERGENCY_INTERVENTION_CURVE);
             double dSBI2 = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.SERVICE_INTERVENTION_CURVE_2);
             double dI = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.INDICATION_CURVE);
