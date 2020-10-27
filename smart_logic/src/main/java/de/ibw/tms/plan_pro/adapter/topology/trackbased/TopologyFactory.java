@@ -13,7 +13,6 @@ import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
-import plan_pro.modell.basisobjekte._1_9_0.CBearbeitungsvermerkAllg;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.signale._1_9_0.CSignal;
@@ -163,7 +162,7 @@ public class TopologyFactory implements ITopologyFactory {
 
 
             TopologyGraph.Edge tgEdge = new TopologyGraph.Edge(A,tcA,B,tcB, Edge);
-            TG.EdgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
+            TG.edgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
 
 
 
@@ -184,7 +183,7 @@ public class TopologyFactory implements ITopologyFactory {
         fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
 
         // iterate over edges
-        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.EdgeRepo.values());
+        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.edgeRepo.values());
 
 
 
@@ -321,7 +320,7 @@ public class TopologyFactory implements ITopologyFactory {
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
-            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(TopKante.getIdentitaet().getWert());
+            TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(TopKante.getIdentitaet().getWert());
 
 
             GeoCoordinates geoCoordinate;

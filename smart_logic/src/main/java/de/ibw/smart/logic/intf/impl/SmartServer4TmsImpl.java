@@ -7,15 +7,15 @@ import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.intf.*;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.util.ThreadedRepo;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
@@ -28,10 +28,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.log4j.Logger;
 
 /**
  * Diese Klasse verwaltet die Serverroutine des SL Servers.
@@ -144,7 +140,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
     private void sendMessageToTMS(SmartServerMessage SmartMessage) {
-        SmartLogic.outputQueue.offer(SmartMessage);
+        try {
+            SmartLogic.outputQueue.put(SmartMessage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMaResponseToTMS(MaRequestReturnPayload MaReturn, Long lPrio)  {
@@ -179,7 +179,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                                        Long lPriority) {
         RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
         MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
-        SmartSafety Safety = SmartSafety.getSmartSafety();
+        SafetyLogic Safety = SafetyLogic.getSmartSafety();
         boolean bCheckOk = true;
         boolean bTmsIdentified = false;
         boolean bTrainIdIsVerified = false;
@@ -190,7 +190,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bRouteCriteriaCheck = false;
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
-        RouteDataSL requestedTrackElementList = null;
+        RouteDataSL requestedTrackElementList = new RouteDataSL();
         bCheckOk = Safety.slSelfCheck(MaAdapter);
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
@@ -213,6 +213,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         requestedTrackElementList = identifyRouteElements(MaRequest, requestedTrackElementList);
         bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(MaRequest, MaAdapter,requestedTrackElementList);
+        /**To Debug **/
+        bIsOccupatonFree = true;
         if(!bIsOccupatonFree) {
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
@@ -230,11 +232,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(MaRequest, requestedTrackElementList);
         if(!bRouteElementAreTheRightOnes) {
-            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SmartSafety.TRACK_SAFETY );
+            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
             MaReturnPayload.setErrorState(uuid, true,NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
             return;
-        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SmartSafety.TRACK_SAFETY );
+        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
 
         bRouteElementStatusIsRight = Safety.checkIfRouteElementStatusIsCorrect(MaRequest, requestedTrackElementList);
         if(!bRouteElementStatusIsRight) {
@@ -312,7 +314,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
     private boolean handleDangerZones(UUID uuid) {
-        SmartSafety Safety = SmartSafety.getSmartSafety();
+        SafetyLogic Safety = SafetyLogic.getSmartSafety();
         if(!Safety.dangerZonesAreReceivable()) {
             MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
             MaReturnPayload.setErrorState(uuid, true,NO_DANGERZONE_RETRIEVAL_ERROR );
@@ -343,11 +345,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, TrackElement> TePair = null;
+                Pair<Route.TrackElementType, ITrackElement> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
-                   TopologyGraph.Edge E =  PlanData.topGraph.EdgeRepo.get(sId);
+                   TopologyGraph.Edge E =  PlanData.topGraph.edgeRepo.get(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 
