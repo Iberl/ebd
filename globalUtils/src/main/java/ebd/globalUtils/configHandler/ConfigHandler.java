@@ -155,12 +155,6 @@ public class ConfigHandler {
     public double releaseSpeed = 11.11;
 
     /**
-     * Distance to end of movement authority at which train will switch into
-     * release speed mode if below release speed in [m]
-     */
-    public double releaseSpeedDistance = 20;
-
-    /**
      * Distance to end of movement authority that is seen as "target reached" in [m]
      */
     public double targetReachedDistance = 5;
@@ -273,8 +267,35 @@ public class ConfigHandler {
      */
     public double V_warning_max = 58.33;
 
+    /**
+     * Rise time for acceleration in [s]
+     */
+    public double accRiseTime = 2;
 
+    /**
+     * Fall time for acceleration in [s]
+     */
+    public double accFallTime = 0.1;
 
+    /**
+     * Rise time for deceleration in [s]
+     */
+    public double breakRiseTime = 5;
+
+    /**
+     * Fall time for deceleration in [s]
+     */
+    public double breakFallTime = 10;
+
+    /**
+     * Rise time for emergency deceleration in [s]
+     */
+    public double emBreakRiseTime = 3;
+
+    /**
+     * Fall time for emergency deceleration in [s]
+     */
+    public double emBreakFallTime = 10;
 
     /**
      * Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)

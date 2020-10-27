@@ -1,5 +1,6 @@
 package ebd.trainData.util.dataConstructs;
 
+import ebd.trainData.util.availableAcceleration.BreakType;
 import ebd.trainData.util.exceptions.TDBadDataException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,7 +34,7 @@ public class TrainCar {
     /**
      * The chosen break method. (P, G, P+G, etc.)
      */
-    private String chosenBreakingMethod;
+    private BreakType chosenBreakingMethod;
 
     /*
     Data from the "Type" field
@@ -161,7 +162,16 @@ public class TrainCar {
         else throw new TDBadDataException("The key 'Position' was missing in the trainCar data send by the tool TrainConfigurator");
 
         if (jsonObjectKeySet.contains("gewaehlteBremsstellungName")){
-            this.chosenBreakingMethod = (String)jsonObject.get("gewaehlteBremsstellungName");
+            String bm = (String)jsonObject.get("gewaehlteBremsstellungName");
+            for(BreakType bt : BreakType.values()){
+                if (bt.getDescriptor().equals(bm)){
+                    this.chosenBreakingMethod = bt;
+                    break;
+                }
+            }
+            if(this.chosenBreakingMethod == null){
+                throw new TDBadDataException("The value " + bm + " of key 'gewaehlteBremsstellungName' was not found in BreakType");
+            }
         }
         else throw new TDBadDataException("The key 'gewaehlteBremsstellungName' was missing in the trainCar data send by the tool TrainConfigurator");
 
@@ -381,7 +391,7 @@ public class TrainCar {
         return chosenBreakingWeight;
     }
 
-    public String getChosenBreakingMethod() {
+    public BreakType getChosenBreakingMethod() {
         return chosenBreakingMethod;
     }
 

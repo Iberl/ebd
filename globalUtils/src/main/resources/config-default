@@ -118,9 +118,6 @@ timeBetweenActions = 2
 # Release speed for ETCS Level 1 in [m/s]
 releaseSpeed = 6.94
 
-# Distance to end of movement authority at which train will switch into release speed mode if below release speed in [m]
-releaseSpeedDistance = 20
-
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 5
 
