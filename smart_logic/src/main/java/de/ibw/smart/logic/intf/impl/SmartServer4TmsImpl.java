@@ -7,7 +7,7 @@ import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.intf.*;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
+import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
@@ -344,7 +344,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, ITrackElement> TePair = null;
+                Pair<Route.TrackElementType, TrackElement> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {

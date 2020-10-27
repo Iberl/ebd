@@ -103,6 +103,11 @@ public class TrainModel {
         } else this.sNodeIdTrainRunningTo = null;
     }
 
+    public void unsetPassedElements() {
+        this.passedTopologicalElements = new ArrayList<>();
+    }
+
+
     /**
      * Unused
      * Misst Geschwindigkeit an Punkt

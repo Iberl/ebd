@@ -8,7 +8,7 @@ import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
@@ -61,7 +61,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
     public void checkIfMainNullError() throws InterruptedException {
 
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false
             , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
@@ -121,18 +121,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true
                 , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
         NodeRunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -258,18 +258,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -429,18 +429,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -591,7 +591,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe;
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe;
         Balise B;
         try {
             routenListe = TestUtil.generateRandomContinousRoute(7, true, true,
@@ -601,12 +601,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
             return;
         }
 
-        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -932,12 +932,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
 
     }
     */
-    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe) {
+    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {
         int iResultLength = 0;
-        Pair<Route.TrackElementType, ITrackElement> StartKomposition = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
+        Pair<Route.TrackElementType, TrackElement> StartKomposition = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
         for(int i = 0; i < routenListe.size() -2; i++) {
-            Pair<Route.TrackElementType, ITrackElement> Komposition = routenListe.get(i);
+            Pair<Route.TrackElementType, TrackElement> Komposition = routenListe.get(i);
             TopologyGraph.Edge E = null;
             if(Komposition == StartKomposition) {
                 if(Komposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -947,7 +947,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
                     throw new InvalidParameterException("Not valid Test setup");
                 }
             } else {
-                Pair<Route.TrackElementType, ITrackElement> NextKomposition = routenListe.get(i + 1);
+                Pair<Route.TrackElementType, TrackElement> NextKomposition = routenListe.get(i + 1);
                 if (NextKomposition == EndKomposition) {
                     if (NextKomposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
                         E = (TopologyGraph.Edge) NextKomposition.getRight();

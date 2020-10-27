@@ -15,7 +15,7 @@ public class MainEntry {
     public static void main(String[] args) {
         // füllt Balisen und Topologie
         PlanData.getInstance();
-        System.out.println("Saved Edges: " + getGraph().EdgeRepo.size());
+        System.out.println("Saved Edges: " + getGraph().edgeRepo.size());
         System.out.println("Saved Balises " + getBalises().getAll().size());
         while(true);
     }

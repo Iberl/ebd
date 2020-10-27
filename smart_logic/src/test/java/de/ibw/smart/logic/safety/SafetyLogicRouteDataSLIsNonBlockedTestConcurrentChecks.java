@@ -7,7 +7,7 @@ import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.rbc_tms.util.EOA;
@@ -137,7 +137,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTestConcurrentChecks {
     public void checkIfMainNullError() throws InterruptedException {
         initTestEnv();
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false,
                     TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
@@ -191,12 +191,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTestConcurrentChecks {
 
 
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING);
         int iMaxLength = calcMaxLengthOfTrack(routenListe);
-        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
         int iLengthFirstTrail = (int) ((TopologyGraph.Edge) StartTrail.getRight()).dTopLength;
         dTrainToNextPointOne = new BigDecimal(iLengthFirstTrail).subtract(BigDecimal.valueOf(iLengthTrainOne)).subtract(BigDecimal.valueOf(10));
         dTrainToNextPointTwo = new BigDecimal(iLengthFirstTrail).subtract(dTrainToNextPointOne);
@@ -217,12 +217,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTestConcurrentChecks {
         endTest();
     }
 
-    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe) {
+    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {
         int iResultLength = 0;
-        Pair<Route.TrackElementType, ITrackElement> StartKomposition = routenListe.get(0);
-        Pair<Route.TrackElementType, ITrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
+        Pair<Route.TrackElementType, TrackElement> StartKomposition = routenListe.get(0);
+        Pair<Route.TrackElementType, TrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
         for(int i = 0; i < routenListe.size() -2; i++) {
-            Pair<Route.TrackElementType, ITrackElement> Komposition = routenListe.get(i);
+            Pair<Route.TrackElementType, TrackElement> Komposition = routenListe.get(i);
             TopologyGraph.Edge E = null;
             if(Komposition == StartKomposition) {
                 if(Komposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -232,7 +232,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTestConcurrentChecks {
                     throw new InvalidParameterException("Not valid Test setup");
                 }
             } else {
-                Pair<Route.TrackElementType, ITrackElement> NextKomposition = routenListe.get(i + 1);
+                Pair<Route.TrackElementType, TrackElement> NextKomposition = routenListe.get(i + 1);
                 if (NextKomposition == EndKomposition) {
                     if (NextKomposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
                         E = (TopologyGraph.Edge) NextKomposition.getRight();

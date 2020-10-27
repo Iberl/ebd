@@ -32,11 +32,11 @@ public class LinkedGeo {
         boolean isEndReached = false;
         GeoCoordinates CurrentPos = null;
         if(b_fromA) {
-           StartCoordinates = edge.A.TE.getGeoCoordinates();
-           EndCoordinatees = edge.B.TE.getGeoCoordinates();
+           StartCoordinates = edge.A.getGeoCoordinates();
+           EndCoordinatees = edge.B.getGeoCoordinates();
         } else {
-           StartCoordinates = edge.B.TE.getGeoCoordinates();
-           EndCoordinatees = edge.A.TE.getGeoCoordinates();
+           StartCoordinates = edge.B.getGeoCoordinates();
+           EndCoordinatees = edge.A.getGeoCoordinates();
         }
         CurrentPos = StartCoordinates;
         while(!isEndReached) {

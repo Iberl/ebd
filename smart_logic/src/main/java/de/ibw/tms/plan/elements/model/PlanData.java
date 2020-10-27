@@ -341,7 +341,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * @param e - Target Edge
      * @return String - Bereichs-ID
      */
-    @Nullable
+
     public String getRefIdOfEdge(TopologyGraph.Edge e) {
         String Ref;
         TopologyConnect RefConnect = null;

@@ -7,7 +7,6 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.UtilFunction;
 import ebd.ConfigHandler;
@@ -163,7 +162,7 @@ public class TopologyFactory implements ITopologyFactory {
 
 
             TopologyGraph.Edge tgEdge = new TopologyGraph.Edge(A,tcA,B,tcB, Edge);
-            TG.EdgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
+            TG.edgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
 
 
 
@@ -184,7 +183,7 @@ public class TopologyFactory implements ITopologyFactory {
         fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
 
         // iterate over edges
-        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.EdgeRepo.values());
+        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.edgeRepo.values());
 
 
 
@@ -321,7 +320,7 @@ public class TopologyFactory implements ITopologyFactory {
             GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
-            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(TopKante.getIdentitaet().getWert());
+            TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(TopKante.getIdentitaet().getWert());
 
 
             GeoCoordinates geoCoordinate;

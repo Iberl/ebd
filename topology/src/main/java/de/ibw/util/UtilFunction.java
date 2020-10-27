@@ -34,7 +34,7 @@ public class UtilFunction {
      */
     public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
         if(edge.dTopLength < distanceA1) throw new IllegalArgumentException("The desired point must lay on the top edge.");
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();

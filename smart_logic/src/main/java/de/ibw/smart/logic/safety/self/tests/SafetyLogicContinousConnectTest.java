@@ -4,7 +4,7 @@ import de.ibw.feed.Balise;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
@@ -91,10 +91,10 @@ public class SafetyLogicContinousConnectTest {
     @Test
     public void checkIfRouteIsContinuousWithToLessItems() {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        Pair<Route.TrackElementType, ITrackElement> test1 = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, this.pickRandomNode());
+        Pair<Route.TrackElementType, TrackElement> test1 = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, this.pickRandomNode());
         TopologyGraph.Node N = pickRandomNode();
         try {
-            ArrayList<Pair<Route.TrackElementType, ITrackElement>> list1 = new ArrayList();
+            ArrayList<Pair<Route.TrackElementType, TrackElement>> list1 = new ArrayList();
             list1.add(test1);
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, list1);
             // this assert shall not be called, since code above thorws Nullpointer
@@ -103,7 +103,7 @@ public class SafetyLogicContinousConnectTest {
             assertTrue(true);
         }
         try {
-            ArrayList<Pair<Route.TrackElementType, ITrackElement>> list2 = new ArrayList();
+            ArrayList<Pair<Route.TrackElementType, TrackElement>> list2 = new ArrayList();
             list2.add(new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, this.pickRandomEdge()));
             ModulUnderTest.checkIfRouteIsContinuousConnected(null, list2);
             // this assert shall not be called, since code above thorws Nullpointer
@@ -119,16 +119,16 @@ public class SafetyLogicContinousConnectTest {
     @Test
     public void checkIfSmartSaftyRecogniseInvalidNullValues() {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<ArrayList<Pair<Route.TrackElementType, ITrackElement>>> testRoutes = new ArrayList<>();
+        ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
             if(testRoutes.size() <= this.I_AMOUNT_OF_TESTS_4_ACCEPTED_ROUTE_TESTS) {
-                ArrayList<Pair<Route.TrackElementType, ITrackElement>> OneRoute = generateRandomContinousRoute();
+                ArrayList<Pair<Route.TrackElementType, TrackElement>> OneRoute = generateRandomContinousRoute();
                 if(null != OneRoute) {
                     testRoutes.add(OneRoute);
                 }
             }
         }
-        for(ArrayList<Pair<Route.TrackElementType, ITrackElement>> Route : testRoutes) {
+        for(ArrayList<Pair<Route.TrackElementType, TrackElement>> Route : testRoutes) {
             try {
                 Route = malifiyRouteWithNullEntry(Route);
                 ModulUnderTest.checkIfRouteIsContinuousConnected(null, Route);
@@ -147,16 +147,16 @@ public class SafetyLogicContinousConnectTest {
     @Test
     public void checkIfRouteContinousShallReturnTrue() {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<ArrayList<Pair<Route.TrackElementType, ITrackElement>>> testRoutes = new ArrayList<>();
+        ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = new ArrayList<>();
         for(int i = 0; i < this.I_TRYS_FOR_FINAL_ROUTE; i++) {
             if(testRoutes.size() <= this.I_AMOUNT_OF_TESTS_4_ACCEPTED_ROUTE_TESTS) {
-                ArrayList<Pair<Route.TrackElementType, ITrackElement>> OneRoute = generateRandomContinousRoute();
+                ArrayList<Pair<Route.TrackElementType, TrackElement>> OneRoute = generateRandomContinousRoute();
                 if(null != OneRoute) {
                     testRoutes.add(OneRoute);
                 }
             }
         }
-        for(ArrayList<Pair<Route.TrackElementType, ITrackElement>> Route : testRoutes) {
+        for(ArrayList<Pair<Route.TrackElementType, TrackElement>> Route : testRoutes) {
             boolean bResult = ModulUnderTest.checkIfRouteIsContinuousConnected(null, Route);
 
             assertTrue(bResult);
@@ -200,9 +200,9 @@ public class SafetyLogicContinousConnectTest {
 
     private void checkRouteHavingWrongConnection(MalifyRouteWithWrongValues malification) {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<ArrayList<Pair<Route.TrackElementType, ITrackElement>>> testRoutes = prepareWorkingRoutes(new ArrayList<>());
+        ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes = prepareWorkingRoutes(new ArrayList<>());
 
-        for(ArrayList<Pair<Route.TrackElementType, ITrackElement>> Route : testRoutes) {
+        for(ArrayList<Pair<Route.TrackElementType, TrackElement>> Route : testRoutes) {
 
                 Route = malifiyRouteWithWrongEntry(Route, malification);
 
@@ -223,15 +223,15 @@ public class SafetyLogicContinousConnectTest {
         }
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> malifiyRouteWithWrongEntry(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, MalifyRouteWithWrongValues malifyPosition) {
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute = new ArrayList<>();
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> malifiyRouteWithWrongEntry(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, MalifyRouteWithWrongValues malifyPosition) {
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute = new ArrayList<>();
         int iMaliciousIndex =  Math.abs(new Random().nextInt()) % (route.size() - 1);
-        Pair<Route.TrackElementType, ITrackElement> BadItem = null;
+        Pair<Route.TrackElementType, TrackElement> BadItem = null;
         switch (malifyPosition) {
             case MALIFY_START: {
                 iMaliciousIndex = 0;
 
-                Pair<Route.TrackElementType, ITrackElement> maliciosItem = route.get(iMaliciousIndex);
+                Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
                     case(0): {
@@ -261,7 +261,7 @@ public class SafetyLogicContinousConnectTest {
             case MALIFY_END: {
                 iMaliciousIndex = route.size() - 1;
 
-                Pair<Route.TrackElementType, ITrackElement> maliciosItem = route.get(iMaliciousIndex);
+                Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
                 Route.TrackElementType OriginalElementType = maliciosItem.getLeft();
                 switch(iMalifyKind % 2) {
                     case(0): {
@@ -284,9 +284,9 @@ public class SafetyLogicContinousConnectTest {
 
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> replaceMiddleElementWithOtherOne(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> replaceMiddleElementWithOtherOne(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex) {
         Route.TrackElementType BadType;
-        Pair<Route.TrackElementType, ITrackElement> BadItem;
+        Pair<Route.TrackElementType, TrackElement> BadItem;
         BadType = Route.TrackElementType.CROSSOVER_TYPE;
         int iIndexNotConnected = -1;
         Boolean previousIndexIsNotConnected = new Random().nextBoolean();
@@ -300,8 +300,8 @@ public class SafetyLogicContinousConnectTest {
         return createMalicousRoute(route, newMalicousRoute, iMaliciousIndex, BadItem );
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> invertType(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex, Pair<Route.TrackElementType, ITrackElement> maliciosItem, Route.TrackElementType originalElementType) {
-        Pair<Route.TrackElementType, ITrackElement> BadItem;
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> invertType(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex, Pair<Route.TrackElementType, TrackElement> maliciosItem, Route.TrackElementType originalElementType) {
+        Pair<Route.TrackElementType, TrackElement> BadItem;
         Route.TrackElementType BadType = Route.TrackElementType.RAIL_TYPE;
         if(originalElementType.equals(Route.TrackElementType.RAIL_TYPE)) {
             BadType = Route.TrackElementType.CROSSOVER_TYPE;
@@ -310,7 +310,7 @@ public class SafetyLogicContinousConnectTest {
         return createMalicousRoute(route, newMalicousRoute, iMaliciousIndex, BadItem);
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> replaceElementWithOtherOne(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex, Route.TrackElementType originalElementType, boolean isStart) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> replaceElementWithOtherOne(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex, Route.TrackElementType originalElementType, boolean isStart) {
 
         if(originalElementType.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
             return handleStartOrEndWithMalicousCrossover(route, newMalicousRoute, iMaliciousIndex, isStart);
@@ -319,22 +319,22 @@ public class SafetyLogicContinousConnectTest {
         }
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> handleStartOrEndWithMalicousCrossover(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex, boolean isStart) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> handleStartOrEndWithMalicousCrossover(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex, boolean isStart) {
         Route.TrackElementType BadType;
-        Pair<Route.TrackElementType, ITrackElement> BadItem;
+        Pair<Route.TrackElementType, TrackElement> BadItem;
         BadType = Route.TrackElementType.CROSSOVER_TYPE;
         TopologyGraph.Node MaliciousNode = getMalicousNode(route, isStart);
         BadItem = new ImmutablePair<>(BadType, MaliciousNode);
         return createMalicousRoute(route, newMalicousRoute, iMaliciousIndex, BadItem );
     }
 
-    private TopologyGraph.Node getMalicousNode(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, boolean isStart) {
+    private TopologyGraph.Node getMalicousNode(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, boolean isStart) {
         return isStart ? pickRandomNode(route.get(1)) : pickRandomNode(route.get(route.size()-2));
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> handleStartOrEndWithMalicousRail(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex, boolean isStart) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> handleStartOrEndWithMalicousRail(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex, boolean isStart) {
         Route.TrackElementType BadType;
-        Pair<Route.TrackElementType, ITrackElement> BadItem;
+        Pair<Route.TrackElementType, TrackElement> BadItem;
         BadType = Route.TrackElementType.RAIL_TYPE;
         TopologyGraph.Edge MaliciousStartEdge = isStart ? pickRandomEdge(route.get(1)) : pickRandomEdge(route.get(route.size() -2));
         BadItem = new ImmutablePair<>(BadType, MaliciousStartEdge);
@@ -342,7 +342,7 @@ public class SafetyLogicContinousConnectTest {
     }
 
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> createMalicousRoute(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route, ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute, int iMaliciousIndex, Pair<Route.TrackElementType, ITrackElement> badItem) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> createMalicousRoute(ArrayList<Pair<Route.TrackElementType, TrackElement>> route, ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute, int iMaliciousIndex, Pair<Route.TrackElementType, TrackElement> badItem) {
         for(int i = 0; i < route.size(); i++) {
             if(i == iMaliciousIndex) {
                 newMalicousRoute.add(badItem);
@@ -356,10 +356,10 @@ public class SafetyLogicContinousConnectTest {
     }
 
 
-    private ArrayList<ArrayList<Pair<Route.TrackElementType, ITrackElement>>> prepareWorkingRoutes(ArrayList<ArrayList<Pair<Route.TrackElementType, ITrackElement>>> testRoutes) {
+    private ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> prepareWorkingRoutes(ArrayList<ArrayList<Pair<Route.TrackElementType, TrackElement>>> testRoutes) {
         for(int i = 0; i < this.I_AMOUNT_OF_TESTS_4_NEGATIVE_ROUTE_TESTS; i++) {
             if(testRoutes.size() <= this.I_AMOUNT_OF_TESTS_4_NEGATIVE_ROUTE_TESTS) {
-                ArrayList<Pair<Route.TrackElementType, ITrackElement>> OneRoute = generateRandomContinousRoute();
+                ArrayList<Pair<Route.TrackElementType, TrackElement>> OneRoute = generateRandomContinousRoute();
                 if(null != OneRoute) {
                     testRoutes.add(OneRoute);
                 }
@@ -369,11 +369,11 @@ public class SafetyLogicContinousConnectTest {
     }
 
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> malifiyRouteWithNullEntry(ArrayList<Pair<Route.TrackElementType, ITrackElement>> route) {
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> newMalicousRoute = new ArrayList<>();
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> malifiyRouteWithNullEntry(ArrayList<Pair<Route.TrackElementType, TrackElement>> route) {
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> newMalicousRoute = new ArrayList<>();
         int iMaliciousIndex =  Math.abs(new Random().nextInt()) % (route.size() - 1);
-        Pair<Route.TrackElementType, ITrackElement> maliciosItem = route.get(iMaliciousIndex);
-        Pair<Route.TrackElementType, ITrackElement> BadNullItem = null;
+        Pair<Route.TrackElementType, TrackElement> maliciosItem = route.get(iMaliciousIndex);
+        Pair<Route.TrackElementType, TrackElement> BadNullItem = null;
         boolean b = new Random().nextBoolean();
         if(b) {
             BadNullItem = new ImmutablePair<>(null, maliciosItem.getRight());
@@ -391,7 +391,7 @@ public class SafetyLogicContinousConnectTest {
 
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> generateRandomContinousRoute() {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute() {
         int iTargetAmountOfRouteElements = calcRouteElementAmount();
         return generateRandomContinousRoute(iTargetAmountOfRouteElements);
 
@@ -404,16 +404,16 @@ public class SafetyLogicContinousConnectTest {
      * @param beginnOnEdge boolean - bestimmt ob die Zufallsstrecke auf einer Kante beginnt
      * @return Streckenlisten mit Art (Knoten oder Kante) und konkretem Element.
      */
-    public ArrayList<Pair<Route.TrackElementType, ITrackElement>> generateRandomContinousRoute(
+    public ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(
             int iTargetAmountOfRouteElements,
                                                                                       boolean beginnOnEdge,
                                                                                       boolean beginnWithBalise,
                                                                                       TestUtil.RouteConfig TestConfig) {
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> RouteResult = new ArrayList<>();
-        ArrayList<ITrackElement> visitedElements = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
+        ArrayList<TrackElement> visitedElements = new ArrayList<>();
 
         TopologyGraph.Edge NewWay = null;
-        ITrackElement CurrentElement;
+        TrackElement CurrentElement;
         if(beginnWithBalise) {
             CurrentElement = handleBeginOnBalise(RouteResult,visitedElements, TestConfig);
         } else if(beginnOnEdge) {
@@ -440,7 +440,7 @@ public class SafetyLogicContinousConnectTest {
         return returnFinishedRoute(RouteResult, visitedElements, NewWay);
     }
 
-    public void fillPossibleWays(ArrayList<ITrackElement> visitedElements, TopologyGraph.Node currentElement,
+    public void fillPossibleWays(ArrayList<TrackElement> visitedElements, TopologyGraph.Node currentElement,
                                  ArrayList<TopologyGraph.Edge> possibleWays, TestUtil.RouteConfig testConfig) {
 
         for (TopologyGraph.Edge E : currentElement.inEdges) {
@@ -455,7 +455,7 @@ public class SafetyLogicContinousConnectTest {
         }
     }
 
-    private boolean checkIfEdgeIsPossible(TopologyGraph.Edge E, TopologyGraph.Node currentElement, TestUtil.RouteConfig testConfig, ArrayList<ITrackElement> visitedElements) {
+    private boolean checkIfEdgeIsPossible(TopologyGraph.Edge E, TopologyGraph.Node currentElement, TestUtil.RouteConfig testConfig, ArrayList<TrackElement> visitedElements) {
         switch (testConfig) {
             case BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING: {
                 if(visitedElements.size() != 1) {
@@ -478,14 +478,14 @@ public class SafetyLogicContinousConnectTest {
         }
     }
 
-    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<ITrackElement> visitedElements) {
+    private boolean checkIfVisited(TopologyGraph.Edge e, ArrayList<TrackElement> visitedElements) {
         if (!visitedElements.contains(e)) {
             return true;
         }
         return false;
     }
 
-    private ITrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements, TestUtil.RouteConfig TestConfig) {
+    private TrackElement handleBeginOnBalise(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, TestUtil.RouteConfig TestConfig) {
         I_CURRENT_TRYS = 0;
         boolean bDirectionNodeA = new Random().nextBoolean();
         TopologyGraph.Edge EdgeWithBalise = pickRandomEdgeWithBalise(TestConfig);
@@ -549,12 +549,12 @@ public class SafetyLogicContinousConnectTest {
 
 
     @Nullable
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements) {
-        ArrayList<Pair<Route.TrackElementType, ITrackElement>> RouteResult = new ArrayList<>();
-        ArrayList<ITrackElement> visitedElements = new ArrayList<>();
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements) {
+        ArrayList<Pair<Route.TrackElementType, TrackElement>> RouteResult = new ArrayList<>();
+        ArrayList<TrackElement> visitedElements = new ArrayList<>();
         boolean beginnOnEdge = new Random().nextBoolean();
         TopologyGraph.Edge NewWay = null;
-        ITrackElement CurrentElement;
+        TrackElement CurrentElement;
         if(beginnOnEdge) {
             CurrentElement = handleBeginOnEdge(RouteResult, visitedElements);
         } else {
@@ -579,14 +579,14 @@ public class SafetyLogicContinousConnectTest {
         return returnFinishedRoute(RouteResult, visitedElements, NewWay);
     }
 
-    private ITrackElement handleBeginOnEdge(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements) {
+    private TrackElement handleBeginOnEdge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
         boolean bDirectionNodeA = new Random().nextBoolean();
         TopologyGraph.Edge OldEdge = pickRandomEdge();
         return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, OldEdge);
     }
 
-    private ITrackElement provideTrackElement4Edge(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements, boolean bDirectionNodeA, TopologyGraph.Edge oldEdge) {
-        ITrackElement currentElement = null;
+    private TrackElement provideTrackElement4Edge(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, boolean bDirectionNodeA, TopologyGraph.Edge oldEdge) {
+        TrackElement currentElement = null;
         visitedElements.add(oldEdge);
         routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, oldEdge));
         if(bDirectionNodeA) {
@@ -599,15 +599,15 @@ public class SafetyLogicContinousConnectTest {
         return currentElement;
     }
 
-    private ITrackElement handleBeginOnNode(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements) {
-        ITrackElement CurrentElement;
+    private TrackElement handleBeginOnNode(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements) {
+        TrackElement CurrentElement;
         CurrentElement = this.pickRandomNode();
         visitedElements.add(CurrentElement);
         routeResult.add(new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, CurrentElement));
         return CurrentElement;
     }
 
-    private ArrayList<Pair<Route.TrackElementType, ITrackElement>> returnFinishedRoute(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements, TopologyGraph.Edge newWay) {
+    private ArrayList<Pair<Route.TrackElementType, TrackElement>> returnFinishedRoute(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, TopologyGraph.Edge newWay) {
         boolean bEndOnEdge = new Random().nextBoolean();
         if(bEndOnEdge) {
             routeResult.add(new ImmutablePair(Route.TrackElementType.RAIL_TYPE, newWay));
@@ -618,8 +618,8 @@ public class SafetyLogicContinousConnectTest {
         return routeResult;
     }
 
-    private ITrackElement prepareNewIteration(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routeResult, ArrayList<ITrackElement> visitedElements, TopologyGraph.Edge newWay) {
-        ITrackElement CurrentElement;
+    private TrackElement prepareNewIteration(ArrayList<Pair<Route.TrackElementType, TrackElement>> routeResult, ArrayList<TrackElement> visitedElements, TopologyGraph.Edge newWay) {
+        TrackElement CurrentElement;
         visitedElements.add(newWay);
         CurrentElement = getNodeNotVisited(visitedElements, newWay);
         visitedElements.add(CurrentElement);
@@ -627,7 +627,7 @@ public class SafetyLogicContinousConnectTest {
         return CurrentElement;
     }
 
-    private TopologyGraph.Node getNodeNotVisited(ArrayList<ITrackElement> visitedElements, TopologyGraph.Edge newWay) {
+    private TopologyGraph.Node getNodeNotVisited(ArrayList<TrackElement> visitedElements, TopologyGraph.Edge newWay) {
         TopologyGraph.Node LastTargetNode = newWay.A;
         if(visitedElements.contains(LastTargetNode)) {
             LastTargetNode = newWay.B;
@@ -649,8 +649,8 @@ public class SafetyLogicContinousConnectTest {
         return (TopologyGraph.Node) pickRandomElement(nodeList);
 
     }
-    private TopologyGraph.Node pickRandomNode(Pair<Route.TrackElementType, ITrackElement> notConnectedWith) {
-        ITrackElement ElementNotConnectedWith = notConnectedWith.getRight();
+    private TopologyGraph.Node pickRandomNode(Pair<Route.TrackElementType, TrackElement> notConnectedWith) {
+        TrackElement ElementNotConnectedWith = notConnectedWith.getRight();
         for(int i = 0; i < I_TRYS_FOR_FINAL_ROUTE; i++) {
 
             TopologyGraph.Node ReturnNode = pickRandomNode();
@@ -678,8 +678,8 @@ public class SafetyLogicContinousConnectTest {
         return true;
     }
 
-    private TopologyGraph.Edge pickRandomEdge(Pair<Route.TrackElementType, ITrackElement> notConnectedWith) {
-        ITrackElement ElementNotConnectedWith = notConnectedWith.getRight();
+    private TopologyGraph.Edge pickRandomEdge(Pair<Route.TrackElementType, TrackElement> notConnectedWith) {
+        TrackElement ElementNotConnectedWith = notConnectedWith.getRight();
         for(int i = 0; i < I_TRYS_FOR_FINAL_ROUTE; i++) {
 
             TopologyGraph.Edge ReturnEdge = pickRandomEdge();
