@@ -6,7 +6,6 @@ import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.TopRailReturn;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
@@ -182,7 +181,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setPaint(Color.gray);
         DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
             // diese Liste zeichenen

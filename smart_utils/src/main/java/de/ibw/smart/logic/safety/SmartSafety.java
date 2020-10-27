@@ -3,16 +3,11 @@ package de.ibw.smart.logic.safety;
 
 
 import de.ibw.feed.Balise;
-import de.ibw.history.PositionData;
-import de.ibw.history.PositionModul;
-import de.ibw.history.data.PositionEnterType;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.self.tests.SmartSafetyContinousConnectTest;
-import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
@@ -23,7 +18,6 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
-import de.ibw.util.UtilFunction;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
@@ -31,10 +25,11 @@ import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import info.dornbach.dbdclient.DBDClient;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
-import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
+import org.junit.platform.engine.discovery.DiscoverySelectors;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -70,7 +65,7 @@ import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-07
+ * @since 2020-09-02
  */
 public class SmartSafety {
     /**
@@ -89,6 +84,7 @@ public class SmartSafety {
      * Nachricht, wenn ein noch nicht definiertes Routen-Element besteht.
      */
     public static final String UNKNOWN_TRACK_ELEMENT_GIVEN = "Input Track Element Is Unknowed (Only Edges and Nodes allowed)";
+
     private static SmartSafety instance;
     /**
      * Ein Repository, dass durch eine ZugId die Positionsdaten des Zuges speichert.
@@ -100,9 +96,7 @@ public class SmartSafety {
     public static DefaultRepo<Integer, TrainInfo> trainInformation = new DefaultRepo<>();
     /**
      * Ein Repository, dass durch eine ZugId, vergangene Positionsdaten speichert.
-     *
      */
-    @Deprecated
     public static DefaultRepo<Integer, CircularFifoBuffer> positionHistory  = new DefaultRepo<Integer, CircularFifoBuffer>();
     // when trespass new Trail between new Endnode save meters of passed tracks form balise on
     // if balise is not on current trail we know how far it is away
@@ -143,14 +137,7 @@ public class SmartSafety {
      */
     private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
 
-    /**
-     * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
-     * @param iTrainId - nid-engineId des angeforderten Zuges
-     * @return List - liste der belegten Abschnitte durch den Zug
-     */
-    public synchronized List<BlockedArea> getAllAreaBlockedByOwn(int iTrainId) {
-        return blockList.getModel(iTrainId);
-    }
+
 
     private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
         List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
@@ -241,7 +228,7 @@ public class SmartSafety {
                             getModel(N1.TopNodeId).getModel(N2.TopNodeId);
                     toBlock.add(new BlockedArea(N1, N1.TopNodeId));
                     toBlock.add(new BlockedArea(N2, N2.TopNodeId));
-                    toBlock.add(new BlockedArea(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
+                    toBlock.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0 , BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
                     int iSumDistance = distanceFromTrainToNextNode.get();
                     iSumDistance += Math.floor(E.dTopLength);
                     distanceFromTrainToNextNode.set(iSumDistance);
@@ -269,15 +256,15 @@ public class SmartSafety {
                         bMovesToB = Ed.A.equals(N);
                         if (bMovesToB) {
 
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, 0,
-                                    Q_SCALE_1M, (int) dDistanceFromRecentNode));
+                            toBlock.add(new BlockedArea(Ed, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0,
+                                    BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dDistanceFromRecentNode));
                         } else {
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
+                            toBlock.add(new BlockedArea(Ed, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dDistanceFromRecentNode, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                                     (int) Math.ceil(Ed.dTopLength)));
                         }
                     }
                 }
-                // TODO PositionData usage
+
                 toBlock = calcCrossoverSignals(toBlock);
 
                 List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
@@ -396,8 +383,8 @@ public class SmartSafety {
                     if(distanceToA2 > dCurrentTrackLength) distanceToA2 = dCurrentTrackLength;
                 }
                 distanceFromTrainToNextNode.set((int) Math.floor(distanceToA2 - distanceToA1) + 1);
-                StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
-                        Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+                StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                        BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.ceil(distanceToA2));
             }
         }
         List<BlockedArea> blockList = getAllAreaNotBlockedByOwn(iTrainId);
@@ -425,8 +412,8 @@ public class SmartSafety {
         distanceToA2 = distanceToA2 + tm.length;
         if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
-                Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+        StartArea = new BlockedArea(startEL, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
     }
 
@@ -442,8 +429,8 @@ public class SmartSafety {
         distanceToA1 = distanceToA1 - tm.length;
         if(distanceToA1 < 0) distanceToA1 = 0;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
-                Q_SCALE_1M, (int) Math.ceil(distanceToA2));
+        StartArea = new BlockedArea(startEL, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
     }
 
@@ -501,13 +488,13 @@ public class SmartSafety {
         iNID_LRBG = CurrentPosition.nid_lrbg;
         B = Balise.baliseByNid_bg.getModel(iNID_LRBG);
         if(B == null) {
-
+            blockLastPositionReports(iTrainId);
             throw new InvalidParameterException("Balse requested not found");
         }
 
         iQ_DirLength = CurrentPosition.q_length;
         if(!checkQ_Length(iQ_DirLength)) {
-
+            blockLastPositionReports(iTrainId);
             throw new InvalidParameterException("No Train Length information available");
         }
 
@@ -517,8 +504,6 @@ public class SmartSafety {
         return CurrentPosition;
     }
 
-
-    @Deprecated
     private synchronized void blockLastPositionReports(int iTrainId) {
         List<BlockedArea> blockedAreasById = blockList.getModel(iTrainId);
         CircularFifoBuffer lastPositions = positionHistory.getModel(iTrainId);
@@ -533,7 +518,7 @@ public class SmartSafety {
             if(B == null) continue;
             CTOPKante BaliseEdge = B.getTopPositionOfDataPoint();
             TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(BaliseEdge.getIdentitaet().getWert());
-            BlockedArea BA = new BlockedArea(E, Q_SCALE_1M, 0, Q_SCALE_1M, 0);
+            BlockedArea BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0);
             blockedAreasById.add(BA);
         }
         blockList.update(iTrainId, blockedAreasById);
@@ -748,7 +733,7 @@ public class SmartSafety {
      * @return boolean
      */
     public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
-        //DBDClient dbdclient = new DBDClient();
+        DBDClient dbdclient = new DBDClient();
         return true;
     }
 
@@ -773,7 +758,7 @@ public class SmartSafety {
             iQ_Length = PosInf.q_length;
             trainInformation.update(iTrainId, P.trainInfo);
             lastPositionReport.update(iTrainId, PosInf);
-            new Thread(() -> handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader())).start();
+            handlePositionHistory(iTrainId, PosInf);
             unlockPassedElements(iTrainId, PosInf);
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
@@ -817,14 +802,11 @@ public class SmartSafety {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    private void handlePositionHistory(int iTrainId, PositionInfo posInf, Message.Header header) {
-        PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                iTrainId, posInf);
-        BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
-
-
-
-        PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+    private void handlePositionHistory(int iTrainId, PositionInfo posInf) {
+        CircularFifoBuffer buffer = positionHistory.getModel(iTrainId);
+        if(buffer == null) buffer = new CircularFifoBuffer(100);
+        buffer.add(posInf);
+        positionHistory.update(iTrainId, buffer);
     }
 
     private boolean checkQ_Length(int iQ_Length) {
@@ -836,67 +818,8 @@ public class SmartSafety {
         return ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_dirTrain || ETCSVariables.Q_DIRTRAIN_REVERSE == iQ_dirTrain;
     }
 
-    private synchronized boolean smartLogicWorking() {
-        final LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-                .selectors(
-                        selectPackage("de.ibw.smart.logic.safety.self.tests"),
-                        selectClass(SmartSafetyContinousConnectTest.class)
-                )
-                .build();
-
-        final Launcher launcher = LauncherFactory.create();
-
-        final boolean pathContainsTests = launcher.discover(request).containsTests();
-        if (!pathContainsTests) {
-            EBM.log("Path de.ibw.smart.logic.safety is invalid or not having tests", SMART_SAFETY);
-
-        }
-
-        final SummaryGeneratingListener listener = new SummaryGeneratingListener();
-
-        launcher.execute(request, listener);
-
-        final TestExecutionSummary summary = listener.getSummary();
 
 
-        final long containersFoundCount = summary.getContainersFoundCount();
-        EBM.log("containers Found Count  " + containersFoundCount, SELF_CHECK);
-
-
-        final long containersSkippedCount = summary.getContainersSkippedCount();
-        EBM.log("containers Skipped Count  " + containersSkippedCount, SELF_CHECK);
-
-        final long testsFoundCount = summary.getTestsFoundCount();
-        EBM.log("tests Found Count  " + testsFoundCount, SELF_CHECK);
-
-
-        final long testsSkippedCount = summary.getTestsSkippedCount();
-        EBM.log("tests Skipped Count  " + testsSkippedCount, SELF_CHECK);
-        StringWriter resultWriter = new StringWriter();
-
-        summary.printFailuresTo(new PrintWriter(resultWriter));
-
-        EBM.log("Test Results " + resultWriter.toString(), SELF_CHECK);
-
-
-        return summary.getTestsFailedCount() == 0L;
-    }
-
-    /**
-     * Untersucht ob die SmartLogic richtig funktioniert
-     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
-     * @return boolean - funktioniert SL
-     */
-    public synchronized boolean slSelfCheck(RbcMaAdapter maAdapter) {
-
-        if(smartLogicWorking()){
-            EBM.log("Self Test was successful. No Errors.", SMART_SAFETY);
-            return true;
-        }
-        EBM.log("Self Test was not successful.", SMART_SAFETY);
-
-        return false;
-    }
 
     /**
      * Noch nicht implementiert
@@ -963,10 +886,7 @@ public class SmartSafety {
 
     }
 
-    public static void main(String[] args) {
-        SmartSafety safety = SmartSafety.getSmartSafety();
-        safety.slSelfCheck(null);
-    }
+
 
     /**
      * Methode zum Testen gegen dieses Modul.
@@ -986,22 +906,7 @@ public class SmartSafety {
     }
 
 
-    /**
-     * Check ob eine Weiche in der Blockierten Liste vorhanden ist.
-     * @param cdc
-     */
-    public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
-        String checkSid = cdc.sId;
-        for(List<BlockedArea> l :this.blockList.getAll()) {
-            for(BlockedArea BA : l) {
-                if(BA.isSidBlocked(checkSid)) {
-                    sendResponseDbdCommandToTms(false, cdc.sCrossoverEbdName, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
-                    return;
-                }
-            }
-        }
-        sendResponseDbdCommandToTms(true, cdc.sCrossoverEbdName,null);
-    }
+
 
     private void sendResponseDbdCommandToTms(boolean isSuccess, String sCrossoverEbdName, String sFailReason) {
         long lPrio = ConfigHandler.getInstance().lCheckDbdReturn;

@@ -1,7 +1,6 @@
 package de.ibw.smart.logic.safety;
 
 import de.ibw.feed.Balise;
-import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.safety.self.tests.TestUtil;
 import de.ibw.tms.etcs.Q_SCALE;
@@ -9,11 +8,10 @@ import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
-import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
@@ -35,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.
  * Dieser Test stellt die funktionale Korrektheit sicher
  */
-class SmartSafetyRouteDataSLIsNonBlockedTest {
+class SafetyLogicRouteDataSLIsNonBlockedTest {
 
     @Spy
-    SmartSafety Safety = SmartSafety.getSmartSafety();
+    SafetyLogic Safety = SafetyLogic.getSmartSafety();
 
 
     @BeforeAll
@@ -48,8 +46,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
 
     @BeforeEach
     public void initTestEnv() throws InterruptedException {
-        SmartSafety.getSmartSafety().resetAllBlockings();
-        SmartSafety.lastPositionReport = new DefaultRepo<>();
+        SafetyLogic.getSmartSafety().resetAllBlockings();
+        SafetyLogic.lastPositionReport = new DefaultRepo<>();
 
     }
 
@@ -62,8 +60,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
     @Test
     public void checkIfMainNullError() throws InterruptedException {
 
-        SmartSafety ModulUnderTest = SmartSafety.getSmartSafety();
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false
             , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
@@ -123,18 +121,18 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true
                 , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
         NodeRunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -218,8 +216,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
                 q_lrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
                 i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
 
-        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
-        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
+        SafetyLogic.lastPositionReport.update(iTrainOne, PosInfoTrain1);
+        SafetyLogic.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
@@ -260,18 +258,18 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -377,8 +375,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
                 q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainTwo,
                 i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
 
-        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
-        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
+        SafetyLogic.lastPositionReport.update(iTrainOne, PosInfoTrain1);
+        SafetyLogic.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
@@ -431,18 +429,18 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -546,8 +544,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
                 q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
                 i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
 
-        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
-        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
+        SafetyLogic.lastPositionReport.update(iTrainOne, PosInfoTrain1);
+        SafetyLogic.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
@@ -593,7 +591,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe;
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe;
         Balise B;
         try {
             routenListe = TestUtil.generateRandomContinousRoute(7, true, true,
@@ -603,12 +601,12 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
             return;
         }
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITrackElement> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITrackElement> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -732,8 +730,8 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
                 q_dirlrbg, q_dlrbg, l_doubtover, l_doubtunder, Q_SCALE.SCALE_1_M.flag, iTrainOne,
                 i_Speed_5_km_per_hour, q_dirtrain, m_mode, m_level, nid_ntc);
 
-        SmartSafety.lastPositionReport.update(iTrainOne, PosInfoTrain1);
-        SmartSafety.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
+        SafetyLogic.lastPositionReport.update(iTrainOne, PosInfoTrain1);
+        SafetyLogic.lastPositionReport.update(iTrainTwo, PosInfoTrain2);
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
@@ -934,12 +932,12 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
 
     }
     */
-    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {
+    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, ITrackElement>> routenListe) {
         int iResultLength = 0;
-        Pair<Route.TrackElementType, TrackElement> StartKomposition = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
+        Pair<Route.TrackElementType, ITrackElement> StartKomposition = routenListe.get(0);
+        Pair<Route.TrackElementType, ITrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
         for(int i = 0; i < routenListe.size() -2; i++) {
-            Pair<Route.TrackElementType, TrackElement> Komposition = routenListe.get(i);
+            Pair<Route.TrackElementType, ITrackElement> Komposition = routenListe.get(i);
             TopologyGraph.Edge E = null;
             if(Komposition == StartKomposition) {
                 if(Komposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -949,7 +947,7 @@ class SmartSafetyRouteDataSLIsNonBlockedTest {
                     throw new InvalidParameterException("Not valid Test setup");
                 }
             } else {
-                Pair<Route.TrackElementType, TrackElement> NextKomposition = routenListe.get(i + 1);
+                Pair<Route.TrackElementType, ITrackElement> NextKomposition = routenListe.get(i + 1);
                 if (NextKomposition == EndKomposition) {
                     if (NextKomposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
                         E = (TopologyGraph.Edge) NextKomposition.getRight();
