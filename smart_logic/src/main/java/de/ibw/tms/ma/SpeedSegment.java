@@ -7,40 +7,46 @@ import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.etcs.NC_DIFF;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
 import java.io.Serializable;
 @JsonIgnoreProperties(value = {
         "ssp"
 })
-public class SpeedSegment extends LinearLocation implements Serializable {
+public class SpeedSegment extends LinearContiguousTrackArea implements Serializable {
+    public static final String CLASS_IDENTIFIER = "Speed_Segment";
     private SSP ssp;
     //vorerst true
     @Expose
-    public de.ibw.tms.ma.location.SpotLocation speedChangeBegin;
+    private SpotLocation speedChangeBegin;
     @Expose
-    public de.ibw.tms.ma.location.SpotLocation speedChangeEnd;
+    private SpotLocation speedChangeEnd;
     @Expose
-    public ApplicationDirection direction;
+    private ApplicationDirection direction;
     @Expose
-    public ETCS_SPEED v_STATIC;
+    private ETCS_SPEED v_STATIC;
     // vorerst null
     @Expose
-    public NC_CDDIFF nc_CDDIFF;
+    private NC_CDDIFF nc_CDDIFF;
     @Expose
-    public NC_DIFF nc_DIFF;
+    private NC_DIFF nc_DIFF;
+
+
+    private SpeedChange ChangeA;
+    private SpeedChange ChangeB;
+
 
     public SpeedSegment(de.ibw.tms.ma.location.SpotLocation begin, de.ibw.tms.ma.location.SpotLocation end, ApplicationDirection direction) {
-        super(begin, end, direction);
-        speedChangeBegin = begin;
-        speedChangeEnd = end;
+        super(CLASS_IDENTIFIER);
+
         this.direction = direction;
 
     }
 
-    public void setSpeedChangeBegin(de.ibw.tms.ma.location.SpotLocation speedChangeBegin) {
-        this.speedChangeBegin = speedChangeBegin;
-    }
+
+
+
 
     public SSP getSsp() {
         return ssp;
@@ -48,21 +54,6 @@ public class SpeedSegment extends LinearLocation implements Serializable {
 
     public void setSsp(SSP ssp) {
         this.ssp = ssp;
-    }
-
-
-    @Override
-    public de.ibw.tms.ma.location.SpotLocation getBegin() {
-        return super.getBegin();
-    }
-
-    public de.ibw.tms.ma.location.SpotLocation getSpeedChangeEnd() {
-        return speedChangeEnd;
-    }
-
-
-    public void setSpeedChangeEnd(SpotLocation speedChangeEnd) {
-        this.speedChangeEnd = speedChangeEnd;
     }
 
     public ETCS_SPEED getV_STATIC() {
@@ -87,6 +78,34 @@ public class SpeedSegment extends LinearLocation implements Serializable {
 
     public void setNc_DIFF(NC_DIFF nc_DIFF) {
         this.nc_DIFF = nc_DIFF;
+    }
+
+
+    public ApplicationDirection getDirection() {
+        return direction;
+    }
+
+    public void setDirection(ApplicationDirection direction) {
+        this.direction = direction;
+    }
+
+    public SpeedChange getChangeA() {
+        return ChangeA;
+    }
+
+    public void setChangeA(SpeedChange changeA) {
+        ChangeA = changeA;
+        this.speedChangeBegin = ChangeA.getIntrinsicCoord();
+    }
+
+    public SpeedChange getChangeB() {
+        return ChangeB;
+
+    }
+
+    public void setChangeB(SpeedChange changeB) {
+        ChangeB = changeB;
+        this.speedChangeEnd = ChangeB.getIntrinsicCoord();
     }
 
     @Override

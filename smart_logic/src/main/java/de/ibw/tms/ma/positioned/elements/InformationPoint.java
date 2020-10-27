@@ -13,6 +13,10 @@ public class InformationPoint extends TrackArea {
     public InformationPoint() {
         super(CLASS_IDENTIFIER);
     }
+    public InformationPoint(String sName) {
+        super(sName);
+    }
+
 
     @Override
     public List<TrackEdgeSection> getTrackEdgeSections() {
