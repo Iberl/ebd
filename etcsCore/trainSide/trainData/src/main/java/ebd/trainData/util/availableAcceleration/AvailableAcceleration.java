@@ -14,7 +14,15 @@ public class AvailableAcceleration {
 
     private double accelerationModification = 1d;
 
+    private double availableAccMod = 0d;
+
     private double breakingModification = 1d;
+
+    private double availableBreakMod = 0d;
+
+    private double availableEmBreakMod = 0d;
+
+    private double timeAtLastChangeInMS = 0;
 
     private ForwardSpline speedUpCurve;
 

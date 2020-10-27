@@ -77,7 +77,6 @@ public class Position {
         this.increment = increment;
         this.direction = direction;
         this.location = location;
-        this.previousLocations = previousLocations;
     }
 
 
