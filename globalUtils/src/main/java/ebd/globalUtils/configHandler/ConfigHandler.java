@@ -429,6 +429,17 @@ public class ConfigHandler {
     }
 
     /**
+     *
+     */
+    private ConfigHandler(Exception e){
+        e.printStackTrace();
+        System.out.println("Loaded no values");
+        ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
+                e, ExceptionEventTyp.FATAL);
+        EventBus.getDefault().post(ev);
+    }
+
+    /**
      * Loads the default values for the config
      * @throws IOException if config-default file is not found
      */
@@ -617,12 +628,8 @@ public class ConfigHandler {
             if (single_instance == null) single_instance = new ConfigHandler();
             return single_instance;
         }catch (IOException ioe){
-            ioe.printStackTrace();
-            ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
-                    ioe, ExceptionEventTyp.FATAL);
-            EventBus.getDefault().post(ev);
+            return new ConfigHandler(ioe);
         }
-        return null;
     }
 
 }
