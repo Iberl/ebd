@@ -268,7 +268,7 @@ public class Balise implements ICoord<Double> {
         BigDecimal dDpLength = this.getDpLength();
         BigDecimal dDistanceFromA = this.getBalisenPositionFromNodeA();
         BigDecimal dTrackLength = this.getLengthOfTopEdge();
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
         BlockedArea.BLOCK_Q_SCALE scale = BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
         BigDecimal dStart = dDistanceFromA.subtract(dDpLength);
         BigDecimal dEnd = dDistanceFromA.add(dDpLength);

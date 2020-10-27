@@ -13,7 +13,6 @@ import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -197,7 +196,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setPaint(Color.gray);
         DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
 
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
@@ -412,7 +411,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
     private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
         // Get TopEdge
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
         if(edge.dTopLength < distanceA1 || edge.dTopLength < distanceA2) throw new IllegalArgumentException("The desired point must lay on the top edge.");
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
@@ -505,7 +504,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      */
     public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
         if(edge.dTopLength < distanceA1) throw new IllegalArgumentException("The desired point must lay on the top edge.");
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
@@ -516,8 +515,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
 
         if (geoEdgeList.isEmpty() || Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
-            GeoCoordinates nodeA = edge.A.getGeoCoordinates();
-            GeoCoordinates nodeB = edge.B.getGeoCoordinates();
+            GeoCoordinates nodeA = edge.A.TE.getGeoCoordinates();
+            GeoCoordinates nodeB = edge.B.TE.getGeoCoordinates();
 
             if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
             else {

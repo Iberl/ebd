@@ -6,12 +6,13 @@ import de.ibw.history.data.RouteDataSL;
 import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
 import de.ibw.util.UtilFunction;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -150,10 +151,10 @@ public class PositionModul implements IPositionModul {
             if(route.getRouteLength().compareTo(dTrainLength) < 0) {
                 return evaluatePositionReport(null, PD);
             }
-            Iterator<Pair<Route.TrackElementType, TrackElement>> it = route.iterator();
+            Iterator<Pair<Route.TrackElementType, ITrackElement>> it = route.iterator();
             try {
                 TopologyGraph.Edge E =
-                        PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+                        PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
                 if (it.hasNext()) {
                     TopologyGraph.Edge Ed = (TopologyGraph.Edge) it.next().getValue();
                     // Routenbeginn passt nicht zur Balise => ohne Route auswerten
@@ -168,7 +169,7 @@ public class PositionModul implements IPositionModul {
                         BigDecimal EndDistance = new BigDecimal(iDistanceToBalise);
                         TopologyGraph.Node N = B.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
                         if (it.hasNext()) {
-                            Pair<Route.TrackElementType, TrackElement> RouteNode = it.next();
+                            Pair<Route.TrackElementType, ITrackElement> RouteNode = it.next();
                             if(RouteNode.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
                                 if(N.equals(RouteNode.getValue())) {
                                     if(route.getRouteLength().compareTo(BigDecimal.valueOf(iDistanceToBalise))>= 0) {
@@ -178,7 +179,7 @@ public class PositionModul implements IPositionModul {
                                         while(StartDistance.compareTo(CurrentDistance) >= 0) {
                                             tempDistance = new BigDecimal(CurrentDistance.doubleValue());
 
-                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            Pair<Route.TrackElementType, ITrackElement> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
@@ -193,7 +194,7 @@ public class PositionModul implements IPositionModul {
                                             PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     (int) E.dTopLength));
-                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            Pair<Route.TrackElementType, ITrackElement> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
@@ -296,7 +297,7 @@ public class PositionModul implements IPositionModul {
         N1 = b.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
         BigDecimal dDistanceFromA = b.getBalisenPositionFromNodeA();
         TopologyGraph.Edge E =
-                PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
+                PlanData.topGraph.edgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
         if(E.B.equals(N1)) {
             BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                     dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
@@ -408,7 +409,7 @@ public class PositionModul implements IPositionModul {
         return dFromRangeStart != null && dToRangeEnd != null;
     }
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdge);
         if(E == null) return false;
         BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                 dFromRangeStart.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dToRangeEnd.intValue());
@@ -422,7 +423,7 @@ public class PositionModul implements IPositionModul {
         return false;
     }
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge) {
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdge);
         if(E == null) return false;
         BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                 0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
