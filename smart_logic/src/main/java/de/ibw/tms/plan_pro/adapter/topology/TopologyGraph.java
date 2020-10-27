@@ -2,7 +2,6 @@ package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.GeoCoordinates;
-import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
@@ -27,10 +26,6 @@ import java.util.List;
  * @version 0.3
  * @since 2020-08-10
  */
-@XmlRootElement(name = "topology")
-@XmlType(namespace = "https://www.disposim.de/topologyGraph",
-    propOrder = {"edgeRepo"})
-@XmlAccessorType(XmlAccessType.FIELD)
 public class TopologyGraph {
 
     private static Node LeftmostNode = null;
@@ -59,7 +54,7 @@ public class TopologyGraph {
         if(LeftmostNode == null) {
             return null;
         }
-        GeoCoordinates xy = LeftmostNode.TE.getGeoCoordinates();
+        GeoCoordinates xy = LeftmostNode.getGeoCoordinates();
         if(xy == null) return null;
         return xy.getX();
     }
@@ -74,9 +69,7 @@ public class TopologyGraph {
     /**
      * HashMap die f&uuml;r die PlanPro-Kanten ID die Topologische Kante speichert
      */
-
-    @XmlElement(name = "edgeRepo")
-    public HashMap<String, Edge> edgeRepo = new HashMap<>();
+    public HashMap<String, Edge> EdgeRepo = new HashMap<>();
         // String is TopNode_ID
     /**
      * HashMap die f&uuml;r die PlanPro-Knoten ID einen Topologische Knoten speichert
@@ -88,54 +81,34 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    @XmlType(namespace = "https://www.disposim.de/node",
-    propOrder = {"name", "TopNodeId"})
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static class Node implements ITrackElement {
+    public static class Node extends TrackElement {
 
-        @XmlTransient
-        public TrackElement TE = new TrackElement() {
-            @Override
-            public String getViewName() {
-                return name;
-            }
-        };
         /**
          * Knoten Bezeichnung
          */
-        @XmlElement
-        public String name;
+        public final String name;
         /**
          * PlanPro Knoten Id
          */
-        @XmlElement
-        public String TopNodeId;
+            public final String TopNodeId;
         /**
          * Knoten realisierung
          */
-        @XmlTransient
         public Object NodeImpl;
         /**
          * Klasse des Knoten
          */
-        @XmlTransient
         public Class NodeType;
         /**
          * Kanten eingehend
          */
-        @XmlTransient
-        public HashSet<Edge> inEdges;
+        public final HashSet<Edge> inEdges;
         /**
          * Kanten ausgehend
          */
-        @XmlTransient
-        public HashSet<Edge> outEdges;
+        public final HashSet<Edge> outEdges;
             //public GeoCoordinates Coordinates;
 
-
-        public Node() {
-
-        }
         /**
          * Konstruktur zur instanziierung eines Knoten
          * @param name {@link String} - Bezeichnung des Knoten
@@ -147,7 +120,7 @@ public class TopologyGraph {
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
                 outEdges = new HashSet<Edge>();
-                this.TE.setGeoCoordinates(GeoCo);
+                this.setGeoCoordinates(GeoCo);
                 NodeRepo.put(this.TopNodeId, this);
 
             }
@@ -191,70 +164,42 @@ public class TopologyGraph {
         public String getViewName() {
             return name;
         }
-
-        @Override
-        public void updatePositionedRelation(List<PositionedRelation> relationList) {
-            TE.updatePositionedRelation(relationList);
-        }
-
-        @Override
-        public List<PositionedRelation> getPositionedRelations() {
-            return TE.getPositionedRelations();
-        }
     }
 
     /**
      * Topologische Kante
      */
-    @XmlRootElement(name = "edge")
-    @XmlType(namespace = "https://www.disposim.de/edge",
-    propOrder = {"A", "TopConnectFromA", "B", "TopConnectFromB", "dTopLength", "sId"})
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static class Edge implements ITrackElement {
+    public static class Edge extends TrackElement {
 
-        @XmlTransient
-        TrackElement TE = new TrackElement() {
-            @Override
-            public String getViewName() {
-                return sId;
-            }
-        };
 
-        @XmlTransient
-        private Rail R = null;
 
-        @XmlTransient
-        private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
+            private Rail R = null;
+
+            private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
         /**
          * Knoten A der Kante
          */
-        @XmlElement
         public final Node A;
         /**
          * Verbindungsart des Knoten A (Spitze, Rechts, Links)
          */
-        @XmlElement
-        public TopologyConnect TopConnectFromA;
+        public final TopologyConnect TopConnectFromA;
         /**
          * Knoten B dieser Kante
          */
-        @XmlElement
         public final Node B;
         /**
          * Verbindungsart des Knoten B (Spitze, Rechts, Links)
          */
-        @XmlElement
-        public TopologyConnect TopConnectFromB;
+        public final TopologyConnect TopConnectFromB;
         /**
          * Kantenl&auml;nge in meter
          */
-        @XmlElement
-        public final double dTopLength;
+            public final double dTopLength;
         /**
          * PlanPro KantenId
          */
         @Expose
-        @XmlElement
         public String sId;
 
         /**
@@ -270,6 +215,10 @@ public class TopologyGraph {
                 E.printStackTrace();
                 return null;
             }
+        }
+
+        public String getRefId() {
+            return PlanData.getInstance().getRefIdOfEdge(this);
         }
 
         /**
@@ -289,7 +238,7 @@ public class TopologyGraph {
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
-                GeoCoordinates reference = A.TE.getGeoCoordinates();
+                GeoCoordinates reference = A.getGeoCoordinates();
 
                 /*boolean b_fromA;
                 CGEOKante firstEdge = paintListGeo.get(0);
@@ -391,8 +340,7 @@ public class TopologyGraph {
                 R = r;
             }
 
-        @XmlTransient
-        private CTOPKante PlanProEdge;
+            private CTOPKante PlanProEdge;
 
         /**
          * Gibt die Topologische Kante nach Definition in PlanPro wider
@@ -401,15 +349,6 @@ public class TopologyGraph {
         public CTOPKante getPlanProEdge() {
                 return PlanProEdge;
             }
-
-        public Edge(){
-            this.A = null;
-            this.TopConnectFromA = null;
-            this.B = null;
-            this.PlanProEdge = null;
-            this.sId = null;
-            this.dTopLength = -1;
-        }
 
         /**
          * Dieser Konstruktur instanziiert eine Topologische Kante
@@ -489,16 +428,7 @@ public class TopologyGraph {
             }
 
 
-        @Override
-        public void updatePositionedRelation(List<PositionedRelation> relationList) {
-            TE.updatePositionedRelation(relationList);
         }
-
-        @Override
-        public List<PositionedRelation> getPositionedRelations() {
-            return TE.getPositionedRelations();
-        }
-    }
 
         public static void main(String[] args) {
            /* Node seven = new Node("7", topNodeId);

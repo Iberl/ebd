@@ -327,51 +327,64 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();
         for(TopologyGraph.Edge E : edges) {
             String Ref = null;
-            TopologyConnect RefConnect = null;
-            TopologyGraph.Node A = E.A;
-            TopologyGraph.Node B = E.B;
-            String aId = SwitchIdRepo.getModel(A);
-            String bId = SwitchIdRepo.getModel(B);
-            if(aId == null && bId == null) continue;
-            if(aId == null) {
-                Ref = bId;
-                RefConnect = E.TopConnectFromB;
-            } else if(bId == null) {
-                Ref = aId;
-                RefConnect = E.TopConnectFromA;
-            } else {
-                int aCrossingNumber = generateCrossingNumber(aId);
-                int bCrossingNumber = generateCrossingNumber(bId);
-                if(aCrossingNumber < bCrossingNumber) {
-                    Ref = aId;
-                    RefConnect = E.TopConnectFromA;
-                } else {
-                    Ref = bId;
-                    RefConnect = E.TopConnectFromB;
-                }
-
-
-            }
-            switch (RefConnect) {
-                case LINKS: {
-                    Ref += "L";
-                    break;
-                } case RECHTS: {
-                    Ref += "R";
-                    break;
-                } case SPITZE: {
-                    Ref += "S";
-                    break;
-                } default: {
-                    continue;
-                }
-
-            }
+            Ref = getRefIdOfEdge(E);
+            if (Ref == null) continue;
             EdgeIdLookupRepo.update(Ref, E);
 
 
         }
 
+    }
+
+    /**
+     * Holt aus der Edge die Bereichs-ID
+     * @param e - Target Edge
+     * @return String - Bereichs-ID
+     */
+    @Nullable
+    public String getRefIdOfEdge(TopologyGraph.Edge e) {
+        String Ref;
+        TopologyConnect RefConnect = null;
+        TopologyGraph.Node A = e.A;
+        TopologyGraph.Node B = e.B;
+        String aId = SwitchIdRepo.getModel(A);
+        String bId = SwitchIdRepo.getModel(B);
+        if(aId == null && bId == null) return null;
+        if(aId == null) {
+            Ref = bId;
+            RefConnect = e.TopConnectFromB;
+        } else if(bId == null) {
+            Ref = aId;
+            RefConnect = e.TopConnectFromA;
+        } else {
+            int aCrossingNumber = generateCrossingNumber(aId);
+            int bCrossingNumber = generateCrossingNumber(bId);
+            if(aCrossingNumber < bCrossingNumber) {
+                Ref = aId;
+                RefConnect = e.TopConnectFromA;
+            } else {
+                Ref = bId;
+                RefConnect = e.TopConnectFromB;
+            }
+
+
+        }
+        switch (RefConnect) {
+            case LINKS: {
+                Ref += "L";
+                break;
+            } case RECHTS: {
+                Ref += "R";
+                break;
+            } case SPITZE: {
+                Ref += "S";
+                break;
+            } default: {
+                return null;
+            }
+
+        }
+        return Ref;
     }
 
     private int generateCrossingNumber(String crossId) {
@@ -518,10 +531,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 Chainage ChainageN = ChainageSupply.getModel(N);
                 Chainage ChainageN2 = ChainageSupply.getModel(N2);
 
-                float x1 = N.TE.getGeoCoordinates().getFloatX();
-                float y1 = N.TE.getGeoCoordinates().getFloatY();
-                float x2 = N2.TE.getGeoCoordinates().getFloatX();
-                float y2 = N2.TE.getGeoCoordinates().getFloatY();
+                float x1 = N.getGeoCoordinates().getFloatX();
+                float y1 = N.getGeoCoordinates().getFloatY();
+                float x2 = N2.getGeoCoordinates().getFloatX();
+                float y2 = N2.getGeoCoordinates().getFloatY();
 
                 handleCrossoverInput(N, N2, ConnectN2, ConnectN, ChainageN, ChainageN2, x1, y1, x2, y2);
 

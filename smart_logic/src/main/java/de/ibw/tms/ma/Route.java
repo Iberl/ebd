@@ -6,6 +6,8 @@ import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.plan.elements.CrossoverModel;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
@@ -85,7 +87,7 @@ public class Route implements Cloneable, Serializable {
         if(trackElementOfEnd instanceof ControlledTrackElement) {
             EndModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) trackElementOfEnd);
 
-            String sId = EndModel.getNode().TopNodeId;
+            String sId = PlanData.SwitchIdRepo.getModel(EndModel.getNode());
             this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
         } else {
             // no Crossover so it has to be a rail
@@ -97,14 +99,15 @@ public class Route implements Cloneable, Serializable {
     public void handleCrossoverWaypoint(TrackElement CTE) {
         String sId;
         CrossoverModel M = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) CTE);
-        sId = M.getNode().TopNodeId;
+        sId = PlanData.SwitchIdRepo.getModel(M.getNode());
         this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
     }
 
     public void handleRailWaypoint(TrackElement TE) {
 
         Trail T = (Trail) TE;
-        this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, T.getPlanProId());
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(T.getPlanProId());
+        this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, E.getRefId());
     }
 
     private void addWaypointIntoTransmission(TrackElementType TrackType, String sId) {

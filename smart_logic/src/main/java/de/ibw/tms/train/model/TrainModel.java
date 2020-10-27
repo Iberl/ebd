@@ -1,7 +1,6 @@
 package de.ibw.tms.train.model;
 
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
@@ -208,19 +207,23 @@ public class TrainModel {
         return sNodeIdTrainRunningTo;
     }
 
+    public void setsNodeIdTrainRunningTo(String sNodeIdTrainRunningTo) {
+        this.sNodeIdTrainRunningTo = sNodeIdTrainRunningTo;
+    }
+
     private double dDistanceToNodeRunningTo;
     private Integer nid_lrbg = null;
 
     @Expose
-    private ArrayList<ITrackElement> passedTopologicalElements = new ArrayList<>();
+    private ArrayList<TrackElement> passedTopologicalElements = new ArrayList<>();
 
-    public boolean addPassedElement(ITrackElement TE) {
+    public boolean addPassedElement(TrackElement TE) {
         if(passedTopologicalElements.contains(TE)) return false;
         else passedTopologicalElements.add(TE);
         return true;
     }
 
-    public ArrayList<ITrackElement> getPassedTopologicalElements() {
+    public ArrayList<TrackElement> getPassedTopologicalElements() {
         return passedTopologicalElements;
     }
 

@@ -124,9 +124,9 @@ public class UtilFunction {
         try {
             boolean b_A_IsTarget = false;
             iEngineId = PositonReport.trainInfo.nid_engine;
-            BigDecimal distanceToNextTargetPoint = null;
+            BigDecimal distanceToNextTargetPoint = new BigDecimal(0);
             Tm = TrainModel.TrainRepo.getModel(iEngineId);
-
+            boolean q_dirlrbgNominal = PositonReport.positionInfo.q_dirlrbg == 1;
             if (Tm == null) {
                 Tm = initTrainModel(iEngineId);
             }
@@ -156,7 +156,7 @@ public class UtilFunction {
             System.out.println("TMS " + "Engine ID: " + iEngineId + " POS_REP_Distance_RECOG_Q_SCALE: " + distance_from_dp);
 
             TopologyGraph topologyGraph = PlanData.topGraph;
-            TopologyGraph.Node TargetNode = null;
+            TopologyGraph.Node TargetNode = B.getNodeInDirectionOfBaliseGroup(q_dirlrbgNominal);
 
             TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.edgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
             if(NewTrainPositionEdge == null) {
@@ -328,6 +328,7 @@ public class UtilFunction {
 
 
         } catch(Exception E) {
+            E.printStackTrace();
             return null;
         }
         return Tm;

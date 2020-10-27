@@ -270,12 +270,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
                 sTopId = CS.getEbdTitle();
                 if(sTopId == null) {
-                    sTopId = TargetCrossoverModel.getNode().TopNodeId;
+                    sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
                 }
 
                 if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
             } catch (Exception E) {
-                sTopId = TargetCrossoverModel.getNode().TopNodeId;
+                sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
             }
 
 

@@ -12,13 +12,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class RouteDataSL extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITrackElement>> {
+public class RouteDataSL extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, TrackElement>> {
 
     public BigDecimal getRouteLength() {
         BigDecimal result = new BigDecimal("0");
-        Iterator<Pair<de.ibw.tms.ma.Route.TrackElementType, ITrackElement>> it = this.iterator();
+        Iterator<Pair<de.ibw.tms.ma.Route.TrackElementType, TrackElement>> it = this.iterator();
         while(it.hasNext()) {
-            Pair<de.ibw.tms.ma.Route.TrackElementType, ITrackElement> element = it.next();
+            Pair<de.ibw.tms.ma.Route.TrackElementType, TrackElement> element = it.next();
             if(element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                 TopologyGraph.Edge E = (TopologyGraph.Edge) element.getValue();
                 result.add(BigDecimal.valueOf(E.dTopLength));
