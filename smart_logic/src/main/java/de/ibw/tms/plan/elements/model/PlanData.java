@@ -29,7 +29,9 @@ import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
+import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
 import javax.xml.bind.JAXBContext;
@@ -322,7 +324,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     }
 
     private void setEdges() {
-        Collection<TopologyGraph.Edge> edges = PlanData.topGraph.EdgeRepo.values();
+        Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();
         for(TopologyGraph.Edge E : edges) {
             String Ref = null;
             TopologyConnect RefConnect = null;
