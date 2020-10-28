@@ -55,7 +55,7 @@ public class ATOClientWorker implements Runnable{
                 String input = this.in.readLine();
                 receiveString(input);
             } catch (IOException e) {
-                e.printStackTrace();
+                if(!(e instanceof SocketException)) e.printStackTrace();
                 break;
             }
         }
