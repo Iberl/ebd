@@ -4,7 +4,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
-import ebd.globalUtils.movementState.MovementState;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -14,10 +14,8 @@ import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,7 +56,7 @@ class DynamicStateTest {
         System.out.println(dynamicState.getSpeed());
         dynamicState.nextState(0.1);
         System.out.println(dynamicState.getSpeed());
-        dynamicState.setMovementState(MovementState.BREAKING);
+        dynamicState.setMovementState(MovementState.SERVICE_BREAKING);
         dynamicState.setBreakingModification(0);
         dynamicState.nextState(0.1);
         System.out.println(dynamicState.getSpeed());

@@ -1,6 +1,6 @@
 package ebd.globalUtils.events.trainStatusMananger;
 
-import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
+import ebd.globalUtils.enums.ETCSLevel;
 import ebd.globalUtils.events.Event;
 
 public class LevelReportEvent extends Event {

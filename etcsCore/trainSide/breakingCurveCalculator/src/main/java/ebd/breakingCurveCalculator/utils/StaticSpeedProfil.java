@@ -4,7 +4,7 @@ import java.util.*;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
-import ebd.globalUtils.breakingCurveType.CurveType;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;

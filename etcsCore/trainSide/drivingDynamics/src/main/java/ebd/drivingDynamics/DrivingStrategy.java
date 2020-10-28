@@ -62,13 +62,22 @@ public class DrivingStrategy {
      * @throws ParseException If the file can not parsed, indicating faulty json formatting.
      */
     private void loadProfileFromFile() throws DDBadDataException, IOException, ParseException {
-        String pathToProfile = ConfigHandler.getInstance().pathToDriverStrategyJson;
-        try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(pathToProfile)){
-            try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))){
-                JSONParser jsonParser = new org.json.simple.parser.JSONParser();
-                Object object = jsonParser.parse(bufferedReader);
+        String fileName = ConfigHandler.getInstance().pathToDriverStrategyJson;
+        String pathToProfile = "configuration/strategies/" + fileName;
 
-                jsonToProfile((JSONObject)object);
+        fileSetup(pathToProfile, fileName);
+
+        try(FileReader fileReader = new FileReader(pathToProfile)){
+            try(BufferedReader input = new BufferedReader(fileReader)){
+
+            /*
+            Reading the input data into the variables
+            */
+                JSONParser parser = new JSONParser();
+                Object object = parser.parse(input);
+                JSONObject jsonObject = (JSONObject) object;
+
+                jsonToProfile(jsonObject);
             }
         }
         catch (NullPointerException npe){
@@ -78,6 +87,54 @@ public class DrivingStrategy {
         }
 
 
+    }
+
+    private void fileSetup(String path, String filename) throws IOException {
+        /*
+        Setting up .json file if it does not already exists
+         */
+        File file = new File(path);
+
+        if (file.length() == 0) {
+            boolean createdDir = file.getParentFile().mkdir();
+            boolean createdFile = file.createNewFile();
+            if(!createdFile && !file.exists()){
+                throw new IOException(path + " could not be created");
+            }
+
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)) {
+
+                if(inputStream == null) {
+                    throw new IOException("Strategy file stream could not be found");
+                }
+
+                try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                    int length;
+                    byte[] buffer = new byte[1024];
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                }catch (IOException ioe){
+                    throw new IOException("Strategy file could not be created. " + ioe.getMessage());
+                }
+            }catch (IOException ioe){
+                ioe.printStackTrace();
+                try(FileInputStream inputStream = new FileInputStream(filename)) {
+
+                    try (FileOutputStream outputStream = new FileOutputStream(path)) {
+                        int length;
+                        byte[] buffer = new byte[1024];
+                        while ((length = inputStream.read(buffer)) != -1){
+                            outputStream.write(buffer,0,length);
+                        }
+                    }catch (IOException ioe3){
+                        throw new IOException("Strategy file could not be created: " + ioe3.getMessage());
+                    }
+                }catch (IOException ioe2){
+                    throw new IOException(ioe2.getMessage());
+                }
+            }
+        }
     }
 
     /**

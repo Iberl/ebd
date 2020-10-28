@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.HashMap;
 
 import ebd.messageLibrary.util.ETCSVariables;
-import org.junit.jupiter.api.Test;
 
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
@@ -43,9 +42,9 @@ class PositionTest {
 		assertFalse(posOne.getIncrement() == posTwo.getIncrement());
 		assertFalse(posOne.getDirection() == posTwo.getDirection());
 		
-		assertThrows(PositionReferenzException.class, () -> posOne.totalDistanceToPastLocation(0)); //Tests unfound locations
-		assertEquals(415d,posTwo.totalDistanceToPastLocation(1),0.001);
-		assertThrows(PositionReferenzException.class, () -> posThree.totalDistanceToPastLocation(1)); //Tests breaks in the chain of locations
+		assertThrows(PositionReferenzException.class, () -> posOne.estimatedDistanceToPastLocation(0)); //Tests unfound locations
+		assertEquals(415d,posTwo.estimatedDistanceToPastLocation(1),0.001);
+		assertThrows(PositionReferenzException.class, () -> posThree.estimatedDistanceToPastLocation(1)); //Tests breaks in the chain of locations
 	}
 
 }

@@ -13,25 +13,26 @@ public class Location {
 	/**
 	 * ID if this location, normally the balise ID
 	 */
-	private int id;
+	private final int id;
 
 	/**
-	 * Direction of this location, values are based on {@link ebd.messageLibrary.util.ETCSVariables#Q_DIR}, so:
+	 * Direction of train movement over the location, relates to {@link ebd.messageLibrary.util.ETCSVariables#Q_DIRTRAIN}, so:
 	 * 1 = Nominal, 0 = Reverse, 2 = Unknown/Both.
+	 * Can be used to validate messages that contain a Q_DIR.
 	 */
-	private int direction;
+	private final int direction;
 	
 	/**
 	 * Id of the last previous crossed Location, is null if there is no previous location!
 	 */
 	@Nullable
-	private int idOfPrevious;
+	private final int idOfPrevious;
 	
 	/**
 	 * Distance to the last previous crossed Location in [m], is null if there is no previous location!
 	 */
 	@Nullable
-	private Double distanceToPrevious;
+	private final Double distanceToPrevious;
 	
 	
 	public Location(int id, int idOfPrevious, int direction, Double distanceToPrevious) {
@@ -66,7 +67,13 @@ public class Location {
 		return distanceToPrevious;
 	}
 
-
-	
-	
+	@Override
+	public String toString() {
+		return "Location{" +
+				"id=" + id +
+				", direction=" + direction +
+				", idOfPrevious=" + idOfPrevious +
+				", distanceToPrevious=" + distanceToPrevious +
+				'}';
+	}
 }

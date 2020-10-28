@@ -45,6 +45,8 @@ public class ConfigHandler {
 
     public String dmiServerPort = "";
 
+    public String atoServerPort = "";
+
     /**
      * Determines the source of the trip profile.
      * Allowed values are 'breakingcurve', 'file' and 'socket'.
@@ -79,6 +81,10 @@ public class ConfigHandler {
      * If true, GUIs can connect to the program.
      */
     public boolean allowGUI = true;
+    /**
+     * If true, ATO control can connect to the program
+     */
+    public boolean allowATO = false;
     /**
      * If true, the program does wait for an input and just calls load.
      */
@@ -139,20 +145,16 @@ public class ConfigHandler {
      */
     /**
      * Minimum time between actions in [s].
-     * Train will not switch between accelerating/breaking etc. faster than this value.
+     * Train switches between accelerating/breaking etc. by using a rolling average.
+     * The span of this average is controlled by this value.
      */
-    public double timeBetweenActions = 2;
+    public double averageTimeBetweenActions = 2;
+
 
     /**
-     * Release speed in [m/s]
+     * Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
      */
-    public double releaseSpeed = 11.11;
-
-    /**
-     * Distance to end of movement authority at which train will switch into
-     * release speed mode if below release speed in [m]
-     */
-    public double releaseSpeedDistance = 20;
+    public double timeBetweenDynLog = 2;
 
     /**
      * Distance to end of movement authority that is seen as "target reached" in [m]
@@ -266,6 +268,47 @@ public class ConfigHandler {
      * in [m/s]
      */
     public double V_warning_max = 58.33;
+
+    /**
+     * Rise time for acceleration in [s]
+     */
+    public double accRiseTime = 2;
+
+    /**
+     * Fall time for acceleration in [s]
+     */
+    public double accFallTime = 0.1;
+
+    /**
+     * Rise time for deceleration in [s]
+     */
+    public double breakRiseTime = 5;
+
+    /**
+     * Fall time for deceleration in [s]
+     */
+    public double breakFallTime = 10;
+
+    /**
+     * Rise time for emergency deceleration in [s]
+     */
+    public double emBreakRiseTime = 3;
+
+    /**
+     * Fall time for emergency deceleration in [s]
+     */
+    public double emBreakFallTime = 10;
+
+    /**
+     * Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
+     */
+    public double d_Confidence = 0.01;
+
+    /**
+     *  Absolut location confidence intervall in [m]
+     */
+    public double d_LocCon = 1;
+
 
     /*
     longs
@@ -406,6 +449,17 @@ public class ConfigHandler {
         Loads the config
          */
         loadConfig(false);
+    }
+
+    /**
+     *
+     */
+    private ConfigHandler(Exception e){
+        e.printStackTrace();
+        System.out.println("Loaded no values");
+        ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
+                e, ExceptionEventTyp.FATAL);
+        EventBus.getDefault().post(ev);
     }
 
     /**
@@ -597,12 +651,8 @@ public class ConfigHandler {
             if (single_instance == null) single_instance = new ConfigHandler();
             return single_instance;
         }catch (IOException ioe){
-            ioe.printStackTrace();
-            ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
-                    ioe, ExceptionEventTyp.FATAL);
-            EventBus.getDefault().post(ev);
+            return new ConfigHandler(ioe);
         }
-        return null;
     }
 
 }

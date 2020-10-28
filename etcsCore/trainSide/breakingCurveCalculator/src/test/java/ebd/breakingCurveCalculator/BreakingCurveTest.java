@@ -1,13 +1,12 @@
 package ebd.breakingCurveCalculator;
 
 import ebd.breakingCurveCalculator.tests.BCREgeneratorFromDataset;
-import ebd.globalUtils.breakingCurveType.CurveType;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
+import ebd.globalUtils.enums.CurveType;
+import ebd.globalUtils.enums.SpeedSupervisionState;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -3,19 +3,16 @@ package ebd.trainData.util.availableAcceleration;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
-import ebd.globalUtils.movementState.MovementState;
+import ebd.globalUtils.enums.MovementState;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.routeData.RouteData;
 import ebd.trainData.TrainData;
 import ebd.trainData.tests.TDTestHandler;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,7 +38,7 @@ class AvailableAccelerationTest {
 
         assertEquals(0.44,aa.getAcceleration(0,0, MovementState.ACCELERATING),0.001);
         assertEquals(0.43,aa.getAcceleration(50,150, MovementState.ACCELERATING),0.001);
-        assertEquals(-0.73,aa.getAcceleration(40,200, MovementState.BREAKING),0.001);
+        assertEquals(-0.73,aa.getAcceleration(40,200, MovementState.SERVICE_BREAKING),0.001);
         assertEquals(0.0,aa.getAcceleration(40,100, MovementState.CRUISE));
     }
 

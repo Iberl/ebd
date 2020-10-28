@@ -1,7 +1,7 @@
 package ebd.trainData.util.availableAcceleration;
 
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
-import ebd.globalUtils.movementState.MovementState;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
@@ -14,7 +14,15 @@ public class AvailableAcceleration {
 
     private double accelerationModification = 1d;
 
+    private double availableAccMod = 0d;
+
     private double breakingModification = 1d;
+
+    private double availableBreakMod = 0d;
+
+    private double availableEmBreakMod = 0d;
+
+    private double timeAtLastChangeInMS = 0;
 
     private ForwardSpline speedUpCurve;
 
@@ -60,7 +68,7 @@ public class AvailableAcceleration {
                 acceleration += resistanceCurve.getPointOnCurve(currentSpeed);
                 acceleration -= accGradientProfile.getPointOnCurve(tripDistance);
                 return acceleration;
-            case BREAKING:
+            case SERVICE_BREAKING:
                 double deceleration = - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification;
                 deceleration += resistanceCurve.getPointOnCurve(currentSpeed);
                 deceleration -= accGradientProfile.getPointOnCurve(tripDistance);

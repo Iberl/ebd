@@ -7,10 +7,10 @@ import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.EmptyCurveGroup;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
-import ebd.globalUtils.breakingCurveType.CurveType;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
+import ebd.globalUtils.enums.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
 
 /**
@@ -104,6 +104,10 @@ public class BreakingCurve {
 		return Math.min(sspSpeed,bcSpeed);
 	}
 
+	public double getVmrspAtDistance(double distance, CurveType curveType){
+		return this.ssp.getSpeedAtDistance(distance, curveType);
+	}
+
 	/**
 	 * Returns the distance between the reference location and the next target in [m]
 	 * @param distance current distance of the train in [m]
@@ -152,7 +156,8 @@ public class BreakingCurve {
 	}
 
 	/**
-	 * Returns the distance after which the maximum speed of the curve with the given type is always lower or equal then the given speed
+	 * Returns the last distance after which the maximum speed of the curve with the given type is always lower or equal then the given speed
+	 * before the end of the curve
 	 * @param testSpeed in [m/s]
 	 * @return In [m]. Returns {@link Double#POSITIVE_INFINITY} if no part of the breaking curve is lower then the given speed
 	 */
@@ -160,6 +165,21 @@ public class BreakingCurve {
 	public Double getDistanceSpeedAlwaysLower(double testSpeed, CurveType type){
 
 		BackwardSpline curve = this.curveMap.lastEntry().getValue().getCurveFromType(type);
+		if(curve == null) return Double.POSITIVE_INFINITY;
+		return curve.xValueAfterWhichYValueIsAlwaysLowerThen(testSpeed);
+	}
+
+	/**
+	 * Returns the last distance after which the maximum speed of the curve with the given type is always lower or equal then the given speed
+	 * before the given target.
+	 * @param testSpeed in [m/s]
+	 * @param targetDistance in [m] pointing at a target.
+	 * @param type The type of curved to be used
+	 * @return In [m]. Returns {@link Double#POSITIVE_INFINITY} if no part of the breaking curve is lower then the given speed or target was not found
+	 */
+	public Double getDistanceSpeedAlwaysLower(double testSpeed, double targetDistance, CurveType type){
+
+		BackwardSpline curve = this.curveMap.get(targetDistance).getCurveFromType(type);
 		if(curve == null) return Double.POSITIVE_INFINITY;
 		return curve.xValueAfterWhichYValueIsAlwaysLowerThen(testSpeed);
 	}

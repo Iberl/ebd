@@ -16,7 +16,7 @@ import java.util.function.BiFunction;
  * <p>The <b>value</b> key contains a fixed speed value in the range of [0 km/h, 600 km/h] </p>
  * <p>Example: The condition should evaluate to true if the train is slower than 50 km/h.
  * The full JSON string would look like this:<br>
- *     {"type" : "v", "priority": 1, "condition" : {"op" : "<", "value" : 50 }}<br>
+ *     {"type" : "v", "condition" : {"op" : "<", "value" : 50 }}<br>
  *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */

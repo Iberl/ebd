@@ -1,9 +1,8 @@
 package ebd.trainStatusManager.util.socketClientsConnectors;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.szenario.StopTrainEvent;
-import ebd.globalUtils.events.szenario.TerminateTrainEvent;
-import ebd.globalUtils.events.szenario.UpdatingInfrastructureEvent;
+import ebd.globalUtils.events.core.StopTrainEvent;
+import ebd.globalUtils.events.core.UpdatingInfrastructureEvent;
 import ebd.globalUtils.events.trainStatusMananger.ChangeInfrastructureDirectionEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.trainData.TrainDataVolatile;
@@ -12,7 +11,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -13,6 +13,13 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * This Class extends {@link Handler}. It is registered by {@link ebd.logging.Logging}.
+ * While constructing, the {@link PipedInputStream} linked to the local {@link PipedOutputStream} is send into the EventBus
+ * in a {@link LogToGUIPipeEvent}. It is used by the GUI Server to receive logging information.
+ * Every time publish is called, the {@link LogRecord} is used to send a String containing logging data
+ * to the pipe.
+ */
 public class PipeHandler extends Handler {
 
     private ConfigHandler ch = ConfigHandler.getInstance();
@@ -20,7 +27,15 @@ public class PipeHandler extends Handler {
     private PipedOutputStream pos;
     private BufferedWriter out;
 
-
+    /**
+     * This Class extends {@link Handler}. It is registered by {@link ebd.logging.Logging}.
+     * While constructing, the {@link PipedInputStream} linked to the local {@link PipedOutputStream} is send into the EventBus
+     * in a {@link LogToGUIPipeEvent}.
+     * Every time publish is called, the {@link LogRecord} is used to send a String containing logging data
+     * to the pipe.
+     *
+     * @throws IOException should an underlying method or constructor throw {@link IOException}.
+     */
     public PipeHandler() throws IOException {
         super();
         PipedOutputStream pos = new PipedOutputStream();
@@ -30,6 +45,11 @@ public class PipeHandler extends Handler {
         EventBus.getDefault().postSticky(new LogToGUIPipeEvent("log", "szenario", pis));
     }
 
+    /**
+     * Publishes the record by constructing a String and writing it to the {@link PipedOutputStream}.
+     * This String can then be read by the owner of the {@link PipedInputStream}.
+     * @param record {@link LogRecord}
+     */
     @Override
     public void publish(LogRecord record) {
         if(!record.getLevel().equals(Level.INFO) || !ch.allowGUI) {

@@ -1,16 +1,12 @@
 package ebd.trainData.util.availableAcceleration;
 
-import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.events.util.NotCausedByAEvent;
+
+import ebd.globalUtils.enums.BreaksType;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
-import ebd.trainData.util.events.TrainDataExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class BreakingPowerCurveCalculator {
 
@@ -21,37 +17,20 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        String chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
-        chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
-        double deceleration = 0.15;
-        if(chosenBreakingMethod.contains("g")){
-            deceleration = 0.15;
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        double deceleration = 0;
+        switch (chosenBreakingMethod){
+            case G -> deceleration = 0.15;
+            case P -> deceleration = 0.6;
+            case P_E -> deceleration = 0.7;
+            case P_MG -> deceleration = 0.7;
+            case R -> deceleration = 0.8;
+            case R_E -> deceleration = 1.05;
+            case R_MG -> deceleration = 1;
+            case R_WB -> deceleration = 1;
+            case BREAK_CALCULATOR -> deceleration = 1.1;
         }
-        else if(chosenBreakingMethod.contains("p")){
-            deceleration = 0.6;
-        }
-        else if(chosenBreakingMethod.contains("p+mg")){
-            deceleration = 0.7;
-        }
-        else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
-            deceleration = 0.8;
-        }
-        else if(chosenBreakingMethod.contains("r+e")){
-            deceleration = 1;
-        }
-        else if(chosenBreakingMethod.contains("r+mg")){
-            deceleration = 1;
-        }
-        else if(chosenBreakingMethod.contains("bremsrechner")){
-            deceleration = 1.1;
-        }
-        else {
-            String target = "all";
-            IllegalArgumentException iAE = new IllegalArgumentException("Breaking method: " + chosenBreakingMethod + " could not be found, default value will be used");
-            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",target, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
-            eventBus.post(exceptionEvent);
-        }
-
+        if(deceleration == 0) System.err.println("Missed a case in BreakingPowerCurveCalculator");
         breakingPowerCurve.addKnotToCurve(new Knot(0d, new double[]{deceleration,0,0,0}));
 
         return breakingPowerCurve;
@@ -64,37 +43,20 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        String chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
-        chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
-        double deceleration = 0.35;
-        if(chosenBreakingMethod.contains("g")){
-            deceleration = 0.45;
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        double deceleration = 0;
+        switch (chosenBreakingMethod){
+            case G -> deceleration = 0.4;
+            case P -> deceleration = 0.85;
+            case P_E -> deceleration = 0.9;
+            case P_MG -> deceleration = 0.85;
+            case R -> deceleration = 1;
+            case R_E -> deceleration = 1.1;
+            case R_MG -> deceleration = 1;
+            case R_WB -> deceleration = 1.1;
+            case BREAK_CALCULATOR -> deceleration = 1.3;
         }
-        else if(chosenBreakingMethod.contains("p")){
-            deceleration = 0.9;
-        }
-        else if(chosenBreakingMethod.contains("p+mg")){
-            deceleration = 1;
-        }
-        else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
-            deceleration = 1.1;
-        }
-        else if(chosenBreakingMethod.contains("r+e")){
-            deceleration = 1.3;
-        }
-        else if(chosenBreakingMethod.contains("r+mg")){
-            deceleration = 1.3;
-        }
-        else if(chosenBreakingMethod.contains("bremsrechner")){
-            deceleration = 1.4;
-        }
-        else {
-            String target = "all";
-            IllegalArgumentException iAE = new IllegalArgumentException("Breaking method: " + chosenBreakingMethod + " could not be found, default value will be used");
-            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",target, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
-            eventBus.post(exceptionEvent);
-        }
-
+        if(deceleration == 0) System.err.println("Missed a case in BreakingPowerCurveCalculator");
         breakingPowerCurve.addKnotToCurve(new Knot(0d, new double[]{deceleration,0,0,0}));
 
         return breakingPowerCurve;
@@ -107,37 +69,20 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        String chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod(); //Assumes all cars having same breaking method!
-        chosenBreakingMethod = chosenBreakingMethod.toLowerCase();
-        double deceleration = 0.35;
-        if(chosenBreakingMethod.contains("g")){
-            deceleration = 0.35;
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        double deceleration = 0;
+        switch (chosenBreakingMethod){
+            case G -> deceleration = 0.35;
+            case P -> deceleration = 0.8;
+            case P_E -> deceleration = 0.8;
+            case P_MG -> deceleration = 0.9;
+            case R -> deceleration = 1;
+            case R_E -> deceleration = 1.1;
+            case R_MG -> deceleration = 1.2;
+            case R_WB -> deceleration = 1.1;
+            case BREAK_CALCULATOR -> deceleration = 1.3;
         }
-        else if(chosenBreakingMethod.contains("p")){
-            deceleration = 0.8;
-        }
-        else if(chosenBreakingMethod.contains("p+mg")){
-            deceleration = 0.9;
-        }
-        else if(chosenBreakingMethod.contains("r") && !chosenBreakingMethod.contains("+")){
-            deceleration = 1;
-        }
-        else if(chosenBreakingMethod.contains("r+e")){
-            deceleration = 1.2;
-        }
-        else if(chosenBreakingMethod.contains("r+mg")){
-            deceleration = 1.2;
-        }
-        else if(chosenBreakingMethod.contains("bremsrechner")){
-            deceleration = 1.3;
-        }
-        else {
-            String target = "all";
-            IllegalArgumentException iAE = new IllegalArgumentException("Breaking method: " + chosenBreakingMethod + " could not be found, default value will be used");
-            TrainDataExceptionEvent exceptionEvent = new TrainDataExceptionEvent("td",target, new NotCausedByAEvent(), iAE, ExceptionEventTyp.WARNING);
-            eventBus.post(exceptionEvent);
-        }
-
+        if(deceleration == 0) System.err.println("Missed a case in BreakingPowerCurveCalculator");
         breakingPowerCurve.addKnotToCurve(new Knot(0d, new double[]{deceleration,0,0,0}));
 
 

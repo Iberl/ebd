@@ -3,7 +3,6 @@ package ebd.speedAndDistanceSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
@@ -11,7 +10,6 @@ import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
-import ebd.globalUtils.events.trainStatusMananger.ReleaseSpeedModeStateEvent;
 import ebd.globalUtils.events.trainStatusMananger.TsmTripEndEvent;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
@@ -37,25 +35,15 @@ import org.greenrobot.eventbus.ThreadMode;
 public class DistanceSupervisor {
     //TODO Remember SRS 3 A.3.5
     private final EventBus localBus;
-    private final String eventSource;
-    private final String eventTarget;
+    private final String eventSource = "sds";
     private final RouteDataVolatile routeDataVolatile;
     private final TrainDataVolatile trainDataVolatile;
     private final ConfigHandler ch;
     private final double L_TRAIN; //in [m]
 
-    private BreakingCurve emergencyBreakingCurve = null;
-    private double maxEmergencyDistance;
-    private BreakingCurve serviceBreakingCurve = null;
+    private BreakingCurve emergencyBC = null;
+    private BreakingCurve serviceBC = null;
 
-    /**
-     * If release speed == 0, handel it as if there was no release speed
-     */
-    private double curReleaseSpeed = 0; //in [m/s]
-    private double curReleaseSpeedDistance = 0; // in [m]
-    private boolean inRSM;
-
-    private double emergencyBreakingCurveEndOffset = 0; // in [m]
     private double startOfOverlapTimerDistance = 0;
     private double overlapMaxTime = Double.MAX_VALUE;
     private boolean overlapTimerRunning = false;
@@ -74,9 +62,6 @@ public class DistanceSupervisor {
 
         TrainDataPerma trainDataPerma = this.localBus.getStickyEvent(NewTrainDataPermaEvent.class).trainDataPerma;
         this.L_TRAIN = trainDataPerma.getL_train();
-
-        this.eventSource = "tsm;T=" + trainDataVolatile.getEtcsID();
-        this.eventTarget = "all";
     }
 
 
@@ -87,57 +72,23 @@ public class DistanceSupervisor {
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
-        if(this.emergencyBreakingCurve == null) return;
+        if(this.emergencyBC == null) return;
         Position curPos = trainDataVolatile.getCurrentPosition();
         if(curPos == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN) return;
-        double distanceToEMA = this.serviceBreakingCurve.endOfDefinedDistance()
-                                - curPos.totalDistanceToPastLocation(this.serviceBreakingCurve.getRefLocation().getId());
+        double estimatedFrontEnd = curPos.estimatedDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
+
+        double estimatedDistanceToEMA = this.serviceBC.endOfDefinedDistance()
+                                - estimatedFrontEnd;
         double curSpeed = this.trainDataVolatile.getCurrentSpeed();
 
-
-
-        if(!this.inRSM
-                && distanceToEMA <= this.curReleaseSpeedDistance
-                && curSpeed <= this.curReleaseSpeed
-                && curSpeed > 0  ){ //If release speed == 0, handel it as if there was no release speed
-            this.inRSM = true;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
-                    this.eventTarget,
-                    true,
-                    this.curReleaseSpeed,
-                    this.curReleaseSpeedDistance));
-        }
-        else if(this.inRSM && distanceToEMA > this.curReleaseSpeedDistance){ //This endes the release speed mode if a new movement authority message is received
-            this.inRSM = false;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
-                    this.eventTarget,
-                    false,
-                    0d,
-                    this.maxEmergencyDistance
-                    ));
-        }
-        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
+        /* Supervision of train halt */
+        if(estimatedDistanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
         }
-        else if(distanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
-            this.inRSM = false;
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
-                    this.eventTarget,
-                    false,
-                    0d,
-                    this.maxEmergencyDistance));
-            this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
-
+        else if(estimatedDistanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
             }
-        }
-        else if(distanceToEMA < (0 - this.emergencyBreakingCurveEndOffset)){
-            this.localBus.post(new ReleaseSpeedModeStateEvent(this.eventSource,
-                    this.eventTarget,
-                    false,
-                    0d,
-                    this.maxEmergencyDistance));
         }
 
         /*
@@ -148,7 +99,7 @@ public class DistanceSupervisor {
             this.startOfOverlapTimerDistance = Double.MIN_VALUE;
             this.overlapMaxTime = Double.MAX_VALUE;
         }
-        else if(distanceToEMA <= this.startOfOverlapTimerDistance && this.overlapMaxTime < Double.MAX_VALUE && !this.overlapTimerRunning){
+        else if(estimatedDistanceToEMA <= this.startOfOverlapTimerDistance && this.overlapMaxTime < Double.MAX_VALUE && !this.overlapTimerRunning){
             this.overlapTimerRunning = true;
             this.overlapStartTime = AppTime.currentTimeMillis();
         }
@@ -171,11 +122,8 @@ public class DistanceSupervisor {
      */
     @Subscribe
     public void updateBC(NewBreakingCurveEvent bce){
-        this.emergencyBreakingCurve = bce.emergencyBreakingCurve;
-        this.serviceBreakingCurve = bce.serviceBreakingCurve;
-        this.maxEmergencyDistance = this.emergencyBreakingCurve.endOfDefinedDistance();
-        this.curReleaseSpeed = calculateReleaseSpeed();
-        this.curReleaseSpeedDistance = calculateReleaseSpeedDistance();
+        this.emergencyBC = bce.emergencyBreakingCurve;
+        this.serviceBC = bce.serviceBreakingCurve;
 
         /*
         Setting up Overlap Timer supervision
@@ -185,12 +133,10 @@ public class DistanceSupervisor {
             if(p15.Q_OVERLAP == ETCSVariables.Q_OVERLAP_NO_INFO){
                 this.startOfOverlapTimerDistance = Double.MIN_VALUE;
                 this.overlapMaxTime = Double.MAX_VALUE;
-                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetDangerPointDistance(p15);
             }
             else {
                 this.startOfOverlapTimerDistance = MovementAuthorityConverter.p15GetStartTimerDistance(p15);
                 this.overlapMaxTime = MovementAuthorityConverter.p15GetOverlapTime(p15);
-                this.emergencyBreakingCurveEndOffset = MovementAuthorityConverter.p15GetOverlapDistance(p15);
             }
         }
         this.overlapTimerRunning = false;
@@ -205,32 +151,6 @@ public class DistanceSupervisor {
         this.localBus.post(new ToLogEvent("tsm", "log", msg));
     }
 
-    /**
-     * Calculates the release speed based on the danger point distance in {@link ConfigHandler}. <br>
-     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
-     * @return The calculated release speed
-     */
-    private double calculateReleaseSpeed() {
-        double releaseSpeed = this.routeDataVolatile.getPacket_15().V_RELEASEDP * 5 / 3.6;
-        if(releaseSpeed <= 0){
-            releaseSpeed = ch.releaseSpeed;
-        }
-
-        return releaseSpeed;
-    }
-
-    /**
-     * Calculates based on the release speed the distance to EOA at which the train should switch in to release speed. <br>
-     *     A simplified calculation based on SRS 3.13.9.4.8.2 for only one target: EOA
-     * @return The calculated release speed
-     */
-    private double calculateReleaseSpeedDistance() {
-        double distance = this.serviceBreakingCurve.getDistanceSpeedAlwaysLower(this.curReleaseSpeed, CurveType.PERMITTED_SPEED);
-        if(distance < Double.MAX_VALUE){
-            return serviceBreakingCurve.endOfDefinedDistance() - distance;
-        }
-        return ch.releaseSpeedDistance;
-    }
 
     /*
     Revokes the Overlap. This modifies the current Packet_15 by setting Q_Overlap to {@link ETCSVariables#Q_OVERLAP_NO_INFO}

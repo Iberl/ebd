@@ -4,8 +4,6 @@ import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.util.ETCSVariables;
 
-import java.util.List;
-
 /**
  * Converts a {@link Packet_15} into a double value representing the total distance to the End of Authority.<br>
  * The MA data is treated as continuous profile data, because, while it has a possible overlap value, this value
@@ -73,7 +71,7 @@ public class MovementAuthorityConverter {
          * Get the offset from the old reference location
          */
 
-        double offset = newRefPos.totalDistanceToPreviousPosition(oldrefPos);
+        double offset = newRefPos.estimatedDistanceToPreviousPosition(oldrefPos);
 
         /*
          * Return the distance to the end of the movement Authority modified by Q_SCALE

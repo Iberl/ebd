@@ -16,18 +16,13 @@ public class ComparisonParser {
      * @throws DDBadDataException Thrown when opString is not formatted correctly
      */
     public static BiFunction<Double,Double,Boolean> parse(String opString) throws DDBadDataException {
-        switch (opString){
-            case "<":
-                return (Double x, Double y) -> (x < y);
-            case "<=":
-                return (Double x, Double y) -> (x <= y);
-            case ">=":
-                return (Double x, Double y) -> (x >= y);
-            case ">":
-                return (Double x, Double y) -> (x > y);
-            default:
-                throw new DDBadDataException("Unexpected op parameter for RelativeSpeedCondition: " + opString);
-        }
+        return switch (opString) {
+            case "<" -> (Double x, Double y) -> (x < y);
+            case "<=" -> (Double x, Double y) -> (x <= y);
+            case ">=" -> (Double x, Double y) -> (x >= y);
+            case ">" -> (Double x, Double y) -> (x > y);
+            default -> throw new DDBadDataException("Unexpected op parameter for RelativeSpeedCondition: " + opString);
+        };
 
     }
 }

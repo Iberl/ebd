@@ -5,6 +5,7 @@
       "priority": 0,
       "action": {
         "value": 100,
+        "mode": "s",
         "conditions": {
           "orBlock": [
             {
@@ -31,6 +32,7 @@
       "priority": 1,
       "action": {
         "value": 100,
+        "mode": "s",
         "conditions": {
           "orBlock": [
             {

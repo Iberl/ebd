@@ -3,8 +3,8 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
-import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
+import ebd.globalUtils.enums.ETCSLevel;
+import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
@@ -71,6 +71,7 @@ public class ModeAndLevelSupervisor {
     Control Booleans
      */
     private BreakingCurve serviceBC = null;
+    private BreakingCurve emergencyBC = null;
     private boolean errorDetected = false;
     private boolean unconEStop = false; //TODO Implement unconditional emergency stop message
 
@@ -114,6 +115,7 @@ public class ModeAndLevelSupervisor {
     @Subscribe
     public void breakinCurve(NewBreakingCurveEvent nbce){
         this.serviceBC = nbce.serviceBreakingCurve;
+        this.emergencyBC = nbce.emergencyBreakingCurve;
         Packet_80 p80 = routeDataVolatile.getPacket_80();
         this.modeProfil = makeModeProfil(p80);
     }
@@ -236,16 +238,18 @@ public class ModeAndLevelSupervisor {
      * @return True if a train has passed EMA/LOA
      */
     private boolean checkModeCondition12(){
-        boolean etcsLevelOneOrTwoOrThree = this.curLevel != ETCSLevel.LEVEL_ZERO && this.curLevel != ETCSLevel.NTC_PZBLZB;
+        boolean etcsLevelOne = this.curLevel == ETCSLevel.LEVEL_ONE;
         Position curPos = this.trainDataVolatile.getCurrentPosition();
-        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null ||
+                curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
             return false;
         }
 
-        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance() - curPos.totalDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
+        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance()
+                                    - curPos.minSafeFrontDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
         boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
 
-        if(loaOrEoaPassed && etcsLevelOneOrTwoOrThree){//SRS-026 4.6.3 [12]
+        if(loaOrEoaPassed && etcsLevelOne){//SRS-026 4.6.3 [12]
             this.curMode = ETCSMode.TRIP;
             return true;
         }
@@ -271,7 +275,22 @@ public class ModeAndLevelSupervisor {
      * @return True if a train has passed EMA/LOA
      */
     private boolean checkModeCondition16(){
-        return checkModeCondition12();
+        boolean etcsLevelTwoOrThree = this.curLevel == ETCSLevel.LEVEL_TWO || this.curLevel == ETCSLevel.LEVEL_THREE;
+        Position curPos = this.trainDataVolatile.getCurrentPosition();
+        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null ||
+                curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+            return false;
+        }
+
+        double distanceToEoaLoa = this.serviceBC.endOfDefinedDistance()
+                - curPos.minSafeFrontDistanceToPastLocation(this.serviceBC.getRefLocation().getId());
+        boolean loaOrEoaPassed = distanceToEoaLoa < 0 ;
+
+        if(loaOrEoaPassed && etcsLevelTwoOrThree){//SRS-026 4.6.3 [12]
+            this.curMode = ETCSMode.TRIP;
+            return true;
+        }
+        return false;
     }
 
 

@@ -1,6 +1,6 @@
 package ebd.drivingDynamics;
 
-import ebd.globalUtils.movementState.MovementState;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 

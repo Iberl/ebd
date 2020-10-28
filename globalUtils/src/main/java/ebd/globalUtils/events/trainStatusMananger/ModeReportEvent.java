@@ -1,6 +1,6 @@
 package ebd.globalUtils.events.trainStatusMananger;
 
-import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
+import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.events.Event;
 
 public class ModeReportEvent extends Event {
