@@ -1,4 +1,4 @@
-package ebd.globalUtils.speedSupervisionState;
+package ebd.globalUtils.enums;
 
 /**
  * Represents the state of the speed supervision module (SSM), which can be either

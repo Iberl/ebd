@@ -1,4 +1,4 @@
-package ebd.globalUtils.etcsModeAndLevel;
+package ebd.globalUtils.enums;
 
 import ebd.messageLibrary.util.ETCSVariables;
 

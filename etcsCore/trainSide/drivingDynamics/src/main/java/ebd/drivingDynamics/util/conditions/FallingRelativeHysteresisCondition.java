@@ -20,7 +20,7 @@ import org.json.simple.JSONObject;
  *     Example: The condition should evaluate to true if the train is breaks from over 80% of the current maximum speed on the trip profile
  *     to under 80%. It should evaluate to false if it speeds up from under 65% to over 65%.
  *     The JSON string would look like this:<br>
- *     {"type" : "v_Hrel_L", "priority": 1, "condition" : {"v_Low" : 65, "v_High" : 80, "curveBase" : "trip" }}<br>
+ *     {"type" : "v_Hrel_L", "condition" : {"v_Low" : 65, "v_High" : 80, "curveBase" : "trip" }}<br>
  *     The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */

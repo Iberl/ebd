@@ -7,6 +7,18 @@ import org.json.simple.JSONObject;
 /**
  * This action accelerates the train. The power by which the train should be accelerated can be modified by the
  * acceleration percentage.
+ *
+ *<p>The <b>type</b> of this action is "v_acc"</p>
+ *<p>The <b>priority</b> of this action is 0 to Integer.MAX, lower values mean higher priorities and are evaluated first</p>
+ *<p>The <b>action</b> of this action contains the inner values</p>
+ *<p>The <b>value</b> of this action is in the range 0 % to 100 % and modifies the acceleration power</p>
+ *<p>The <b>conditions</b> of this action contains the conditions under which this action is taken</p>
+ *
+ * <p>Example: The train should accelerate with 80 % when the conditions evaluate to true:
+ * The full JSON string would look like this:<br>
+ *     {"type": "v_break", "priority": 0, action: {"value": 80, "condition": {--conditions--}}}<br>
+ *      The value of "action" is passed to the constructor<br></p>
+ * @author Lars Schulze-Falck
  */
 public class AccelerationAction extends Action {
 

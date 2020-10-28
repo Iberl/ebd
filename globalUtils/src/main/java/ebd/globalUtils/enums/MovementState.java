@@ -1,4 +1,4 @@
-package ebd.globalUtils.movementState;
+package ebd.globalUtils.enums;
 
 /**
  * MovementState describes possible movement states a train can be in.

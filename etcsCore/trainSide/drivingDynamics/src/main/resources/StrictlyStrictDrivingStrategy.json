@@ -117,6 +117,7 @@
       "priority": 20,
       "action": {
         "value": 100,
+        "mode": "s",
         "conditions": {
           "orBlock": [
             {"andBlock": [
@@ -141,6 +142,7 @@
       "priority": 21,
       "action": {
         "value": 75,
+        "mode": "s",
         "conditions": {
           "orBlock": [
             {"andBlock": [
@@ -165,6 +167,7 @@
       "priority": 20,
       "action": {
         "value": 30,
+        "mode": "s",
         "conditions": {
           "orBlock": [
             {"andBlock": [

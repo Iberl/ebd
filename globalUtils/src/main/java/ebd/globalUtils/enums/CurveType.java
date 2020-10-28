@@ -1,4 +1,4 @@
-package ebd.globalUtils.breakingCurveType;
+package ebd.globalUtils.enums;
 
 public enum CurveType {
     EMERGENCY_INTERVENTION_CURVE(0),
@@ -8,8 +8,7 @@ public enum CurveType {
     WARNING_CURVE(4),
     PERMITTED_SPEED(5),
     INDICATION_CURVE(6),
-    C30_CURVE(7),
-    ;
+    C30_CURVE(7);
 
     private Integer ranking;
 

@@ -3,7 +3,6 @@ package ebd.speedAndDistanceSupervisionModule;
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.appTime.AppTime;
-import ebd.globalUtils.breakingCurveType.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;

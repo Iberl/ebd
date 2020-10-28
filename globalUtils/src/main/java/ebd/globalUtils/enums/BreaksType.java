@@ -1,6 +1,6 @@
-package ebd.trainData.util.availableAcceleration;
+package ebd.globalUtils.enums;
 
-public enum BreakType {
+public enum BreaksType {
 
     G("G", 0),
 
@@ -23,7 +23,7 @@ public enum BreakType {
     private final String descriptor;
     private final int group;
 
-    BreakType(String descriptor, int group){
+    BreaksType(String descriptor, int group){
         this.descriptor = descriptor;
         this.group = group;
     }

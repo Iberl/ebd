@@ -1,17 +1,19 @@
 package ebd.drivingDynamics.util.actions;
 
+import ebd.drivingDynamics.util.conditions.TrueCondition;
 import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.conditions.helper.SingleConditionParser;
 import ebd.drivingDynamics.util.conditions.conditionBlocks.OrBlock;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
+import ebd.globalUtils.enums.MovementState;
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONObject;
 
 /**
  * This class represents an abstract action. An action represents one of the possible movement states
- * (s. {@link ebd.globalUtils.movementState.MovementState}). Every actions contains one or more {@link Condition}.
+ * (s. {@link MovementState}). Every actions contains one or more {@link Condition}.
  * By checking if these conditions evaluate to true, one can decided if the specific action should be taken.<br>
  * <b>When implementing a new action, this action has to be included in {@link ActionParser} so it can be read
  * out of a json file. It also has to be included in the {@link ebd.drivingDynamics.DrivingDynamics} actionParser method</b>
@@ -32,10 +34,21 @@ public abstract class Action {
     /**
      *
      * @param localEventBus The local {@link EventBus} of the train
+     * @param priority 0 to int.MAX, lower means higher priority
      */
     public Action(@NotNull EventBus localEventBus, int priority){
         this.localEventBus = localEventBus;
         this.priority = priority;
+    }
+
+    /**
+     * Used for signal actions.
+     * @param localEventBus The local {@link EventBus} of the train
+     */
+    public Action(@NotNull EventBus localEventBus){
+        this.localEventBus = localEventBus;
+        this.priority = 0;
+        this.condition = new TrueCondition(localEventBus);
     }
 
     /**

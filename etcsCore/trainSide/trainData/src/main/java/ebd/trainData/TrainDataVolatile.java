@@ -1,7 +1,7 @@
 package ebd.trainData;
 
-import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
-import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
+import ebd.globalUtils.enums.ETCSLevel;
+import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;

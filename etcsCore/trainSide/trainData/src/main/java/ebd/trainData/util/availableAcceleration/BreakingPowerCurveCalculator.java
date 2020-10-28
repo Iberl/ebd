@@ -1,6 +1,7 @@
 package ebd.trainData.util.availableAcceleration;
 
 
+import ebd.globalUtils.enums.BreaksType;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.trainData.TrainDataPerma;
@@ -16,7 +17,7 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        BreakType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
         double deceleration = 0;
         switch (chosenBreakingMethod){
             case G -> deceleration = 0.15;
@@ -42,7 +43,7 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        BreakType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
         double deceleration = 0;
         switch (chosenBreakingMethod){
             case G -> deceleration = 0.4;
@@ -68,7 +69,7 @@ public class BreakingPowerCurveCalculator {
         //TODO fill with math
         //TODO Respect multiple cars
         //TODO Respect train type
-        BreakType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
+        BreaksType chosenBreakingMethod = trainDataPerma.getTrainCarList().get(0).getChosenBreakingMethod();
         double deceleration = 0;
         switch (chosenBreakingMethod){
             case G -> deceleration = 0.35;

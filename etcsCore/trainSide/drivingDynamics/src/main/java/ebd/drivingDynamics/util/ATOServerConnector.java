@@ -7,7 +7,7 @@ import ebd.globalUtils.events.core.ATOStartEvent;
 import ebd.globalUtils.events.core.ATOToTrainUpdateEvent;
 import ebd.globalUtils.events.core.TrainToAtoUpdateEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.movementState.MovementState;
+import ebd.globalUtils.enums.MovementState;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import org.greenrobot.eventbus.EventBus;

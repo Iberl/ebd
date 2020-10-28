@@ -17,6 +17,7 @@
       "type": "v_break", "priority" : 1,
       "action": {
         "value": 90,
+        "mode": "s",
         "conditions": {
           "type": "v",
           "condition": {

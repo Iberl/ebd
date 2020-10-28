@@ -1,6 +1,6 @@
 package ebd.breakingCurveCalculator.utils;
 
-import ebd.globalUtils.breakingCurveType.CurveType;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.Knot;
 import org.jetbrains.annotations.Nullable;

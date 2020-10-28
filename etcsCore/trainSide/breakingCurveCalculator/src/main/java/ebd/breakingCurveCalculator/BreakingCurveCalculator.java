@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 import ebd.breakingCurveCalculator.utils.*;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
-import ebd.globalUtils.breakingCurveType.CurveType;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;

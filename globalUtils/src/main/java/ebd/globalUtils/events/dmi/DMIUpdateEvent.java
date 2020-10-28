@@ -1,8 +1,8 @@
 package ebd.globalUtils.events.dmi;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
+import ebd.globalUtils.enums.SpeedInterventionLevel;
+import ebd.globalUtils.enums.SpeedSupervisionState;
 
 public class DMIUpdateEvent extends NormalEvent {
 

@@ -2,7 +2,7 @@ package ebd.drivingDynamics.util.conditions;
 
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
+import ebd.globalUtils.enums.SpeedInterventionLevel;
 import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -22,7 +22,7 @@ import org.json.simple.JSONObject;
  *         </p>
  * <p>Example: The condition should evaluate to true if the train is in the speed intervention level OVERSPEED.
  * The full JSON string would look like this:<br>
- *     {"type" : "sil", "priority": 1, "condition" : {"value" : "OVERSPEED" }}<br>
+ *     {"type" : "sil", "condition" : {"value" : "OVERSPEED" }}<br>
  *      The value of "condition" is passed to the constructor<br></p>
  * @author Lars Schulze-Falck
  */

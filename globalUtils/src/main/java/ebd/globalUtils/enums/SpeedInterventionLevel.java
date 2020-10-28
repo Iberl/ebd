@@ -1,4 +1,4 @@
-package ebd.globalUtils.speedInterventionLevel;
+package ebd.globalUtils.enums;
 
 /**
  * This represents the different kind of intervention level that the speed supervision module (SSM) can reach.
