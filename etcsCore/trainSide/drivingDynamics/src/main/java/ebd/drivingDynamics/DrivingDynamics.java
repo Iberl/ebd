@@ -8,8 +8,7 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.etcsModeAndLevel.ETCSLevel;
-import ebd.globalUtils.etcsModeAndLevel.ETCSMode;
+import ebd.globalUtils.enums.*;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
@@ -19,10 +18,7 @@ import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.globalUtils.movementState.MovementState;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.speedInterventionLevel.SpeedInterventionLevel;
-import ebd.globalUtils.speedSupervisionState.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
@@ -154,13 +150,19 @@ public class DrivingDynamics {
          */
         updateCurrentMaxTripProfileSpeed();
 
+        /*
+        Controls the ATO Mode
+         */
         if(!this.atoOn) this.atoOn = this.atoServerConnector.isAtoOn();
         else if(!this.atoServerConnector.isAtoOn()){
-            this.dynamicState.setMovementState(MovementState.BREAKING);
+            this.dynamicState.setMovementState(MovementState.SERVICE_BREAKING);
             this.dynamicState.setBreakingModification(1);
             this.atoOn = false;
         }
 
+        /*
+        Sets the dynamic state in preparation for the next state.
+         */
         if(this.atoOn){
             drivingInATO();
         }
@@ -168,22 +170,19 @@ public class DrivingDynamics {
             drivingIllegal();
         }
         else {
-            drivingAllowed();
+            executeAction(drivingAllowed());
+            sendToLogEventSpeedState();
         }
-
 
         /*
         Calculate the next dynamic state.
          */
         this.dynamicState.nextState(deltaT);
 
-        if(this.atoOn){
-            this.atoServerConnector.sendDynamicStateToATO(this.dynamicState);
-        }
+
         /*
         Sends global PositionEvent
          */
-
         EventBus.getDefault().post(new PositionEvent("dd;T=" + this.etcsTrainID, "all", dynamicState.getPosition()));
 
         /*
@@ -195,6 +194,13 @@ public class DrivingDynamics {
         Update DMI
          */
         updateDMI();
+
+        /*
+        Informs ATO if appropriate
+         */
+        if(this.atoOn){
+            this.atoServerConnector.sendDynamicStateToATO(this.dynamicState);
+        }
 
         cycleCount++;
         if(this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
@@ -305,8 +311,8 @@ public class DrivingDynamics {
                     modifier = this.atoServerConnector.getCurModifier();
                 }
                 case APPLY_SERVICE_BREAKS -> {
-                    sendToLogEventSpeedSupervision(MovementState.BREAKING);
-                    ms = MovementState.BREAKING;
+                    sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                    ms = MovementState.SERVICE_BREAKING;
                     modifier = 1;
                 }
                 default -> {
@@ -340,19 +346,18 @@ public class DrivingDynamics {
     /**
      * Movement decision tree should the current {@link ETCSMode} allow movement.
      */
-    private void drivingAllowed() {
+    private Action drivingAllowed() {
         /*
         Checks the current SsmReportEvent for the status of the train
         Getting next action that should be taken and parsing that action
          */
         SsmReportEvent speedSupervisionReport = this.localEventBus.getStickyEvent(SsmReportEvent.class);
         if(speedSupervisionReport == null ){
-            actionParser(this.drivingStrategy.actionToTake());
+            return this.drivingStrategy.actionToTake();
         }
         else if(this.shouldHalt && this.dynamicState.getSpeed() == 0){
             sendMovementStateIfNotAlreadySend(MovementState.HALTING);
-            this.dynamicState.setMovementState(MovementState.HALTING);
-            this.dynamicState.setBreakingModification(1d);
+            return new HaltAction(this.localEventBus);
         }
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
@@ -362,17 +367,15 @@ public class DrivingDynamics {
                 switch (this.currentSil) {
                     case NOT_SET, NO_INTERVENTION, INDICATION, OVERSPEED, WARNING -> {
                         sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
-                        actionParser(this.drivingStrategy.actionToTake());
+                        return this.drivingStrategy.actionToTake();
                     }
                     case APPLY_SERVICE_BREAKS -> {
-                        sendToLogEventSpeedSupervision(MovementState.BREAKING);
-                        this.dynamicState.setMovementState(MovementState.BREAKING);
-                        this.dynamicState.setBreakingModification(1d);
+                        sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                        return new BreakAction(this.localEventBus, 1, BreakMode.SERVICE_BREAKING);
                     }
                     default -> {
                         sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
-                        this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
-                        this.dynamicState.setBreakingModification(1d);
+                        return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);
                     }
                 }
             }
@@ -387,28 +390,24 @@ public class DrivingDynamics {
                     case INDICATION -> {
                         if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
                             sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
-                            this.dynamicState.setMovementState(MovementState.ACCELERATING);
-                            this.dynamicState.setAccelerationModification(1d);
                             calculateModifier();
+                            return new AccelerationAction(this.localEventBus, 1);
                         }
                         if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
                             sendToLogEventSpeedSupervision(MovementState.CRUISE);
-                            this.dynamicState.setMovementState(MovementState.CRUISE);
                             calculateModifier();
+                            return new CruiseAction(this.localEventBus);
                         } else {
-                            sendToLogEventSpeedSupervision(MovementState.BREAKING);
-                            this.dynamicState.setMovementState(MovementState.BREAKING);
-                            this.dynamicState.setBreakingModification(this.breakModifierForRSM);
+                            sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                            return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
                         }
                     }
                     default -> {
                         sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
-                        this.dynamicState.setMovementState(MovementState.EMERGENCY_BREAKING);
-                        this.dynamicState.setBreakingModification(1d);
+                        return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);
                     }
                 }
             }
-            sendToLogEventSpeedState();
         }
     }
 
@@ -572,12 +571,7 @@ public class DrivingDynamics {
      * This Method takes an Action and applies the resulting behaviour.
      * @param action Any {@link Action}
      */
-    private void actionParser(Action action) {
-        if(this.timeOfLastAction > -1 && (this.time - this.timeOfLastAction) / 1E9 < this.timeBetweenActions){
-            return;
-        }
-
-        this.timeOfLastAction = this.time;
+    private void executeAction(Action action) {
 
         if (action instanceof AccelerationAction) {
             this.dynamicState.setMovementState(MovementState.ACCELERATING);
@@ -585,9 +579,14 @@ public class DrivingDynamics {
             sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
         }
         else if (action instanceof BreakAction) {
-            this.dynamicState.setMovementState(MovementState.BREAKING);
+            MovementState ms = switch (((BreakAction) action).getBreakMode()){
+                                    case EMERGENCY_BREAKING -> MovementState.EMERGENCY_BREAKING;
+                                    case SERVICE_BREAKING -> MovementState.SERVICE_BREAKING;
+                                    case NORMAL_BREAKING -> MovementState.NORMAL_BREAKING;
+                                };
+            this.dynamicState.setMovementState(ms);
             this.dynamicState.setBreakingModification(((BreakAction) action).getBreakPercentage());
-            sendMovementStateIfNotAlreadySend(MovementState.BREAKING);
+            sendMovementStateIfNotAlreadySend(ms);
         }
         else if (action instanceof CruiseAction) {
             this.dynamicState.setMovementState(MovementState.CRUISE);
@@ -606,6 +605,4 @@ public class DrivingDynamics {
             localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
         }
     }
-
-
 }

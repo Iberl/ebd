@@ -68,7 +68,7 @@ public class AvailableAcceleration {
                 acceleration += resistanceCurve.getPointOnCurve(currentSpeed);
                 acceleration -= accGradientProfile.getPointOnCurve(tripDistance);
                 return acceleration;
-            case BREAKING:
+            case SERVICE_BREAKING:
                 double deceleration = - breakingPowerCurve.getPointOnCurve(currentSpeed) * breakingModification;
                 deceleration += resistanceCurve.getPointOnCurve(currentSpeed);
                 deceleration -= accGradientProfile.getPointOnCurve(tripDistance);

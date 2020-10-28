@@ -41,6 +41,18 @@ public class BreakAction extends Action {
         fromJSON(jsonObject);
     }
 
+    /**
+     * Constructs a signal Action that always evaluates to true and has the priority 0
+     * @param localEventBus localEventBus the local {@link EventBus}
+     * @param breakPercentage in range [0,1]
+     * @param breakMode s. {@link BreakMode}
+     */
+    public BreakAction(EventBus localEventBus, double breakPercentage, BreakMode breakMode){
+        super(localEventBus);
+        this.breakPercentage = breakPercentage;
+        this.breakMode = breakMode;
+    }
+
 
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
@@ -63,9 +75,8 @@ public class BreakAction extends Action {
         else throw new DDBadDataException("The key 'value' was missing for a BreakAction");
 
         if(jsonObject.containsKey("mode")){
-            Object tempObject = jsonObject.get("mode");
-            String tempObjectName = tempObject.getClass().getSimpleName();
-            switch (tempObjectName){
+            String tempObject = (String) jsonObject.get("mode");
+            switch (tempObject){
                 case "e" -> this.breakMode = BreakMode.EMERGENCY_BREAKING;
                 case "s" -> this.breakMode = BreakMode.SERVICE_BREAKING;
                 case "n" -> this.breakMode = BreakMode.NORMAL_BREAKING;

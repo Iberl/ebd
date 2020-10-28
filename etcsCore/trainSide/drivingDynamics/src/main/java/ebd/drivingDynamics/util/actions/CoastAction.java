@@ -35,6 +35,15 @@ public class CoastAction extends Action {
         fromJSON(jsonObject);
     }
 
+    /**
+     * Constructs a signal Action that always evaluates to true and has the priority 0
+     *
+     * @param localEventBus the local {@link EventBus}
+     */
+    public CoastAction(EventBus localEventBus){
+        super(localEventBus);
+    }
+
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
         if(jsonObject.containsKey("conditions")){

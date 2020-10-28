@@ -19,9 +19,14 @@ public enum MovementState {
     ACCELERATING,
 
     /**
+     * The train is braking with reduced breaks.
+     */
+    NORMAL_BREAKING,
+
+    /**
      * The train is breaking with the service breaks
      */
-    BREAKING,
+    SERVICE_BREAKING,
 
     /**
      * The train is breaking with the emergency breaks

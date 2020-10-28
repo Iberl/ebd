@@ -37,6 +37,17 @@ public class AccelerationAction extends Action {
         fromJSON(jsonObject);
     }
 
+    /**
+     * Constructs a signal Action that always evaluates to true and has the priority 0
+     *
+     * @param localEventBus the local {@link EventBus}
+     * @param accelerationPercentage in range [0,1]
+     */
+    public AccelerationAction(EventBus localEventBus, double accelerationPercentage){
+        super(localEventBus);
+        this.accelerationPercentage = accelerationPercentage;
+    }
+
     @Override
     protected void fromJSON(JSONObject jsonObject) throws DDBadDataException {
         if(jsonObject.containsKey("value")){

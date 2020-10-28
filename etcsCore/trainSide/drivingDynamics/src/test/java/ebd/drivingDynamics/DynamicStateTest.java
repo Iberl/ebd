@@ -56,7 +56,7 @@ class DynamicStateTest {
         System.out.println(dynamicState.getSpeed());
         dynamicState.nextState(0.1);
         System.out.println(dynamicState.getSpeed());
-        dynamicState.setMovementState(MovementState.BREAKING);
+        dynamicState.setMovementState(MovementState.SERVICE_BREAKING);
         dynamicState.setBreakingModification(0);
         dynamicState.nextState(0.1);
         System.out.println(dynamicState.getSpeed());
