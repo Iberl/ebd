@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InformationPoint extends TrackArea {
-    public static final String CLASS_IDENTIFIER = "Track_Edge";
+    public static final String CLASS_IDENTIFIER = "Information_Point";
 
     public InformationPoint() {
         super(CLASS_IDENTIFIER);
