@@ -30,7 +30,7 @@ class BreakingCurveTest {
         this.breakingCurves = breakingCurveCalculator.getBreakingCurve(bcreGen.generate());
     }
 
-    @Test
+
     void getSpeedAtDistance() {
         BreakingCurve eBC = this.breakingCurves.get(0);
 
