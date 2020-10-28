@@ -343,7 +343,7 @@ public class TrainStatusManager implements Runnable {
         changesForTD.put("rbcID", rbcID);
         changesForTD.put("currentPosition",curPos);
         changesForTD.put("currentSpeed", 0d);
-        changesForTD.put("currentApplicableReleaseSpeed", ch.releaseSpeed);
+        changesForTD.put("currentApplicableReleaseSpeed", 0);
         this.localEventBus.post(new TrainDataMultiChangeEvent("tsm", "td",changesForTD));
 
         this.clock = new Clock(this.localEventBus);

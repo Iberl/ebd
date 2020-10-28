@@ -145,14 +145,16 @@ public class ConfigHandler {
      */
     /**
      * Minimum time between actions in [s].
-     * Train will not switch between accelerating/breaking etc. faster than this value.
+     * Train switches between accelerating/breaking etc. by using a rolling average.
+     * The span of this average is controlled by this value.
      */
-    public double timeBetweenActions = 2;
+    public double averageTimeBetweenActions = 2;
+
 
     /**
-     * Release speed in [m/s]
+     * Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
      */
-    public double releaseSpeed = 11.11;
+    public double timeBetweenDynLog = 2;
 
     /**
      * Distance to end of movement authority that is seen as "target reached" in [m]

@@ -112,11 +112,11 @@ timeBase = 1593522000000
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
-# Minimum time between actions in [s]. Train will not switch between accelerating/breaking etc. faster than this
-timeBetweenActions = 2
+# Train switches between accelerating/breaking etc. by using a rolling average. The span of this average is controlled by this value.
+averageTimeBetweenActions = 2
 
-# Release speed for ETCS Level 1 in [m/s]
-releaseSpeed = 6.94
+#Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
+timeBetweenDynLog = 2
 
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 5

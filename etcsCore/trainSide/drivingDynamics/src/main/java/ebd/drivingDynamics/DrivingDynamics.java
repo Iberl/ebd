@@ -6,7 +6,6 @@ import ebd.drivingDynamics.util.TripProfileProvider;
 import ebd.drivingDynamics.util.actions.*;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.enums.*;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
@@ -67,20 +66,17 @@ public class DrivingDynamics {
     private DynamicState dynamicState;
     private DrivingStrategy drivingStrategy;
 
-    private long time;
-    private long timeOfLastAction = -1;
-    private final double timeBetweenActions;
-
     private final String tdTarget = "td";
     private final String exceptionTarget = "tsm";
     private double maxTripSectionDistance;
 
     private double profileTargetSpeed = 0d;
     private double breakModifierForRSM = 1;
-    private boolean inRSM = false;
 
-    private int cycleCount = 20;
-    private int cylceCountMax = 20; //TODO Connect to Config
+    private int cycleCount;
+    private final int cylceCountMax; //TODO Connect to Config
+
+    private final List<Action> actionList;
     private MovementState currentMovementState = MovementState.UNCHANGED;
     private SpeedInterventionLevel currentSil = SpeedInterventionLevel.NO_INTERVENTION;
     private SpeedInterventionLevel lastSendSil = SpeedInterventionLevel.NOT_SET;
@@ -113,7 +109,14 @@ public class DrivingDynamics {
         this.tripProfileProvider = new TripProfileProvider(this.localEventBus);
         this.atoServerConnector = new ATOServerConnector(this.localEventBus, this.etcsTrainID);
 
-        this.timeBetweenActions = this.ch.timeBetweenActions;
+        this.cylceCountMax = (int)(ch.timeBetweenDynLog / (ch.clockTickInMS / 1000.0));
+        this.cycleCount = this.cylceCountMax;
+
+        this.actionList = new ArrayList<>();
+        int actionListSize = (int)(this.ch.averageTimeBetweenActions / (ch.clockTickInMS / 1000.0)) + 1;
+        for (int i = 0; i < actionListSize; i++){
+            this.actionList.add(new NoAction(this.localEventBus));
+        }
     }
 
     /**
@@ -130,7 +133,6 @@ public class DrivingDynamics {
         Getting the modified time between two clock ticks, which is the time between clock ticks modified by the
         time acceleration factor.
          */
-        this.time = AppTime.nanoTime();
         double deltaT = cte.deltaT;
 
         /*
@@ -138,7 +140,7 @@ public class DrivingDynamics {
          */
         if(this.dynamicState == null || (this.tripProfile == null && !this.atoServerConnector.isAtoOn()) || this.currentMode == ETCSMode.NO_MODE){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, (int)0, 0,
+            EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, 0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
                     0, 0, 0, 0, 0));
             return;
@@ -172,6 +174,7 @@ public class DrivingDynamics {
         else {
             executeAction(drivingAllowed());
             sendToLogEventSpeedState();
+            sendMovementStateIfNotAlreadySend();
         }
 
         /*
@@ -280,7 +283,6 @@ public class DrivingDynamics {
         else {
             this.dynamicState.setDistanceToStartOfProfile(curPos.estimatedDistanceToPastLocation(utpe.refLocID));
         }
-        this.time = AppTime.nanoTime();
         this.shouldHalt = false;
 
 
@@ -356,14 +358,13 @@ public class DrivingDynamics {
             return this.drivingStrategy.actionToTake();
         }
         else if(this.shouldHalt && this.dynamicState.getSpeed() == 0){
-            sendMovementStateIfNotAlreadySend(MovementState.HALTING);
+            sendMovementStateIfNotAlreadySend();
             return new HaltAction(this.localEventBus);
         }
         else {
             this.currentSil = speedSupervisionReport.interventionLevel;
             this.currentSsState = speedSupervisionReport.supervisionState;
             if(this.currentSsState != SpeedSupervisionState.RELEASE_SPEED_SUPERVISION){
-                this.inRSM = false;
                 switch (this.currentSil) {
                     case NOT_SET, NO_INTERVENTION, INDICATION, OVERSPEED, WARNING -> {
                         sendToLogEventSpeedSupervision(MovementState.UNCHANGED);
@@ -380,32 +381,28 @@ public class DrivingDynamics {
                 }
             }
             else {
-                if(!this.inRSM || breakModifierForRSM == 0) calculateModifier();
-                this.inRSM = true;
+                calculateModifier();
                 /*
-                        This control flow is necessary in case the train emergency breaks into RSM.
-                        This control flow allows the train accelerate again until the stopping region is reached.
-                        */
-                switch (this.currentSil) {
-                    case INDICATION -> {
-                        if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
-                            sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
-                            calculateModifier();
-                            return new AccelerationAction(this.localEventBus, 1);
-                        }
-                        if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
-                            sendToLogEventSpeedSupervision(MovementState.CRUISE);
-                            calculateModifier();
-                            return new CruiseAction(this.localEventBus);
-                        } else {
-                            sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
-                            return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
-                        }
+                This control flow is necessary in case the train emergency breaks into RSM.
+                This control flow allows the train accelerate again until the stopping region is reached.
+                */
+                if (this.currentSil == SpeedInterventionLevel.INDICATION) {
+                    if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
+                        sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
+                        calculateModifier();
+                        return new AccelerationAction(this.localEventBus, 1);
                     }
-                    default -> {
-                        sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
-                        return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);
+                    if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
+                        sendToLogEventSpeedSupervision(MovementState.CRUISE);
+                        calculateModifier();
+                        return new CruiseAction(this.localEventBus);
+                    } else {
+                        sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                        return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
                     }
+                } else {
+                    sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
+                    return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);
                 }
             }
         }
@@ -509,7 +506,7 @@ public class DrivingDynamics {
      * Sends logging information regarding the current {@link MovementState} if this {@link MovementState}
      * was not the last MovementState send.
      */
-    private void sendMovementStateIfNotAlreadySend(MovementState ms){
+    private void sendMovementStateIfNotAlreadySend(){
         if(this.currentMovementState != this.dynamicState.getMovementState()){
             sendToLogEventMovementState(this.dynamicState.getMovementState());
             this.currentMovementState = this.dynamicState.getMovementState();
@@ -522,7 +519,7 @@ public class DrivingDynamics {
     private void calculateModifier() {
         double currentSpeed = this.dynamicState.getSpeed();
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
-        double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
+        double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile() - 1; //Break 1 m in front of EOA
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
         neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
         double modifier = -neededBreakingACC/maxBreakingAcc;
@@ -573,36 +570,77 @@ public class DrivingDynamics {
      */
     private void executeAction(Action action) {
 
-        if (action instanceof AccelerationAction) {
+        this.actionList.remove(0);
+        this.actionList.add(action);
+
+        Action tempAction = getActionFromActionList();
+
+        if (tempAction instanceof AccelerationAction) {
             this.dynamicState.setMovementState(MovementState.ACCELERATING);
-            this.dynamicState.setAccelerationModification(((AccelerationAction) action).getAccelerationPercentage());
-            sendMovementStateIfNotAlreadySend(MovementState.ACCELERATING);
+            this.dynamicState.setAccelerationModification(((AccelerationAction) tempAction).getAccelerationPercentage());
         }
-        else if (action instanceof BreakAction) {
-            MovementState ms = switch (((BreakAction) action).getBreakMode()){
+        else if (tempAction instanceof BreakAction) {
+            MovementState ms = switch (((BreakAction) tempAction).getBreakMode()){
                                     case EMERGENCY_BREAKING -> MovementState.EMERGENCY_BREAKING;
                                     case SERVICE_BREAKING -> MovementState.SERVICE_BREAKING;
                                     case NORMAL_BREAKING -> MovementState.NORMAL_BREAKING;
                                 };
             this.dynamicState.setMovementState(ms);
-            this.dynamicState.setBreakingModification(((BreakAction) action).getBreakPercentage());
-            sendMovementStateIfNotAlreadySend(ms);
+            this.dynamicState.setBreakingModification(((BreakAction) tempAction).getBreakPercentage());
         }
-        else if (action instanceof CruiseAction) {
+        else if (tempAction instanceof CruiseAction) {
             this.dynamicState.setMovementState(MovementState.CRUISE);
-            sendMovementStateIfNotAlreadySend(MovementState.CRUISE);
         }
-        else if (action instanceof CoastAction) {
+        else if (tempAction instanceof CoastAction) {
             this.dynamicState.setMovementState(MovementState.COASTING);
-            sendMovementStateIfNotAlreadySend(MovementState.COASTING);
         }
-        else if (action instanceof HaltAction) {
+        else if (tempAction instanceof HaltAction) {
             this.dynamicState.setMovementState(MovementState.HALTING);
-            sendMovementStateIfNotAlreadySend(MovementState.HALTING);
         }
-        else if(!(action instanceof NoAction)) {
-            IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + action.getClass().getSimpleName());
+        else if(!(tempAction instanceof NoAction)) {
+            IllegalArgumentException iAE = new IllegalArgumentException("DrivingDynamics could not parse this action: " + tempAction.getClass().getSimpleName());
             localEventBus.post(new DrivingDynamicsExceptionEvent("dd", this.exceptionTarget, new NotCausedByAEvent(), iAE, ExceptionEventTyp.FATAL));
+        }
+    }
+
+    private Action getActionFromActionList() {
+        double accumMods = 0;
+        int counter = 0;
+        BreakMode curMode = BreakMode.SERVICE_BREAKING;
+        for(Action action : this.actionList){
+            if (action instanceof AccelerationAction) {
+                accumMods += ((AccelerationAction) action).getAccelerationPercentage();
+                counter++;
+            }
+            else if (action instanceof BreakAction) {
+                accumMods -= ((BreakAction) action).getBreakPercentage();
+                curMode = ((BreakAction) action).getBreakMode();
+                counter++;
+            }
+            else {
+                counter++;
+            }
+        }
+
+        double curModifier = accumMods / counter;
+
+        if(curModifier > 1) curModifier = 1;
+        else if (curModifier > -0.1 && curModifier < 0.1) curModifier = 0;
+        else if (curModifier < -1) curModifier = -1;
+
+        if(curModifier > 0){
+            return new AccelerationAction(this.localEventBus, curModifier);
+        }
+        else if(curModifier < 0){
+            return new BreakAction(this.localEventBus, Math.abs(curModifier), curMode);
+        }
+
+        Action lastAction = this.actionList.get(this.actionList.size()-1);
+        if (lastAction instanceof AccelerationAction || lastAction instanceof BreakAction) {
+            return new CoastAction(this.localEventBus);
+        }
+        else {
+            return lastAction;
         }
     }
 }
