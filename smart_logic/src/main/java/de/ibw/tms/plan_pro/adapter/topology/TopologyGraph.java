@@ -50,7 +50,7 @@ public class TopologyGraph {
         if(LeftmostNode == null) {
             return null;
         }
-        GeometricCoordinate xy = LeftmostNode.getGeoCoordinates();
+        GeometricCoordinate xy = (GeometricCoordinate) LeftmostNode.getGeoCoordinates();
         if(xy == null) return null;
         return xy.getX();
     }
@@ -230,7 +230,7 @@ public class TopologyGraph {
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
-                GeometricCoordinate reference = A.getGeoCoordinates();
+                GeometricCoordinate reference = (GeometricCoordinate) A.getGeoCoordinates();
 
                 /*boolean b_fromA;
                 CGEOKante firstEdge = paintListGeo.get(0);

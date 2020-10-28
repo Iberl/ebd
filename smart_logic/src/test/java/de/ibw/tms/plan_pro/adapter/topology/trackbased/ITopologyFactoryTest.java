@@ -28,7 +28,7 @@ class ITopologyFactoryTest {
 
     @Test
     void connectTopology() throws JAXBException {
-        ITopologyFactory ModulUnderTest = new TopologyFactory();
+        ITopologyFactory ModulUnderTest = null;
         System.out.println("TestBreak");
         TopologyGraph TG = ModulUnderTest.connectTopology();
 
