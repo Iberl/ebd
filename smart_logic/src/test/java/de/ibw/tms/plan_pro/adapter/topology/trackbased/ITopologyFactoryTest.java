@@ -10,12 +10,17 @@ import plan_pro.modell.basisobjekte._1_9_0.CBereichObjektTeilbereich;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class ITopologyFactoryTest {
 
+    private DefaultRepo<String, TopologyGraph.Edge> edgeByReadableId = new DefaultRepo<>();
+    private ArrayList<TopologyGraph.Edge> multible = new ArrayList<>();
 
     @Test
     void printBereichsnamen() {
@@ -24,6 +29,15 @@ class ITopologyFactoryTest {
         for(TopologyGraph.Edge E : edges) {
             print(E);
         }
+        if(!multible.isEmpty()) {
+            System.out.println("-----------EDGE NAME NOT UNIQUE----------");
+            for (TopologyGraph.Edge E : multible) {
+                print(E);
+            }
+        }
+        assertTrue(multible.isEmpty(), "There are multible BereichsIDs: (Number of Edges) " + multible.size()
+            + "of: " + edges.size());
+
     }
 
     private void print(TopologyGraph.Edge e) {
@@ -32,6 +46,16 @@ class ITopologyFactoryTest {
         System.out.println("Kantenlaenge: " + e.dTopLength);
         printConnections(e);
         String edgeId = e.getRefId();
+        TopologyGraph.Edge Old = edgeByReadableId.getModel(edgeId);
+        if(Old == null) {
+            edgeByReadableId.update(edgeId, e);
+        } else {
+            if(!multible.contains(e))
+                multible.add(e);
+            if(!multible.contains(Old)) {
+                multible.add(Old);
+            }
+        }
         if(edgeId == null) System.out.println("No Id for Edge generated");
         else System.out.println("Edge has Id: " + edgeId);
     }
