@@ -1,5 +1,6 @@
 package de.ibw.smart.logic.datatypes;
 
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -58,7 +59,7 @@ public class BlockedArea {
      * Single Element beeing blocked
      * it can not a track and an element be blocked in one Blocked Area
      */
-    private TrackElement BlockedElement;
+    private PositioningNetElement BlockedElement;
 
     /**
      * Node Id of Single Element beeing blocked
@@ -108,7 +109,7 @@ public class BlockedArea {
      * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
      * @param Element beeing Blocked
      */
-    public BlockedArea(TrackElement Element, String sId) {
+    public BlockedArea(Pos Element, String sId) {
         this.BlockedElement = Element;
         this.sIdOfElement = sId;
     }

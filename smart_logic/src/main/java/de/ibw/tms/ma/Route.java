@@ -6,8 +6,8 @@ import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.plan.elements.CrossoverModel;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
@@ -52,7 +52,7 @@ public class Route implements Cloneable, Serializable {
         ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
         WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);
         WaypointDecorator WayEnd = (WaypointDecorator) waypoints.get(waypoints.size() -1);
-        TrackElement TrackElementOfEnd = WayEnd.getTrackElement();
+        PositioningNetElement TrackElementOfEnd = WayEnd.getTrackElement();
         TrackElementType TypeOfWaypoint = null;
         TypeOfWaypoint = TrackElementType.RAIL_TYPE;
         CrossoverModel EndModel = null;
@@ -76,7 +76,7 @@ public class Route implements Cloneable, Serializable {
 
 
 
-            TrackElement CTE = W.getTrackElement();
+            PositioningNetElement CTE = W.getTrackElement();
             handleCrossoverWaypoint(CTE);
         }
     }
@@ -96,17 +96,17 @@ public class Route implements Cloneable, Serializable {
 
     }
 
-    public void handleCrossoverWaypoint(TrackElement CTE) {
+    public void handleCrossoverWaypoint(PositioningNetElement CTE) {
         String sId;
         CrossoverModel M = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) CTE);
         sId = M.getNode().TopNodeId;
         this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
     }
 
-    public void handleRailWaypoint(TrackElement TE) {
+    public void handleRailWaypoint(PositioningNetElement TE) {
 
-        Trail T = (Trail) TE;
-        this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, T.getPlanProId());
+
+        this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, TE.getPlanProId());
     }
 
     private void addWaypointIntoTransmission(TrackElementType TrackType, String sId) {
@@ -209,7 +209,7 @@ public class Route implements Cloneable, Serializable {
         }
     }
 
-    public void addWaypoint(ControlledTrackElement TE, TrackElementStatus Status) {
+    public void addWaypoint(PositioningNetElement TE, TrackElementStatus Status) {
         Waypoint W = new Waypoint(TE, Status);
         int x = TrackController.ClickPoint.x;
         int y = TrackController.ClickPoint.y;

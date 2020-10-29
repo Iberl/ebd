@@ -44,8 +44,7 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
 
     @Expose
     public Chainage chainage;
-    @JsonIgnore
-    protected TrackElement trackElement;
+
 
     private SectionOfLine lineSection;
 
@@ -60,7 +59,7 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
     public SpotLocation(Chainage chainage, TrackElement trackElement, SectionOfLine lineSection) {
         super(CLASS_IDENTIFIER);
         this.chainage = chainage;
-        this.trackElement = trackElement;
+
         this.lineSection = lineSection;
     }
 

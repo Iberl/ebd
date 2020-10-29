@@ -1,8 +1,10 @@
 package de.ibw.tms.controller;
 
 import de.ibw.feed.Balise;
+import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
@@ -169,10 +171,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         }
         SingleSlip Slip = CrossoverMod.getRailWaySlip();
         PositionedRelation PosRel = Slip.getOutputRelation();
-        TrackElement TE_From = PosRel.getFrom();
-        TrackElement TE_To = PosRel.getTo();
-        Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_From);
-        Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_To);
+        IRTMPositioningNetElement TE_From = PosRel.getFrom();
+        IRTMPositioningNetElement TE_To = PosRel.getTo();
+        Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic((PositioningNetElement) TE_From);
+        Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic((PositioningNetElement) TE_To);
         Rail R_Next = null;
         if(R_From == Rail_Current) {
             R_Next = R_To;

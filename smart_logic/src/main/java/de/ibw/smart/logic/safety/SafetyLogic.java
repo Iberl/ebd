@@ -13,10 +13,7 @@ import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
-import de.ibw.tms.ma.EoaSectionAdapter;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -348,7 +345,7 @@ public class SafetyLogic {
             //TODO Check if Train is standing on trail still
             distanceFromTrainToNextNode.set((int) tm.getdDistanceToNodeRunningTo());
             iSumSectionsLength.set((int) tm.getdDistanceToNodeRunningTo());
-            TrackElement StartEL = (TrackElement) startElement.getValue();
+            PositioningNetElement StartEL = (PositioningNetElement) startElement.getValue();
             double distanceToA1 = 0;
             double distanceToA2 = 0;
             Balise B = Balise.baliseByNid_bg.getModel(iNID_lrbg);

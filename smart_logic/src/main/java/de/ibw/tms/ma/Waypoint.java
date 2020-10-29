@@ -1,16 +1,16 @@
 package de.ibw.tms.ma;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 
 import java.io.Serializable;
 
 public class Waypoint implements Serializable {
 
-    private TrackElement TrackElement;
+    private Movea TrackElement;
     private TrackElementStatus ElementStatus;
 
-    public TrackElement getTrackElement() {
+    public PositioningNetElement getTrackElement() {
         return TrackElement;
     }
 
@@ -18,7 +18,7 @@ public class Waypoint implements Serializable {
         return ElementStatus;
     }
 
-    public Waypoint(TrackElement trackElement, TrackElementStatus elementStatus) {
+    public Waypoint(PositioningNetElement trackElement, TrackElementStatus elementStatus) {
         TrackElement = trackElement;
         ElementStatus = elementStatus;
     }

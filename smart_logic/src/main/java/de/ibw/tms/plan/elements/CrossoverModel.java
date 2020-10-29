@@ -1,5 +1,6 @@
 package de.ibw.tms.plan.elements;
 
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -34,7 +35,7 @@ public class CrossoverModel {
     /**
      * Ein Repository das den Schlupf als key hat und diese Vermittlung als Value widergibt.
      */
-    public static DefaultRepo<ControlledTrackElement, CrossoverModel> BranchToCrossoverModelRepo = new DefaultRepo<>();
+    public static DefaultRepo<PositioningNetElement, CrossoverModel> BranchToCrossoverModelRepo = new DefaultRepo<>();
 
     /**
      * Factory Method dieser Vermittlung

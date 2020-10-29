@@ -8,4 +8,8 @@ public class DangerArea extends TrackArea {
     public DangerArea() {
         super(CLASS_IDENTIFIER);
     }
+
+    public DangerArea(String sName) {
+        super(sName);
+    }
 }

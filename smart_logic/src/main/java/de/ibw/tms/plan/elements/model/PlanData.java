@@ -5,6 +5,7 @@ import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
@@ -98,7 +99,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         /**
          * {@link HashMap} zum Ermitteln des Gleis {@link Rail} aus einem {@link Trail} - TrackElement eines Gleismodells
          */
-        private static HashMap<TrackElement, Line2D.Double> positionMap = new HashMap<TrackElement, Line2D.Double>();
+        private static HashMap<PositioningNetElement, Line2D.Double> positionMap = new HashMap<>();
         /**
          * Bisher unbenutzt
          * {@link HashMap} zum Ermitteln eines Point_RemoteOperated aus einem {@link BranchingSwitch} - TrackElement einer Weiche
@@ -125,10 +126,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         /**
          * Transferiert ein TrackElment zu einer zeichenbaren Linie
-         * @param TE - {@link TrackElement} - Ein logischen Gleis Trail
+         * @param TE - {@link PositioningNetElement} - Ein logischen Gleis Trail
          * @return Line2D.Double - Eine Rail die zeichnbar ist
          */
-        public static Line2D.Double translateTeToGraphic(TrackElement TE) {
+        public static Line2D.Double translateTeToGraphic(PositioningNetElement TE) {
             return positionMap.get(TE);
         }
         /*

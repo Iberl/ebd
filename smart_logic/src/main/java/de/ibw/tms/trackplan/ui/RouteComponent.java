@@ -139,7 +139,10 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
         }
     }
 
-    private TrackElement TrackEl;
+    /**
+     * @Waypoint
+     */
+    private PositioningNetElement TrackEl;
     private Flow.Subscription RouteSubscription = null;
     private RouteController RC;
     private ArrayList<JComponent> routeMenuItemList = new ArrayList<JComponent>();
