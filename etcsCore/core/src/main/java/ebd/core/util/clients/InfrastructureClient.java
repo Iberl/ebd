@@ -68,20 +68,9 @@ public class InfrastructureClient {
             registeredTrains.add(trainID);
             init(trainID);
         }
-        if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
-            /*
-            Necessary, because the infrastructure logic has a quirk, which sets the train power level to 0
-            from 0 to 10 km/h and starts with two at 10 km/h.
-            */
-            go(trainID, 1);
-            String msg = "Send: go " + trainID + " " + "1";
-            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
-        }
-        else {
-            gok(trainID, uie.speedInKmh);
-            String msg = "Send: gok " + trainID + " " + uie.speedInKmh;
-            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
-        }
+        gok(trainID, uie.speedInKmh);
+        String msg = "Send: gok " + trainID + " " + uie.speedInKmh;
+        this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
     }
 
     @Subscribe

@@ -23,13 +23,12 @@ public class InfrastructureClientConnector {
     private final EventBus localEventBus;
     private final EventBus globalEventBus;
     private TrainDataVolatile trainDataVolatile;
-    private final int etcsID;
     private final int infrastructureID;
     private final String eventSource;
     private final String target = "szenario";
 
     private int tickCounter = 0;
-    private int updateMultiplier;
+    private final int updateMultiplier;
 
     private double carry;
     private List<Double> speeds = new ArrayList<>(); // in [m/s]
@@ -47,10 +46,9 @@ public class InfrastructureClientConnector {
 
         this.trainDataVolatile = null;
 
-        this.etcsID = etcsID;
         this.infrastructureID = infrastructureID;
 
-        this.eventSource = "tsm;T=" + this.etcsID;
+        this.eventSource = "tsm;T=" + etcsID;
 
         this.updateMultiplier = ConfigHandler.getInstance().infrastructureUpdateMultiplier;
     }
@@ -72,29 +70,34 @@ public class InfrastructureClientConnector {
         this.times.add(cte.deltaT);
 
         this.tickCounter += 1;
-        /**
+        /*
          * Only calculated a update and send it if there where updateMultiplier many clock tick events.
+         *
          */
         if(this.tickCounter <= this.updateMultiplier) return;
         this.tickCounter = 0;
-
         double averageSpeed = 0;
         double timeBetweenUpdates = 0;
+
         for(Double time : this.times){
             timeBetweenUpdates += time;
         }
         for(int i = 0; i < this.speeds.size(); i++){
-            averageSpeed += this.speeds.get(i) * 3.6 * (this.times.get(i) / timeBetweenUpdates);
+            // We need km/H, speeds are in m/s, so we multiply with 3.6 and only then weight the it with the time
+            averageSpeed += (this.speeds.get(i) * 3.6) * (this.times.get(i) / timeBetweenUpdates);
         }
 
         /*
         To reduce rounding to integer errors, the difference between the long and the double is carried over,
         weighted with the time spend between updates and then added back in.
+        We also only send speeds greater than 10 km/h to prevent problems with the infrastructure
+        //TODO Remove after FeedBackAlgorithm is implemented
          */
         double weightedCarry = this.carry * timeBetweenUpdates;
 
         averageSpeed += weightedCarry;
-        long curVlong = Math.round(averageSpeed);
+        long curVlong = 5 * Math.round(averageSpeed/5.0);
+        if(curVlong < 10) curVlong = 0;
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
