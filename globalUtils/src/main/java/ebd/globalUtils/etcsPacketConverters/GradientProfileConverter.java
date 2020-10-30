@@ -1,10 +1,13 @@
 package ebd.globalUtils.etcsPacketConverters;
 
+import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class GradientProfileConverter {
@@ -119,7 +122,7 @@ public class GradientProfileConverter {
      * @return A array in the format {totalDistance in [m], grad in [0/00], totalDistance2, grad2 ...}.
      *          The distance values are always in reference to the start of the profile.
      */
-    public static double[] packet21ToGradArray(Packet_21 p21, double refGradient) {
+    public static double[][] packet21ToGradArray(Packet_21 p21, double refGradient) {
 
         double totalDistance = 0d;
         double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);
@@ -132,34 +135,48 @@ public class GradientProfileConverter {
 
         int extraValue = p21.gradient.D_GRADIENT != 0 ? 1 : 0;
 
-        double[] gradientArray = new double[(gradients.size() + extraValue) * 2];
+        double[][] gradientArray = new double[(gradients.size() + extraValue)][2];
         int currentIndex = 0;
 
         if (p21.gradient.D_GRADIENT != 0) {
-            gradientArray[currentIndex++] = 0;
-            gradientArray[currentIndex++] = refGradient;
+            double[] ta = {0,refGradient};
+            gradientArray[currentIndex++] = ta;
         }
 
         for(Packet_21.Packet_21_Gradient gradient : gradients){
             totalDistance += gradient.D_GRADIENT * distanceFactor;
             if (gradient.G_A < 255) {
-                if (!gradient.Q_GDIR) 	{
-                    gradientArray[currentIndex++] = totalDistance;
-                    gradientArray[currentIndex++] = - gradient.G_A;
+                if (!gradient.Q_GDIR){
+                    double[] ta = {totalDistance, -gradient.G_A};
+                    gradientArray[currentIndex++] = ta;
                 }
                 else {
-                    gradientArray[currentIndex++] = totalDistance;
-                    gradientArray[currentIndex++] = gradient.G_A;
+                    double[] ta = {totalDistance, gradient.G_A};
+                    gradientArray[currentIndex++] = ta;
                 }
 
             }
             else {
-                gradientArray[currentIndex++] = totalDistance;
-                gradientArray[currentIndex] = -Double.MAX_VALUE;
+                gradientArray[currentIndex] = new double[]{totalDistance, -Double.MAX_VALUE};
                 break; //TODO Better way to represent G_A = 255 (see 7.5.1.37)
             }
         }
         return gradientArray;
+    }
+
+    public static String packet21ToDMIString(Packet_21 p21, double refGradient, double offsetFromTripStart){
+        StringBuilder sb = new StringBuilder("gp ");
+
+        double [][] gp = packet21ToGradArray(p21, refGradient);
+        Iterator<double[]> iter = Arrays.stream(gp).iterator();
+
+        while(iter.hasNext()){
+            double[] temp = iter.next();
+            sb.append(temp[0] + offsetFromTripStart).append(",").append(temp[1]);
+            if(iter.hasNext()) sb.append(";");
+        }
+
+        return sb.toString();
     }
 
 

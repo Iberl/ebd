@@ -10,7 +10,7 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.enums.*;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
-import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
@@ -194,11 +194,6 @@ public class DrivingDynamics {
         updateTrainDataVolatile();
 
         /*
-        Update DMI
-         */
-        updateDMI();
-
-        /*
         Informs ATO if appropriate
          */
         if(this.atoOn){
@@ -253,10 +248,10 @@ public class DrivingDynamics {
     /**
      * This method updates the trip profile. This can become necessary should a new one become available. This does
      * <b>not</b> require the train to be at standstill.
-     * @param utpe {@link DDUpdateTripProfileEvent}
+     * @param utpe {@link NewTripProfileEvent}
      */
     @Subscribe
-    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
+    public void updateTripProfile(NewTripProfileEvent utpe){
         if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }
@@ -424,26 +419,6 @@ public class DrivingDynamics {
     }
 
     /**
-     * This method gathers the new information from dynamic state, adds data saved in {@link TrainDataVolatile}
-     * and send these to the DMI
-     */
-    private void updateDMI(){
-        double speed = this.dynamicState.getSpeed();
-        double targetSpeed = this.trainDataVolatile.getTargetSpeed();
-        double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-        double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
-        double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
-        double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
-        double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceIntervention2Speed();
-        double curApplReleaseSpeed = this.trainDataVolatile.getCurrentApplicableReleaseSpeed();
-
-        String source = "dd;T=" + this.etcsTrainID;
-        EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", speed, targetSpeed, (int)distanceToDrive,
-                curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,
-                currentPermSpeed, currentWarnSpeed, currentIntervSpeed, this.dynamicState.getTripDistance()));
-    }
-
-    /**
      * This method calculates the new profile maximum speed for the current location. Also sends these to {@link TrainDataVolatile}
      */
     private void updateCurrentMaxTripProfileSpeed() {
@@ -535,7 +510,7 @@ public class DrivingDynamics {
     /**
      * Takes a spline and saves it to a file
      */
-    private void saveTripProfileToFile(DDUpdateTripProfileEvent ddutpe) {
+    private void saveTripProfileToFile(NewTripProfileEvent ddutpe) {
         Spline tp = ddutpe.tripProfile;
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);

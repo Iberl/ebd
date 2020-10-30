@@ -408,7 +408,6 @@ public class SpeedSupervisor {
                                                  boolean eoaTarget,
                                                  boolean svlTarget) {
         if(!(eoaTarget || svlTarget) || this.releaseSpeed == 0){//Table 8 in effect
-            System.out.println(this.targetDistance);
             double dEBI = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.EMERGENCY_INTERVENTION_CURVE);
             double dSBI2 = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.SERVICE_INTERVENTION_CURVE_2);
             double dI = this.emergencyBreakingCurve.getDistanceSpeedAlwaysLower(curSpeed, this.targetDistance, CurveType.INDICATION_CURVE);
