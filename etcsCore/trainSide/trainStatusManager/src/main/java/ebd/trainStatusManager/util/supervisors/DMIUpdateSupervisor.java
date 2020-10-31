@@ -20,6 +20,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+/**
+ * This class supervises the connection between the Train and the DMIServer. It uses {@link TrainDataVolatile},
+ * {@link RouteDataVolatile}, {@link SsmReportEvent} and {@link NewTripProfileEvent} to gather the necessary data.
+ * and sends {@link DMIUpdateEvent} and {@link DMISpeedUpdateEvent} to DMIServer.
+ */
 public class DMIUpdateSupervisor {
 
     private final EventBus localEventBus;
@@ -31,6 +36,10 @@ public class DMIUpdateSupervisor {
     private double curMaxTripDistance = 0;
     private double curOffsetToTripStart = 0;
 
+    /**
+     *
+     * @param localEventBus Local {@link EventBus} of the train
+     */
     public DMIUpdateSupervisor(EventBus localEventBus) {
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
@@ -39,18 +48,30 @@ public class DMIUpdateSupervisor {
         this.source = "tsm;T=" + this.trainDataVolatile.getEtcsID();
     }
 
+    /**
+     * Every clock tick, the DMI is updated with new speeds, distances and states of the train
+     * @param cte {@link ClockTickEvent}
+     */
     @Subscribe
     public void clockTick(ClockTickEvent cte){
         updateDMISpeeds();
-        
     }
 
+    /**
+     * Collects current speed intervention levels and supervision states
+     * @param ssmre {@link SsmReportEvent}
+     */
     @Subscribe
     public void getSDSReport(SsmReportEvent ssmre){
         this.currentSil = ssmre.interventionLevel;
         this.currentSsState = ssmre.supervisionState;
     }
 
+    /**
+     * Collects the current trip profile and uses it to update the gradient profile of the DMI.
+     * Also sets this.curMaxTripDistance.
+     * @param ntpe {@link NewTripProfileEvent}
+     */
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void curTripProfile(NewTripProfileEvent ntpe){
         Spline curProfile = ntpe.tripProfile;
@@ -65,6 +86,9 @@ public class DMIUpdateSupervisor {
         updateDMIGP();
     }
 
+    /**
+     * Collects data and generates a {@link DMIUpdateEvent}
+     */
     private void updateDMIGP() {
         Packet_21 packet_21 = this.routeDataVolatile.getPacket_21();
         String dmiString = GradientProfileConverter.packet21ToDMIString(packet_21,
