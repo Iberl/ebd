@@ -164,6 +164,13 @@ public class GradientProfileConverter {
         return gradientArray;
     }
 
+    /**
+     * Transforms a packet 21 into a String that can be used to update the DMI
+     * @param p21 {@link Packet_21}
+     * @param refGradient in [0/000]. The current gradient, to be used if the profil doesn't start with 0 m
+     * @param offsetFromTripStart in [m]. The offset between trip section start and trip start
+     * @return String formatted for use with DMI
+     */
     public static String packet21ToDMIString(Packet_21 p21, double refGradient, double offsetFromTripStart){
         StringBuilder sb = new StringBuilder("gp ");
 

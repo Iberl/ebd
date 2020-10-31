@@ -90,8 +90,8 @@ class GradientProfileConverterTest {
     @Test
     void packet21ToDMIString(){
         String dmiString = GradientProfileConverter.packet21ToDMIString(p21_1, 0, 0);
-        System.out.println(dmiString);
+        assertEquals("gp 0.0,-1.0;100.0,1.0;300.0,-2.0", dmiString);
         String dmiString2 = GradientProfileConverter.packet21ToDMIString(p21_1, 1, 100);
-        System.out.println(dmiString2);
+        assertEquals("gp 100.0,-1.0;200.0,1.0;400.0,-2.0", dmiString2);
     }
 }
