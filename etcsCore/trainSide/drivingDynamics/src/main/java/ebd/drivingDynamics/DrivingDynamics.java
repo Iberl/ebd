@@ -139,10 +139,6 @@ public class DrivingDynamics {
         If driving dynamics is locked, nothing will be done.
          */
         if(this.dynamicState == null || (this.tripProfile == null && !this.atoServerConnector.isAtoOn()) || this.currentMode == ETCSMode.NO_MODE){
-            String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            EventBus.getDefault().post(new DMISpeedUpdateEvent(source, "dmi", 0, 0, 0, 0,
-                    SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
-                    0, 0, 0, 0, 0));
             return;
         }
 
