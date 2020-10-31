@@ -93,6 +93,7 @@ public class TrainStatusManager implements Runnable {
     private PositionReportSupervisor positionReportSupervisor;
     private TrackSupervisor trackSupervisor;
     private SpeedUpdateSupervisor speedUpdateSupervisor;
+    private DMIUpdateSupervisor dmiUpdateSupervisor;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -321,8 +322,6 @@ public class TrainStatusManager implements Runnable {
          */
 
         this.routeData = new RouteData(this.localEventBus);
-
-
         this.trainData = new TrainData(this.localEventBus, this.etcsTrainID, trainConfigID, infrastructureID);
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", true);
@@ -334,6 +333,7 @@ public class TrainStatusManager implements Runnable {
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.trackSupervisor = new TrackSupervisor(this.localEventBus);
         this.speedUpdateSupervisor = new SpeedUpdateSupervisor(this.localEventBus);
+        this.dmiUpdateSupervisor = new DMIUpdateSupervisor(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 

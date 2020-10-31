@@ -1,6 +1,7 @@
 package ebd.core.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.dmi.DMISpeedUpdateEvent;
 import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -65,25 +66,37 @@ public class DMIServer implements Runnable {
     }
 
     @Subscribe
-    public void send(DMIUpdateEvent dmiUpdateEvent) {
+    public void send(DMISpeedUpdateEvent dmiSpeedUpdateEvent) {
+        String source = dmiSpeedUpdateEvent.source;
+        String[] sourceComponents = source.split(";T=");
+        int entityID = Integer.parseInt(sourceComponents[1]);
+        if(this.clientMap.size() == 0 || this.clientMap.get(entityID) == null) return;
+        //order as getter methods in DMISpeedUpdateEvent
+        String dmiParameters = dmiSpeedUpdateEvent.getCurrentSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentTargetSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentReleaseSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentIndSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentPermSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentWarnSpeed() + " "
+                + dmiSpeedUpdateEvent.getCurrentIntervSpeed() + " "
+                + dmiSpeedUpdateEvent.getSpeedInterventionLevel() + " "
+                + dmiSpeedUpdateEvent.getSpeedSupervisionState() + " "
+                + dmiSpeedUpdateEvent.getTripDistance();
+
+        for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)) {
+            dmiClientWorker.sendString(dmiParameters);
+        }
+    }
+
+    @Subscribe
+    public void send(DMIUpdateEvent dmiUpdateEvent){
         String source = dmiUpdateEvent.source;
         String[] sourceComponents = source.split(";T=");
         int entityID = Integer.parseInt(sourceComponents[1]);
         if(this.clientMap.size() == 0 || this.clientMap.get(entityID) == null) return;
-        //order as getter methods in DMIUpdateEvent
-        String dmiParameters = dmiUpdateEvent.getCurrentSpeed() + " "
-                + dmiUpdateEvent.getCurrentTargetSpeed() + " "
-                + dmiUpdateEvent.getCurrentReleaseSpeed() + " "
-                + dmiUpdateEvent.getCurrentIndSpeed() + " "
-                + dmiUpdateEvent.getCurrentPermSpeed() + " "
-                + dmiUpdateEvent.getCurrentWarnSpeed() + " "
-                + dmiUpdateEvent.getCurrentIntervSpeed() + " "
-                + dmiUpdateEvent.getSpeedInterventionLevel() + " "
-                + dmiUpdateEvent.getSpeedSupervisionState() + " "
-                + dmiUpdateEvent.getTripDistance();
 
-        for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)) {
-            dmiClientWorker.sendString(dmiParameters);
+        for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)){
+            dmiClientWorker.sendString(dmiUpdateEvent.dmiUpdateString);
         }
     }
 }

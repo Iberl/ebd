@@ -57,7 +57,6 @@ public class TripProfileProvider {
             getProfileFromBreakingCurveGroup(nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve);
         }
 
-
         this.localEventBus.post(new NewTripProfileEvent("dd",
                                 "all",
                                 this.profile,

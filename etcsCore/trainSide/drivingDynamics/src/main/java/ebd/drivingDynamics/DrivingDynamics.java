@@ -8,7 +8,7 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.enums.*;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
+import ebd.globalUtils.events.dmi.DMISpeedUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
@@ -140,7 +140,7 @@ public class DrivingDynamics {
          */
         if(this.dynamicState == null || (this.tripProfile == null && !this.atoServerConnector.isAtoOn()) || this.currentMode == ETCSMode.NO_MODE){
             String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, 0, 0,
+            EventBus.getDefault().post(new DMISpeedUpdateEvent(source, "dmi", 0, 0, 0, 0,
                     SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
                     0, 0, 0, 0, 0));
             return;
@@ -250,7 +250,7 @@ public class DrivingDynamics {
      * <b>not</b> require the train to be at standstill.
      * @param utpe {@link NewTripProfileEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void updateTripProfile(NewTripProfileEvent utpe){
         if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;

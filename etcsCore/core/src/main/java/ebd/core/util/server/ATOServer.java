@@ -1,19 +1,10 @@
 package ebd.core.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ATOServer implements Runnable {
 
