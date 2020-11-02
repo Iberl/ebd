@@ -1,7 +1,7 @@
 package de.ibw.smart.logic.safety.self.tests;
 
 import de.ibw.feed.Balise;
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -532,7 +532,7 @@ public class SafetyLogicContinousConnectTest {
         if (edgeHavingNonPeekConnection(E)) {
             // Weiche ist NICHT über spitze mit Kante der Balise verbunden
 
-            BlockedArea Datapointarea = B.createAreaFromBalise();
+            Occupation Datapointarea = B.createAreaFromBalise();
             return Datapointarea.getListOfEdgeLimits().size() > 0;
         }
         return false;

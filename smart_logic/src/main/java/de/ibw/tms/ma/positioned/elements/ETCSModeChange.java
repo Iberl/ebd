@@ -4,6 +4,9 @@ import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.L_ACKMAMODE;
 import de.ibw.tms.etcs.L_MAMODE;
 import de.ibw.tms.etcs.M_MAMODE;
+import de.ibw.tms.ma.ModeChangeProfile;
+
+import java.util.List;
 
 public class ETCSModeChange extends InformationPoint {
     public static final String CLASS_IDENTIFIER = "ETCS_Mode_Change";
@@ -13,6 +16,8 @@ public class ETCSModeChange extends InformationPoint {
     private L_MAMODE l_mamode;
     private L_ACKMAMODE l_ackmamode;
     private boolean q_mamode;
+
+    private List<ModeChangeProfile> profileList;
 
     public ETCSModeChange() {
         super(CLASS_IDENTIFIER);
@@ -56,5 +61,13 @@ public class ETCSModeChange extends InformationPoint {
 
     public void setQ_mamode(boolean q_mamode) {
         this.q_mamode = q_mamode;
+    }
+
+    public List<ModeChangeProfile> getProfileList() {
+        return profileList;
+    }
+
+    public void setProfileList(List<ModeChangeProfile> profileList) {
+        this.profileList = profileList;
     }
 }

@@ -10,8 +10,9 @@ public class TrackEdgeSection extends LinearElement {
     private SpotLocationIntrinsic end;
 
 
-
-
+    public TrackEdgeSection(String sName) {
+        super(sName);
+    }
 
     public TrackEdgeSection() {
         super(CLASS_IDENTIFIER);

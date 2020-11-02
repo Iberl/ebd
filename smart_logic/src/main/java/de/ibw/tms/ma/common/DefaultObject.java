@@ -8,7 +8,7 @@ import java.util.UUID;
 
 /**
  *
- * Grundlegendes Objekt
+ * Grundlegendes Repository
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de

@@ -5,8 +5,10 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_TIMER;
 import de.ibw.tms.etcs.Q_SCALE;
+import de.ibw.tms.etcs.T_EMA;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.spotsma.MASpots;
 
 import java.io.Serializable;
 @JsonIgnoreProperties(value = {
@@ -14,7 +16,15 @@ import java.io.Serializable;
         "firstName",
         "trackElement"
 })
-public class EoA extends SpotLocation implements Serializable {
+/**
+ * End of Authority
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-10-30
+ */
+public class EoA extends MASpots implements Serializable {
+    public static final String CLASS_IDENTIFIER = "End_Of_Authority";
+
     @Expose
     public int v_EMA;
     @Expose
@@ -33,10 +43,14 @@ public class EoA extends SpotLocation implements Serializable {
     public boolean q_OVERLAP;
     @Expose
     public Overlap overlap;
+    @Expose
+    public Chainage chainage;
 
+    private T_EMA t_ema;
 
     public EoA(Chainage chainage, TrackElement trackElement, SectionOfLine lineSection) {
-        super(chainage, trackElement, lineSection);
+        super(CLASS_IDENTIFIER);
+        this.chainage = chainage;
 
     }
 
@@ -46,6 +60,14 @@ public class EoA extends SpotLocation implements Serializable {
 
     public void setV_EMA(int v_EMA) {
         this.v_EMA = v_EMA;
+    }
+
+    public T_EMA getT_ema() {
+        return t_ema;
+    }
+
+    public void setT_ema(T_EMA t_ema) {
+        this.t_ema = t_ema;
     }
 
     public boolean isQ_ENDTIMER() {

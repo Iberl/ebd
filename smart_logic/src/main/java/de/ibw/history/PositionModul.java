@@ -4,14 +4,13 @@ import de.ibw.feed.Balise;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.history.data.RouteMap;
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
 import de.ibw.util.UtilFunction;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -190,8 +189,8 @@ public class PositionModul implements IPositionModul {
                                         CurrentDistance = CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
                                         while(CurrentDistance.compareTo(EndDistance) < 0) {
                                             tempDistance = new BigDecimal(CurrentDistance.doubleValue());
-                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                                                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                            PD.add(new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dDistanceFromA.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     (int) E.dTopLength));
                                             Pair<Route.TrackElementType, TrackElement> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -203,12 +202,12 @@ public class PositionModul implements IPositionModul {
                                         }
                                         BigDecimal dEndDistance = EndDistance.subtract(tempDistance);
                                         if(E.equals(StartEdge)) {
-                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                                                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                            PD.add(new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    dDistanceFromA.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     dEndDistance.intValue()));
                                         } else {
-                                            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                                                    0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                            PD.add(new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                                    0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     dEndDistance.intValue()));
                                         }
                                         return PD;
@@ -224,9 +223,9 @@ public class PositionModul implements IPositionModul {
                                     new BigDecimal(iDistanceToBalise)
                             );
                             if(new BigDecimal(E.dTopLength).compareTo(endDistanceFromA) >= 0) {
-                                PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
+                                PD.add(new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                                         B.getBalisenPositionFromNodeA().intValue(),
-                                        BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, endDistanceFromA.intValue()));
+                                        Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, endDistanceFromA.intValue()));
                                 return PD;
                             } else return evaluatePositionReport(null, PD);
                         }
@@ -278,8 +277,8 @@ public class PositionModul implements IPositionModul {
             BigDecimal tempToReserve = toVisitMeters.get(0);
             toVisitMeters.remove(0);
             tempToReserve.subtract(new BigDecimal(E.dTopLength));
-            PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0 ,
-                    BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength));
+            PD.add(new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, 0 ,
+                    Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength));
             if(tempToReserve.compareTo(new BigDecimal("0")) <= 0) continue;
             else {
                 visitEdge(visitedEdgesList, toVisitEdgesList, E.A, E, tempToReserve, toVisitMeters);
@@ -298,16 +297,16 @@ public class PositionModul implements IPositionModul {
         TopologyGraph.Edge E =
                 PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
         if(E.B.equals(N1)) {
-            BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                    dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+            Occupation StartArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                    dDistanceFromA.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
             iToReserve = iToReserve.subtract(new BigDecimal(E.dTopLength).subtract(dDistanceFromA));
             PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
 
             visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve, toVisitMeters);
         } else {
-            BlockedArea StartArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                    0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
+            Occupation StartArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                    0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
             iToReserve = iToReserve.subtract(dDistanceFromA);
             PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
@@ -410,11 +409,11 @@ public class PositionModul implements IPositionModul {
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
         TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
         if(E == null) return false;
-        BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                dFromRangeStart.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dToRangeEnd.intValue());
+        Occupation RequestArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                dFromRangeStart.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dToRangeEnd.intValue());
         Iterator PosIterate = pd.iterator(); {
             while(PosIterate.hasNext()) {
-                BlockedArea BA = (BlockedArea) PosIterate.next();
+                Occupation BA = (Occupation) PosIterate.next();
                 if(BA.compareIfIntersection(RequestArea)) return true;
             }
 
@@ -424,11 +423,11 @@ public class PositionModul implements IPositionModul {
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge) {
         TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdge);
         if(E == null) return false;
-        BlockedArea RequestArea = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
-                0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+        Occupation RequestArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
+                0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
         Iterator PosIterate = pd.iterator(); {
             while(PosIterate.hasNext()) {
-                BlockedArea BA = (BlockedArea) PosIterate.next();
+                Occupation BA = (Occupation) PosIterate.next();
                 if(BA.compareIfIntersection(RequestArea)) return true;
             }
 

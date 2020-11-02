@@ -7,7 +7,7 @@ import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.smart.logic.EventBusManager;
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
@@ -56,7 +56,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
+import static de.ibw.smart.logic.datatypes.Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
 
 
 /**
@@ -137,26 +137,26 @@ public class SafetyLogic {
      * Blockierte Abschnitte
      * Zugneutrale Abschnitte werden mit Zugnummer -1 blockiert
      */
-    private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
+    private volatile ThreadedRepo<Integer, List<Occupation>> blockList = new ThreadedRepo<>();
 
     /**
      * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
      * @param iTrainId - nid-engineId des angeforderten Zuges
      * @return List - liste der belegten Abschnitte durch den Zug
      */
-    public synchronized List<BlockedArea> getAllAreaBlockedByOwn(int iTrainId) {
+    public synchronized List<Occupation> getAllAreaBlockedByOwn(int iTrainId) {
         return blockList.getModel(iTrainId);
     }
 
-    private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
-        List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
+    private synchronized List<Occupation> getAllAreaNotBlockedByOwn(int iTrainId) {
+        List<Occupation> ownBlocking = blockList.getModel(iTrainId);
         if(ownBlocking == null) ownBlocking = new ArrayList<>();
-        Collection<List<BlockedArea>> all = blockList.getAll();
-        List<BlockedArea> result = Collections.synchronizedList(new ArrayList<>());
-        for(List<BlockedArea> trainset: all) {
+        Collection<List<Occupation>> all = blockList.getAll();
+        List<Occupation> result = Collections.synchronizedList(new ArrayList<>());
+        for(List<Occupation> trainset: all) {
             result.addAll(trainset);
         }
-        for(BlockedArea B : ownBlocking) {
+        for(Occupation B : ownBlocking) {
             result.remove(B);
         }
         return result;
@@ -174,7 +174,7 @@ public class SafetyLogic {
      */
     public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
-        List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
+        List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
         int iQ_DirLength = -1;
         int iQ_Scale = -1;
@@ -206,7 +206,7 @@ public class SafetyLogic {
             int iRequestSize = requestedTrackElementList.size();
             Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
             Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
-            BlockedArea StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
+            Occupation StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
                 ,iDistance_LRBG, iNID_LRBG, iQ_DirLrbg, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
             // start Area is blocked
             if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
@@ -228,23 +228,23 @@ public class SafetyLogic {
                         // also muss die Weiche als Blockiert eingetragen werden
                         TopologyGraph.Node N = (TopologyGraph.Node) Element1.getValue();
 
-                        toBlock.add(new BlockedArea(N, N.TopNodeId));
+                        toBlock.add(new Occupation(N, N.TopNodeId));
                         break;
                     }
                     TopologyGraph.Node N1 = (TopologyGraph.Node) Element1.getValue();
                     TopologyGraph.Node N2 = (TopologyGraph.Node) Element2.getValue();
                     TopologyGraph.Edge E = TopologyGraph.twoTopPointBelongsToEdgeRepo.
                             getModel(N1.TopNodeId).getModel(N2.TopNodeId);
-                    toBlock.add(new BlockedArea(N1, N1.TopNodeId));
-                    toBlock.add(new BlockedArea(N2, N2.TopNodeId));
-                    toBlock.add(new BlockedArea(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
+                    toBlock.add(new Occupation(N1, N1.TopNodeId));
+                    toBlock.add(new Occupation(N2, N2.TopNodeId));
+                    toBlock.add(new Occupation(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
                     int iSumDistance = distanceFromTrainToNextNode.get();
                     iSumDistance += Math.floor(E.dTopLength);
                     distanceFromTrainToNextNode.set(iSumDistance);
                 }
                 if(EndElement.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
                     TopologyGraph.Node NC = (TopologyGraph.Node) EndElement.getValue();
-                    toBlock.add(new BlockedArea(NC, NC.TopNodeId));
+                    toBlock.add(new Occupation(NC, NC.TopNodeId));
                 } else if(EndElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                     if (StartElement.getValue().equals(EndElement.getValue())) {
                         // Es handelt sich um nur ein Gleisabschnitt ohne Topologischen Knoten
@@ -265,10 +265,10 @@ public class SafetyLogic {
                         bMovesToB = Ed.A.equals(N);
                         if (bMovesToB) {
 
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, 0,
+                            toBlock.add(new Occupation(Ed, Q_SCALE_1M, 0,
                                     Q_SCALE_1M, (int) dDistanceFromRecentNode));
                         } else {
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
+                            toBlock.add(new Occupation(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
                                     (int) Math.ceil(Ed.dTopLength)));
                         }
                     }
@@ -276,9 +276,9 @@ public class SafetyLogic {
                 // TODO PositionData usage
                 toBlock = calcCrossoverSignals(toBlock);
 
-                List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
-                for(BlockedArea ThisArea : toBlock)
-                for(BlockedArea OtherArea: blockedAreas) {
+                List<Occupation> occupations = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
+                for(Occupation ThisArea : toBlock)
+                for(Occupation OtherArea: occupations) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
 
                         return false;
@@ -307,11 +307,11 @@ public class SafetyLogic {
      * Berechnet Grenzzeichen, falls ein Zug sich im Grenzzeichen befindet.
      * @param toBlock - alle bisherigen Blockaden
      */
-    private ArrayList<BlockedArea> calcCrossoverSignals(List<BlockedArea> toBlock) {
-        ArrayList<BlockedArea> crossoverAreas = new ArrayList<>(toBlock);
-        for(BlockedArea BA : toBlock) {
-            ArrayList<BlockedArea> limitAreas = BA.getListOfEdgeLimits();
-            for(BlockedArea L_BA : limitAreas) {
+    private ArrayList<Occupation> calcCrossoverSignals(List<Occupation> toBlock) {
+        ArrayList<Occupation> crossoverAreas = new ArrayList<>(toBlock);
+        for(Occupation BA : toBlock) {
+            ArrayList<Occupation> limitAreas = BA.getListOfEdgeLimits();
+            for(Occupation L_BA : limitAreas) {
                 if(!crossoverAreas.contains(L_BA)) crossoverAreas.add(L_BA);
             }
         }
@@ -331,15 +331,15 @@ public class SafetyLogic {
     }
 */
 
-    private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirLrbg, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+    private Occupation handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirLrbg, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
         int iTrainId = tm.iTrainId;
 
 
-        BlockedArea StartArea = null;
+        Occupation StartArea = null;
         Route.TrackElementType TET = (Route.TrackElementType) startElement.getKey();
         if (TET.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
             TopologyGraph.Node N = (TopologyGraph.Node) startElement.getValue();
-            StartArea = new BlockedArea(N, N.TopNodeId);
+            StartArea = new Occupation(N, N.TopNodeId);
             return StartArea;
         } else if (TET.equals(Route.TrackElementType.RAIL_TYPE)) {
             //TODO Check if Train is standing on trail still
@@ -392,12 +392,12 @@ public class SafetyLogic {
                     if(distanceToA2 > dCurrentTrackLength) distanceToA2 = dCurrentTrackLength;
                 }
                 distanceFromTrainToNextNode.set((int) Math.floor(distanceToA2 - distanceToA1) + 1);
-                StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                StartArea = new Occupation((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                         Q_SCALE_1M, (int) Math.ceil(distanceToA2));
             }
         }
-        List<BlockedArea> blockList = getAllAreaNotBlockedByOwn(iTrainId);
-        for(BlockedArea OtherArea: blockList) {
+        List<Occupation> blockList = getAllAreaNotBlockedByOwn(iTrainId);
+        for(Occupation OtherArea: blockList) {
             if(StartArea.compareIfIntersection(OtherArea)) {
                 // has intersection so SL reject
                 return null;
@@ -410,10 +410,10 @@ public class SafetyLogic {
 
 
     @NotNull
-    private BlockedArea handleMoveToA(TrainModel tm, BigDecimal dMaTrackLength, TopologyGraph.Edge startEL) {
+    private Occupation handleMoveToA(TrainModel tm, BigDecimal dMaTrackLength, TopologyGraph.Edge startEL) {
         double distanceToA2;
         double distanceToA1;
-        BlockedArea StartArea;
+        Occupation StartArea;
         distanceToA2 = tm.getdDistanceToNodeRunningTo();
         distanceToA1 = distanceToA2 - dMaTrackLength.doubleValue();
         if(distanceToA1 < 0) distanceToA1 = 0;
@@ -421,16 +421,16 @@ public class SafetyLogic {
         distanceToA2 = distanceToA2 + tm.length;
         if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+        StartArea = new Occupation(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
     }
 
     @NotNull
-    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, BigDecimal dMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+    private Occupation handleMovingToB(TrainModel tm, int iQ_scale, BigDecimal dMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
         double distanceToA2;
         double distanceToA1;
-        BlockedArea StartArea;
+        Occupation StartArea;
         //double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iMaTrackLength, dDistanceBaliseFromA, true);
         distanceToA1 = startEdge.dTopLength - tm.getdDistanceToNodeRunningTo();
         distanceToA2 = distanceToA1 + dMaTrackLength.doubleValue();
@@ -438,7 +438,7 @@ public class SafetyLogic {
         distanceToA1 = distanceToA1 - tm.length;
         if(distanceToA1 < 0) distanceToA1 = 0;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+        StartArea = new Occupation(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
     }
@@ -516,7 +516,7 @@ public class SafetyLogic {
 
     @Deprecated
     private synchronized void blockLastPositionReports(int iTrainId) {
-        List<BlockedArea> blockedAreasById = blockList.getModel(iTrainId);
+        List<Occupation> blockedAreasById = blockList.getModel(iTrainId);
         CircularFifoBuffer lastPositions = positionHistory.getModel(iTrainId);
         if(lastPositions == null) return;
         List<PositionInfo> lastInfo = new ArrayList<PositionInfo>(lastPositions).subList(0,10);
@@ -529,7 +529,7 @@ public class SafetyLogic {
             if(B == null) continue;
             CTOPKante BaliseEdge = B.getTopPositionOfDataPoint();
             TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(BaliseEdge.getIdentitaet().getWert());
-            BlockedArea BA = new BlockedArea(E, Q_SCALE_1M, 0, Q_SCALE_1M, 0);
+            Occupation BA = new Occupation(E, Q_SCALE_1M, 0, Q_SCALE_1M, 0);
             blockedAreasById.add(BA);
         }
         blockList.update(iTrainId, blockedAreasById);
@@ -988,8 +988,8 @@ public class SafetyLogic {
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
         String checkSid = cdc.sId;
-        for(List<BlockedArea> l :this.blockList.getAll()) {
-            for(BlockedArea BA : l) {
+        for(List<Occupation> l :this.blockList.getAll()) {
+            for(Occupation BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
                     sendResponseDbdCommandToTms(false, cdc.sCrossoverEbdName, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;

@@ -3,6 +3,9 @@ package de.ibw.tms.ma.positioned.elements;
 import de.ibw.tms.etcs.M_AXLELOADCAT;
 import de.ibw.tms.etcs.Q_FRONT;
 import de.ibw.tms.etcs.V_AXLELOAD;
+import de.ibw.tms.ma.AxleLoadSpeedProfile;
+
+import java.util.List;
 
 public class AxleLoadSpeedSegment extends LinearContiguousTrackArea {
     public static final String CLASS_IDENTIFIER = "Axle_Load_Speed_Segment";
@@ -12,6 +15,8 @@ public class AxleLoadSpeedSegment extends LinearContiguousTrackArea {
     private V_AXLELOAD v_axleload;
     private AxleLoadSpeedChange LoadChangeA;
     private AxleLoadSpeedChange LoadChangeB;
+    private List<AxleLoadSpeedProfile> profileList;
+
 
     public AxleLoadSpeedSegment() {
         super(CLASS_IDENTIFIER);
@@ -55,5 +60,13 @@ public class AxleLoadSpeedSegment extends LinearContiguousTrackArea {
 
     public void setLoadChangeB(AxleLoadSpeedChange loadChangeB) {
         LoadChangeB = loadChangeB;
+    }
+
+    public List<AxleLoadSpeedProfile> getProfileList() {
+        return profileList;
+    }
+
+    public void setProfileList(List<AxleLoadSpeedProfile> profileList) {
+        this.profileList = profileList;
     }
 }

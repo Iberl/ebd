@@ -1,10 +1,9 @@
 package de.ibw.history;
 
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
 import ebd.rbc_tms.util.PositionInfo;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
  * @version 0.4
  * @since 2020-09-30
  */
-public class PositionData extends ArrayList<BlockedArea> implements List<BlockedArea> {
+public class PositionData extends ArrayList<Occupation> implements List<Occupation> {
     /** Timestamp Of Message Creation */
     private long rbc_timestamp;
 

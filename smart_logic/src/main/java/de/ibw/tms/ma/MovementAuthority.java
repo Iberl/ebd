@@ -1,8 +1,11 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.flanking.FlankArea;
+import de.ibw.tms.ma.occupation.MAOccupation;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class MovementAuthority implements Serializable {
         @Expose
@@ -13,6 +16,34 @@ public class MovementAuthority implements Serializable {
         public SSP speedProfile;
         private GradientProfile gradientProfile;
         private TrainMovement trainMovement;
+
+        private List<MASection> sections;
+        private AxleLoadSpeedProfile AxleLoadProfile;
+        private ModeChangeProfile ModeChanges;
+        private RouteSuitabilityData RS;
+        private List<MAOccupation> maOccupationList;
+        private FlankArea FlArea;
+
+
+
+        public MovementAuthority() {
+        }
+
+        public MovementAuthority(EoA endOfAuthority, SvL superviesedLocation, SSP speedProfile,
+                                 GradientProfile gradientProfile, List<MASection> sections,
+                                 AxleLoadSpeedProfile axleLoadProfile, ModeChangeProfile modeChanges,
+                                 RouteSuitabilityData RS, List<MAOccupation> maOccupationList, FlankArea flArea) {
+                this.endOfAuthority = endOfAuthority;
+                this.superviesedLocation = superviesedLocation;
+                this.speedProfile = speedProfile;
+                this.gradientProfile = gradientProfile;
+                this.sections = sections;
+                AxleLoadProfile = axleLoadProfile;
+                ModeChanges = modeChanges;
+                this.RS = RS;
+                this.maOccupationList = maOccupationList;
+                FlArea = flArea;
+        }
 
         public EoA getEndOfAuthority() {
                 return endOfAuthority;

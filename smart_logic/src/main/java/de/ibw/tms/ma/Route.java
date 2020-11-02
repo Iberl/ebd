@@ -1,11 +1,13 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
+import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.trackplan.controller.TrackController;
@@ -20,22 +22,52 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Route implements Cloneable, Serializable {
+public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
+    public static final String CLASS_IDENTIFIER = "Route";
 
+    private List<RouteSection> sections;
+    private LinearLocation location = new LinearLocation(null,null,null);
 
+    private List<Waypoint> waypointsList = new ArrayList<Waypoint>();
+
+    public Route(List<RouteSection> sectionList) {
+        super(CLASS_IDENTIFIER);
+        this.sections = sectionList;
+    }
 
     public enum TrackElementType {
         RAIL_TYPE, CROSSOVER_TYPE
     }
 
-    private LinearLocation location = new LinearLocation(null,null,null);
 
-    private List<Waypoint> waypointsList = new ArrayList<Waypoint>();
     @Expose
     private List<String> elementListIds = new ArrayList<>();
     @Expose
     private List<TrackElementType> elemetTypes = new ArrayList<>();
 
+    public List<RouteSection> getSections() {
+        return sections;
+    }
+
+    public void setSections(List<RouteSection> sections) {
+        this.sections = sections;
+    }
+
+    public void setLocation(LinearLocation location) {
+        this.location = location;
+    }
+
+    public void setWaypointsList(List<Waypoint> waypointsList) {
+        this.waypointsList = waypointsList;
+    }
+
+    public void setElementListIds(List<String> elementListIds) {
+        this.elementListIds = elementListIds;
+    }
+
+    public void setElemetTypes(List<TrackElementType> elemetTypes) {
+        this.elemetTypes = elemetTypes;
+    }
 
     public List<String> getElementListIds() {
         return elementListIds;

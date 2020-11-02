@@ -14,6 +14,7 @@ import java.io.Serializable;
 })
 public class Overlap implements Serializable {
     private EoA eoa;
+    private SvL svl;
 
     @Override
     public String toString() {
@@ -40,4 +41,11 @@ public class Overlap implements Serializable {
     @Expose
     public ETCS_SPEED v_RELEASEOL;
 
+    public SvL getSvl() {
+        return svl;
+    }
+
+    public void setSvl(SvL svl) {
+        this.svl = svl;
+    }
 }

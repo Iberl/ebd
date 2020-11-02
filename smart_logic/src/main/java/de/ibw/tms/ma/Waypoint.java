@@ -1,24 +1,30 @@
 package de.ibw.tms.ma;
 
+import de.ibw.tms.ma.physical.MovableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
+import de.ibw.tms.ma.positioned.elements.SpotElement;
 
 import java.io.Serializable;
+import java.util.List;
 
-public class Waypoint implements Serializable {
+public class Waypoint extends SpotElement implements Serializable {
+    public static final String CLASS_IDENTIFIER = "Waypoint";
 
-    private Movea TrackElement;
-    private TrackElementStatus ElementStatus;
 
-    public PositioningNetElement getTrackElement() {
+    private MovableTrackElement TrackElement;
+    private List<TrackElementStatus> ElementStatus;
+
+    public MovableTrackElement getTrackElement() {
         return TrackElement;
     }
 
-    public TrackElementStatus getElementStatus() {
+    public List<TrackElementStatus> getElementStatus() {
         return ElementStatus;
     }
 
-    public Waypoint(PositioningNetElement trackElement, TrackElementStatus elementStatus) {
+    public Waypoint(MovableTrackElement trackElement, List<TrackElementStatus> elementStatus) {
+        super(CLASS_IDENTIFIER);
         TrackElement = trackElement;
         ElementStatus = elementStatus;
     }

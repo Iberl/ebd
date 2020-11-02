@@ -1,13 +1,12 @@
-package de.ibw.smart.logic.datatypes;
+package de.ibw.tms.ma.occupation;
 
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.signale._1_9_0.CSignal;
 
-import javax.print.attribute.standard.MediaSize;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -17,22 +16,24 @@ import java.util.Objects;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-17
+ * @since 2020-10-30
  */
-public class BlockedArea {
+public class Occupation extends TrackArea {
+    public static final String CLASS_IDENTIFIER = "Occupation";
+
 
     /**
      * Checkt diese Area (zum Beispiel als eine Balise mit Datenpunktbereich) ob sie sich im Grenzbereich einer Weiche sich befindet
      * @return ArrayList - Liste von Grenzbereichbetretungen - meist nur 0 oder 1 Elemente
      */
-    public ArrayList<BlockedArea> getListOfEdgeLimits() {
-        ArrayList<BlockedArea> resultArea = new ArrayList<>();
+    public ArrayList<Occupation> getListOfEdgeLimits() {
+        ArrayList<Occupation> resultArea = new ArrayList<>();
         if(Edge == null) return resultArea;
         if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.A, true)) {
-            resultArea.add(new BlockedArea(Edge.A, Edge.A.TopNodeId));
+            resultArea.add(new Occupation(Edge.A, Edge.A.TopNodeId));
         }
         if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.B, false)) {
-            resultArea.add(new BlockedArea(Edge.B, Edge.B.TopNodeId));
+            resultArea.add(new Occupation(Edge.B, Edge.B.TopNodeId));
         }
         return resultArea;
     }
@@ -88,6 +89,14 @@ public class BlockedArea {
      */
     private int d_from_PointA_of_GeoEdge_to_BlockEndMa;
 
+    public Occupation(String sName) {
+        super(sName);
+
+    }
+
+
+
+
     /**
      * Dieser Konstruktor instanziiiert eine Sperrzone auf einer Kante E von einem Startpunkt bis zu einem Endpunkt
      * @param E Edge beeing blocked
@@ -96,8 +105,8 @@ public class BlockedArea {
      * @param End_Ma - Q_Scale End
      * @param d_A_to_Block_End - Distence to Ma- or Block-End
      */
-    public BlockedArea(TopologyGraph.Edge E, BLOCK_Q_SCALE Start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE End_Ma,
-                       int d_A_to_Block_End) {
+    public Occupation(TopologyGraph.Edge E, BLOCK_Q_SCALE Start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE End_Ma,
+                      int d_A_to_Block_End) {
         this.Edge = E;
         this.q_scale_block_To_StartMa = Start_Ma;
         this.d_from_PointA_of_GeoEdge_to_BlockStartMa = d_A_to_Block_Start;
@@ -109,7 +118,7 @@ public class BlockedArea {
      * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
      * @param Element beeing Blocked
      */
-    public BlockedArea(Pos Element, String sId) {
+    public Occupation(Pos Element, String sId) {
         this.BlockedElement = Element;
         this.sIdOfElement = sId;
     }
@@ -126,10 +135,10 @@ public class BlockedArea {
 
     /**
      * Vergleicht gefahren Punkte zweier BlockedAreas
-     * @param OtherArea {@link BlockedArea} Vergleichsobjekt
+     * @param OtherArea {@link Occupation} Vergleichsobjekt
      * @return boolean - gibt an ob Gefahrenpunkte bestehen
      */
-    public boolean compareIfIntersection(BlockedArea OtherArea) {
+    public boolean compareIfIntersection(Occupation OtherArea) {
         boolean hasSameType = check4BeeingSameTrackElementType(OtherArea);
         if(!hasSameType)  return handleNotHavingSameType(OtherArea);
         else {
@@ -150,8 +159,8 @@ public class BlockedArea {
         }
     }
 
-    private boolean handleNotHavingSameType(BlockedArea otherArea) {
-        BlockedArea EdgeArea = null;
+    private boolean handleNotHavingSameType(Occupation otherArea) {
+        Occupation EdgeArea = null;
         TopologyGraph.Edge E = null;
         TopologyGraph.Node N = null;
         if(this.Edge == null) {
@@ -178,13 +187,13 @@ public class BlockedArea {
 
     /**
      * Pr&uuml;ft ob die Straße zu einem Grenzsignal einer Weiche reicht
-     * @param edgeArea {@link BlockedArea} - der blockierte Bereich
+     * @param edgeArea {@link Occupation} - der blockierte Bereich
      * @param e TopologyGraph.Edge - die Kante selbst
      * @param n TopologyGraph.Node - der Knoten der auf ein Grenzsignal gepr&uuml;ft wird
      * @param checkIfConnectedByA - Boolean, ob a oder b geprüft wird
      * @return boolean ob ein Grenzsignalbereich betreten wird
      */
-    private boolean checkIfBlockedAreaReachingToCrossoverLimits(BlockedArea edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
+    private boolean checkIfBlockedAreaReachingToCrossoverLimits(Occupation edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
         CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
         if(CS == null) return false;
 
@@ -192,7 +201,7 @@ public class BlockedArea {
         BigDecimal dSigDistanceToA;
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
             if(CTopKante.getIDTOPKante().getWert().equals(e.sId)) {
-                BlockedArea BA = CS.getInsecureAreAtGivenEdge(e);
+                Occupation BA = CS.getInsecureAreAtGivenEdge(e);
 
 
                 if(BA.compareIfIntersection(edgeArea)) return true;
@@ -208,10 +217,10 @@ public class BlockedArea {
 
     }
 
-    private boolean intersects(BlockedArea blockedArea, BlockedArea otherArea) {
+    private boolean intersects(Occupation occupation, Occupation otherArea) {
 
-        int iStart1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, blockedArea.q_scale_block_To_StartMa.getiScaleValue()-1));
-        int iEnd1 = (int) (blockedArea.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, blockedArea.q_scale_block_To_EndMa.getiScaleValue()-1) );
+        int iStart1 = (int) (occupation.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, occupation.q_scale_block_To_StartMa.getiScaleValue()-1));
+        int iEnd1 = (int) (occupation.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, occupation.q_scale_block_To_EndMa.getiScaleValue()-1) );
         int iStart2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, otherArea.q_scale_block_To_StartMa.getiScaleValue()-1));
         int iEnd2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, otherArea.q_scale_block_To_EndMa.getiScaleValue()-1));
 
@@ -227,7 +236,7 @@ public class BlockedArea {
 
     }
 
-    private boolean check4BeeingSameTrackElementType(BlockedArea otherArea) {
+    private boolean check4BeeingSameTrackElementType(Occupation otherArea) {
         if(this.Edge == null && otherArea.Edge != null) return false;
         if(otherArea != null && otherArea.Edge == null) return false;
         return true;
@@ -239,7 +248,7 @@ public class BlockedArea {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BlockedArea that = (BlockedArea) o;
+        Occupation that = (Occupation) o;
         return d_from_PointA_of_GeoEdge_to_BlockStartMa == that.d_from_PointA_of_GeoEdge_to_BlockStartMa &&
                 d_from_PointA_of_GeoEdge_to_BlockEndMa == that.d_from_PointA_of_GeoEdge_to_BlockEndMa &&
                 Objects.equals(sIdOfElement, that.sIdOfElement) &&

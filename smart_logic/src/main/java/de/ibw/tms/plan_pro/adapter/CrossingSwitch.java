@@ -1,6 +1,6 @@
 package de.ibw.tms.plan_pro.adapter;
 
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
@@ -118,20 +118,20 @@ public class CrossingSwitch implements ICompareTrackMeter {
      * @param E - Grenzbereich wird zu Topologischen Kante E widergegeben
      * @return BlockedArea - Grenzbereich als Blockierter Abschnitt
      */
-    public BlockedArea getInsecureAreAtGivenEdge(TopologyGraph.Edge E) {
+    public Occupation getInsecureAreAtGivenEdge(TopologyGraph.Edge E) {
         CSignal Sig = this.getSignal();
         BigDecimal dSigDistanceToA;
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
             if (CTopKante.getIDTOPKante().getWert().equals(E.sId)) {
                 dSigDistanceToA = CTopKante.getAbstand().getWert();
 
-                BlockedArea BA;
+                Occupation BA;
                 if (checkIfConnectedByA(E)) {
-                    BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0,
-                            BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue());
+                    BA = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, 0,
+                            Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue());
                 } else {
-                    BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
-                            BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
+                    BA = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
+                            Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
                 }
                 return BA;
             }
