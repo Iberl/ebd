@@ -8,7 +8,7 @@ import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.SpeedProfile;
 import org.apache.commons.lang3.tuple.Pair;

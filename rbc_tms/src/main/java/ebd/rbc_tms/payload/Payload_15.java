@@ -2,7 +2,7 @@ package ebd.rbc_tms.payload;
 
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.Constants;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
 
