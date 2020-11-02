@@ -380,14 +380,17 @@ public class DrivingDynamics {
                 if (this.currentSil == SpeedInterventionLevel.INDICATION) {
                     if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
                         sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
-                        calculateModifier();
                         return new AccelerationAction(this.localEventBus, 1);
                     }
                     if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
                         sendToLogEventSpeedSupervision(MovementState.CRUISE);
-                        calculateModifier();
                         return new CruiseAction(this.localEventBus);
-                    } else {
+                    }
+                    else if(this.breakModifierForRSM == 0){
+                        sendToLogEventSpeedSupervision(MovementState.CRUISE);
+                        return new CruiseAction(this.localEventBus);
+                    }
+                    else {
                         sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
                         return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
                     }
@@ -544,7 +547,7 @@ public class DrivingDynamics {
         this.actionList.remove(0);
         this.actionList.add(action);
 
-        Action tempAction = getActionFromActionList();
+        Action tempAction = action;//getActionFromActionList();
 
         if (tempAction instanceof AccelerationAction) {
             this.dynamicState.setMovementState(MovementState.ACCELERATING);

@@ -55,35 +55,30 @@ public class AvailableAcceleration {
      */
     public double getAcceleration(double currentSpeed, double tripDistance, MovementState movementState)
                         throws IllegalArgumentException {
+        //If positiv, trackDeceleration slows the train down. If negativ, speeds it up.
+        double trackDeceleration = resistanceCurve.getPointOnCurve(currentSpeed) + accGradientProfile.getPointOnCurve(tripDistance);
         switch (movementState){
-            case UNCHANGED:
-            case HALTING:
-            case CRUISE:
-                return 0d; //TODO Check if 0 is possible
-            case ACCELERATING:
-                double acceleration = speedUpCurve.getPointOnCurve(currentSpeed) * accelerationModification;
-                acceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                acceleration -= accGradientProfile.getPointOnCurve(tripDistance);
-                return acceleration;
-            case NORMAL_BREAKING:
-                double normalDeceleration = - normalBreakingCurve.getPointOnCurve(currentSpeed) * breakingModification;
-                normalDeceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                normalDeceleration -= accGradientProfile.getPointOnCurve(tripDistance);
-                return  normalDeceleration;
-            case SERVICE_BREAKING:
-                double serviceDeceleration = - serviceBreakingCurve.getPointOnCurve(currentSpeed) * breakingModification;
-                serviceDeceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                serviceDeceleration -= accGradientProfile.getPointOnCurve(tripDistance);
-                return  serviceDeceleration;
-            case EMERGENCY_BREAKING:
-                double emergencyDeceleration = - emergencyBreakingCurve.getPointOnCurve(currentSpeed);
-                emergencyDeceleration += resistanceCurve.getPointOnCurve(currentSpeed);
-                emergencyDeceleration -= accGradientProfile.getPointOnCurve(tripDistance);
-                return  emergencyDeceleration;
-            case COASTING:
-                return resistanceCurve.getPointOnCurve(currentSpeed) - accGradientProfile.getPointOnCurve(tripDistance);
-            default:
-                throw new IllegalArgumentException("This MovementState was not caught by AvailableAcceleration");
+            case HALTING -> {
+                if(currentSpeed == 0) return 0; //The trains was able to stop, so it will be able to stand still.
+
+                double maxAcc = getMaxAcc(currentSpeed, MovementState.SERVICE_BREAKING);
+                if(trackDeceleration < 0 && maxAcc > trackDeceleration) {
+                    System.out.println("Couldn't break, gradient was to big"); //Train can not stand still
+                    return getTimeBasedAcc(currentSpeed,MovementState.SERVICE_BREAKING) - trackDeceleration;
+                }
+                else {
+                    //Train can halt, breaking in progress
+                    return getTimeBasedAcc(currentSpeed, MovementState.SERVICE_BREAKING);
+                }
+            }
+            case CRUISE -> {
+                double maxAcc = getMaxAcc(currentSpeed, MovementState.ACCELERATING);
+                if(maxAcc > trackDeceleration) return getTimeBasedAcc(currentSpeed, movementState);
+                else return getTimeBasedAcc(currentSpeed,movementState) - trackDeceleration;
+            }
+            default -> {
+                return getTimeBasedAcc(currentSpeed,movementState) - trackDeceleration;
+            }
         }
     }
 
@@ -103,63 +98,92 @@ public class AvailableAcceleration {
     /**
      * Calculates the current available acceleration based on the time since last change of the movement state and the
      * riseTimes and fallTimes set in the ConfigHandler, with the maximal value given by the current available power and
-     * the modification value.
+     * the modification value.<br>
+     *     To archive this for different MovementStates, there are two phases of transitioning.
+     *     First the power of the current MovementState is reduced, until it reaches 0 (phase one). Then the MovementState is switched
+     *     to the new MovementState and the power is increased until full power is archived (phase two).<br>
+     * For simplicity, it is assumed that the power rises and falls linear through the rise and fall times.
      * @param currentSpeed current Speed
      * @param movementState current
      * @return Acceleration in m/s^2
      */
     private double getTimeBasedAcc(double currentSpeed, MovementState movementState){
+
         double timeSinceChange = System.currentTimeMillis() - this.timeAtLastChange;
 
-        double curAcc = switch (this.curMoveState){
+        double curAcc = getMaxAcc(currentSpeed, this.curMoveState);
+
+        double curModification = switch (this.curMoveState){
+            case ACCELERATING -> this.accelerationModification;
+            case NORMAL_BREAKING, SERVICE_BREAKING, EMERGENCY_BREAKING -> this.breakingModification;
+            default -> 1;
+        };
+
+        if(this.awaitedMoveState != movementState && movementState != MovementState.UNCHANGED) {
+            //Detecting a switch in requested movement, starting transition phase one
+            this.timeAtLastChange = System.currentTimeMillis();
+            this.awaitedMoveState = movementState;
+
+            double timeToChange = switch (this.awaitedMoveState){
+                case ACCELERATING -> ch.accFallTime;
+                case NORMAL_BREAKING, SERVICE_BREAKING -> ch.breakFallTime;
+                case EMERGENCY_BREAKING -> ch.emBreakFallTime;
+                default -> 0;
+            };
+            /*
+             timeMod is the percentage of the completion of the last change. If the last change was only half completed,
+             it should only take half the time to change it again. This is a reasonable simplification.
+            */
+            double timeMod = this.curTimeToChange == 0 ? 0 : Math.min(timeSinceChange / this.curTimeToChange, 1);
+            /*
+             curTimeToChange is the time we need to for phase one. The full time needed for a change
+             from full power to 0 power has to be modified, because we could either not have completed a previous
+             transition phase or we do not use full power.
+             */
+            this.curTimeToChange = Math.min(timeToChange * timeMod, timeToChange * curModification);
+
+            timeSinceChange = 0;
+        }
+
+        System.out.println("awaitedMoveState: " + this.awaitedMoveState);
+        System.out.println("curMoveState: " + this.curMoveState);
+
+        if(timeSinceChange >= this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
+            //MovementState has been transitioned to full power, phase two is complete
+            return curAcc * curModification;
+        }
+        else if(timeSinceChange >= this.curTimeToChange && this.curMoveState != this.awaitedMoveState){
+            //Transition from current MovementState to awaited MovementState has been reached, starting phase two
+            this.curMoveState = this.awaitedMoveState;
+            this.timeAtLastChange = System.currentTimeMillis();
+            this.curTimeToChange = switch (this.awaitedMoveState){
+                case ACCELERATING -> ch.accRiseTime;
+                case NORMAL_BREAKING, SERVICE_BREAKING -> ch.breakRiseTime;
+                case EMERGENCY_BREAKING -> ch.emBreakRiseTime;
+                default -> 0;
+            };
+            return 0;
+        }
+        else if(timeSinceChange < this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
+            //Operating in phase two.
+            double timeBasedMod = (this.curTimeToChange == 0) ? 1 : Math.min(timeSinceChange / this.curTimeToChange, 1);
+            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
+        }
+        else {
+            //Operating in phase one.
+            double timeBasedMod = (this.curTimeToChange == 0) ? 0 : Math.min(1 - (timeSinceChange / this.curTimeToChange), 0);
+            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
+        }
+    }
+
+    private double getMaxAcc(double currentSpeed, MovementState ms){
+        return switch (ms){
             case ACCELERATING -> speedUpCurve.getPointOnCurve(currentSpeed);
             case NORMAL_BREAKING -> -normalBreakingCurve.getPointOnCurve(currentSpeed);
             case SERVICE_BREAKING -> -serviceBreakingCurve.getPointOnCurve(currentSpeed);
             case EMERGENCY_BREAKING -> -emergencyBreakingCurve.getPointOnCurve(currentSpeed);
             default -> 0;
         };
-
-        double curModification = switch (this.curMoveState){
-            case ACCELERATING -> this.accelerationModification;
-            default -> this.breakingModification;
-        };
-
-        if(this.awaitedMoveState != movementState) {//Detecting a switch in requested movement
-            this.timeAtLastChange = System.currentTimeMillis();
-            this.awaitedMoveState = movementState;
-
-            double timeToChange = switch (this.awaitedMoveState){
-                case ACCELERATING -> ch.accFallTime;
-                case NORMAL_BREAKING, SERVICE_BREAKING, EMERGENCY_BREAKING -> ch.breakFallTime;
-                default -> 0;
-            };
-            double timeMod = this.curTimeToChange == 0 ? 0 : Math.min(timeSinceChange / this.curTimeToChange, 1);
-            this.curTimeToChange = timeToChange * timeMod * curModification;
-
-            timeSinceChange = 0;
-        }
-
-        if(timeSinceChange >= this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
-            return curAcc * curModification;
-        }
-        else if(timeSinceChange >= this.curTimeToChange && this.curMoveState != this.awaitedMoveState){
-            this.curMoveState = this.awaitedMoveState;
-            this.timeAtLastChange = System.currentTimeMillis();
-            this.curTimeToChange = switch (this.awaitedMoveState){
-                case ACCELERATING -> ch.accRiseTime;
-                case NORMAL_BREAKING, SERVICE_BREAKING, EMERGENCY_BREAKING -> ch.breakRiseTime;
-                default -> 0;
-            };
-            return 0;
-        }
-        else if(timeSinceChange < this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
-            double timeBasedMod = (this.curTimeToChange == 0) ? 1 : Math.min(timeSinceChange / this.curTimeToChange, 1);
-            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
-        }
-        else {
-            double timeBasedMod = (this.curTimeToChange == 0) ? 0 : Math.min(1 - (timeSinceChange / this.curTimeToChange), 0);
-            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
-        }
     }
 
     /*
@@ -179,7 +203,7 @@ public class AvailableAcceleration {
      */
 
     public void setAccelerationModification(double accelerationModification) {
-        this.accelerationModification = accelerationModification;
+        if(accelerationModification > 0) this.accelerationModification = accelerationModification;
     }
 
     public void setBreakingModification(double breakingModification) {

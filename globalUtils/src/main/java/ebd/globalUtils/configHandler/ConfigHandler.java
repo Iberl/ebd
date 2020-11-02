@@ -272,17 +272,17 @@ public class ConfigHandler {
     /**
      * Rise time for acceleration in [s]
      */
-    public double accRiseTime = 2;
+    public double accRiseTime = 30;
 
     /**
      * Fall time for acceleration in [s]
      */
-    public double accFallTime = 0.1;
+    public double accFallTime = 1;
 
     /**
      * Rise time for deceleration in [s]
      */
-    public double breakRiseTime = 5;
+    public double breakRiseTime = 30;
 
     /**
      * Fall time for deceleration in [s]
