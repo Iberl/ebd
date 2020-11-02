@@ -34,7 +34,7 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
 
-import static ebd.rbc_tms.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.*;
 
 /**
  * Diese Komponente implementiert, was das TMS bei eingehenden PositionReports unternimmt.

@@ -18,6 +18,7 @@ import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.ModeProfile.Mode;
 import ebd.rbc_tms.util.exception.MissingInformationException;
