@@ -245,6 +245,10 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
      * @throws MissingInformationException - Fehler
      */
     public void sendCommand(TmsMessage TmsCmd) throws MissingInformationException {
-        this.tmsCommandQueue.offer(TmsCmd.parseToJson());
+        try {
+            this.tmsCommandQueue.put(TmsCmd.parseToJson());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

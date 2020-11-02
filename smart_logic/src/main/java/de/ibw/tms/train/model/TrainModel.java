@@ -103,6 +103,11 @@ public class TrainModel {
         } else this.sNodeIdTrainRunningTo = null;
     }
 
+    public void unsetPassedElements() {
+        this.passedTopologicalElements = new ArrayList<>();
+    }
+
+
     /**
      * Unused
      * Misst Geschwindigkeit an Punkt
@@ -205,6 +210,10 @@ public class TrainModel {
 
     public String getsNodeIdTrainRunningTo() {
         return sNodeIdTrainRunningTo;
+    }
+
+    public void setsNodeIdTrainRunningTo(String sNodeIdTrainRunningTo) {
+        this.sNodeIdTrainRunningTo = sNodeIdTrainRunningTo;
     }
 
     private double dDistanceToNodeRunningTo;

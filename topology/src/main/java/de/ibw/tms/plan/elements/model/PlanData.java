@@ -311,8 +311,8 @@ public class PlanData {
             if(planProEdges.size() < 2) continue;
             sEdgeId1 = planProEdges.get(0).getIDTOPKante().getWert();
             sEdgeId2 = planProEdges.get(1).getIDTOPKante().getWert();
-            E1 = topGraph.EdgeRepo.get(sEdgeId1);
-            E2 = topGraph.EdgeRepo.get(sEdgeId2);
+            E1 = topGraph.edgeRepo.get(sEdgeId1);
+            E2 = topGraph.edgeRepo.get(sEdgeId2);
             if(E1 == null || E2 == null) continue;
             TopologyGraph.Node N = null;
             if(E2.A.equals(E1.A) || E2.B.equals(E1.A)) {

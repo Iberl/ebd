@@ -158,7 +158,7 @@ public class TopologyFactory implements ITopologyFactory {
 
 
             TopologyGraph.Edge tgEdge = new TopologyGraph.Edge(A,tcA,B,tcB, Edge);
-            TG.EdgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
+            TG.edgeRepo.put(Edge.getIdentitaet().getWert(),tgEdge);
 
 
 
@@ -179,7 +179,7 @@ public class TopologyFactory implements ITopologyFactory {
         fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
 
         // iterate over edges
-        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.EdgeRepo.values());
+        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.edgeRepo.values());
 
 
 
@@ -316,7 +316,7 @@ public class TopologyFactory implements ITopologyFactory {
             GeometricCoordinate Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
             GeometricCoordinate Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
-            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(TopKante.getIdentitaet().getWert());
+            TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(TopKante.getIdentitaet().getWert());
 
 
             GeometricCoordinate geoCoordinate;

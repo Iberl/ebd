@@ -2,6 +2,7 @@ package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
 import ebd.ConfigHandler;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.message.Message_00;

@@ -25,26 +25,14 @@ import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import info.dornbach.dbdclient.DBDClient;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
-import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 
 import java.math.BigDecimal;
@@ -54,8 +42,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
 
 
 /**
@@ -346,7 +332,7 @@ public class SmartSafety {
             //boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
             String sIdOfEdgeOfTrain = tm.getEdgeTrainStandsOn().sId;
             String sIdStartEdgeOfMa = ((TopologyGraph.Edge)startElement.getValue()).sId;
-            TopologyGraph.Edge StartEdge = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
+            TopologyGraph.Edge StartEdge = PlanData.topGraph.edgeRepo.get(sIdOfEdgeOfTrain);
             boolean bMovesToB = calcIsMovingToB(sIdOfEdgeOfTrain, tm);
             if (!sIdOfEdgeOfTrain.equals(sIdStartEdgeOfMa)) {
 
@@ -435,7 +421,7 @@ public class SmartSafety {
     }
 
     private boolean calcIsMovingToB(String sIdOfEdgeOfTrain, TrainModel tm) {
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdOfEdgeOfTrain);
         TopologyGraph.Node N = TopologyGraph.NodeRepo.get(tm.getsNodeIdTrainRunningTo());
         if(E == null) throw new InvalidParameterException("Edge of Train not found");
         if(E.A.equals(N)) return false;
@@ -517,7 +503,7 @@ public class SmartSafety {
             Balise B = Balise.baliseByNid_bg.getModel(nid_lrbg);
             if(B == null) continue;
             CTOPKante BaliseEdge = B.getTopPositionOfDataPoint();
-            TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(BaliseEdge.getIdentitaet().getWert());
+            TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(BaliseEdge.getIdentitaet().getWert());
             BlockedArea BA = new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M, 0);
             blockedAreasById.add(BA);
         }
@@ -733,7 +719,7 @@ public class SmartSafety {
      * @return boolean
      */
     public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
-        DBDClient dbdclient = new DBDClient();
+
         return true;
     }
 

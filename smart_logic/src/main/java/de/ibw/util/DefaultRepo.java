@@ -30,6 +30,7 @@ public class DefaultRepo<K, V> {
      * @return V - Das Value-Object
      */
     public V getModel(K key) {
+        if(key == null) return null;
         return this.repo.get(key);
     }
 

@@ -5,11 +5,9 @@ import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.Logging;
-import ebd.szenario.util.server.GUIServer;
+import ebd.core.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
 
-import javax.swing.tree.ExpandVetoException;
-import java.awt.im.InputContext;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;

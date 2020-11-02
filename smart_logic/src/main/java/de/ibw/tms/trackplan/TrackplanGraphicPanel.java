@@ -181,7 +181,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setPaint(Color.gray);
         DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
-        HashMap edgeRepo = PlanData.topGraph.EdgeRepo;
+        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
             // diese Liste zeichenen

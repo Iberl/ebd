@@ -18,6 +18,7 @@ import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.ModeProfile.Mode;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -269,6 +270,13 @@ public class TrainController extends SubmissionPublisher implements IController 
             CheckMoveAuthCommand.rbc_id = sRbcId;
             CheckMoveAuthCommand.tms_id = sTmsId;
             CheckMoveAuthCommand.uuid = uuid;
+            TopologyGraph.Edge E = CheckMoveAuthCommand.MaRequest.Tm.getEdgeTrainStandsOn();
+            E.sId = E.getRefId();
+            CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
+            TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
+            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(PlanData.SwitchIdRepo.getModel(N));
+            CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
+
             TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
 

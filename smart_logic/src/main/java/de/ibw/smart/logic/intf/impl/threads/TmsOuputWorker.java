@@ -5,6 +5,8 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -29,6 +31,7 @@ public class TmsOuputWorker<T> extends Thread {
      */
     public static TmsOuputWorker<String> TmsToSmartWorker;
 
+    private ExecutorService executor = Executors.newCachedThreadPool();
     private final SynchronousQueue<T> queue;
     private final ChannelHandlerContext ctx;
 
@@ -38,8 +41,10 @@ public class TmsOuputWorker<T> extends Thread {
      * @param ctx - Kontext der Nachrichten einstellt
      */
     public TmsOuputWorker(SynchronousQueue<T> queue, ChannelHandlerContext ctx) {
+
         this.queue = queue;
         this.ctx = ctx;
+
     }
 
 

@@ -1,0 +1,188 @@
+{
+  "actions": [
+    {
+      "name": "Start_25",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 25,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": "<", "value": 5 }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 2 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_50",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 50,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">=", "value": 5 }},
+            {"type": "v", "condition": { "op": "<", "value": 10 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_75",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">=", "value": 10 }},
+            {"type": "v", "condition": { "op": "<", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Start_100",
+      "type": "v_acc",
+      "priority": 100,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type": "v", "condition": { "op": ">", "value": 20 }},
+            {"type" : "t_atHalt", "condition" : {"op" : "<", "value" : 150 }}
+          ]
+        }
+      }
+    },
+
+
+    {
+      "name": "Acc_100",
+      "type": "v_acc",
+      "priority": 60,
+      "action": {
+        "value": 100,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 85, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }},
+            {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Acc_30",
+      "type": "v_acc",
+      "priority": 60,
+      "action": {
+        "value": 30,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : ">", "value" : 95, "curveBase" : "trip" }},
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 101, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }},
+            {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Acc_75",
+      "type": "v_acc",
+      "priority": 61,
+      "action": {
+        "value": 75,
+        "conditions": {
+          "andBlock": [
+            {"type" : "v_rel", "condition" : {"op" : "<", "value" : 101, "curveBase" : "trip" }},
+            {"type" : "t_atHalt", "condition" : {"op" : ">", "value" : 150 }},
+            {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+          ]
+        }
+      }
+    },
+
+   {
+      "name": "Break_100",
+      "type": "v_break",
+      "priority": 20,
+      "action": {
+        "value": 100,
+        "mode": "s",
+        "conditions": {
+          "orBlock": [
+            {"andBlock": [
+              {"orBlock":  [
+                {"type" : "v_rel", "condition" : {"op" : ">", "value" : 107, "curveBase" : "trip" }},
+                {"type" : "sil", "condition" : {"value" : "WARNING" }}
+              ]},
+              {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+              ]
+            },
+            {"andBlock": [
+              {"type" : "v_rel", "condition" : {"op" : ">", "value" : 75, "curveBase" : "trip" }},
+              {"type" : "sss", "condition" : {"value" : "TARGET_SPEED_SUPERVISION" }}
+            ]
+            }
+          ]
+        }
+      }
+    },{
+      "name": "Break_75",
+      "type": "v_break",
+      "priority": 21,
+      "action": {
+        "value": 75,
+        "mode": "s",
+        "conditions": {
+          "orBlock": [
+            {"andBlock": [
+              {"orBlock":  [
+                {"type" : "v_rel", "condition" : {"op" : ">", "value" : 105, "curveBase" : "trip" }},
+                {"type" : "sil", "condition" : {"value" : "PERMITTED_SPEED" }}
+              ]},
+              {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+            ]
+            },
+            {"andBlock": [
+              {"type" : "v_rel", "condition" : {"op" : ">", "value" : 75, "curveBase" : "trip" }},
+              {"type" : "sss", "condition" : {"value" : "TARGET_SPEED_SUPERVISION" }}
+            ]
+            }
+          ]
+        }
+      }
+    },{
+      "name": "Break_30",
+      "type": "v_break",
+      "priority": 20,
+      "action": {
+        "value": 30,
+        "mode": "s",
+        "conditions": {
+          "orBlock": [
+            {"andBlock": [
+              {"type" : "v_rel", "condition" : {"op" : ">", "value" : 102, "curveBase" : "trip" }},
+              {"type" : "sss", "condition" : {"value" : "CEILING_SPEED_SUPERVISION" }}
+            ]
+            },
+            {"andBlock": [
+              {"type" : "v_rel", "condition" : {"op" : ">", "value" : 75, "curveBase" : "trip" }},
+              {"type" : "sss", "condition" : {"value" : "TARGET_SPEED_SUPERVISION" }}
+            ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

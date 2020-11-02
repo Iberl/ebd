@@ -3,11 +3,12 @@ package de.ibw.smart.logic.safety.self.tests;
 import de.ibw.feed.Balise;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.SpeedProfile;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,7 +48,7 @@ public class TestUtil {
      * @return Zufallsstrecke
      */
     public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
-                                 boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
+                                                                                                      boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
         SafetyLogicContinousConnectTest Submodul = new SafetyLogicContinousConnectTest();
         return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
                 TestConfig);
@@ -71,7 +72,7 @@ public class TestUtil {
     ) {
         PlanData.getInstance();
 
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdTopEdgeStandingOn);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdgeStandingOn);
         TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sidNodeRunnintTo);
         TrainModel Tm = new TrainModel();
         Tm.setNid_lrbg(TestUtil.lastRandomBalise.getHashcodeOfBaliseDp());

@@ -28,7 +28,7 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
 
-import static ebd.rbc_tms.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.*;
 
 /**
  * Diese Komponente implementiert, was das TMS bei eingehenden PositionReports unternimmt.
@@ -114,11 +114,11 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     public synchronized void servePositionReport(Payload_14 PositionReport, String sRBC) {
         boolean bSaveable = true;
         Integer iEngineId = null;
-        TrainModel Tm = null;
+        TrainModel Tm = UtilFunction.servePositionReport(PositionReport, sRBC);
 
 
-        if(UtilFunction.servePositionReport(PositionReport, sRBC) != null) {
-
+        if(Tm != null) {
+            iEngineId = PositionReport.trainInfo.nid_engine;
             TrainModel.TrainRepo.update(iEngineId, Tm);
 
             DataStore.getInstance().update(PositionReport);

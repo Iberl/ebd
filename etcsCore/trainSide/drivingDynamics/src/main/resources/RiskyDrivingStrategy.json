@@ -1,0 +1,31 @@
+{
+  "actions": [
+    {
+      "type": "v_acc", "priority" : 0,
+      "action": {
+        "value": 100,
+        "conditions": {
+          "type": "v",
+          "condition": {
+            "op": "<",
+            "value": 119
+          }
+        }
+      }
+    },
+    {
+      "type": "v_break", "priority" : 1,
+      "action": {
+        "value": 90,
+        "mode": "s",
+        "conditions": {
+          "type": "v",
+          "condition": {
+            "op": ">",
+            "value": 121
+          }
+        }
+      }
+    }
+  ]
+}

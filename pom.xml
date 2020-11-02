@@ -50,11 +50,6 @@
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
           <version>3.2.0</version>
-          <configuration>
-            <descriptors>
-              <descriptor>src/assembly/bin.xml</descriptor>
-            </descriptors>
-          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
@@ -122,14 +117,11 @@
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
-    <module>messageReceiver</module>
-    <module>messageSender</module>
     <module>smart_logic</module>
     <module>messageLibrary</module>
-    <module>trainSide</module>
-    <module>trackSide</module>
-    <module>szenario</module>
     <module>rbc_tms</module>
+    <module>etcsCore</module>
+    <module>topology</module>
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

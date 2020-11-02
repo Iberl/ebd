@@ -66,7 +66,7 @@ public class TopologyGraph {
     /**
      * HashMap die f&uuml;r die PlanPro-Kanten ID die Topologische Kante speichert
      */
-    public HashMap<String, Edge> EdgeRepo = new HashMap<>();
+    public HashMap<String, Edge> edgeRepo = new HashMap<>();
         // String is TopNode_ID
     /**
      * HashMap die f&uuml;r die PlanPro-Knoten ID einen Topologische Knoten speichert

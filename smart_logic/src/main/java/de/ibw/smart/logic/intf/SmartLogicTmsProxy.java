@@ -83,7 +83,11 @@ public class SmartLogicTmsProxy implements TmsIntf {
                 EM.log("SL Sends To TMS: " + msgFromRbc.parseToJson(), TMS_PROXY);
 
             }
-            SmartLogic.outputQueue.offer(new SmartServerMessage(msgFromRbc.parseToJson(), this.lPriority));
+            try {
+                SmartLogic.outputQueue.put(new SmartServerMessage(msgFromRbc.parseToJson(), this.lPriority));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
 
             return getResponseMessage(0, msgFromRbc, null);

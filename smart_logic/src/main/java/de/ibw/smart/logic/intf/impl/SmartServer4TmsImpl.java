@@ -139,7 +139,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
     private void sendMessageToTMS(SmartServerMessage SmartMessage) {
-        SmartLogic.outputQueue.offer(SmartMessage);
+        try {
+            SmartLogic.outputQueue.put(SmartMessage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMaResponseToTMS(MaRequestReturnPayload MaReturn, Long lPrio)  {
@@ -185,7 +189,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bRouteCriteriaCheck = false;
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
-        RouteDataSL requestedTrackElementList = null;
+        RouteDataSL requestedTrackElementList = new RouteDataSL();
         bCheckOk = Safety.slSelfCheck(MaAdapter);
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
@@ -208,6 +212,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         requestedTrackElementList = identifyRouteElements(MaRequest, requestedTrackElementList);
         bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(MaRequest, MaAdapter,requestedTrackElementList);
+        /**To Debug **/
+        bIsOccupatonFree = true;
         if(!bIsOccupatonFree) {
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
@@ -342,7 +348,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
-                   TopologyGraph.Edge E =  PlanData.topGraph.EdgeRepo.get(sId);
+                   TopologyGraph.Edge E =  PlanData.topGraph.edgeRepo.get(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 

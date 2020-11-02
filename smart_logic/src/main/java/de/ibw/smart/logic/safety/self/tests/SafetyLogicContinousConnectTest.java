@@ -5,6 +5,7 @@ import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
@@ -501,7 +502,7 @@ public class SafetyLogicContinousConnectTest {
 
        switch (TestConfig) {
            case BALISE_NEAR_CROSSING: {
-               return PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+               return PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
            }
            case BALISE_NOT_NEAR_CROSSING: {
                return retrieveBaliseNotNearCrossing(TestConfig, B);
@@ -523,11 +524,11 @@ public class SafetyLogicContinousConnectTest {
             I_CURRENT_TRYS++;
             return pickRandomEdgeWithBalise(testConfig);
         }
-        return PlanData.topGraph.EdgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        return PlanData.topGraph.edgeRepo.get(b.getTopPositionOfDataPoint().getIdentitaet().getWert());
     }
 
     private boolean checkIfBaliseIsInCrossoverArea(Balise B) {
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
         CrossingSwitch CS = null;
         if (edgeHavingNonPeekConnection(E)) {
             // Weiche ist NICHT über spitze mit Kante der Balise verbunden
@@ -701,7 +702,7 @@ public class SafetyLogicContinousConnectTest {
 
 
     private TopologyGraph.Edge pickRandomEdge() {
-        if(edgeList == null) edgeList = new ArrayList<TopologyGraph.Edge>(PlanData.topGraph.EdgeRepo.values());
+        if(edgeList == null) edgeList = new ArrayList<TopologyGraph.Edge>(PlanData.topGraph.edgeRepo.values());
         return (TopologyGraph.Edge) pickRandomElement(edgeList);
     }
 

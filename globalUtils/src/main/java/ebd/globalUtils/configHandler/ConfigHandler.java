@@ -45,6 +45,8 @@ public class ConfigHandler {
 
     public String dmiServerPort = "";
 
+    public String atoServerPort = "";
+
     /**
      * Determines the source of the trip profile.
      * Allowed values are 'breakingcurve', 'file' and 'socket'.
@@ -79,6 +81,10 @@ public class ConfigHandler {
      * If true, GUIs can connect to the program.
      */
     public boolean allowGUI = true;
+    /**
+     * If true, ATO control can connect to the program
+     */
+    public boolean allowATO = false;
     /**
      * If true, the program does wait for an input and just calls load.
      */
@@ -117,7 +123,7 @@ public class ConfigHandler {
     /**
      * Time base in milli seconds since epoch (default 1593522000000 equals 2020-06-30 15:00:00)
      */
-    public long timeBase = 1593522000000l;
+    public long timeBase = 1593522000000L;
 
     //############# Train Variables #############
 
@@ -139,20 +145,16 @@ public class ConfigHandler {
      */
     /**
      * Minimum time between actions in [s].
-     * Train will not switch between accelerating/breaking etc. faster than this value.
+     * Train switches between accelerating/breaking etc. by using a rolling average.
+     * The span of this average is controlled by this value.
      */
-    public double timeBetweenActions = 2;
+    public double averageTimeBetweenActions = 2;
+
 
     /**
-     * Release speed in [m/s]
+     * Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
      */
-    public double releaseSpeed = 11.11;
-
-    /**
-     * Distance to end of movement authority at which train will switch into
-     * release speed mode if below release speed in [m]
-     */
-    public double releaseSpeedDistance = 20;
+    public double timeBetweenDynLog = 2;
 
     /**
      * Distance to end of movement authority that is seen as "target reached" in [m]
@@ -167,27 +169,27 @@ public class ConfigHandler {
     /**
      * Service break intervention curve offset in [s]
      */
-    public double serviceInterventionOffset = 1;
+    public double serviceInterventionOffset = 4;
 
     /**
      * Service break warning curve offset in [s]
      */
-    public double serviceWarningOffset = 3;
+    public double warningOffset = 6;
 
     /**
      * Service break permitted speed curve offset in [s]
      */
-    public double servicePermittedOffset = 7;
+    public double permittedOffset = 10;
 
     /**
      * Service break indication curve offset in [s]
      */
-    public double serviceIndicationOffset = 12;
+    public double indicationOffset = 15;
 
     /**
      * Service coasting curve that allows for a coasting phase before breaking is needed
      */
-    public double serviceCoastingPhaseOffset = 37;
+    public double coastingPhaseOffset = 34;
 
     /**
      * Speed difference between Permitted speed
@@ -266,6 +268,47 @@ public class ConfigHandler {
      * in [m/s]
      */
     public double V_warning_max = 58.33;
+
+    /**
+     * Rise time for acceleration in [s]
+     */
+    public double accRiseTime = 2;
+
+    /**
+     * Fall time for acceleration in [s]
+     */
+    public double accFallTime = 0.1;
+
+    /**
+     * Rise time for deceleration in [s]
+     */
+    public double breakRiseTime = 5;
+
+    /**
+     * Fall time for deceleration in [s]
+     */
+    public double breakFallTime = 10;
+
+    /**
+     * Rise time for emergency deceleration in [s]
+     */
+    public double emBreakRiseTime = 3;
+
+    /**
+     * Fall time for emergency deceleration in [s]
+     */
+    public double emBreakFallTime = 10;
+
+    /**
+     * Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
+     */
+    public double d_Confidence = 0.01;
+
+    /**
+     *  Absolut location confidence intervall in [m]
+     */
+    public double d_LocCon = 1;
+
 
     /*
     longs
@@ -406,6 +449,17 @@ public class ConfigHandler {
         Loads the config
          */
         loadConfig(false);
+    }
+
+    /**
+     *
+     */
+    private ConfigHandler(Exception e){
+        e.printStackTrace();
+        System.out.println("Loaded no values");
+        ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
+                e, ExceptionEventTyp.FATAL);
+        EventBus.getDefault().post(ev);
     }
 
     /**
@@ -597,12 +651,8 @@ public class ConfigHandler {
             if (single_instance == null) single_instance = new ConfigHandler();
             return single_instance;
         }catch (IOException ioe){
-            ioe.printStackTrace();
-            ExceptionEvent ev = new ExceptionEvent("cfg","all", new NotCausedByAEvent(),
-                    ioe, ExceptionEventTyp.FATAL);
-            EventBus.getDefault().post(ev);
+            return new ConfigHandler(ioe);
         }
-        return null;
     }
 
 }

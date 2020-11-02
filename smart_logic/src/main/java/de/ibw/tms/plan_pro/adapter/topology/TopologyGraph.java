@@ -3,6 +3,7 @@ package de.ibw.tms.plan_pro.adapter.topology;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -10,6 +11,8 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
+
+import javax.xml.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +68,7 @@ public class TopologyGraph {
     /**
      * HashMap die f&uuml;r die PlanPro-Kanten ID die Topologische Kante speichert
      */
-    public HashMap<String, Edge> EdgeRepo = new HashMap<>();
+    public HashMap<String, Edge> edgeRepo = new HashMap<>();
         // String is TopNode_ID
     /**
      * HashMap die f&uuml;r die PlanPro-Knoten ID einen Topologische Knoten speichert
@@ -211,6 +214,10 @@ public class TopologyGraph {
                 E.printStackTrace();
                 return null;
             }
+        }
+
+        public String getRefId() {
+            return PlanData.getInstance().getRefIdOfEdge(this);
         }
 
         /**

@@ -22,14 +22,17 @@ portOfInfrastructureServer = 25555
 
 ipToTMSServer = 127.0.0.1
 
-ipToTripProfileServer = 127.0.0.1
-portToTripProfileServer = 22227
-
 # Internal RBC Server
 portOfRBCServer = 22224
 
 #Internal DMI Server
 dmiServerPort = 22225
+
+#Internal ATO Server
+atoServerPort = 22227
+
+ipToTripProfileServer = 127.0.0.1
+portToTripProfileServer = 22228
 
 #Determines the source of the trip profile. Allowed values are 'breakingcurve', 'file' and 'socket'.
 #'file', 'socket' are not implemented yet.
@@ -53,6 +56,9 @@ useTSMServer = false
 
 # If true, GUIs can connect to the program.
 allowGUI = true
+
+# If true, ATO control can connect to the program
+allowATO = false
 
 # If true, the program does wait for an input and just calls load.
 autoStart = false
@@ -106,14 +112,11 @@ timeBase = 1593522000000
 ######
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
-# Minimum time between actions in [s]. Train will not switch between accelerating/breaking etc. faster than this
-timeBetweenActions = 2
+# Train switches between accelerating/breaking etc. by using a rolling average. The span of this average is controlled by this value.
+averageTimeBetweenActions = 2
 
-# Release speed for ETCS Level 1 in [m/s]
-releaseSpeed = 6.94
-
-# Distance to end of movement authority at which train will switch into release speed mode if below release speed in [m]
-releaseSpeedDistance = 20
+#Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
+timeBetweenDynLog = 2
 
 # Distance before end of movement authority that is seen as "target reached" in [m]
 targetReachedDistance = 5
@@ -122,19 +125,19 @@ targetReachedDistance = 5
 emergencyInterventionOffset = 2
 
 # Service break intervention curve offset in [s]
-serviceInterventionOffset = 1
+serviceInterventionOffset = 4
 
 # Service break warning curve offset in [s]
-serviceWarningOffset = 3
+warningOffset = 6
 
 # Service break permitted speed curve offset in [s]
-servicePermittedOffset = 7
+permittedOffset = 10
 
 # Service break indication curve offset in [s]
-serviceIndicationOffset = 12
+indicationOffset = 15
 
 # Service break coasting phase offset in [s]
-serviceCoastingPhaseOffset = 37
+coastingPhaseOffset = 30
 
 # Speed difference between Permitted speed and Emergency Brake Intervention supervision limits, minimum value in [m/s]
 dV_ebi_min = 2.08
@@ -171,6 +174,12 @@ V_warning_min = 38.89
 
 # Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
 V_warning_max = 58.33
+
+# Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
+d_Confidence = 0.01
+
+# Absolut location confidence intervall in [m]
+d_LocCon = 1
 
 ######
 ###### Longs
