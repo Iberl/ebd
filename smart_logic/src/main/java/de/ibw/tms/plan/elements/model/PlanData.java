@@ -358,6 +358,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
     public String getRefIdOfEdge(TopologyGraph.Edge e) {
         String Ref;
         TopologyConnect RefConnect = null;
+        TopologyConnect OtherConnect = null;
+        int iOtherNumber = -1;
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
         if(checkSameAnlage(A,B)) return handleDKW(e);
@@ -367,23 +369,32 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         if(aId == null) {
             Ref = bId;
             RefConnect = e.TopConnectFromB;
+            OtherConnect = e.TopConnectFromA;
         } else if(bId == null) {
             Ref = aId;
             RefConnect = e.TopConnectFromA;
+            OtherConnect = e.TopConnectFromB;
+
         } else {
+            boolean aIsDKW = checkSameAnlage(A,A);
+            boolean bIsDKW = checkSameAnlage(B,B);
             int aCrossingNumber = generateCrossingNumber(aId);
             int bCrossingNumber = generateCrossingNumber(bId);
             if(aCrossingNumber < bCrossingNumber) {
                 Ref = aId;
                 RefConnect = e.TopConnectFromA;
+                iOtherNumber = bCrossingNumber;
             } else {
                 Ref = bId;
                 RefConnect = e.TopConnectFromB;
+                iOtherNumber = aCrossingNumber;
             }
 
 
         }
-        return addOrientation(Ref, RefConnect);
+        Ref = addOrientation(Ref, RefConnect);
+        Ref += "W" + iOtherNumber;
+        return addOrientation(Ref, OtherConnect);
     }
 
     @Nullable
@@ -399,7 +410,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
                 ref += "S";
                 break;
             } default: {
-                return null;
+                return "E";
             }
 
         }
@@ -473,6 +484,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         if(isADominating) {
             Ref =  initRef(CSA);
             Ref = addOrientation(Ref, E.TopConnectFromA);
+
             return addOrientation(Ref, E.TopConnectFromB);
         } else {
             Ref = initRef(CSB);
