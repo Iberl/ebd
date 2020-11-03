@@ -156,7 +156,7 @@ public class CrossingSwitch implements ICompareTrackMeter {
      * Gibt den Titel einer Weiche im EBD wider. Zum Beispiel "12W14"
      * @return String - der Titel
      */
-    public String getEbdTitle() {
+    public String getEbdTitle(int sidDKWshortage, boolean isFull, boolean withoutAddOn) {
         boolean isDKW = isDKW();
 
         CWKrGspElement Element = getElement();
@@ -167,14 +167,20 @@ public class CrossingSwitch implements ICompareTrackMeter {
             String sAddOn = "";
             if(isDKW) {
                 String sID = this.getComponent().getIdentitaet().getWert();
-                sAddOn = "UID" + sID.substring(sID.length() - 3);
+                if(isFull) {
+                    sAddOn = "UID" + sID;
+                } else {
+                    sAddOn = "UID" + sID.substring(sID.length() - sidDKWshortage);
+                }
             }
-
+            if(withoutAddOn) return B.getBezeichnungTabelle().getWert();
             return B.getBezeichnungTabelle().getWert() + sAddOn;
         } catch(Exception E) {
             return null;
         }
     }
+
+
 
     public boolean isDKW() {
         boolean isDKW = false;
@@ -188,14 +194,20 @@ public class CrossingSwitch implements ICompareTrackMeter {
         return isDKW;
     }
 
+    /**
+     * Checks if corssover belonging to same Anlage
+     * like Two Kompontents of DKW belonging to same Anlage
+     * @return boolean - true for beeing same else false
+     */
+    public boolean isSameAnlage(CrossingSwitch CS) {
+        return (this.Anlage.getIdentitaet().getWert().equals(CS.Anlage.getIdentitaet().getWert()));
+    }
 
     /**
      * Gibt die Streckenkilometrierung einer Strecke wider.
      * @param trackId {@link String} - StreckenId aus PLanPro, die zur Kilometrierung verwendet wird
      * @return BigDecimal - Streckekilometrierung in Meter
      */
-
-
 
     @Override
     public BigDecimal getTrackMeterByTrackId(String trackId) {

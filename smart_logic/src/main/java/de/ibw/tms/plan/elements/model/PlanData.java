@@ -1,20 +1,18 @@
 package de.ibw.tms.plan.elements.model;
 
-import de.ibw.feed.BaliseExtractor;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.TopRailReturn;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.DummyChainageSupply;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -22,25 +20,18 @@ import de.ibw.tms.plan_pro.adapter.topology.intf.ChainageSupplyInterface;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ITopologyFactory;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
-import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
-import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.sql.Ref;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Flow;
@@ -55,7 +46,7 @@ import java.util.concurrent.Flow;
  * @version 0.3
  * @since 2020-08-10
  */
-public class PlanData implements Flow.Subscriber<GradientProfile> {
+public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandler {
 
 
 
@@ -91,9 +82,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W13 und als Value die Weiche
      */
-    public static ThreadedRepo<String, TopologyGraph.Node> SwitchRepo = new ThreadedRepo<>();
+    private static ThreadedRepo<String, NodeInformation> SwitchRepo = new ThreadedRepo<>();
 
-    public static ThreadedRepo<TopologyGraph.Node, String> SwitchIdRepo = new ThreadedRepo<>();
+    private static ThreadedRepo<TopologyGraph.Node, String> SwitchIdRepo = new ThreadedRepo<>();
 
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W8L und als Value die Kante
@@ -109,6 +100,27 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * Erlaubte Streckengeschwindigkeit eines Gleises ({@link Rail}  in km/h
      */
     public static int vmax = 160; // km/h
+
+    @Override
+    public NodeInformation getNodeInfoBySwitchId(String switchId) {
+        return SwitchRepo.getModel(switchId);
+    }
+
+    @Override
+    public String getNodeId(TopologyGraph.Node N) {
+        return SwitchIdRepo.getModel(N);
+    }
+
+    @Override
+    public void registerNode(TopologyGraph.Node N, String switchId) {
+        NodeInformation NI = this.getNodeInfoBySwitchId(switchId);
+        if(NI == null) NI = new NodeInformation();
+        if(!NI.contains(N)) {
+            NI.add(N);
+        }
+        SwitchRepo.update(switchId, NI);
+        SwitchIdRepo.update(N,switchId);
+    }
 
     /**
      * Diese Klasse setzt ein TrackElement in Graphische Linien-Objekte um.
@@ -419,17 +431,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
-            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
-            if(CS.isDKW()) {
-                switchId = handleDKW(CS);
-            } else {
-                switchId = CS.getEbdTitle();
-
-
-            }
+            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle(0,false,true));
+            switchId = CS.getEbdTitle(0,false, true);
             if(switchId != null) {
-                SwitchRepo.update(switchId, N);
-                SwitchIdRepo.update(N, switchId);
+                this.registerNode(N, switchId);
             }
 
 
@@ -575,7 +580,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
             try {
-                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle();
+                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle(0,false,true);
             } catch(Exception E) {
                 sName = "";
             }
@@ -590,7 +595,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         if(connectN.equals(TopologyConnect.SPITZE)) {
             try {
-                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle();
+                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle(0,false,true);
             } catch(Exception E) {
                 sName = "";
             }

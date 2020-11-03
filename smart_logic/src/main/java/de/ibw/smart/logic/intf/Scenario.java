@@ -11,6 +11,7 @@ import de.ibw.tms.ma.physical.EdgeOfMap;
 import de.ibw.tms.ma.physical.RailConnector;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 
 import javax.swing.*;
@@ -80,7 +81,7 @@ public class Scenario {
         Chainage Balise7 = new Chainage(2440);
         Chainage Balise8 = new Chainage(2565);
         Chainage Between9To10 = new Chainage(2650);
-        PlanData PlanDat = PlanData.getInstance();
+        ISwitchHandler PlanDat = PlanData.getInstance();
         EoA Eoa1Sz1and3 = new EoA(Balise2Ch, PlanData.connectorList.get(2), new SectionOfLine());
         setDefaultAuthority(Eoa1Sz1and3, Speed80.bSpeed);
 
