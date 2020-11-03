@@ -274,7 +274,7 @@ public class TrainController extends SubmissionPublisher implements IController 
             E.sId = E.getRefId();
             CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
             TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
-            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(PlanData.SwitchIdRepo.getModel(N));
+            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(PlanData.getInstance().getNodeId(N));
             CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
             TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);

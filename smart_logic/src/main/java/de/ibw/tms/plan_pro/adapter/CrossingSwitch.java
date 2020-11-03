@@ -27,7 +27,8 @@ import java.util.Locale;
  * @version 0.4
  * @since 2020-09-29
  */
-public class CrossingSwitch implements ICompareTrackMeter {
+public class
+CrossingSwitch implements ICompareTrackMeter {
 
 
 

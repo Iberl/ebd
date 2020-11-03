@@ -23,6 +23,7 @@ import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
+import org.jetbrains.annotations.Nullable;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
@@ -44,7 +45,7 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3
- * @since 2020-08-10
+ * @since 2020-11-03
  */
 public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandler {
 
@@ -359,6 +360,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         TopologyConnect RefConnect = null;
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
+        if(checkSameAnlage(A,B)) return handleDKW(e);
         String aId = SwitchIdRepo.getModel(A);
         String bId = SwitchIdRepo.getModel(B);
         if(aId == null && bId == null) return null;
@@ -381,22 +383,40 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
 
 
         }
-        switch (RefConnect) {
+        return addOrientation(Ref, RefConnect);
+    }
+
+    @Nullable
+    private String addOrientation(String ref, TopologyConnect refConnect) {
+        switch (refConnect) {
             case LINKS: {
-                Ref += "L";
+                ref += "L";
                 break;
             } case RECHTS: {
-                Ref += "R";
+                ref += "R";
                 break;
             } case SPITZE: {
-                Ref += "S";
+                ref += "S";
                 break;
             } default: {
                 return null;
             }
 
         }
-        return Ref;
+        return ref;
+    }
+
+    private boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b) {
+        CrossingSwitch CSA;
+        CrossingSwitch CSB;
+        try {
+            CSA = (CrossingSwitch) a.NodeImpl;
+            CSB = (CrossingSwitch) b.NodeImpl;
+        } catch(Exception E) {
+            return false;
+        }
+        if(CSA == null || CSB == null) return false;
+        return CSA.isSameAnlage(CSB);
     }
 
     private int generateCrossingNumber(String crossId) {
@@ -442,14 +462,43 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         }
     }
 
-    private String handleDKW(CrossingSwitch CS) {
-        CWKrGspElement Element = CS.getElement();
-        if(Element == null) return null;
-        CBezeichnungElement B = Element.getBezeichnung();
+    private String handleDKW(TopologyGraph.Edge E) {
+        String Ref;
+        TopologyGraph.Node A = E.A;
+        TopologyGraph.Node B = E.B;
+        CrossingSwitch CSA = (CrossingSwitch) A.NodeImpl;
+        CrossingSwitch CSB = (CrossingSwitch) B.NodeImpl;
+        boolean isADominating = isADominating(CSA, CSB);
+        CWKrGspElement RefElement = null;
+        if(isADominating) {
+            Ref =  initRef(CSA);
+            Ref = addOrientation(Ref, E.TopConnectFromA);
+            return addOrientation(Ref, E.TopConnectFromB);
+        } else {
+            Ref = initRef(CSB);
+            Ref = addOrientation(Ref, E.TopConnectFromB);
+            return addOrientation(Ref, E.TopConnectFromA);
+        }
 
-        return B.getBezeichnungTabelle().getWert();
 
 
+
+
+    }
+
+    @Nullable
+    private String initRef(CrossingSwitch CS) {
+        CWKrGspElement RefElement;
+        String Ref;
+        RefElement = CS.getElement();
+        if(RefElement == null) return null;
+        CBezeichnungElement Bez = RefElement.getBezeichnung();
+        return Bez.getBezeichnungTabelle().getWert();
+    }
+
+    private boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
+        return Integer.parseInt(CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert())
+                < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
     }
 
     private void linkRailsToCrossover() {

@@ -68,7 +68,7 @@ class ITopologyFactoryTest {
 
     private void printNode(TopologyGraph.Node a, TopologyConnect topConnectFromA, String s) {
         System.out.println("Node " + s +  " id: " + a.TopNodeId + " type: " + topConnectFromA.value());
-        String sCrossoverName = PlanData.SwitchIdRepo.getModel(a);
+        String sCrossoverName = PlanData.getInstance().getNodeId(a);
         if(sCrossoverName == null) System.out.println("Node has no Id");
         else System.out.println("Node has Id: " + sCrossoverName);
 

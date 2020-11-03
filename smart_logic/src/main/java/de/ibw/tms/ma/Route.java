@@ -87,7 +87,7 @@ public class Route implements Cloneable, Serializable {
         if(trackElementOfEnd instanceof ControlledTrackElement) {
             EndModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) trackElementOfEnd);
 
-            String sId = PlanData.SwitchIdRepo.getModel(EndModel.getNode());
+            String sId = PlanData.getInstance().getNodeId(EndModel.getNode());
             this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
         } else {
             // no Crossover so it has to be a rail
@@ -99,7 +99,7 @@ public class Route implements Cloneable, Serializable {
     public void handleCrossoverWaypoint(TrackElement CTE) {
         String sId;
         CrossoverModel M = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) CTE);
-        sId = PlanData.SwitchIdRepo.getModel(M.getNode());
+        sId = PlanData.getInstance().getNodeId(M.getNode());
         this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
     }
 
