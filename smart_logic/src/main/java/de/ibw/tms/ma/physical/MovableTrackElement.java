@@ -1,12 +1,24 @@
 package de.ibw.tms.ma.physical;
 
+import de.ibw.tms.ma.physical.intf.IControlledElementStatus;
+
 import java.util.List;
 
 public class MovableTrackElement extends ControlledElement {
     public static final String CLASS_IDENTIFIER = "Movable_Track_Element";
 
+    public TrackElementStatus getCurrentStatus() {
+        return (TrackElementStatus) super.getStatus();
+    }
+
+    public void setCurrentStatus(TrackElementStatus status) {
+        super.setStatus(status);
+    }
+
     private int operationTime;
-    private List<TrackElementStatus> trackElementStatuses;
+    private List<TrackElementStatus> listOfPossibleStatus;
+
+    private TrackElementStatus requestedStatus;
 
     public MovableTrackElement() {
         super(CLASS_IDENTIFIER);
@@ -20,11 +32,13 @@ public class MovableTrackElement extends ControlledElement {
         this.operationTime = operationTime;
     }
 
-    public List<TrackElementStatus> getTrackElementStatuses() {
-        return trackElementStatuses;
+    public List<TrackElementStatus> getListOfPossibleStatus() {
+        return listOfPossibleStatus;
     }
 
-    public void setTrackElementStatuses(List<TrackElementStatus> trackElementStatuses) {
-        this.trackElementStatuses = trackElementStatuses;
+    public void setListOfPossibleStatus(List<TrackElementStatus> listOfPossibleStatus) {
+        this.listOfPossibleStatus = listOfPossibleStatus;
     }
+
+
 }

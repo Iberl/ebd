@@ -1,6 +1,7 @@
 package de.ibw.feed;
 
-import de.ibw.smart.logic.datatypes.Occupation;
+
+import de.ibw.tms.ma.Occupation;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -268,8 +269,8 @@ public class Balise implements ICoord<Double> {
         BigDecimal dDpLength = this.getDpLength();
         BigDecimal dDistanceFromA = this.getBalisenPositionFromNodeA();
         BigDecimal dTrackLength = this.getLengthOfTopEdge();
-        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
-        Occupation.BLOCK_Q_SCALE scale = Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
+        
         BigDecimal dStart = dDistanceFromA.subtract(dDpLength);
         BigDecimal dEnd = dDistanceFromA.add(dDpLength);
         if(dStart.compareTo(new BigDecimal(0) ) < 0) dStart = new BigDecimal(0);
