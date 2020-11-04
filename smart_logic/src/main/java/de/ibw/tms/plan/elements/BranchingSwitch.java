@@ -8,6 +8,7 @@ import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
@@ -224,7 +225,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             return;
         }
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
-        String sId = PlanData.getInstance().getNodeId(this.Node);
+        String sId = ISwitchHandler.getNodeId(this.Node);
         CheckDbdCommand DbdCommandPayload =
                 new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
@@ -322,7 +323,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         Target = getTargetOfOutputChange(outputRelation, From);
 
 
-        String sSrc = PlanData.getInstance().getNodeId(Node);
+        String sSrc = ISwitchHandler.getNodeId(Node);
         String sTarget;
 
 

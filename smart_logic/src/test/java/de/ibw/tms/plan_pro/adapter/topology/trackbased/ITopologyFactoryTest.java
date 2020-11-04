@@ -1,6 +1,7 @@
 package de.ibw.tms.plan_pro.adapter.topology.trackbased;
 
 import de.ibw.tms.plan.elements.CrossoverModel;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -67,8 +68,9 @@ class ITopologyFactoryTest {
     }
 
     private void printNode(TopologyGraph.Node a, TopologyConnect topConnectFromA, String s) {
-        System.out.println("Node " + s +  " id: " + a.TopNodeId + " type: " + topConnectFromA.value());
-        String sCrossoverName = PlanData.getInstance().getNodeId(a);
+        String isDKW = PlanData.checkSameAnlage(a,a) ? "yes" : "no";
+        System.out.println("Node " + s +  " id: " + a.TopNodeId + " type: " + topConnectFromA.value() + " is DKW: " + isDKW);
+        String sCrossoverName = ISwitchHandler.getNodeId(a);
         if(sCrossoverName == null) System.out.println("Node has no Id");
         else System.out.println("Node has Id: " + sCrossoverName);
 

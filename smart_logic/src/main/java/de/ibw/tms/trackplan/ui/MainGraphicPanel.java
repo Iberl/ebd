@@ -13,6 +13,7 @@ import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -270,12 +271,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
                 sTopId = CS.getEbdTitle(0,false,true);
                 if(sTopId == null) {
-                    sTopId = PlanData.getInstance().getNodeId(TargetCrossoverModel.getNode());
+                    sTopId = ISwitchHandler.getNodeId(TargetCrossoverModel.getNode());
                 }
 
                 if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
             } catch (Exception E) {
-                sTopId = PlanData.getInstance().getNodeId(TargetCrossoverModel.getNode());
+                sTopId = ISwitchHandler.getNodeId(TargetCrossoverModel.getNode());
             }
 
 

@@ -218,7 +218,7 @@ public class TopologyGraph {
         }
 
         public String getRefId() {
-            return PlanData.getInstance().getRefIdOfEdge(this);
+            return PlanData.getRefIdOfEdge(this);
         }
 
         /**

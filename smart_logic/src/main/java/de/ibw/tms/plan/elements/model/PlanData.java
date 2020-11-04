@@ -23,16 +23,19 @@ import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 
 import javax.xml.bind.JAXBException;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Flow;
@@ -45,9 +48,9 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3
- * @since 2020-11-03
+ * @since 2020-11-04
  */
-public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandler {
+public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 
@@ -83,14 +86,21 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W13 und als Value die Weiche
      */
-    private static ThreadedRepo<String, NodeInformation> SwitchRepo = new ThreadedRepo<>();
+    public static ThreadedRepo<String, NodeInformation> SwitchRepo = new ThreadedRepo<>();
 
-    private static ThreadedRepo<TopologyGraph.Node, String> SwitchIdRepo = new ThreadedRepo<>();
+    public static ThreadedRepo<TopologyGraph.Node, String> SwitchIdRepo = new ThreadedRepo<>();
+
+    public static ThreadedRepo<CWKrAnlage, ArrayList<CrossingSwitch>> CrossingSwitchRepoByAnlage = new ThreadedRepo<>();
 
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W8L und als Value die Kante
      */
     public static ThreadedRepo<String, TopologyGraph.Edge> EdgeIdLookupRepo = new ThreadedRepo<>();
+
+    /**
+     * Ein Repository speichert zu jeder Kante die eindeutige BereichsId 12W8L
+     */
+    public static ThreadedRepo<TopologyGraph.Edge, String> EdgeLookupByIdRepo = new ThreadedRepo<>();
 
 
     /**
@@ -102,26 +112,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
      */
     public static int vmax = 160; // km/h
 
-    @Override
-    public NodeInformation getNodeInfoBySwitchId(String switchId) {
-        return SwitchRepo.getModel(switchId);
-    }
 
-    @Override
-    public String getNodeId(TopologyGraph.Node N) {
-        return SwitchIdRepo.getModel(N);
-    }
-
-    @Override
-    public void registerNode(TopologyGraph.Node N, String switchId) {
-        NodeInformation NI = this.getNodeInfoBySwitchId(switchId);
-        if(NI == null) NI = new NodeInformation();
-        if(!NI.contains(N)) {
-            NI.add(N);
-        }
-        SwitchRepo.update(switchId, NI);
-        SwitchIdRepo.update(N,switchId);
-    }
 
     /**
      * Diese Klasse setzt ein TrackElement in Graphische Linien-Objekte um.
@@ -338,15 +329,39 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
 
     private void setEdges() {
         Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();
+        ArrayList<TopologyGraph.Edge> setEdges = new ArrayList<>();
         for(TopologyGraph.Edge E : edges) {
-            String Ref = null;
-            Ref = getRefIdOfEdge(E);
-            if (Ref == null) continue;
-            EdgeIdLookupRepo.update(Ref, E);
-
+            lookupNamesWithinDKW(setEdges, E);
 
         }
+        for(TopologyGraph.Edge E : edges) {
+            lookupOtherCrossings(setEdges, E);
+        }
 
+    }
+
+    private void lookupOtherCrossings(ArrayList<TopologyGraph.Edge> setEdges, TopologyGraph.Edge e) {
+        if(setEdges.contains(e)) return;
+        String Ref = null;
+        Ref = getRefIdOfEdge(e);
+        if (Ref == null) return;
+        EdgeIdLookupRepo.update(Ref, e);
+        EdgeLookupByIdRepo.update(e, Ref);
+    }
+
+    private void lookupNamesWithinDKW(ArrayList<TopologyGraph.Edge> setEdges, TopologyGraph.Edge e) {
+        String Ref;
+        TopologyConnect RefConnect = null;
+
+        TopologyGraph.Node A = e.A;
+        TopologyGraph.Node B = e.B;
+        if(checkSameAnlage(A,B)) {
+            Ref = handleSameAnlage(e);
+            EdgeIdLookupRepo.update(Ref, e);
+            EdgeLookupByIdRepo.update(e,Ref);
+            setEdges.add(e);
+
+        }
     }
 
     /**
@@ -355,50 +370,120 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
      * @return String - Bereichs-ID
      */
 
-    public String getRefIdOfEdge(TopologyGraph.Edge e) {
+    public static String getRefIdOfEdge(TopologyGraph.Edge e) {
         String Ref;
         TopologyConnect RefConnect = null;
-        TopologyConnect OtherConnect = null;
-        int iOtherNumber = -1;
+
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
-        if(checkSameAnlage(A,B)) return handleDKW(e);
+
+        if(checkSameAnlage(A,B)) return handleSameAnlage(e);
         String aId = SwitchIdRepo.getModel(A);
         String bId = SwitchIdRepo.getModel(B);
         if(aId == null && bId == null) return null;
+        boolean isDKW;
         if(aId == null) {
             Ref = bId;
             RefConnect = e.TopConnectFromB;
-            OtherConnect = e.TopConnectFromA;
+
+            isDKW = checkSameAnlage(B,B);
         } else if(bId == null) {
             Ref = aId;
             RefConnect = e.TopConnectFromA;
-            OtherConnect = e.TopConnectFromB;
 
+            isDKW = checkSameAnlage(A,A);
         } else {
-            boolean aIsDKW = checkSameAnlage(A,A);
-            boolean bIsDKW = checkSameAnlage(B,B);
+
+
             int aCrossingNumber = generateCrossingNumber(aId);
             int bCrossingNumber = generateCrossingNumber(bId);
             if(aCrossingNumber < bCrossingNumber) {
                 Ref = aId;
                 RefConnect = e.TopConnectFromA;
-                iOtherNumber = bCrossingNumber;
+
+                isDKW = checkSameAnlage(A,A);
             } else {
                 Ref = bId;
                 RefConnect = e.TopConnectFromB;
-                iOtherNumber = aCrossingNumber;
+
+                isDKW = checkSameAnlage(B,B);
             }
 
 
         }
+        if(isDKW) {
+            CrossingSwitch CS;
+
+            if(Ref.equals(aId)) {
+                CS = (CrossingSwitch) A.NodeImpl;
+
+            } else {
+                CS = (CrossingSwitch) B.NodeImpl;
+            }
+            List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
+            Ref = getLinkNameToDKW(CS, switchList);
+            return refOfNodeConnectingDKW(Ref, A, e ,RefConnect);
+            
+        }
         Ref = addOrientation(Ref, RefConnect);
-        Ref += "W" + iOtherNumber;
-        return addOrientation(Ref, OtherConnect);
+
+        return Ref;
+    }
+
+    private static String refOfNodeConnectingDKW(String ref, TopologyGraph.Node a, TopologyGraph.Edge e, TopologyConnect refConnect) {
+        if(refConnect.equals(TopologyConnect.LINKS)) return ref + "L";
+        if(refConnect.equals(TopologyConnect.RECHTS)) return ref + "R";
+        for(TopologyGraph.Edge E : a.inEdges) {
+            if(e.equals(E)) continue;
+            if(checkSameAnlage(E.A,E.B)) {
+                if (E.getRefId().endsWith("RR")) return ref + "R";
+                if (E.getRefId().endsWith("LL")) return ref + "L";
+            }
+        }
+        for(TopologyGraph.Edge E : a.outEdges) {
+            if(e.equals(E)) continue;
+            if(checkSameAnlage(E.A,E.B)) {
+                if (E.getRefId().endsWith("RR")) return ref + "R";
+                if (E.getRefId().endsWith("LL")) return ref + "L";
+            }
+        }
+        return ref + "E";
+    }
+
+    private static String getLinkNameToDKW(CrossingSwitch cs, List<CrossingSwitch> switchList) {
+        String sResult = cs.getElement().getBezeichnung().getKennzahl().getWert() + "W";
+        Integer iLowerNumber = null;
+        int iSearchedNumber = -1;
+        for(CrossingSwitch C : switchList) {
+            int iW = getCrossNumber(C);
+            iLowerNumber = handleLowerNumber(iLowerNumber, iW);
+            if(C.equals(cs)) {
+                iSearchedNumber = iW;
+            }
+        }
+        if(iLowerNumber == iSearchedNumber) return sResult + iLowerNumber + "AB";
+        else return sResult + iLowerNumber + "CD";
+
+    }
+
+    @NotNull
+    private static Integer handleLowerNumber(Integer iLowerNumber, int iW) {
+        if(iLowerNumber == null ) {
+            iLowerNumber = iW;
+        } else {
+            if(iLowerNumber > iW) iLowerNumber = iW;
+        }
+        return iLowerNumber;
+    }
+
+    private static int getCrossNumber(CrossingSwitch c) {
+        int iW = Integer.parseInt(c.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
+        return iW;
     }
 
     @Nullable
-    private String addOrientation(String ref, TopologyConnect refConnect) {
+    private static String addOrientation(String ref, TopologyConnect refConnect) {
+        if(refConnect == null) return ref + "E";
         switch (refConnect) {
             case LINKS: {
                 ref += "L";
@@ -417,7 +502,13 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         return ref;
     }
 
-    private boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b) {
+    /**
+     * checks if node a and b belongen to same Anlage
+     * @param a - Node A
+     * @param b - Node B
+     * @return true - same anlage else false
+     */
+    public static boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b) {
         CrossingSwitch CSA;
         CrossingSwitch CSB;
         try {
@@ -430,7 +521,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         return CSA.isSameAnlage(CSB);
     }
 
-    private int generateCrossingNumber(String crossId) {
+    private static int generateCrossingNumber(String crossId) {
         return Integer.parseInt(crossId.split("W")[1]);
     }
 
@@ -465,7 +556,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
             N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle(0,false,true));
             switchId = CS.getEbdTitle(0,false, true);
             if(switchId != null) {
-                this.registerNode(N, switchId);
+                ISwitchHandler.registerNode(N, switchId);
             }
 
 
@@ -473,7 +564,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         }
     }
 
-    private String handleDKW(TopologyGraph.Edge E) {
+    private static String handleSameAnlage(TopologyGraph.Edge E) {
         String Ref;
         TopologyGraph.Node A = E.A;
         TopologyGraph.Node B = E.B;
@@ -499,7 +590,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
     }
 
     @Nullable
-    private String initRef(CrossingSwitch CS) {
+    private static String initRef(CrossingSwitch CS) {
         CWKrGspElement RefElement;
         String Ref;
         RefElement = CS.getElement();
@@ -508,7 +599,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile>, ISwitchHandle
         return Bez.getBezeichnungTabelle().getWert();
     }
 
-    private boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
+    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
         return Integer.parseInt(CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert())
                 < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
     }

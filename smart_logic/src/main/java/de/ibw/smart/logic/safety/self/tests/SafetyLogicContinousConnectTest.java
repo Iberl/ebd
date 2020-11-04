@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SafetyLogicContinousConnectTest {
 
 
-    private ISwitchHandler PD = PlanData.getInstance();
+    private PlanData PD = PlanData.getInstance();
     private ArrayList<TopologyGraph.Node> nodeList;
     private ArrayList<TopologyGraph.Edge> edgeList;
     private final int I_TRYS_FOR_FINAL_ROUTE = 70;

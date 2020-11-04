@@ -3,6 +3,7 @@ package de.ibw.tms.plan_pro.adapter.topology.trackbased;
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
 import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
@@ -273,12 +274,15 @@ public class TopologyFactory implements ITopologyFactory {
             } catch (Exception E) {
 
             }
+
             if (sAnlageId != null) {
                 A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
-
+                CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
+                ISwitchHandler.registerCrossingSwitch(A, CS);
+                PlanData.RailSwitchList.add(CS);
             }
-            CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
-            PlanData.RailSwitchList.add(CS);
+
+
         }
     }
 

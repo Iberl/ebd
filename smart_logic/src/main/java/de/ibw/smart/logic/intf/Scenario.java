@@ -81,7 +81,7 @@ public class Scenario {
         Chainage Balise7 = new Chainage(2440);
         Chainage Balise8 = new Chainage(2565);
         Chainage Between9To10 = new Chainage(2650);
-        ISwitchHandler PlanDat = PlanData.getInstance();
+        PlanData PlanDat = PlanData.getInstance();
         EoA Eoa1Sz1and3 = new EoA(Balise2Ch, PlanData.connectorList.get(2), new SectionOfLine());
         setDefaultAuthority(Eoa1Sz1and3, Speed80.bSpeed);
 
