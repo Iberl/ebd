@@ -98,20 +98,21 @@ public class ATOClientWorker implements Runnable{
      */
     private void receiveString(String string) {
         String[] split = string.split(" ");
-        String target = "dd;T=" + split[0];
+        String etcsID = split[0];
+        String target = "dd;T=" + etcsID;
         String action = split[1].toUpperCase(Locale.ROOT);
         switch (action){
             case "INIT" -> {
-                this.connectedTrains.add(split[0]);
+                this.connectedTrains.add(etcsID);
                 this.globalEventBus.post(new ATOStartEvent("core", target));
             }
             case "TERM" -> {
-                this.connectedTrains.remove(split[0]);
+                this.connectedTrains.remove(etcsID);
                 this.globalEventBus.post(new ATOEndEvent("core", target));
             }
-            case "EXISTS" -> {
-                boolean exists = !this.connectedTrains.contains(split[0]) && th.isRegistered(split[0]);
-                sendString(split[0] + " " + exists);
+            case "EXIST" -> {
+                boolean exists = !this.connectedTrains.contains(etcsID) && th.isRegistered(etcsID);
+                sendString(etcsID + " exists=" + exists);
             }
             default -> this.globalEventBus.post(new ATOToTrainUpdateEvent("core", target, string));
         }
