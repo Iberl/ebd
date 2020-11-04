@@ -151,7 +151,7 @@ public class PositionModul implements IPositionModul {
             if(route.getRouteLength().compareTo(dTrainLength) < 0) {
                 return evaluatePositionReport(null, PD);
             }
-            Iterator<Pair<Route.TrackElementType, TrackElement>> it = route.iterator();
+            Iterator<Pair<Route.TrackElementType, ITrackElement>> it = route.iterator();
             try {
                 TopologyGraph.Edge E =
                         PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
@@ -169,7 +169,7 @@ public class PositionModul implements IPositionModul {
                         BigDecimal EndDistance = new BigDecimal(iDistanceToBalise);
                         TopologyGraph.Node N = B.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
                         if (it.hasNext()) {
-                            Pair<Route.TrackElementType, TrackElement> RouteNode = it.next();
+                            Pair<Route.TrackElementType, ITrackElement> RouteNode = it.next();
                             if(RouteNode.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
                                 if(N.equals(RouteNode.getValue())) {
                                     if(route.getRouteLength().compareTo(BigDecimal.valueOf(iDistanceToBalise))>= 0) {
@@ -179,7 +179,7 @@ public class PositionModul implements IPositionModul {
                                         while(StartDistance.compareTo(CurrentDistance) >= 0) {
                                             tempDistance = new BigDecimal(CurrentDistance.doubleValue());
 
-                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            Pair<Route.TrackElementType, ITrackElement> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
@@ -194,7 +194,7 @@ public class PositionModul implements IPositionModul {
                                             PD.add(new BlockedArea(E, BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     dDistanceFromA.intValue(), BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     (int) E.dTopLength));
-                                            Pair<Route.TrackElementType, TrackElement> Element = it.next();
+                                            Pair<Route.TrackElementType, ITrackElement> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));

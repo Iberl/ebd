@@ -6,7 +6,6 @@ import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
-import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
@@ -18,6 +17,7 @@ import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -176,7 +176,7 @@ public class SafetyLogic {
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
@@ -208,8 +208,8 @@ public class SafetyLogic {
 
             AtomicInteger distanceFromTrainToNextNode = new AtomicInteger(0);
             int iRequestSize = requestedTrackElementList.size();
-            Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
-            Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
+            Pair<Route.TrackElementType, ITrackElement> StartElement = requestedTrackElementList.get(0);
+            Pair<Route.TrackElementType, ITrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
             BlockedArea StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
                 ,iDistance_LRBG, iNID_LRBG, iQ_DirLrbg, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
             // start Area is blocked
@@ -220,8 +220,8 @@ public class SafetyLogic {
                 for(int i = 1; i < requestedTrackElementList.size() - 1; i++) {
                     // erstes und letztes Element wird nicht mit i referenziet letztes Element in letzter iteration
                     // => i + 1
-                    Pair<Route.TrackElementType, TrackElement> Element1 = requestedTrackElementList.get(i);
-                    Pair<Route.TrackElementType, TrackElement> Element2 = requestedTrackElementList.get(i + 1);
+                    Pair<Route.TrackElementType, ITrackElement> Element1 = requestedTrackElementList.get(i);
+                    Pair<Route.TrackElementType, ITrackElement> Element2 = requestedTrackElementList.get(i + 1);
                     // Waypoint between start and end have to be crossover nodes, ui is in this manner implemented
                     if(!Element1.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) return false;
                     if(!Element2.equals(EndElement)) {
@@ -322,7 +322,7 @@ public class SafetyLogic {
         return crossoverAreas;
     }
 /*
-    private BlockedArea createStartBlocking(Pair<Route.TrackElementType, TrackElement> startElement, TrainModel tm) {
+    private BlockedArea createStartBlocking(Pair<Route.TrackElementType, ITrackElement> startElement, TrainModel tm) {
         if(startElement.getLeft().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
             TopologyGraph.Node StartNode = (TopologyGraph.Node) startElement.getRight();
             return new BlockedArea(StartNode, StartNode.TopNodeId);
@@ -545,7 +545,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
      */
-    public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
         if(requestedTrackElementList == null) {
             throw new NullPointerException("Track List is null");
         } else if (requestedTrackElementList.isEmpty()) {
@@ -555,8 +555,8 @@ public class SafetyLogic {
         } else if(routeHasNullValue(requestedTrackElementList)) {
             throw new InvalidParameterException("Route must not have null value content");
         }
-        Pair<Route.TrackElementType, TrackElement> FirstElement = requestedTrackElementList.get(0);
-        Pair<Route.TrackElementType, TrackElement> LastElement = requestedTrackElementList.get(requestedTrackElementList.size() -1);
+        Pair<Route.TrackElementType, ITrackElement> FirstElement = requestedTrackElementList.get(0);
+        Pair<Route.TrackElementType, ITrackElement> LastElement = requestedTrackElementList.get(requestedTrackElementList.size() -1);
         try {
             if (requestedTrackElementList.size() == 2) {
                 if (bothElementsSameType(FirstElement, LastElement, Route.TrackElementType.RAIL_TYPE)) {
@@ -630,7 +630,7 @@ public class SafetyLogic {
         return true;
     }
 
-    private boolean handleDifferentialElements(Pair<Route.TrackElementType, TrackElement> edgeElement, Pair<Route.TrackElementType, TrackElement> nodeElement, TopologyGraph.Node N, TopologyGraph.Edge E) {
+    private boolean handleDifferentialElements(Pair<Route.TrackElementType, ITrackElement> edgeElement, Pair<Route.TrackElementType, ITrackElement> nodeElement, TopologyGraph.Node N, TopologyGraph.Edge E) {
         try {
             N = (TopologyGraph.Node) nodeElement.getRight();
 
@@ -646,7 +646,7 @@ public class SafetyLogic {
         return E.A.equals(N) || E.B.equals(N);
     }
 
-    private boolean firstOrLastElmentIsNOTconnectedWithMiddle(Pair<Route.TrackElementType, TrackElement> middleElement, Pair<Route.TrackElementType, TrackElement> firstOrLastElement) throws InvalidParameterException {
+    private boolean firstOrLastElmentIsNOTconnectedWithMiddle(Pair<Route.TrackElementType, ITrackElement> middleElement, Pair<Route.TrackElementType, ITrackElement> firstOrLastElement) throws InvalidParameterException {
         if(bothElementsSameType(firstOrLastElement, middleElement, Route.TrackElementType.RAIL_TYPE))
             return true;
 
@@ -684,7 +684,7 @@ public class SafetyLogic {
         return false;
     }
 
-    private void handleWrongElements(Pair<Route.TrackElementType, TrackElement> WrongTypeElement, boolean shallBeEdge) throws InvalidParameterException {
+    private void handleWrongElements(Pair<Route.TrackElementType, ITrackElement> WrongTypeElement, boolean shallBeEdge) throws InvalidParameterException {
         String sId;
         if(shallBeEdge) {
             sId = WrongTypeElement.getRight() instanceof TopologyGraph.Node ? ((TopologyGraph.Node) WrongTypeElement.getRight()).TopNodeId : null;
@@ -727,14 +727,14 @@ public class SafetyLogic {
      * @param type - type beeing same
      * @return
      */
-    private boolean bothElementsSameType(Pair<Route.TrackElementType, TrackElement> elementA,
-                                         Pair<Route.TrackElementType, TrackElement> elementB, Route.TrackElementType type) {
+    private boolean bothElementsSameType(Pair<Route.TrackElementType, ITrackElement> elementA,
+                                         Pair<Route.TrackElementType, ITrackElement> elementB, Route.TrackElementType type) {
         return elementA.getLeft().equals(type) && elementB.getLeft().equals(type);
     }
 
 
-    private boolean routeHasNullValue(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
-        for(Pair<Route.TrackElementType, TrackElement> RouteElement: requestedTrackElementList) {
+    private boolean routeHasNullValue(ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
+        for(Pair<Route.TrackElementType, ITrackElement> RouteElement: requestedTrackElementList) {
             if(RouteElement.getLeft() == null || RouteElement.getRight() == null) return true;
         }
         return false;
@@ -747,7 +747,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
      * @return boolean
      */
-    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
         //DBDClient dbdclient = new DBDClient();
         return true;
     }
@@ -947,7 +947,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert
@@ -959,7 +959,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, ITrackElement>> requestedTrackElementList) {
 
     }
 

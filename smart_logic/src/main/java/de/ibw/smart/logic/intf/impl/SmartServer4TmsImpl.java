@@ -12,7 +12,10 @@ import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
+import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan.NodeInformation;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.rbc_tms.message.Message_21;
@@ -344,11 +347,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, TrackElement> TePair = null;
+                Pair<Route.TrackElementType, ITrackElement> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
-                   TopologyGraph.Edge E =  PlanData.topGraph.edgeRepo.get(sId);
+                   TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 
@@ -357,7 +360,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
                 } else if(T.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sId);
+                    NodeInformation N = ISwitchHandler.getNodeInfoBySwitchId(sId);
                     if(N == null) {
                         if(EBM != null) EBM.log("Node Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
                         throw new NullPointerException("Some elements cannot be Identifed");

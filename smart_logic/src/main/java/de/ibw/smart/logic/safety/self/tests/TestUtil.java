@@ -47,7 +47,7 @@ public class TestUtil {
      * @param beginnOnEdge boolean - true Teststrecke beginnt auf Kante
      * @return Zufallsstrecke
      */
-    public static ArrayList<Pair<Route.TrackElementType, TrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
+    public static ArrayList<Pair<Route.TrackElementType, ITrackElement>> generateRandomContinousRoute(int iTargetAmountOfRouteElements,
                                                                                                       boolean beginnOnEdge, boolean beginnEdgeHasBalise, RouteConfig TestConfig) {
         SafetyLogicContinousConnectTest Submodul = new SafetyLogicContinousConnectTest();
         return Submodul.generateRandomContinousRoute(iTargetAmountOfRouteElements, beginnOnEdge, beginnEdgeHasBalise,
