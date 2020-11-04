@@ -97,17 +97,6 @@ public class Logging{
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
         logger.addHandler(fileHandler);
 
-        //Connecting the config value debug with the handlers, to pull them to level debug
-        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
-        /*if(ConfigHandler.getInstance().debug){
-            Handler[] handlers = logger.getParent().getHandlers();
-            for(Handler handler : handlers){
-                if(handler.getLevel() == Level.INFO){
-                    handler.setLevel(Level.FINE);
-                }
-            }
-        }
-*/
         this.eventBus = eventBus;
         this.eventBus.register(this);
 
@@ -124,17 +113,6 @@ public class Logging{
         logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
-
-        //Connecting the config value debug with the handerls, to pull them to level debug
-        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
-        /*if(ConfigHandler.getInstance().debug){
-            Handler[] handlers = logger.getParent().getHandlers();
-            for(Handler handler : handlers){
-                if(handler.getLevel() == Level.INFO){
-                    handler.setLevel(Level.FINE);
-                }
-            }
-        }*/
 
         eventBus = EventBus.getDefault();
         eventBus.register(this);
