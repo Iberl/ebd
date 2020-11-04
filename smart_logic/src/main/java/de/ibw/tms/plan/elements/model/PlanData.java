@@ -31,6 +31,7 @@ import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
 import javax.xml.bind.JAXBException;
 import java.awt.geom.Line2D;
@@ -355,7 +356,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
-        if(checkSameAnlage(A,B)) {
+        if(checkSameAnlage(A,B,true)) {
             Ref = handleSameAnlage(e);
             EdgeIdLookupRepo.update(Ref, e);
             EdgeLookupByIdRepo.update(e,Ref);
@@ -377,7 +378,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
 
-        if(checkSameAnlage(A,B)) return handleSameAnlage(e);
+        if(checkSameAnlage(A,B,true)) return handleSameAnlage(e);
         String aId = SwitchIdRepo.getModel(A);
         String bId = SwitchIdRepo.getModel(B);
         if(aId == null && bId == null) return null;
@@ -386,12 +387,12 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             Ref = bId;
             RefConnect = e.TopConnectFromB;
 
-            isDKW = checkSameAnlage(B,B);
+            isDKW = checkSameAnlage(B,B, true);
         } else if(bId == null) {
             Ref = aId;
             RefConnect = e.TopConnectFromA;
 
-            isDKW = checkSameAnlage(A,A);
+            isDKW = checkSameAnlage(A,A, true);
         } else {
 
 
@@ -401,12 +402,12 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 Ref = aId;
                 RefConnect = e.TopConnectFromA;
 
-                isDKW = checkSameAnlage(A,A);
+                isDKW = checkSameAnlage(A,A, true);
             } else {
                 Ref = bId;
                 RefConnect = e.TopConnectFromB;
 
-                isDKW = checkSameAnlage(B,B);
+                isDKW = checkSameAnlage(B,B, true);
             }
 
 
@@ -416,13 +417,16 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
             if(Ref.equals(aId)) {
                 CS = (CrossingSwitch) A.NodeImpl;
-
+                List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
+                Ref = getLinkNameToDKW(CS, switchList);
+                return refOfNodeConnectingDKW(Ref, A, e ,RefConnect);
             } else {
                 CS = (CrossingSwitch) B.NodeImpl;
+                List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
+                Ref = getLinkNameToDKW(CS, switchList);
+                return refOfNodeConnectingDKW(Ref, B, e ,RefConnect);
             }
-            List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
-            Ref = getLinkNameToDKW(CS, switchList);
-            return refOfNodeConnectingDKW(Ref, A, e ,RefConnect);
+
             
         }
         Ref = addOrientation(Ref, RefConnect);
@@ -435,14 +439,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         if(refConnect.equals(TopologyConnect.RECHTS)) return ref + "R";
         for(TopologyGraph.Edge E : a.inEdges) {
             if(e.equals(E)) continue;
-            if(checkSameAnlage(E.A,E.B)) {
+            if(checkSameAnlage(E.A,E.B, true)) {
                 if (E.getRefId().endsWith("RR")) return ref + "R";
                 if (E.getRefId().endsWith("LL")) return ref + "L";
             }
         }
         for(TopologyGraph.Edge E : a.outEdges) {
             if(e.equals(E)) continue;
-            if(checkSameAnlage(E.A,E.B)) {
+            if(checkSameAnlage(E.A,E.B, true)) {
                 if (E.getRefId().endsWith("RR")) return ref + "R";
                 if (E.getRefId().endsWith("LL")) return ref + "L";
             }
@@ -508,7 +512,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * @param b - Node B
      * @return true - same anlage else false
      */
-    public static boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b) {
+    public static boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b, boolean shallBeDKW) {
         CrossingSwitch CSA;
         CrossingSwitch CSB;
         try {
@@ -518,6 +522,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             return false;
         }
         if(CSA == null || CSB == null) return false;
+        if(shallBeDKW && !CSA.getAnlage().getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.DKW)) return false;
         return CSA.isSameAnlage(CSB);
     }
 

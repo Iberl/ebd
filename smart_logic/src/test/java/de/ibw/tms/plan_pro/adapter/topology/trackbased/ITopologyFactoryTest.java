@@ -68,7 +68,7 @@ class ITopologyFactoryTest {
     }
 
     private void printNode(TopologyGraph.Node a, TopologyConnect topConnectFromA, String s) {
-        String isDKW = PlanData.checkSameAnlage(a,a) ? "yes" : "no";
+        String isDKW = PlanData.checkSameAnlage(a,a, true) ? "yes" : "no";
         System.out.println("Node " + s +  " id: " + a.TopNodeId + " type: " + topConnectFromA.value() + " is DKW: " + isDKW);
         String sCrossoverName = ISwitchHandler.getNodeId(a);
         if(sCrossoverName == null) System.out.println("Node has no Id");
