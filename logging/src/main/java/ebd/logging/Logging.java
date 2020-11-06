@@ -3,6 +3,7 @@ package ebd.logging;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
+import ebd.globalUtils.events.dmi.ToLogDeepDebugEvent;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.util.handler.PipeHandler;
@@ -21,9 +22,9 @@ import java.util.logging.*;
 
 public class Logging{
 
-    private Logger logger;
-    private EventBus eventBus;
-    private String logPrefix;
+    private final Logger logger;
+    private final EventBus eventBus;
+    private final String logPrefix;
     static String logDateTime;
     static Handler fileHandlerAll;
     static Handler pipeHandler;
@@ -39,24 +40,24 @@ public class Logging{
                 if(!createdFile && !propertyFile.exists()){
                     throw new IOException("logging.properties could not be created");
                 }
-            }
-            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
+                try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
 
-                if(inputStream == null) {
-                    throw new IOException("The stream logging.properties could not be found");
-                }
+                    if(inputStream == null) {
+                        throw new IOException("The stream logging.properties could not be found");
+                    }
 
-                try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
-                    int length;
-                    byte[] buffer = new byte[1024];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
+                    try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+                        int length;
+                        byte[] buffer = new byte[1024];
+                        while ((length = inputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, length);
+                        }
+                    }catch (IOException ioe){
+                        throw new IOException("logging.properties could not be created. " + ioe.getMessage());
                     }
                 }catch (IOException ioe){
-                    throw new IOException("logging.properties could not be created. " + ioe.getMessage());
+                    throw ioe;
                 }
-            }catch (IOException ioe){
-                throw ioe;
             }
         }catch (IOException e){
             e.printStackTrace();
@@ -95,18 +96,6 @@ public class Logging{
         logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
         logger.addHandler(fileHandler);
-        //logger.getParent().addHandler(new PipeHandler());
-
-        //Connecting the config value debug with the handerls, to pull them to level debug
-        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
-        if(ConfigHandler.getInstance().debug){
-            Handler[] handlers = logger.getParent().getHandlers();
-            for(Handler handler : handlers){
-                if(handler.getLevel() == Level.INFO){
-                    handler.setLevel(Level.FINE);
-                }
-            }
-        }
 
         this.eventBus = eventBus;
         this.eventBus.register(this);
@@ -124,17 +113,6 @@ public class Logging{
         logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " GB.log");
         logger.addHandler(fileHandler);
-
-        //Connecting the config value debug with the handerls, to pull them to level debug
-        //We only do this, when the level is Level.INFO, else we assume that this was deliberately chosen.
-        if(ConfigHandler.getInstance().debug){
-            Handler[] handlers = logger.getParent().getHandlers();
-            for(Handler handler : handlers){
-                if(handler.getLevel() == Level.INFO){
-                    handler.setLevel(Level.FINE);
-                }
-            }
-        }
 
         eventBus = EventBus.getDefault();
         eventBus.register(this);
@@ -161,7 +139,7 @@ public class Logging{
     public void onNormalEvent(NormalEvent normalEvent) {
         if (!normalEvent.getClass().getName().equals("ebd.globalUtils.events.logger.ToLogEvent")) {
             String padSrc = String.format("%4s", normalEvent.source); //Inserted by LSF
-            logger.finer(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
+            logger.finest(logPrefix + ": " + padSrc + ": " + normalEvent.getClass().getSimpleName() + " occurred");
         }
     }
 
@@ -184,5 +162,15 @@ public class Logging{
     public void toLogDebugEvent(ToLogDebugEvent toLogDebugEvent){
         String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
         logger.fine("debug: " + logPrefix + ": " + padSrc + ": " + toLogDebugEvent.msg);
+    }
+
+    /**
+     * log when ToLogDeepDebugEvent occurred
+     * @param toLogDebugEvent
+     */
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void toLogDeepDebugEvent(ToLogDeepDebugEvent toLogDebugEvent){
+        String padSrc = String.format("%3s", toLogDebugEvent.source); //Inserted by LSF
+        logger.finer("debug: " + logPrefix + ": " + padSrc + ": " + toLogDebugEvent.msg);
     }
 }

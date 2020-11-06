@@ -307,8 +307,8 @@ public class TrainsHandler {
                 System.exit(-1);
             }
             this.addTrain(etcsID,
-                    infrastructureID,
                     trainConfigID,
+                    infrastructureID,
                     trainScheduleID,
                     rbcID,
                     startingBaliseGroup,
