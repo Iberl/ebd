@@ -97,6 +97,7 @@ public class DMIServer implements Runnable {
 
         for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)){
             dmiClientWorker.sendString(dmiUpdateEvent.dmiUpdateString);
+            //dmiClientWorker.sendString("gp 0.0,0.0;100.0,-5.0;300,2.0;1000,0.0;1500,1.0;4000,-3.0");
         }
     }
 }
