@@ -1,6 +1,7 @@
 package de.ibw.util;
 
 import de.ibw.feed.Balise;
+import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
@@ -30,7 +31,7 @@ import static ebd.rbc_tms.util.ETCSVariables.*;
  * @author iberl@verkehr.tu-darmstadt.de
  *
  * @version 0.4
- * @since 2020-10-07
+ * @since 2020-11-05
  */
 public class UtilFunction {
 
@@ -403,5 +404,22 @@ public class UtilFunction {
 
         }
         return CalcTarget;
+    }
+
+    /**
+     * Intrinisic calculator
+     * @param dTopLength - double whole edge length
+     * @param scale {@link de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE} - Q_Scale
+     * @param iDistance int - distance in q_scale units
+     * @return double - result in 0 - 1 as percents but not form 0 to 100, but form 0.0 to 1.0
+     */
+    public static double generateIntrinsic(double dTopLength, Occupation.BLOCK_Q_SCALE scale, int iDistance) {
+        BigDecimal dDistance = new BigDecimal(iDistance);
+        BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
+        BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));
+        if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dDistance) <= 0) {
+           return dPartDistance.divide(dDistance).doubleValue();
+        }
+        throw new InvalidParameterException("Subdistance has to be larger than 0 but smaller than whole Edgelength");
     }
 }

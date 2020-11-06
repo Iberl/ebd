@@ -1,6 +1,8 @@
 package de.ibw.tms.ma;
 
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.plan.elements.Rail;
 
 import java.io.Serializable;

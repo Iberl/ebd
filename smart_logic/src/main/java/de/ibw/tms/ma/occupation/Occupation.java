@@ -1,14 +1,19 @@
 package de.ibw.tms.ma.occupation;
 
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.util.UtilFunction;
+import org.railMl.rtm4rail.TApplicationDirection;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.signale._1_9_0.CSignal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -67,27 +72,8 @@ public class Occupation extends TrackArea {
      */
     private String sIdOfElement;
 
-    /**
-     * a longer Track beeing blocked
-     * it can not a track and an element be blocked in one Blocked Area
-     */
-    private TopologyGraph.Edge Edge;
-    /**
-     * Scale Distance from Point A of Edge to Start Ma or Start of Edge
-     */
-    private BLOCK_Q_SCALE q_scale_block_To_StartMa;
-    /**
-     * Distance from Point A of Edge to Start Ma or Start of Edge
-     */
-    private int d_from_PointA_of_GeoEdge_to_BlockStartMa;
-    /**
-     * Scale Distance from Point A of Edge to End Ma or End of Edge
-     */
-    private BLOCK_Q_SCALE q_scale_block_To_EndMa;
-    /**
-     *  Distance from Point A of Edge to End Ma or End of Edge
-     */
-    private int d_from_PointA_of_GeoEdge_to_BlockEndMa;
+
+
 
     public Occupation(String sName) {
         super(sName);
@@ -106,22 +92,36 @@ public class Occupation extends TrackArea {
      * @param d_A_to_Block_End - Distence to Ma- or Block-End
      */
     public Occupation(TopologyGraph.Edge E, BLOCK_Q_SCALE Start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE End_Ma,
-                      int d_A_to_Block_End) {
-        this.Edge = E;
-        this.q_scale_block_To_StartMa = Start_Ma;
-        this.d_from_PointA_of_GeoEdge_to_BlockStartMa = d_A_to_Block_Start;
-        this.q_scale_block_To_EndMa = End_Ma;
-        this.d_from_PointA_of_GeoEdge_to_BlockEndMa = d_A_to_Block_End;
+                      int d_A_to_Block_End,String sOccname) {
+        super(sOccname);
+        initOccupation(E, Start_Ma, d_A_to_Block_Start, End_Ma, d_A_to_Block_End);
+
     }
 
-    /**
-     * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
-     * @param Element beeing Blocked
-     */
-    public Occupation(Pos Element, String sId) {
-        this.BlockedElement = Element;
-        this.sIdOfElement = sId;
+    public void initOccupation(TopologyGraph.Edge e, BLOCK_Q_SCALE start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE end_Ma, int d_A_to_Block_End) {
+        this.setApplicationDirection(TApplicationDirection.BOTH);
+        TrackEdgeSection EdgeSection = new TrackEdgeSection();
+        SpotLocationIntrinsic begin = new SpotLocationIntrinsic();
+        SpotLocationIntrinsic end = new SpotLocationIntrinsic();
+        initEdgeSections(e, start_Ma, d_A_to_Block_Start, end_Ma, d_A_to_Block_End, EdgeSection, begin, end);
     }
+
+    public void initEdgeSections(TopologyGraph.Edge e, BLOCK_Q_SCALE start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE end_Ma, int d_A_to_Block_End, TrackEdgeSection edgeSection, SpotLocationIntrinsic begin, SpotLocationIntrinsic end) {
+        begin.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, start_Ma, d_A_to_Block_Start));
+        end.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, end_Ma, d_A_to_Block_End));
+        defineOccupatedSection(e, edgeSection, begin, end);
+        List<TrackEdgeSection> edgeList = new ArrayList<>();
+        edgeList.add(edgeSection);
+
+        this.setTrackEdgeSections(edgeList);
+    }
+
+    public void defineOccupatedSection(TopologyGraph.Edge e, TrackEdgeSection edgeSection, SpotLocationIntrinsic begin, SpotLocationIntrinsic end) {
+        edgeSection.setTrackEdge(e);
+        edgeSection.setBegin(begin);
+        edgeSection.setEnd(end);
+    }
+
 
     /**
      * Pr&uuml;ft ob sid blockiert ist.
@@ -139,10 +139,8 @@ public class Occupation extends TrackArea {
      * @return boolean - gibt an ob Gefahrenpunkte bestehen
      */
     public boolean compareIfIntersection(Occupation OtherArea) {
-        boolean hasSameType = check4BeeingSameTrackElementType(OtherArea);
-        if(!hasSameType)  return handleNotHavingSameType(OtherArea);
-        else {
-            if(this.Edge == null) {
+            
+        if(this.Edge == null) {
                 // both are no RailsType
                 TopologyGraph.Node thisNode = (TopologyGraph.Node) this.BlockedElement;
                 TopologyGraph.Node N2 = (TopologyGraph.Node) OtherArea.BlockedElement;
@@ -156,8 +154,8 @@ public class Occupation extends TrackArea {
 
 
             }
-        }
     }
+
 
     private boolean handleNotHavingSameType(Occupation otherArea) {
         Occupation EdgeArea = null;

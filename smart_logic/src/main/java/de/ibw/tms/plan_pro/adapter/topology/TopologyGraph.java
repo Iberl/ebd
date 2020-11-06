@@ -1,9 +1,9 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -168,7 +168,7 @@ public class TopologyGraph {
     /**
      * Topologische Kante
      */
-    public static class Edge extends TrackElement {
+    public static class Edge extends TrackEdge {
 
 
 
@@ -217,7 +217,7 @@ public class TopologyGraph {
         }
 
         public String getRefId() {
-            return PlanData.getInstance().getRefIdOfEdge(this);
+            return PlanData.getRefIdOfEdge(this);
         }
 
         /**

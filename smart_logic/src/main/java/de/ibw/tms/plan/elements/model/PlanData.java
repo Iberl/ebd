@@ -7,6 +7,7 @@ import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.*;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.BranchingSwitch;
@@ -41,8 +42,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-05
  */
 public class PlanData implements Flow.Subscriber<GradientProfile> {
 
@@ -111,7 +112,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
          * @param TE {@link TrackElement} - Ein logischen Gleis Trail
          * @param Line - ein {@link Rail} - geographisches Gleise
          */
-        public static void put(TrackElement TE, Line2D.Double Line) {
+        public static void put(TopologyGraph.Edge TE, Line2D.Double Line) {
             positionMap.put(TE, Line);
         }
 
@@ -298,7 +299,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
             setNodeToBranchingPoints();
             System.out.println("Test");
-        } catch (ParseException e) {
+        } catch (ParseException | JAXBException e) {
             e.printStackTrace();
         }
     }
@@ -318,8 +319,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(planProEdges.size() < 2) continue;
             sEdgeId1 = planProEdges.get(0).getIDTOPKante().getWert();
             sEdgeId2 = planProEdges.get(1).getIDTOPKante().getWert();
-            E1 = topGraph.EdgeRepo.get(sEdgeId1);
-            E2 = topGraph.EdgeRepo.get(sEdgeId2);
+            E1 = topGraph.edgeRepo.get(sEdgeId1);
+            E2 = topGraph.edgeRepo.get(sEdgeId2);
             if(E1 == null || E2 == null) continue;
             TopologyGraph.Node N = null;
             if(E2.A.equals(E1.A) || E2.B.equals(E1.A)) {
@@ -432,10 +433,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 Chainage ChainageN = ChainageSupply.getModel(N);
                 Chainage ChainageN2 = ChainageSupply.getModel(N2);
 
-                float x1 = N.getGeoCoordinates().getFloatX();
-                float y1 = N.getGeoCoordinates().getFloatY();
-                float x2 = N2.getGeoCoordinates().getFloatX();
-                float y2 = N2.getGeoCoordinates().getFloatY();
+                float x1 = (float) N.getGeoCoordinates().getX();
+                float y1 = (float) N.getGeoCoordinates().getY();
+                float x2 = (float) N2.getGeoCoordinates().getX();
+                float y2 = (float) N2.getGeoCoordinates().getY();
 
                 handleCrossoverInput(N, N2, ConnectN2, ConnectN, ChainageN, ChainageN2, x1, y1, x2, y2);
 
@@ -535,40 +536,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         de.ibw.tms.ma.location.SpotLocation B9Location = new de.ibw.tms.ma.location.SpotLocation(B9Chainage, null, BeheimWholeSection);
         de.ibw.tms.ma.location.SpotLocation B10Location = new SpotLocation(B10Chainage, null, BeheimWholeSection);
 
-
-        GradientSegment GS_0_1000_8 = new GradientSegment(LeftLocation, B2Location, ApplicationDirection.BOTH);
-        ETCS_GRADIENT etcsGradient8 = new ETCS_GRADIENT();
-        etcsGradient8.bGradient = 8;
-        GS_0_1000_8.setGradient(etcsGradient8, true);
-        gradientProfiles.add(GS_0_1000_8);
-
-        GradientSegment GS_1000_1900_0 = new GradientSegment(B2Location, B4Location,ApplicationDirection.BOTH);
-        ETCS_GRADIENT etcsGradient0 = new ETCS_GRADIENT();
-        etcsGradient0.bGradient = 0;
-        GS_1000_1900_0.setGradient(etcsGradient0, false);
-        gradientProfiles.add(GS_1000_1900_0);
-
-        GradientSegment GS_1900_2200_M10 = new GradientSegment(B4Location,B5Location, ApplicationDirection.BOTH);
-        ETCS_GRADIENT etcsGradientM10 = new ETCS_GRADIENT();
-        etcsGradientM10.bGradient = 10;
-        GS_1900_2200_M10.setGradient(etcsGradientM10, false);
-        gradientProfiles.add(GS_1900_2200_M10);
-
-        GradientSegment GS_2200_2800_10 = new GradientSegment(B5Location, B8Location, ApplicationDirection.BOTH);
-        ETCS_GRADIENT etcsGradient10 = new ETCS_GRADIENT();
-        etcsGradient10.bGradient = 10;
-        GS_2200_2800_10.setGradient(etcsGradient10, true);
-        gradientProfiles.add(GS_2200_2800_10);
-
-        GradientSegment GS_2800_3000_M5 = new GradientSegment(B8Location, B9Location, ApplicationDirection.BOTH);
-        ETCS_GRADIENT etcsGradientM5 = new ETCS_GRADIENT();
-        etcsGradientM5.bGradient = 5;
-        GS_2800_3000_M5.setGradient(etcsGradientM5, false);
-        gradientProfiles.add(GS_2800_3000_M5);
-
-        GradientSegment GS_3000_3500_0 = new GradientSegment(B9Location, B10Location, ApplicationDirection.BOTH);
-        GS_3000_3500_0.setGradient(etcsGradient0, false);
-        gradientProfiles.add(GS_3000_3500_0);
 
 
 
