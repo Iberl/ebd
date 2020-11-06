@@ -4,7 +4,6 @@ import de.ibw.feed.Balise;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;

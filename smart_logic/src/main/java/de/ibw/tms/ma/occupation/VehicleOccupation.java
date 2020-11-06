@@ -3,6 +3,7 @@ package de.ibw.tms.ma.occupation;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
 import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.globalUtils.position.Position;
 
 /**
@@ -20,6 +21,9 @@ public class VehicleOccupation extends Occupation {
 
     public VehicleOccupation() {
         super(CLASS_IDENTIFIER);
+    }
+    public VehicleOccupation(TopologyGraph.Edge e, BLOCK_Q_SCALE qScale1m, int i, BLOCK_Q_SCALE qScale1m1, int i1) {
+        super(e,qScale1m,i,qScale1m1,i1,CLASS_IDENTIFIER);
     }
 
     public SafeMOBPosition getPosition() {

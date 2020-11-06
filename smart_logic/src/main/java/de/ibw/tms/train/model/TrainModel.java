@@ -1,7 +1,6 @@
 package de.ibw.tms.train.model;
 
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
 

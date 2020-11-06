@@ -1,6 +1,5 @@
 package de.ibw.tms.plan.elements;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 

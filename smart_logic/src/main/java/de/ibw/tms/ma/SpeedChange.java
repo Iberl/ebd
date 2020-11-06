@@ -1,8 +1,6 @@
 package de.ibw.tms.ma;
 
 import de.ibw.tms.etcs.Q_FRONT;
-import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.positioned.elements.InformationPoint;
 
 import java.io.Serializable;

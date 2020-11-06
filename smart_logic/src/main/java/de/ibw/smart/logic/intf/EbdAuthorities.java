@@ -5,7 +5,6 @@ import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.EdgeOfMap;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 
 import java.util.ArrayList;

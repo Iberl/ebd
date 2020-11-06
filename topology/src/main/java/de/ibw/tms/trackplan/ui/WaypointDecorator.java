@@ -1,7 +1,6 @@
 package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.Waypoint;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.plan.elements.UiTools;
 

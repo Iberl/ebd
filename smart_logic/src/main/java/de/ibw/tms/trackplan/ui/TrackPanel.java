@@ -3,7 +3,6 @@ package de.ibw.tms.trackplan.ui;
 import de.ibw.tms.ma.physical.DoubleSlip;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.SlipConnectionPoint;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;

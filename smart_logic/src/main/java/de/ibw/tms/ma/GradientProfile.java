@@ -1,6 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,6 +10,14 @@ import java.util.List;
         "movementAuthority"
 
 })
+/**
+ * Ein Profil als Gradient Segments
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-11-06
+ */
 public class GradientProfile implements Serializable {
     private MovementAuthority movementAuthority;
     private List<GradientSegment> segmentList;
@@ -20,7 +29,7 @@ public class GradientProfile implements Serializable {
     public void addSegment(GradientSegment GS) {
         if(!this.segmentList.contains(GS)) {
             this.segmentList.add(GS);
-            GS.addToProfile(this);
+
         }
     }
 

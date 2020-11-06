@@ -4,11 +4,9 @@ import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.gradient.profile.controller.GradientController;
 import de.ibw.tms.gradient.profile.viewmodel.GradientTableModel;
-import de.ibw.tms.ma.GradientSegment;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.physical.Trail;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 
@@ -173,7 +171,7 @@ public class GradientFrame extends JFrame {
 
             SpotLocation EndLocation = new SpotLocation(T.getChainageEnd(), T, S);
 
-
+            /*
             // Test Values
             if(i != 0) {
                 Segment = new GradientSegment(BeginLocation, EndLocation, ApplicationDirection.BOTH);
@@ -199,7 +197,7 @@ public class GradientFrame extends JFrame {
 
 
             PlanData.putGradientData(TrailModel, segmentList);
-
+            */
         }
 
 

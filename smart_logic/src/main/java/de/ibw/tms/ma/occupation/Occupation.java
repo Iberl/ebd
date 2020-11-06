@@ -3,15 +3,18 @@ package de.ibw.tms.ma.occupation;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.UtilFunction;
+import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.TApplicationDirection;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.signale._1_9_0.CSignal;
 
 import java.math.BigDecimal;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,19 +30,21 @@ public class Occupation extends TrackArea {
     public static final String CLASS_IDENTIFIER = "Occupation";
 
 
+
     /**
+     * @Deprecated
      * Checkt diese Area (zum Beispiel als eine Balise mit Datenpunktbereich) ob sie sich im Grenzbereich einer Weiche sich befindet
      * @return ArrayList - Liste von Grenzbereichbetretungen - meist nur 0 oder 1 Elemente
      */
     public ArrayList<Occupation> getListOfEdgeLimits() {
         ArrayList<Occupation> resultArea = new ArrayList<>();
-        if(Edge == null) return resultArea;
+        /*if(Edge == null) return resultArea;
         if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.A, true)) {
             resultArea.add(new Occupation(Edge.A, Edge.A.TopNodeId));
         }
         if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.B, false)) {
             resultArea.add(new Occupation(Edge.B, Edge.B.TopNodeId));
-        }
+        }*/
         return resultArea;
     }
 
@@ -139,26 +144,32 @@ public class Occupation extends TrackArea {
      * @return boolean - gibt an ob Gefahrenpunkte bestehen
      */
     public boolean compareIfIntersection(Occupation OtherArea) {
-            
-        if(this.Edge == null) {
-                // both are no RailsType
-                TopologyGraph.Node thisNode = (TopologyGraph.Node) this.BlockedElement;
-                TopologyGraph.Node N2 = (TopologyGraph.Node) OtherArea.BlockedElement;
-                // same -> then there oul be an intersection on node
-                return thisNode.TopNodeId.equals(N2.TopNodeId);
+        List<TrackEdgeSection> tesList = this.getTrackEdgeSections();
+        List<TrackEdgeSection> otherList = OtherArea.getTrackEdgeSections();
+        if(tesList == null || otherList == null)
+            throw new InvalidParameterException("Section Edges-List must not be null");
+        if(tesList.size() == 0 || otherList.size() == 0) return false;
+        for(TrackEdgeSection ThisSection : tesList) {
+            for(TrackEdgeSection OtherSection : otherList) {
+                if(ThisSection == null || OtherSection == null)
+                    throw new InvalidParameterException("Sections must not be null");
 
-            } else {
-
-                if(!this.Edge.sId.equals(OtherArea.Edge.sId)) return false;
-                else return this.intersects(this, OtherArea);
-
-
+                if(this.intersects(ThisSection, OtherSection)) return true;
             }
+        }
+        return false;
+
+
     }
 
-
+    /**
+     * @deprecated
+     * @param otherArea
+     * @return
+     */
     private boolean handleNotHavingSameType(Occupation otherArea) {
-        Occupation EdgeArea = null;
+        throw new NotImplementedException("Deprecated");
+        /*Occupation EdgeArea = null;
         TopologyGraph.Edge E = null;
         TopologyGraph.Node N = null;
         if(this.Edge == null) {
@@ -180,10 +191,11 @@ public class Occupation extends TrackArea {
         } catch(Exception Except) {
             return true;
         }
-        return false;
+        return false;*/
     }
 
     /**
+     * @deprecated
      * Pr&uuml;ft ob die Straße zu einem Grenzsignal einer Weiche reicht
      * @param edgeArea {@link Occupation} - der blockierte Bereich
      * @param e TopologyGraph.Edge - die Kante selbst
@@ -192,6 +204,8 @@ public class Occupation extends TrackArea {
      * @return boolean ob ein Grenzsignalbereich betreten wird
      */
     private boolean checkIfBlockedAreaReachingToCrossoverLimits(Occupation edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
+       throw new NotImplementedException("deprecated");
+        /*
         CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
         if(CS == null) return false;
 
@@ -206,6 +220,8 @@ public class Occupation extends TrackArea {
             }
         }
         return false;
+
+         */
     }
 
     private Boolean checkifConnectedByA(TopologyGraph.Edge e, TopologyGraph.Node n) {
@@ -215,12 +231,16 @@ public class Occupation extends TrackArea {
 
     }
 
-    private boolean intersects(Occupation occupation, Occupation otherArea) {
+    private boolean intersects(TrackEdgeSection ThisSection, TrackEdgeSection OtherSection) {
+        TrackEdge ThisEdge = ThisSection.getTrackEdge();
+        TrackEdge OtherEdge = OtherSection.getTrackEdge();
+        if(ThisEdge == null || OtherEdge == null) throw new InvalidParameterException("Edges must not be null");
+        if(!ThisEdge.equals(OtherEdge)) return false;
 
-        int iStart1 = (int) (occupation.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, occupation.q_scale_block_To_StartMa.getiScaleValue()-1));
-        int iEnd1 = (int) (occupation.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, occupation.q_scale_block_To_EndMa.getiScaleValue()-1) );
-        int iStart2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockStartMa * Math.pow(10, otherArea.q_scale_block_To_StartMa.getiScaleValue()-1));
-        int iEnd2 = (int) (otherArea.d_from_PointA_of_GeoEdge_to_BlockEndMa * Math.pow(10, otherArea.q_scale_block_To_EndMa.getiScaleValue()-1));
+        double iStart1 = ThisSection.getBegin().getIntrinsicCoord();
+        double iEnd1 = ThisSection.getEnd().getIntrinsicCoord();
+        double iStart2 = OtherSection.getBegin().getIntrinsicCoord();
+        double iEnd2 = OtherSection.getEnd().getIntrinsicCoord();
 
         if(((iStart1 >= iStart2 || iEnd1 >= iStart2) && (iStart2 >= iStart1 || iEnd2 >= iStart1))) {
             System.out.println("iStart1: " + iStart1);
@@ -234,12 +254,13 @@ public class Occupation extends TrackArea {
 
     }
 
+    /**
+     * @deprecated
+     * @param otherArea
+     * @return
+     */
     private boolean check4BeeingSameTrackElementType(Occupation otherArea) {
-        if(this.Edge == null && otherArea.Edge != null) return false;
-        if(otherArea != null && otherArea.Edge == null) return false;
-        return true;
-        // returns true when its same rail or both ar not a rail
-
+        throw new NotImplementedException("deprecated");
     }
 
     @Override
@@ -247,15 +268,11 @@ public class Occupation extends TrackArea {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Occupation that = (Occupation) o;
-        return d_from_PointA_of_GeoEdge_to_BlockStartMa == that.d_from_PointA_of_GeoEdge_to_BlockStartMa &&
-                d_from_PointA_of_GeoEdge_to_BlockEndMa == that.d_from_PointA_of_GeoEdge_to_BlockEndMa &&
-                Objects.equals(sIdOfElement, that.sIdOfElement) &&
-                q_scale_block_To_StartMa == that.q_scale_block_To_StartMa &&
-                q_scale_block_To_EndMa == that.q_scale_block_To_EndMa;
+        return (that.getTrackEdgeSections().equals(((Occupation) o).getTrackEdgeSections()));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sIdOfElement, q_scale_block_To_StartMa, d_from_PointA_of_GeoEdge_to_BlockStartMa, q_scale_block_To_EndMa, d_from_PointA_of_GeoEdge_to_BlockEndMa);
+        return Objects.hash(this.getName(), this.getTrackEdgeSections());
     }
 }

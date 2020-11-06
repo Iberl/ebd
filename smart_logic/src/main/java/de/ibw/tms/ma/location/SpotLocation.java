@@ -1,6 +1,5 @@
 package de.ibw.tms.ma.location;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 import de.ibw.rtm.intf.IRTMGeometricCoordinate;
 import de.ibw.rtm.intf.IRTMLinearCoordinate;
@@ -9,8 +8,6 @@ import de.ibw.rtm.intf.IRTMSpotLocation;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.common.DefaultObject;
-import de.ibw.tms.ma.physical.TrackElement;
-import jdk.jshell.spi.ExecutionControl;
 import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMGeometricCoordinate;
 import org.railMl.rtm4rail.RTMLinearCoordinate;
@@ -72,13 +69,7 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
         this.chainage = chainage;
     }
 
-    public TrackElement getTrackElement() {
-        return trackElement;
-    }
 
-    public void setTrackElement(TrackElement trackElement) {
-        this.trackElement = trackElement;
-    }
 
     public SectionOfLine getLineSection() {
         return lineSection;

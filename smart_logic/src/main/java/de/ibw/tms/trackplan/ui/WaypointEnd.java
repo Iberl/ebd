@@ -3,7 +3,6 @@ package de.ibw.tms.trackplan.ui;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 

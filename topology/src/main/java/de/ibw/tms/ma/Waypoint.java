@@ -1,6 +1,5 @@
 package de.ibw.tms.ma;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 
 import java.io.Serializable;

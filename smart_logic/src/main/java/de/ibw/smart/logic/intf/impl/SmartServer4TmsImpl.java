@@ -12,13 +12,14 @@ import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.MA;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -344,7 +345,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, TrackElement> TePair = null;
+                Pair<Route.TrackElementType, NetworkResource> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -441,12 +442,21 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return requestedTrackElementList;
     }*/
 
+    /**
+     * @deprecated
+     * @param requestedTrackElementList
+     * @param wayStart
+     * @param wayEnd
+     * @return
+     */
     private boolean handleWaypontsOnOneTrail(ArrayList<TrackElement> requestedTrackElementList, Waypoint wayStart, Waypoint wayEnd) {
+        throw new NotImplementedException("deprecated");/*
         if(wayStart.getTrackElement() == wayEnd.getTrackElement()) {
             requestedTrackElementList.add(wayStart.getTrackElement());
             return true;
         }
         return false;
+        */
     }
 
 

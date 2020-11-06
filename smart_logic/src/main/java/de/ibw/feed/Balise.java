@@ -1,7 +1,6 @@
 package de.ibw.feed;
 
 
-import de.ibw.tms.ma.Occupation;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;

@@ -1,6 +1,5 @@
 package de.ibw.smart.logic.datatypes;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;

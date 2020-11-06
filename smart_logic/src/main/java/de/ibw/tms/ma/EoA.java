@@ -6,8 +6,6 @@ import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_TIMER;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.etcs.T_EMA;
-import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.spotsma.MASpots;
 
 import java.io.Serializable;

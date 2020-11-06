@@ -48,21 +48,7 @@ public class LinearLocation extends EntityLocation implements IRTMLinearLocation
 
 
 
-    public Comparator<SpeedSegment> SpeedComparator() {
-        return new Comparator<SpeedSegment>() {
-            @Override
-            public int compare(SpeedSegment lhs, SpeedSegment rhs) {
-                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                if (lhs.getBegin().getChainage().getiMeters() > rhs.getBegin().getChainage().getiMeters()) return 1;
-                if (lhs.getBegin().getChainage().getiMeters() < rhs.getBegin().getChainage().getiMeters()) return -1;
-                if (lhs.getBegin().getChainage().getiMeters() == rhs.getBegin().getChainage().getiMeters()) {
-                    if (lhs.getV_STATIC().bSpeed == 0) return 1;
-                    else return -1;
-                }
-                return 0;
-            }
-        };
-    }
+
     public Comparator<LinearLocation> DefaultComparator() {
         return new Comparator<LinearLocation>() {
             @Override

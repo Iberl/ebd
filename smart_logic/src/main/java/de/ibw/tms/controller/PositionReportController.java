@@ -6,7 +6,6 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;

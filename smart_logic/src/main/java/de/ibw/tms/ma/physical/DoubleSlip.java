@@ -13,8 +13,7 @@ public class DoubleSlip extends SlipConnectionPoint {
 
 
     public DoubleSlip(Chainage C) {
-        this.setChainageBeginn(C);
-        this.setChainageEnd(C);
+
         this.FirstSlipA = new SingleSlip(C);
         this.SecondSlipB = new SingleSlip(C);
     }
@@ -28,7 +27,7 @@ public class DoubleSlip extends SlipConnectionPoint {
     }
 
     public void updatePositionedRelation(List<PositionedRelation> relationList, String sViewNameA, String sViewNameB) {
-        super.updatePositionedRelation(relationList);
+
         this.FirstSlipA.updatePositionedRelation(relationList.subList(0,2));
         if(sViewNameA != null) {
             this.FirstSlipA.setViewName(sViewNameA);
@@ -39,9 +38,9 @@ public class DoubleSlip extends SlipConnectionPoint {
         }
     }
 
-    @Override
+
     public void updatePositionedRelation(List<PositionedRelation> relationList) {
-        super.updatePositionedRelation(relationList);
+
         this.updatePositionedRelation(relationList, null, null);
     }
 
@@ -59,7 +58,7 @@ public class DoubleSlip extends SlipConnectionPoint {
         return this.SecondSlipB.getViewName();
     }
 
-    @Override
+
     public String getViewName() {
         return this.FirstSlipA.getViewName().concat(" ").concat(this.SecondSlipB.getViewName());
     }

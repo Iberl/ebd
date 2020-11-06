@@ -1,6 +1,5 @@
 package de.ibw.tms.ma.net.elements;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 

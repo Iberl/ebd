@@ -24,6 +24,8 @@ import java.util.UUID;
  * @since 2020-10-14
  */
 public class PositionedRelation extends NetworkResource implements IRTMRelation {
+    public static final String CLASS_IDENTIFIER = "Positioned_Relation";
+
 
     private IRTMPositioningNetElement elementA;
     private IRTMPositioningNetElement elementB;
@@ -44,7 +46,7 @@ public class PositionedRelation extends NetworkResource implements IRTMRelation 
      * @param elements - Liste mit mindestens einem Element
      */
     public PositionedRelation(List<INetElement> elements) {
-        super();
+        super(CLASS_IDENTIFIER);
         defaultInit("PositionedRelation");
     }
 

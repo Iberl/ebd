@@ -2,7 +2,6 @@ package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.ma.topologie.PositionedRelation;

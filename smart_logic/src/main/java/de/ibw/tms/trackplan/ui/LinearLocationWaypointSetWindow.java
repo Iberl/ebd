@@ -1,7 +1,6 @@
 package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;

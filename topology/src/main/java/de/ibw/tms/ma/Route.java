@@ -2,14 +2,10 @@ package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
-import de.ibw.tms.trackplan.ui.WaypointEnd;
-import de.ibw.tms.trackplan.ui.WaypointStart;
 
 import java.io.Serializable;
 import java.security.InvalidParameterException;

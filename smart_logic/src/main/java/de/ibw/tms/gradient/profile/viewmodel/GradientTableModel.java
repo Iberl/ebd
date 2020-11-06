@@ -3,7 +3,6 @@ package de.ibw.tms.gradient.profile.viewmodel;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.GradientSegment;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.plan.elements.model.PlanData;
 
@@ -15,11 +14,11 @@ import java.util.ArrayList;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-06
  */
 public class GradientTableModel {
-
+    /*
     private DefaultTableModel TableModel;
 
     public DefaultTableModel getTableModel() {
@@ -179,5 +178,5 @@ public class GradientTableModel {
             default: return false;
         }
     }
-
+*/
 }

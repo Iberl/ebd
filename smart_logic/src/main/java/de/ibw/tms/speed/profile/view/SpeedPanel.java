@@ -5,7 +5,6 @@ import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.speed.profile.controller.SegmentAddController;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
