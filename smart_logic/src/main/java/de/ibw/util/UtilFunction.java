@@ -22,7 +22,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 
-import static ebd.rbc_tms.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.*;
 
 /**
  * Uitilities Allgemeiner Art

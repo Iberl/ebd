@@ -13,7 +13,7 @@ import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
 import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 
 import javax.swing.*;
 import java.awt.*;
