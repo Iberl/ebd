@@ -114,8 +114,10 @@ public class DMIUpdateSupervisor {
         if(this.currentSsState == SpeedSupervisionState.RELEASE_SPEED_SUPERVISION) currentPermSpeed = curApplReleaseSpeed;
         else currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
 
-        EventBus.getDefault().post(new DMISpeedUpdateEvent(this.source, "dmi", speed, targetSpeed, (int)distanceToDrive,
+        DMISpeedUpdateEvent dmiSpeedUpdateEvent = new DMISpeedUpdateEvent(this.source, "dmi", speed, targetSpeed, (int)distanceToDrive,
                 curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,
-                currentPermSpeed, currentWarnSpeed, currentIntervSpeed, this.trainDataVolatile.getCurTripDistance()));
+                currentPermSpeed, currentWarnSpeed, currentIntervSpeed, this.trainDataVolatile.getCurTripDistance());
+
+        EventBus.getDefault().post(dmiSpeedUpdateEvent);
     }
 }

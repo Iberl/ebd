@@ -9,9 +9,9 @@ import java.net.Socket;
  */
 public class DMIClientWorker implements Runnable{
 
-    private Thread dmiClientWorker;
-    private Socket client;
-    private PrintWriter out;
+    private final Thread dmiClientWorker;
+    private final Socket client;
+    private final PrintWriter out;
 
     /**
      * Constructs and starts a thread of itself.
@@ -32,7 +32,9 @@ public class DMIClientWorker implements Runnable{
     public void run() {
         while(!this.client.isClosed()){
             try {
-                Thread.sleep(100);
+                synchronized (this.dmiClientWorker){
+                    this.dmiClientWorker.wait();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
