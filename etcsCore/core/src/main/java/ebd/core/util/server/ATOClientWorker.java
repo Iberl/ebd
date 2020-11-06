@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class manages socket connected to {@link GUIServer}
@@ -97,20 +98,21 @@ public class ATOClientWorker implements Runnable{
      */
     private void receiveString(String string) {
         String[] split = string.split(" ");
-        String target = "dd;T=" + split[0];
-        String action = split[1];
+        String etcsID = split[0];
+        String target = "dd;T=" + etcsID;
+        String action = split[1].toUpperCase(Locale.ROOT);
         switch (action){
-            case "START" -> {
-                this.connectedTrains.add(split[0]);
+            case "INIT" -> {
+                this.connectedTrains.add(etcsID);
                 this.globalEventBus.post(new ATOStartEvent("core", target));
             }
-            case "STOP" -> {
-                this.connectedTrains.remove(split[0]);
+            case "TERM" -> {
+                this.connectedTrains.remove(etcsID);
                 this.globalEventBus.post(new ATOEndEvent("core", target));
             }
-            case "EXISTS" -> {
-                boolean exists = !this.connectedTrains.contains(split[0]) && th.isRegistered(split[0]);
-                sendString(split[0] + " " + exists);
+            case "EXIST" -> {
+                boolean exists = !this.connectedTrains.contains(etcsID) && th.isRegistered(etcsID);
+                sendString(etcsID + " exists=" + exists);
             }
             default -> this.globalEventBus.post(new ATOToTrainUpdateEvent("core", target, string));
         }

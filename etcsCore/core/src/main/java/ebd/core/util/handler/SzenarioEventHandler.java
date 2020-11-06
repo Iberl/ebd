@@ -42,7 +42,7 @@ public class SzenarioEventHandler {
             case FATAL: //Kill the process
                 System.err.println(ee.exception.getMessage());
                 ee.exception.printStackTrace();
-                System.exit(-1);
+                System.exit(-2);
                 break;
         }
     }

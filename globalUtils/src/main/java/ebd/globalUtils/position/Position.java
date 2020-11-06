@@ -229,7 +229,7 @@ public class Position {
 
     @Override
     public String toString() {
-        return "Position={" +
+        return "position={" +
                 "direction=" + direction +
                 ",locationID=" + location.getId() +
                 ",incrementInM=" + increment +

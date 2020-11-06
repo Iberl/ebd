@@ -4,6 +4,7 @@ import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.dmi.ToLogDeepDebugEvent;
 import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
@@ -59,7 +60,7 @@ public class SpeedUpdateSupervisor {
         updateSpeeds(curDistance);
         sendCurrentMaxSpeed();
 
-        if(ConfigHandler.getInstance().debug) logDebug();
+        if(ConfigHandler.getInstance().debug) logDeepDebug();
     }
 
     @Subscribe
@@ -125,7 +126,7 @@ public class SpeedUpdateSupervisor {
         }
     }
 
-    private void logDebug(){
+    private void logDeepDebug(){
         String msg = "Max V in m/s. ";
         String msg2 = String.format("ebi: %3.2f,sbi2: %3.2f,sbi1: %3.2f, nbi: %3.2f," +
                         "w: %3.2f, p: %3.2f, i: %3.2f, c30: %3.2f, t: %3.2f,r: %3.2f,",
@@ -139,7 +140,7 @@ public class SpeedUpdateSupervisor {
                 this.maxC30Speed,
                 this.targetSpeed,
                 this.releaseSpeed);
-        this.localEventBus.post(new ToLogDebugEvent("dd", "log", msg + msg2));
+        this.localEventBus.post(new ToLogDeepDebugEvent("dd", "log", msg + msg2));
     }
 
     private void findTargetSpeedAndDistance(double curTripDistance) {
