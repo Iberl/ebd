@@ -52,7 +52,7 @@ useTrainConfiguratorTool = false
 useInfrastructureServer = false
 
 # If true, the program will try to connect to the Train Manager System program.
-useTSMServer = false
+useTMSServer = false
 
 # If true, GUIs can connect to the program.
 allowGUI = true

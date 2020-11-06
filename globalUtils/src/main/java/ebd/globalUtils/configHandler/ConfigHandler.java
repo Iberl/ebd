@@ -76,7 +76,7 @@ public class ConfigHandler {
     /**
      * If true, the program will try to connect to the Train Manager System program.
      */
-    public boolean useTSMServer = false;
+    public boolean useTMSServer = false;
     /**
      * If true, GUIs can connect to the program.
      */
