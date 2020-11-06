@@ -91,7 +91,7 @@ public class LoggingTest{
      */
     private static ClockTickEvent generateClockTickEvent(){
         clockTickTarget = "clockTickTarget1";
-        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTarget, 0);
+        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTarget, 0, 0);
         return clockTickEvent;
     }
 

@@ -2,6 +2,7 @@ package ebd.radioBlockCenter.util;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.messageLibrary.packet.trackpackets.*;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.*;
 import org.jetbrains.annotations.NotNull;
 

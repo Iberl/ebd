@@ -54,17 +54,6 @@ public class DMIServer implements Runnable {
         }
     }
 
-    private void addDMIClientWorkerToMap(int entityID, Socket client) throws IOException {
-        if(this.clientMap.containsKey(entityID)){
-            this.clientMap.get(entityID).add(new DMIClientWorker(client));
-        }
-        else {
-            ArrayList<DMIClientWorker> innerList = new ArrayList<>();
-            innerList.add(new DMIClientWorker(client));
-            this.clientMap.put(entityID, innerList);
-        }
-    }
-
     @Subscribe
     public void send(DMISpeedUpdateEvent dmiSpeedUpdateEvent) {
         String source = dmiSpeedUpdateEvent.source;
@@ -82,7 +71,6 @@ public class DMIServer implements Runnable {
                 + dmiSpeedUpdateEvent.getSpeedInterventionLevel() + " "
                 + dmiSpeedUpdateEvent.getSpeedSupervisionState() + " "
                 + dmiSpeedUpdateEvent.getTripDistance();
-
         for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)) {
             dmiClientWorker.sendString(dmiParameters);
         }
@@ -98,6 +86,17 @@ public class DMIServer implements Runnable {
         for(DMIClientWorker dmiClientWorker : this.clientMap.get(entityID)){
             dmiClientWorker.sendString(dmiUpdateEvent.dmiUpdateString);
             //dmiClientWorker.sendString("gp 0.0,0.0;100.0,-5.0;300,2.0;1000,0.0;1500,1.0;4000,-3.0");
+        }
+    }
+
+    private void addDMIClientWorkerToMap(int entityID, Socket client) throws IOException {
+        if(this.clientMap.containsKey(entityID)){
+            this.clientMap.get(entityID).add(new DMIClientWorker(client));
+        }
+        else {
+            ArrayList<DMIClientWorker> innerList = new ArrayList<>();
+            innerList.add(new DMIClientWorker(client));
+            this.clientMap.put(entityID, innerList);
         }
     }
 }

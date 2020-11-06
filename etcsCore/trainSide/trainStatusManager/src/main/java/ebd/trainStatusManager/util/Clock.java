@@ -12,23 +12,23 @@ import java.util.Collections;
 /**
  * This is the clock of the train system, it determines the tact rate that is used by modules to schedule their
  * calculation. Every clock tick is signaled by an {@link ClockTickEvent}.
- *
+ * A running tally of clock ticks is kept.
  * @author Lars Schulze-Falck
  */
 public class Clock implements Runnable {
 
-    private EventBus eventBus;
-    private Thread clockThread;
+    private final EventBus eventBus;
+    private final Thread clockThread;
 
     private int tickTime; //in [ms]
-
+    private int counter = 0;
 
     private boolean running = true;
     private boolean paused;
     private long lastClockTickTime; //in [ns]
 
-    private String exceptionTarget = "tsm";
-    private String eventTarget = "all";
+    private final String exceptionTarget = "tsm";
+    private final String eventTarget = "all";
 
 
     public Clock(EventBus eventBus) {
@@ -44,7 +44,7 @@ public class Clock implements Runnable {
                 if(!paused){
                     long timeDifference = AppTime.nanoTime() - this.lastClockTickTime;
                     double deltaT = timeDifference / 1E9;
-                    this.eventBus.post(new ClockTickEvent("clock", this.eventTarget, deltaT));
+                    this.eventBus.post(new ClockTickEvent("clock", this.eventTarget, deltaT, counter++));
                     this.lastClockTickTime = AppTime.nanoTime();
                 }
                 Thread.sleep(this.tickTime);
