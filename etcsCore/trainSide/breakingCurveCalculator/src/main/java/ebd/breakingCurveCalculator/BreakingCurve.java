@@ -255,6 +255,13 @@ public class BreakingCurve {
 		return sb.toString();
 	}
 
+	/**
+	 * @return A String representing the {@link StaticSpeedProfil}, formatted for use with DMI.
+	 */
+	public String getSspDMIString(){
+		return this.ssp.toDMIString();
+	}
+
 
 
 

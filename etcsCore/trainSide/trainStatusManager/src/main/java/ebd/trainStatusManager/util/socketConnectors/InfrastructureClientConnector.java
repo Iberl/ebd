@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util.socketClientsConnectors;
+package ebd.trainStatusManager.util.socketConnectors;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.core.StopTrainEvent;

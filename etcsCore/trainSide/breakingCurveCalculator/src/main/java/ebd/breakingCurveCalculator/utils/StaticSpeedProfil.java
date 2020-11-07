@@ -386,6 +386,21 @@ public class StaticSpeedProfil extends ForwardSpline{
 	}
 
 	/**
+	 * @return A String representing the {@link StaticSpeedProfil}, formatted for use with DMI.
+	 */
+	public String toDMIString(){
+		StringBuilder sb = new StringBuilder("sp ");
+		Iterator<Double> iter = this.curve.keySet().iterator();
+		while (iter.hasNext()){
+			double key = iter.next();
+			sb.append(key).append(",").append(this.curve.get(key).get(0));
+			if(iter.hasNext()) sb.append(";");
+		}
+		return sb.toString();
+	}
+
+
+	/**
 	 * @return the emergency ceiling speed for the ceiling supervision limits in [m/s]
 	 */
 	private double emergencyInterventionCeiling(double maxV) {

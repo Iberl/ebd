@@ -1,5 +1,6 @@
-package ebd.trainStatusManager.util.supervisors;
+package ebd.trainStatusManager.util.socketConnectors;
 
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.enums.SpeedInterventionLevel;
 import ebd.globalUtils.enums.SpeedSupervisionState;
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
@@ -25,7 +26,7 @@ import org.greenrobot.eventbus.ThreadMode;
  * {@link RouteDataVolatile}, {@link SsmReportEvent} and {@link NewTripProfileEvent} to gather the necessary data.
  * and sends {@link DMIUpdateEvent} and {@link DMISpeedUpdateEvent} to DMIServer.
  */
-public class DMIUpdateSupervisor {
+public class DMIServerConnector {
 
     private final EventBus localEventBus;
     private final TrainDataVolatile trainDataVolatile;
@@ -40,7 +41,7 @@ public class DMIUpdateSupervisor {
      *
      * @param localEventBus Local {@link EventBus} of the train
      */
-    public DMIUpdateSupervisor(EventBus localEventBus) {
+    public DMIServerConnector(EventBus localEventBus) {
         this.localEventBus = localEventBus;
         this.localEventBus.register(this);
         trainDataVolatile = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class).trainDataVolatile;
@@ -84,6 +85,13 @@ public class DMIUpdateSupervisor {
         this.curOffsetToTripStart = trainDataVolatile.getCurTripDistance() - trainDataVolatile.getCurTripSectionDistance();
 
         updateDMIGP();
+    }
+
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void curBreakingCurve(NewBreakingCurveEvent nbce){
+        String spString = nbce.emergencyBreakingCurve.getSspDMIString();
+        //TODO Uncomment when DMI is ready
+        //EventBus.getDefault().post(new DMIUpdateEvent(this.source, "dmi", spString));
     }
 
     /**
