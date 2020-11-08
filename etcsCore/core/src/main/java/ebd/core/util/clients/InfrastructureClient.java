@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is a intermediary between {@link ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector}
+ * This class is a intermediary between {@link ebd.trainStatusManager.util.socketConnectors.InfrastructureClientConnector}
  * and the EBD infrastructure server. It listens to {@link UpdatingInfrastructureEvent} and sends the content over a
  * socket connection to the server.
  */
