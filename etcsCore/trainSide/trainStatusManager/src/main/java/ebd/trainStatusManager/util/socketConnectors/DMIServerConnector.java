@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.socketConnectors;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.enums.SpeedInterventionLevel;
 import ebd.globalUtils.enums.SpeedSupervisionState;
@@ -68,30 +69,14 @@ public class DMIServerConnector {
         this.currentSsState = ssmre.supervisionState;
     }
 
-    /**
-     * Collects the current trip profile and uses it to update the gradient profile of the DMI.
-     * Also sets this.curMaxTripDistance.
-     * @param ntpe {@link NewTripProfileEvent}
-     */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void curTripProfile(NewTripProfileEvent ntpe){
-        Spline curProfile = ntpe.tripProfile;
-        if(curProfile instanceof ForwardSpline) this.curMaxTripDistance = Double.MAX_VALUE;
-        else if(curProfile instanceof BackwardSpline) this.curMaxTripDistance = ((BackwardSpline) curProfile).getHighestXValue();
-        else {
-            this.curMaxTripDistance = 0;
-        }
-
-        this.curOffsetToTripStart = trainDataVolatile.getCurTripDistance() - trainDataVolatile.getCurTripSectionDistance();
-
-        updateDMIGP();
-    }
-
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void curBreakingCurve(NewBreakingCurveEvent nbce){
-        String spString = nbce.emergencyBreakingCurve.getSspDMIString();
+        this.curOffsetToTripStart = trainDataVolatile.getCurTripDistance() - trainDataVolatile.getCurTripSectionDistance();
+        this.curMaxTripDistance = nbce.serviceBreakingCurve.endOfDefinedDistance();
+
+        updateDMIGP();
         //TODO Uncomment when DMI is ready
-        //EventBus.getDefault().post(new DMIUpdateEvent(this.source, "dmi", spString));
+        //updateDMISP();
     }
 
     /**
@@ -104,6 +89,15 @@ public class DMIServerConnector {
                         this.curOffsetToTripStart);
         EventBus.getDefault().post(new DMIUpdateEvent(this.source, "dmi", dmiString));
     }
+
+    /**
+     * Collects data and generates a {@link DMIUpdateEvent}
+     */
+    private void updateDMISP(BreakingCurve serviceBC) {
+        String spString = serviceBC.getSspDMIString(this.curOffsetToTripStart);
+        EventBus.getDefault().post(new DMIUpdateEvent(this.source, "dmi", spString));
+    }
+
 
     /**
      * This method gathers the new information from dynamic state, adds data saved in {@link TrainDataVolatile}

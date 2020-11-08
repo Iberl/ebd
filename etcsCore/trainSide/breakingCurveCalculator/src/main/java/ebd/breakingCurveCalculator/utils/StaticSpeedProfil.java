@@ -386,14 +386,15 @@ public class StaticSpeedProfil extends ForwardSpline{
 	}
 
 	/**
+	 * @param offset Offset of current trip section to trip start.
 	 * @return A String representing the {@link StaticSpeedProfil}, formatted for use with DMI.
 	 */
-	public String toDMIString(){
+	public String toDMIString(double offset){
 		StringBuilder sb = new StringBuilder("sp ");
 		Iterator<Double> iter = this.curve.keySet().iterator();
 		while (iter.hasNext()){
 			double key = iter.next();
-			sb.append(key).append(",").append(this.curve.get(key).get(0));
+			sb.append(key).append(",").append(this.curve.get(key).get(0) + offset);
 			if(iter.hasNext()) sb.append(";");
 		}
 		return sb.toString();
