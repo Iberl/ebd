@@ -21,7 +21,7 @@ import de.ibw.util.ThreadedRepo;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
