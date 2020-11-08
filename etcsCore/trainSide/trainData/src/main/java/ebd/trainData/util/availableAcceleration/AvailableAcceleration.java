@@ -108,10 +108,10 @@ public class AvailableAcceleration {
      * @return Acceleration in m/s^2
      */
     private double getTimeBasedAcc(double currentSpeed, MovementState movementState){
+        System.out.println("-----");
+        double timeSinceChange = (System.currentTimeMillis() - this.timeAtLastChange) / 1000.0;
 
-        double timeSinceChange = System.currentTimeMillis() - this.timeAtLastChange;
-
-        double curAcc = getMaxAcc(currentSpeed, this.curMoveState);
+        double curMaxAcc = getMaxAcc(currentSpeed, this.curMoveState);
 
         double curModification = switch (this.curMoveState){
             case ACCELERATING -> this.accelerationModification;
@@ -124,7 +124,7 @@ public class AvailableAcceleration {
             this.timeAtLastChange = System.currentTimeMillis();
             this.awaitedMoveState = movementState;
 
-            double timeToChange = switch (this.awaitedMoveState){
+            double timeToChange = switch (this.curMoveState){
                 case ACCELERATING -> ch.accFallTime;
                 case NORMAL_BREAKING, SERVICE_BREAKING -> ch.breakFallTime;
                 case EMERGENCY_BREAKING -> ch.emBreakFallTime;
@@ -140,19 +140,24 @@ public class AvailableAcceleration {
              from full power to 0 power has to be modified, because we could either not have completed a previous
              transition phase or we do not use full power.
              */
-            this.curTimeToChange = Math.min(timeToChange * timeMod, timeToChange * curModification);
+            this.curTimeToChange = timeToChange * Math.min(timeMod, curModification);
+
+            System.out.println("CurT: " + this.curTimeToChange);
 
             timeSinceChange = 0;
         }
 
         System.out.println("awaitedMoveState: " + this.awaitedMoveState);
         System.out.println("curMoveState: " + this.curMoveState);
+        System.out.println("timeSinceChange: " + timeSinceChange);
 
         if(timeSinceChange >= this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
+            System.out.println("case1");
             //MovementState has been transitioned to full power, phase two is complete
-            return curAcc * curModification;
+            return curMaxAcc * curModification;
         }
         else if(timeSinceChange >= this.curTimeToChange && this.curMoveState != this.awaitedMoveState){
+            System.out.println("case2");
             //Transition from current MovementState to awaited MovementState has been reached, starting phase two
             this.curMoveState = this.awaitedMoveState;
             this.timeAtLastChange = System.currentTimeMillis();
@@ -162,17 +167,27 @@ public class AvailableAcceleration {
                 case EMERGENCY_BREAKING -> ch.emBreakRiseTime;
                 default -> 0;
             };
+            System.out.println("CurT2: " + this.curTimeToChange);
             return 0;
         }
         else if(timeSinceChange < this.curTimeToChange && this.curMoveState == this.awaitedMoveState){
+            System.out.println("case3");
+            System.out.println("CurT2: " + this.curTimeToChange);
+            System.out.println("CurTS: " + timeSinceChange);
             //Operating in phase two.
             double timeBasedMod = (this.curTimeToChange == 0) ? 1 : Math.min(timeSinceChange / this.curTimeToChange, 1);
-            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
+            System.out.println("tbasedMod: " + timeBasedMod);
+            System.out.println("curMaxAcc: " + curMaxAcc);
+            return curMaxAcc * Math.min(timeBasedMod, curModification);
         }
         else {
+            System.out.println("case4");
             //Operating in phase one.
-            double timeBasedMod = (this.curTimeToChange == 0) ? 0 : Math.min(1 - (timeSinceChange / this.curTimeToChange), 0);
-            return Math.min(curAcc * timeBasedMod, curAcc * curModification);
+            System.out.println("CurT2: " + this.curTimeToChange);
+            System.out.println("CurTS: " + timeSinceChange);
+            System.out.println("curMaxAcc: " + curMaxAcc);
+            double timeBasedMod = (this.curTimeToChange == 0) ? 0 : Math.max(1 - (timeSinceChange / this.curTimeToChange), 0);
+            return curMaxAcc * Math.min(timeBasedMod, curModification);
         }
     }
 
