@@ -223,7 +223,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             return;
         }
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
-        String sId = PlanData.SwitchIdRepo.getModel(this.Node);
+        String sId = PlanData.switchIdRepo.getModel(this.Node);
         CheckDbdCommand DbdCommandPayload =
                 new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
@@ -315,13 +315,13 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
-        Trail Target = null;
-        Trail From = (Trail) outputRelation.getFrom();
+        /* Trail Target = null;
+            Trail From = (Trail) outputRelation.getFrom();
+        */
+        //Target = getTargetOfOutputChange(outputRelation, From);
 
-        Target = getTargetOfOutputChange(outputRelation, From);
 
-
-        String sSrc = PlanData.SwitchIdRepo.getModel(Node);
+        String sSrc = PlanData.switchIdRepo.getModel(Node);
         String sTarget;
 
 
