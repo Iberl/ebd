@@ -15,10 +15,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     with conn:
         print('Connected by', addr)
         startTime = time.time()
+        distance = 0
         while True:
             data = conn.recv(1024)
             if not data:
                 break
             dataString = data.decode("utf-8")
+            dataSplit = dataString.split(" ")
             currentTime = time.time()
-            print(str(currentTime - startTime) + " " + dataString.rstrip())
+            if(dataSplit[0] == "gok"):
+                distance += (float(dataSplit[-1]) / 3.6) * (currentTime - startTime)
+            print("deltaT in s: " + str(currentTime - startTime) + " " + dataString.rstrip() + " DistanceTotal in m: " + str(distance))
+            startTime = currentTime

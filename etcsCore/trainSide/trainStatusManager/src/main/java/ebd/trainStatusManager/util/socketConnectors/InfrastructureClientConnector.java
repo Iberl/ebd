@@ -33,6 +33,7 @@ public class InfrastructureClientConnector {
     private double carry;
     private List<Double> speeds = new ArrayList<>(); // in [m/s]
     private List<Double> times = new ArrayList<>(); // in [s]
+    private double distanceDriven = 0;
 
     /**
      * Constructs an Instance
@@ -99,6 +100,8 @@ public class InfrastructureClientConnector {
         long curVlong = 5 * Math.round(averageSpeed/5.0);
         if(curVlong < 10) curVlong = 0;
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
+        this.distanceDriven += (curVlong/3.6) * timeBetweenUpdates;
+        System.out.println("TotalDInM: " + this.distanceDriven + " deltaTInS: " + timeBetweenUpdates);
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
