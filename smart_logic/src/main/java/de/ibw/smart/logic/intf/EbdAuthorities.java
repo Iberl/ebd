@@ -10,7 +10,7 @@ import de.ibw.tms.ma.topologie.ApplicationDirection;
 import java.util.ArrayList;
 /**
  * Inzwischen nicht mehr verwendet deswegen nicht weiter dokumentiert.
- *
+ * @deprecated
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.3
@@ -21,7 +21,7 @@ public class EbdAuthorities {
     private static Chainage LeftChainage = new Chainage(0);
     private static Chainage ChTrail = new Chainage(700);
     private static Chainage DrivingChainage = new Chainage(300);
-    private static Trail T;
+
 
     private static de.ibw.tms.ma.location.SpotLocation BeginLocation;
     private static de.ibw.tms.ma.location.SpotLocation EndLocation;
@@ -36,9 +36,7 @@ public class EbdAuthorities {
         EbdMa = new RbcMA("7733");
 
         generateTrack();
-        BeginLocation = new de.ibw.tms.ma.location.SpotLocation(LeftChainage,T, Section);
-        EndLocation = new de.ibw.tms.ma.location.SpotLocation(ChTrail, T, Section);
-        EndOfAuthorityLocation = new SpotLocation(DrivingChainage, T, Section);
+
 
         generateEoA();
         generateGradientProfile();
@@ -54,10 +52,7 @@ public class EbdAuthorities {
     }
 
     private static void generateSupervisedLocation() {
-        SvL svl = new SvL(DrivingChainage, T, Section);
-        svl.setVmax(35);
-        svl.setMovementAuthority(EbdMa);
-        EbdMa.setSuperviesedLocation(svl);
+
 
 
 
@@ -82,14 +77,14 @@ public class EbdAuthorities {
         ETCS_SPEED etcsSpeedEnd = new ETCS_SPEED();
         etcsSpeedEnd.bSpeed = 0;
 
-        SpeedChange SCbegin = new SpeedChange(LeftChainage, T, Section);
+        //SpeedChange SCbegin = new SpeedChange(LeftChainage, T, Section);
 
         //SpeedChange SCend = new SpeedChange(DrivingChanage, T, Section);
 
         SpeedSegment NormalSegment = new SpeedSegment(BeginLocation, EndOfAuthorityLocation, ApplicationDirection.BOTH);
         NormalSegment.setNc_CDDIFF(nc_cddiff);
         NormalSegment.setNc_DIFF(nc_diff);
-        NormalSegment.setSpeedChangeEnd(SCbegin);
+        //NormalSegment.setSpeedChangeEnd(SCbegin);
         NormalSegment.setV_STATIC(etcsSpeed);
         NormalSegment.setSsp(SpeedProfile);
 
@@ -98,7 +93,7 @@ public class EbdAuthorities {
 
         EndSegment.setNc_CDDIFF(nc_cddiff);
         EndSegment.setNc_DIFF(nc_diff);
-        EndSegment.setSpeedChangeEnd(SCbegin);
+        //EndSegment.setSpeedChangeEnd(SCbegin);
         EndSegment.setV_STATIC(etcsSpeedEnd);
         EndSegment.setSsp(SpeedProfile);
 
@@ -120,39 +115,17 @@ public class EbdAuthorities {
 
         // left to right rails
 
-        eoa = new EoA(DrivingChainage,T, Section);
 
-        eoa.setD_ENDTIMERSTARTLOC(null);
-        //eoa.s
-        eoa.setDangerPoint(null);
-        eoa.setOverlap(null);
-        eoa.setQ_DANGERPOINT(false);
-        eoa.setQ_ENDTIMER(false);
-        eoa.setQ_OVERLAP(false);
-        eoa.setQ_scale(Q_SCALE.SCALE_1_M);
-        eoa.setV_EMA(27);
-        eoa.setT_ENDTIMER(null);
-        EbdMa.setEndOfAuthority(eoa);
     }
 
     private static void generateTrack() {
         EdgeOfMap LeftEnd = new EdgeOfMap("Left EBD");
-        LeftEnd.setChainageBeginn(LeftChainage);
-        LeftEnd.setChainageEnd(LeftChainage);
-        EdgeOfMap RightEnd = new EdgeOfMap("Right - EBD");
-        T = new Trail(LeftChainage, ChTrail, LeftEnd, RightEnd, ApplicationDirection.BOTH,150, ApplicationDirection.BOTH, new TrackElementStatus());
+
     }
 
     public static void generateGradientProfile() {
 
-        GradientSegment SegmentA = new GradientSegment(BeginLocation,EndLocation, ApplicationDirection.BOTH);
-        ETCS_GRADIENT normalGradient = new ETCS_GRADIENT();
-        normalGradient.bGradient = 0;
-        SegmentA.setGradient(normalGradient, true);
-        GradientProfile GP = new GradientProfile(EbdMa);
 
-        GP.addSegment(SegmentA);
-        EbdMa.setGradientProfile(GP);
 
     }
 

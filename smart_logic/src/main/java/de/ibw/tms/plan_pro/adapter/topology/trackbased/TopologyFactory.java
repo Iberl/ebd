@@ -653,7 +653,7 @@ public class TopologyFactory implements ITopologyFactory {
     }
 
 
-    private static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
+    private static GeometricCoordinate getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
         CTOPKnoten TopNode = (CTOPKnoten) nodeRepo.getModel(sNodeA);
         String sGeoNodeId = TopNode.getIDGEOKnoten().getWert();
         //CGEOKnoten geoPointOfNode = geoPointRepo.getModel(sGeoNodeId);

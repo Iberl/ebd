@@ -1,7 +1,5 @@
 package de.ibw.tms.ma.physical;
 
-import de.ibw.tms.ma.topologie.PositionedRelation;
-
 public class Point extends BranchingElement {
     private PointType type;
     private int turnaroundLength;

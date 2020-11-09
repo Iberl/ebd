@@ -2,9 +2,7 @@ package de.ibw.tms.plan.elements;
 
 
 import de.ibw.tms.ma.physical.*;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
-import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
@@ -35,9 +33,10 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-08-31
+ * @since 2020-11-09
+ * @deprecated
  */
-public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover, ITrack, Flow.Subscriber<CrossoverMainModel> {
+public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover,  Flow.Subscriber<CrossoverMainModel> {
 
 
     private static Logger logger = Logger.getLogger( BranchingSwitch.class );
@@ -293,9 +292,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
         Trail Target = null;
-        Trail From = (Trail) outputRelation.getFrom();
+        //Trail From = (Trail) outputRelation.getFrom();
 
-        Target = getTargetOfOutputChange(outputRelation, From);
+        //Target = getTargetOfOutputChange(outputRelation, From);
 
 
         String sSrc = Node.TopNodeId;
@@ -353,11 +352,11 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
         Trail Target;
         if(from.getRail().equals(PeekRail)) {
-            Target = (Trail) outputRelation.getTo();
+       //     Target = (Trail) outputRelation.getTo();
         } else {
             Target = from;
         }
-        return Target;
+        return null;//Target;
     }
 
     /**
@@ -471,14 +470,6 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         return null;
     }
 
-    /**
-     * Gibt Schlupf der Weiche wider
-     * @return TrackElement - {@link SlipConnectionPoint} Gipt Schlupf wider
-     */
-    @Override
-    public TopologyGraph.Node getTrackReference() {
-        return this.BranchingPoint;
-    }
 
 
     /**

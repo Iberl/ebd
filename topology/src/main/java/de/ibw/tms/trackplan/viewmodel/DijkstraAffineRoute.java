@@ -6,7 +6,6 @@ import de.ibw.tms.ma.SpotLocation;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 

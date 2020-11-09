@@ -8,6 +8,7 @@ import de.ibw.rtm.intf.IRTMSpotLocation;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.common.DefaultObject;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMGeometricCoordinate;
 import org.railMl.rtm4rail.RTMLinearCoordinate;
@@ -53,10 +54,10 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
         super(CLASS_IDENTIFIER);
     }
 
-    public SpotLocation(Chainage chainage, TrackElement trackElement, SectionOfLine lineSection) {
+    public SpotLocation(Chainage chainage, PositioningNetElement trackElement, SectionOfLine lineSection) {
         super(CLASS_IDENTIFIER);
         this.chainage = chainage;
-
+        this.NetElement = trackElement;
         this.lineSection = lineSection;
     }
 

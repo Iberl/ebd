@@ -19,8 +19,9 @@ import java.util.List;
  * Geographisches Gleis
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
+ * @deprecated
  */
 public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
@@ -117,13 +118,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
     /**
      * Dieser Konstruktur erstellt ein Geographisches Gleis
+     * @deprecated
      * @param x1 - xPosition 1
      * @param y1 - yPosition 1
      * @param x2 - xPosition 2
      * @param y2 - yPosition 2
      * @param addTo {@link List} - Liste von Gleisen, die diese Gleis zugeordnet werden, nach erstellung
-     * @param IConA {@link TrackElement} - Anschluss A
-     * @param IConB {@link TrackElement} - Anschluss B
+     * @param IConA {@link } - Anschluss A
+     * @param IConB {@link} - Anschluss B
      * @param Cb - not used
      * @param Cc - not used
      * @param Navigal - {@link ApplicationDirection} von A zu B, oder B zu A, oder beides
@@ -143,8 +145,8 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
         ConA = IConA;
         ConB = IConB;
-        TrackSection = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
-        PlanData.TrackElementPositionCalc.put(TrackSection, this);
+        //TrackSection = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
+        ///PlanData.TrackElementPositionCalc.put(TrackSection, this);
     }
 
 
@@ -176,6 +178,6 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      */
     @Override
     public TopologyGraph.Node getTrackReference() {
-        return this.getTrackSection();
+        return null;
     }
 }

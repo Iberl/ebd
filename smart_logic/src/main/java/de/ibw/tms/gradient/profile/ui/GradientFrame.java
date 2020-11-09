@@ -22,8 +22,9 @@ import java.util.ArrayList;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
+ * @deprecated
  */
 public class GradientFrame extends JFrame {
 
@@ -42,7 +43,7 @@ public class GradientFrame extends JFrame {
 
         CurrentTrailModel = currentTrailModel;
         ArrayList<GradientSegment> gradientList = PlanData.getInstance().GradientMap.get(CurrentTrailModel);
-
+        /*
         GradientTableModel GTM = new GradientTableModel(CurrentTrailModel);
 
         GradientTable.setModel(GTM.getTableModel());
@@ -54,7 +55,7 @@ public class GradientFrame extends JFrame {
 
 
 
-
+        */
 
         /*this.ScrollPane = new JScrollPane(GradientTable);
         this.ScrollPane.repaint();
@@ -116,6 +117,7 @@ public class GradientFrame extends JFrame {
         TrailList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                /*
                 GradientTableModel GTM;
                 GradientTrailModel GradientModel = GradientFrame.this.TrailList.getSelectedValue();
 
@@ -125,6 +127,8 @@ public class GradientFrame extends JFrame {
                 GTM.getTableModel().fireTableDataChanged();
                 GradientFrame.this.getContentPane().remove(GradientTable);
                 GradientFrame.this.getContentPane().add(GradientTable);
+
+                 */
             }
         });
         GradientTableModel GTM;
@@ -135,9 +139,9 @@ public class GradientFrame extends JFrame {
         }
         if(segments == null) segments = new ArrayList<GradientSegment>();
         System.out.println("Segmentprint" + segments.size());
-        GTM = new GradientTableModel(CurrentTrailModel);
+        /*GTM = new GradientTableModel(CurrentTrailModel);
         GradientTable = new JTable(GTM.getTableModel());
-
+        */
 
         this.getContentPane().remove(GradientTable);
         this.getContentPane().add(GradientTable);
