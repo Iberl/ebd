@@ -308,7 +308,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
                 if(LastTrackElement == null) {
                     // no waypoint checked so train must stand on trail
                     TopologyGraph.Edge CurrentEdge = StartingPointTrain.getEdgeTrainStandsOn();
-                    return TrackEl == CurrentEdge.getRail().getTrailModel();
+                    return TrackEl == CurrentEdge.getRail().getTrackSection();
                 }
                 return handleRoutingOverWaypoint((ControlledTrackElement) TrackEl, (ControlledTrackElement) LastTrackElement);
 
@@ -318,7 +318,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
             if(LastTrackElement == null || LastTrackElement == RouteComponent.lastTrackElements.get(0)) {
                 // Waypoint on trains current trail is true when no other waypoint is set
                 // but it must then stand on this trail
-                return StartingPointTrain.getEdgeTrainStandsOn().getRail() .getTrailModel()== TrackEl;
+                return StartingPointTrain.getEdgeTrainStandsOn().getRail() .getTrackSection()== TrackEl;
             } else {
                 // is Endpoint routeable decides smart logic so the tms accept then any End Waypoint
                 return true;

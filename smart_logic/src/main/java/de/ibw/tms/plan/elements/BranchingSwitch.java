@@ -1,17 +1,17 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
+import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.EnumModel;
@@ -20,7 +20,9 @@ import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.railMl.rtm4rail.TElementWithIDref;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -35,6 +37,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Flow;
 
 /**
@@ -316,29 +319,31 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
-        Trail Target = null;
+        /*Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
-
-        Target = getTargetOfOutputChange(outputRelation, From);
-
-
-        String sSrc = ISwitchHandler.getNodeId(Node);
-        String sTarget;
+        */
+        //Target = getTargetOfOutputChange(outputRelation, From);
 
 
-        sTarget = getTargetOfOutputEdge(Target);
+        TElementWithIDref IdElementA = outputRelation.getElementA();
+        TElementWithIDref IdElementB = outputRelation.getElementB();
+        TopologyGraph.Edge NetElementA = (TopologyGraph.Edge) DefaultObject.topologyRepository.getModel(UUID.fromString(IdElementA.getRef()));
+        TopologyGraph.Edge NetElementB = (TopologyGraph.Edge) DefaultObject.topologyRepository.getModel(UUID.fromString(IdElementB.getRef()));
 
-
-
-
-        logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
+        logger.info("Switch: " + NetElementA.getRefId() + " points to " + NetElementB.getRefId() + " now.\n");
 
         ///
 
 
     }
 
-    private String getTargetOfOutputEdge(Trail target) {
+    /**
+     * @deprecated
+     * @return
+     */
+    private String getTargetOfOutputEdge(/*Trail target*/) {
+        throw new NotImplementedException("deprecated");
+        /*
         String sTarget;
         try {
 
@@ -361,9 +366,17 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
         }
         return sTarget;
+
+         */
     }
 
+    /**
+     * @deprecated
+     * @return
+     */
     private String getThisNode() {
+        throw new NotImplementedException("deprecated");
+        /*
         String sSrc;
         try {
             CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
@@ -372,9 +385,18 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             sSrc =  Node.TopNodeId;
         }
         return sSrc;
+
+         */
     }
 
-    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
+    /**
+     * @deprecated
+     * @param outputRelation
+     * @return
+     */
+    private /*Trail */ void getTargetOfOutputChange(PositionedRelation outputRelation/*, Trail from*/) {
+        throw new NotImplementedException("deprecated");
+        /*
         Trail Target;
         if(from.getRail().equals(PeekRail)) {
             Target = (Trail) outputRelation.getTo();
@@ -382,6 +404,8 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             Target = from;
         }
         return Target;
+
+         */
     }
 
     /**
@@ -496,12 +520,12 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
     /**
-     * Gibt Schlupf der Weiche wider
-     * @return TrackElement - {@link SlipConnectionPoint} Gipt Schlupf wider
+     * Gibt Topologischen Knoten als Modell der Ui wieder.
+     * @return Node - Logical Representation
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.BranchingPoint;
+    public TopologyGraph.Node getTrackReference() {
+        return this.Node;
     }
 
 

@@ -98,12 +98,12 @@ public class CrossoverModel {
 
         PosRelationA = new PositionedRelation();
         PosRelationA.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailA.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
+                PeekRail.getTrackSection(), RailA.getTrackSection(), true, PlanData.vmax, ApplicationDirection.BOTH,
                     new TrackElementStatus()
             );
         PosRelationB = new PositionedRelation();
         PosRelationB.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailB.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
+                PeekRail.getTrackSection(), RailB.getTrackSection(), true, PlanData.vmax, ApplicationDirection.BOTH,
                 new TrackElementStatus()
         );
         List<PositionedRelation> list = new ArrayList<PositionedRelation>();

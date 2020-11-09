@@ -66,7 +66,7 @@ public class LinearLocationWaypointSetWindow extends JDialog {
 
                 //RouteComponent.calcTrackLengthUntilLastWayoint(startingPointTrain);
         double dMax = dMinimum + dTrackLength;
-        if(startingPointTrain.getEdgeTrainStandsOn().getRail().getTrailModel() == TE) {
+        if(startingPointTrain.getEdgeTrainStandsOn().getRail().getTrackSection() == TE) {
 
             dMinimum = 0;
             dMax = startingPointTrain.getdDistanceToNodeRunningTo();

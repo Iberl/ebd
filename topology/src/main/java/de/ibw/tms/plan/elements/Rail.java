@@ -170,7 +170,7 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @return Trail
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.getTrailModel();
+    public TopologyGraph.Node getTrackReference() {
+        return this.getTrackSection();
     }
 }

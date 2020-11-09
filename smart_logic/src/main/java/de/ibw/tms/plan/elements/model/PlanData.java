@@ -31,8 +31,10 @@ import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Node;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
@@ -68,7 +70,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private ITopologyFactory topologyFactory;
 
-    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws JAXBException {
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException {
         if(topologyFactory == null) {
             this.topologyFactory = new TopologyFactory();
         }
@@ -114,7 +116,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      */
     public static ThreadedRepo<TopologyGraph.Edge, String> EdgeLookupByIdRepo = new ThreadedRepo<>();
 
-    public static DefaultRepo<String, TopologyGraph.Node> SwitchRepo = new DefaultRepo<>();
 
     /**
      * Der topGraph speichert das SL-TMS-interen Topologische Modell
@@ -131,18 +132,18 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      */
     public static class TrackElementPositionCalc {
         /**
-         * {@link HashMap} zum Ermitteln des Gleis {@link Rail} aus einem {@link Trail} - TrackElement eines Gleismodells
+         * {@link HashMap} zum Ermitteln des Gleis {@link Rail} - TrackElement eines Gleismodells
          */
         private static HashMap<PositioningNetElement, Line2D.Double> positionMap = new HashMap<>();
         /**
          * Bisher unbenutzt
          * {@link HashMap} zum Ermitteln eines Point_RemoteOperated aus einem {@link BranchingSwitch} - TrackElement einer Weiche
          */
-        private static HashMap<TrackElement, Point2D.Double> pointMap = new HashMap<TrackElement, Point2D.Double>();
+        private static HashMap<TopologyGraph.Node, Point2D.Double> pointMap = new HashMap<TopologyGraph.Node, Point2D.Double>();
 
         /**
-         * dieses Put gibt als Key ein {@link Trail} dem logischen Gleis zu dem Value eines geographischen Gleis {@link Rail}
-         * @param TE {@link TrackElement} - Ein logischen Gleis Trail
+         * dieses Put gibt als Key ein UI-Gleis dem logischen Gleis zu dem Value eines geographischen Gleis {@link Rail}
+         * @param TE {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge} - Ein logischen Gleis Trail
          * @param Line - ein {@link Rail} - geographisches Gleise
          */
         public static void put(TopologyGraph.Edge TE, Line2D.Double Line) {
@@ -151,10 +152,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         /**
          * dieses Put gibt als Key ein {@link Point_RemoteOperated} - ein Umschaltelement der Weiche als TrackElment zu dem Value eines {@link BranchingSwitch} - Trackelement einer Weiche
-         * @param TE - {@link TrackElement} - das UmschaltElement der Weiche
+         * @param TE - {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Node} - das UmschaltElement der Weiche
          * @param Point - {@link BranchingSwitch} - das Modell einer Weiche
          */
-        public static void put(TrackElement TE, Point2D.Double Point) {
+        public static void put(TopologyGraph.Node TE, Point2D.Double Point) {
             pointMap.put(TE, Point);
         }
 
@@ -242,7 +243,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     /**
      * Not used
      */
-    public static ArrayList<TrackElement> trainOccupiedList = new ArrayList<TrackElement>();
+    public static ArrayList trainOccupiedList = new ArrayList();
     /**
      * Not used
      */
@@ -333,7 +334,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setNodeToBranchingPoints();
             setEdges();
             System.out.println("Test");
-        } catch (JAXBException | ParseException e) {
+        } catch (ParseException | jakarta.xml.bind.JAXBException e) {
             e.printStackTrace();
         }
     }
@@ -597,17 +598,16 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             Ref = addOrientation(Ref, E.TopConnectFromB);
             return addOrientation(Ref, E.TopConnectFromA);
         }
+    }
 
-
-            }
-            if(switchId != null) {
-                SwitchRepo.update(switchId, N);
-                SwitchIdRepo.update(N, switchId);
-            }
-
-
-
-        }
+    @Nullable
+    private static String initRef(CrossingSwitch CS) {
+            CWKrGspElement RefElement;
+            String Ref;
+            RefElement = CS.getElement();
+            if(RefElement == null) return null;
+            CBezeichnungElement Bez = RefElement.getBezeichnung();
+            return Bez.getBezeichnungTabelle().getWert();
     }
 
     private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
@@ -615,25 +615,24 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
     }
 
+    /**
+     * @deprecated
+     */
     private void linkRailsToCrossover() {
+        throw new NotImplementedException("deprecated");/*
         Collection<CrossoverModel> models = CrossoverModel.CrossoverRepo.getAll();
         for(CrossoverModel M: models) {
             M.createPositionedRelation();
 
         }
-
+        */
     }
 
     private void paintTopologyGraph(ChainageSupplyInterface ChainageSupply) {
 
 
         DefaultRepo<TopologyGraph.Node, RailConnector> railConnectorRepo = new DefaultRepo<>();
-        EdgeOfMap LeftEnd = new EdgeOfMap("Left Adorf");
-        LeftEnd.setChainageBeginn(new Chainage(0));
-        LeftEnd.setChainageEnd(new Chainage(0));
-        RightEnd = new EdgeOfMap("Right Cehausen");
-        RightEnd.setChainageBeginn(new Chainage(1000));
-        RightEnd.setChainageEnd(new Chainage(1000));
+
 
 
         // Balisenconnectors
@@ -720,19 +719,21 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 //TODO
+                    /*
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
                             ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
+                    */
                 } else {
-
+                    /*
 
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
                             ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
 
-
+                    */
 
                 }
             }
@@ -784,7 +785,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
     }
 
+    /**
+     * @deprecated
+     * @param BeheimWholeSection
+     * @return
+     */
     private ArrayList<GradientSegment> generateGradient4Beheim(SectionOfLine BeheimWholeSection) {
+        throw new NotImplementedException("deprecated");
+        /*
         ArrayList<GradientSegment> gradientProfiles = new ArrayList<>();
         Chainage LeftChainage = new Chainage(0);
         Chainage B2Chainage = new Chainage(982);
@@ -806,35 +814,35 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         GradientSegment GS_0_1000_8 = new GradientSegment(LeftLocation, B2Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient8 = new ETCS_GRADIENT();
         etcsGradient8.bGradient = 8;
-        GS_0_1000_8.setGradient(etcsGradient8, true);
+        //GS_0_1000_8.setGradient(etcsGradient8, true);
         gradientProfiles.add(GS_0_1000_8);
 
         GradientSegment GS_1000_1900_0 = new GradientSegment(B2Location, B4Location,ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient0 = new ETCS_GRADIENT();
         etcsGradient0.bGradient = 0;
-        GS_1000_1900_0.setGradient(etcsGradient0, false);
+        //GS_1000_1900_0.setGradient(etcsGradient0, false);
         gradientProfiles.add(GS_1000_1900_0);
 
         GradientSegment GS_1900_2200_M10 = new GradientSegment(B4Location,B5Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradientM10 = new ETCS_GRADIENT();
         etcsGradientM10.bGradient = 10;
-        GS_1900_2200_M10.setGradient(etcsGradientM10, false);
+        //GS_1900_2200_M10.setGradient(etcsGradientM10, false);
         gradientProfiles.add(GS_1900_2200_M10);
 
         GradientSegment GS_2200_2800_10 = new GradientSegment(B5Location, B8Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient10 = new ETCS_GRADIENT();
         etcsGradient10.bGradient = 10;
-        GS_2200_2800_10.setGradient(etcsGradient10, true);
+        //GS_2200_2800_10.setGradient(etcsGradient10, true);
         gradientProfiles.add(GS_2200_2800_10);
 
         GradientSegment GS_2800_3000_M5 = new GradientSegment(B8Location, B9Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradientM5 = new ETCS_GRADIENT();
         etcsGradientM5.bGradient = 5;
-        GS_2800_3000_M5.setGradient(etcsGradientM5, false);
+        //GS_2800_3000_M5.setGradient(etcsGradientM5, false);
         gradientProfiles.add(GS_2800_3000_M5);
 
         GradientSegment GS_3000_3500_0 = new GradientSegment(B9Location, B10Location, ApplicationDirection.BOTH);
-        GS_3000_3500_0.setGradient(etcsGradient0, false);
+        //GS_3000_3500_0.setGradient(etcsGradient0, false);
         gradientProfiles.add(GS_3000_3500_0);
 
 
@@ -844,6 +852,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
         return gradientProfiles;
+
+         */
     }
 /*
     private void createBeheimPlan() {
@@ -1055,7 +1065,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, sName,
                 ViewType);
         this.branchingSwitchList.add(C);
-        PlanData.TrackElementPositionCalc.put(Point.getRemotePoint(), C);
+
         return C;
     }
     /*

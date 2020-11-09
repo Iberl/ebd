@@ -18,7 +18,6 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
-import de.ibw.tms.trackplan.viewmodel.DijkstraAffineRoute;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
@@ -195,7 +194,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
 
         g2d.setPaint(Color.gray);
-        DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
+        DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
         HashMap edgeRepo = PlanData.topGraph.edgeRepo;
 
@@ -208,8 +207,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 if (geoEdge == null) continue;
                 double strokeFactor = Math.max(Zoom.getdZoomX(), Zoom.getdZoomY());
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
-                GeoCoordinates nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-                GeoCoordinates nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+                GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+                GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
 
 
@@ -262,21 +261,21 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             BranchingSwitch C = (BranchingSwitch) OCrossover;
 
             //debug
-            SingleSlip SiBranch = (SingleSlip) C.getTrackReference();
 
-            CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) SiBranch.getRemotePoint());
+
+           // CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel();
             String sTopId;
             String sTrackKilometers = "";
             try {
-                CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
-                sTopId = CS.getEbdTitle();
-                if(sTopId == null) {
-                    sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
-                }
+                //CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
+                //sTopId = CS.getEbdTitle();
+                //if(sTopId == null) {
+                    //sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
+                //}
 
-                if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
+                //if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
             } catch (Exception E) {
-                sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
+                //sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
             }
 
 
@@ -300,7 +299,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
+                g2d.drawString(C.getN + sTrackKilometers, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -503,7 +502,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * @param distanceA1 double - Abstand zum Referenzknoten
      * @return GeoCoordinates - Geographischer Punkt
      */
-    public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
+    public static GeometricCoordinate getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
@@ -516,8 +515,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
 
         if (geoEdgeList.isEmpty() || Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
-            GeoCoordinates nodeA = edge.A.getGeoCoordinates();
-            GeoCoordinates nodeB = edge.B.getGeoCoordinates();
+            GeometricCoordinate nodeA = edge.A.getGeoCoordinates();
+            GeometricCoordinate nodeB = edge.B.getGeoCoordinates();
 
             if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
             else {

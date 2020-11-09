@@ -136,12 +136,12 @@ public class TopologyFactory implements ITopologyFactory {
 
             TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sNodeA);
             if(A == null) {
-                GeometricCoordinate GeoA = getGeoCoordinate(nodeRepo,sNodeA);
+                GeometricCoordinate GeoA = null;//getGeoCoordinate(nodeRepo,sNodeA);
                 A = new TopologyGraph.Node("", sNodeA, GeoA);
             }
             TopologyGraph.Node B = TopologyGraph.NodeRepo.get(sNodeB);
             if(B == null) {
-                GeometricCoordinate GeoB = getGeoCoordinate(nodeRepo,sNodeB);
+                GeometricCoordinate GeoB = null;//getGeoCoordinate(nodeRepo,sNodeB);
                 B = new TopologyGraph.Node("", sNodeB , GeoB);
             }
 

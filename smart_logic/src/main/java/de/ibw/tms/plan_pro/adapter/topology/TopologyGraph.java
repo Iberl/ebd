@@ -1,13 +1,16 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.intf.INode;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
+import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 
@@ -43,16 +46,21 @@ public class TopologyGraph {
     }
 
     /**
+     * @deprecated
      * Holt die X-coordinate des Startknotens
      * @return Double - X-coordinate
      */
     public static Double getXofCurrentLeftMostNode() {
+        throw new NotImplementedException("deprecated");
+        /*
         if(LeftmostNode == null) {
             return null;
         }
         GeometricCoordinate xy = (GeometricCoordinate) LeftmostNode.getGeoCoordinates();
         if(xy == null) return null;
         return xy.getX();
+
+         */
     }
 
     /**
@@ -77,7 +85,7 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    public static class Node extends TrackElement {
+    public static class Node extends ArrayList<PositionedRelation> implements INode {
 
         /**
          * Knoten Bezeichnung
@@ -116,7 +124,8 @@ public class TopologyGraph {
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
                 outEdges = new HashSet<Edge>();
-                this.setGeoCoordinates(GeoCo);
+                // @TODO Relation having no Geo co
+                //this.setGeoCoordinates(GeoCo);
                 NodeRepo.put(this.TopNodeId, this);
 
             }
@@ -156,7 +165,6 @@ public class TopologyGraph {
          * Knotenname in Ansichten
          * @return String - Bezeichnung des Knoten
          */
-        @Override
         public String getViewName() {
             return name;
         }
@@ -234,6 +242,7 @@ public class TopologyGraph {
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
+                //TODO get Coordinate via implementation of node
                 GeometricCoordinate reference = (GeometricCoordinate) A.getGeoCoordinates();
 
                 /*boolean b_fromA;
@@ -403,10 +412,10 @@ public class TopologyGraph {
          * Bezeichnung der Kante in Ansichten
          * @return String - Ansichtsname der Kante
          */
-        @Override
             public String getViewName() {
+                throw new NotImplementedException("not used");
                 //TODO:
-                return null;
+               //return null;
             }
 
         /**

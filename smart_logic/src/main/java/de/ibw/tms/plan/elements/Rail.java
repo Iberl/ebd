@@ -2,6 +2,7 @@ package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.physical.TrackElementStatus;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
@@ -32,14 +33,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * Name des Gleissegmentes
      */
     public String segmentName = " ";
-    private TopologyGraph.Edge Edge;
+    private TrackEdgeSection EdgeSection;
 
     /**
      * Gibt die Topologiesche Kante dieses Gleis wider
      * @return {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
      */
     public TopologyGraph.Edge getEdge() {
-        return Edge;
+        return (TopologyGraph.Edge) EdgeSection.getTrackEdge();
     }
 
     /**
@@ -47,7 +48,11 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @param edge {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
      */
     public void setEdge(TopologyGraph.Edge edge) {
-        Edge = edge;
+
+    }
+
+    public void setTrackSection(TrackEdgeSection Section) {
+        this.EdgeSection = Section;
     }
 
     /**
@@ -55,14 +60,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      */
     public int iStroke = 3;
 
-    private Trail TrailModel;
+    private TrackEdgeSection TrackSection;
 
     /**
      * Gibt logisches Model des Gleises wieder
      * @return Trail
      */
-    public Trail getTrailModel() {
-        return TrailModel;
+    public TrackEdgeSection getTrackSection() {
+        return TrackSection;
     }
 
     /**
@@ -138,8 +143,8 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
         ConA = IConA;
         ConB = IConB;
-        TrailModel = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
-        PlanData.TrackElementPositionCalc.put(TrailModel, this);
+        TrackSection = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
+        PlanData.TrackElementPositionCalc.put(TrackSection, this);
     }
 
 
@@ -170,7 +175,7 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @return Trail
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.getTrailModel();
+    public TopologyGraph.Node getTrackReference() {
+        return this.getTrackSection();
     }
 }

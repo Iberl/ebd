@@ -33,7 +33,7 @@ public class CrossoverModel {
     /**
      * Ein Repository das den Schlupf als key hat und diese Vermittlung als Value widergibt.
      */
-    public static DefaultRepo<PositioningNetElement, CrossoverModel> BranchToCrossoverModelRepo = new DefaultRepo<>();
+    //public static DefaultRepo<PositioningNetElement, CrossoverModel> BranchToCrossoverModelRepo = new DefaultRepo<>();
 
     /**
      * Factory Method dieser Vermittlung
@@ -66,7 +66,7 @@ public class CrossoverModel {
         RailWaySwitch = railWaySwitch;
         CrossoverRepo.update(node, this);
         // Maps an Branching element in UI to this Branch Model
-        BranchToCrossoverModelRepo.update(railWaySlip.getRemotePoint(),this);
+        //BranchToCrossoverModelRepo.update(railWaySlip.getRemotePoint(),this);
 
 
 
@@ -86,41 +86,9 @@ public class CrossoverModel {
         this.RailWaySwitch.setPeekRail(PeekRail);
         this.RailWaySwitch.setNode(this.getNode());
         notPeekEdges.remove(PeekEdge);
-        Rail RailA = notPeekEdges.get(0).getRail();
-        Rail RailB = notPeekEdges.get(1).getRail();
-        try {
-            isIndex_0_RightPosition = checkCrossingSwitchIsFirstRight(notPeekEdges);
-        } catch (Exception e) {
-            e.printStackTrace();
-            isIndex_0_RightPosition = true;
-        }
 
 
-        PosRelationA = new PositionedRelation();
-        PosRelationA.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailA.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
-                    new TrackElementStatus()
-            );
-        PosRelationB = new PositionedRelation();
-        PosRelationB.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailB.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
-                new TrackElementStatus()
-        );
-        List<PositionedRelation> list = new ArrayList<PositionedRelation>();
 
-
-        if(isIndex_0_RightPosition) {
-
-            list.add(PosRelationA);
-            list.add(PosRelationB);
-            this.RailWaySlip.updatePositionedRelation(list);
-        } else {
-
-            list.add(PosRelationB);
-            list.add(PosRelationA);
-            this.RailWaySlip.updatePositionedRelation(list);
-        }
-        this.RailWaySlip.setOutputRelation(PosRelationA);
 
 
     }

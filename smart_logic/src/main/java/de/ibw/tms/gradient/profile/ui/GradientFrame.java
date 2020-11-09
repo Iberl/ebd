@@ -7,6 +7,7 @@ import de.ibw.tms.gradient.profile.viewmodel.GradientTableModel;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.positioned.elements.GradientSegment;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 
@@ -158,7 +159,7 @@ public class GradientFrame extends JFrame {
             GradientSegment Segment;
             segmentList = new ArrayList<GradientSegment>();
             Rail R = railList.get(i);
-            Trail T = R.getTrailModel();
+            TrackEdgeSection T = R.getTrackSection();
             ETCS_GRADIENT defaultGrdient = new ETCS_GRADIENT();
             defaultGrdient.bGradient = 0;
             GradientTrailModel TrailModel = new GradientTrailModel(R);
@@ -167,9 +168,7 @@ public class GradientFrame extends JFrame {
             }
             SectionOfLine S = new SectionOfLine();
 
-            SpotLocation BeginLocation = new SpotLocation(T.getChainageBeginn(), T, S);
 
-            SpotLocation EndLocation = new SpotLocation(T.getChainageEnd(), T, S);
 
             /*
             // Test Values

@@ -26,10 +26,10 @@ public class DummyRoute extends Route {
             }
         }
 
-        this.setStartSpot(StartRail.getTrailModel(), 30);
+        this.setStartSpot(StartRail.getTrackSection(), 30);
         //this.setEndSpot(EndSwitch.getBranchingPoint(),EndSwitch.getBranchingPoint().getChainageBeginn().getiMeters());
         Rail R2 = railList.get(railList.size() -1);
-        this.setEndSpot(R2.getTrailModel(), 1000);
+        this.setEndSpot(R2.getTrackSection(), 1000);
 
 
     }
