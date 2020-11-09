@@ -5,10 +5,14 @@ import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
@@ -107,7 +111,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
 
 
-            PositioningNetElement CTE = W.getTrackElement();
+            TrackElement CTE = W.getTrackElement();
             handleCrossoverWaypoint(CTE);
         }
     }
@@ -118,7 +122,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         if(trackElementOfEnd instanceof ControlledTrackElement) {
             EndModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) trackElementOfEnd);
 
-            String sId = EndModel.getNode().TopNodeId;
+            String sId = ISwitchHandler.getNodeId(EndModel.getNode());
             this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
         } else {
             // no Crossover so it has to be a rail
@@ -127,10 +131,10 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
     }
 
-    public void handleCrossoverWaypoint(PositioningNetElement CTE) {
+    public void handleCrossoverWaypoint(TrackElement CTE) {
         String sId;
         CrossoverModel M = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) CTE);
-        sId = M.getNode().TopNodeId;
+        sId = ISwitchHandler.getNodeId(M.getNode());
         this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
     }
 
@@ -147,14 +151,14 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
     private HashMap<TrackElement, IWaypoint> generateWaypointOnTrackMap() {
         HashMap<TrackElement, IWaypoint> resultMap = new HashMap<TrackElement, IWaypoint>();
-        de.ibw.tms.ma.location.SpotLocation BeginPoint = location.getBegin();
+        SpotLocation BeginPoint = location.getBegin();
 
 
         if(BeginPoint != null) {
             resultMap.put(BeginPoint.getTrackElement(), (IWaypoint) BeginPoint);
 
         }
-        de.ibw.tms.ma.location.SpotLocation EndPoint =  location.getEnd();
+        SpotLocation EndPoint =  location.getEnd();
         if(EndPoint != null) {
             resultMap.put(EndPoint.getTrackElement(), (IWaypoint) EndPoint);
         }
@@ -167,7 +171,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
     private ArrayList<Waypoint> getAllWaypointsInOrder(boolean withEndpoint) {
         ArrayList<Waypoint> resultList = new ArrayList<>();
-        de.ibw.tms.ma.location.SpotLocation BeginPoint = location.getBegin();
+        SpotLocation BeginPoint = location.getBegin();
         SpotLocation EndPoint = location.getEnd();
         WaypointDecorator BeginWayPoint =
                 new WaypointDecorator(BeginPoint.getTrackElement(), new TrackElementStatus(), -1, -1);

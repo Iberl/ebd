@@ -7,6 +7,8 @@ import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.ETCSVariables;

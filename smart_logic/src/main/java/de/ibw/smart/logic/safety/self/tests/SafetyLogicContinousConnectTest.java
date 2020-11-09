@@ -4,6 +4,8 @@ import de.ibw.feed.Balise;
 import de.ibw.smart.logic.datatypes.Occupation;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;

@@ -8,6 +8,7 @@ import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
@@ -17,6 +18,13 @@ import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.EoaSectionAdapter;
+import de.ibw.tms.ma.MaRequestWrapper;
+import de.ibw.tms.ma.RbcMaAdapter;
+import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
@@ -32,6 +40,8 @@ import ebd.rbc_tms.util.TrainInfo;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
+import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import static de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -66,7 +76,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-11-06
+ * @since 2020-11-09
  */
 public class SafetyLogic {
     /**
@@ -985,7 +995,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
+    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert
@@ -996,9 +1006,8 @@ public class SafetyLogic {
 
     /**
      * Noch nicht implementiert
-     * @param requestedTrackElementList
      */
-    public synchronized void unlockElementsNotUsed(RouteDataSL requestedTrackElementList) {
+    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
 
     }
 
@@ -1031,8 +1040,8 @@ public class SafetyLogic {
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
         String checkSid = cdc.sId;
-        for(List<Occupation> l :this.blockList.getAll()) {
-            for(Occupation BA : l) {
+        for(List<BlockedArea> l :this.blockList.getAll()) {
+            for(BlockedArea BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
                     sendResponseDbdCommandToTms(false, cdc.sCrossoverEbdName, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;
@@ -1049,7 +1058,11 @@ public class SafetyLogic {
         else DbdPayload.setErrorState(sFailReason);
         SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);
         BlockMessage.setbIsFromSL(true);
-        SmartLogic.outputQueue.offer(BlockMessage);
+        try {
+            SmartLogic.outputQueue.put(BlockMessage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

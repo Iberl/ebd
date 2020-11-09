@@ -3,6 +3,7 @@ package de.ibw.history.data;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.util.DefaultRepo;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigDecimal;

@@ -11,6 +11,7 @@ import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
@@ -26,6 +27,7 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -274,7 +276,7 @@ public class TrainController extends SubmissionPublisher implements IController 
             E.sId = E.getRefId();
             CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
             TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
-            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(PlanData.SwitchIdRepo.getModel(N));
+            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
             CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
             TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);

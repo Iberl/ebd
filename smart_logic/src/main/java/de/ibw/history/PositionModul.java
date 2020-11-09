@@ -324,6 +324,7 @@ public class PositionModul implements IPositionModul {
                     0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
             PD.mergeOtherOccupationIntoThis(VO);
             iToReserve = iToReserve.subtract(dDistanceFromA);
+            PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
             toVisitMeters.add(iToReserve);
             visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve, toVisitMeters);

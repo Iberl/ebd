@@ -1,6 +1,7 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
@@ -222,8 +223,8 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             handleDKW();
             return;
         }
-        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
-        String sId = PlanData.switchIdRepo.getModel(this.Node);
+        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
+        String sId = ISwitchHandler.getNodeId(this.Node);
         CheckDbdCommand DbdCommandPayload =
                 new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
@@ -315,13 +316,13 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
-        /* Trail Target = null;
-            Trail From = (Trail) outputRelation.getFrom();
-        */
-        //Target = getTargetOfOutputChange(outputRelation, From);
+        Trail Target = null;
+        Trail From = (Trail) outputRelation.getFrom();
+
+        Target = getTargetOfOutputChange(outputRelation, From);
 
 
-        String sSrc = PlanData.switchIdRepo.getModel(Node);
+        String sSrc = ISwitchHandler.getNodeId(Node);
         String sTarget;
 
 
@@ -352,7 +353,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                 CS = (CrossingSwitch) ref.NodeImpl;
                 logger.info("Switched to " + target.getRail().getEdge().TopConnectFromA.value());
             }
-            sTarget = CS.getEbdTitle();
+            sTarget = CS.getEbdTitle(3,false,false);
 
         } catch ( Exception E) {
 
