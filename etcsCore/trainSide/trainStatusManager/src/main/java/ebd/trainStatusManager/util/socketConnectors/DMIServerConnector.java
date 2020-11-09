@@ -75,8 +75,7 @@ public class DMIServerConnector {
         this.curMaxTripDistance = nbce.serviceBreakingCurve.endOfDefinedDistance();
 
         updateDMIGP();
-        //TODO Uncomment when DMI is ready
-        //updateDMISP();
+        updateDMISP(nbce.serviceBreakingCurve);
     }
 
     /**
