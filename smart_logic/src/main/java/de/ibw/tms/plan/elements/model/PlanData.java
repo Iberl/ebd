@@ -326,13 +326,13 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             topologyFactory.connectTopology();
             topologyFactory.handleBranchingPoints();
             paintTopologyGraph(new DummyChainageSupply());
-            linkRailsToCrossover();
+            //linkRailsToCrossover();
             topologyFactory.getBalises();
 
             topologyFactory.mapBalisesToCoordinate();
 
             setNodeToBranchingPoints();
-            setEdges();
+            //setEdges();
             System.out.println("Test");
         } catch (ParseException | jakarta.xml.bind.JAXBException e) {
             e.printStackTrace();

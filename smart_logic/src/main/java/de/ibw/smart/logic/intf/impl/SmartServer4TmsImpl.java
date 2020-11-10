@@ -14,11 +14,13 @@ import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.physical.ITrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
@@ -349,7 +351,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, NetworkResource> TePair = null;
+                Pair<Route.TrackElementType, ITopological> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -367,7 +369,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                         if(EBM != null) EBM.log("Node Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
                         throw new NullPointerException("Some elements cannot be Identifed");
                     }
-                    TePair = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, N);
+                    TePair = new ImmutablePair<Route.TrackElementType, ITopological>(Route.TrackElementType.CROSSOVER_TYPE, N);
                 } else {
                     EBM.log("The given Element Type is not supported", ROUTE_COMPONENTS_IDENTIFY);
                     EBM.log("The Element Type has to be a Rail Or Crossover Type", ROUTE_COMPONENTS_IDENTIFY);
@@ -453,7 +455,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * @param wayEnd
      * @return
      */
-    private boolean handleWaypontsOnOneTrail(ArrayList<TrackElement> requestedTrackElementList, Waypoint wayStart, Waypoint wayEnd) {
+    private boolean handleWaypontsOnOneTrail(ArrayList<TrackEdge> requestedTrackElementList, Waypoint wayStart, Waypoint wayEnd) {
         throw new NotImplementedException("deprecated");/*
         if(wayStart.getTrackElement() == wayEnd.getTrackElement()) {
             requestedTrackElementList.add(wayStart.getTrackElement());

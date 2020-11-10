@@ -21,21 +21,29 @@ public class SectionOfLine implements Serializable {
         this.positioningNetElementList = new ArrayList<>();
 
     }
+
+    /**
+     * @deprecated
+     * @param rails
+     */
     public void addRails(ArrayList<Rail> rails) {
+        throw new NotImplementedException("deprecated");
+        /*
         for(Rail R : rails) {
             TrackElement TE = R.getTrackReference();
 
             throw new NotImplementedException("add Rails of Section Of Line not implemented");
 
-            /*PositioningNetElement PNE = new PositioningNetElement();
+            PositioningNetElement PNE = new PositioningNetElement();
             EntityLocation EL = new EntityLocation();
             EL.setLocatedNetEntity(TE);
             EL.setMainNetElement(PNE);
             PNE.setEntityLocation(EL);
             this.positioningNetElementList.add(PNE);
-            */
 
         }
+
+         */
     }
 
 }

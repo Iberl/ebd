@@ -382,7 +382,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             float y = 140.0f;
             g2d.setColor(new Color(0,150,150));
 
-            g2d.drawString(RC.getViewName(),x - 5.0f,(float) y);
+            //g2d.drawString(RC.getViewName(),x - 5.0f,(float) y);
         }
 
     }

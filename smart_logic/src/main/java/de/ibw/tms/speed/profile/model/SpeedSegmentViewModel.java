@@ -120,10 +120,13 @@ public class SpeedSegmentViewModel {
      * @param iResult int - Meter
      */
     public void setStartMeter(int iResult) {
+        /*
         SpotLocation spotLocation = this.Segment.getBegin();
 
         spotLocation.setChainage(new Chainage(iResult));
         this.Segment.setSpeedChangeBegin(spotLocation);
+         */
+
     }
 
     /**
@@ -131,10 +134,13 @@ public class SpeedSegmentViewModel {
      * @param iResult int - Meter
      */
     public void setEndMeter(int iResult) {
+       /*
         SpotLocation spotLocation = this.Segment.getEnd();
         spotLocation.setChainage(new Chainage(iResult));
         this.Segment.setSpeedChangeEnd(spotLocation);
+        */
     }
+
 
     /**
      * Setzt die Geschwindigkeit als Eingabe in (km per h)

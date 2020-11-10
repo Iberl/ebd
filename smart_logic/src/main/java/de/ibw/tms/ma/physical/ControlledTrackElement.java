@@ -2,7 +2,14 @@ package de.ibw.tms.ma.physical;
 
 import com.google.gson.annotations.Expose;
 
-public abstract class ControlledTrackElement extends TrackElement {
+/**
+ * @deprecated
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-11-10
+ */
+public abstract class ControlledTrackElement  {
     @Expose
     TrackElementStatus Status;
     @Expose

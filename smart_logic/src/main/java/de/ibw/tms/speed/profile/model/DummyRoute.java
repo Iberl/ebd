@@ -1,13 +1,19 @@
 package de.ibw.tms.speed.profile.model;
 
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DummyRoute extends Route {
+    public DummyRoute(List<RouteSection> sectionList) {
+        super(sectionList);
+    }
+    /*
     public DummyRoute() {
         ArrayList<Rail> railList = PlanData.getInstance().railList;
         ArrayList<BranchingSwitch> branchingSwitchList = PlanData.getInstance().branchingSwitchList;
@@ -33,4 +39,6 @@ public class DummyRoute extends Route {
 
 
     }
+
+     */
 }

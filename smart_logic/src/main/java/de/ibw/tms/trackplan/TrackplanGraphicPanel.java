@@ -263,7 +263,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
             g2d.fill(new Ellipse2D.Float(ex, ey, diam, diam));
           */
 
-        this.RoutePort.paintRoute(g2d);
+        //this.RoutePort.paintRoute(g2d);
 
 
         }

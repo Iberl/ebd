@@ -13,4 +13,8 @@ public class StopPosition extends LocatedNetEntity {
     private boolean air;
     private boolean electricity;
     private boolean diesel;
+
+    public StopPosition(String sName) {
+        super(sName);
+    }
 }

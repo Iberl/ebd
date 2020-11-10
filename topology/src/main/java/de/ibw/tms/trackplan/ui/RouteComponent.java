@@ -22,6 +22,7 @@ import java.util.concurrent.Flow;
  * Dieses Panel stellt ein Kontextmenu dar.
  * Die Aktionen dieses Menus betreffen das Setzten der Waypoints einer MA Route
  *
+ * @deprecated
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4

@@ -5,19 +5,19 @@ import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.physical.MovableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
-import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
 import de.ibw.tms.trackplan.ui.WaypointEnd;
 import de.ibw.tms.trackplan.ui.WaypointStart;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.Serializable;
 import java.security.InvalidParameterException;
@@ -87,7 +87,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
         WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);
         WaypointDecorator WayEnd = (WaypointDecorator) waypoints.get(waypoints.size() -1);
-        PositioningNetElement TrackElementOfEnd = WayEnd.getTrackElement();
+        MovableTrackElement TrackElementOfEnd = WayEnd.getTrackElement();
         TrackElementType TypeOfWaypoint = null;
         TypeOfWaypoint = TrackElementType.RAIL_TYPE;
         CrossoverModel EndModel = null;
@@ -111,37 +111,53 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
 
 
-            TrackElement CTE = W.getTrackElement();
+            MovableTrackElement CTE = W.getTrackElement();
             handleCrossoverWaypoint(CTE);
         }
     }
 
-    public void handleEndWaypoint(TrackElement trackElementOfEnd) {
+    /**
+     * @deprecated
+     * @param trackElementOfEnd
+     */
+    public void handleEndWaypoint(MovableTrackElement trackElementOfEnd) {
+        throw new NotImplementedException("deprecated");
+        /*
         CrossoverModel EndModel;
 
         if(trackElementOfEnd instanceof ControlledTrackElement) {
             EndModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) trackElementOfEnd);
-
+            trackElementOfEnd.
             String sId = ISwitchHandler.getNodeId(EndModel.getNode());
             this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
         } else {
             // no Crossover so it has to be a rail
             handleRailWaypoint(trackElementOfEnd);
         }
-
+*/
     }
 
-    public void handleCrossoverWaypoint(TrackElement CTE) {
-        String sId;
+    /**
+     * @deprecated
+     * @param CTE
+     */
+    public void handleCrossoverWaypoint(MovableTrackElement CTE) {
+        throw new NotImplementedException("deprecated");
+        /*String sId;
         CrossoverModel M = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) CTE);
         sId = ISwitchHandler.getNodeId(M.getNode());
         this.addWaypointIntoTransmission(TrackElementType.CROSSOVER_TYPE, sId);
+        */
     }
 
-    public void handleRailWaypoint(PositioningNetElement TE) {
+    /**
+     * @deprecated
+     * @param TE
+     */
+    public void handleRailWaypoint(MovableTrackElement TE) {
+        throw new NotImplementedException("deprecated");
 
-
-        this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, TE.getPlanProId());
+        //this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, TE.getPlanProId());
     }
 
     private void addWaypointIntoTransmission(TrackElementType TrackType, String sId) {
@@ -149,22 +165,26 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         elementListIds.add(sId);
     }
 
-    private HashMap<TrackElement, IWaypoint> generateWaypointOnTrackMap() {
-        HashMap<TrackElement, IWaypoint> resultMap = new HashMap<TrackElement, IWaypoint>();
+    /**
+     * @deprecated
+     * @return
+     */
+    private HashMap<ITopological, IWaypoint> generateWaypointOnTrackMap() {
+        HashMap<ITopological, IWaypoint> resultMap = new HashMap<ITopological, IWaypoint>();
         SpotLocation BeginPoint = location.getBegin();
 
 
         if(BeginPoint != null) {
-            resultMap.put(BeginPoint.getTrackElement(), (IWaypoint) BeginPoint);
+            resultMap.put((ITopological) BeginPoint.getElement(), (IWaypoint) BeginPoint);
 
         }
         SpotLocation EndPoint =  location.getEnd();
         if(EndPoint != null) {
-            resultMap.put(EndPoint.getTrackElement(), (IWaypoint) EndPoint);
+            resultMap.put((ITopological) EndPoint.getElement(), (IWaypoint) EndPoint);
         }
         List<Waypoint> points = this.waypointsList;
         for(Waypoint W : points) {
-            resultMap.put(W.getTrackElement(), (IWaypoint) W);
+           //Deprecated debug
         }
         return resultMap;
     }
@@ -173,39 +193,51 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         ArrayList<Waypoint> resultList = new ArrayList<>();
         SpotLocation BeginPoint = location.getBegin();
         SpotLocation EndPoint = location.getEnd();
-        WaypointDecorator BeginWayPoint =
-                new WaypointDecorator(BeginPoint.getTrackElement(), new TrackElementStatus(), -1, -1);
+        /*WaypointDecorator BeginWayPoint =
+                new WaypointDecorator(BeginPoint.getElement(), new TrackElementStatus(), -1, -1);
         WaypointDecorator EndWayPoint = null;
         if (withEndpoint) {
             EndWayPoint =
-                new WaypointDecorator(EndPoint.getTrackElement(), new TrackElementStatus(), -1, -1);
-        }
-        resultList.add(BeginWayPoint);
+                new WaypointDecorator(EndPoint.getElement(), new TrackElementStatus(), -1, -1);
+        }*/
+        //resultList.add(BeginWayPoint);
         resultList.addAll(this.waypointsList);
 
-        if(withEndpoint) resultList.add(EndWayPoint);
+        //if(withEndpoint) resultList.add(EndWayPoint);
         return resultList;
 
     }
 
-    public IWaypoint retrieveWaypointOnTrack(TrackElement Element) {
-        return (IWaypoint) generateWaypointOnTrackMap().get(Element);
+
+    /**
+     * @deprecated
+     * @return
+     */
+    public IWaypoint retrieveWaypointOnTrack() {
+        return null;
     }
 
+    /**
+     * @deprecated
 
-    public void setStartSpot(TrackElement Element, int iMeters) {
-        setSpot(Element, iMeters, true);
+     */
+    public void setStartSpot() {
+        throw new NotImplementedException("deprecated");
 
 
     }
 
-    private void setSpot(TrackElement Element, int iMeters, boolean isBegin) {
-        System.out.println("not implemented");
+    /**
+     * @deprecated
+     */
+    private void setSpot() {
+        throw new NotImplementedException("deprecated");
 
         /*int iBeginMeter = Element.getChainageBeginn().getiMeters();
         int iEndMeter = Element.getChainageEnd().getiMeters();
         boolean isValid = (iBeginMeter <= iMeters) && (iMeters <= iEndMeter);
         */
+        /*
         boolean isValid = true;
         if(isValid) {
             int x = TrackController.ClickPoint.x;
@@ -238,13 +270,21 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
                     location.setEnd(new WaypointEnd(new Chainage(iMeters), Element, null
                             , RouteComponent.FocusedPoint.x, RouteComponent.FocusedPoint.y));
                 }
-            }*/
+            }
         } else {
             throw new IndexOutOfBoundsException("Spot not in Tracks Chainage");
         }
+        */
     }
 
+    /**
+     * @deprecated
+     * @param TE
+     * @param Status
+     */
     public void addWaypoint(PositioningNetElement TE, TrackElementStatus Status) {
+        throw new NotImplementedException("deprecated");
+        /*
         Waypoint W = new Waypoint(TE, Status);
         int x = TrackController.ClickPoint.x;
         int y = TrackController.ClickPoint.y;
@@ -255,9 +295,16 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         } else {
             waypointsList.add(WayDecorated);
         }
-
+        */
     }
+
+    /**
+     * @deprecated
+     * @param TE
+     */
     public void removeWaypoint(ControlledTrackElement TE) {
+        throw new NotImplementedException("deprecated");
+        /*
         for(Waypoint W : waypointsList)  {
             if(W.getTrackElement() == TE) {
                 waypointsList.remove(W);
@@ -267,7 +314,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
             }
         }
         throw new InvalidParameterException("Waypoint cannot be removed");
-
+        */
     }
     public void addWaypoint(Waypoint W) {
 
@@ -286,9 +333,11 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         }
     }
 
-    public void setEndSpot(TrackElement Element, int iMeters) {
-        setSpot(Element, iMeters, false);
-
+    /**
+     * @deprecated
+     */
+    public void setEndSpot() {
+        throw new NotImplementedException("deprecated");
     }
 
     public LinearLocation getLocation() {

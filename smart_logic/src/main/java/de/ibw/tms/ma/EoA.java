@@ -6,6 +6,8 @@ import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_TIMER;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.etcs.T_EMA;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.spotsma.MASpots;
 
 import java.io.Serializable;
@@ -18,7 +20,7 @@ import java.io.Serializable;
  * End of Authority
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-30
+ * @since 2020-11-10
  */
 public class EoA extends MASpots implements Serializable {
     public static final String CLASS_IDENTIFIER = "End_Of_Authority";
@@ -46,9 +48,21 @@ public class EoA extends MASpots implements Serializable {
 
     private T_EMA t_ema;
 
-    public EoA(Chainage chainage, TrackElement trackElement, SectionOfLine lineSection) {
+    public EoA(SpotLocationIntrinsic SLI, int v_EMA, T_EMA T_E, boolean q_ENDTIMER, ETCS_DISTANCE d_ENDTIMERSTARTLOC,
+               ETCS_TIMER t_ENDTIMER, boolean q_DANGERPOINT, DangerPoint DP, boolean q_OLAP,  Overlap O, Q_SCALE Q_S) {
         super(CLASS_IDENTIFIER);
-        this.chainage = chainage;
+        this.setLocation(SLI);
+        this.chainage = SLI.chainage;
+        this.setV_EMA(v_EMA);
+        this.setT_ema(T_E);
+        this.setQ_ENDTIMER(q_ENDTIMER);
+        this.setD_ENDTIMERSTARTLOC(d_ENDTIMERSTARTLOC);
+        this.setT_ENDTIMER(t_ENDTIMER);
+        this.setQ_DANGERPOINT(q_DANGERPOINT);
+        this.setDangerPoint(DP);
+        this.setQ_OVERLAP(q_OLAP);
+        this.setOverlap(O);
+        this.setQ_scale(Q_S);
 
     }
 

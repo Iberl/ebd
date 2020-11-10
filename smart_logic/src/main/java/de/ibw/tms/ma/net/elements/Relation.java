@@ -21,17 +21,8 @@ import java.util.List;
 public class Relation extends NetworkResource implements Serializable {
     private List<INetElement> neighbourElements;
 
-    /**
-     * Relation muss mindestens ein Element enhalten
-     * @param elements - Liste mit mindestens einem Element
-     */
-    public Relation(List<INetElement> elements) {
 
-        if(elements.size() <= 1) {
-            throw new InvalidParameterException("Relations size must be greather than 0");
-        }
-        defaultInit("NeighbourRelation");
-        neighbourElements = elements;
+    public Relation(String sName) {
+        super(sName);
     }
-
 }

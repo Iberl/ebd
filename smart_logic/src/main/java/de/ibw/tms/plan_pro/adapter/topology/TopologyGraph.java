@@ -7,6 +7,7 @@ import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.intf.IEdge;
 import de.ibw.tms.plan_pro.adapter.topology.intf.INode;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
@@ -173,7 +174,7 @@ public class TopologyGraph {
     /**
      * Topologische Kante
      */
-    public static class Edge extends TrackEdge {
+    public static class Edge extends TrackEdge implements IEdge {
 
 
 

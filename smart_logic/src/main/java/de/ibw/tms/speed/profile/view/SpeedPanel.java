@@ -254,8 +254,8 @@ public class SpeedPanel extends CartesianPanel {
 
 
 
-        this.WayStart = new WaypointStart(new Chainage(777),null,null,777,0);
-        this.WayEnd = new WaypointEnd(new Chainage(7777),null,null, 7777,0);
+        //this.WayStart = new WaypointStart(new Chainage(777),null,null,777,0);
+        //this.WayEnd = new WaypointEnd(new Chainage(7777),null,null, 7777,0);
     }
 
     @Override

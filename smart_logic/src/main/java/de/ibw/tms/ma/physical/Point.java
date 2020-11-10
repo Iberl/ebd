@@ -29,8 +29,4 @@ public class Point extends BranchingElement {
         TurnoutNeighbour = turnoutNeighbour;
     }
 
-    @Override
-    public String getViewName() {
-        return " ";
-    }
 }

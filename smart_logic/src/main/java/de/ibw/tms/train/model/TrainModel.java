@@ -2,6 +2,7 @@ package de.ibw.tms.train.model;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.ThreadedRepo;
 
 import java.awt.*;
@@ -219,15 +220,15 @@ public class TrainModel {
     private Integer nid_lrbg = null;
 
     @Expose
-    private ArrayList<TrackElement> passedTopologicalElements = new ArrayList<>();
+    private ArrayList<ITopological> passedTopologicalElements = new ArrayList<>();
 
-    public boolean addPassedElement(TrackElement TE) {
+    public boolean addPassedElement(ITopological TE) {
         if(passedTopologicalElements.contains(TE)) return false;
         else passedTopologicalElements.add(TE);
         return true;
     }
 
-    public ArrayList<TrackElement> getPassedTopologicalElements() {
+    public ArrayList<ITopological> getPassedTopologicalElements() {
         return passedTopologicalElements;
     }
 

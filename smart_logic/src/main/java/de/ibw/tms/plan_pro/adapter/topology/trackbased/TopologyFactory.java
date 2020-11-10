@@ -206,7 +206,7 @@ public class TopologyFactory implements ITopologyFactory {
                         continue;
                     }
                     NextGeoNode = (CGEOKnoten) geoPointRepo.getModel(sNextGeo);
-                    handleGeoEdges(A, currentGeo, NextGeoNode);
+                    //handleGeoEdges(A, currentGeo, NextGeoNode);
 
 
                 }
@@ -400,8 +400,8 @@ public class TopologyFactory implements ITopologyFactory {
             // getGeoCoordinate()
 
 
-            B.setX(geoCoordinate.getX());
-            B.setY(geoCoordinate.getY());
+            //B.setX(geoCoordinate.getX());
+            //B.setY(geoCoordinate.getY());
 
             //UtilFunction.calcTargetGeoByStartPoint(B, dA, Geo_A, Geo_B);
 

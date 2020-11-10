@@ -10,6 +10,7 @@ import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.ThreadedRepo;
 import de.ibw.util.UtilFunction;
 import org.apache.commons.lang3.tuple.Pair;
@@ -150,7 +151,7 @@ public class PositionModul implements IPositionModul {
             if(route.getRouteLength().compareTo(dTrainLength) < 0) {
                 return evaluatePositionReport(null, PD);
             }
-            Iterator<Pair<Route.TrackElementType, NetworkResource>> it = route.iterator();
+            Iterator<Pair<Route.TrackElementType, ITopological>> it = route.iterator();
             try {
                 TopologyGraph.Edge E =
                         PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
@@ -169,7 +170,7 @@ public class PositionModul implements IPositionModul {
                         BigDecimal EndDistance = new BigDecimal(iDistanceToBalise);
                         TopologyGraph.Node N = B.getNodeInDirectionOfBaliseGroup(isTrainMovingNominal);
                         if (it.hasNext()) {
-                            Pair<Route.TrackElementType, NetworkResource> RouteNode = it.next();
+                            Pair<Route.TrackElementType, ITopological> RouteNode = it.next();
                             if(RouteNode.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
                                 if(N.equals(RouteNode.getValue())) {
                                     if(route.getRouteLength().compareTo(BigDecimal.valueOf(iDistanceToBalise))>= 0) {
@@ -179,7 +180,7 @@ public class PositionModul implements IPositionModul {
                                         while(StartDistance.compareTo(CurrentDistance) >= 0) {
                                             tempDistance = new BigDecimal(CurrentDistance.doubleValue());
 
-                                            Pair<Route.TrackElementType, NetworkResource> Element = it.next();
+                                            Pair<Route.TrackElementType, ITopological> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
@@ -199,7 +200,7 @@ public class PositionModul implements IPositionModul {
                                                     dDistanceFromA.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                                                     (int) E.dTopLength);
                                             PD.mergeOtherOccupationIntoThis(VO);
-                                            Pair<Route.TrackElementType, NetworkResource> Element = it.next();
+                                            Pair<Route.TrackElementType, ITopological> Element = it.next();
                                             if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                                                 E = (TopologyGraph.Edge) Element.getValue();
                                                 CurrentDistance.add(BigDecimal.valueOf(E.dTopLength));
@@ -324,7 +325,7 @@ public class PositionModul implements IPositionModul {
                     0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dDistanceFromA.intValue());
             PD.mergeOtherOccupationIntoThis(VO);
             iToReserve = iToReserve.subtract(dDistanceFromA);
-            PD.add(StartArea);
+            //PD.add(StartArea);
             if(iToReserve.compareTo(new BigDecimal("0")) <= 0) return PD;
             toVisitMeters.add(iToReserve);
             visitEdge(visitedEdgesList, toVisitEdgesList, N1, E, iToReserve, toVisitMeters);

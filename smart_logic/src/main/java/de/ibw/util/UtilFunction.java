@@ -1,7 +1,9 @@
 package de.ibw.util;
 
 import de.ibw.feed.Balise;
+import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
@@ -19,10 +21,14 @@ import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
+import javax.sound.midi.Track;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 
-import static ebd.rbc_tms.util.ETCSVariables.*;
+import static de.ibw.tms.etcs.Q_SCALE.SCALE_10_CM;
+import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER;
+import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE;
+
 
 /**
  * Uitilities Allgemeiner Art
@@ -57,8 +63,8 @@ public class UtilFunction {
         }
         SingleSlip Slip = CrossoverMod.getRailWaySlip();
         PositionedRelation PosRel = Slip.getOutputRelation();
-        TrackElement TE_From = PosRel.getFrom();
-        TrackElement TE_To = PosRel.getTo();
+        TrackEdge TE_From = (TrackEdge) PosRel.getFrom();
+        TrackEdge TE_To = (TrackEdge) PosRel.getTo();
         Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_From);
         Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_To);
         Rail R_Next = null;
@@ -78,19 +84,23 @@ public class UtilFunction {
     }
 
     private static BigDecimal calcDistanceFromDP(int q_scale, BigDecimal distance_from_dp) {
-        switch (q_scale) {
-            case Q_SCALE_10CM: {
+        Q_SCALE Q_S = Q_SCALE.getScale(q_scale);
+
+        switch (Q_S) {
+            case SCALE_10_CM: {
                 distance_from_dp = distance_from_dp.multiply(new BigDecimal(0.1d));
                 break;
             }
-            case Q_SCALE_1M: {
+            case SCALE_1_M: {
 
                 break;
             }
-            case Q_SCALE_10M: {
+            case SCALE_10_M: {
                 distance_from_dp = distance_from_dp.multiply(new BigDecimal(10.0d));
                 break;
             }
+            default:
+                throw new IllegalStateException("Unexpected value: " + q_scale);
         }
         return distance_from_dp;
     }
@@ -158,7 +168,7 @@ public class UtilFunction {
             TopologyGraph topologyGraph = PlanData.topGraph;
             TopologyGraph.Node TargetNode = null;
 
-            TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.EdgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
+            TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.edgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
             if(NewTrainPositionEdge == null) {
                 throw new NullPointerException("Balise Not on Track in TopologyGraph");
             }

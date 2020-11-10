@@ -39,7 +39,7 @@ public class AddSegmentDialog extends JDialog {
         Ctrl.setView(this);
         this.SegmentViewModel = SegmentViewModel;
         SpeedSegment Segment = SegmentViewModel.getSegment();
-        int iMeterBegin = Segment.getBegin().getChainage().getiMeters();
+        //int iMeterBegin = Segment.getBegin().getChainage().getiMeters();
         AddPanel = new JPanel();
         GroupLayout layout = new GroupLayout(AddPanel);
         AddPanel.setLayout(layout);
@@ -64,7 +64,7 @@ public class AddSegmentDialog extends JDialog {
         endField = new JTextField();
         speedField = new JTextField();
 
-        beginField.setText(String.valueOf(iMeterBegin));
+        //beginField.setText(String.valueOf(iMeterBegin));
         endField.setText(String.valueOf(iMaxMeter));
         speedField.setText(String.valueOf(Segment.getV_STATIC().bSpeed * 5));
 

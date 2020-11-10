@@ -275,7 +275,7 @@ public class Balise implements ICoord<Double> {
         BigDecimal dEnd = dDistanceFromA.add(dDpLength);
         if(dStart.compareTo(new BigDecimal(0) ) < 0) dStart = new BigDecimal(0);
         if(dEnd.compareTo(dTrackLength) > 0) dEnd = dTrackLength;
-        return new Occupation(E,scale, dStart.intValue(), scale, dEnd.intValue() );
-
+        //return new Occupation(E,scale, dStart.intValue(), scale, dEnd.intValue() );
+        return null;
     }
 }

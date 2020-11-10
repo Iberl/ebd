@@ -68,10 +68,11 @@ public class TrackPanel extends javax.swing.JPanel {
             if(SlipPoint instanceof SingleSlip) {
                 String desc = "Single Slip";
                 if(!isMainWindow) {
-                    this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl));
+                   // this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl));
                 }
             } else {
                 if(SlipPoint instanceof DoubleSlip) {
+                    /*
                     DoubleSlip DSlip = (DoubleSlip) SlipPoint;
                     String desc = "Double Slip";
                     TrackElement TeA = DSlip.getFirstSlipA().getRemotePoint();
@@ -84,11 +85,13 @@ public class TrackPanel extends javax.swing.JPanel {
                         this.add(new RouteComponent(sDescB, TeB,
                                 this.RouteCntrl));
                     }
+
+                     */
                 }
             }
         } else {
             if(!isMainWindow) {
-                this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl));
+                //this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl));
             }
         }
 

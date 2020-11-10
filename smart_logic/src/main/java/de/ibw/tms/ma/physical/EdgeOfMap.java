@@ -1,12 +1,11 @@
 package de.ibw.tms.ma.physical;
 
-public class EdgeOfMap extends TrackElement {
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+
+public class EdgeOfMap extends TrackEdge {
     String sViewName = "";
 
-    @Override
-    public String getViewName() {
-        return this.sViewName;
-    }
+
 
     public EdgeOfMap(String sViewName) {
         this.sViewName = sViewName;

@@ -80,6 +80,10 @@ public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Se
         this.lineSection = lineSection;
     }
 
+    public PositioningNetElement getElement() {
+        return (PositioningNetElement) this.NetElement;
+    }
+
 
     @Override
     public RTMLinearCoordinate getLinearCoordinate() {

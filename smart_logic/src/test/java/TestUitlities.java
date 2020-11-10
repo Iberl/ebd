@@ -39,34 +39,8 @@ public class TestUitlities {
     }
 
 
-    public static TrackElement generateTrackElement() {
-        return null;
-    }
-
-    public static Trail generateTrailRandomElement(boolean inLine, ChainageSteps Step, byte bMaxStepFactor,
-                                                   boolean bUseLastChainage, ApplicationDirection Navigation,
-                                                   Int_Handler V_Max_Handler,
-                                                   ApplicationDirection ConnectionDirection, TrackElementStatus TrackStat) {
-        Chainage ChBeginn = null;
-        if(LastChainage != null && bUseLastChainage) {
-            ChBeginn = LastChainage;
-        }
-        if(inLine) {
-            if(ChBeginn == null) {
-
-            }
-        } else {
-
-        }
 
 
-        Trail T = new Trail(null,null, null, null,ApplicationDirection.BOTH, 0,
-                ApplicationDirection.BOTH,null);
-
-        return T;
-
-
-    }
 
 
 }

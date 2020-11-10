@@ -1,9 +1,10 @@
 package de.ibw.tms.plan_pro.adapter;
 
-import de.ibw.smart.logic.datatypes.Occupation;
+import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
+import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
@@ -115,30 +116,13 @@ CrossingSwitch implements ICompareTrackMeter {
     }
 
     /**
+     * @deprecated
      * Gibt den Grenzbereich dieser Weiche wider.
      * @param E - Grenzbereich wird zu Topologischen Kante E widergegeben
      * @return BlockedArea - Grenzbereich als Blockierter Abschnitt
      */
     public Occupation getInsecureAreAtGivenEdge(TopologyGraph.Edge E) {
-        CSignal Sig = this.getSignal();
-        BigDecimal dSigDistanceToA;
-        for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
-            if (CTopKante.getIDTOPKante().getWert().equals(E.sId)) {
-                dSigDistanceToA = CTopKante.getAbstand().getWert();
-
-                Occupation BA;
-                if (checkIfConnectedByA(E)) {
-                    BA = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, 0,
-                            Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue());
-                } else {
-                    BA = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, dSigDistanceToA.intValue(),
-                            Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength);
-                }
-                return BA;
-            }
-        }
-        throw new InvalidParameterException("Edge has for this Switch no insecure Area");
-
+        throw new NotImplementedException("deprecated");
     }
 
     private boolean checkIfConnectedByA(TopologyGraph.Edge Edge) {

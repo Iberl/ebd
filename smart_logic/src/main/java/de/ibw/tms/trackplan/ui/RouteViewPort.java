@@ -1,7 +1,7 @@
 package de.ibw.tms.trackplan.ui;
 
-import de.ibw.tms.ma.LinearLocation;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.RouteController;
 

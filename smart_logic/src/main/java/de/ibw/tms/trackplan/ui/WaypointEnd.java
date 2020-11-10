@@ -3,8 +3,10 @@ package de.ibw.tms.trackplan.ui;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SectionOfLine;
 import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -38,6 +40,7 @@ public class WaypointEnd extends SpotLocation implements IWaypoint, IPaintable {
     }
 
     /**
+     * @deprecated
      * Generiert End-Waypoint
      * @param C - unused
      * @param endElement - letztes Element der Route
@@ -45,12 +48,13 @@ public class WaypointEnd extends SpotLocation implements IWaypoint, IPaintable {
      * @param xPixel int x-Zeichenpositon - nicht reale Position in der Streckenansicht.
      * @param yPixel int y-Zeichenpositon - nicht reale Position in der Streckenansicht.
      */
-    public WaypointEnd(Chainage C, TrackElement endElement, SectionOfLine Section, int xPixel, int yPixel ) {
-        super(C,endElement,Section);
+    public WaypointEnd(Chainage C, TrackEdge endElement, SectionOfLine Section, int xPixel, int yPixel ) {
+        throw new NotImplementedException("deprecated");
+        /*super(C,endElement,Section);
 
         this.x = xPixel;
         this.y = yPixel;
-
+*/
 
     }
 
@@ -84,14 +88,6 @@ public class WaypointEnd extends SpotLocation implements IWaypoint, IPaintable {
         }
     }
 
-    /**
-     * Gibt Element von Waypoint wider
-     * @return TrackElement
-     */
 
-    @Override
-    public TrackElement getTrackElement() {
-        return super.getTrackElement();
-    }
 
 }

@@ -5,6 +5,8 @@ import de.ibw.tms.controller.TmsController;
 import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.train.model.TrainModel;
 
+import java.util.ArrayList;
+
 public class MaRequestWrapper {
 
     private static int iRequestCount = 0;
@@ -24,7 +26,7 @@ public class MaRequestWrapper {
     private void init() {
         if(this.Request == null) {
             this.Request = new MARequest();
-            this.Request.setRoute(new Route());
+            this.Request.setRoute(new Route(new ArrayList<>()));
             this.Request.setMa(new MovementAuthority());
             this.Request.setTms(TmsController.getInstance());
             this.Request.setTrain(new TrainMovement());

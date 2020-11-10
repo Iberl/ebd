@@ -4,6 +4,9 @@ import de.ibw.tms.ma.physical.TrackElementStatus;
 
 import java.io.Serializable;
 
+/**
+ * @deprecated
+ */
 public class Waypoint implements Serializable {
 
     private TrackElement TrackElement;

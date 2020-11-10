@@ -8,10 +8,8 @@ import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.tms.ma.EoaSectionAdapter;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
@@ -20,7 +18,6 @@ import de.ibw.util.ThreadedRepo;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
@@ -120,19 +117,19 @@ public class SmartSafety {
      * Blockierte Abschnitte
      * Zugneutrale Abschnitte werden mit Zugnummer -1 blockiert
      */
-    private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
+    private volatile ThreadedRepo<Integer, List<Occupation>> blockList = new ThreadedRepo<>();
 
 
 
-    private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
-        List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
+    private synchronized List<Occupation> getAllAreaNotBlockedByOwn(int iTrainId) {
+        List<Occupation> ownBlocking = blockList.getModel(iTrainId);
         if(ownBlocking == null) ownBlocking = new ArrayList<>();
-        Collection<List<BlockedArea>> all = blockList.getAll();
-        List<BlockedArea> result = Collections.synchronizedList(new ArrayList<>());
-        for(List<BlockedArea> trainset: all) {
+        Collection<List<Occupation>> all = blockList.getAll();
+        List<Occupation> result = Collections.synchronizedList(new ArrayList<>());
+        for(List<Occupation> trainset: all) {
             result.addAll(trainset);
         }
-        for(BlockedArea B : ownBlocking) {
+        for(Occupation B : ownBlocking) {
             result.remove(B);
         }
         return result;
@@ -150,7 +147,7 @@ public class SmartSafety {
      */
     public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
-        List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
+        List<MARequestOccupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
         int iQ_DirLength = -1;
         int iQ_Scale = -1;

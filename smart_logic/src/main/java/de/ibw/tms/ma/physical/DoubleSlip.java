@@ -27,7 +27,7 @@ public class DoubleSlip extends SlipConnectionPoint {
     }
 
     public void updatePositionedRelation(List<PositionedRelation> relationList, String sViewNameA, String sViewNameB) {
-
+        /*
         this.FirstSlipA.updatePositionedRelation(relationList.subList(0,2));
         if(sViewNameA != null) {
             this.FirstSlipA.setViewName(sViewNameA);
@@ -36,6 +36,8 @@ public class DoubleSlip extends SlipConnectionPoint {
         if(sViewNameB != null) {
             this.SecondSlipB.setViewName(sViewNameB);
         }
+
+         */
     }
 
 

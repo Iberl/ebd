@@ -1,6 +1,7 @@
 package de.ibw.smart.logic.safety;
 
 import de.ibw.feed.Balise;
+import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.safety.self.tests.TestUtil;
 import de.ibw.tms.etcs.Q_SCALE;
@@ -8,12 +9,11 @@ import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.DefaultRepo;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
     public void checkIfMainNullError() throws InterruptedException {
 
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        RouteDataSL routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false
             , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
@@ -121,18 +121,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        RouteDataSL routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true
                 , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITopological> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> FirstWaypoint = routenListe.get(1);
         NodeRunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -258,18 +258,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        RouteDataSL routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITopological> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -429,18 +429,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        RouteDataSL routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITopological> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -591,7 +591,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe;
+        RouteDataSL routenListe;
         Balise B;
         try {
             routenListe = TestUtil.generateRandomContinousRoute(7, true, true,
@@ -601,12 +601,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
             return;
         }
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITopological> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> FirstWaypoint = routenListe.get(1);
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -779,18 +779,18 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge BaliseStandingOn = null;
         int q_dir = 1;
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe =
+        RouteDataSL routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_TARGET_POINTS_TO_PEEK_AND_NOT_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
 
 
-        Pair<Route.TrackElementType, TrackElement> StartTrail = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> FirstWaypoint = routenListe.get(1);
+        Pair<Route.TrackElementType, ITopological> StartTrail = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> FirstWaypoint = routenListe.get(1);
         FirstNodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListeNEW4TEST = new ArrayList<>();
+        RouteDataSL routenListeNEW4TEST = new ArrayList<>();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(1));
         routenListeNEW4TEST.add(routenListe.get(2));
@@ -932,12 +932,12 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
 
     }
     */
-    private int calcMaxLengthOfTrack(ArrayList<Pair<Route.TrackElementType, TrackElement>> routenListe) {
+    private int calcMaxLengthOfTrack(RouteDataSL routenListe) {
         int iResultLength = 0;
-        Pair<Route.TrackElementType, TrackElement> StartKomposition = routenListe.get(0);
-        Pair<Route.TrackElementType, TrackElement> EndKomposition = routenListe.get(routenListe.size() - 1);
+        Pair<Route.TrackElementType, ITopological> StartKomposition = routenListe.get(0);
+        Pair<Route.TrackElementType, ITopological> EndKomposition = routenListe.get(routenListe.size() - 1);
         for(int i = 0; i < routenListe.size() -2; i++) {
-            Pair<Route.TrackElementType, TrackElement> Komposition = routenListe.get(i);
+            Pair<Route.TrackElementType, ITopological> Komposition = routenListe.get(i);
             TopologyGraph.Edge E = null;
             if(Komposition == StartKomposition) {
                 if(Komposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
@@ -947,7 +947,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
                     throw new InvalidParameterException("Not valid Test setup");
                 }
             } else {
-                Pair<Route.TrackElementType, TrackElement> NextKomposition = routenListe.get(i + 1);
+                Pair<Route.TrackElementType, ITopological> NextKomposition = routenListe.get(i + 1);
                 if (NextKomposition == EndKomposition) {
                     if (NextKomposition.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
                         E = (TopologyGraph.Edge) NextKomposition.getRight();

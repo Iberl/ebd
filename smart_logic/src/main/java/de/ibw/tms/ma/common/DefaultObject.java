@@ -19,7 +19,7 @@ public abstract class DefaultObject implements IBaseObject {
     public static ThreadedRepo<UUID, DefaultObject> topologyRepository = new ThreadedRepo<>();
 
 
-
+    private UUID id = null;
     private String sSystemName = IBaseObject.sName;
     private Timestamp lastUpdated = IBaseObject.lastUpdated;
     private String sComment = IBaseObject.sComment;
@@ -38,7 +38,8 @@ public abstract class DefaultObject implements IBaseObject {
 
     @Override
     public UUID getUuid() {
-        return this.getUuid();
+        if(this.id == null) this.id = UUID.randomUUID();
+        return this.id;
     }
 
     @Override

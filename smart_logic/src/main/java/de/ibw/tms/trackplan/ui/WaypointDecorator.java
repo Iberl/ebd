@@ -1,6 +1,7 @@
 package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.Waypoint;
+import de.ibw.tms.ma.physical.MovableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
@@ -8,6 +9,8 @@ import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
+
 /**
  * Ein Wrapper von Wapoints.
  * Start und Endpunkt sind nicht als Waypoints modeliert worden.
@@ -40,12 +43,12 @@ public class WaypointDecorator extends Waypoint implements IWaypoint, IPaintable
 
     /**
      * Wrapt Start oder End Waypoint
-     * @param startOrEndElement {@link TrackElement} - Element soll Wrapper haben
+     * @param startOrEndElement {@link TrackEdge} - Element soll Wrapper haben
      * @param TeStatus {@link TrackElementStatus} - Status des angefragten Elementes
      * @param xPixel int - xPosition des Bildes in der Streckenansicht
      * @param yPixel int - yPosition des Bildes in der Streckenansicht
      */
-    public WaypointDecorator(TrackElement startOrEndElement, TrackElementStatus TeStatus, int xPixel, int yPixel ) {
+    public WaypointDecorator(MovableTrackElement startOrEndElement, List<TrackElementStatus> TeStatus, int xPixel, int yPixel ) {
         super( startOrEndElement, TeStatus);
 
         this.x = xPixel;

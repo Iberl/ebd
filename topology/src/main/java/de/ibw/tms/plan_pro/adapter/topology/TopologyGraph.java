@@ -77,7 +77,7 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    public static class Node extends TrackElement {
+    public static class Node extends Tr {
 
         /**
          * Knoten Bezeichnung

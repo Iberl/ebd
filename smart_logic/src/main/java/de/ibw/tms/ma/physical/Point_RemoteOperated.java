@@ -34,8 +34,8 @@ public class Point_RemoteOperated extends Point {
 
     public Point_RemoteOperated(Chainage C, PositionedRelation OutputRelation) {
         super(OutputRelation);
-        this.setChainageBeginn(C);
-        this.setChainageEnd(C);
+        //this.setChainageBeginn(C);
+        //this.setChainageEnd(C);
         this.state = PointState.WAIT_ON_COMMAND;
         this.operationMode = PointOperationMode.NORMAL;
         this.status = BranchingSwitch.CrossoverStatus.RIGHT;
