@@ -20,10 +20,13 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 break
             currentTime = time.time()
             dT = currentTime - startTime
+            startTime = currentTime
+
             dataString = data.decode("utf-8")
             dataSplit = dataString.split(" ")
+            print("Command: " + " " + dataString.rstrip() )
             if(dataSplit[0] == "gok"):
                 distance += dT * float(dataSplit[-1]) / 3.6
-            print("Command: " + " " + dataString.rstrip() )
-            print("DeltaT[s]: " + str(dT) + " Distance[m]: " + str(distance))
-            startTime = currentTime
+                print("DeltaT[s]: " + str(dT) + " Distance[m]: " + str(distance))
+            elif(dataSplit[0] == "stop"):
+                break
