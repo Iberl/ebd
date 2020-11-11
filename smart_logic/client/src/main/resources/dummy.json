@@ -28,8 +28,7 @@
           "sId": "12W1L"
         },
         "DistanceRefPointOfEdge": {},
-        "NodeTrainRunningTo": {},
-        "sNodeIdTrainRunningTo": "A0639347-9D87-4D55-A2B5-051EDE490C30",
+        "sNodeIdTrainRunningTo": "12W1",
         "passedTopologicalElements": []
       }
     },

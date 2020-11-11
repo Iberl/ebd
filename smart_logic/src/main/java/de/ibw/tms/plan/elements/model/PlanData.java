@@ -332,7 +332,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             topologyFactory.mapBalisesToCoordinate();
 
             setNodeToBranchingPoints();
-            //setEdges();
+            setEdges();
             System.out.println("Test");
         } catch (ParseException | jakarta.xml.bind.JAXBException e) {
             e.printStackTrace();
@@ -569,11 +569,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
-            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle(0,false,true));
+
             switchId = CS.getEbdTitle(0,false, true);
+            N.name = switchId;
+            N.TopNodeId = switchId;
             if(switchId != null) {
                 ISwitchHandler.registerNode(N, switchId);
             }
+
 
 
 

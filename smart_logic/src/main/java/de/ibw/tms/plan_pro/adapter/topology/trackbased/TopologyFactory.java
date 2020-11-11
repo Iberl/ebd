@@ -273,6 +273,7 @@ public class TopologyFactory implements ITopologyFactory {
                 A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
 
             }
+            if(A == null) continue;
             CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }

@@ -5,7 +5,14 @@ import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsMessage;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
-
+/**
+ * Client Handler
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-11-11
+ */
 public class ClientHandler extends SmartClientHandler {
 
 

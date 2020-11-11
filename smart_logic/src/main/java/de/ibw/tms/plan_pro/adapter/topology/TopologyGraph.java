@@ -15,10 +15,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+
 /**
  * Der Graph aus Knoten und Kanten der Topologie
  *
@@ -91,11 +89,11 @@ public class TopologyGraph {
         /**
          * Knoten Bezeichnung
          */
-        public final String name;
+        public String name;
         /**
          * PlanPro Knoten Id
          */
-            public final String TopNodeId;
+        public String TopNodeId;
         /**
          * Knoten realisierung
          */
@@ -145,11 +143,13 @@ public class TopologyGraph {
         }
 
         /**
+         * @deprecated
          * Diese Methode zieht die Vermittlung zur Weiche
          * @return CrossoverModel - Vermittlung zur Logischen Weiche
          */
         public CrossoverModel getModel() {
-                return CrossoverModel.CrossoverRepo.getModel(this);
+            throw new NotImplementedException("deprecated");
+            //return CrossoverModel.CrossoverRepo.getModel(this);
             }
 
         /**
@@ -168,6 +168,23 @@ public class TopologyGraph {
          */
         public String getViewName() {
             return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            Node that = (Node) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(TopNodeId, that.TopNodeId) &&
+                    Objects.equals(NodeImpl, that.NodeImpl) &&
+                    Objects.equals(NodeType, that.NodeType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), name, TopNodeId, NodeImpl, NodeType);
         }
     }
 

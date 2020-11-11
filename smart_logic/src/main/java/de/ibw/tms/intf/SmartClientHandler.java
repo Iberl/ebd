@@ -32,7 +32,7 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
 
     private static SmartClientHandler instance = null;
-    private static Logger logger = Logger.getLogger( SmartClientHandler.class );
+    protected static Logger logger = Logger.getLogger( SmartClientHandler.class );
 
     /**
      * Singelton um den ClientHandler des TMS widerzugeben
@@ -45,9 +45,9 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
 
 
-    private SynchronousQueue<String> tmsCommandQueue;
+    protected SynchronousQueue<String> tmsCommandQueue;
     //private SendCommandThreadFromQueue sender;
-    private SmartClientHandler() {
+    protected SmartClientHandler() {
         tmsCommandQueue = new SynchronousQueue<>();
 
 

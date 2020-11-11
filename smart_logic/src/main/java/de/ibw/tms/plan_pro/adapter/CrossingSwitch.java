@@ -1,6 +1,7 @@
 package de.ibw.tms.plan_pro.adapter;
 
 import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
@@ -64,6 +65,7 @@ CrossingSwitch implements ICompareTrackMeter {
                 );
             supportedTracks.add(TrackRelevantObj.getIDStrecke().getWert());
         }
+        ISwitchHandler.registerCrossingSwitch(A, this);
     }
 
     /**

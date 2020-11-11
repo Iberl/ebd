@@ -355,7 +355,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
-                   TopologyGraph.Edge E =  PlanData.topGraph.edgeRepo.get(sId);
+                   TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 

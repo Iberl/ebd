@@ -12,17 +12,17 @@ import java.util.List;
 
 public interface ISwitchHandler {
 
-    public static NodeInformation getNodeInfoBySwitchId(String switchId) {
+    static NodeInformation getNodeInfoBySwitchId(String switchId) {
         return PlanData.SwitchRepo.getModel(switchId);
     }
 
 
-    public static String getNodeId(TopologyGraph.Node N) {
+    static String getNodeId(TopologyGraph.Node N) {
         return PlanData.SwitchIdRepo.getModel(N);
     }
 
 
-    public static void registerNode(TopologyGraph.Node N, String switchId) {
+    static void registerNode(TopologyGraph.Node N, String switchId) {
         NodeInformation NI = getNodeInfoBySwitchId(switchId);
         if(NI == null) NI = new NodeInformation();
         if(!NI.contains(N)) {
@@ -33,14 +33,14 @@ public interface ISwitchHandler {
     }
 
 
-    public static void registerCrossingSwitch(CWKrAnlage A, CrossingSwitch CS) {
+    static void registerCrossingSwitch(CWKrAnlage A, CrossingSwitch CS) {
         ArrayList<CrossingSwitch> switchList = (ArrayList<CrossingSwitch>) getCrossingSwitches(A);
         if(!switchList.contains(CS)) switchList.add(CS);
         PlanData.CrossingSwitchRepoByAnlage.update(A,switchList);
     }
 
 
-    public static List<CrossingSwitch> getCrossingSwitches(CWKrAnlage A) {
+    static List<CrossingSwitch> getCrossingSwitches(CWKrAnlage A) {
         ArrayList<CrossingSwitch> switchList = PlanData.CrossingSwitchRepoByAnlage.getModel(A);
         if(switchList == null) {
             switchList = new ArrayList<>();

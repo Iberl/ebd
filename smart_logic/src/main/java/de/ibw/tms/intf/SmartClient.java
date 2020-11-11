@@ -48,13 +48,13 @@ public class SmartClient extends RbcModul {
     @Override
     public void run() {
         try {
-            startSmartLogicClient();
+            startSmartLogicClient(SmartClientHandler.getInstance());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void startSmartLogicClient() throws InterruptedException {
+    protected void startSmartLogicClient(SmartClientHandler ClientHandler) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
 
         EventLoopGroup group = new NioEventLoopGroup();
@@ -72,7 +72,7 @@ public class SmartClient extends RbcModul {
                             getClass().getClassLoader())));
 
 
-                    socketChannel.pipeline().addLast("handler", SmartClientHandler.getInstance());
+                    socketChannel.pipeline().addLast("handler", ClientHandler);
                 }
             });
 
