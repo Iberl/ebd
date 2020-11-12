@@ -118,8 +118,12 @@ public class AvailableAcceleration {
             case NORMAL_BREAKING, SERVICE_BREAKING, EMERGENCY_BREAKING -> this.breakingModification;
             default -> 1;
         };
-
-        if(this.awaitedMoveState != movementState && movementState != MovementState.UNCHANGED) {
+        boolean change = this.awaitedMoveState != movementState && movementState != MovementState.UNCHANGED;
+        if (change && this.awaitedMoveState != this.curMoveState){
+            //Detecting a switch in requested movement, but we are already in phase one, so we only change the target
+            this.awaitedMoveState = movementState;
+        }
+        else if(change) {
             //Detecting a switch in requested movement, starting transition phase one
             this.timeAtLastChange = System.currentTimeMillis();
             this.awaitedMoveState = movementState;
