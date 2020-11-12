@@ -326,9 +326,6 @@ public class ConfigHandler {
     booleans
      */
 
-    /** Indicates wether the dummy should continue running the tcp server or should shutdown after all sequences finished */
-    public boolean tmsShutdown = true;
-
     /*
     ints
      */

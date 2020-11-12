@@ -65,25 +65,8 @@ public class TMSSzenario {
             sequences.remove(e.source);
             if(sequences.isEmpty()) {
                 EventBus.getDefault().post(new StopWaitingEvent());
-                if(Objects.requireNonNull(ConfigHandler.getInstance()).tmsShutdown) {
-                    try {
-                        log("TMS Dummy begins shutdown");
-                        communicator.kill();
-                        communicator.join();
-                    } catch(InterruptedException interruptedException) {
-                        interruptedException.printStackTrace();
-                    }
-                    shutdown();
-                }
             }
         }
-    }
-
-
-    private void shutdown() {
-        log("Szenario " + filename + " ended");
-        log("TMS Dummy was shut down");
-        System.exit(0);
     }
 
 }

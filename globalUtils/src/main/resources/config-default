@@ -191,7 +191,8 @@ d_LocCon = 1
 ######
 
 # TMS ID (Temporary)
-registeredTMS = 1
+tmsId = 1
+rbcId = 1
 
 ######
 ###### Booleans (either " = true" or " = false")
