@@ -1,4 +1,4 @@
-package ebd.trainStatusManager.util.socketClientsConnectors;
+package ebd.trainStatusManager.util.socketConnectors;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.core.StopTrainEvent;
@@ -27,12 +27,14 @@ public class InfrastructureClientConnector {
     private final String eventSource;
     private final String target = "szenario";
 
-    private int tickCounter = 0;
+    private int tickCounter = 1;
     private final int updateMultiplier;
 
     private double carry;
     private List<Double> speeds = new ArrayList<>(); // in [m/s]
     private List<Double> times = new ArrayList<>(); // in [s]
+
+    private double time;
 
     /**
      * Constructs an Instance
@@ -47,10 +49,10 @@ public class InfrastructureClientConnector {
         this.trainDataVolatile = null;
 
         this.infrastructureID = infrastructureID;
-
         this.eventSource = "tsm;T=" + etcsID;
 
         this.updateMultiplier = ConfigHandler.getInstance().infrastructureUpdateMultiplier;
+        this.time = System.currentTimeMillis() / 1000.0;
     }
 
     /**
@@ -74,16 +76,20 @@ public class InfrastructureClientConnector {
          * Only calculated a update and send it if there where updateMultiplier many clock tick events.
          *
          */
-        if(this.tickCounter <= this.updateMultiplier) return;
-        this.tickCounter = 0;
-        double averageSpeed = 0;
-        double timeBetweenUpdates = 0;
+        if(this.tickCounter < this.updateMultiplier) return;
+        this.tickCounter = 1;
 
-        for(Double time : this.times){
-            timeBetweenUpdates += time;
-        }
+        double averageSpeed = 0;
+        double timeBetweenUpdates = (System.currentTimeMillis() / 1000.0) - this.time;
+
+        /*
+         Needed are km/H, speeds are in m/s, so the speeds are multiply with 3.6.
+         To get an average speed between now and the last update, the delta times of every speed
+         has to be divided by the time between updates, because this time is always slightly longer than
+         the sum of all delta times. This means the train drives slightly longer, but at a lower speed,
+         which nullifies this difference.
+        */
         for(int i = 0; i < this.speeds.size(); i++){
-            // We need km/H, speeds are in m/s, so we multiply with 3.6 and only then weight the it with the time
             averageSpeed += (this.speeds.get(i) * 3.6) * (this.times.get(i) / timeBetweenUpdates);
         }
 
@@ -99,9 +105,11 @@ public class InfrastructureClientConnector {
         long curVlong = 5 * Math.round(averageSpeed/5.0);
         if(curVlong < 10) curVlong = 0;
         this.carry = (averageSpeed - curVlong) / timeBetweenUpdates;
+
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
+        this.time = System.currentTimeMillis() / 1000.0;
     }
 
     @Subscribe

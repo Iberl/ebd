@@ -72,6 +72,7 @@ public class DrivingDynamics {
 
     private double profileTargetSpeed = 0d;
     private double breakModifierForRSM = 1;
+    private boolean inRSMRecovery = false;
 
     private int cycleCount;
     private final int cylceCountMax; //TODO Connect to Config
@@ -375,22 +376,26 @@ public class DrivingDynamics {
                 calculateModifier();
                 /*
                 This control flow is necessary in case the train emergency breaks into RSM.
-                This control flow allows the train accelerate again until the stopping region is reached.
+                It allows the train to accelerate again until the stopping region is reached.
                 */
                 if (this.currentSil == SpeedInterventionLevel.INDICATION) {
-                    if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
-                        sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
-                        calculateModifier();
-                        return new AccelerationAction(this.localEventBus, 1);
-                    }
-                    if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
-                        sendToLogEventSpeedSupervision(MovementState.CRUISE);
-                        calculateModifier();
-                        return new CruiseAction(this.localEventBus);
-                    } else {
-                        sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                    if(this.breakModifierForRSM > 0){
+                        this.inRSMRecovery = false;
                         return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
                     }
+                    else if ((this.dynamicState.getSpeed() > 0 && !this.inRSMRecovery) || this.dynamicState.getSpeed() > 5) {
+                        this.inRSMRecovery = false;
+                        return new CruiseAction(this.localEventBus);
+                    }
+                    else if (!shouldHalt){
+                        this.inRSMRecovery = true;
+                        return new AccelerationAction(this.localEventBus, 1);
+                    }
+                    else {
+                        return new HaltAction(this.localEventBus);
+                    }
+
+
                 } else {
                     sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                     return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);

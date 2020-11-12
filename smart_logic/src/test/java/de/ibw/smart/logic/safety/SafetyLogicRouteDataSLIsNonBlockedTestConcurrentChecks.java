@@ -11,7 +11,7 @@ import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.ETCSVariables;
+import ebd.messageLibrary.util.ETCSVariables;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.FixMethodOrder;

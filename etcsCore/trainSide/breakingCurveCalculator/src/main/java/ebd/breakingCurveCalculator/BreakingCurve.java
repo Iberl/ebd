@@ -255,6 +255,14 @@ public class BreakingCurve {
 		return sb.toString();
 	}
 
+	/**
+	 * @param offset Offset of current trip section to trip start.
+	 * @return A String representing the {@link StaticSpeedProfil}, formatted for use with DMI.
+	 */
+	public String getSspDMIString(double offset){
+		return this.ssp.toDMIString(offset);
+	}
+
 
 
 
