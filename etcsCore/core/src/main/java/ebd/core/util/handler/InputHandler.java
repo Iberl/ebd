@@ -11,10 +11,10 @@ import java.util.Scanner;
 
 public class InputHandler implements Runnable {
 
-    private EventBus globalEventBus;
+    private final EventBus globalEventBus;
     private boolean shouldRun = true;
 
-    private Thread ihThread = new Thread(this);
+    private final Thread ihThread = new Thread(this);
 
     public InputHandler(){
         this.globalEventBus = EventBus.getDefault();
