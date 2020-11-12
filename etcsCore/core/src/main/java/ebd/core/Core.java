@@ -170,7 +170,7 @@ public class Core implements Runnable {
         }
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
-        EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
+        if(!ConfigHandler.getInstance().useTMSServer) EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
     }
 
     private boolean validTarget(String target) {
