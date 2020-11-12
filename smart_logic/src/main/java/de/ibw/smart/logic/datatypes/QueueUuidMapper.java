@@ -1,7 +1,6 @@
 package de.ibw.smart.logic.datatypes;
 
 import de.ibw.smart.logic.intf.SmartLogic;
-import de.ibw.smart.logic.intf.SmartLogicTmsProxy;
 import de.ibw.util.ThreadedRepo;
 
 import java.util.UUID;

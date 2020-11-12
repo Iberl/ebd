@@ -35,7 +35,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_24;
-import static ebd.radioBlockCenter.util.ETCSPacketCreator.*;
+import static ebd.radioBlockCenter.util.ETCSPacketCreator.createInitialPacket_57;
+import static ebd.radioBlockCenter.util.ETCSPacketCreator.createInitialPacket_58;
 import static ebd.radioBlockCenter.util.TMSMessageCreator.createPositionInfo;
 
 public class ETCSEndpoint {

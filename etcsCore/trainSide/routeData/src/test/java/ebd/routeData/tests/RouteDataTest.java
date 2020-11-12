@@ -9,7 +9,6 @@ import ebd.routeData.RouteData;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 class RouteDataTest {

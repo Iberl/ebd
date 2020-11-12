@@ -1,6 +1,5 @@
 package ebd.logging;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.dmi.ToLogDeepDebugEvent;
@@ -17,7 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Logging{

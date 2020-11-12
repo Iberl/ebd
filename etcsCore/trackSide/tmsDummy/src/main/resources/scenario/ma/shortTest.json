@@ -1,0 +1,43 @@
+{
+  "m_ack": true,
+  "nid_lrbg": 4703,
+  "q_dir": 1,
+  "q_scale": 1,
+  "eoa": {
+    "v_loa": 0,
+    "t_loa": 1023,
+    "sections": [
+      {
+        "l_section": 1000,
+        "q_sectiontimer": false
+      }
+    ],
+    "dangerPoint": {
+      "d_dp": 200,
+      "v_releasedp": 0
+    }
+  },"gradientProfile": {
+  "gradients": [
+    {
+      "d_gradient": 0,
+      "q_gdir": false,
+      "g_a": 1
+    },
+    {
+      "d_gradient": 500,
+      "q_gdir": true,
+      "g_a": 1
+    }
+  ]
+},
+  "speedProfile": {
+    "sections": [
+      {
+        "d_static": 0,
+        "v_static": 32,
+        "q_front": false,
+        "categories": []
+      }
+    ]
+  }
+}

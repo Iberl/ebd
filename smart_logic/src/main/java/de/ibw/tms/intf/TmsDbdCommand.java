@@ -2,7 +2,6 @@ package de.ibw.tms.intf;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
 import de.ibw.tms.intf.cmd.Commands;
 
 /**

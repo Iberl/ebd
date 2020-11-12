@@ -3,9 +3,9 @@ package ebd.trainStatusManager.util.handlers;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
-import ebd.globalUtils.events.trainStatusMananger.SwitchInfrastructureDirectionEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewMaRequestParametersEvent;
 import ebd.globalUtils.events.trainStatusMananger.NewPositionReportParametersEvent;
+import ebd.globalUtils.events.trainStatusMananger.SwitchInfrastructureDirectionEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.*;
@@ -16,7 +16,9 @@ import ebd.trainData.util.dataConstructs.IncrPosRprtDist;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class deals with optional packages that come up in {@link MessageHandler}

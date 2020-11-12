@@ -1,10 +1,10 @@
 package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.conditions.TrueCondition;
-import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
 import ebd.drivingDynamics.util.conditions.abstracts.Condition;
-import ebd.drivingDynamics.util.conditions.helper.SingleConditionParser;
+import ebd.drivingDynamics.util.conditions.conditionBlocks.AndBlock;
 import ebd.drivingDynamics.util.conditions.conditionBlocks.OrBlock;
+import ebd.drivingDynamics.util.conditions.helper.SingleConditionParser;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.enums.MovementState;
 import org.greenrobot.eventbus.EventBus;

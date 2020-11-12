@@ -1,16 +1,16 @@
 package ebd.breakingCurveCalculator.utils;
 
-import java.util.*;
-
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
-import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+
+import java.util.*;
 
 /**
  * This class calculates and represents a static speed profile. It is based on ForwardSpline from the Spline Module.

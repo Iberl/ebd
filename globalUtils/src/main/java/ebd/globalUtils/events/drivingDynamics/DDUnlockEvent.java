@@ -2,8 +2,6 @@ package ebd.globalUtils.events.drivingDynamics;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class DDUnlockEvent extends NormalEvent {
     /**
      * Constructs an Event that unlocks DrivingDynamics, allowing execution of code

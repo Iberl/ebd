@@ -2,7 +2,10 @@ package ebd.rbc_tms.message;
 
 import ebd.rbc_tms.MessageTestBase;
 import ebd.rbc_tms.payload.Payload_22;
-import ebd.rbc_tms.util.*;
+import ebd.rbc_tms.util.EOA;
+import ebd.rbc_tms.util.LinkingProfile;
+import ebd.rbc_tms.util.ModeProfile;
+import ebd.rbc_tms.util.ShortenMA;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.ArrayList;

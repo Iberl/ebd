@@ -1,9 +1,7 @@
 package ebd.routeData.util.events;
 
-import ebd.routeData.RouteDataVolatile;
 import ebd.globalUtils.events.NormalEvent;
-
-import java.util.List;
+import ebd.routeData.RouteDataVolatile;
 
 public class NewRouteDataVolatileEvent extends NormalEvent {
     public final RouteDataVolatile routeDataVolatile;

@@ -1,10 +1,7 @@
 package ebd.globalUtils.events.drivingDynamics;
 
 import ebd.globalUtils.events.NormalEvent;
-import ebd.globalUtils.location.Location;
 import ebd.globalUtils.spline.Spline;
-
-import java.util.List;
 
 public class NewTripProfileEvent extends NormalEvent {
 

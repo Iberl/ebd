@@ -20,6 +20,11 @@
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
+            <artifactId>tmsDummy</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
             <artifactId>messageSender</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
@@ -33,6 +38,12 @@
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>logging</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>tmsDummy</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

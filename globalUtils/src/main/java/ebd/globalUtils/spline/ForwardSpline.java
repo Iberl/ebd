@@ -1,8 +1,8 @@
 package ebd.globalUtils.spline;
 
-import java.util.ArrayList;
-
 import ebd.globalUtils.spline.util.KnotCoefficientException;
+
+import java.util.ArrayList;
 
 /**
  * <p>

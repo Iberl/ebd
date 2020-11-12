@@ -1,11 +1,10 @@
 package ebd.globalUtils.spline;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BackwardSplineTest {
     static BackwardSpline bs0;

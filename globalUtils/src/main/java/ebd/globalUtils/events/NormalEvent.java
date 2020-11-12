@@ -1,7 +1,5 @@
 package ebd.globalUtils.events;
 
-import java.util.List;
-
 public class NormalEvent extends Event {
 
 	/**

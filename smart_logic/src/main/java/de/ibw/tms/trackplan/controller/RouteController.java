@@ -3,7 +3,6 @@ package de.ibw.tms.trackplan.controller;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteViewPort;
-import de.ibw.tms.trackplan.ui.TrackWindow;
 
 import java.util.ArrayList;
 import java.util.List;

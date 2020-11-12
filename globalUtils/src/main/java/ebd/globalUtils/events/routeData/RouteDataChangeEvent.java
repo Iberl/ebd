@@ -2,8 +2,6 @@ package ebd.globalUtils.events.routeData;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 /**
  * @author Lars Schulze-Falck
  */

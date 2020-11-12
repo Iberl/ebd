@@ -1,16 +1,15 @@
 package ebd.breakingCurveCalculator.tests;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.messageLibrary.packet.trackpackets.Packet_15.Packet_15_Section;
 import ebd.messageLibrary.util.ETCSVariables;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 
 /**

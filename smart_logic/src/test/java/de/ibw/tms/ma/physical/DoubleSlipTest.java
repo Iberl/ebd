@@ -3,10 +3,7 @@ package de.ibw.tms.ma.physical;
 import de.ibw.tms.ma.Chainage;
 import org.junit.jupiter.api.Test;
 
-import java.nio.channels.Channel;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DoubleSlipTest {
 

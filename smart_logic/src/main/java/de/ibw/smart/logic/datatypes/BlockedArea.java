@@ -1,13 +1,11 @@
 package de.ibw.smart.logic.datatypes;
 
 import de.ibw.tms.ma.physical.ITrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.signale._1_9_0.CSignal;
 
-import javax.print.attribute.standard.MediaSize;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Objects;

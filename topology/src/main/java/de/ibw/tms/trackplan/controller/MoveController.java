@@ -4,8 +4,6 @@ import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 
-import javax.swing.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;

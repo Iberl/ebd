@@ -1,30 +1,29 @@
 package ebd.breakingCurveCalculator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
-
 import ebd.breakingCurveCalculator.utils.*;
+import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveCalculatorBusyException;
-import ebd.globalUtils.enums.CurveType;
+import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveSetupException;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.etcsPacketConverters.MovementAuthorityConverter;
+import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
+import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.location.Location;
+import ebd.globalUtils.position.Position;
+import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveSetupException;
-import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
-import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
-import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
-import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.position.Position;
-import ebd.globalUtils.spline.ForwardSpline;
-import ebd.globalUtils.spline.Knot;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Module shorthand: bcc

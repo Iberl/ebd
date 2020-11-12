@@ -3,8 +3,6 @@ package ebd.globalUtils.events.trainStatusMananger;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.position.Position;
 
-import java.util.List;
-
 /**
  * ONLY EVER LISTEN TO THIS EVENT WITH {@link org.greenrobot.eventbus.ThreadMode#ASYNC} !!
  */

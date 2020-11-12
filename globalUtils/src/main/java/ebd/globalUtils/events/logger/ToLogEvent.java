@@ -2,8 +2,6 @@ package ebd.globalUtils.events.logger;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 /**
  *
  */

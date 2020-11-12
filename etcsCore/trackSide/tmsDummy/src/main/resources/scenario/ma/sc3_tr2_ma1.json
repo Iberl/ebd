@@ -1,0 +1,65 @@
+{
+  "gradientProfile": {
+    "q_dir": 0,
+    "q_scale": 1,
+    "gradients": [
+      {
+        "d_gradient": 3371,
+        "q_gdir": true,
+        "g_a": 0
+      }
+    ]
+  },
+  "speedProfile": {
+    "q_dir": 0,
+    "q_scale": 1,
+    "sections": [
+      {
+        "d_static": 0,
+        "v_static": 0,
+        "q_front": true,
+        "categories": []
+      },
+      {
+        "d_static": 813,
+        "v_static": 12,
+        "q_front": true,
+        "categories": []
+      },
+      {
+        "d_static": 643,
+        "v_static": 32,
+        "q_front": true,
+        "categories": []
+      }
+    ]
+  },
+  "m_ack": true,
+  "nid_lrbg": 13736,
+  "q_dir": 0,
+  "q_scale": 1,
+  "eoa": {
+    "q_dir": 0,
+    "q_scale": 1,
+    "v_loa": 0,
+    "t_loa": 1023,
+    "sections": [
+      {
+        "l_section": 813,
+        "q_sectiontimer": false
+      },
+      {
+        "l_section": 2558,
+        "q_sectiontimer": false
+      }
+    ],
+	"dangerPoint": {
+      "d_dp": 250,
+	  "v_releasedp": 0
+	},
+    "endTimer": {
+      "t_endtimer": 1023,
+      "d_endtimerstartloc": 0
+    }
+  }
+}

@@ -11,7 +11,6 @@ import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.trainData.TrainData;
 import org.greenrobot.eventbus.EventBus;
-import org.junit.jupiter.api.Test;
 
 class SpeedSupervisorTest {
 

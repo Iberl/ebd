@@ -3,7 +3,6 @@ package de.ibw.tms.controller;
 import de.ibw.feed.Balise;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
-import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.topologie.PositionedRelation;
@@ -13,18 +12,11 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
-import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
-import de.ibw.util.DefaultRepo;
-import de.ibw.util.DoubleCoord;
 import de.ibw.util.UtilFunction;
 import ebd.ConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
-import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
-import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
-import plan_pro.modell.geodaten._1_9_0.CTOPKante;
-import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
 import javax.swing.*;
 import java.math.BigDecimal;
@@ -32,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 

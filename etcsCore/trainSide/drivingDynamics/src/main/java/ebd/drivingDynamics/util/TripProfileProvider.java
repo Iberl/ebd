@@ -2,8 +2,8 @@ package ebd.drivingDynamics.util;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;

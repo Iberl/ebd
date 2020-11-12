@@ -2,8 +2,6 @@ package ebd.globalUtils.events.messageLibrary;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 /**
  * Superclass for all Events send over an EventBus containing an Message or Telegram
  *

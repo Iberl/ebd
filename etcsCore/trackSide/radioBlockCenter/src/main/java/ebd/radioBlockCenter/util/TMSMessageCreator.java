@@ -1,6 +1,5 @@
 package ebd.radioBlockCenter.util;
 
-import ebd.messageLibrary.message.trainmessages.Message_132;
 import ebd.messageLibrary.packet.trainpackets.Packet_1;
 import ebd.messageLibrary.packet.trainpackets.PositionPacket;
 import ebd.rbc_tms.util.PositionInfo;

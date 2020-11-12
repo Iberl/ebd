@@ -2,8 +2,6 @@ package ebd.globalUtils.szenario;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class NewTrainEvent extends NormalEvent {
 
     /*

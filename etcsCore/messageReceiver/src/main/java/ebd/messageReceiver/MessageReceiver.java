@@ -1,9 +1,9 @@
 package ebd.messageReceiver;
 
-import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
-import ebd.globalUtils.events.messageReceiver.ReceivedTelegramEvent;
 import ebd.globalUtils.events.SerializedBitstreamEvent;
 import ebd.globalUtils.events.messageReceiver.MessageReceiverExceptionEvent;
+import ebd.globalUtils.events.messageReceiver.ReceivedMessageEvent;
+import ebd.globalUtils.events.messageReceiver.ReceivedTelegramEvent;
 import ebd.messageLibrary.message.Message;
 import ebd.messageLibrary.message.Telegram;
 import ebd.messageLibrary.serialization.BitStreamReader;

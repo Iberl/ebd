@@ -1,7 +1,5 @@
 package ebd.speedAndDistanceSupervisionModule;
 
-import java.util.ArrayList;
-
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
@@ -14,6 +12,8 @@ import ebd.messageLibrary.packet.trackpackets.Packet_21.Packet_21_Gradient;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
 import ebd.messageLibrary.util.ETCSVariables;
+
+import java.util.ArrayList;
 
 /**
  * @author Lars Schulze-Falck
