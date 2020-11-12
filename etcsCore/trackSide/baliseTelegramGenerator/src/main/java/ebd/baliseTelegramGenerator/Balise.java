@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Balise {
 
-    // x Modell of a Eurobalise
+    // x Model of a Eurobalise
     // x Holds simple information contained in just one balise
 
 	//TODO Q_UPDOWN
