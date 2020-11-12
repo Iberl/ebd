@@ -9,7 +9,6 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class LoggingTest{
 

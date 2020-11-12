@@ -2,7 +2,6 @@ package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.enums.BreakMode;
-import ebd.globalUtils.enums.CurveType;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 

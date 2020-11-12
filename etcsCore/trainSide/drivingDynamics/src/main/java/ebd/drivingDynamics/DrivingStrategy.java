@@ -7,7 +7,6 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.trainData.util.events.TrainDataExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

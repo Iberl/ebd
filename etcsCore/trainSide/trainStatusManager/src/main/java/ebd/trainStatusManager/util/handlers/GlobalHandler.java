@@ -6,8 +6,6 @@ import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.List;
-
 /**
  * This class handles the communication with the global {@link EventBus}
  * for the {@link ebd.trainStatusManager.TrainStatusManager}.

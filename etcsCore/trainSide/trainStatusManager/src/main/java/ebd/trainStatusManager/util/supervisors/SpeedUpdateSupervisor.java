@@ -2,10 +2,9 @@ package ebd.trainStatusManager.util.supervisors;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.events.dmi.ToLogDeepDebugEvent;
-import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;

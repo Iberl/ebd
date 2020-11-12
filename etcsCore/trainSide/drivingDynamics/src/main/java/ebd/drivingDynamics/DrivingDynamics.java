@@ -8,10 +8,10 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.enums.*;
-import ebd.globalUtils.events.dmi.DMISpeedUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
 import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
@@ -24,7 +24,6 @@ import ebd.globalUtils.spline.Spline;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
-import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -38,7 +37,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Driving Dynamics simulates the physical movement of the train. It uses a {@link DrivingStrategy} to represent a driver.

@@ -2,7 +2,6 @@ package ebd.globalUtils.events.routeData;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
 import java.util.Map;
 
 public class RouteDataMultiChangeEvent extends NormalEvent {

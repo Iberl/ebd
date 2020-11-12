@@ -9,20 +9,20 @@ import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import ebd.ConfigHandler;
+import ebd.core.util.server.GUIServer;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.payload.Payload_15;
-import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import ebd.core.util.server.GUIServer;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 

@@ -1,9 +1,6 @@
 package ebd.globalUtils.events.trainStatusMananger;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.NormalEvent;
-
-import java.util.List;
 
 /**
  * This event signals a clock tick.

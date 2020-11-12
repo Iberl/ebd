@@ -4,7 +4,6 @@ import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
 import ebd.rbc_tms.util.PositionInfo;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

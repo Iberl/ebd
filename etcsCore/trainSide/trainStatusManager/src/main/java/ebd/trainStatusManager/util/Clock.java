@@ -7,8 +7,6 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.trainStatusManager.util.events.TsmExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
-
 /**
  * This is the clock of the train system, it determines the tact rate that is used by modules to schedule their
  * calculation. Every clock tick is signaled by an {@link ClockTickEvent}.

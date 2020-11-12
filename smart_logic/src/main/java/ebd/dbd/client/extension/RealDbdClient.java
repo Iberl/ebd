@@ -2,14 +2,15 @@ package ebd.dbd.client.extension;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
 import ebd.ConfigHandler;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
-import java.net.UnknownHostException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Wrapper-Classe, sie benutzt den Anlagen-Client und dient nicht zur Simulation der Anlage

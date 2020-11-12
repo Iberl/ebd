@@ -3,8 +3,6 @@ package ebd.globalUtils.events.messageReceiver;
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 
-import java.util.List;
-
 public class MessageReceiverExceptionEvent extends ExceptionEvent {
 
 	/**

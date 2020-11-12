@@ -1,24 +1,19 @@
 package ebd.breakingCurveCalculator.tests;
 
+import ebd.breakingCurveCalculator.BreakingCurve;
+import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
+import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
+import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.NormalEvent;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import ebd.globalUtils.events.ExceptionEvent;
-import ebd.globalUtils.events.NormalEvent;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
-import ebd.breakingCurveCalculator.BreakingCurve;
-import ebd.breakingCurveCalculator.utils.events.BreakingCurveExceptionEvent;
-import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import org.greenrobot.eventbus.ThreadMode;
 
 /**
  *

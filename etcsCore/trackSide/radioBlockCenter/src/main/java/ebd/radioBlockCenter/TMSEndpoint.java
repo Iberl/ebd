@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static ebd.rbc_tms.util.Constants.*;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_3;
 import static ebd.radioBlockCenter.util.ETCSMessageAssembler.assembleMessage_33;
+import static ebd.rbc_tms.util.Constants.*;
 
 public class TMSEndpoint {
 

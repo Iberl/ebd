@@ -2,8 +2,6 @@ package ebd.globalUtils.events.trainData;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 /**
  * @author Lars Schulze-Falck
  */

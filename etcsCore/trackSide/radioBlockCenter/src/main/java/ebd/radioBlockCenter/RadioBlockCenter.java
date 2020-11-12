@@ -5,6 +5,7 @@ import ebd.logging.Logging;
 import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.util.Constants;
+import ebd.tmsDummy.TMSSzenario;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
@@ -25,12 +26,17 @@ public class RadioBlockCenter {
     private MessageReceiver messageReceiver;
     private MessageSender   messageSender;
 
-    private String registeredTMS = ConfigHandler.getInstance().registeredTMS;
+    private String registeredTMS = ConfigHandler.getInstance().tmsId;
 
     private Map<Integer, String> trainIDMap = new HashMap<>();
 
     public RadioBlockCenter(int rbcID) {
         this.rbcID = rbcID;
+
+        ConfigHandler config = ConfigHandler.getInstance();
+        if(!config.useTMSServer) {
+            TMSSzenario szenario = new TMSSzenario();
+        }
 
         tmsCommunicator = new TMSCommunicator(localBus);
         tmsCommunicator.start();

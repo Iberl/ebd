@@ -2,7 +2,6 @@ package de.ibw.tms;
 
 import de.ibw.tms.trackplan.controller.MoveController;
 import de.ibw.tms.trackplan.controller.ZoomController;
-import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;

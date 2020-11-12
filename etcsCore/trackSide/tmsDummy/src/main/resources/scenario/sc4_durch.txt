@@ -1,0 +1,5 @@
+1 sleep 180
+1 end sc4_tr1_ma1.json
+2 send sc4_tr2_ma1.json
+2 sleep 120
+2 end sc4_tr2_ma2_durch.json

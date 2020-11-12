@@ -2,8 +2,6 @@ package ebd.globalUtils.events.radioBlockCenter;
 
 import ebd.globalUtils.events.NormalEvent;
 import ebd.rbc_tms.Message;
-import ebd.rbc_tms.Payload;
-import ebd.rbc_tms.payload.Payload_21;
 
 /**
  * @author Christopher Bernjus

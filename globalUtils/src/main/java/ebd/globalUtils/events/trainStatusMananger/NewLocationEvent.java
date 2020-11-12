@@ -3,8 +3,6 @@ package ebd.globalUtils.events.trainStatusMananger;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.location.Location;
 
-import java.util.List;
-
 public class NewLocationEvent extends NormalEvent {
 
     public Location newLocation;

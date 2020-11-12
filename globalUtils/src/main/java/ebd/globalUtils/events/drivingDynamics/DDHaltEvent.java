@@ -2,8 +2,6 @@ package ebd.globalUtils.events.drivingDynamics;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class DDHaltEvent extends NormalEvent {
     /**
      * Constructs an Event that locks DrivingDynamics, preventing it of executing code

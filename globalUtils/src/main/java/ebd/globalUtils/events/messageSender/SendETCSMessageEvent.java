@@ -3,8 +3,6 @@ package ebd.globalUtils.events.messageSender;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.messageLibrary.message.Message;
 
-import java.util.List;
-
 /**
  * Event send to the Message Sender containing a Message to transfer over global Eventbus
  *

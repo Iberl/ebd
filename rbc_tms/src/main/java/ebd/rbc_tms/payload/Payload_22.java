@@ -1,9 +1,9 @@
 package ebd.rbc_tms.payload;
 
 import com.google.gson.annotations.SerializedName;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.Constants;
-import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.ShortenMA;
 
 import java.util.Objects;

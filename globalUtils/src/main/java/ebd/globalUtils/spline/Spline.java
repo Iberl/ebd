@@ -1,10 +1,10 @@
 package ebd.globalUtils.spline;
 
+import ebd.globalUtils.spline.util.KnotCoefficientException;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-
-import ebd.globalUtils.spline.util.KnotCoefficientException;
 
 /**
  * This implementation is based on the mathematical model of a Spline, which describes curves piecewise with polynomials.

@@ -3,14 +3,11 @@ package de.ibw.smart.logic.intf;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.smart.logic.safety.SmartSafety;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 
 import java.io.IOException;
 
