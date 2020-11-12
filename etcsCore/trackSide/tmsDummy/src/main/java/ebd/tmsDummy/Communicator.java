@@ -2,8 +2,8 @@ package ebd.tmsDummy;
 
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.util.exception.MissingInformationException;
-import ebd.tms_Dummy.handler.ConfigHandler;
-import ebd.tms_Dummy.handler.TMSClientHandler;
+import ebd.tmsDummy.handler.ConfigHandler;
+import ebd.tmsDummy.handler.TMSClientHandler;
 import ebd.globalUtils.events.tmsDummy.SendMessageToRBCEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
