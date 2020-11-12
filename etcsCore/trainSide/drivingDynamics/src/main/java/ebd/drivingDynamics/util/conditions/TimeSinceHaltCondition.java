@@ -9,6 +9,7 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.simple.JSONObject;
 
 import java.util.function.BiFunction;
@@ -58,7 +59,7 @@ public class TimeSinceHaltCondition extends Condition {
         return  this.comparator.apply(deltaT, this.timeValue);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void trainData(ClockTickEvent cte){
         if(this.trainDataVolatile.getCurrentSpeed() == 0){
             this.timeAt0Speed = AppTime.currentTimeMillis();

@@ -197,10 +197,8 @@ public class DrivingDynamics {
         if(this.atoOn){
             this.atoServerConnector.sendDynamicStateToATO(this.dynamicState);
         }
-
-        cycleCount++;
-        if(this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
-            cycleCount = 0;
+        if(++this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
+            cycleCount = 1;
             sendToLogEventDynamicState();
         }
     }
