@@ -427,7 +427,7 @@ public class UtilFunction {
         BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
         BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));
         if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dDistance) <= 0) {
-           return dPartDistance.divide(dDistance).doubleValue();
+           return dPartDistance.divide(new BigDecimal(dTopLength)).doubleValue();
         }
         throw new InvalidParameterException("Subdistance has to be larger than 0 but smaller than whole Edgelength");
     }

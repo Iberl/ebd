@@ -69,7 +69,7 @@ public class CrossoverController extends SubmissionPublisher<CrossoverMainModel>
     public void publish() {
         try {
             this.standardSubscription();
-            Model.CrossoverStatus = (BranchingSwitch.CrossoverStatus) this.CrossoverStatus.getSingleSelection().Item;
+            Model.SwitchStatus = (BranchingSwitch.SwitchStatus) this.CrossoverStatus.getSingleSelection().Item;
             this.submit(Model);
 
         } catch(IllegalStateException Ex) {

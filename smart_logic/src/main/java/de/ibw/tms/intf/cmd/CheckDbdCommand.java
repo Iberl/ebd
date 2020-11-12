@@ -11,15 +11,11 @@ import java.util.Objects;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-02
+ * @since 2020-11-12
  */
 public class CheckDbdCommand extends Commands {
 
-    /**
-     * EBD-Name der Weiche
-     */
-    @Expose
-    public String sCrossoverEbdName;
+
 
     /**
      * Node-ID (Topologisch) der Weiche
@@ -31,7 +27,7 @@ public class CheckDbdCommand extends Commands {
      * Status der Weiche der gesetzt werden soll und von der SL gepr&uuml;ft werden soll
      */
     @Expose
-    public BranchingSwitch.CrossoverStatus CrossoverStatus;
+    public BranchingSwitch.SwitchStatus SwitchStatus;
 
     /**
      * Priorität des Befehls
@@ -44,22 +40,12 @@ public class CheckDbdCommand extends Commands {
      *
      * @param lPriority long - Priority dieses Befehls im TMS Postausgang.
      */
-    public CheckDbdCommand(String sCrossoverEbdName, String sId, BranchingSwitch.CrossoverStatus Status ,long lPriority) {
+    public CheckDbdCommand(String sCrossoverEbdName, String sId, BranchingSwitch.SwitchStatus Status , long lPriority) {
         super(lPriority);
-        this.sCrossoverEbdName = sCrossoverEbdName;
         this.sId = sId;
-        this.CrossoverStatus = Status;
+        this.SwitchStatus = Status;
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_DBD_COMMAND;
-    }
-
-    @Override
-    public String toString() {
-        return "CheckDbdCommand{" +
-                "sCrossoverEbdName='" + sCrossoverEbdName + '\'' +
-                ", CrossoverStatus=" + CrossoverStatus +
-                ", lPriority=" + lPriority +
-                '}';
     }
 
     @Override
@@ -67,18 +53,27 @@ public class CheckDbdCommand extends Commands {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CheckDbdCommand that = (CheckDbdCommand) o;
-        return sCrossoverEbdName.equals(that.sCrossoverEbdName) &&
-                CrossoverStatus == that.CrossoverStatus &&
+        return sId.equals(that.sId) &&
+                SwitchStatus == that.SwitchStatus &&
                 lPriority.equals(that.lPriority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sCrossoverEbdName, CrossoverStatus, lPriority);
+        return Objects.hash(sId, SwitchStatus, lPriority);
+    }
+
+    @Override
+    public String toString() {
+        return "CheckDbdCommand{" +
+                "sId='" + sId + '\'' +
+                ", SwitchStatus=" + SwitchStatus +
+                ", lPriority=" + lPriority +
+                '}';
     }
 
     public static void main(String[] args) throws MissingInformationException {
-        CheckDbdCommand DbdCmd = new CheckDbdCommand("TestW12","123", BranchingSwitch.CrossoverStatus.LEFT, 1L);
+        CheckDbdCommand DbdCmd = new CheckDbdCommand("TestW12","123", BranchingSwitch.SwitchStatus.LEFT, 1L);
         System.out.println(DbdCmd.parseToJson());
     }
 

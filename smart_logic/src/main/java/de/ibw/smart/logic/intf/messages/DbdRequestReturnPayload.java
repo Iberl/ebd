@@ -49,8 +49,8 @@ public class DbdRequestReturnPayload implements ITypable {
     String sFailreason;
 
 
-    public DbdRequestReturnPayload(String sCrossoverEbdName) {
-        sDbdCommandTargetName = sCrossoverEbdName;
+    public DbdRequestReturnPayload(String sId) {
+        sDbdCommandTargetName = sId;
         sFailreason = "";
         dbdCommandSuccessfull = true;
     }

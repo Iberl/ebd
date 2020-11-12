@@ -82,7 +82,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private static BufferedImage img = null;
 
     private ViewType BranchViewTypeCurrent;
-    private CrossoverStatus LastState = CrossoverStatus.RIGHT;
+    private SwitchStatus LastState = SwitchStatus.RIGHT;
 
 
     private String sBrachName;
@@ -104,12 +104,12 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
-        CrossoverStatus CurrentStatus = this.getStatus();
+        SwitchStatus CurrentStatus = this.getStatus();
 
         try {
-            if( CurrentStatus == CrossoverStatus.BUSY || CurrentStatus == CrossoverStatus.UNSAFE) {
+            if( CurrentStatus == SwitchStatus.BUSY || CurrentStatus == SwitchStatus.UNSAFE) {
                 CurrentStatus = LastState;
-                if(LastState == CrossoverStatus.BUSY || LastState == CrossoverStatus.UNSAFE ) {
+                if(LastState == SwitchStatus.BUSY || LastState == SwitchStatus.UNSAFE ) {
                     return UiTools.handleImaging(cl, "images/StreightBranch.png");
 
                 }
@@ -119,7 +119,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             }
             switch(this.BranchViewTypeCurrent) {
                 case Branch_LRU: {
-                    if(CurrentStatus == CrossoverStatus.RIGHT || CurrentStatus == CrossoverStatus.UNSAFE_RIGHT) {
+                    if(CurrentStatus == SwitchStatus.RIGHT || CurrentStatus == SwitchStatus.UNSAFE_RIGHT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_LRU.png");
@@ -127,7 +127,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_ORL: {
-                    if(CurrentStatus == CrossoverStatus.LEFT || CurrentStatus == CrossoverStatus.UNSAFE_LEFT) {
+                    if(CurrentStatus == SwitchStatus.LEFT || CurrentStatus == SwitchStatus.UNSAFE_LEFT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_ORL.png");
@@ -136,7 +136,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_RLO: {
-                    if(CurrentStatus == CrossoverStatus.RIGHT || CurrentStatus == CrossoverStatus.UNSAFE_RIGHT) {
+                    if(CurrentStatus == SwitchStatus.RIGHT || CurrentStatus == SwitchStatus.UNSAFE_RIGHT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_RLO.png");
@@ -144,7 +144,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_ULR: {
-                    if(CurrentStatus == CrossoverStatus.LEFT || CurrentStatus == CrossoverStatus.UNSAFE_LEFT) {
+                    if(CurrentStatus == SwitchStatus.LEFT || CurrentStatus == SwitchStatus.UNSAFE_LEFT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_ULR.png");
@@ -229,7 +229,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
         String sId = ISwitchHandler.getNodeId(this.Node);
         CheckDbdCommand DbdCommandPayload =
-                new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
+                new CheckDbdCommand(sEbdName,sId, (SwitchStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
         try {
             SmartClientHandler.getInstance().sendCommand(DbdCommand);
@@ -288,20 +288,20 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     @Override
     public void onNext(CrossoverMainModel item) {
-        if(item.CrossoverStatus != Status) {
+        if(item.SwitchStatus != Status) {
             this.LastState = Status;
-            Status = item.CrossoverStatus;
+            Status = item.SwitchStatus;
         }
         this.fLinkageTimeInMs = item.fLinkageTimeInMs;
 
         this.BrachingStates.update(this.Status);
-        if(this.Status.equals(CrossoverStatus.RIGHT)) {
+        if(this.Status.equals(SwitchStatus.RIGHT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
             BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getRightPosition());
             handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
 
         }
-        if(this.Status.equals(CrossoverStatus.LEFT)) {
+        if(this.Status.equals(SwitchStatus.LEFT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
             BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getLeftPosition());
 
@@ -532,7 +532,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     /**
      * Status die eine Weiche haben kann
      */
-    public enum CrossoverStatus {
+    public enum SwitchStatus {
         RIGHT, LEFT, BUSY, UNSAFE, UNSAFE_RIGHT, UNSAFE_LEFT
     }
 
@@ -568,7 +568,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }*/
 
 
-    private CrossoverStatus Status = CrossoverStatus.RIGHT;
+    private SwitchStatus Status = SwitchStatus.RIGHT;
 
 
     private float fLinkageTimeInMs = 1000.0f;
@@ -610,9 +610,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     /**
      * Setzt den Weichenstatus
-     * @param status - {@link CrossoverStatus} der neue Status der Weiche
+     * @param status - {@link SwitchStatus} der neue Status der Weiche
      */
-    public void setStatus(CrossoverStatus status) {
+    public void setStatus(SwitchStatus status) {
         Status = status;
     }
 
@@ -620,7 +620,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      * Hold den aktuellen Status der Weiche
      * @return CrossoverStatus - Weichenstatus der widergegeben wird
      */
-    public CrossoverStatus getStatus() {
+    public SwitchStatus getStatus() {
         return this.Status;
     }
 
