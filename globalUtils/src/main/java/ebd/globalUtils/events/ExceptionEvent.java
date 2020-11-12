@@ -4,8 +4,6 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 /**
  * Superclass for all Events that encapsulate an Exception and are send over an EventBus
  *

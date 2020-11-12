@@ -2,8 +2,6 @@ package ebd.globalUtils.events.trainStatusMananger;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class CrossedBaliseGroupEvent extends NormalEvent {
 
     public int baliseGroupID;

@@ -1,11 +1,8 @@
 package de.ibw.history.data;
 
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.util.DefaultRepo;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigDecimal;

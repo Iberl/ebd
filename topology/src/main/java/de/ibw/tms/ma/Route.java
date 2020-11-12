@@ -8,8 +8,6 @@ import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
-import de.ibw.tms.trackplan.ui.WaypointEnd;
-import de.ibw.tms.trackplan.ui.WaypointStart;
 
 import java.io.Serializable;
 import java.security.InvalidParameterException;

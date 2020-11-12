@@ -4,8 +4,6 @@ import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 
-import java.util.List;
-
 public class TsmExceptionEvent extends ExceptionEvent {
 
     /**

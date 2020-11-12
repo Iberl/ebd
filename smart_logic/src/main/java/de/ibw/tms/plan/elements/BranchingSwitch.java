@@ -1,7 +1,6 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;

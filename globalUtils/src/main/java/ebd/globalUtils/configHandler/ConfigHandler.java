@@ -8,7 +8,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.util.Collections;
 
 /**
  * This class holds the configuration parameters, which it reads out of the config.txt file.
@@ -30,7 +29,7 @@ public class ConfigHandler {
     Strings
     */
     public String pathToDriverStrategyJson = "";
-    public String pathToSzenarioJSON = "";
+    public String nameOfScenarioFile = "";
     public String pathToInitFile = "";
 
     public String ipToTrainConfigurator = "";
@@ -40,6 +39,7 @@ public class ConfigHandler {
     public String portOfInfrastructureServer = "";
 
     public String ipToTMSServer = "";
+    public String ipToRBCServer = "";
 
     public String portOfGUIServer = "";
 
@@ -319,14 +319,15 @@ public class ConfigHandler {
     /*
     Strings
     */
-    /**
-     * TMS ID (Temporary)
-     */
-    public String registeredTMS = "1";
+    public String rbcId = "1";
+    public String tmsId = "1";
 
     /*
     booleans
      */
+
+    /** Indicates wether the dummy should continue running the tcp server or should shutdown after all sequences finished */
+    public boolean tmsShutdown = true;
 
     /*
     ints
@@ -390,7 +391,7 @@ public class ConfigHandler {
      */
 
 
-
+    //############# Config Handler Internals #############
 
     /**
      * Set private to stop instantiation

@@ -1,29 +1,28 @@
 package ebd.tmsDummy.command;
 
 import com.google.gson.Gson;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
+import ebd.globalUtils.events.tmsDummy.SendMessageToRBCEvent;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
-import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.ModeProfile;
-import ebd.tmsDummy.handler.ConfigHandler;
-import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
-import ebd.globalUtils.events.tmsDummy.SendMessageToRBCEvent;
 import ebd.tmsDummy.util.exception.InvalidSequenceException;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Objects;
 
+import static ebd.globalUtils.fileHandler.FileHandler.readConfigurationFile;
 import static ebd.tmsDummy.util.Utils.log;
 
 public class EndCommand implements ebd.tmsDummy.command.ICommand {
 
-    public  String dirPath = "szenario/ma/";
+    public  String dirPath = "scenario/ma/";
     private String filepath;
 
     MA ma;
@@ -31,7 +30,7 @@ public class EndCommand implements ebd.tmsDummy.command.ICommand {
     public EndCommand(String trainId, String filename) throws IOException, InvalidSequenceException {
         filepath = dirPath + filename;
         // read file and validate
-        BufferedReader reader = new BufferedReader(new FileReader(filepath));
+        BufferedReader reader = new BufferedReader(readConfigurationFile(filepath));
         ma = new Gson().fromJson(reader, MA.class);
         if(ma == null) throw new InvalidSequenceException("Ma could not be read " + filepath);
 

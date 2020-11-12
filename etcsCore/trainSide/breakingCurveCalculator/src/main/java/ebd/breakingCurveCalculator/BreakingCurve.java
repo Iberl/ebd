@@ -1,17 +1,20 @@
 package ebd.breakingCurveCalculator;
 
 
-import java.util.*;
-
 import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.EmptyCurveGroup;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
 import ebd.globalUtils.enums.CurveType;
+import ebd.globalUtils.enums.SpeedSupervisionState;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
-import ebd.globalUtils.enums.SpeedSupervisionState;
 import ebd.globalUtils.spline.BackwardSpline;
+
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * <p>

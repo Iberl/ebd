@@ -2,8 +2,6 @@ package ebd.globalUtils.szenario;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 /**
  * This event signals TrainManger in Scenario to remove a train
  */

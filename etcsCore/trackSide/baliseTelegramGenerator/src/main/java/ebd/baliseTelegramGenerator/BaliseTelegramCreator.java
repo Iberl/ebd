@@ -5,7 +5,8 @@ import ebd.messageLibrary.message.Telegram;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ebd.messageLibrary.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.M_VERSION_2_0;
+import static ebd.messageLibrary.util.ETCSVariables.Q_MEDIA_BALISE;
 
 public class BaliseTelegramCreator {
 

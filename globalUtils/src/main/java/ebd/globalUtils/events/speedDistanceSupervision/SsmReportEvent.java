@@ -1,8 +1,8 @@
 package ebd.globalUtils.events.speedDistanceSupervision;
 
-import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.enums.SpeedInterventionLevel;
 import ebd.globalUtils.enums.SpeedSupervisionState;
+import ebd.globalUtils.events.NormalEvent;
 
 public class SsmReportEvent extends NormalEvent {
 

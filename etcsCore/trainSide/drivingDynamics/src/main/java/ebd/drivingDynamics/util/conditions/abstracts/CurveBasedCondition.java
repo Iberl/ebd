@@ -1,6 +1,5 @@
 package ebd.drivingDynamics.util.conditions.abstracts;
 
-import ebd.drivingDynamics.util.conditions.abstracts.Condition;
 import org.greenrobot.eventbus.EventBus;
 
 /**

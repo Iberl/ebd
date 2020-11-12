@@ -1,7 +1,5 @@
 package de.ibw.tms.co;
 
-import de.ibw.tms.speed.profile.view.SpeedDialog;
-
 import javax.swing.*;
 /**
  * Testklasse

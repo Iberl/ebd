@@ -1,11 +1,9 @@
-import com.sun.net.httpserver.Filter;
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.ma.topologie.PositionedRelation;
-import de.ibw.tms.plan.elements.Rail;
 
 import java.security.InvalidParameterException;
 import java.util.Random;

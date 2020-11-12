@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <nsPlanPro:PlanPro_Schnittstelle
-		xmlns:nsPlanPro="http://www.plan-pro.org/modell/PlanPro/1.8.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:nsPlanPro="http://www.plan-pro.org/modell/PlanPro/1.8.0"
 >
 	<Identitaet>
 		<Wert>AD16F4ED-D77C-44A2-8553-C9D39E52AC2B</Wert>

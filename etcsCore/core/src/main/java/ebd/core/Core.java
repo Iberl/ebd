@@ -1,26 +1,27 @@
 package ebd.core;
 
 
+import ebd.core.util.clients.InfrastructureClient;
+import ebd.core.util.events.LoadEvent;
+import ebd.core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.handler.InputHandler;
+import ebd.core.util.handler.SzenarioEventHandler;
 import ebd.core.util.server.ATOServer;
+import ebd.core.util.server.DMIServer;
+import ebd.core.util.server.GUIServer;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.tmsDummy.TMSDummyStartEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.core.util.clients.InfrastructureClient;
-import ebd.core.util.handler.InputHandler;
-import ebd.core.util.handler.SzenarioEventHandler;
-import ebd.core.util.events.LoadEvent;
-import ebd.core.util.events.SzenarioExceptionEvent;
-import ebd.core.util.server.DMIServer;
-import ebd.core.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -169,6 +170,7 @@ public class Core implements Runnable {
         }
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
     }
 
     private boolean validTarget(String target) {

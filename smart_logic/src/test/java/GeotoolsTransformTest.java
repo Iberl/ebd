@@ -1,5 +1,4 @@
 import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.coords.UTMCoord;
 import org.junit.jupiter.api.Test;
 

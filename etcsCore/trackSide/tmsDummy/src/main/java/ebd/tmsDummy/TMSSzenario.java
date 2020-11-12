@@ -1,16 +1,15 @@
 package ebd.tmsDummy;
 
-import ebd.rbc_tms.util.exception.MissingInformationException;
-import ebd.tmsDummy.Communicator;
-import ebd.tmsDummy.Parser;
-import ebd.tmsDummy.command.ICommand;
-import ebd.tmsDummy.handler.CommandHandler;
-import ebd.tmsDummy.handler.ConfigHandler;
-import ebd.tmsDummy.handler.WaitingHandler;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.tmsDummy.EndOfMissionEvent;
 import ebd.globalUtils.events.tmsDummy.StopWaitingEvent;
-import ebd.tmsDummy.util.exception.InvalidSequenceException;
+import ebd.globalUtils.events.tmsDummy.TMSDummyStartEvent;
 import ebd.logging.Logging;
+import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.tmsDummy.command.ICommand;
+import ebd.tmsDummy.handler.CommandHandler;
+import ebd.tmsDummy.handler.WaitingHandler;
+import ebd.tmsDummy.util.exception.InvalidSequenceException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -19,38 +18,38 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static ebd.tmsDummy.util.Utils.log;
 
-public class Szenario {
+public class TMSSzenario {
 
-    private String                       filename;
-    private Communicator communicator;
+    private String                       filename = ConfigHandler.getInstance().nameOfScenarioFile;;
+    private Communicator                 communicator;
     private Map<String, Queue<ICommand>> sequences;
 
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-    public void run(String[] args) throws MissingInformationException, IOException, InvalidSequenceException {
-        if(args.length <= 0) args = new String[]{ConfigHandler.getInstance().scenario};
-        EventBus.getDefault().register(this);
+    public TMSSzenario() {
+        try {
+            communicator = new Communicator();
+            communicator.start();
 
-        new Logging();
-        communicator = new Communicator();
-        communicator.start();
+            sequences = Parser.parse(filename);
+            System.out.println("Loading Scenario " + filename);
 
-        filename = args[0];
-        System.out.println("Loading Szenario " + filename);
-        sequences = Parser.parse(filename);
-
-        System.out.println("Welcome to the TMS Dummy");
-        Scanner scanner = new Scanner(System.in);
-        while(true) {
-            if(scanner.next().equals("load")) { break; } else System.out.println("Could not understand input");
+            EventBus.getDefault().register(this);
+        } catch(InvalidSequenceException e) {
+            e.printStackTrace();
+        } catch(IOException e) {
+            e.printStackTrace();
         }
+    }
 
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void start(TMSDummyStartEvent e){
+        if(!Objects.equals(e.target, "tms")) return;
         threadPool.execute(new WaitingHandler());
 
         for(String trainId : sequences.keySet()) {
@@ -66,7 +65,7 @@ public class Szenario {
             sequences.remove(e.source);
             if(sequences.isEmpty()) {
                 EventBus.getDefault().post(new StopWaitingEvent());
-                if(Objects.requireNonNull(ConfigHandler.getInstance()).shutdown) {
+                if(Objects.requireNonNull(ConfigHandler.getInstance()).tmsShutdown) {
                     try {
                         log("TMS Dummy begins shutdown");
                         communicator.kill();

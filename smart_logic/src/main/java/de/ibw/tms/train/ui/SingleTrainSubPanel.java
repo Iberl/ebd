@@ -1,19 +1,17 @@
 package de.ibw.tms.train.ui;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.gradient.profile.controller.GradientController;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.speed.profile.view.SpeedDialog;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.RouteController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.rbc_tms.util.EOA;
 import ebd.messageLibrary.util.ETCSVariables;
+import ebd.rbc_tms.util.EOA;
 
 import javax.swing.*;
 import java.awt.*;

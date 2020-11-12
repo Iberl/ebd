@@ -1,9 +1,8 @@
 package ebd.tmsDummy.handler;
 
-import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
-import ebd.tmsDummy.command.ICommand;
 import ebd.globalUtils.events.tmsDummy.EndOfMissionEvent;
 import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
+import ebd.tmsDummy.command.ICommand;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 

@@ -3,8 +3,6 @@ package ebd.routeData.util.events;
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 
-import java.util.List;
-
 /**
  * @author Lars Schulze-Falck
  */

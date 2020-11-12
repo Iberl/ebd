@@ -2,7 +2,6 @@ package de.ibw.tms.trackplan.ui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 /**

@@ -1,8 +1,8 @@
 package ebd.tmsDummy.command;
 
 import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
-import ebd.globalUtils.events.tmsDummy.StepEvent;
 import ebd.globalUtils.events.tmsDummy.StartWaitingEvent;
+import ebd.globalUtils.events.tmsDummy.StepEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 

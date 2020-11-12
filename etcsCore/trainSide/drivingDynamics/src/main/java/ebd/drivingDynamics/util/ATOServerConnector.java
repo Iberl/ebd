@@ -2,12 +2,12 @@ package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.DynamicState;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.events.core.ATOEndEvent;
 import ebd.globalUtils.events.core.ATOStartEvent;
 import ebd.globalUtils.events.core.ATOToTrainUpdateEvent;
 import ebd.globalUtils.events.core.TrainToAtoUpdateEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.enums.MovementState;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import org.greenrobot.eventbus.EventBus;

@@ -1,9 +1,9 @@
 package ebd.trainData.util.availableAcceleration;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
-import ebd.globalUtils.enums.MovementState;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.routeData.RouteData;
 import ebd.trainData.TrainData;
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AvailableAccelerationTest {
 

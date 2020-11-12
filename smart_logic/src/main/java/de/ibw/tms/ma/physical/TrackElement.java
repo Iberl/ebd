@@ -5,9 +5,7 @@ import de.ibw.tms.ma.DangerZone;
 import de.ibw.tms.ma.Occupation;
 import de.ibw.tms.ma.SpotLocation;
 import de.ibw.tms.ma.topologie.PositionedRelation;
-import de.ibw.tms.plan.elements.interfaces.IConnectable;
 
-import javax.xml.bind.annotation.XmlTransient;
 import java.util.ArrayList;
 import java.util.List;
 

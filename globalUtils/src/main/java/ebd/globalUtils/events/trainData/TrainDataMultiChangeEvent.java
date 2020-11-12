@@ -2,7 +2,6 @@ package ebd.globalUtils.events.trainData;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
 import java.util.Map;
 
 public class TrainDataMultiChangeEvent extends NormalEvent {

@@ -5,8 +5,6 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Arrays;
-
 public class Clock implements Runnable {
 
     private EventBus eventBus;

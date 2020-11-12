@@ -1,6 +1,7 @@
 package de.ibw.util;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Ein Threadsicheres DefaultRepo

@@ -4,25 +4,25 @@ import ebd.tmsDummy.command.*;
 import ebd.tmsDummy.util.exception.InvalidSequenceException;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static ebd.globalUtils.fileHandler.FileHandler.readConfigurationFile;
 import static ebd.tmsDummy.util.Utils.log;
 
 public class Parser {
 
-    public static  String                       dirPath = "szenario/";
+    public static  String                       dirPath = "scenario/";
     private static String                       filepath;
     private static Map<String, Queue<ICommand>> sequences;
 
     public static Map<String, Queue<ICommand>> parse(String filename) throws InvalidSequenceException, IOException {
-        filepath = dirPath + filename;
-        BufferedReader reader = new BufferedReader(new FileReader(filepath));
+        Parser.filepath = dirPath + filename;
+
+        BufferedReader reader = new BufferedReader(readConfigurationFile(filepath));
         String[]       lines  = reader.lines().toArray(String[]::new);
 
         sequences = new HashMap<>();
-
 
         for(int i = 0; i < lines.length; i++) {
             String   line       = lines[i];

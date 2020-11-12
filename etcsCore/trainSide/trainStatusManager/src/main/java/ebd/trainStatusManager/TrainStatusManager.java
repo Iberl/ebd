@@ -10,8 +10,8 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -29,6 +29,7 @@ import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.routeData.RouteDataVolatile;
+import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
 import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
 import ebd.trainData.TrainData;
 import ebd.trainStatusManager.util.Clock;
@@ -40,7 +41,6 @@ import ebd.trainStatusManager.util.handlers.TelegramHandler;
 import ebd.trainStatusManager.util.socketConnectors.DMIServerConnector;
 import ebd.trainStatusManager.util.socketConnectors.InfrastructureClientConnector;
 import ebd.trainStatusManager.util.supervisors.*;
-import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -51,7 +51,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class TrainStatusManager implements Runnable {
 

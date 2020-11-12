@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMovementAuthority;
 import ebd.rbc_tms.Payload;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
