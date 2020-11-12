@@ -2,14 +2,16 @@ package ebd.core.util.server;
 
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.events.ScenarioExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class GUIPipeDistribution implements Runnable {
 
@@ -46,7 +48,7 @@ public class GUIPipeDistribution implements Runnable {
             }
             catch (IOException e) {
                 if(this.running){
-                    SzenarioExceptionEvent see = new SzenarioExceptionEvent("szenario",
+                    ScenarioExceptionEvent see = new ScenarioExceptionEvent("szenario",
                             "szenario", new NotCausedByAEvent(), e, ExceptionEventTyp.WARNING);
                     EventBus.getDefault().post(see);
                     this.running = false;

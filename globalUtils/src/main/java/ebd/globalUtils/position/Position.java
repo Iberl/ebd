@@ -1,14 +1,14 @@
 package ebd.globalUtils.position;
 
 
-import java.util.HashMap;
-import java.util.Map;
-
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.exceptions.PositionReferenzException;
 import ebd.messageLibrary.util.ETCSVariables;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A position represents a precise place on the track. It uses fixed reference points called

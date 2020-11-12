@@ -5,7 +5,6 @@ import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainModel;
 
-import javax.swing.*;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;

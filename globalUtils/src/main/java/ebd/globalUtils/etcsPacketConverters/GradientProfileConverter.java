@@ -1,6 +1,5 @@
 package ebd.globalUtils.etcsPacketConverters;
 
-import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;

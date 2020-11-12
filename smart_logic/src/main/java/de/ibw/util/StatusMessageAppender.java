@@ -1,10 +1,11 @@
 package de.ibw.util;
 
-import javax.swing.JTextArea;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.spi.LoggingEvent;
+
+import javax.swing.*;
 
 /**
  * Diese gibt das Logging in ein Textfeld.

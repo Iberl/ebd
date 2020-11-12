@@ -1,80 +1,123 @@
 package ebd.baliseTelegramGenerator;
 
-import ebd.globalUtils.events.DisconnectEvent;
-import ebd.globalUtils.events.messageSender.SendTelegramEvent;
-import ebd.globalUtils.events.trainStatusMananger.PositionEvent;
-import ebd.globalUtils.location.InitalLocation;
-import ebd.globalUtils.location.Location;
-import ebd.globalUtils.position.Position;
+import com.google.gson.Gson;
 import ebd.messageLibrary.message.Telegram;
-import ebd.messageLibrary.util.Pair;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.util.Collections;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static ebd.baliseTelegramGenerator.BaliseTelegramCreator.createTelegramsForBaliseGroup;
 
 public class BaliseTelegramGenerator {
 
-	// x Checks Position of Trains
-	// x Manages List Of Trains (one Train)
-	// x Sends Telegram if Balise (BaliseGroup) is driven over
-	// x Handles EventBus and MS
+    // IF no Map already exists
+    // THEN [x] Read TelegramByBalise Map
+    // ELSE [ ] Create Telegrams for every balise in list
+    // AND  [x] Save TelegramByBalise Map
 
-	EventBus localbus;
+    // [ ] Error Messages
 
-	ListOfBalises listOfBalises;
+    Gson   gson    = new Gson();
+    String dirPath = "configuration/balises/";
 
-	// trainID, lastknownPosition, lastsentPosition
-	Map<String, Pair<Position, Integer>> positions = new HashMap<>();
+    private final BaliseTelegramSender sender;
+    private String balisePositioningId;
 
-	// Constructors
+    public BaliseTelegramGenerator(String balisePositioningId) {
+        this.balisePositioningId = balisePositioningId;
+        Map<String, Telegram[]> telegramsByBalise = null;
 
-	public BaliseTelegramGenerator(EventBus localbus, ListOfBalises listOfBalises) {
-		EventBus.getDefault().register(this);
-		this.localbus = localbus;
-		this.listOfBalises = listOfBalises;
-	}
+        if(Files.isReadable(Paths.get(dirPath + balisePositioningId + ".json"))) {
+            try {
+                telegramsByBalise = loadTelegramMap();
+            } catch(IOException e) {
+                // TODO Error: can't be loaded
+                System.out.println("telegram map could not be loaded");
+                e.printStackTrace();
+            }
+        } else if(Files.isReadable(Paths.get(dirPath + balisePositioningId + ".xlxs"))) {
+            try {
+                telegramsByBalise = createTelegramMap();
+            } catch(Exception e) {
+                // TODO Error: can't be created
+                System.out.println("telegram map could not be created");
+                e.printStackTrace();
+            }
+            saveTelegramMap(telegramsByBalise);
+        }
 
+        sender = new BaliseTelegramSender(telegramsByBalise);
+    }
 
-	// Methods
+    private Map<String, Telegram[]> createTelegramMap() {
+        File file = new File(dirPath + balisePositioningId + ".xlsx");
+        Map<String, Telegram[]> telegramsByBalise = new HashMap<>();
 
-	private void sendTelegram(String trainId) {
-		Position lastKnownPosition = positions.get(trainId).getKey();
-		Integer lastSendingBalise = positions.get(trainId).getValue();
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
 
-		if(lastSendingBalise == 10) return; //TODO Get better handeling of reaching last balise! LSF
-		BaliseGroup nextBG = listOfBalises.getBaliseGroup(listOfBalises.getConnectionsOf(lastSendingBalise).getValue());
+            // File must be of form:
+            // ___|   A   |   B    |    C    |    D    | ... // Coordinates
+            //  1 | nid_c | nid_bg | n_total | dp_type | ... // Header
+            //  2 |  1..  |  1..   |   1..   |   1..   | ... // First Data Line
 
-		if(lastKnownPosition.getIncrement() >= nextBG.getLocation().getDistanceToPrevious()) {
-			localbus.post(new SendTelegramEvent("btg1", "ms", nextBG.generateTelegramFor(0), trainId));
-			positions.put(trainId, new Pair<>(lastKnownPosition, nextBG.getNID_BG()));
-		}
-	}
+            // Skip header
+            rowIterator.next();
 
-	private void sendInitialTelegram(String trainId) {
-		Telegram telegram = listOfBalises.getBaliseGroup(1).generateTelegramFor(0);
-		localbus.post(new SendTelegramEvent("btg1", "ms", telegram, trainId));
-		positions.put(trainId, new Pair<>(positions.get(trainId).getKey(), 1));
-	}
+            while(rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                try {
+                    int nid_c   = (int) row.getCell(0).getNumericCellValue();
+                    int nid_bg  = (int) row.getCell(1).getNumericCellValue();
+                    int n_total = (int) row.getCell(2).getNumericCellValue();
+                    int type    = (int) row.getCell(3).getNumericCellValue();
+                    Map<String, Telegram[]> telegrams = createTelegramsForBaliseGroup(nid_c, nid_bg, n_total, type);
+                    telegramsByBalise.putAll(telegrams);
+                } catch(IllegalStateException | NumberFormatException e) {
+                    // TODO Fatal Error?
+                    System.out.println("malformed datapoint in row " + row.getRowNum());
+                }
+            }
 
-	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void receivePosition(PositionEvent event) {
-		String trainID = event.source.split(";T=")[1];
-		String src = "mr;T=" + trainID;
+        } catch(FileNotFoundException e) {
+            // TODO Error: no file for creation
+            e.printStackTrace();
+        } catch(IOException e) {
+            // TODO Error: can't read file
+            e.printStackTrace();
+        }
 
-		if((event.position.getLocation() instanceof InitalLocation)) {
-			positions.put(src, new Pair<>(new Position(0, true, new Location(0, 0, 0, 0d)), null));
-			sendInitialTelegram(src);
-		} else {
-			positions.put(src, new Pair<>(event.position, positions.get(src).getValue()));
-			sendTelegram(src);
-		}
-	}
+        return telegramsByBalise;
+    }
 
-	@Subscribe
-	public void disconnect(DisconnectEvent event) { EventBus.getDefault().unregister(this); }
+    private Map<String, Telegram[]> loadTelegramMap() throws IOException {
+        Reader reader = Files.newBufferedReader(Paths.get(dirPath + balisePositioningId + "_telegrams.json"));
+        Map<String, Telegram[]> map = gson.fromJson(reader, Map.class);
+        reader.close();
+        return map;
+    }
+
+    private void saveTelegramMap(Map<String, Telegram[]> telegramsByBalise) {
+        // TODO Try vs Throw
+        try {
+            gson.toJson(telegramsByBalise, new FileWriter(dirPath + balisePositioningId + "_telegrams.json"));
+        } catch(IOException e) {
+            // TODO Error: TelegramMap can't be saved
+            System.out.println("telegram map could not be saved");
+            e.printStackTrace();
+        }
+    }
+
+    public String getBalisePositioningId() { return balisePositioningId; }
 
 }

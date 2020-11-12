@@ -1,7 +1,6 @@
 package ebd.drivingDynamics.util.actions;
 
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
-import ebd.globalUtils.events.Event;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 

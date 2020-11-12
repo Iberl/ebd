@@ -3,17 +3,13 @@ package de.ibw.tms.plan_pro.adapter.topology;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
-
-import javax.xml.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;

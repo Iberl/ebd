@@ -1,7 +1,5 @@
 package ebd.globalUtils.events;
 
-import java.util.List;
-
 /**
  * This event signals all targeted subscribers that are registered on the global EventBus to unregister them self from the
  * global EventBus immediately.

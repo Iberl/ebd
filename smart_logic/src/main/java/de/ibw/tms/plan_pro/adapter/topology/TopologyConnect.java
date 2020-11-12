@@ -2,7 +2,6 @@ package de.ibw.tms.plan_pro.adapter.topology;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * Dieses Enum beschreibt welche Knoten-Konnektoren es geben kann

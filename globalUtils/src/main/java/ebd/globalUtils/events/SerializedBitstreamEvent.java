@@ -2,8 +2,6 @@ package ebd.globalUtils.events;
 
 import ebd.messageLibrary.serialization.BitStreamReader;
 
-import java.util.List;
-
 /**
  * Event containing the serialized information of an Message send over the global Eventbus
  *

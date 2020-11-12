@@ -1,6 +1,5 @@
 package org.plan_pro.modell.weichen_und_gleissperren._1_8;
 
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.bind.JAXBContext;

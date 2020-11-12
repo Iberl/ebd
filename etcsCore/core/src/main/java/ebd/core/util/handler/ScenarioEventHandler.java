@@ -6,11 +6,11 @@ import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-public class SzenarioEventHandler {
+public class ScenarioEventHandler {
 
     EventBus globalEventBus;
 
-    public SzenarioEventHandler(){
+    public ScenarioEventHandler(){
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
     }

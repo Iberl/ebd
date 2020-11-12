@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import ebd.rbc_tms.Message;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;

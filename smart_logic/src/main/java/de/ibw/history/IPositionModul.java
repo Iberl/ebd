@@ -4,7 +4,6 @@ package de.ibw.history;
 import de.ibw.history.data.PositionEnterType;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**

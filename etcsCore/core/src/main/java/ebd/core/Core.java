@@ -1,26 +1,27 @@
 package ebd.core;
 
 
+import ebd.core.util.clients.InfrastructureClient;
+import ebd.core.util.events.LoadEvent;
+import ebd.core.util.handler.InputHandler;
 import ebd.core.util.server.ATOServer;
+import ebd.core.util.server.DMIServer;
+import ebd.core.util.server.GUIServer;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.tmsDummy.TMSDummyStartEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trackmessages.Message_24;
 import ebd.messageLibrary.packet.trackpackets.Packet_5;
 import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
-import ebd.core.util.clients.InfrastructureClient;
-import ebd.core.util.handler.InputHandler;
-import ebd.core.util.handler.SzenarioEventHandler;
-import ebd.core.util.events.LoadEvent;
-import ebd.core.util.events.SzenarioExceptionEvent;
-import ebd.core.util.server.DMIServer;
-import ebd.core.util.server.GUIServer;
+import ebd.core.util.handler.ScenarioEventHandler;
+import ebd.core.util.events.ScenarioExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -60,7 +61,7 @@ public class Core implements Runnable {
     private ConfigHandler ch;
     private TrainsHandler iFH;
 
-    private final SzenarioEventHandler szenarioEventHandler;
+    private final ScenarioEventHandler szenarioEventHandler;
     private final InputHandler inputHandler;
     private Logging logger;
     private MessageSender messageSenderTrack;
@@ -90,7 +91,7 @@ public class Core implements Runnable {
     public Core() {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
-        this.szenarioEventHandler = new SzenarioEventHandler();
+        this.szenarioEventHandler = new ScenarioEventHandler();
 
         this.ch = ConfigHandler.getInstance();
         this.iFH = TrainsHandler.getInstance();
@@ -122,7 +123,7 @@ public class Core implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
+            this.globalEventBus.post(new ScenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -133,7 +134,7 @@ public class Core implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
+            this.globalEventBus.post(new ScenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -169,6 +170,7 @@ public class Core implements Runnable {
         }
 
         btgGenerator.sendLinkingInformation(this.messageSenderTrack);
+        if(!ConfigHandler.getInstance().useTMSServer) EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
     }
 
     private boolean validTarget(String target) {

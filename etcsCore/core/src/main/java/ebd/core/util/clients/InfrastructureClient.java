@@ -2,10 +2,10 @@ package ebd.core.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
-import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.core.StopTrainEvent;
 import ebd.globalUtils.events.core.TerminateTrainEvent;
 import ebd.globalUtils.events.core.UpdatingInfrastructureEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.trainStatusMananger.ChangeInfrastructureDirectionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.StandardSocketOptions;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class InfrastructureClient {
     private Socket socket;
     private PrintWriter out;
 
-    private final List<Integer> registeredTrains = new ArrayList();
+    private final List<Integer> registeredTrains = new ArrayList<>();
 
     /**
      * If simulated, do not connect to any servers
@@ -145,7 +146,8 @@ public class InfrastructureClient {
     private void connect() throws IOException {
         if(socket == null){
             socket = new Socket(ip, port);
-            out = new PrintWriter(socket.getOutputStream());
+            socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
+            out = new PrintWriter(socket.getOutputStream(),true);
         }
     }
 
@@ -164,31 +166,16 @@ public class InfrastructureClient {
         return socket != null && out != null && !out.checkError();
     }
 
-    private void send(String cmd) {
-        PrintWriter out = this.out;
-        if (out != null) {
-            out.println(cmd);
-            if (!out.checkError()) {
-                //System.out.println("Command \"" + cmd.toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
-            } else {
-                try {
-                    reconnect();
-                } catch (IOException e) {
-                    System.err.println("Could not reconnect to Fahrsteuerung: " + e.getLocalizedMessage());
-                }
-            }
-        } //TODO Do not chat IOexception
-    }
-
     private void send(String format, Object... params) {
         PrintWriter out = this.out;
         if (out != null) {
             synchronized (out) {
                 out.printf(format, params);
-                out.println();
+
                 if (!out.checkError()) {
                     //System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
-                } else {
+                }
+                else {
                     try {
                         reconnect();
                     } catch (IOException e) {

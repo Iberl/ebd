@@ -5,18 +5,14 @@ import ebd.drivingDynamics.util.actions.AccelerationAction;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.trainData.TrainData;
-import ebd.trainData.TrainDataVolatile;
-import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AccelerationActionTest {
     @BeforeAll

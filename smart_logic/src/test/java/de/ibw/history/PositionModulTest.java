@@ -1,15 +1,8 @@
 package de.ibw.history;
 
-import com.sun.xml.bind.v2.model.annotation.RuntimeAnnotationReader;
-import de.ibw.tms.etcs.Q_SCALE;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.DefaultRepo;
-import ebd.globalUtils.position.Position;
-import ebd.rbc_tms.util.PositionInfo;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;

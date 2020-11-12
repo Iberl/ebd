@@ -1,16 +1,12 @@
 package de.ibw.tms.trackplan.ui;
 
-import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-
 import de.ibw.tms.trackplan.controller.RouteController;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.UtilFunction;

@@ -1,9 +1,9 @@
 package ebd.core.util.handler;
 
+import ebd.core.util.events.LoadEvent;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
-import ebd.core.util.events.LoadEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -11,10 +11,10 @@ import java.util.Scanner;
 
 public class InputHandler implements Runnable {
 
-    private EventBus globalEventBus;
+    private final EventBus globalEventBus;
     private boolean shouldRun = true;
 
-    private Thread ihThread = new Thread(this);
+    private final Thread ihThread = new Thread(this);
 
     public InputHandler(){
         this.globalEventBus = EventBus.getDefault();
@@ -25,7 +25,7 @@ public class InputHandler implements Runnable {
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        while(shouldRun){
+        while(shouldRun && scanner.hasNext()){
             selectNext(scanner.next());
         }
     }

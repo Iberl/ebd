@@ -6,9 +6,9 @@ import ebd.globalUtils.events.logger.LogToGUIPipeEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.*;
-import java.time.*;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;

@@ -2,13 +2,16 @@ package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
 import ebd.ConfigHandler;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.message.Message_00;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_00;
 import ebd.rbc_tms.payload.Payload_21;
-import ebd.rbc_tms.util.*;
+import ebd.rbc_tms.util.EOA;
+import ebd.rbc_tms.util.MA;
+import ebd.rbc_tms.util.TrainInfo;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;

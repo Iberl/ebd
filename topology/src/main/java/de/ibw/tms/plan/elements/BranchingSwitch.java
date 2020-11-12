@@ -9,12 +9,9 @@ import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import ebd.ConfigHandler;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;

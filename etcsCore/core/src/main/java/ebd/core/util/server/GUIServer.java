@@ -12,7 +12,10 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This GUIServer organises connecting GUI clients. It creates a {@link GUIClientWorker} for every client and maps them

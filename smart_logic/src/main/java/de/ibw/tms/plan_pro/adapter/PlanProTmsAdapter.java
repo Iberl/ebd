@@ -2,21 +2,21 @@ package de.ibw.tms.plan_pro.adapter;
 
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
-import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.GeoCoordinates;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.util.DefaultRepo;
-import plan_pro.modell.bahnsteig._1_9_0.*;
+import plan_pro.modell.bahnsteig._1_9_0.CBahnsteigZugang;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
-import plan_pro.modell.geodaten._1_9_0.*;
-import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
-import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
-import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
+import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
+import plan_pro.modell.geodaten._1_9_0.CTOPKante;
+import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
-import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 /**

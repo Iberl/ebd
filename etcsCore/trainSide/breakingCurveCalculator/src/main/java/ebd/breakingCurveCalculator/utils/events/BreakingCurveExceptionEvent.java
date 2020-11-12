@@ -1,7 +1,5 @@
 package ebd.breakingCurveCalculator.utils.events;
 
-import java.util.List;
-
 import ebd.globalUtils.events.Event;
 import ebd.globalUtils.events.ExceptionEvent;
 

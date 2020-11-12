@@ -2,12 +2,12 @@ package ebd.core;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
-import ebd.globalUtils.szenario.RemoveTrainEvent;
+import ebd.globalUtils.events.scenario.RemoveTrainEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

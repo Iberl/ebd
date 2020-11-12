@@ -2,9 +2,6 @@ package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
 import ebd.rbc_tms.util.GradientProfile;
-import ebd.rbc_tms.util.annotations.CanBeNull;
-import ebd.rbc_tms.util.annotations.MinOneElem;
-import jdk.jfr.Experimental;
 
 import java.util.ArrayList;
 import java.util.List;

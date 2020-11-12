@@ -1,7 +1,5 @@
 package ebd.globalUtils.enums;
 
-import ebd.messageLibrary.util.ETCSVariables;
-
 public enum ETCSMode {
 
     /**

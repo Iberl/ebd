@@ -1,8 +1,8 @@
 package ebd.rbc_tms.payload;
 
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.Constants;
-import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.MA;
 
 import java.util.Objects;

@@ -1,7 +1,5 @@
 package de.ibw.tms.intf.cmd;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
