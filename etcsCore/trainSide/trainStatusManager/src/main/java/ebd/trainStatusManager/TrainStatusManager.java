@@ -19,7 +19,7 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.szenario.RemoveTrainEvent;
+import ebd.globalUtils.events.scenario.RemoveTrainEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;

@@ -25,7 +25,7 @@ public class InputHandler implements Runnable {
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        while(shouldRun){
+        while(shouldRun && scanner.hasNext()){
             selectNext(scanner.next());
         }
     }

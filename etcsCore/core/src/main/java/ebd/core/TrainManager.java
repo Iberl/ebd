@@ -2,7 +2,7 @@ package ebd.core;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
-import ebd.globalUtils.szenario.RemoveTrainEvent;
+import ebd.globalUtils.events.scenario.RemoveTrainEvent;
 import ebd.trainStatusManager.TrainStatusManager;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

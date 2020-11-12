@@ -16,9 +16,9 @@ import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.core.util.clients.InfrastructureClient;
 import ebd.core.util.handler.InputHandler;
-import ebd.core.util.handler.SzenarioEventHandler;
+import ebd.core.util.handler.ScenarioEventHandler;
 import ebd.core.util.events.LoadEvent;
-import ebd.core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.events.ScenarioExceptionEvent;
 import ebd.core.util.server.DMIServer;
 import ebd.core.util.server.GUIServer;
 import org.greenrobot.eventbus.EventBus;
@@ -60,7 +60,7 @@ public class Core implements Runnable {
     private ConfigHandler ch;
     private TrainsHandler iFH;
 
-    private final SzenarioEventHandler szenarioEventHandler;
+    private final ScenarioEventHandler szenarioEventHandler;
     private final InputHandler inputHandler;
     private Logging logger;
     private MessageSender messageSenderTrack;
@@ -90,7 +90,7 @@ public class Core implements Runnable {
     public Core() {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
-        this.szenarioEventHandler = new SzenarioEventHandler();
+        this.szenarioEventHandler = new ScenarioEventHandler();
 
         this.ch = ConfigHandler.getInstance();
         this.iFH = TrainsHandler.getInstance();
@@ -122,7 +122,7 @@ public class Core implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
+            this.globalEventBus.post(new ScenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }
@@ -133,7 +133,7 @@ public class Core implements Runnable {
         } catch (InterruptedException e) {
             InterruptedException ie = new InterruptedException("TSM was interrupted: " + e.getMessage());
             ie.setStackTrace(e.getStackTrace());
-            this.globalEventBus.post(new SzenarioExceptionEvent("szenario", "Core",
+            this.globalEventBus.post(new ScenarioExceptionEvent("szenario", "Core",
                     new NotCausedByAEvent(),ie));
         }
     }
