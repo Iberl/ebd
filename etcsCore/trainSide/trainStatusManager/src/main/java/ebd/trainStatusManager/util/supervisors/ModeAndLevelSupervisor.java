@@ -6,6 +6,8 @@ import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
 import ebd.globalUtils.enums.ETCSLevel;
 import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.events.ExceptionEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
+import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import ebd.globalUtils.events.trainStatusMananger.LevelReportEvent;
@@ -58,12 +60,13 @@ public class ModeAndLevelSupervisor {
 
     }
 
-    private EventBus localEventBus;
-    private TrainDataVolatile trainDataVolatile;
-    private TrainDataPerma trainDataPerma;
-    private RouteDataVolatile routeDataVolatile;
+    private final EventBus localEventBus;
+    private final TrainDataVolatile trainDataVolatile;
+    private final TrainDataPerma trainDataPerma;
+    private final RouteDataVolatile routeDataVolatile;
     private ETCSLevel curLevel = ETCSLevel.LEVEL_TWO;
     private ETCSMode curMode = ETCSMode.STAND_BY;
+    private ETCSMode lastLoggedMode = ETCSMode.NO_MODE;
 
     private ModeProfil modeProfil;
 
@@ -104,7 +107,16 @@ public class ModeAndLevelSupervisor {
 
         this.localEventBus.postSticky(new LevelReportEvent("tsm", "all", this.curLevel));
         this.localEventBus.postSticky(new ModeReportEvent("tsm", "all", this.curMode));
+        log();
 
+    }
+
+    private void log() {
+        if(this.lastLoggedMode != this.curMode){
+            this.lastLoggedMode = this.curMode;
+            String msg = "Mode changed to " + this.lastLoggedMode.name();
+            this.localEventBus.post(new ToLogEvent("tsm", "log", msg));
+        }
     }
 
     @Subscribe
@@ -160,34 +172,34 @@ public class ModeAndLevelSupervisor {
         Only implemented modes (see ETCSMode) are considered.
          */
         switch (this.curMode){
-            case STAND_BY:
-                if(checkModeCondition13()); //P3 SystemFailure
-                else if(checkModeCondition20()); //P4 Trip
-                else if(checkModeCondition10()); //P7 FullSupervision
+            case STAND_BY -> {
+                if (checkModeCondition13()) ; //P3 SystemFailure
+                else if (checkModeCondition20()) ; //P4 Trip
+                else if (checkModeCondition10()) ; //P7 FullSupervision
                 //No switch from Standby to Shunting is currently possible
-                break;
-            case SHUNTING:
-                if(checkModeCondition13()); //P3 SystemFailure
-                break;
-            case FULL_SUPERVISION:
-                if(checkModeCondition13()); // P3 SystemFailure
-                else if(checkModeCondition12()); //P4 Trip
-                else if(checkModeCondition16()); //P4 Trip
-                else if(checkModeCondition20()); //P4 Trip
-                else if(checkModeCondition69()); //P4 Trip
-                else if(checkModeCondition51()); //P6 Shunting
-                break;
-            case TRIP:
-                if(checkModeCondition13()); // P3 SystemFailure
-                else if(checkModeCondition7()); // P4 PostTrip
-                break;
-            case POST_TRIP:
-                if(checkModeCondition13()); // P3 SystemFailure
-                else if(checkModeCondition31()); //P5 FullSupervision
-                break;
-            case NO_MODE:
-            case SYSTEM_FAILURE:
-                break;
+            }
+            case SHUNTING -> {
+                if (checkModeCondition13()) ; //P3 SystemFailure
+            }
+            case FULL_SUPERVISION -> {
+                if (checkModeCondition13()) ; // P3 SystemFailure
+                else if (checkModeCondition12()) ; //P4 Trip
+                else if (checkModeCondition16()) ; //P4 Trip
+                else if (checkModeCondition20()) ; //P4 Trip
+                else if (checkModeCondition69()) ; //P4 Trip
+                else if (checkModeCondition51()) ; //P6 Shunting
+            }
+            case TRIP -> {
+                if (checkModeCondition13()) ; // P3 SystemFailure
+                else if (checkModeCondition7()) ; // P4 PostTrip
+
+            }
+            case POST_TRIP -> {
+                if (checkModeCondition13()) ; // P3 SystemFailure
+                else if (checkModeCondition31()) ; //P5 FullSupervision
+                else if (checkModeCondition51()); //P5 Shunting
+            }
+            case NO_MODE, SYSTEM_FAILURE -> {}
         }
     }
     /*
@@ -322,8 +334,7 @@ public class ModeAndLevelSupervisor {
         boolean trainBehindStartOfSSPOrGP = curPos.getLocation().getId() == locationID || curPos.previousLocationsContainsID(locationID);
 
         boolean etcsLevelTwoOrThree = this.curLevel == ETCSLevel.LEVEL_TWO || this.curLevel == ETCSLevel.LEVEL_THREE;
-        boolean vaildRouteData = routeDataVolatile != null
-                && routeDataVolatile.getPacket_15() != null
+        boolean vaildRouteData = routeDataVolatile.getPacket_15() != null
                 && routeDataVolatile.getPacket_21() != null
                 && routeDataVolatile.getPacket_27() != null
                 && trainBehindStartOfSSPOrGP;
@@ -342,7 +353,9 @@ public class ModeAndLevelSupervisor {
      * @return True if a mode profile demands a switch into shunting and preconditions are met
      */
     private boolean checkModeCondition51() {
-        if(!this.modeProfil.unspecified && this.modeProfil.getMode(this.curDis) == ETCSMode.SHUNTING){
+        if(!this.modeProfil.unspecified
+                && this.modeProfil.getMode(this.curDis) == ETCSMode.SHUNTING
+                && this.trainDataVolatile.getCurrentSpeed() == 0){
             this.curMode = ETCSMode.SHUNTING;
             return true;
         }

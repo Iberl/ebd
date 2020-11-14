@@ -14,7 +14,7 @@
     ],
     "dangerPoint": {
       "d_dp": 200,
-      "v_releasedp": 0
+      "v_releasedp": 5
     }
   },"gradientProfile": {
   "gradients": [
