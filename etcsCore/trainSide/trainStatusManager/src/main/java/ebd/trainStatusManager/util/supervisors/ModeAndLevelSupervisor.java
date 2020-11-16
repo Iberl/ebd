@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 public class ModeAndLevelSupervisor {
 
-    private class ModeProfil {
+    private static class ModeProfil {
 
         private boolean unspecified = true;
         private TreeMap<Double,ETCSMode> modeTreeMap = new TreeMap<>();
@@ -254,8 +254,10 @@ public class ModeAndLevelSupervisor {
     private boolean checkModeCondition12(){
         boolean etcsLevelOne = this.curLevel == ETCSLevel.LEVEL_ONE;
         Position curPos = this.trainDataVolatile.getCurrentPosition();
-        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null ||
-                curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+        if(this.routeDataVolatile.getRefLocation() == null
+                || this.serviceBC == null
+                || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN
+                || trainDataVolatile.getCurrentSpeed() == 0){
             return false;
         }
 
@@ -291,8 +293,10 @@ public class ModeAndLevelSupervisor {
     private boolean checkModeCondition16(){
         boolean etcsLevelTwoOrThree = this.curLevel == ETCSLevel.LEVEL_TWO || this.curLevel == ETCSLevel.LEVEL_THREE;
         Position curPos = this.trainDataVolatile.getCurrentPosition();
-        if(this.routeDataVolatile.getRefLocation() == null || this.serviceBC == null ||
-                curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN){
+        if(this.routeDataVolatile.getRefLocation() == null
+                || this.serviceBC == null
+                || curPos.getLocation().getId() == ETCSVariables.NID_LRBG_UNKNOWN
+                || trainDataVolatile.getCurrentSpeed() == 0){
             return false;
         }
 
