@@ -115,16 +115,17 @@ public class Occupation extends TrackArea {
         begin.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, start_Ma, d_A_to_Block_Start));
         end.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, end_Ma, d_A_to_Block_End));
         defineOccupatedSection(e, edgeSection, begin, end);
-        List<TrackEdgeSection> edgeList = new ArrayList<>();
-        edgeList.add(edgeSection);
 
-        this.setTrackEdgeSections(edgeList);
     }
 
     public void defineOccupatedSection(TopologyGraph.Edge e, TrackEdgeSection edgeSection, SpotLocationIntrinsic begin, SpotLocationIntrinsic end) {
         edgeSection.setTrackEdge(e);
         edgeSection.setBegin(begin);
         edgeSection.setEnd(end);
+        List<TrackEdgeSection> edgeList = new ArrayList<>();
+        edgeList.add(edgeSection);
+
+        this.setTrackEdgeSections(edgeList);
     }
 
 

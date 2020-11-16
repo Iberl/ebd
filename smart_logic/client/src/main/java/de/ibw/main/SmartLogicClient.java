@@ -1,15 +1,12 @@
 package de.ibw.main;
 
 import com.google.gson.Gson;
-import de.ibw.hanlder.ClientHandler;
+import de.ibw.handler.ClientHandler;
 import de.ibw.tms.intf.SmartClient;
-import de.ibw.tms.intf.SmartClientHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
-import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 /**
  * Client(TMS) zur SmartLogic

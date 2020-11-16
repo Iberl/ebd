@@ -4,6 +4,8 @@ import de.ibw.feed.Balise;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.history.data.RouteMap;
+import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.occupation.Occupation;
@@ -17,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -33,6 +36,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 2020-09-30
  */
 public class PositionModul implements IPositionModul {
+     public static String POSITION_MODUL = "POSITION-MODUL";
+
+
      private CopyOnWriteArrayList<PositionData> positionModuls = new CopyOnWriteArrayList<>();
      private ThreadedRepo<Integer, PositionData> CurrentPositionsByNidId = new ThreadedRepo<>();
      private RouteMap routeByNidId = new RouteMap();
@@ -88,15 +94,34 @@ public class PositionModul implements IPositionModul {
         if(PD == null) throw new NullPointerException("Position Data must not be Null");
         PD = handleMovementAuthorities(PD, EnterType);
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
+        log("Update occupation of MOB " + PD.getNid_engine());
         if(NewestData == null) {
+            log("No occupation of MOB " + PD.getNid_engine() + "-> create new occupation");
+
             CurrentPositionsByNidId.update(PD.getNid_engine(), PD);
+            log("Occupation for MOB " + PD.getNid_engine() + "-> successfuly created");
 
         } else {
+
             if(NewestData.getRbc_timestamp() < PD.getRbc_timestamp()) {
+                log("Occupation of MOB " + PD.getNid_engine() + " existing -> update occupation");
                 CurrentPositionsByNidId.update(PD.getNid_engine(), PD);
+                log("Occupation for MOB " + PD.getNid_engine() + "-> successfuly updated");
+
             }
         }
+
         positionModuls.add(PD);
+    }
+
+    public void log(String sMsg) {
+        try {
+            EventBusManager.registerOrGetBus(1, false)
+                    .log(sMsg,
+                            SmartLogic.getsModuleId(POSITION_MODUL));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private PositionData handleMovementAuthorities(PositionData pd, PositionEnterType enterType) {
@@ -411,8 +436,6 @@ public class PositionModul implements IPositionModul {
             if(dFromRangeStart.compareTo(dToRangeEnd) > 0) throw new InvalidParameterException("Start after End Range");
             // entfernt alle daten, die keine Schnittfläche zwischen Anfrage und Tatsächlichen Positionsangabe haben
             results.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge, dFromRangeStart, dToRangeEnd));
-
-
         }
         return results;
 

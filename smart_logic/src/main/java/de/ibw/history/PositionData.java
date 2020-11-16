@@ -8,6 +8,7 @@ import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
 import ebd.rbc_tms.util.PositionInfo;
+import ebd.rbc_tms.util.TrainInfo;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -69,7 +70,8 @@ public class PositionData extends VehicleOccupation {
         return received_timestamp;
     }
 
-    public PositionData(long rbc_timestamp, long received_timestamp, int nid_engine, PositionInfo pos) {
+    public PositionData(long rbc_timestamp, long received_timestamp, TrainInfo TI, PositionInfo pos) {
+        super(TI,pos);
         this.rbc_timestamp = rbc_timestamp;
         this.received_timestamp = received_timestamp;
         this.nid_engine = nid_engine;

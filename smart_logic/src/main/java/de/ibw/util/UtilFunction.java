@@ -423,6 +423,7 @@ public class UtilFunction {
      * @return double - result in 0 - 1 as percents but not form 0 to 100, but form 0.0 to 1.0
      */
     public static double generateIntrinsic(double dTopLength, Occupation.BLOCK_Q_SCALE scale, int iDistance) {
+        if(iDistance + 1 >= dTopLength) return 1;
         BigDecimal dDistance = new BigDecimal(iDistance);
         BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
         BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));

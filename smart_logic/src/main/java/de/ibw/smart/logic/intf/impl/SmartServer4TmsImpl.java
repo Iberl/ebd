@@ -197,7 +197,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
         RouteDataSL requestedTrackElementList = new RouteDataSL();
-        bCheckOk = Safety.slSelfCheck(MaAdapter);
+        bCheckOk = Safety.slSelfCheck();
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
             sendMaResponseToTMS(MaReturnPayload, 1L);
@@ -217,17 +217,37 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 }
             }
         }
+        if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
         requestedTrackElementList = identifyRouteElements(MaRequest, requestedTrackElementList);
+        if(requestedTrackElementList == null) {
+            if(EBM != null) EBM.log("Route not existing", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
+            sendMaResponseToTMS(MaReturnPayload, 2L);
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            return;
+        } else {
+            if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+        }
         bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(MaRequest, MaAdapter,requestedTrackElementList);
         /**To Debug **/
         bIsOccupatonFree = true;
+        if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
         if(!bIsOccupatonFree) {
+            if(EBM != null) EBM.log("Route is not drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             return;
         } else {
-            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
+            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         }
         bTrainStatusIsFresh = Safety.checkIfTrainStatusRequestIsFresh(MaRequest);
         if(!bTrainStatusIsFresh) {
@@ -295,10 +315,14 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         Message_21 MaMsg = new Message_21(uuid,tms_id, rbc_id, MaPayload);
 
+
+        if(EBM != null)
+            EBM.log("Search for RBCs", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
         PriorityMessage priorityMessage = new PriorityMessage(MaMsg, lPriority);
-
-
         ackQueues.createQueue(uuid);
+
         this.RbcClient.sendMessage(priorityMessage);
         try {
             bAcknowledgeMA = ackQueues.poll(uuid);

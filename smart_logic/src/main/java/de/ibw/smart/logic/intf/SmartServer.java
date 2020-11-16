@@ -86,7 +86,8 @@ public class SmartServer extends RbcModul  {
             TmsOuputWorker.SmartToTmsWorker = new TmsOuputWorker<SmartServerMessage>( SmartLogic.outputQueue, ctx);
             TmsOuputWorker.SmartToTmsWorker.start();
 
-            if(EM != null) EM.log("SmartLogic Channel to TMS active", SMART_SERVER_INBOUND_HANDLER);
+            if(EM != null) EM.log("Successfully connected to TMS 1",
+                    SmartLogic.getsModuleId(SMART_SERVER_INBOUND_HANDLER));
 
 
 
@@ -108,7 +109,6 @@ public class SmartServer extends RbcModul  {
 
 
             String received = (String) msg;
-            if(EM != null) EM.log("SL received from TMS: " + received, "SMART_SERVER_INBOUND_HANDLER");
             TmsMessage TmsCommand = TmsMessage.generateFromTms(received);
 
             handleCommand(TmsCommand);
@@ -134,6 +134,18 @@ public class SmartServer extends RbcModul  {
                 new Thread() {
                     @Override
                     public void run() {
+                        if(EM != null) {
+                            try {
+                                EM.log("Message MA-PERMISSION-REQUEST: " + CMA.parseToJson() + " from " +
+                                        "TMS" + CMA.tms_id + " received",
+                                        SmartLogic.getsModuleId(SMART_SERVER_INBOUND_HANDLER));
+                                EM.log("Internal-Request-Id = " + 1,
+                                        SmartLogic.getsModuleId(SMART_SERVER_INBOUND_HANDLER) );
+                            } catch (MissingInformationException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                         ServerImpl.checkMovementAuthority(CMA.MaRequest, CMA.MaAdapter, CMA.uuid, CMA.tms_id, CMA.rbc_id,
                                 CMA.lPriority);
                     }
@@ -143,6 +155,17 @@ public class SmartServer extends RbcModul  {
                 new Thread() {
                     @Override
                     public void run() {
+                        if(EM != null) {
+                            try {
+                                EM.log("Message DBD-REQUEST: " + CDC.parseToJson() + " from " +
+                                                "TMS" + tmsCommand.tms_id + " received",
+                                        SmartLogic.getsModuleId(SMART_SERVER_INBOUND_HANDLER));
+                            } catch (MissingInformationException e) {
+                                e.printStackTrace();
+                            }
+                            EM.log("Internal-Request-Id = " + 0,
+                                    SmartLogic.getsModuleId(SMART_SERVER_INBOUND_HANDLER) );
+                        }
                         SafetyLogic.getSmartSafety().checkIfDbdElementIsNotBlocked(CDC);
                     }
                 }.start();

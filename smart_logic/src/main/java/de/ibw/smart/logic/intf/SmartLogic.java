@@ -19,6 +19,7 @@ import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
 import ebd.core.util.server.GUIServer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -203,12 +204,20 @@ public class SmartLogic extends NetEntity {
      * Starten der SL
      */
     public static void startSmartLogic() {
+        if(EM != null) {
+            EM.log("Initialize smartLogic", getsModuleId(SMART_LOGIC));
+        }
         initSmartLogic();
         startSmartLogicModules();
         if(EM != null) {
-            EM.log("Smart Logic startet. Waiting for TMS", SMART_LOGIC);
+            EM.log("Smart Logic startet. Waiting for TMS 1", getsModuleId(SMART_LOGIC));
         }
 
+    }
+
+    @NotNull
+    public static String getsModuleId(String sKomponent) {
+        return sKomponent + " " + SmartLogic.iSmartId;
     }
 
     /**

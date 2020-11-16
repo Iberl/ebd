@@ -69,7 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-11-09
+ * @since 2020-11-13
  */
 public class SafetyLogic {
     /**
@@ -814,7 +814,12 @@ public class SafetyLogic {
             iQ_Length = PosInf.q_length;
             trainInformation.update(iTrainId, P.trainInfo);
             lastPositionReport.update(iTrainId, PosInf);
-            new Thread(() -> handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader())).start();
+            EBM.log("Position Report for MOB with engine-id " + iTrainId + " received",
+                    SmartLogic.getsModuleId(SMART_SAFETY));
+
+
+
+            new Thread(() -> handlePositionHistory(P.trainInfo, PosInf, PositionReport.getHeader())).start();
             unlockPassedElements(iTrainId, PosInf);
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
@@ -858,10 +863,10 @@ public class SafetyLogic {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    private void handlePositionHistory(int iTrainId, PositionInfo posInf, Message.Header header) {
+    private void handlePositionHistory(TrainInfo TI, PositionInfo posInf, Message.Header header) {
         PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                iTrainId, posInf);
-        BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
+                TI, posInf);
+        //BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
 
 
 
@@ -925,16 +930,16 @@ public class SafetyLogic {
 
     /**
      * Untersucht ob die SmartLogic richtig funktioniert
-     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
      * @return boolean - funktioniert SL
      */
-    public synchronized boolean slSelfCheck(RbcMaAdapter maAdapter) {
+    public synchronized boolean slSelfCheck() {
+        EBM.log("Start Selfcheck", SmartLogic.getsModuleId(SMART_SAFETY));
 
         if(smartLogicWorking()){
-            EBM.log("Self Test was successful. No Errors.", SMART_SAFETY);
+            EBM.log("Selfcheck successful", SmartLogic.getsModuleId(SMART_SAFETY));
             return true;
         }
-        EBM.log("Self Test was not successful.", SMART_SAFETY);
+        EBM.log("Self Test was not successful.", SmartLogic.getsModuleId(SMART_SAFETY));
 
         return false;
     }
@@ -1007,7 +1012,7 @@ public class SafetyLogic {
 
     public static void main(String[] args) {
         SafetyLogic safety = SafetyLogic.getSmartSafety();
-        safety.slSelfCheck(null);
+        safety.slSelfCheck();
     }
 
     /**
@@ -1019,10 +1024,10 @@ public class SafetyLogic {
      */
     public void resetAllBlockings() {
         if(ConfigHandler.getInstance().isInTestMode) {
-            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", TRACK_SAFETY );
+            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", SmartLogic.getsModuleId(TRACK_SAFETY) );
             this.blockList = new ThreadedRepo<>();
         } else {
-            EBM.log("Reset only allowed in Test Mode", TRACK_SAFETY );
+            EBM.log("Reset only allowed in Test Mode", SmartLogic.getsModuleId(TRACK_SAFETY) );
         }
 
     }
@@ -1033,16 +1038,24 @@ public class SafetyLogic {
      * @param cdc
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
+        this.slSelfCheck();
         String checkSid = cdc.sId;
+        EBM.log("Check if Infrastructure is occupied", SmartLogic.getsModuleId(SMART_SAFETY) );
+
         for(List<Occupation> l :this.blockList.getAll()) {
             for(Occupation BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
+
                     sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;
                 }
             }
         }
+
         sendResponseDbdCommandToTms(true,cdc.sId ,null);
+        EBM.log("Send request" + "{uuid}" + "to Object Controller: " + cdc.toString()  , SmartLogic.getsModuleId(SMART_SAFETY) );
+        EBM.log("Object Controller has to be implemented", SmartLogic.getsModuleId(SMART_SAFETY) );
+
     }
 
     private void sendResponseDbdCommandToTms(boolean isSuccess, String sId, String sFailReason) {

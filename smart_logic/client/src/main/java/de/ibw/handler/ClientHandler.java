@@ -1,8 +1,7 @@
-package de.ibw.hanlder;
+package de.ibw.handler;
 
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.TmsMessage;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
 /**
