@@ -147,7 +147,7 @@ public class InfrastructureClient {
         if(socket == null){
             socket = new Socket(ip, port);
             socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
-            out = new PrintWriter(socket.getOutputStream(),true);
+            out = new PrintWriter(socket.getOutputStream());
         }
     }
 
@@ -171,6 +171,8 @@ public class InfrastructureClient {
         if (out != null) {
             synchronized (out) {
                 out.printf(format, params);
+                out.println();
+                out.flush();
 
                 if (!out.checkError()) {
                     //System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
