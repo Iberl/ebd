@@ -3,6 +3,8 @@ package ebd.trainData.util.availableAcceleration;
 import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.etcsPacketConverters.GradientProfileConverter;
 import ebd.globalUtils.spline.ForwardSpline;
+import ebd.globalUtils.spline.Knot;
+import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -95,7 +97,13 @@ public class AvailableAcceleration {
     @Subscribe
     public void updateGradientProfile(NewRouteDataVolatileEvent nrdve){
         RouteDataVolatile rdv = nrdve.routeDataVolatile;
-        this.accGradientProfile = GradientProfileConverter.packet21ToAccGP(rdv.getPacket_21(),rdv.getCurrentGradient());
+        Packet_21 packet21 = rdv.getPacket_21();
+        if(packet21 == null) {
+            ForwardSpline fs = new ForwardSpline(0);
+            fs.addKnotToCurve(new Knot(0d,rdv.getCurrentGradient() * GradientProfileConverter.GRAD_TO_ACC_FACTOR));
+            this.accGradientProfile = fs;
+        }
+        else this.accGradientProfile = GradientProfileConverter.packet21ToAccGP(packet21,rdv.getCurrentGradient());
     }
 
     /*

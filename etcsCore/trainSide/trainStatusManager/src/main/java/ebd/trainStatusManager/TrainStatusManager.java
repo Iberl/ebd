@@ -8,9 +8,11 @@ import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
+import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
@@ -219,15 +221,19 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
 
-    /* //TODO move to SpeedSupervisor or Distance Supervisor
+
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void reactToTripMode(ModeReportEvent mre){
         if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
 
-        //TODO fill with logic
-
+        //When in trip, delete route data.
+        Map<String, Object> changeMap = new HashMap<>();
+        changeMap.put("packet_15", null);
+        changeMap.put("packet_21", null);
+        changeMap.put("packet_27", null);
+        this.localEventBus.post(new RouteDataMultiChangeEvent("tsm","rd", changeMap));
     }
-    */
+
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
