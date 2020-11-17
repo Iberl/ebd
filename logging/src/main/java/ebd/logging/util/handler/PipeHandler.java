@@ -26,6 +26,7 @@ public class PipeHandler extends Handler {
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("[HH:mm:ss.SS]");
     private PipedOutputStream pos;
     private BufferedWriter out;
+    private boolean stopAccepting;
 
     /**
      * This Class extends {@link Handler}. It is registered by {@link ebd.logging.Logging}.
@@ -52,7 +53,7 @@ public class PipeHandler extends Handler {
      */
     @Override
     public void publish(LogRecord record) {
-        if(!record.getLevel().equals(Level.INFO) || !ch.allowGUI) {
+        if(!record.getLevel().equals(Level.INFO) || !ch.allowGUI || stopAccepting) {
             //TODO Connect Level with config.txt
             return;
         }
@@ -66,7 +67,7 @@ public class PipeHandler extends Handler {
             this.out.newLine();
             this.out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            if(!this.stopAccepting) e.printStackTrace();
         }
     }
 
@@ -82,11 +83,10 @@ public class PipeHandler extends Handler {
 
     @Override
     public void close() throws SecurityException {
-        flush();
+        this.stopAccepting = true;
         try {
+            this.pos.close();
             this.out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException ignored) {}
     }
 }

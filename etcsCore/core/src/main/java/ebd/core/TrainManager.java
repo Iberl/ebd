@@ -8,6 +8,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ public class TrainManager {
     public TrainManager() throws IOException {
         this.globalBus = EventBus.getDefault();
         this.trainMap = new HashMap<>();
+        Runtime.getRuntime().addShutdownHook(new Thread(this::forceRemoveAllTrains));
         addTrains();
     }
 
@@ -66,6 +68,29 @@ public class TrainManager {
         this.th.removeTrain(etcsID);
         TrainStatusManager tsm = this.trainMap.remove(etcsID);
         if(tsm != null && trainKill) tsm.kill();
+    }
+
+    /**
+     * If this returns true, the TrainManger is in a save state and the program can be closed.
+     */
+    public boolean isSystemExitUnlocked(){
+        return this.trainMap.isEmpty();
+    }
+
+    /**
+     * Forcefully removes all trains in a save way. This means every trains {@link TrainStatusManager#kill()} method is
+     * called. This kills the train thread and notifies the infrastructure server.
+     */
+    public void forceRemoveAllTrains(){
+        Set<Integer> trains = this.th.getEtcsIDs();
+        for(int etcsID : trains){
+            TrainStatusManager tsm = this.trainMap.get(etcsID);
+            tsm.kill();
+            tsm.join();
+            removeTrain(etcsID, false);
+        }
+
+
     }
 
     @Subscribe

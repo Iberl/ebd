@@ -11,20 +11,20 @@ import java.util.Set;
  */
 public class TrainsHandler {
 
-    public class Train {
+    public static class Train {
 
-        public int etcsID;
-        public int trainConfigID;
-        public int infrastructureID;
-        public String trainScheduleID;
-        public int rbcID;
+        public final int etcsID;
+        public final int trainConfigID;
+        public final int infrastructureID;
+        public final String trainScheduleID;
+        public final int rbcID;
 
-        public int startingBaliseGroup;
-        private boolean startingMovementDir;
-        public String startingTrack;
+        public final int startingBaliseGroup;
+        private final boolean startingMovementDir;
+        public final String startingTrack;
 
-        public boolean startingDirection;
-        private int startingIncrement;
+        public final boolean startingDirection;
+        private final int startingIncrement;
 
         /**
          * @param etcsID The etcs ID of the train
@@ -60,8 +60,8 @@ public class TrainsHandler {
         }
     }
 
-    private static TrainsHandler instance = new TrainsHandler();
-    private Map<Integer, Train> map;
+    private static final TrainsHandler instance = new TrainsHandler();
+    private final Map<Integer, Train> map;
 
     /**
      * Set to private to prevent initiation
@@ -118,7 +118,7 @@ public class TrainsHandler {
                 startingTrack,
                 startingDirection,
                 startingIncrement
-                ));
+        ));
     }
 
     /**

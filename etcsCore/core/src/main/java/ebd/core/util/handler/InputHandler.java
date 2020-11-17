@@ -6,6 +6,7 @@ import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Scanner;
 
@@ -15,38 +16,29 @@ public class InputHandler implements Runnable {
     private boolean shouldRun = true;
 
     private final Thread ihThread = new Thread(this);
+    private final Scanner scanner;
 
     public InputHandler(){
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
+        this.scanner = new Scanner(System.in);
         ihThread.start();
     }
 
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        while(shouldRun && scanner.hasNext()){
-            selectNext(scanner.next());
+        while(this.shouldRun && this.scanner.hasNext()){
+            selectNext(this.scanner.next());
         }
     }
 
     private void selectNext(String next) {
-        switch (next){
-            case "quit":
-                this.globalEventBus.post(new DisconnectEvent("szenario", "all"));
-                System.exit(0);
-                break;
-            case "load":
-                this.globalEventBus.post(new LoadEvent("szenario", "szenario"));
-                break;
-            case "pause":
-                this.globalEventBus.post(new PauseClockEvent("szenario", "all"));
-                break;
-            case "continue":
-                this.globalEventBus.post(new ContinueClockEvent("szenario", "all"));
-                break;
-            default:
-                System.out.println("Could not understand input");
+        switch (next) {
+            case "quit" -> this.globalEventBus.post(new DisconnectEvent("scenario", "all"));
+            case "load" -> this.globalEventBus.post(new LoadEvent("scenario", "scenario"));
+            case "pause" -> this.globalEventBus.post(new PauseClockEvent("scenario", "all"));
+            case "continue" -> this.globalEventBus.post(new ContinueClockEvent("scenario", "all"));
+            default -> System.out.println("Could not understand input");
         }
     }
 
@@ -62,16 +54,14 @@ public class InputHandler implements Runnable {
      * Reacts to a {@link DisconnectEvent} and stops the clock.
      * @param de a {@link DisconnectEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;
         }
-        synchronized (this){
-            this.notify();
-        }
-        globalEventBus.unregister(this);
+        this.globalEventBus.unregister(this);
         this.shouldRun = false;
+        this.scanner.close();
     }
 
     private boolean validTarget(String target) {
