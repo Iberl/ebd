@@ -15,6 +15,13 @@ public class ScenarioEventHandler {
         this.globalEventBus.register(this);
     }
 
+
+    /**
+     * Dummy to prevent warnings from {@link EventBus}
+     */
+    @Subscribe
+    public void dummyHandler(LogToGUIPipeEvent ghe){}
+
     /**
      * ExceptionHandler
      */
