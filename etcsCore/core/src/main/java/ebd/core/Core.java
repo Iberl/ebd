@@ -7,18 +7,13 @@ import ebd.core.util.handler.InputHandler;
 import ebd.core.util.server.ATOServer;
 import ebd.core.util.server.DMIServer;
 import ebd.core.util.server.GUIServer;
-import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
 import ebd.globalUtils.events.tmsDummy.TMSDummyStartEvent;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.logging.Logging;
-import ebd.messageLibrary.message.trackmessages.Message_24;
-import ebd.messageLibrary.packet.trackpackets.Packet_5;
-import ebd.messageSender.MessageSender;
 import ebd.radioBlockCenter.RadioBlockCenter;
 import ebd.core.util.handler.ScenarioEventHandler;
 import ebd.core.util.events.ScenarioExceptionEvent;
@@ -28,7 +23,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 
-import static ebd.messageLibrary.util.ETCSVariables.*;
 
 public class Core implements Runnable {
 
@@ -37,14 +31,12 @@ public class Core implements Runnable {
 
     private final EventBus globalEventBus;
     private final Thread szenarioThread = new Thread(this);
-    private ConfigHandler ch;
-    private TrainsHandler iFH;
-    private boolean endSequenceInProgress = false;
+    private final ConfigHandler ch;
+    private final TrainsHandler iFH;
 
     private final ScenarioEventHandler szenarioEventHandler;
     private final InputHandler inputHandler;
     private Logging logger;
-    private MessageSender messageSenderTrack;
 
     /*
     Sockets
@@ -85,11 +77,10 @@ public class Core implements Runnable {
             e.printStackTrace();
         }
 
-
         this.inputHandler = new InputHandler();
-        this.messageSenderTrack = new MessageSender(new EventBus(), "szenario", false);
 
         System.out.println("This is the virtual environment for the ETCS@EBD project");
+
         szenarioThread.start();
         if(ch.autoStart) load(new LoadEvent("scenario", "scenario"));
     }
@@ -151,12 +142,6 @@ public class Core implements Runnable {
         }
 
         if(!ConfigHandler.getInstance().useTMSServer) EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
-    }
-
-    private void endProgram() {
-        if(!this.tm.isSystemExitUnlocked()) this.tm.forceRemoveAllTrains();
-
-
     }
 
     private boolean validTarget(String target) {
