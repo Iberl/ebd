@@ -3,10 +3,11 @@ package de.ibw.main;
 import com.google.gson.Gson;
 import de.ibw.handler.ClientHandler;
 import de.ibw.tms.intf.SmartClient;
+import ebd.globalUtils.fileHandler.FileHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 /**
  * Client(TMS) zur SmartLogic
@@ -77,23 +78,27 @@ public class SmartLogicClient extends SmartClient {
                     SlClient.start();
                     continue;
             }
-            InputStream InStream = SmartLogicClient.class.getClassLoader().getResourceAsStream(jsonStringOrFileName);
-                    if (InStream == null) {
-                        System.out.println("Json-File not found");
+            String jsonString = null;
+            try {
+                FileReader jsonReaded = FileHandler.readConfigurationFile("slClientCmd/" +  jsonStringOrFileName);
+                try {
+                    jsonString = convertInputStreamToString(jsonReaded);
+                    if(jsonString.isEmpty()) {
+                        System.out.println("Input is no json or json-Resource-File");
                         continue;
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                System.out.println("Json-File not found");
+                continue;
+            }
 
-                    String jsonString = null;
 
-                    try {
-                        jsonString = convertInputStreamToString(InStream);
-                        if(jsonString.isEmpty()) {
-                            System.out.println("Input is no json or json-Resource-File");
-                            continue;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+
+
+
                     if (isJSONValid(jsonString)) {
 
                             String finalJsonString = jsonString;
@@ -124,17 +129,14 @@ public class SmartLogicClient extends SmartClient {
 
 
 
-    private static String convertInputStreamToString(InputStream inputStream)
+    private static String convertInputStreamToString(FileReader input)
             throws IOException {
 
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-            result.write(buffer, 0, length);
-        }
+        BufferedReader in = new BufferedReader(input);
+        StringBuilder sb = new StringBuilder();
+        return in.lines().collect(Collectors.joining());
 
-        return result.toString(StandardCharsets.UTF_8.name());
+
 
     }
 

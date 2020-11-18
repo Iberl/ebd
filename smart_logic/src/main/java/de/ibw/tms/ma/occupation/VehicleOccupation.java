@@ -46,7 +46,7 @@ public class VehicleOccupation extends Occupation {
         Balise B = Balise.baliseByNid_bg.getModel(Pos.nid_lrbg);
         RouteDataSL RDSL = PositionModul.getInstance().getRouteOfNidEngine(TI.nid_engine);
         if(RDSL == null) {
-            handleVehicleWithoutMa(TI, Pos, B);
+            //handleVehicleWithoutMa(TI, Pos, B);
         } else {
 
         }

@@ -424,11 +424,12 @@ public class UtilFunction {
      */
     public static double generateIntrinsic(double dTopLength, Occupation.BLOCK_Q_SCALE scale, int iDistance) {
         if(iDistance + 1 >= dTopLength) return 1;
+        BigDecimal dTop = new BigDecimal(dTopLength);
         BigDecimal dDistance = new BigDecimal(iDistance);
         BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
         BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));
-        if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dDistance) <= 0) {
-           return dPartDistance.divide(new BigDecimal(dTopLength)).doubleValue();
+        if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dTop) <= 0) {
+           return dPartDistance.divide(dTop).doubleValue();
         }
         throw new InvalidParameterException("Subdistance has to be larger than 0 but smaller than whole Edgelength");
     }
