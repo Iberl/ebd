@@ -33,8 +33,7 @@ public class Logging{
         File propertyFile = new File("configuration/logging.properties");
         if(!propertyFile.exists()){
             try {
-                propertyFile = ebd.globalUtils.fileHandler.FileHandler.getFileFromConfigurationFolderOrDefault("logging.properties",
-                        "logging.properties");
+                propertyFile = ebd.globalUtils.fileHandler.FileHandler.getFileFromConfigurationFolder("logging.properties");
             } catch (IOException e) {
                 System.out.println("Could not open logging.properties File.");
                 e.printStackTrace();

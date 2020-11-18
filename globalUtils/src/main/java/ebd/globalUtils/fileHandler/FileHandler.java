@@ -13,6 +13,10 @@ public class FileHandler {
         return new FileReader(getFileFromConfigurationFolderOrDefault(filepath,defaultResource));
     }
 
+    public static File getFileFromConfigurationFolder(String filepath) throws IOException {
+        return getFileFromConfigurationFolderOrDefault(filepath, filepath);
+    }
+
     public static File getFileFromConfigurationFolderOrDefault(String filepath, String defaultResource) throws IOException {
         // does the path exist: configuration/scenario/
         File file = new File("configuration/" + filepath);
