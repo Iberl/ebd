@@ -8,10 +8,10 @@ import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.enums.*;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
 import ebd.globalUtils.events.drivingDynamics.DDHaltEvent;
-import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
+import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
@@ -24,7 +24,6 @@ import ebd.globalUtils.spline.Spline;
 import ebd.routeData.RouteDataVolatile;
 import ebd.routeData.util.events.NewRouteDataVolatileEvent;
 import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
-import ebd.globalUtils.events.speedDistanceSupervision.SsmReportEvent;
 import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -38,7 +37,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Driving Dynamics simulates the physical movement of the train. It uses a {@link DrivingStrategy} to represent a driver.
@@ -72,6 +73,7 @@ public class DrivingDynamics {
 
     private double profileTargetSpeed = 0d;
     private double breakModifierForRSM = 1;
+    private boolean inRSMRecovery = false;
 
     private int cycleCount;
     private final int cylceCountMax; //TODO Connect to Config
@@ -139,10 +141,6 @@ public class DrivingDynamics {
         If driving dynamics is locked, nothing will be done.
          */
         if(this.dynamicState == null || (this.tripProfile == null && !this.atoServerConnector.isAtoOn()) || this.currentMode == ETCSMode.NO_MODE){
-            String source = "dd;T=" + trainDataVolatile.getEtcsID();
-            EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", 0, 0, 0, 0,
-                    SpeedInterventionLevel.NO_INTERVENTION, SpeedSupervisionState.CEILING_SPEED_SUPERVISION,
-                    0, 0, 0, 0, 0));
             return;
         }
 
@@ -194,20 +192,13 @@ public class DrivingDynamics {
         updateTrainDataVolatile();
 
         /*
-        Update DMI
-         */
-        updateDMI();
-
-        /*
         Informs ATO if appropriate
          */
         if(this.atoOn){
             this.atoServerConnector.sendDynamicStateToATO(this.dynamicState);
         }
-
-        cycleCount++;
-        if(this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
-            cycleCount = 0;
+        if(++this.cycleCount >= this.cylceCountMax || (this.dynamicState.getSpeed() < 1 && this.dynamicState.getSpeed() > 0)){
+            cycleCount = 1;
             sendToLogEventDynamicState();
         }
     }
@@ -253,10 +244,10 @@ public class DrivingDynamics {
     /**
      * This method updates the trip profile. This can become necessary should a new one become available. This does
      * <b>not</b> require the train to be at standstill.
-     * @param utpe {@link DDUpdateTripProfileEvent}
+     * @param utpe {@link NewTripProfileEvent}
      */
-    @Subscribe
-    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void updateTripProfile(NewTripProfileEvent utpe){
         if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }
@@ -384,22 +375,26 @@ public class DrivingDynamics {
                 calculateModifier();
                 /*
                 This control flow is necessary in case the train emergency breaks into RSM.
-                This control flow allows the train accelerate again until the stopping region is reached.
+                It allows the train to accelerate again until the stopping region is reached.
                 */
                 if (this.currentSil == SpeedInterventionLevel.INDICATION) {
-                    if (!shouldHalt && this.dynamicState.getSpeed() == 0) {
-                        sendToLogEventSpeedSupervision(MovementState.ACCELERATING);
-                        calculateModifier();
-                        return new AccelerationAction(this.localEventBus, 1);
-                    }
-                    if (!shouldHalt && this.dynamicState.getSpeed() <= 1) {
-                        sendToLogEventSpeedSupervision(MovementState.CRUISE);
-                        calculateModifier();
-                        return new CruiseAction(this.localEventBus);
-                    } else {
-                        sendToLogEventSpeedSupervision(MovementState.SERVICE_BREAKING);
+                    if(this.breakModifierForRSM > 0){
+                        this.inRSMRecovery = false;
                         return new BreakAction(this.localEventBus, this.breakModifierForRSM, BreakMode.SERVICE_BREAKING);
                     }
+                    else if ((this.dynamicState.getSpeed() > 0 && !this.inRSMRecovery) || this.dynamicState.getSpeed() > 5) {
+                        this.inRSMRecovery = false;
+                        return new CruiseAction(this.localEventBus);
+                    }
+                    else if (!shouldHalt){
+                        this.inRSMRecovery = true;
+                        return new AccelerationAction(this.localEventBus, 1);
+                    }
+                    else {
+                        return new HaltAction(this.localEventBus);
+                    }
+
+
                 } else {
                     sendToLogEventSpeedSupervision(MovementState.EMERGENCY_BREAKING);
                     return new BreakAction(this.localEventBus, 1, BreakMode.EMERGENCY_BREAKING);
@@ -421,26 +416,6 @@ public class DrivingDynamics {
         nameToValue.put("curTripSectionDistance", this.dynamicState.getDistanceToStartOfProfile());
         nameToValue.put("curTripTime", this.dynamicState.getTime());
         this.localEventBus.post(new TrainDataMultiChangeEvent("dd", this.tdTarget, nameToValue));
-    }
-
-    /**
-     * This method gathers the new information from dynamic state, adds data saved in {@link TrainDataVolatile}
-     * and send these to the DMI
-     */
-    private void updateDMI(){
-        double speed = this.dynamicState.getSpeed();
-        double targetSpeed = this.trainDataVolatile.getTargetSpeed();
-        double distanceToDrive = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile();
-        double currentIndSpeed = this.trainDataVolatile.getCurrentIndicationSpeed();
-        double currentPermSpeed = this.trainDataVolatile.getCurrentMaximumSpeed();
-        double currentWarnSpeed = this.trainDataVolatile.getCurrentWarningSpeed();
-        double currentIntervSpeed = this.trainDataVolatile.getCurrentServiceIntervention2Speed();
-        double curApplReleaseSpeed = this.trainDataVolatile.getCurrentApplicableReleaseSpeed();
-
-        String source = "dd;T=" + this.etcsTrainID;
-        EventBus.getDefault().post(new DMIUpdateEvent(source, "dmi", speed, targetSpeed, (int)distanceToDrive,
-                curApplReleaseSpeed, this.currentSil, this.currentSsState, currentIndSpeed,
-                currentPermSpeed, currentWarnSpeed, currentIntervSpeed, this.dynamicState.getTripDistance()));
     }
 
     /**
@@ -535,7 +510,7 @@ public class DrivingDynamics {
     /**
      * Takes a spline and saves it to a file
      */
-    private void saveTripProfileToFile(DDUpdateTripProfileEvent ddutpe) {
+    private void saveTripProfileToFile(NewTripProfileEvent ddutpe) {
         Spline tp = ddutpe.tripProfile;
         LocalDateTime ldt = LocalDateTime.now();
         String timeString =  DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(ldt);

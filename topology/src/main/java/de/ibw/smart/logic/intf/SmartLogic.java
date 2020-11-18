@@ -3,21 +3,21 @@ package de.ibw.smart.logic.intf;
 import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-
 import de.ibw.tms.plan.elements.model.PlanData;
 import ebd.ConfigHandler;
+import ebd.core.util.server.GUIServer;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.payload.Payload_15;
-import ebd.rbc_tms.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import ebd.core.util.server.GUIServer;
 
-import javax.swing.*;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 

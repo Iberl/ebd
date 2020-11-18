@@ -1,9 +1,9 @@
 package ebd.drivingDynamics.util.conditions.abstracts;
 
 
-import org.json.simple.JSONObject;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import org.greenrobot.eventbus.EventBus;
+import org.json.simple.JSONObject;
 
 public abstract class RelativeHysteresisCondition extends CurveBasedCondition{
 

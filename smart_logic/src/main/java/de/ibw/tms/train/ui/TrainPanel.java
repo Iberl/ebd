@@ -6,7 +6,6 @@ import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 /**
  * Das Panel beinhaltet die Kartenansicht einer neuen MA Erstellung.
  * Und auch das Panel darunter, dass Zugdaten verwaltet.

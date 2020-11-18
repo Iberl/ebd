@@ -8,10 +8,12 @@ import ebd.drivingDynamics.DrivingDynamics;
 import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.configHandler.TrainsHandler;
+import ebd.globalUtils.enums.ETCSMode;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.logger.ToLogEvent;
-import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.messageSender.SendETCSMessageEvent;
+import ebd.globalUtils.events.routeData.RouteDataMultiChangeEvent;
+import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataMultiChangeEvent;
 import ebd.globalUtils.events.trainStatusMananger.*;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
@@ -19,7 +21,7 @@ import ebd.globalUtils.events.util.NotCausedByAEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.position.Position;
-import ebd.globalUtils.szenario.RemoveTrainEvent;
+import ebd.globalUtils.events.scenario.RemoveTrainEvent;
 import ebd.logging.Logging;
 import ebd.messageLibrary.message.trainmessages.Message_150;
 import ebd.messageLibrary.message.trainmessages.Message_155;
@@ -29,6 +31,7 @@ import ebd.messageReceiver.MessageReceiver;
 import ebd.messageSender.MessageSender;
 import ebd.routeData.RouteData;
 import ebd.routeData.RouteDataVolatile;
+import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
 import ebd.speedAndDistanceSupervisionModule.SpeedSupervisor;
 import ebd.trainData.TrainData;
 import ebd.trainStatusManager.util.Clock;
@@ -37,9 +40,9 @@ import ebd.trainStatusManager.util.handlers.ExceptionHandler;
 import ebd.trainStatusManager.util.handlers.GlobalHandler;
 import ebd.trainStatusManager.util.handlers.MessageHandler;
 import ebd.trainStatusManager.util.handlers.TelegramHandler;
-import ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector;
+import ebd.trainStatusManager.util.socketConnectors.DMIServerConnector;
+import ebd.trainStatusManager.util.socketConnectors.InfrastructureClientConnector;
 import ebd.trainStatusManager.util.supervisors.*;
-import ebd.speedAndDistanceSupervisionModule.DistanceSupervisor;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -50,7 +53,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class TrainStatusManager implements Runnable {
 
@@ -93,6 +98,7 @@ public class TrainStatusManager implements Runnable {
     private PositionReportSupervisor positionReportSupervisor;
     private TrackSupervisor trackSupervisor;
     private SpeedUpdateSupervisor speedUpdateSupervisor;
+    private DMIServerConnector dmiServerConnector;
     private BreakingCurveCalculator breakingCurveCalculator;
     private DrivingDynamics drivingDynamics;
 
@@ -215,15 +221,19 @@ public class TrainStatusManager implements Runnable {
         this.localEventBus.post(new NewPositionEvent("tsm","all", newPos));
     }
 
-    /* //TODO move to SpeedSupervisor or Distance Supervisor
+
     @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void reactToTripMode(ModeReportEvent mre){
         if(!validTarget(mre.target) || mre.curMode != ETCSMode.TRIP) return;
 
-        //TODO fill with logic
-
+        //When in trip, delete route data.
+        Map<String, Object> changeMap = new HashMap<>();
+        changeMap.put("packet_15", null);
+        changeMap.put("packet_21", null);
+        changeMap.put("packet_27", null);
+        this.localEventBus.post(new RouteDataMultiChangeEvent("tsm","rd", changeMap));
     }
-    */
+
 
     @Subscribe
     public void pauseClock(PauseClockEvent pce){
@@ -321,8 +331,6 @@ public class TrainStatusManager implements Runnable {
          */
 
         this.routeData = new RouteData(this.localEventBus);
-
-
         this.trainData = new TrainData(this.localEventBus, this.etcsTrainID, trainConfigID, infrastructureID);
 
         this.messageReceiver = new MessageReceiver(this.localEventBus,String.valueOf(this.etcsTrainID),"tsm", true);
@@ -334,6 +342,7 @@ public class TrainStatusManager implements Runnable {
         this.positionReportSupervisor = new PositionReportSupervisor(this.localEventBus,String.valueOf(this.etcsTrainID), String.valueOf(this.rbcID));
         this.trackSupervisor = new TrackSupervisor(this.localEventBus);
         this.speedUpdateSupervisor = new SpeedUpdateSupervisor(this.localEventBus);
+        this.dmiServerConnector = new DMIServerConnector(this.localEventBus);
         this.breakingCurveCalculator = new BreakingCurveCalculator(this.localEventBus);
         this.drivingDynamics = new DrivingDynamics(this.localEventBus, this.etcsTrainID);
 

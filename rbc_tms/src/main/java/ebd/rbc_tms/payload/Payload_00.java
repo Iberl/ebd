@@ -2,8 +2,8 @@ package ebd.rbc_tms.payload;
 
 import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.util.Constants;
-import ebd.rbc_tms.util.annotations.CanBeNull;
 import ebd.rbc_tms.util.TrainInfo;
+import ebd.rbc_tms.util.annotations.CanBeNull;
 
 import java.util.Objects;
 

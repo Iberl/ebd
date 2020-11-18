@@ -3,15 +3,16 @@ package ebd.baliseTelegramGenerator;
 import ebd.messageLibrary.packet.TrackPacket;
 import ebd.messageLibrary.packet.trackpackets.Packet_0;
 import ebd.messageLibrary.util.ETCSVariables;
-import static ebd.messageLibrary.util.ETCSVariables.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static ebd.messageLibrary.util.ETCSVariables.*;
+
 public class Balise {
 
-    // x Modell of a Eurobalise
+    // x Model of a Eurobalise
     // x Holds simple information contained in just one balise
 
 	//TODO Q_UPDOWN

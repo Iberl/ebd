@@ -9,9 +9,8 @@
 ###### Strings
 ######
 pathToDriverStrategyJson = StrictDrivingStrategy.json
-
 pathToInitFile = initFile.txt
-pathToSzenarioJSON = szenarioAB.json
+nameOfScenarioFile = scenario.txt
 
 ipToTrainConfigurator = 127.0.0.1
 portOfTrainConfigurator = 8080
@@ -52,7 +51,7 @@ useTrainConfiguratorTool = false
 useInfrastructureServer = false
 
 # If true, the program will try to connect to the Train Manager System program.
-useTSMServer = false
+useTMSServer = false
 
 # If true, GUIs can connect to the program.
 allowGUI = true
@@ -192,7 +191,8 @@ d_LocCon = 1
 ######
 
 # TMS ID (Temporary)
-registeredTMS = 1
+tmsId = 1
+rbcId = 1
 
 ######
 ###### Booleans (either " = true" or " = false")

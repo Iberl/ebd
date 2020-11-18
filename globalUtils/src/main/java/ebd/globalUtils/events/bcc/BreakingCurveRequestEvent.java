@@ -1,8 +1,5 @@
 package ebd.globalUtils.events.bcc;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.position.Position;
 import ebd.globalUtils.spline.ForwardSpline;
@@ -11,6 +8,9 @@ import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
 import ebd.messageLibrary.util.ETCSVariables;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * With this Event, the TSM can request BCC to calculate a new BreakingCurve. It is the responsibility of the thrower to check for the integrity of the provided Information.<br>

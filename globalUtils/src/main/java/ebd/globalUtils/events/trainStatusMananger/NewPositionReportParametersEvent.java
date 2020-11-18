@@ -2,8 +2,6 @@ package ebd.globalUtils.events.trainStatusMananger;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class NewPositionReportParametersEvent extends NormalEvent {
     /**
      * Constructs an Event

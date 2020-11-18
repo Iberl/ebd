@@ -6,7 +6,6 @@ import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-
 import de.ibw.tms.trackplan.controller.RouteController;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.UtilFunction;

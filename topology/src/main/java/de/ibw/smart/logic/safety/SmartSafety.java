@@ -1,7 +1,6 @@
 package de.ibw.smart.logic.safety;
 
 
-
 import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.BlockedArea;
@@ -16,6 +15,7 @@ import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.ConfigHandler;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.MA;
@@ -26,11 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-
 import java.io.IOException;
-
-
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;

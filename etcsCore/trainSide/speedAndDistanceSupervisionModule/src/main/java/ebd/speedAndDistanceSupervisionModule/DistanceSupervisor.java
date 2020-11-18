@@ -85,7 +85,7 @@ public class DistanceSupervisor {
         if(estimatedDistanceToEMA <= ch.targetReachedDistance && curSpeed > 0){
             this.localBus.post(new DDHaltEvent(this.eventSource, "dd"));
         }
-        else if(estimatedDistanceToEMA <= ch.targetReachedDistance && curSpeed == 0){
+        else if((estimatedDistanceToEMA <= ch.targetReachedDistance || estimatedDistanceToEMA <= 0) && curSpeed == 0){
             if(this.routeDataVolatile.isLastMABeforeEndOfMission()){
                 sendEndOfMission();
             }

@@ -1,8 +1,8 @@
 package ebd.globalUtils.spline;
 
-import java.util.ArrayList;
-
 import ebd.globalUtils.spline.util.KnotCoefficientException;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -121,8 +121,8 @@ public class ForwardSpline extends Spline {
 	 */
 	
 	public Double getFloorKnotXValue(Double xValue) throws IndexOutOfBoundsException{
-		if (curve.floorKey(xValue) == null) {			
-
+		if (curve.floorKey(xValue) == null) {
+			System.out.println("Curve: " + curve.keySet());
 			throw new IndexOutOfBoundsException(String.format("Input value (%f) is lower then the lowest point (%f) in this curve",xValue,curve.firstKey()));
 		}
 		return curve.floorKey(xValue);

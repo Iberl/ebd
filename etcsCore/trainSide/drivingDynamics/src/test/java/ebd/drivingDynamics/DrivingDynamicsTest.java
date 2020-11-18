@@ -3,7 +3,7 @@ package ebd.drivingDynamics;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
 import ebd.globalUtils.events.drivingDynamics.DDUnlockEvent;
-import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
@@ -18,11 +18,8 @@ import ebd.trainData.util.availableAcceleration.AvailableAcceleration;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 class DrivingDynamicsTest {
@@ -59,7 +56,7 @@ class DrivingDynamicsTest {
         breakingCurve.addKnotToCurve(new Knot(1000d,new double[]{0d,-0.5,-0.00001}));
 
         DrivingDynamics drivingDynamics = new DrivingDynamics(eb, 192);
-        eb.post(new DDUpdateTripProfileEvent("test", "dd", breakingCurve, 0));
+        eb.post(new NewTripProfileEvent("test", "dd", breakingCurve, 0));
         Thread clockThread = new Thread(new Clock(eb));
         clockThread.start();
         Thread.sleep(5000);

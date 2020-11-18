@@ -1,16 +1,16 @@
 package ebd.breakingCurveCalculator.utils;
 
-import java.util.*;
-
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
-import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;
 import ebd.messageLibrary.packet.trackpackets.Packet_65;
+
+import java.util.*;
 
 /**
  * This class calculates and represents a static speed profile. It is based on ForwardSpline from the Spline Module.
@@ -384,6 +384,22 @@ public class StaticSpeedProfil extends ForwardSpline{
 			addSplineToCurve(slice);
 		}
 	}
+
+	/**
+	 * @param offset Offset of current trip section to trip start.
+	 * @return A String representing the {@link StaticSpeedProfil}, formatted for use with DMI.
+	 */
+	public String toDMIString(double offset){
+		StringBuilder sb = new StringBuilder("sp ");
+		Iterator<Double> iter = this.curve.keySet().iterator();
+		while (iter.hasNext()){
+			double key = iter.next();
+			sb.append(key).append(",").append(this.curve.get(key).get(0) + offset);
+			if(iter.hasNext()) sb.append(";");
+		}
+		return sb.toString();
+	}
+
 
 	/**
 	 * @return the emergency ceiling speed for the ceiling supervision limits in [m/s]

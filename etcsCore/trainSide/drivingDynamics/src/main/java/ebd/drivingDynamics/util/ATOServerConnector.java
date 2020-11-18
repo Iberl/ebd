@@ -2,12 +2,12 @@ package ebd.drivingDynamics.util;
 
 import ebd.drivingDynamics.DynamicState;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.events.core.ATOEndEvent;
 import ebd.globalUtils.events.core.ATOStartEvent;
 import ebd.globalUtils.events.core.ATOToTrainUpdateEvent;
 import ebd.globalUtils.events.core.TrainToAtoUpdateEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
-import ebd.globalUtils.enums.MovementState;
 import ebd.trainData.TrainDataPerma;
 import ebd.trainData.util.events.NewTrainDataPermaEvent;
 import org.greenrobot.eventbus.EventBus;
@@ -68,10 +68,10 @@ public class ATOServerConnector {
         try{
             this.curMovementState = MovementState.valueOf(split[1]);
             if(split.length > 2) this.curModifier = Double.parseDouble(split[2]);
+            else this.curModifier = 1;
         }
         catch (ClassCastException | NumberFormatException e){
             this.globalEventBus.post(ddee);
-            return;
         }
     }
 
@@ -81,11 +81,11 @@ public class ATOServerConnector {
      */
     public void sendDynamicStateToATO(DynamicState dynamicState){
         StringBuilder sb = new StringBuilder();
-        sb.append("TripTime=").append(dynamicState.getTime()).append(" ");
+        sb.append("tripTime=").append(dynamicState.getTime()).append(" ");
         sb.append(dynamicState.getPosition().toString()).append(" ");
-        sb.append("SpeedInMS=").append(String.format("%.2f", dynamicState.getSpeed())).append(" ");
-        sb.append("AccInMS^2=").append(String.format("%.2f", dynamicState.getAcceleration())).append(" ");
-        sb.append("MovementState=").append(dynamicState.getMovementState());
+        sb.append("speedInMS=").append(String.format("%.2f", dynamicState.getSpeed())).append(" ");
+        sb.append("accInMS^2=").append(String.format("%.2f", dynamicState.getAcceleration())).append(" ");
+        sb.append("movementState=").append(dynamicState.getMovementState());
         sendToATO(sb.toString());
     }
 
@@ -94,7 +94,7 @@ public class ATOServerConnector {
      */
     private void sendTrainJSONToATO(){
         JSONObject jsonObject = trainDataPerma.getJsonObject();
-        sendToATO(jsonObject.toString());
+        sendToATO("trainData=" + jsonObject.toString());
     }
 
     /**

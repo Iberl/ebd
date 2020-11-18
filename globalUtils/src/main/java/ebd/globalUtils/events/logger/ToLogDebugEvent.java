@@ -2,8 +2,6 @@ package ebd.globalUtils.events.logger;
 
 import ebd.globalUtils.events.NormalEvent;
 
-import java.util.List;
-
 public class ToLogDebugEvent extends NormalEvent {
         public String msg;
 

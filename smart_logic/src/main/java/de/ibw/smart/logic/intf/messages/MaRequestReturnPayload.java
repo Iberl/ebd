@@ -3,7 +3,6 @@ package de.ibw.smart.logic.intf.messages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.util.ArrayList;
 import java.util.UUID;

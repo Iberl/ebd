@@ -5,8 +5,6 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.Arrays;
-
 public class Clock implements Runnable {
 
     private EventBus eventBus;
@@ -22,7 +20,7 @@ public class Clock implements Runnable {
         while(run){
             try {
                 Thread.sleep(2000);
-                eventBus.post(new ClockTickEvent("clock", "all", 2));
+                eventBus.post(new ClockTickEvent("clock", "all", 2, 0));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

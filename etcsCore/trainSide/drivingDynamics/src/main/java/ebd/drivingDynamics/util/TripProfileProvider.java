@@ -2,9 +2,9 @@ package ebd.drivingDynamics.util;
 
 import ebd.breakingCurveCalculator.BreakingCurve;
 import ebd.breakingCurveCalculator.utils.events.NewBreakingCurveEvent;
-import ebd.globalUtils.enums.CurveType;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.enums.CurveType;
+import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.location.InitalLocation;
 import ebd.globalUtils.location.Location;
 import ebd.globalUtils.spline.BackwardSpline;
@@ -57,9 +57,8 @@ public class TripProfileProvider {
             getProfileFromBreakingCurveGroup(nbce.emergencyBreakingCurve, nbce.serviceBreakingCurve);
         }
 
-
-        this.localEventBus.post(new DDUpdateTripProfileEvent("dd",
-                                "dd",
+        this.localEventBus.post(new NewTripProfileEvent("dd",
+                                "all",
                                 this.profile,
                                 refLocation.getId()));
     }

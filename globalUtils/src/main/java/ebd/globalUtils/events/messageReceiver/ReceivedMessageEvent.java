@@ -3,8 +3,6 @@ package ebd.globalUtils.events.messageReceiver;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.messageLibrary.message.Message;
 
-import java.util.List;
-
 /**
  * Event send to TSM by the Message Receiver containing an received Message
  *

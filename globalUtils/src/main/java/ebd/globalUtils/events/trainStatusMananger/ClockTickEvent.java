@@ -1,9 +1,6 @@
 package ebd.globalUtils.events.trainStatusMananger;
 
-import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.NormalEvent;
-
-import java.util.List;
 
 /**
  * This event signals a clock tick.
@@ -18,7 +15,12 @@ public class ClockTickEvent extends NormalEvent {
      * Time difference between this ClockTickEvent and the last ClockTickEvent in [s],
      * modified by the time acceleration factor {@link ebd.globalUtils.configHandler.ConfigHandler#timeAccFactor}.
      */
-    public double deltaT;
+    public final double deltaT;
+
+    /**
+     * A running count of clock ticks
+     */
+    public final int counter;
 
     /**
      * Constructs an Event
@@ -28,10 +30,13 @@ public class ClockTickEvent extends NormalEvent {
      * @param target ID from from the target module or 'all' if more then one target should be reached.
      *
      * @param deltaT Time difference between this ClockTickEvent and the last ClockTickEvent in [s]
+     *
+     * @param counter Running count of the clock tick
      */
-    public ClockTickEvent(String source, String target, double deltaT) {
+    public ClockTickEvent(String source, String target, double deltaT, int counter) {
         super(source, target);
         this.deltaT = deltaT;
+        this.counter = counter;
     }
 
 }

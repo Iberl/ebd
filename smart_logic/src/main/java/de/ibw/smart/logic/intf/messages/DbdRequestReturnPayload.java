@@ -4,9 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
-import java.util.ArrayList;
-import java.util.UUID;
-
 /**
  * Diese Klasse stellt eine Anwort des SL an das TMS f&uuml;r eine DBD-Anforderung dar.
  *

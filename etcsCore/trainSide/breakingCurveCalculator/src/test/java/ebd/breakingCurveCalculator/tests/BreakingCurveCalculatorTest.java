@@ -1,15 +1,10 @@
 package ebd.breakingCurveCalculator.tests;
 
-import org.greenrobot.eventbus.EventBus;
-
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.globalUtils.events.bcc.BreakingCurveLimitedRequestEvent;
 import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
+import org.greenrobot.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * @author Lars Schulze-Falck

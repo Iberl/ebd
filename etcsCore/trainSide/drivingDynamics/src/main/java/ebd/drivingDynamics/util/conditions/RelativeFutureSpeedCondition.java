@@ -7,7 +7,7 @@ import ebd.drivingDynamics.util.conditions.helper.ComparisonParser;
 import ebd.drivingDynamics.util.events.DrivingDynamicsExceptionEvent;
 import ebd.drivingDynamics.util.exceptions.DDBadDataException;
 import ebd.globalUtils.enums.CurveType;
-import ebd.globalUtils.events.drivingDynamics.DDUpdateTripProfileEvent;
+import ebd.globalUtils.events.drivingDynamics.NewTripProfileEvent;
 import ebd.globalUtils.spline.BackwardSpline;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Spline;
@@ -104,10 +104,10 @@ public class RelativeFutureSpeedCondition extends CurveBasedCondition {
     /**
      * This method updates the trip profile. This can become necessary should a new one become available. This does
      * <b>not</b> require the train to be at standstill.
-     * @param utpe {@link DDUpdateTripProfileEvent}
+     * @param utpe {@link NewTripProfileEvent}
      */
     @Subscribe
-    public void updateTripProfile(DDUpdateTripProfileEvent utpe){
+    public void updateTripProfile(NewTripProfileEvent utpe){
         if(!(utpe.target.contains("dd") || utpe.target.contains("all"))){
             return;
         }

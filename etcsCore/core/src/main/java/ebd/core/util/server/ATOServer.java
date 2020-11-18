@@ -1,19 +1,13 @@
 package ebd.core.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.events.dmi.DMIUpdateEvent;
-import org.greenrobot.eventbus.EventBus;
+import ebd.globalUtils.events.DisconnectEvent;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ATOServer implements Runnable {
 
@@ -27,6 +21,9 @@ public class ATOServer implements Runnable {
     public ATOServer() throws IOException {
         this.atoServerThread = new Thread(this);
         this.serverSocket = new ServerSocket(Integer.parseInt(ConfigHandler.getInstance().atoServerPort));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+
         this.atoServerThread.start();
     }
 
@@ -49,7 +46,7 @@ public class ATOServer implements Runnable {
                     client.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace(); //TODO Error Handeling
+                if(running) e.printStackTrace(); //We only care about exceptions that occur while the server should run
             }
         }
         if(clientWorker != null && this.clientWorker.isAlive()){
@@ -62,6 +59,10 @@ public class ATOServer implements Runnable {
     }
 
     public void stop() {
-        this.running = false;
+        try {
+            this.running = false;
+            this.serverSocket.close();
+            if(this.clientWorker != null) this.clientWorker.stop();
+        } catch (IOException ignored) {}
     }
 }

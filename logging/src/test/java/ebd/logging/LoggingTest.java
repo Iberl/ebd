@@ -9,7 +9,6 @@ import ebd.globalUtils.events.trainStatusMananger.ClockTickEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class LoggingTest{
 
@@ -91,7 +90,7 @@ public class LoggingTest{
      */
     private static ClockTickEvent generateClockTickEvent(){
         clockTickTarget = "clockTickTarget1";
-        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTarget, 0);
+        clockTickEvent = new ClockTickEvent("source of ClockTickEvent", clockTickTarget, 0, 0);
         return clockTickEvent;
     }
 

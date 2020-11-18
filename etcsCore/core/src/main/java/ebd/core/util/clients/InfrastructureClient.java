@@ -2,10 +2,10 @@ package ebd.core.util.clients;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.DisconnectEvent;
-import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.core.StopTrainEvent;
 import ebd.globalUtils.events.core.TerminateTrainEvent;
 import ebd.globalUtils.events.core.UpdatingInfrastructureEvent;
+import ebd.globalUtils.events.logger.ToLogDebugEvent;
 import ebd.globalUtils.events.trainStatusMananger.ChangeInfrastructureDirectionEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -15,11 +15,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.StandardSocketOptions;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is a intermediary between {@link ebd.trainStatusManager.util.socketClientsConnectors.InfrastructureClientConnector}
+ * This class is a intermediary between {@link ebd.trainStatusManager.util.socketConnectors.InfrastructureClientConnector}
  * and the EBD infrastructure server. It listens to {@link UpdatingInfrastructureEvent} and sends the content over a
  * socket connection to the server.
  */
@@ -31,7 +32,10 @@ public class InfrastructureClient {
     private Socket socket;
     private PrintWriter out;
 
-    private final List<Integer> registeredTrains = new ArrayList();
+    /**
+     * Contains a list of infrastructure IDs
+     */
+    private final List<Integer> registeredTrains = new ArrayList<>();
 
     /**
      * If simulated, do not connect to any servers
@@ -64,24 +68,13 @@ public class InfrastructureClient {
         }
         int trainID = uie.infrastructureID;
 
-        if(!registeredTrains.contains(trainID)){
-            registeredTrains.add(trainID);
+        if(!this.registeredTrains.contains(trainID)){
+            this.registeredTrains.add(trainID);
             init(trainID);
         }
-        if(uie.speedInKmh > 0 && uie.speedInKmh < 10){
-            /*
-            Necessary, because the infrastructure logic has a quirk, which sets the train power level to 0
-            from 0 to 10 km/h and starts with two at 10 km/h.
-            */
-            go(trainID, 1);
-            String msg = "Send: go " + trainID + " " + "1";
-            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
-        }
-        else {
-            gok(trainID, uie.speedInKmh);
-            String msg = "Send: gok " + trainID + " " + uie.speedInKmh;
-            this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
-        }
+        gok(trainID, uie.speedInKmh);
+        String msg = "Send: gok " + trainID + " " + uie.speedInKmh;
+        this.globalEventBus.post(new ToLogDebugEvent("ic", "log", msg));
     }
 
     @Subscribe
@@ -131,10 +124,15 @@ public class InfrastructureClient {
     /**
      * Listens to {@link DisconnectEvent} and disconnect this from the global event bus
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;
+        }
+        synchronized (this.registeredTrains){
+            for(int train : this.registeredTrains){
+                stop(train);
+            }
         }
 
         this.globalEventBus.unregister(this);
@@ -156,6 +154,7 @@ public class InfrastructureClient {
     private void connect() throws IOException {
         if(socket == null){
             socket = new Socket(ip, port);
+            socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
             out = new PrintWriter(socket.getOutputStream());
         }
     }
@@ -175,31 +174,18 @@ public class InfrastructureClient {
         return socket != null && out != null && !out.checkError();
     }
 
-    private void send(String cmd) {
-        PrintWriter out = this.out;
-        if (out != null) {
-            out.println(cmd);
-            if (!out.checkError()) {
-                //System.out.println("Command \"" + cmd.toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
-            } else {
-                try {
-                    reconnect();
-                } catch (IOException e) {
-                    System.err.println("Could not reconnect to Fahrsteuerung: " + e.getLocalizedMessage());
-                }
-            }
-        } //TODO Do not chat IOexception
-    }
-
     private void send(String format, Object... params) {
         PrintWriter out = this.out;
         if (out != null) {
             synchronized (out) {
                 out.printf(format, params);
                 out.println();
+                out.flush();
+
                 if (!out.checkError()) {
                     //System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");
-                } else {
+                }
+                else {
                     try {
                         reconnect();
                     } catch (IOException e) {

@@ -2,21 +2,23 @@ package ebd.core.util.server;
 
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
-import ebd.core.util.events.SzenarioExceptionEvent;
+import ebd.core.util.events.ScenarioExceptionEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class GUIPipeDistribution implements Runnable {
 
-    private Thread guiPDThread;
-    private PipedInputStream pipedInputStream;
-    private BufferedReader bufferedReader;
-    private Map<String, Map<Integer, List<GUIClientWorker>>> clientMap;
+    private final Thread guiPDThread;
+    private final PipedInputStream pipedInputStream;
+    private final BufferedReader bufferedReader;
+    private final Map<String, Map<Integer, List<GUIClientWorker>>> clientMap;
 
 
     private boolean running = true;
@@ -42,11 +44,12 @@ public class GUIPipeDistribution implements Runnable {
         while(this.running){
             try {
                 String line = this.bufferedReader.readLine();
+                if(line == null) continue;
                 distribute(line);
             }
             catch (IOException e) {
                 if(this.running){
-                    SzenarioExceptionEvent see = new SzenarioExceptionEvent("szenario",
+                    ScenarioExceptionEvent see = new ScenarioExceptionEvent("szenario",
                             "szenario", new NotCausedByAEvent(), e, ExceptionEventTyp.WARNING);
                     EventBus.getDefault().post(see);
                     this.running = false;
@@ -78,29 +81,18 @@ public class GUIPipeDistribution implements Runnable {
             handleSL(line, lineSplit[1]);
             lineSplit[1] = lineSplit[1].replaceAll("[^a-bA-Z]", "");
         }
-        switch (lineSplit[1].toLowerCase()){
-            case "rbc":
-            case "trn":
-                sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
-                break;
-
-            case "gb":
-                sendToGB(line);
-                break;
-            default:
-                sendToAll(line);
+        switch (lineSplit[1].toLowerCase()) {
+            case "rbc", "trn" -> sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
+            case "gb" -> sendToGB(line);
+            default -> sendToAll(line);
         }
 
     }
 
     private void handleSL(String line, String entity) {
         switch (entity.toLowerCase()) {
-            case "sl":
-                sendTo(line, "sl", 1);
-                break;
-            case "tms":
-                sendTo(line, "tms", 1);
-                break;
+            case "sl" -> sendTo(line, "sl", 1);
+            case "tms" -> sendTo(line, "tms", 1);
         }
     }
 

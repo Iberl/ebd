@@ -3,7 +3,6 @@ package ebd.globalUtils.events.logger;
 import ebd.globalUtils.events.NormalEvent;
 
 import java.io.PipedInputStream;
-import java.util.List;
 
 public class LogToGUIPipeEvent extends NormalEvent {
 

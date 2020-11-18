@@ -1,11 +1,9 @@
 package ebd.globalUtils.events.bcc;
 
 
-import java.util.List;
-
 import ebd.globalUtils.events.NormalEvent;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
 import ebd.globalUtils.position.Position;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
 
 /**
  * @author Lars Schulze-Falck

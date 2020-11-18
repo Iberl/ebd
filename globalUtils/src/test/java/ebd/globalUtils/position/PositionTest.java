@@ -1,14 +1,12 @@
 package ebd.globalUtils.position;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import ebd.globalUtils.location.Location;
+import ebd.globalUtils.position.exceptions.PositionReferenzException;
+import ebd.messageLibrary.util.ETCSVariables;
 
 import java.util.HashMap;
 
-import ebd.messageLibrary.util.ETCSVariables;
-
-import ebd.globalUtils.location.Location;
-import ebd.globalUtils.position.exceptions.PositionReferenzException;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Lars Schulze-Falck

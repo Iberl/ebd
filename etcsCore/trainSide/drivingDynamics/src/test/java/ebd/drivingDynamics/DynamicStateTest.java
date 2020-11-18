@@ -1,10 +1,10 @@
 package ebd.drivingDynamics;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.events.routeData.RouteDataChangeEvent;
 import ebd.globalUtils.events.trainData.TrainDataChangeEvent;
 import ebd.globalUtils.location.Location;
-import ebd.globalUtils.enums.MovementState;
 import ebd.globalUtils.position.Position;
 import ebd.messageLibrary.packet.trackpackets.Packet_21;
 import ebd.messageLibrary.util.ETCSVariables;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeAll;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DynamicStateTest {
     @BeforeAll
