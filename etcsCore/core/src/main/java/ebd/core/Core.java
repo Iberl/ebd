@@ -33,6 +33,7 @@ public class Core implements Runnable {
     private final Thread szenarioThread = new Thread(this);
     private final ConfigHandler ch;
     private final TrainsHandler iFH;
+    private boolean normalShutdown = false;
 
     private final ScenarioEventHandler szenarioEventHandler;
     private final InputHandler inputHandler;
@@ -64,6 +65,8 @@ public class Core implements Runnable {
         this.globalEventBus = EventBus.getDefault();
         this.globalEventBus.register(this);
         this.szenarioEventHandler = new ScenarioEventHandler();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::nondefaultShutdown));
 
         this.ch = ConfigHandler.getInstance();
         this.iFH = TrainsHandler.getInstance();
@@ -117,6 +120,7 @@ public class Core implements Runnable {
      */
     @Subscribe
     public void disconnect(DisconnectEvent de){
+        this.normalShutdown = true;
         if(!validTarget(de.target)){
             return;
         }
@@ -142,6 +146,14 @@ public class Core implements Runnable {
         }
 
         if(!ConfigHandler.getInstance().useTMSServer) EventBus.getDefault().post(new TMSDummyStartEvent("glb", "tms"));
+    }
+
+    /**
+     * Catches shutdowns not initiated through a {@link DisconnectEvent}
+     */
+    private void nondefaultShutdown(){
+        if(this.normalShutdown) return;
+        this.globalEventBus.post(new DisconnectEvent("scenario", "all"));
     }
 
     private boolean validTarget(String target) {
