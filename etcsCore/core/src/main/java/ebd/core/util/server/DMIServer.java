@@ -91,7 +91,7 @@ public class DMIServer implements Runnable {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void disconnect(DisconnectEvent de){
         try {
             this.globalBus.unregister(this);

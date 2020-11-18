@@ -8,6 +8,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -91,7 +92,7 @@ public class GUIServer implements Runnable {
      * Listens to a global disconnect event and terminates.
      * @param de {@link DisconnectEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void disconnect(DisconnectEvent de){
         try {
             this.running = false;

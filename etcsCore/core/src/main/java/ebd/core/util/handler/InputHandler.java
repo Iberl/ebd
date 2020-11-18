@@ -54,7 +54,7 @@ public class InputHandler implements Runnable {
      * Reacts to a {@link DisconnectEvent} and stops the clock.
      * @param de a {@link DisconnectEvent}
      */
-    @Subscribe(threadMode = ThreadMode.ASYNC)
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;

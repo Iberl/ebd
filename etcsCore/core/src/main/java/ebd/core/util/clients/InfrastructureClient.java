@@ -68,8 +68,8 @@ public class InfrastructureClient {
         }
         int trainID = uie.infrastructureID;
 
-        if(!registeredTrains.contains(trainID)){
-            registeredTrains.add(trainID);
+        if(!this.registeredTrains.contains(trainID)){
+            this.registeredTrains.add(trainID);
             init(trainID);
         }
         gok(trainID, uie.speedInKmh);
@@ -124,14 +124,17 @@ public class InfrastructureClient {
     /**
      * Listens to {@link DisconnectEvent} and disconnect this from the global event bus
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;
         }
-        for(int train : registeredTrains){
-            stop(train);
+        synchronized (this.registeredTrains){
+            for(int train : this.registeredTrains){
+                stop(train);
+            }
         }
+
         this.globalEventBus.unregister(this);
     }
 

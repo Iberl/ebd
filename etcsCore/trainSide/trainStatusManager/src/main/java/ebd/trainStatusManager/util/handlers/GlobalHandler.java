@@ -5,6 +5,7 @@ import ebd.globalUtils.events.trainStatusMananger.ContinueClockEvent;
 import ebd.globalUtils.events.trainStatusMananger.PauseClockEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 /**
  * This class handles the communication with the global {@link EventBus}
@@ -41,7 +42,7 @@ public class GlobalHandler {
         this.localBus.post(cce);
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;

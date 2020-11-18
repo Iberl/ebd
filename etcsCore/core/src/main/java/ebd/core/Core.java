@@ -118,7 +118,7 @@ public class Core implements Runnable {
      * Reacts to a {@link DisconnectEvent} and stops the clock.
      * @param de a {@link DisconnectEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void disconnect(DisconnectEvent de){
         this.normalShutdown = true;
         if(!validTarget(de.target)){
