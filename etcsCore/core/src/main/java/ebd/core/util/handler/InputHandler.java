@@ -34,7 +34,7 @@ public class InputHandler implements Runnable {
 
     private void selectNext(String next) {
         switch (next) {
-            case "quit" -> this.globalEventBus.post(new DisconnectEvent("scenario", "all"));
+            case "quit", "q", "end", "stop" -> this.globalEventBus.post(new DisconnectEvent("scenario", "all"));
             case "load" -> this.globalEventBus.post(new LoadEvent("scenario", "scenario"));
             case "pause" -> this.globalEventBus.post(new PauseClockEvent("scenario", "all"));
             case "continue" -> this.globalEventBus.post(new ContinueClockEvent("scenario", "all"));

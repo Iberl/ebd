@@ -32,6 +32,9 @@ public class InfrastructureClient {
     private Socket socket;
     private PrintWriter out;
 
+    /**
+     * Contains a list of infrastructure IDs
+     */
     private final List<Integer> registeredTrains = new ArrayList<>();
 
     /**
@@ -126,7 +129,9 @@ public class InfrastructureClient {
         if(!validTarget(de.target)){
             return;
         }
-
+        for(int train : registeredTrains){
+            stop(train);
+        }
         this.globalEventBus.unregister(this);
     }
 
