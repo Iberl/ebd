@@ -10,8 +10,10 @@ import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import ebd.routeData.RouteData;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidParameterException;
@@ -29,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-04
+ * @since 2020-11-16
  */
 public class SafetyLogicContinousConnectTest {
 
@@ -398,6 +400,27 @@ public class SafetyLogicContinousConnectTest {
     }
 
     /**
+     * Generiert f&uuml;r die angegebene Balisennummer eine Route mit angegebener Routen-Element-Anzahl
+     * @param iBaliseNumber - nid-id of Balise
+     * @param iRouteElementNumber - Routen-Element-Anzahl
+     * @return RouteDataSL - die angeforderte Route
+     */
+    public RouteDataSL generateRandomContinousRouteOnBalise(int iBaliseNumber, int iRouteElementNumber) {
+        RouteDataSL RouteResult = new RouteDataSL();
+        ArrayList<ITopological> visitedElements = new ArrayList<>();
+        TopologyGraph.Edge NewWay = null;
+        ITopological CurrentElement;
+        Balise B = Balise.baliseByNid_bg.getModel(iBaliseNumber);
+        TopologyGraph.Edge EdgeOfBalise = PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        CurrentElement = handleBeginOnBalise(RouteResult, visitedElements, TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
+
+
+
+        return getRouteBeginingOnElementSpecified(iRouteElementNumber,TestUtil.RouteConfig.BALISE_NOT_NEAR_CROSSING,
+                RouteResult, visitedElements,NewWay, CurrentElement);
+    }
+
+    /**
      * Generiert aus PlanPro-Daten zufällige zusammenhängende Strecken.
      * @param iTargetAmountOfRouteElements int - Anzahl der Beteiligten Elmente (Kanten oder Knoten)
      * @param beginnOnEdge boolean - bestimmt ob die Zufallsstrecke auf einer Kante beginnt
@@ -420,23 +443,29 @@ public class SafetyLogicContinousConnectTest {
         } else {
             CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
         }
-        for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
+        return getRouteBeginingOnElementSpecified(iTargetAmountOfRouteElements, TestConfig, RouteResult, visitedElements, NewWay, CurrentElement);
+    }
+
+    @Nullable
+    private RouteDataSL getRouteBeginingOnElementSpecified(int iTargetAmountOfRouteElements, TestUtil.RouteConfig TestConfig, RouteDataSL routeResult, ArrayList<ITopological> visitedElements, TopologyGraph.Edge newWay, ITopological currentElement) {
+        for (int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size()) {
             int iWayIndex;
 
             ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
-            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestConfig);
-            if(possibleWays.isEmpty()) {
-                if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
-                else return RouteResult;
+            fillPossibleWays(visitedElements, (TopologyGraph.Node) currentElement, possibleWays, TestConfig);
+            if (possibleWays.isEmpty()) {
+                if (routeResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
+                else return routeResult;
 
-            } if(possibleWays.size() == 1) iWayIndex = 0;
+            }
+            if (possibleWays.size() == 1) iWayIndex = 0;
             else iWayIndex = Math.abs(new Random().nextInt()) % (possibleWays.size() - 1);
-            NewWay = possibleWays.get(iWayIndex);
-            if(i == iTargetAmountOfRouteElements) break;
-            CurrentElement = prepareNewIteration(RouteResult, visitedElements, NewWay);
+            newWay = possibleWays.get(iWayIndex);
+            if (i == iTargetAmountOfRouteElements) break;
+            currentElement = prepareNewIteration(routeResult, visitedElements, newWay);
 
         }
-        return returnFinishedRoute(RouteResult, visitedElements, NewWay);
+        return returnFinishedRoute(routeResult, visitedElements, newWay);
     }
 
     public void fillPossibleWays(ArrayList<ITopological> visitedElements, TopologyGraph.Node currentElement,
@@ -482,6 +511,14 @@ public class SafetyLogicContinousConnectTest {
             return true;
         }
         return false;
+    }
+
+    private ITopological handleBeginOnBalise(RouteDataSL routeResult, ArrayList<ITopological> visitedElements,
+                                           TopologyGraph.Edge EdgeWithBalise) {
+        I_CURRENT_TRYS = 0;
+        boolean bDirectionNodeA = new Random().nextBoolean();
+
+        return provideTrackElement4Edge(routeResult, visitedElements, bDirectionNodeA, EdgeWithBalise);
     }
 
     private ITopological handleBeginOnBalise(RouteDataSL routeResult, ArrayList<ITopological> visitedElements, TestUtil.RouteConfig TestConfig) {
@@ -558,23 +595,7 @@ public class SafetyLogicContinousConnectTest {
         } else {
             CurrentElement = handleBeginOnNode(RouteResult, visitedElements);
         }
-        for(int i = visitedElements.size(); i <= iTargetAmountOfRouteElements; i = visitedElements.size() ) {
-            int iWayIndex;
-
-            ArrayList<TopologyGraph.Edge> possibleWays = new ArrayList<>();
-            fillPossibleWays(visitedElements, (TopologyGraph.Node) CurrentElement, possibleWays, TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
-            if(possibleWays.isEmpty()) {
-                if(RouteResult.size() < I_LOWEST_ROUTE_LENGTH) return null;
-                else return RouteResult;
-
-            } if(possibleWays.size() == 1) iWayIndex = 0;
-            else iWayIndex = Math.abs(new Random().nextInt()) % (possibleWays.size() - 1);
-            NewWay = possibleWays.get(iWayIndex);
-            if(i == iTargetAmountOfRouteElements) break;
-            CurrentElement = prepareNewIteration(RouteResult, visitedElements, NewWay);
-
-        }
-        return returnFinishedRoute(RouteResult, visitedElements, NewWay);
+        return getRouteBeginingOnElementSpecified(iTargetAmountOfRouteElements, TestUtil.RouteConfig.BALISE_NEAR_CROSSING, RouteResult, visitedElements, NewWay, CurrentElement);
     }
 
     private ITopological handleBeginOnEdge(RouteDataSL routeResult, ArrayList<ITopological> visitedElements) {

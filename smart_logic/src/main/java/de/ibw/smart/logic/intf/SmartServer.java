@@ -7,9 +7,9 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMessage;
-import de.ibw.tms.intf.TmsMovementAuthority;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.buffer.Unpooled;
@@ -129,8 +129,8 @@ public class SmartServer extends RbcModul  {
             SmartServer4TmsImpl ServerImpl = SmartServer4TmsImpl.instance;
             String sType = tmsCommand.getPayload().CommandType;
             Class CmdType = Commands.getClassByString(sType);
-            if(CmdType.equals(TmsMovementAuthority.class)) {
-                CheckMovementAuthority CMA = (CheckMovementAuthority) tmsCommand.getPayload();
+            if(CmdType.equals(TmsMovementPermissionRequest.class)) {
+                CheckMovementPermission CMA = (CheckMovementPermission) tmsCommand.getPayload();
                 new Thread() {
                     @Override
                     public void run() {

@@ -4,11 +4,15 @@
       "Request": {
         "route": {
           "elementListIds": [
-            "12W1L",
-            "12W1L"
+            "12W16CDL",
+            "12W17",
+            "12W13",
+            "12W13ABR"
           ],
           "elemetTypes": [
             "RAIL_TYPE",
+            "CROSSOVER_TYPE",
+            "CROSSOVER_TYPE",
             "RAIL_TYPE"
           ]
         }

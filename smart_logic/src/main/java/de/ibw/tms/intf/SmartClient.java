@@ -1,7 +1,6 @@
 package de.ibw.tms.intf;
 
 import de.ibw.smart.logic.intf.RbcModul;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;

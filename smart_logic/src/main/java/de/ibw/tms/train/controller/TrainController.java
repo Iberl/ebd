@@ -5,15 +5,12 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.TmsMovementAuthority;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.positioned.elements.GradientSegment;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
@@ -29,7 +26,6 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.lang.annotation.ElementType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -268,7 +264,7 @@ public class TrainController extends SubmissionPublisher implements IController 
                     MoProfile, null);
 
             MaAdapter = new RbcMaAdapter(SendMa);
-            CheckMovementAuthority CheckMoveAuthCommand = new CheckMovementAuthority(3L);
+            CheckMovementPermission CheckMoveAuthCommand = new CheckMovementPermission(3L);
             CheckMoveAuthCommand.MaRequest = requestWrapper;
             CheckMoveAuthCommand.MaAdapter = MaAdapter;
             CheckMoveAuthCommand.rbc_id = sRbcId;
@@ -281,7 +277,7 @@ public class TrainController extends SubmissionPublisher implements IController 
             CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
             CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
-            TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
+            TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
 
                 SmartClientHandler.getInstance().sendCommand(Msg);

@@ -20,7 +20,7 @@ import java.util.UUID;
  * @version 0.3
  * @since 2020-08-10
  */
-public class CheckMovementAuthority extends Commands {
+public class CheckMovementPermission extends Commands {
 
     /**
      * Ma to check
@@ -67,7 +67,7 @@ public class CheckMovementAuthority extends Commands {
      * Dieser Konstruktor erstellt einen neuen leeren Check-Befehl mit einer Priority
      * @param lPriority long - Priority im TMS Postausgang
      */
-    public CheckMovementAuthority(long lPriority) {
+    public CheckMovementPermission(long lPriority) {
         super(lPriority);
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_MOVEMENT_AUTHORITY;
@@ -111,7 +111,7 @@ public class CheckMovementAuthority extends Commands {
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
-        CheckMovementAuthority that = (CheckMovementAuthority) o;
+        CheckMovementPermission that = (CheckMovementPermission) o;
         return Objects.equals(CommandType, that.CommandType) && Objects.equals(MaRequest, that.MaRequest) &&
                 Objects.equals(MaAdapter, that.MaAdapter) && Objects.equals(uuid, that.uuid) && Objects.equals(tms_id, that.tms_id) &&
                 Objects.equals(rbc_id, that.rbc_id) && Objects.equals(lPriority, that.lPriority);
@@ -119,12 +119,12 @@ public class CheckMovementAuthority extends Commands {
 
     //testmain
     public static void main(String[] args) throws MissingInformationException {
-        CheckMovementAuthority cma = getDummyMovementAuthorityCommand();
+        CheckMovementPermission cma = getDummyMovementAuthorityCommand();
         System.out.println(cma.parseToJson());
     }
 
-    public static CheckMovementAuthority getDummyMovementAuthorityCommand() {
-        CheckMovementAuthority cma = new CheckMovementAuthority(3L);
+    public static CheckMovementPermission getDummyMovementAuthorityCommand() {
+        CheckMovementPermission cma = new CheckMovementPermission(3L);
         //return null;
         MARequest mar = new MARequest();
 

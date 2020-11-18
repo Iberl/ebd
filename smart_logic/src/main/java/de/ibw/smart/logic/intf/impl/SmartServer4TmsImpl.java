@@ -388,12 +388,12 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
                 } else if(T.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sId);
+                    NodeInformation N = ISwitchHandler.getNodeInfoBySwitchId(sId);
                     if(N == null) {
                         if(EBM != null) EBM.log("Node Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
                         throw new NullPointerException("Some elements cannot be Identifed");
                     }
-                    TePair = new ImmutablePair<Route.TrackElementType, ITopological>(Route.TrackElementType.CROSSOVER_TYPE, N);
+                    TePair = new ImmutablePair<Route.TrackElementType, ITopological>(Route.TrackElementType.CROSSOVER_TYPE, (ITopological) N);
                 } else {
                     EBM.log("The given Element Type is not supported", ROUTE_COMPONENTS_IDENTIFY);
                     EBM.log("The Element Type has to be a Rail Or Crossover Type", ROUTE_COMPONENTS_IDENTIFY);

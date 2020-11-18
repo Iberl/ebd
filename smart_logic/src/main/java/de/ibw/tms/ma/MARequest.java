@@ -6,7 +6,8 @@ import de.ibw.tms.controller.TmsController;
 import java.io.Serializable;
 
 public class MARequest implements Serializable {
-    @Expose
+
+
     public MovementAuthority ma;
     private TrainMovement train;
     private TmsController tms;

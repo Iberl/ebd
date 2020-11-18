@@ -1,7 +1,7 @@
 package de.ibw.tms.intf;
 
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
 
 /**
@@ -12,13 +12,13 @@ import de.ibw.tms.intf.cmd.Commands;
  * @version 0.3
  * @since 2020-08-10
  */
-public class TmsMovementAuthority extends TmsMessage implements Comparable<TmsMessage> {
+public class TmsMovementPermissionRequest extends TmsMessage implements Comparable<TmsMessage> {
 
     /**
      *  Nachrichteninhalt
      */
     @Expose
-    public CheckMovementAuthority payload;
+    public CheckMovementPermission payload;
 
     /**
      * Konstruktur eine TMS-Ma-Nachricht an die SL
@@ -26,7 +26,7 @@ public class TmsMovementAuthority extends TmsMessage implements Comparable<TmsMe
      * @param rbc_id - Ziel-RBC-Id
      * @param payload - Inhalt der Nachricht
      */
-    public TmsMovementAuthority(String tms_id, String rbc_id, CheckMovementAuthority payload) {
+    public TmsMovementPermissionRequest(String tms_id, String rbc_id, CheckMovementPermission payload) {
             super(tms_id, rbc_id,payload);
             this.payload = payload;
     }

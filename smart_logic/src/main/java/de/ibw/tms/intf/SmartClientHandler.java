@@ -7,7 +7,7 @@ import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.controller.PositionReportController;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.exception.MissingInformationException;
@@ -220,8 +220,8 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
     }
 
     private void sendDummyCommand() {
-        CheckMovementAuthority c = CheckMovementAuthority.getDummyMovementAuthorityCommand();
-        TmsMovementAuthority tmsCmd = new TmsMovementAuthority("TMS_TEST_ID", "RBC_ID", c);
+        CheckMovementPermission c = CheckMovementPermission.getDummyMovementAuthorityCommand();
+        TmsMovementPermissionRequest tmsCmd = new TmsMovementPermissionRequest("TMS_TEST_ID", "RBC_ID", c);
 
         new Thread() {
             @Override
