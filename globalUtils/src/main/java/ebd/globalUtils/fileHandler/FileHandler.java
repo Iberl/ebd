@@ -9,6 +9,11 @@ public class FileHandler {
     }
 
     public static FileReader readerConfigurationFileOrDefault(String filepath, String defaultResource) throws IOException {
+
+        return new FileReader(getFileFromConfigurationFolderOrDefault(filepath,defaultResource));
+    }
+
+    public static File getFileFromConfigurationFolderOrDefault(String filepath, String defaultResource) throws IOException {
         // does the path exist: configuration/scenario/
         File file = new File("configuration/" + filepath);
 
@@ -35,6 +40,7 @@ public class FileHandler {
             }
         }
 
-        return new FileReader(file);
+        return file;
     }
+
 }
