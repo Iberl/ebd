@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CWKrAnlageAllgTest {
 
-    @Test
+
     public void testImportFromExternal() throws JAXBException, ParseException {
       /*  ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         InputStream is = classloader.getResourceAsStream("FrederiksBeispiel.xml");

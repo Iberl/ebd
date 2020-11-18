@@ -49,7 +49,7 @@ class VehicleOccupationComponentTest {
         }
     }
 
-    @Test
+
     public void initTestEnv() throws InterruptedException {
         new smartLogicThread().start();
         Thread.sleep(3000);
@@ -57,11 +57,14 @@ class VehicleOccupationComponentTest {
         Thread.sleep(3000);
         new RbcThread().start();
         Thread.sleep(4000);
+
         assertTrue(PosMod.getCurrentPositions().size() > 0,
                 "Es wurden keine Züge registriert FEHLER." );
         System.out.println("Vehicle Report Count: " + PosMod.getCurrentPositions().size());
         VehicleOccupation VO = new ArrayList<>(PosMod.getCurrentPositions()).get(0);
         testprint(VO);
+
+
     }
 
     private void testprint(VehicleOccupation vo) {

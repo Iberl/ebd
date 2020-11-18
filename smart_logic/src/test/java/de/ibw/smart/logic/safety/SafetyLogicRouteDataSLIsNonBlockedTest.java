@@ -57,7 +57,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
     /**
      * Pr&uuml;ft ob Null-Werte als Anfrage abgefangen werden
      */
-    @Test
+
     public void checkIfMainNullError() throws InterruptedException {
 
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
@@ -99,7 +99,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
     /**
      * Pr&uuml;ft ob Smart-Logic zwei uberlappende MAs auf einem Streckenabschnitt erkennt.
      */
-    @RepeatedTest(100)
+
     public void checkIfTracksAreBlockedByTwoTrainsOnSameTrack() throws InterruptedException {
         this.initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke
@@ -402,7 +402,6 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
      * Das Blockademodul, soll die zweite Anfrage verwerfen.
      * @throws InterruptedException
      */
-    @RepeatedTest(100)
     public void checkIfTwoTrainsIntersectingOnSameTrailBeeingDetected() throws InterruptedException {
         this.initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke
@@ -564,7 +563,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
      * Das Blockademodul, soll die beiden Anfragen akzeptieren.
      * @throws InterruptedException
      */
-    @RepeatedTest(100)
+
     public void checkIfTwoTrainsNonIntersectingOnSameTrailBeeingAllowed() throws InterruptedException {
         this.initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke

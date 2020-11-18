@@ -12,7 +12,6 @@ class EbdAuthoritiesTest {
 
 
 
-    @org.junit.jupiter.api.Test
     void generateEbdMa() {
         EbdAuthorities.generateEbdMa();
         RbcMA MUT = EbdAuthorities.EbdMa;
