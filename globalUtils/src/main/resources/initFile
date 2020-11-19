@@ -8,7 +8,7 @@
 
 #trainConfigID (int): The ID of the train in the TrainConfig Tool (192 if no Tool is used).
 
-#infrastructureID (int): The ID of the train on the EBD infrastructure, has to be unique.
+#infrastructureID (int): The ID of the train on the EBD infrastructure (aka Triebfahrzeugnummer), has to be unique.
 
 #trainScheduleID (String): The ID of the train in the EBD train schedule, currently not used, has to be unique.
 

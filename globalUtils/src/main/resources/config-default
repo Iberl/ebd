@@ -48,6 +48,8 @@ tripProfileFolderPath = tripprofiles/
 useTrainConfiguratorTool = false
 
 # If true, the program will try to connect to the infrastructure server.
+# If successful, it WILL initialise AND take control over all trains specified in the initFile.
+# Only set to true if you are sure you want model trains to move.
 useInfrastructureServer = false
 
 # If true, the program will try to connect to the Train Manager System program.
