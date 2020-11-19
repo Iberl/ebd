@@ -7,23 +7,12 @@
         "value": 100,
         "mode": "s",
         "conditions": {
-          "orBlock": [
-            {
-              "type": "v_rel",
-              "condition": {
-                "curveBase" : "trip",
-                "op": ">",
-                "value": 100
-              }
-            },
-            {
-              "type": "v",
-              "condition": {
-                "op": ">=",
-                "value": 120
-              }
+            "type": "v_rel",
+            "condition": {
+              "curveBase": "trip",
+              "op": ">",
+              "value": 100
             }
-          ]
         }
       }
     },
