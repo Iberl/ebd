@@ -88,12 +88,7 @@ public class SmartLogic {
         }
         try {
             if (SL_UI_Server != null) {
-                try {
-                    SL_UI_Server.disconnect(null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                SL_UI_Server.disconnect(null);
                 SL_UI_Server = null;
             }
         } catch(Exception Except) {
