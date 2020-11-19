@@ -51,7 +51,7 @@ public class DMIServerConnector {
      * Every clock tick, the DMI is updated with new speeds, distances and states of the train
      * @param cte {@link ClockTickEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
     public void clockTick(ClockTickEvent cte){
         updateDMISpeeds();
     }

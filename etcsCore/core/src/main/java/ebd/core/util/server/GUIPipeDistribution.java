@@ -15,10 +15,10 @@ import java.util.Map;
 
 public class GUIPipeDistribution implements Runnable {
 
-    private Thread guiPDThread;
-    private PipedInputStream pipedInputStream;
-    private BufferedReader bufferedReader;
-    private Map<String, Map<Integer, List<GUIClientWorker>>> clientMap;
+    private final Thread guiPDThread;
+    private final PipedInputStream pipedInputStream;
+    private final BufferedReader bufferedReader;
+    private final Map<String, Map<Integer, List<GUIClientWorker>>> clientMap;
 
 
     private boolean running = true;
@@ -44,6 +44,7 @@ public class GUIPipeDistribution implements Runnable {
         while(this.running){
             try {
                 String line = this.bufferedReader.readLine();
+                if(line == null) continue;
                 distribute(line);
             }
             catch (IOException e) {
@@ -80,29 +81,18 @@ public class GUIPipeDistribution implements Runnable {
             handleSL(line, lineSplit[1]);
             lineSplit[1] = lineSplit[1].replaceAll("[^a-bA-Z]", "");
         }
-        switch (lineSplit[1].toLowerCase()){
-            case "rbc":
-            case "trn":
-                sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
-                break;
-
-            case "gb":
-                sendToGB(line);
-                break;
-            default:
-                sendToAll(line);
+        switch (lineSplit[1].toLowerCase()) {
+            case "rbc", "trn" -> sendTo(line, lineSplit[1], Integer.parseInt(lineSplit[2].replaceAll("[^0-9]", "")));
+            case "gb" -> sendToGB(line);
+            default -> sendToAll(line);
         }
 
     }
 
     private void handleSL(String line, String entity) {
         switch (entity.toLowerCase()) {
-            case "sl":
-                sendTo(line, "sl", 1);
-                break;
-            case "tms":
-                sendTo(line, "tms", 1);
-                break;
+            case "sl" -> sendTo(line, "sl", 1);
+            case "tms" -> sendTo(line, "tms", 1);
         }
     }
 

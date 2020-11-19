@@ -1,6 +1,9 @@
 package ebd.core.util.server;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.events.DisconnectEvent;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,6 +21,9 @@ public class ATOServer implements Runnable {
     public ATOServer() throws IOException {
         this.atoServerThread = new Thread(this);
         this.serverSocket = new ServerSocket(Integer.parseInt(ConfigHandler.getInstance().atoServerPort));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+
         this.atoServerThread.start();
     }
 
@@ -40,7 +46,7 @@ public class ATOServer implements Runnable {
                     client.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace(); //TODO Error Handeling
+                if(running) e.printStackTrace(); //We only care about exceptions that occur while the server should run
             }
         }
         if(clientWorker != null && this.clientWorker.isAlive()){
@@ -53,6 +59,10 @@ public class ATOServer implements Runnable {
     }
 
     public void stop() {
-        this.running = false;
+        try {
+            this.running = false;
+            this.serverSocket.close();
+            if(this.clientWorker != null) this.clientWorker.stop();
+        } catch (IOException ignored) {}
     }
 }

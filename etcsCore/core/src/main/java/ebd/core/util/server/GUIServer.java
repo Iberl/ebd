@@ -8,6 +8,7 @@ import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -24,11 +25,11 @@ import java.util.Map;
  */
 public class GUIServer implements Runnable {
 
-    private EventBus globalBus;
-    private Thread guiServerThread;
+    private final EventBus globalBus;
+    private final Thread guiServerThread;
     private GUIPipeDistribution guiPipeDistribution = null;
 
-    private ServerSocket serverSocket;
+    private final ServerSocket serverSocket;
     private Map<String, Map<Integer,List<GUIClientWorker>>> clientMap;
 
     private boolean running = true;
@@ -43,8 +44,10 @@ public class GUIServer implements Runnable {
         this.guiServerThread = new Thread(this);
         this.serverSocket = new ServerSocket(Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer));
         setUpMap();
+
         guiServerThread.start();
     }
+
 
     public GUIServer(EventBus eBus, int iPort) throws Exception {
         this.globalBus = eBus;
@@ -52,6 +55,7 @@ public class GUIServer implements Runnable {
         this.guiServerThread = new Thread(this);
         this.serverSocket = new ServerSocket(iPort);
         setUpMap();
+
         guiServerThread.start();
 
     }
@@ -78,7 +82,7 @@ public class GUIServer implements Runnable {
                 addGUIClientWorkerToMap(greeting, client);
 
             } catch (IOException e) {
-                e.printStackTrace(); //TODO Error Handeling
+                if(running) e.printStackTrace(); //If running is false, that exception is expected
             }
         }
     }
@@ -88,12 +92,14 @@ public class GUIServer implements Runnable {
      * Listens to a global disconnect event and terminates.
      * @param de {@link DisconnectEvent}
      */
-    @Subscribe
-    public void disconnect(DisconnectEvent de) throws IOException {
-        this.running = false;
-        this.guiPipeDistribution.stop();
-        this.globalBus.unregister(this);
-        this.serverSocket.close();
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void disconnect(DisconnectEvent de){
+        try {
+            this.running = false;
+            this.guiPipeDistribution.stop();
+            this.globalBus.unregister(this);
+            this.serverSocket.close();
+        } catch (IOException ignored) {} //We end the GUI Server, exceptions are expected and ignored
     }
 
     /**

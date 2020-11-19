@@ -1,5 +1,7 @@
 package ebd.globalUtils.configHandler;
 
+import ebd.globalUtils.fileHandler.FileHandler;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,20 +13,20 @@ import java.util.Set;
  */
 public class TrainsHandler {
 
-    public class Train {
+    public static class Train {
 
-        public int etcsID;
-        public int trainConfigID;
-        public int infrastructureID;
-        public String trainScheduleID;
-        public int rbcID;
+        public final int etcsID;
+        public final int trainConfigID;
+        public final int infrastructureID;
+        public final String trainScheduleID;
+        public final int rbcID;
 
-        public int startingBaliseGroup;
-        private boolean startingMovementDir;
-        public String startingTrack;
+        public final int startingBaliseGroup;
+        private final boolean startingMovementDir;
+        public final String startingTrack;
 
-        public boolean startingDirection;
-        private int startingIncrement;
+        public final boolean startingDirection;
+        private final int startingIncrement;
 
         /**
          * @param etcsID The etcs ID of the train
@@ -60,8 +62,8 @@ public class TrainsHandler {
         }
     }
 
-    private static TrainsHandler instance = new TrainsHandler();
-    private Map<Integer, Train> map;
+    private static final TrainsHandler instance = new TrainsHandler();
+    private final Map<Integer, Train> map;
 
     /**
      * Set to private to prevent initiation
@@ -118,7 +120,7 @@ public class TrainsHandler {
                 startingTrack,
                 startingDirection,
                 startingIncrement
-                ));
+        ));
     }
 
     /**
@@ -262,10 +264,10 @@ public class TrainsHandler {
      * @throws IOException If there is an Exception reading the initFile
      */
     private void parseInitFile() throws IOException {
-        createInitFile();
+        String fileName = ConfigHandler.getInstance().pathToInitFile;
 
         String[] stringArray;
-        try(BufferedReader reader = new BufferedReader(new FileReader("configuration/" + ConfigHandler.getInstance().pathToInitFile))){
+        try(BufferedReader reader = new BufferedReader(FileHandler.readConfigurationFile(fileName))){
             stringArray = reader.lines().toArray(String[]::new);
         }
 
@@ -316,59 +318,6 @@ public class TrainsHandler {
                     startingTrack,
                     startingDirection,
                     startingIncrement);
-        }
-    }
-
-    /**
-     * Creates the InitFile.txt out of the initFile default if it does not already exists.
-     *
-     * @throws IOException If there is an Exception reading the initFile
-     */
-    private void createInitFile() throws IOException {
-        /*
-        Setting up initFile.txt file if it does not already exists
-         */
-        File initFile = new File("configuration/initFile.txt");
-
-        if (initFile.length() == 0) {
-            boolean createdDir = initFile.getParentFile().mkdir();
-            boolean createdFile = initFile.createNewFile();
-            if(!createdFile && !initFile.exists()){
-                throw new IOException("initFile.txt could not be created");
-            }
-
-            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("initFile")) {
-
-                if(inputStream == null) {
-                    throw new IOException("The stream initFile could not be found");
-                }
-
-                try (FileOutputStream outputStream = new FileOutputStream(initFile)) {
-                    int length;
-                    byte[] buffer = new byte[1024];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                }catch (IOException ioe){
-                    throw new IOException("InitFile file could not be created. " + ioe.getMessage());
-                }
-            }catch (IOException ioe){
-                ioe.printStackTrace();
-                try(FileInputStream inputStream = new FileInputStream("initFile")) {
-
-                    try (FileOutputStream outputStream = new FileOutputStream("configuration/initFile.txt")) {
-                        int length;
-                        byte[] buffer = new byte[1024];
-                        while ((length = inputStream.read(buffer)) != -1){
-                            outputStream.write(buffer,0,length);
-                        }
-                    }catch (IOException ioe3){
-                        throw new IOException("InitFile file could not be created: " + ioe3.getMessage());
-                    }
-                }catch (IOException ioe2){
-                    throw new IOException(ioe2.getMessage());
-                }
-            }
         }
     }
 }

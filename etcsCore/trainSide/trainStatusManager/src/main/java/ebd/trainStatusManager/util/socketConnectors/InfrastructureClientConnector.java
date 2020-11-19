@@ -9,6 +9,7 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class InfrastructureClientConnector {
      * this method checks if it has to send out a {@link UpdatingInfrastructureEvent}. It it
      * @param cte A {@link ClockTickEvent}
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
         if(this.trainDataVolatile == null){
             NewTrainDataVolatileEvent ntdve = this.localEventBus.getStickyEvent(NewTrainDataVolatileEvent.class);

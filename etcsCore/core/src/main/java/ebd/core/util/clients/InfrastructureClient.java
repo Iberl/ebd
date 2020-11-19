@@ -32,6 +32,9 @@ public class InfrastructureClient {
     private Socket socket;
     private PrintWriter out;
 
+    /**
+     * Contains a list of infrastructure IDs
+     */
     private final List<Integer> registeredTrains = new ArrayList<>();
 
     /**
@@ -65,8 +68,8 @@ public class InfrastructureClient {
         }
         int trainID = uie.infrastructureID;
 
-        if(!registeredTrains.contains(trainID)){
-            registeredTrains.add(trainID);
+        if(!this.registeredTrains.contains(trainID)){
+            this.registeredTrains.add(trainID);
             init(trainID);
         }
         gok(trainID, uie.speedInKmh);
@@ -121,10 +124,15 @@ public class InfrastructureClient {
     /**
      * Listens to {@link DisconnectEvent} and disconnect this from the global event bus
      */
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void disconnect(DisconnectEvent de){
         if(!validTarget(de.target)){
             return;
+        }
+        synchronized (this.registeredTrains){
+            for(int train : this.registeredTrains){
+                stop(train);
+            }
         }
 
         this.globalEventBus.unregister(this);
@@ -147,7 +155,7 @@ public class InfrastructureClient {
         if(socket == null){
             socket = new Socket(ip, port);
             socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
-            out = new PrintWriter(socket.getOutputStream(),true);
+            out = new PrintWriter(socket.getOutputStream());
         }
     }
 
@@ -171,6 +179,8 @@ public class InfrastructureClient {
         if (out != null) {
             synchronized (out) {
                 out.printf(format, params);
+                out.println();
+                out.flush();
 
                 if (!out.checkError()) {
                     //System.out.println("Command \"" + String.format(format, params).toUpperCase(Locale.ENGLISH) + "\" sent to FST.");

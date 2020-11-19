@@ -12,6 +12,7 @@ import ebd.trainData.TrainDataVolatile;
 import ebd.trainData.util.events.NewTrainDataVolatileEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 
@@ -49,7 +50,7 @@ public class SpeedUpdateSupervisor {
         this.trainDataVolatile = ntdve.trainDataVolatile;
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.ASYNC)
     public void clockTick(ClockTickEvent cte){
         if(emergencyBC == null) return;
 

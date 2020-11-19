@@ -11,6 +11,8 @@ import java.util.List;
 
 public class GradientProfileConverter {
 
+    public static final double GRAD_TO_ACC_FACTOR = 9.81 * 0.001;
+
     /**
      * This method converts a {@link Packet_21} and returns a profile that contains distances in [m] and acceleration in [m/s^2].
      * Uphill values are positive, downhill values are negative. In other words, gradients that speed the train up are negative,
@@ -29,9 +31,9 @@ public class GradientProfileConverter {
      */
     public static ForwardSpline packet21ToAccGP(Packet_21 p21, double refGradient) {
 
+
         double totalDistance = 0d;
         double distanceFactor = Math.pow(10, p21.Q_SCALE - 1);
-        double gradToAccFactor = 9.81 * 0.001;
 
         /*
          * We add the gradient into the list of all gradients
@@ -44,7 +46,7 @@ public class GradientProfileConverter {
         /*
          * Should D_GRADIENT not be 0, the first knot is based on the current gradient, see SRS 3.6.3.2.2
          */
-        if (p21.gradient.D_GRADIENT != 0) {gp.addKnotToCurve(new Knot(0d, refGradient * gradToAccFactor));}
+        if (p21.gradient.D_GRADIENT != 0) {gp.addKnotToCurve(new Knot(0d, refGradient * GRAD_TO_ACC_FACTOR));}
 
         /*
          * We generate the spline out of the packet values. A G_A of 255 is a end marker.
@@ -52,8 +54,8 @@ public class GradientProfileConverter {
         for (Packet_21.Packet_21_Gradient gradient : gradients) {
             totalDistance += gradient.D_GRADIENT * distanceFactor;
             if (gradient.G_A < 255) {
-                if (!gradient.Q_GDIR) 	{gp.addKnotToCurve(new Knot(totalDistance, - gradient.G_A * gradToAccFactor));}
-                else 							{gp.addKnotToCurve(new Knot(totalDistance, gradient.G_A * gradToAccFactor));}
+                if (!gradient.Q_GDIR) 	{gp.addKnotToCurve(new Knot(totalDistance, - gradient.G_A * GRAD_TO_ACC_FACTOR));}
+                else 							{gp.addKnotToCurve(new Knot(totalDistance, gradient.G_A * GRAD_TO_ACC_FACTOR));}
 
             }
             else {
