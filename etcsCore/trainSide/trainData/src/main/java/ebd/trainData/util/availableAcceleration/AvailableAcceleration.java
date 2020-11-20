@@ -68,10 +68,9 @@ public class AvailableAcceleration {
                     System.out.println("Couldn't break, gradient was to big"); //Train can not stand still
                     return getTimeBasedAcc(currentSpeed,MovementState.SERVICE_BREAKING) - trackDeceleration;
                 }
-                else {
-                    //Train can halt, breaking in progress
-                    return getTimeBasedAcc(currentSpeed, MovementState.SERVICE_BREAKING);
-                }
+                //Train can halt, breaking in progress
+                return getTimeBasedAcc(currentSpeed, MovementState.SERVICE_BREAKING);
+
             }
             case CRUISE -> {
                 double maxAcc = getMaxAcc(currentSpeed, MovementState.ACCELERATING);
