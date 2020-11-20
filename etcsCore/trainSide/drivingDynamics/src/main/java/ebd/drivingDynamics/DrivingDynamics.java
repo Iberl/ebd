@@ -73,6 +73,7 @@ public class DrivingDynamics {
 
     private double profileTargetSpeed = 0d;
     private double breakModifierForRSM = 1;
+    private boolean finalRSMBreaking = false;
     private boolean inRSMRecovery = false;
 
     private int cycleCount;
@@ -372,7 +373,8 @@ public class DrivingDynamics {
                 }
             }
             else {
-                calculateModifier();
+                if(!this.finalRSMBreaking) this.breakModifierForRSM = calculateRSMBreakModifier();
+                if(this.breakModifierForRSM > 0) this.finalRSMBreaking = true;
                 /*
                 This control flow is necessary in case the train emergency breaks into RSM.
                 It allows the train to accelerate again until the stopping region is reached.
@@ -391,6 +393,7 @@ public class DrivingDynamics {
                         return new AccelerationAction(this.localEventBus, 1);
                     }
                     else {
+                        this.finalRSMBreaking = false;
                         return new HaltAction(this.localEventBus);
                     }
 
@@ -489,22 +492,29 @@ public class DrivingDynamics {
     }
 
     /**
-     * Calculates the necessary modifier to break gracefully to the signal
+     * Calculates the necessary modifier to break gracefully to the signal. Is only used in Release Speed Mode
      */
-    private void calculateModifier() {
+    private double calculateRSMBreakModifier() {
         double currentSpeed = this.dynamicState.getSpeed();
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
-        double distanceToEOA = this.maxTripSectionDistance - this.dynamicState.getDistanceToStartOfProfile() - 1; //Break 1 m in front of EOA
-        double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
-        neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
-        double modifier = -neededBreakingACC/maxBreakingAcc;
-        if(modifier > 1){
-            modifier = 1;
+        double distanceToEOA = this.maxTripSectionDistance
+                                    - this.dynamicState.getDistanceToStartOfProfile()
+                                    - (0.25 * ch.targetReachedDistance); //
+        if(distanceToEOA <= 0){
+            return 1;
         }
-        else if(modifier < 0.5){
-            modifier = 0;
+        else {
+            double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
+            neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
+            double modifier = -neededBreakingACC/maxBreakingAcc;
+            if(modifier > 1){
+                return 1;
+            }
+            else if(modifier < 0.5){
+                return 0;
+            }
+            return modifier;
         }
-        this.breakModifierForRSM = modifier;
     }
 
     /**
