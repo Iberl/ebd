@@ -1,15 +1,13 @@
 package de.ibw.tms.ma.common;
 
 import de.ibw.rtm.intf.IRTMBaseObject;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import org.apache.commons.lang3.time.DateUtils;
 
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 
 public interface IBaseObject extends IRTMBaseObject {
@@ -18,7 +16,7 @@ public interface IBaseObject extends IRTMBaseObject {
     Timestamp lastUpdated = new Timestamp(System.currentTimeMillis());
     String sComment = "";
     Date validFrom = new Date(System.currentTimeMillis());
-    Date validTo = DateUtils.addMonths(new Date(), ConfigHandler.getInstance().defaultAmountOfMonthBaseObjectIsValidTo);
+    Date validTo = DateUtils.addMonths(new Date(), SlConfigHandler.getInstance().defaultAmountOfMonthBaseObjectIsValidTo);
 
     default UUID getUuid() {
         return id;

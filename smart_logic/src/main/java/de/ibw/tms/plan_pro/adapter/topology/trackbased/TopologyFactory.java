@@ -10,7 +10,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
@@ -300,7 +300,7 @@ public class TopologyFactory implements ITopologyFactory {
         DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
         DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
 
-        ConfigHandler CH = ConfigHandler.getInstance();
+        SlConfigHandler CH = SlConfigHandler.getInstance();
 
 
         if(B_PRINT_BALISE_LIST) System.out.println("----Balise-List---");

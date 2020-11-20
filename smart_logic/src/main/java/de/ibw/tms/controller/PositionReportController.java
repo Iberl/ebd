@@ -15,7 +15,7 @@ import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.UtilFunction;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 
@@ -75,9 +75,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
         if(iEngineId == 1) {
 
-            isNominal = ConfigHandler.getInstance().train1StartingInTrackDirection;
+            isNominal = SlConfigHandler.getInstance().train1StartingInTrackDirection;
         } else if(iEngineId == 2) {
-            isNominal = ConfigHandler.getInstance().train2StartingInTrackDirection;
+            isNominal = SlConfigHandler.getInstance().train2StartingInTrackDirection;
 
         } else return null;
         TopologyGraph.Node TargetNode;

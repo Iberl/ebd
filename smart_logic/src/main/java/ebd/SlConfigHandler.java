@@ -12,9 +12,9 @@ import java.lang.reflect.Field;
  * method (for example lists), it also has to be included in the saveCurrent method, for special handling.
  * @author Lars Schulze-Falck
  */
-public class ConfigHandler {
+public class SlConfigHandler {
 
-    private static ConfigHandler single_instance = null;
+    private static SlConfigHandler single_instance = null;
 
     /*
     Strings
@@ -109,7 +109,7 @@ public class ConfigHandler {
      *
      * @throws IOException If config.txt file was not found
      */
-    private ConfigHandler() throws IOException {
+    private SlConfigHandler() throws IOException {
 
         /*
         Setting up config.txt file if it does not already exists
@@ -337,11 +337,11 @@ public class ConfigHandler {
     /**
      * Returns the singleton instance of the config store. Should this not be possible, System.exit(-1) is called
      *
-     * @return The instance of @{@link ConfigHandler} or null if this was not possible
+     * @return The instance of @{@link SlConfigHandler} or null if this was not possible
      */
-    public static ConfigHandler getInstance() {
+    public static SlConfigHandler getInstance() {
         try {
-            if (single_instance == null) single_instance = new ConfigHandler();
+            if (single_instance == null) single_instance = new SlConfigHandler();
             return single_instance;
         }catch (IOException ioe){
             ioe.printStackTrace();

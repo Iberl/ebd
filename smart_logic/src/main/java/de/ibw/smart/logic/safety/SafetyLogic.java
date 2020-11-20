@@ -24,8 +24,7 @@ import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
-import de.ibw.util.UtilFunction;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
@@ -1023,7 +1022,7 @@ public class SafetyLogic {
      * Kann nur in Testkonfiguration aufgerufen werden.
      */
     public void resetAllBlockings() {
-        if(ConfigHandler.getInstance().isInTestMode) {
+        if(SlConfigHandler.getInstance().isInTestMode) {
             EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", SmartLogic.getsModuleId(TRACK_SAFETY) );
             this.blockList = new ThreadedRepo<>();
         } else {
@@ -1059,7 +1058,7 @@ public class SafetyLogic {
     }
 
     private void sendResponseDbdCommandToTms(boolean isSuccess, String sId, String sFailReason) {
-        long lPrio = ConfigHandler.getInstance().lCheckDbdReturn;
+        long lPrio = SlConfigHandler.getInstance().lCheckDbdReturn;
         DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload(sId);
         if(isSuccess) DbdPayload.setDbdSuccessfull();
         else DbdPayload.setErrorState(sFailReason);

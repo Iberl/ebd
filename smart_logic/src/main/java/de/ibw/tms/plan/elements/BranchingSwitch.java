@@ -18,7 +18,7 @@ import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
@@ -219,7 +219,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
     public void sendDbdCommandToSL() {
-        long lPriority = ConfigHandler.getInstance().lCheckDbdCommand;
+        long lPriority = SlConfigHandler.getInstance().lCheckDbdCommand;
         Object OEnumField = BrachingStates.getSelectedItem();
         EnumModel.EnumField EF = (EnumModel.EnumField) OEnumField;
         if(((CrossingSwitch) this.Node.NodeImpl).isDKW()) {

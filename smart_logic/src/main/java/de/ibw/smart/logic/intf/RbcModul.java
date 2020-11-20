@@ -1,7 +1,7 @@
 package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
@@ -236,8 +236,8 @@ public class RbcModul extends Thread {
          * @param ExecutingModul - Ausf&uuml;hrendes Modul
          */
         public SL_To_RBC_ClientThread(Message M, RbcModul ExecutingModul) {
-            this.sHost = ConfigHandler.getInstance().ipOfRBCServer;
-            this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfRBCServer);
+            this.sHost = SlConfigHandler.getInstance().ipOfRBCServer;
+            this.iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfRBCServer);
             this.M = M;
             this.ExecutingModul = ExecutingModul;
 
@@ -597,7 +597,7 @@ public class RbcModul extends Thread {
      */
     public void startTmsServer(String sHost) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
-        this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfTMSServer);
+        this.iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfTMSServer);
         EventBusManager EM = null;
         try {
             EM = EventBusManager.registerOrGetBus(1, false);

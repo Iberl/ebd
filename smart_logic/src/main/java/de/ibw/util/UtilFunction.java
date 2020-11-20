@@ -13,7 +13,7 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
@@ -21,11 +21,9 @@ import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
-import javax.sound.midi.Track;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 
-import static de.ibw.tms.etcs.Q_SCALE.SCALE_10_CM;
 import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER;
 import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE;
 
@@ -356,7 +354,7 @@ public class UtilFunction {
                 positionInfo.q_length == Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE) {
            return new BigDecimal(positionInfo.l_trainint);
         } else {
-            BigDecimal dLength = new BigDecimal(ConfigHandler.getInstance().D_DEFAULT_MIN_LENGTH);
+            BigDecimal dLength = new BigDecimal(SlConfigHandler.getInstance().D_DEFAULT_MIN_LENGTH);
             if(dLength.compareTo(new BigDecimal("0")) < 0)
                 throw new InvalidParameterException("The default length of trains must not be negative");
             return dLength;

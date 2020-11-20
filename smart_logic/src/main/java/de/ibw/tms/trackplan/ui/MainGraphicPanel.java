@@ -4,16 +4,8 @@ import de.ibw.feed.Balise;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.RailConnector;
-import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
-import de.ibw.tms.plan.elements.CrossoverModel;
-import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -23,7 +15,7 @@ import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
@@ -256,7 +248,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         //g2d.translate(t_Model.getdMoveX(), t_Model.getdMoveY());
         
         g2d.setPaint(Color.cyan);
-        ConfigHandler CH = ConfigHandler.getInstance();
+        SlConfigHandler CH = SlConfigHandler.getInstance();
 
         for(Object OCrossover: PlanData.getInstance().branchingSwitchList) {
             BranchingSwitch C = (BranchingSwitch) OCrossover;

@@ -10,7 +10,7 @@ import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.ma.positioned.elements.NetEntity;
 import de.ibw.tms.ma.positioned.elements.SmartLogicArea;
 import de.ibw.tms.plan.elements.model.PlanData;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.payload.Payload_14;
@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 
@@ -76,7 +74,7 @@ public class SmartLogic extends NetEntity {
     public static boolean isInShutdown = false;
 
     public static void shutdownSmartLogic() {
-        if(!ConfigHandler.getInstance().isInTestMode) {
+        if(!SlConfigHandler.getInstance().isInTestMode) {
             if(SmartLogic.EM != null) EM.log("Shudown of Smart Logic only allowed in Test-Mode.", SMART_LOGIC);
         }
         isInShutdown = true;
