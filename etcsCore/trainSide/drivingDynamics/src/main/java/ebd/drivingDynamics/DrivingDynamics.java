@@ -373,8 +373,7 @@ public class DrivingDynamics {
                 }
             }
             else {
-                if(!this.finalRSMBreaking) this.breakModifierForRSM = calculateRSMBreakModifier();
-                if(this.breakModifierForRSM > 0) this.finalRSMBreaking = true;
+                this.breakModifierForRSM = calculateRSMBreakModifier();
                 /*
                 This control flow is necessary in case the train emergency breaks into RSM.
                 It allows the train to accelerate again until the stopping region is reached.
@@ -499,22 +498,28 @@ public class DrivingDynamics {
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance
                                     - this.dynamicState.getDistanceToStartOfProfile()
-                                    - (0.25 * ch.targetReachedDistance); //
-        if(distanceToEOA <= 0){
+                                    - (0.25 * ch.targetReachedDistance); //Aiming for a point shortly before the EOA
+        if(distanceToEOA <= 0) return 1; //If EOA was passed, maximum breaks are applied
+
+        double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
+        neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
+
+        double modifier = -neededBreakingACC/maxBreakingAcc;
+        if(this.finalRSMBreaking) modifier = Math.max(modifier, this.breakModifierForRSM); //once breaks are applied, they are not released.
+
+        if(modifier > 1){
             return 1;
         }
-        else {
-            double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
-            neededBreakingACC -= this.routeDataVolatile.getCurrentGradient() * 9.81 * 0.001;
-            double modifier = -neededBreakingACC/maxBreakingAcc;
-            if(modifier > 1){
-                return 1;
-            }
-            else if(modifier < 0.5){
-                return 0;
-            }
-            return modifier;
+        else if(modifier < 0.5){
+            return 0;
         }
+        else {
+            this.finalRSMBreaking = true;
+        }
+
+
+        return modifier;
+
     }
 
     /**
