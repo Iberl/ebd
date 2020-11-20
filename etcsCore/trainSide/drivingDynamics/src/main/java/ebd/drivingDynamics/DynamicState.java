@@ -35,17 +35,7 @@ public class DynamicState {
      */
     private double acceleration;
 
-    /**
-     * Current movement state as defined in {@link MovementState}
-     */
-    private MovementState movementState;
-
-    /**
-     * Previous movement state as defined in {@link MovementState} for logging
-     */
-    private MovementState prevMovementState = null;
-
-    private AvailableAcceleration availableAcceleration;
+    private final AvailableAcceleration availableAcceleration;
 
     /**
      * The Dynamic state. Has to be newly set at each journeys starts, which can only be done while standing still.
@@ -59,7 +49,6 @@ public class DynamicState {
         this.distanceToStartOfProfile = 0;
         this.speed = 0;
         this.acceleration = 0;
-        this.movementState = MovementState.HALTING;
         this.availableAcceleration = availableAcceleration;
     }
 
@@ -69,7 +58,7 @@ public class DynamicState {
      */
     public void nextState(double deltaT){
         this.time += deltaT;
-        this.acceleration = this.availableAcceleration.getAcceleration(this.speed, this.distanceToStartOfProfile, this.movementState);
+        this.acceleration = this.availableAcceleration.getAcceleration(this.speed, this.distanceToStartOfProfile);
         this.speed += this.acceleration * deltaT;
         if(this.speed < 0) this.speed = 0;
         this.position.setIncrement(this.position.getIncrement() + this.speed * deltaT);
@@ -122,11 +111,8 @@ public class DynamicState {
         return acceleration;
     }
 
-    /**
-     * Current movement state as defined in {@link MovementState}
-     */
-    public MovementState getMovementState() {
-        return movementState;
+    public MovementState getMovementState(){
+        return this.availableAcceleration.getTargetMoveState();
     }
 
     /*
@@ -146,7 +132,7 @@ public class DynamicState {
      * @param movementState see {@link MovementState}
      */
     public void setMovementState(MovementState movementState) {
-        this.movementState = movementState;
+        this.availableAcceleration.setTargetMoveState(movementState);
     }
 
     /**
@@ -161,14 +147,14 @@ public class DynamicState {
     Sets the modifier for the available acceleration force
      */
     public void setAccelerationModification(double accelerationModification) {
-        this.availableAcceleration.setAccelerationModification(accelerationModification);
+        this.availableAcceleration.setTargetAccelerationModification(accelerationModification);
     }
 
     /*
     Sets the modifier for the available breaking force
      */
     public void setBreakingModification(double breakingModification) {
-        this.availableAcceleration.setBreakingModification(breakingModification);
+        this.availableAcceleration.setTargetBreakingModification(breakingModification);
     }
 
     public void setDistanceToStartOfProfile(double distance){

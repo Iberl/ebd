@@ -496,7 +496,7 @@ public class DrivingDynamics {
         double maxBreakingAcc = this.trainDataVolatile.getCurrentServiceBreakingPower().getPointOnCurve(currentSpeed);
         double distanceToEOA = this.maxTripSectionDistance
                                     - this.dynamicState.getDistanceToStartOfProfile()
-                                    - (0.25 * ch.targetReachedDistance); //Aiming for a point shortly before the EOA
+                                    - (0.5 * ch.targetReachedDistance); //Aiming for a point shortly before the EOA
         if(distanceToEOA <= 0) return 1; //If EOA was passed, maximum breaks are applied
 
         double neededBreakingACC = -0.5 * Math.pow(currentSpeed,2) / distanceToEOA;
@@ -561,7 +561,7 @@ public class DrivingDynamics {
         this.actionList.remove(0);
         this.actionList.add(action);
 
-        Action tempAction = action;//getActionFromActionList();
+        Action tempAction = getActionFromActionList();
 
         if (tempAction instanceof AccelerationAction) {
             this.dynamicState.setMovementState(MovementState.ACCELERATING);
