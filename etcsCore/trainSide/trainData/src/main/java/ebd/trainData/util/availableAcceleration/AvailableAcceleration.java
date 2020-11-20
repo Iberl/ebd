@@ -37,7 +37,7 @@ public class AvailableAcceleration {
     private MovementState awaitedMoveState = MovementState.UNCHANGED;
     private MovementState curMoveState = MovementState.UNCHANGED;
 
-    private long timeAtLastChange = 0;
+    private double timeAtLastChange = 0;
     private double curTimeToChange = 0;
 
     public AvailableAcceleration(EventBus eventBus){
@@ -118,7 +118,7 @@ public class AvailableAcceleration {
      */
     private double getTimeBasedAcc(double currentSpeed, MovementState movementState){
         System.out.println("-----");
-        double timeSinceChange = (System.currentTimeMillis() - this.timeAtLastChange) / 1000.0;
+        double timeSinceChange = System.currentTimeMillis() - this.timeAtLastChange;
 
         double curMaxAcc = getMaxAcc(currentSpeed, this.curMoveState);
 
@@ -129,12 +129,27 @@ public class AvailableAcceleration {
         };
         boolean change = this.awaitedMoveState != movementState && movementState != MovementState.UNCHANGED;
         if (change && this.awaitedMoveState != this.curMoveState){
-            //Detecting a switch in requested movement, but we are already in phase one, so we only change the target
+
             this.awaitedMoveState = movementState;
+            //Detecting a switch in requested movement, being already in phase one, so only the target is changed
+            if(movementState != this.curMoveState) this.awaitedMoveState = movementState;
+            //Detecting a switch in requested movement, being in phase one but change directly into phase 2
+            else {
+                double timeToChange = switch (this.curMoveState) {
+                    case ACCELERATING -> ch.accRiseTime;
+                    case NORMAL_BREAKING, SERVICE_BREAKING -> ch.breakRiseTime;
+                    case EMERGENCY_BREAKING -> ch.emBreakRiseTime;
+                    default -> 0;
+                };
+                //
+                timeSinceChange = timeToChange * Math.min(1, timeSinceChange/this.curTimeToChange);
+                this.curTimeToChange = timeToChange;
+                this.timeAtLastChange = System.currentTimeMillis() - timeSinceChange;
+            }
         }
         else if(change) {
             //Detecting a switch in requested movement, starting transition phase one
-            this.timeAtLastChange = System.currentTimeMillis();
+            this.timeAtLastChange = System.currentTimeMillis() / 1000.0;
             this.awaitedMoveState = movementState;
 
             double timeToChange = switch (this.curMoveState){
@@ -173,7 +188,7 @@ public class AvailableAcceleration {
             System.out.println("case2");
             //Transition from current MovementState to awaited MovementState has been reached, starting phase two
             this.curMoveState = this.awaitedMoveState;
-            this.timeAtLastChange = System.currentTimeMillis();
+            this.timeAtLastChange = System.currentTimeMillis() / 1000.0;
             this.curTimeToChange = switch (this.awaitedMoveState){
                 case ACCELERATING -> ch.accRiseTime;
                 case NORMAL_BREAKING, SERVICE_BREAKING -> ch.breakRiseTime;
