@@ -1,16 +1,24 @@
 package de.ibw.tms.plan.elements.model;
 
+import de.ibw.feed.BaliseExtractor;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.*;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
+import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.DummyChainageSupply;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -18,18 +26,30 @@ import de.ibw.tms.plan_pro.adapter.topology.intf.ChainageSupplyInterface;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ITopologyFactory;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
+import de.ibw.tms.trackplan.viewmodel.TranslationModel;
+import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.dbd.client.extension.RealDbdClient;
+import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.w3c.dom.Node;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
+import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Flow;
@@ -41,8 +61,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
  */
 public class PlanData implements Flow.Subscriber<GradientProfile> {
 
@@ -50,7 +70,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private ITopologyFactory topologyFactory;
 
-    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws JAXBException {
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException {
         if(topologyFactory == null) {
             this.topologyFactory = new TopologyFactory();
         }
@@ -71,7 +91,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     /**
      * Ein Reposory der als Schl&uuml;ssel den Identifieer eine PlanPro-GeoKnoten h&auml;lt und als Wert Geo-Coordinaten bereitstellt.
      */
-    public static DefaultRepo<String, GeoCoordinates> GeoNodeRepo = new DefaultRepo<>();
+    public static DefaultRepo<String, GeometricCoordinate> GeoNodeRepo = new DefaultRepo<>();
     /**
      * Bahnh&ouml;fe noch nicht vollst&auml;ndig implementiert
      */
@@ -80,14 +100,21 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W13 und als Value die Weiche
      */
-    public static ThreadedRepo<String, TopologyGraph.Node> SwitchRepo = new ThreadedRepo<>();
+    public static ThreadedRepo<String, NodeInformation> SwitchRepo = new ThreadedRepo<>();
 
     public static ThreadedRepo<TopologyGraph.Node, String> SwitchIdRepo = new ThreadedRepo<>();
+
+    public static ThreadedRepo<CWKrAnlage, ArrayList<CrossingSwitch>> CrossingSwitchRepoByAnlage = new ThreadedRepo<>();
 
     /**
      * Ein Repository speichert als Schl&uuml;ssel die EBD-Bezeichnung 12W8L und als Value die Kante
      */
     public static ThreadedRepo<String, TopologyGraph.Edge> EdgeIdLookupRepo = new ThreadedRepo<>();
+
+    /**
+     * Ein Repository speichert zu jeder Kante die eindeutige BereichsId 12W8L
+     */
+    public static ThreadedRepo<TopologyGraph.Edge, String> EdgeLookupByIdRepo = new ThreadedRepo<>();
 
 
     /**
@@ -105,39 +132,39 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      */
     public static class TrackElementPositionCalc {
         /**
-         * {@link HashMap} zum Ermitteln des Gleis {@link Rail} aus einem {@link Trail} - TrackElement eines Gleismodells
+         * {@link HashMap} zum Ermitteln des Gleis {@link Rail} - TrackElement eines Gleismodells
          */
-        private static HashMap<TrackElement, Line2D.Double> positionMap = new HashMap<TrackElement, Line2D.Double>();
+        private static HashMap<PositioningNetElement, Line2D.Double> positionMap = new HashMap<>();
         /**
          * Bisher unbenutzt
          * {@link HashMap} zum Ermitteln eines Point_RemoteOperated aus einem {@link BranchingSwitch} - TrackElement einer Weiche
          */
-        private static HashMap<TrackElement, Point2D.Double> pointMap = new HashMap<TrackElement, Point2D.Double>();
+        private static HashMap<TopologyGraph.Node, Point2D.Double> pointMap = new HashMap<TopologyGraph.Node, Point2D.Double>();
 
         /**
-         * dieses Put gibt als Key ein {@link Trail} dem logischen Gleis zu dem Value eines geographischen Gleis {@link Rail}
-         * @param TE {@link TrackElement} - Ein logischen Gleis Trail
+         * dieses Put gibt als Key ein UI-Gleis dem logischen Gleis zu dem Value eines geographischen Gleis {@link Rail}
+         * @param TE {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge} - Ein logischen Gleis Trail
          * @param Line - ein {@link Rail} - geographisches Gleise
          */
-        public static void put(TrackElement TE, Line2D.Double Line) {
+        public static void put(TopologyGraph.Edge TE, Line2D.Double Line) {
             positionMap.put(TE, Line);
         }
 
         /**
          * dieses Put gibt als Key ein {@link Point_RemoteOperated} - ein Umschaltelement der Weiche als TrackElment zu dem Value eines {@link BranchingSwitch} - Trackelement einer Weiche
-         * @param TE - {@link TrackElement} - das UmschaltElement der Weiche
+         * @param TE - {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Node} - das UmschaltElement der Weiche
          * @param Point - {@link BranchingSwitch} - das Modell einer Weiche
          */
-        public static void put(TrackElement TE, Point2D.Double Point) {
+        public static void put(TopologyGraph.Node TE, Point2D.Double Point) {
             pointMap.put(TE, Point);
         }
 
         /**
          * Transferiert ein TrackElment zu einer zeichenbaren Linie
-         * @param TE - {@link TrackElement} - Ein logischen Gleis Trail
+         * @param TE - {@link PositioningNetElement} - Ein logischen Gleis Trail
          * @return Line2D.Double - Eine Rail die zeichnbar ist
          */
-        public static Line2D.Double translateTeToGraphic(TrackElement TE) {
+        public static Line2D.Double translateTeToGraphic(PositioningNetElement TE) {
             return positionMap.get(TE);
         }
         /*
@@ -216,7 +243,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     /**
      * Not used
      */
-    public static ArrayList<TrackElement> trainOccupiedList = new ArrayList<TrackElement>();
+    public static ArrayList trainOccupiedList = new ArrayList();
     /**
      * Not used
      */
@@ -299,7 +326,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             topologyFactory.connectTopology();
             topologyFactory.handleBranchingPoints();
             paintTopologyGraph(new DummyChainageSupply());
-            linkRailsToCrossover();
+            //linkRailsToCrossover();
             topologyFactory.getBalises();
 
             topologyFactory.mapBalisesToCoordinate();
@@ -307,22 +334,46 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setNodeToBranchingPoints();
             setEdges();
             System.out.println("Test");
-        } catch (JAXBException | ParseException e) {
+        } catch (ParseException | jakarta.xml.bind.JAXBException e) {
             e.printStackTrace();
         }
     }
 
     private void setEdges() {
         Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();
+        ArrayList<TopologyGraph.Edge> setEdges = new ArrayList<>();
         for(TopologyGraph.Edge E : edges) {
-            String Ref = null;
-            Ref = getRefIdOfEdge(E);
-            if (Ref == null) continue;
-            EdgeIdLookupRepo.update(Ref, E);
-
+            lookupNamesWithinDKW(setEdges, E);
 
         }
+        for(TopologyGraph.Edge E : edges) {
+            lookupOtherCrossings(setEdges, E);
+        }
 
+    }
+
+    private void lookupOtherCrossings(ArrayList<TopologyGraph.Edge> setEdges, TopologyGraph.Edge e) {
+        if(setEdges.contains(e)) return;
+        String Ref = null;
+        Ref = getRefIdOfEdge(e);
+        if (Ref == null) return;
+        EdgeIdLookupRepo.update(Ref, e);
+        EdgeLookupByIdRepo.update(e, Ref);
+    }
+
+    private void lookupNamesWithinDKW(ArrayList<TopologyGraph.Edge> setEdges, TopologyGraph.Edge e) {
+        String Ref;
+        TopologyConnect RefConnect = null;
+
+        TopologyGraph.Node A = e.A;
+        TopologyGraph.Node B = e.B;
+        if(checkSameAnlage(A,B,true)) {
+            Ref = handleSameAnlage(e);
+            EdgeIdLookupRepo.update(Ref, e);
+            EdgeLookupByIdRepo.update(e,Ref);
+            setEdges.add(e);
+
+        }
     }
 
     /**
@@ -331,52 +382,162 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
      * @return String - Bereichs-ID
      */
 
-    public String getRefIdOfEdge(TopologyGraph.Edge e) {
+    public static String getRefIdOfEdge(TopologyGraph.Edge e) {
         String Ref;
         TopologyConnect RefConnect = null;
+
         TopologyGraph.Node A = e.A;
         TopologyGraph.Node B = e.B;
+
+        if(checkSameAnlage(A,B,true)) return handleSameAnlage(e);
         String aId = SwitchIdRepo.getModel(A);
         String bId = SwitchIdRepo.getModel(B);
         if(aId == null && bId == null) return null;
+        boolean isDKW;
         if(aId == null) {
             Ref = bId;
             RefConnect = e.TopConnectFromB;
+
+            isDKW = checkSameAnlage(B,B, true);
         } else if(bId == null) {
             Ref = aId;
             RefConnect = e.TopConnectFromA;
+
+            isDKW = checkSameAnlage(A,A, true);
         } else {
+
+
             int aCrossingNumber = generateCrossingNumber(aId);
             int bCrossingNumber = generateCrossingNumber(bId);
             if(aCrossingNumber < bCrossingNumber) {
                 Ref = aId;
                 RefConnect = e.TopConnectFromA;
+
+                isDKW = checkSameAnlage(A,A, true);
             } else {
                 Ref = bId;
                 RefConnect = e.TopConnectFromB;
+
+                isDKW = checkSameAnlage(B,B, true);
             }
 
 
         }
-        switch (RefConnect) {
-            case LINKS: {
-                Ref += "L";
-                break;
-            } case RECHTS: {
-                Ref += "R";
-                break;
-            } case SPITZE: {
-                Ref += "S";
-                break;
-            } default: {
-                return null;
+        if(isDKW) {
+            CrossingSwitch CS;
+
+            if(Ref.equals(aId)) {
+                CS = (CrossingSwitch) A.NodeImpl;
+                List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
+                Ref = getLinkNameToDKW(CS, switchList);
+                return refOfNodeConnectingDKW(Ref, A, e ,RefConnect);
+            } else {
+                CS = (CrossingSwitch) B.NodeImpl;
+                List<CrossingSwitch> switchList = ISwitchHandler.getCrossingSwitches(CS.getAnlage());
+                Ref = getLinkNameToDKW(CS, switchList);
+                return refOfNodeConnectingDKW(Ref, B, e ,RefConnect);
             }
 
+
         }
+        Ref = addOrientation(Ref, RefConnect);
+
         return Ref;
     }
 
-    private int generateCrossingNumber(String crossId) {
+    private static String refOfNodeConnectingDKW(String ref, TopologyGraph.Node a, TopologyGraph.Edge e, TopologyConnect refConnect) {
+        if(refConnect.equals(TopologyConnect.LINKS)) return ref + "L";
+        if(refConnect.equals(TopologyConnect.RECHTS)) return ref + "R";
+        for(TopologyGraph.Edge E : a.inEdges) {
+            if(e.equals(E)) continue;
+            if(checkSameAnlage(E.A,E.B, true)) {
+                if (E.getRefId().endsWith("RR")) return ref + "R";
+                if (E.getRefId().endsWith("LL")) return ref + "L";
+            }
+        }
+        for(TopologyGraph.Edge E : a.outEdges) {
+            if(e.equals(E)) continue;
+            if(checkSameAnlage(E.A,E.B, true)) {
+                if (E.getRefId().endsWith("RR")) return ref + "R";
+                if (E.getRefId().endsWith("LL")) return ref + "L";
+            }
+        }
+        return ref + "E";
+    }
+
+    private static String getLinkNameToDKW(CrossingSwitch cs, List<CrossingSwitch> switchList) {
+        String sResult = cs.getElement().getBezeichnung().getKennzahl().getWert() + "W";
+        Integer iLowerNumber = null;
+        int iSearchedNumber = -1;
+        for(CrossingSwitch C : switchList) {
+            int iW = getCrossNumber(C);
+            iLowerNumber = handleLowerNumber(iLowerNumber, iW);
+            if(C.equals(cs)) {
+                iSearchedNumber = iW;
+            }
+        }
+        if(iLowerNumber == iSearchedNumber) return sResult + iLowerNumber + "AB";
+        else return sResult + iLowerNumber + "CD";
+
+    }
+
+    @NotNull
+    private static Integer handleLowerNumber(Integer iLowerNumber, int iW) {
+        if(iLowerNumber == null ) {
+            iLowerNumber = iW;
+        } else {
+            if(iLowerNumber > iW) iLowerNumber = iW;
+        }
+        return iLowerNumber;
+    }
+
+    private static int getCrossNumber(CrossingSwitch c) {
+        int iW = Integer.parseInt(c.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
+        return iW;
+    }
+
+    @Nullable
+    private static String addOrientation(String ref, TopologyConnect refConnect) {
+        if(refConnect == null) return ref + "E";
+        switch (refConnect) {
+            case LINKS: {
+                ref += "L";
+                break;
+            } case RECHTS: {
+                ref += "R";
+                break;
+            } case SPITZE: {
+                ref += "S";
+                break;
+            } default: {
+                return "E";
+            }
+
+        }
+        return ref;
+    }
+
+    /**
+     * checks if node a and b belongen to same Anlage
+     * @param a - Node A
+     * @param b - Node B
+     * @return true - same anlage else false
+     */
+    public static boolean checkSameAnlage(TopologyGraph.Node a, TopologyGraph.Node b, boolean shallBeDKW) {
+        CrossingSwitch CSA;
+        CrossingSwitch CSB;
+        try {
+            CSA = (CrossingSwitch) a.NodeImpl;
+            CSB = (CrossingSwitch) b.NodeImpl;
+        } catch(Exception E) {
+            return false;
+        }
+        if(CSA == null || CSB == null) return false;
+        if(shallBeDKW && !CSA.getAnlage().getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.DKW)) return false;
+        return CSA.isSameAnlage(CSB);
+    }
+
+    private static int generateCrossingNumber(String crossId) {
         return Integer.parseInt(crossId.split("W")[1]);
     }
 
@@ -408,53 +569,73 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
-            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
-            if(CS.isDKW()) {
-                switchId = handleDKW(CS);
-            } else {
-                switchId = CS.getEbdTitle();
 
-
-            }
+            switchId = CS.getEbdTitle(0,false, true);
+            N.name = switchId;
+            N.TopNodeId = switchId;
             if(switchId != null) {
-                SwitchRepo.update(switchId, N);
-                SwitchIdRepo.update(N, switchId);
+                ISwitchHandler.registerNode(N, switchId);
             }
+
 
 
 
         }
     }
 
-    private String handleDKW(CrossingSwitch CS) {
-        CWKrGspElement Element = CS.getElement();
-        if(Element == null) return null;
-        CBezeichnungElement B = Element.getBezeichnung();
+    private static String handleSameAnlage(TopologyGraph.Edge E) {
+        String Ref;
+        TopologyGraph.Node A = E.A;
+        TopologyGraph.Node B = E.B;
+        CrossingSwitch CSA = (CrossingSwitch) A.NodeImpl;
+        CrossingSwitch CSB = (CrossingSwitch) B.NodeImpl;
+        boolean isADominating = isADominating(CSA, CSB);
+        CWKrGspElement RefElement = null;
+        if(isADominating) {
+            Ref =  initRef(CSA);
+            Ref = addOrientation(Ref, E.TopConnectFromA);
 
-        return B.getBezeichnungTabelle().getWert();
-
-
+            return addOrientation(Ref, E.TopConnectFromB);
+        } else {
+            Ref = initRef(CSB);
+            Ref = addOrientation(Ref, E.TopConnectFromB);
+            return addOrientation(Ref, E.TopConnectFromA);
+        }
     }
 
+    @Nullable
+    private static String initRef(CrossingSwitch CS) {
+            CWKrGspElement RefElement;
+            String Ref;
+            RefElement = CS.getElement();
+            if(RefElement == null) return null;
+            CBezeichnungElement Bez = RefElement.getBezeichnung();
+            return Bez.getBezeichnungTabelle().getWert();
+    }
+
+    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
+        return Integer.parseInt(CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert())
+                < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
+    }
+
+    /**
+     * @deprecated
+     */
     private void linkRailsToCrossover() {
+        throw new NotImplementedException("deprecated");/*
         Collection<CrossoverModel> models = CrossoverModel.CrossoverRepo.getAll();
         for(CrossoverModel M: models) {
             M.createPositionedRelation();
 
         }
-
+        */
     }
 
     private void paintTopologyGraph(ChainageSupplyInterface ChainageSupply) {
 
 
         DefaultRepo<TopologyGraph.Node, RailConnector> railConnectorRepo = new DefaultRepo<>();
-        EdgeOfMap LeftEnd = new EdgeOfMap("Left Adorf");
-        LeftEnd.setChainageBeginn(new Chainage(0));
-        LeftEnd.setChainageEnd(new Chainage(0));
-        RightEnd = new EdgeOfMap("Right Cehausen");
-        RightEnd.setChainageBeginn(new Chainage(1000));
-        RightEnd.setChainageEnd(new Chainage(1000));
+
 
 
         // Balisenconnectors
@@ -541,19 +722,21 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 //TODO
+                    /*
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
                             ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
+                    */
                 } else {
-
+                    /*
 
                     Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
                             ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
                     R.setEdge(E);
                     E.setRail(R);
 
-
+                    */
 
                 }
             }
@@ -564,7 +747,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
             try {
-                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle();
+                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle(0,false,true);
             } catch(Exception E) {
                 sName = "";
             }
@@ -579,7 +762,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         if(connectN.equals(TopologyConnect.SPITZE)) {
             try {
-                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle();
+                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle(0,false,true);
             } catch(Exception E) {
                 sName = "";
             }
@@ -605,7 +788,14 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
     }
 
+    /**
+     * @deprecated
+     * @param BeheimWholeSection
+     * @return
+     */
     private ArrayList<GradientSegment> generateGradient4Beheim(SectionOfLine BeheimWholeSection) {
+        throw new NotImplementedException("deprecated");
+        /*
         ArrayList<GradientSegment> gradientProfiles = new ArrayList<>();
         Chainage LeftChainage = new Chainage(0);
         Chainage B2Chainage = new Chainage(982);
@@ -627,35 +817,35 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         GradientSegment GS_0_1000_8 = new GradientSegment(LeftLocation, B2Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient8 = new ETCS_GRADIENT();
         etcsGradient8.bGradient = 8;
-        GS_0_1000_8.setGradient(etcsGradient8, true);
+        //GS_0_1000_8.setGradient(etcsGradient8, true);
         gradientProfiles.add(GS_0_1000_8);
 
         GradientSegment GS_1000_1900_0 = new GradientSegment(B2Location, B4Location,ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient0 = new ETCS_GRADIENT();
         etcsGradient0.bGradient = 0;
-        GS_1000_1900_0.setGradient(etcsGradient0, false);
+        //GS_1000_1900_0.setGradient(etcsGradient0, false);
         gradientProfiles.add(GS_1000_1900_0);
 
         GradientSegment GS_1900_2200_M10 = new GradientSegment(B4Location,B5Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradientM10 = new ETCS_GRADIENT();
         etcsGradientM10.bGradient = 10;
-        GS_1900_2200_M10.setGradient(etcsGradientM10, false);
+        //GS_1900_2200_M10.setGradient(etcsGradientM10, false);
         gradientProfiles.add(GS_1900_2200_M10);
 
         GradientSegment GS_2200_2800_10 = new GradientSegment(B5Location, B8Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradient10 = new ETCS_GRADIENT();
         etcsGradient10.bGradient = 10;
-        GS_2200_2800_10.setGradient(etcsGradient10, true);
+        //GS_2200_2800_10.setGradient(etcsGradient10, true);
         gradientProfiles.add(GS_2200_2800_10);
 
         GradientSegment GS_2800_3000_M5 = new GradientSegment(B8Location, B9Location, ApplicationDirection.BOTH);
         ETCS_GRADIENT etcsGradientM5 = new ETCS_GRADIENT();
         etcsGradientM5.bGradient = 5;
-        GS_2800_3000_M5.setGradient(etcsGradientM5, false);
+        //GS_2800_3000_M5.setGradient(etcsGradientM5, false);
         gradientProfiles.add(GS_2800_3000_M5);
 
         GradientSegment GS_3000_3500_0 = new GradientSegment(B9Location, B10Location, ApplicationDirection.BOTH);
-        GS_3000_3500_0.setGradient(etcsGradient0, false);
+        //GS_3000_3500_0.setGradient(etcsGradient0, false);
         gradientProfiles.add(GS_3000_3500_0);
 
 
@@ -665,6 +855,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
         return gradientProfiles;
+
+         */
     }
 /*
     private void createBeheimPlan() {
@@ -876,7 +1068,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, sName,
                 ViewType);
         this.branchingSwitchList.add(C);
-        PlanData.TrackElementPositionCalc.put(Point.getRemotePoint(), C);
+
         return C;
     }
     /*

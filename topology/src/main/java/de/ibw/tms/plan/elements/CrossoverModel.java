@@ -2,10 +2,8 @@ package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.ma.physical.ControlledTrackElement;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.ma.topologie.PositionedRelation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -19,11 +17,11 @@ import java.util.List;
 /**
  * Branching Switch ein Modell einer Weiche Logischer Art.
  * Verbindet das Geographische Modell der Weiche {@link BranchingSwitch} mit dem Topologischen {@link TopologyGraph.Node}
- *
+ * @deprecated
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
  */
 public class CrossoverModel {
 
@@ -51,14 +49,12 @@ public class CrossoverModel {
     private TopologyConnect TopConnect;
     private SingleSlip RailWaySlip;
     private BranchingSwitch RailWaySwitch;
-    private PositionedRelation PosRelationA;
-    private PositionedRelation PosRelationB;
+    /*private PositionedRelation PosRelationA;
+    private PositionedRelation PosRelationB;*/
     private Rail PeekRail = null;
 
 
-    public BranchingSwitch getRailWaySwitch() {
-        return RailWaySwitch;
-    }
+
 
     private CrossoverModel(TopologyGraph.Node node, TopologyConnect topConnect, SingleSlip railWaySlip, BranchingSwitch railWaySwitch) {
         Node = node;
@@ -96,15 +92,15 @@ public class CrossoverModel {
             isIndex_0_RightPosition = true;
         }
 
-
+        /*
         PosRelationA = new PositionedRelation();
-        PosRelationA.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailA.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
+        PosRelationA.createPositionedRelation(null,
+                null, null, true, PlanData.vmax, ApplicationDirection.BOTH,
                     new TrackElementStatus()
             );
         PosRelationB = new PositionedRelation();
-        PosRelationB.createPositionedRelation((TrackElement) this.RailWaySwitch.getBranchingPoint(),
-                PeekRail.getTrailModel(), RailB.getTrailModel(), true, PlanData.vmax, ApplicationDirection.BOTH,
+        PosRelationB.createPositionedRelation(null,
+                null, null, true, PlanData.vmax, ApplicationDirection.BOTH,
                 new TrackElementStatus()
         );
         List<PositionedRelation> list = new ArrayList<PositionedRelation>();
@@ -123,7 +119,7 @@ public class CrossoverModel {
         }
         this.RailWaySlip.setOutputRelation(PosRelationA);
 
-
+        */
     }
 
     private boolean checkCrossingSwitchIsFirstRight(ArrayList<TopologyGraph.Edge> notPeekEdges) throws Exception {

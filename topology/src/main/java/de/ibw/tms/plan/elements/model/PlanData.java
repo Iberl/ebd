@@ -323,7 +323,7 @@ public class PlanData {
             if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
-            N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
+            //N.getModel().getRailWaySwitch().setsBrachName(CS.getEbdTitle());
             if(CS.isDKW()) {
                 handleDKW();
             } else {
@@ -425,12 +425,9 @@ public class PlanData {
                 Chainage ChainageN = ChainageSupply.getModel(N);
                 Chainage ChainageN2 = ChainageSupply.getModel(N2);
 
-                float x1 = N.getGeoCoordinates().getFloatX();
-                float y1 = N.getGeoCoordinates().getFloatY();
-                float x2 = N2.getGeoCoordinates().getFloatX();
-                float y2 = N2.getGeoCoordinates().getFloatY();
 
-                handleCrossoverInput(N, N2, ConnectN2, ConnectN, ChainageN, ChainageN2, x1, y1, x2, y2);
+
+                handleCrossoverInput(N, N2, ConnectN2, ConnectN, ChainageN, ChainageN2);
 
 
                 if(!visitedNodes.getModel(N2)) {
@@ -446,17 +443,6 @@ public class PlanData {
 
 
 //TODO
-                    Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
-                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
-                    R.setEdge(E);
-                    E.setRail(R);
-                } else {
-
-
-                    Rail R = new Rail(x1,y1,x2,y2, this.railList,null,null,ChainageN,ChainageN2,ApplicationDirection.BOTH
-                            ,vmax  , ApplicationDirection.BOTH, new TrackElementStatus());
-                    R.setEdge(E);
-                    E.setRail(R);
 
 
 
@@ -465,7 +451,7 @@ public class PlanData {
         }
     }
 
-    private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2, float x1, float y1, float x2, float y2) {
+    private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2) {
         String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
             try {
@@ -474,11 +460,10 @@ public class PlanData {
                 sName = "";
             }
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN2);
-            BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x2,
-                    y2,sName, BranchingSwitch.ViewType.Branch_LRU);
 
 
-            CrossoverModel.createCrossoverModel(n2, connectN2, RailWaySwitchSlip, RailwaySwitch);
+
+            //CrossoverModel.createCrossoverModel(n2, connectN2, RailWaySwitchSlip, RailwaySwitch);
 
         }
 
@@ -489,11 +474,10 @@ public class PlanData {
                 sName = "";
             }
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN);
-            BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x1,
-                    y1,sName, BranchingSwitch.ViewType.Branch_LRU);
 
 
-            CrossoverModel.createCrossoverModel(n, connectN, RailWaySwitchSlip, RailwaySwitch);
+
+
         }
     }
 

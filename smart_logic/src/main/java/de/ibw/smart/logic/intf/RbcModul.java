@@ -1,7 +1,7 @@
 package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.Payload;
@@ -236,8 +236,8 @@ public class RbcModul extends Thread {
          * @param ExecutingModul - Ausf&uuml;hrendes Modul
          */
         public SL_To_RBC_ClientThread(Message M, RbcModul ExecutingModul) {
-            this.sHost = ConfigHandler.getInstance().ipOfRBCServer;
-            this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfRBCServer);
+            this.sHost = SlConfigHandler.getInstance().ipOfRBCServer;
+            this.iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfRBCServer);
             this.M = M;
             this.ExecutingModul = ExecutingModul;
 
@@ -290,14 +290,14 @@ public class RbcModul extends Thread {
         @Override
         public void channelActive(ChannelHandlerContext channelHandlerContext) throws MissingInformationException {
             if(M != null) {
-                if(EM != null) EM.log("SL trys sending Message to RBC", RBC_MODUL);
+                if(EM != null) EM.log("Successfully connected to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
                 String sSend = M.parseToJson() + "\n";
                 channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sSend, CharsetUtil.UTF_8));
-                EM.log("SL has send message to RBC", RBC_MODUL);
+                EM.log("SL has send message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
             } else {
-                if(EM != null) EM.log("SL trys sending Message to RBC", RBC_MODUL);
+                if(EM != null) EM.log("SL trys sending Message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
             }
         }
@@ -524,7 +524,7 @@ public class RbcModul extends Thread {
             clientBootstrap.handler(new ChannelInitializer<SocketChannel>() {
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
                     socketChannel.pipeline().addLast(finalCustomHandlerTcpClient);
-                    if(finalEM != null) finalEM.log("SL opened Channel to RBC", RBC_MODUL);
+                    if(finalEM != null) finalEM.log("Try to connect to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
 
                 }
@@ -597,7 +597,7 @@ public class RbcModul extends Thread {
      */
     public void startTmsServer(String sHost) throws InterruptedException {
         if(sHost == null) sHost = "localhost";
-        this.iPort = Integer.parseInt(ConfigHandler.getInstance().portOfTMSServer);
+        this.iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfTMSServer);
         EventBusManager EM = null;
         try {
             EM = EventBusManager.registerOrGetBus(1, false);

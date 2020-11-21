@@ -1,17 +1,19 @@
 package de.ibw.util;
 
 import de.ibw.feed.Balise;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.etcs.Q_SCALE;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
@@ -22,7 +24,9 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 
-import static ebd.messageLibrary.util.ETCSVariables.*;
+import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER;
+import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE;
+
 
 /**
  * Uitilities Allgemeiner Art
@@ -30,7 +34,7 @@ import static ebd.messageLibrary.util.ETCSVariables.*;
  * @author iberl@verkehr.tu-darmstadt.de
  *
  * @version 0.4
- * @since 2020-10-07
+ * @since 2020-11-05
  */
 public class UtilFunction {
 
@@ -57,8 +61,8 @@ public class UtilFunction {
         }
         SingleSlip Slip = CrossoverMod.getRailWaySlip();
         PositionedRelation PosRel = Slip.getOutputRelation();
-        TrackElement TE_From = PosRel.getFrom();
-        TrackElement TE_To = PosRel.getTo();
+        TrackEdge TE_From = (TrackEdge) PosRel.getFrom();
+        TrackEdge TE_To = (TrackEdge) PosRel.getTo();
         Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_From);
         Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_To);
         Rail R_Next = null;
@@ -78,19 +82,23 @@ public class UtilFunction {
     }
 
     private static BigDecimal calcDistanceFromDP(int q_scale, BigDecimal distance_from_dp) {
-        switch (q_scale) {
-            case Q_SCALE_10CM: {
+        Q_SCALE Q_S = Q_SCALE.getScale(q_scale);
+
+        switch (Q_S) {
+            case SCALE_10_CM: {
                 distance_from_dp = distance_from_dp.multiply(new BigDecimal(0.1d));
                 break;
             }
-            case Q_SCALE_1M: {
+            case SCALE_1_M: {
 
                 break;
             }
-            case Q_SCALE_10M: {
+            case SCALE_10_M: {
                 distance_from_dp = distance_from_dp.multiply(new BigDecimal(10.0d));
                 break;
             }
+            default:
+                throw new IllegalStateException("Unexpected value: " + q_scale);
         }
         return distance_from_dp;
     }
@@ -124,9 +132,9 @@ public class UtilFunction {
         try {
             boolean b_A_IsTarget = false;
             iEngineId = PositonReport.trainInfo.nid_engine;
-            BigDecimal distanceToNextTargetPoint = new BigDecimal(0);
+            BigDecimal distanceToNextTargetPoint = null;
             Tm = TrainModel.TrainRepo.getModel(iEngineId);
-            boolean q_dirlrbgNominal = PositonReport.positionInfo.q_dirlrbg == 1;
+
             if (Tm == null) {
                 Tm = initTrainModel(iEngineId);
             }
@@ -156,7 +164,7 @@ public class UtilFunction {
             System.out.println("TMS " + "Engine ID: " + iEngineId + " POS_REP_Distance_RECOG_Q_SCALE: " + distance_from_dp);
 
             TopologyGraph topologyGraph = PlanData.topGraph;
-            TopologyGraph.Node TargetNode = B.getNodeInDirectionOfBaliseGroup(q_dirlrbgNominal);
+            TopologyGraph.Node TargetNode = null;
 
             TopologyGraph.Edge NewTrainPositionEdge = topologyGraph.edgeRepo.get(CurrentTopKante.getIdentitaet().getWert());
             if(NewTrainPositionEdge == null) {
@@ -246,8 +254,8 @@ public class UtilFunction {
             CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
             CGEOKnoten GeoNodeA = (CGEOKnoten) geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
             CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
-            GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
-            GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+            GeometricCoordinate Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
+            GeometricCoordinate Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
 
             Tm.setEdgeTrainStandsOn(NewTrainPositionEdge);
@@ -328,7 +336,6 @@ public class UtilFunction {
 
 
         } catch(Exception E) {
-            E.printStackTrace();
             return null;
         }
         return Tm;
@@ -347,7 +354,7 @@ public class UtilFunction {
                 positionInfo.q_length == Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE) {
            return new BigDecimal(positionInfo.l_trainint);
         } else {
-            BigDecimal dLength = new BigDecimal(ConfigHandler.getInstance().D_DEFAULT_MIN_LENGTH);
+            BigDecimal dLength = new BigDecimal(SlConfigHandler.getInstance().D_DEFAULT_MIN_LENGTH);
             if(dLength.compareTo(new BigDecimal("0")) < 0)
                 throw new InvalidParameterException("The default length of trains must not be negative");
             return dLength;
@@ -380,11 +387,11 @@ public class UtilFunction {
      * Gegeben sind zwei Coordinaten. In der Linie auf den beiden Coordinate wird der Punkt widergegeben der den Abstand dA von Coordinate A hat.
      * @param CalcTarget {@link ICoord} Die ZielCoordinate, das Ergebnis
      * @param dA - Abstand zu Coordinate A
-     * @param geo_A - {@link GeoCoordinates} A
-     * @param geo_B {@link GeoCoordinates} B
+     * @param geo_A - {@link GeometricCoordinate} A
+     * @param geo_B {@link GeometricCoordinate} B
      * @return ICoord - Ergebnis
      */
-    public static ICoord<Double> calcTargetGeoByStartPoint(ICoord<Double> CalcTarget, double dA, GeoCoordinates geo_A, GeoCoordinates geo_B) {
+    public static ICoord<Double> calcTargetGeoByStartPoint(ICoord<Double> CalcTarget, double dA, GeometricCoordinate geo_A, GeometricCoordinate geo_B) {
         double dx_diff = geo_B.getX() - geo_A.getX();
         if(dx_diff == 0d) {
             double dYnew = geo_A.getY() + dA;
@@ -404,5 +411,24 @@ public class UtilFunction {
 
         }
         return CalcTarget;
+    }
+
+    /**
+     * Intrinisic calculator
+     * @param dTopLength - double whole edge length
+     * @param scale {@link de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE} - Q_Scale
+     * @param iDistance int - distance in q_scale units
+     * @return double - result in 0 - 1 as percents but not form 0 to 100, but form 0.0 to 1.0
+     */
+    public static double generateIntrinsic(double dTopLength, Occupation.BLOCK_Q_SCALE scale, int iDistance) {
+        if(iDistance + 1 >= dTopLength) return 1;
+        BigDecimal dTop = new BigDecimal(dTopLength);
+        BigDecimal dDistance = new BigDecimal(iDistance);
+        BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
+        BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));
+        if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dTop) <= 0) {
+           return dPartDistance.divide(dTop).doubleValue();
+        }
+        throw new InvalidParameterException("Subdistance has to be larger than 0 but smaller than whole Edgelength");
     }
 }

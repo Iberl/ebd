@@ -2,8 +2,9 @@ package de.ibw.smart.logic;
 
 
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.core.util.server.GUIServer;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.logger.ToLogEvent;
 import ebd.logging.Logging;
 import org.greenrobot.eventbus.EventBus;
@@ -74,6 +75,13 @@ public class EventBusManager {
         new Thread() {
             public void run() {
 
+                if(ConfigHandler.getInstance().debug) {
+                    String prefix = "sl 00001";
+                    if(EventBusManager.this.isTMS) {
+                        prefix = "tms 00001";
+                    }
+                    System.out.println("csv" + ";" + prefix + ";" + sModuleId + ";" +sMsg);
+                }
                 EventBusManager.this.LocalBus.post(new ToLogEvent(sModuleId, "log", sMsg));
 
             }
@@ -90,10 +98,10 @@ public class EventBusManager {
         Integer iServerPort = null;
         EventBusManager BusManager = null;
         if(bIsTMS) {
-            iServerPort = Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer4TMS);
+            iServerPort = Integer.parseInt(SlConfigHandler.getInstance().portOfGUIServer4TMS);
 
         } else {
-            iServerPort = Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer4SL);
+            iServerPort = Integer.parseInt(SlConfigHandler.getInstance().portOfGUIServer4SL);
         }
         BusManager = EventBusManager.registerOrGetBus(1, bIsTMS);
         return new GUIServer(BusManager.LocalBus, iServerPort);
@@ -105,8 +113,8 @@ public class EventBusManager {
      * @throws Exception - test
      */
     public static void main(String args[]) throws Exception {
-        int iGuiServerPortTms = Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer4TMS);
-        int iGuiServerPortSl = Integer.parseInt(ConfigHandler.getInstance().portOfGUIServer4SL);
+        int iGuiServerPortTms = Integer.parseInt(SlConfigHandler.getInstance().portOfGUIServer4TMS);
+        int iGuiServerPortSl = Integer.parseInt(SlConfigHandler.getInstance().portOfGUIServer4SL);
         EventBusManager ebmTms = EventBusManager.registerOrGetBus(1, true);
         EventBusManager ebmSl = EventBusManager.registerOrGetBus(1, false);
 

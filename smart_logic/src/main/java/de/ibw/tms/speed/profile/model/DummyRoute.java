@@ -1,13 +1,19 @@
 package de.ibw.tms.speed.profile.model;
 
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DummyRoute extends Route {
+    public DummyRoute(List<RouteSection> sectionList) {
+        super(sectionList);
+    }
+    /*
     public DummyRoute() {
         ArrayList<Rail> railList = PlanData.getInstance().railList;
         ArrayList<BranchingSwitch> branchingSwitchList = PlanData.getInstance().branchingSwitchList;
@@ -26,11 +32,13 @@ public class DummyRoute extends Route {
             }
         }
 
-        this.setStartSpot(StartRail.getTrailModel(), 30);
+        this.setStartSpot(StartRail.getTrackSection(), 30);
         //this.setEndSpot(EndSwitch.getBranchingPoint(),EndSwitch.getBranchingPoint().getChainageBeginn().getiMeters());
         Rail R2 = railList.get(railList.size() -1);
-        this.setEndSpot(R2.getTrailModel(), 1000);
+        this.setEndSpot(R2.getTrackSection(), 1000);
 
 
     }
+
+     */
 }

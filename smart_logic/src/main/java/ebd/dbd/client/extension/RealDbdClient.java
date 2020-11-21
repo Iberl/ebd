@@ -3,7 +3,7 @@ package ebd.dbd.client.extension;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,7 +41,7 @@ public abstract class RealDbdClient implements IDbdClientInterface {
      * @return IDbdClientInterface - der Client
      */
     public static IDbdClientInterface getInstance() {
-        ConfigHandler ch  = ConfigHandler.getInstance();
+        SlConfigHandler ch  = SlConfigHandler.getInstance();
         DefaultRepo<String, Integer> initStateRepo = null;
         if(instance == null) {
             if (ch.isSimulatingEbd) {
@@ -67,7 +67,7 @@ public abstract class RealDbdClient implements IDbdClientInterface {
 
     }
 
-    private static DefaultRepo<String, Integer> prompt4InitialStateSetting(ConfigHandler ch) {
+    private static DefaultRepo<String, Integer> prompt4InitialStateSetting(SlConfigHandler ch) {
         final DefaultRepo<String, Integer>[] fakeRepo = new DefaultRepo[]{new DefaultRepo<>()};
         if(ch.shallUserPrompt4SimulationFile) {
             SwingUtilities.invokeLater(new Runnable() {

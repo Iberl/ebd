@@ -1,6 +1,7 @@
 package de.ibw.feed;
 
-import de.ibw.smart.logic.datatypes.BlockedArea;
+
+import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -257,11 +258,11 @@ public class Balise implements ICoord<Double> {
      * @return BlockedArea - Ausdehnung als Balise - streng genommen keine BlockedArea, aber praktisch,
      *                      bei Vergleich ob sich eine Balise mit anderen Bereichen schneidet.
      */
-    public BlockedArea createAreaFromBalise() {
+    public Occupation createAreaFromBalise() {
         return createDummyArea();
     }
 
-    private BlockedArea createDummyArea() {
+    private Occupation createDummyArea() {
         // ausdehnung um den Datenpunkt sicherheitshalber in beiden Richtung
         // Real abhängig vom Datenpunkt
         PlanData.getInstance();
@@ -269,12 +270,12 @@ public class Balise implements ICoord<Double> {
         BigDecimal dDistanceFromA = this.getBalisenPositionFromNodeA();
         BigDecimal dTrackLength = this.getLengthOfTopEdge();
         TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(this.TopPositionOfDataPoint.getIdentitaet().getWert());
-        BlockedArea.BLOCK_Q_SCALE scale = BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
+        
         BigDecimal dStart = dDistanceFromA.subtract(dDpLength);
         BigDecimal dEnd = dDistanceFromA.add(dDpLength);
         if(dStart.compareTo(new BigDecimal(0) ) < 0) dStart = new BigDecimal(0);
         if(dEnd.compareTo(dTrackLength) > 0) dEnd = dTrackLength;
-        return new BlockedArea(E,scale, dStart.intValue(), scale, dEnd.intValue() );
-
+        //return new Occupation(E,scale, dStart.intValue(), scale, dEnd.intValue() );
+        return null;
     }
 }

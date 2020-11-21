@@ -3,7 +3,6 @@ package de.ibw.tms.trackplan.ui;
 import de.ibw.tms.ma.physical.DoubleSlip;
 import de.ibw.tms.ma.physical.SingleSlip;
 import de.ibw.tms.ma.physical.SlipConnectionPoint;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
@@ -69,10 +68,11 @@ public class TrackPanel extends javax.swing.JPanel {
             if(SlipPoint instanceof SingleSlip) {
                 String desc = "Single Slip";
                 if(!isMainWindow) {
-                    this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl));
+                   // this.add(new RouteComponent(desc, ((SingleSlip) SlipPoint).getRemotePoint(), this.RouteCntrl));
                 }
             } else {
                 if(SlipPoint instanceof DoubleSlip) {
+                    /*
                     DoubleSlip DSlip = (DoubleSlip) SlipPoint;
                     String desc = "Double Slip";
                     TrackElement TeA = DSlip.getFirstSlipA().getRemotePoint();
@@ -85,11 +85,13 @@ public class TrackPanel extends javax.swing.JPanel {
                         this.add(new RouteComponent(sDescB, TeB,
                                 this.RouteCntrl));
                     }
+
+                     */
                 }
             }
         } else {
             if(!isMainWindow) {
-                this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl));
+                //this.add(new RouteComponent(((ITrack) this.TrackElementModel).getTrackReference(), this.RouteCntrl));
             }
         }
 

@@ -1,4 +1,4 @@
 package de.ibw.tms.ma.physical;
 
-public abstract class FlankAreaElement extends TrackElement {
+public abstract class FlankAreaElement {
 }

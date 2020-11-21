@@ -2,8 +2,8 @@ package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.SectionOfLine;
-import de.ibw.tms.ma.SpotLocation;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.elements.UiTools;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 
@@ -39,6 +39,7 @@ public class WaypointStart extends SpotLocation implements IWaypoint,IPaintable 
 
     }
     /**
+     * @deprecated
      * Generiert Start-Waypoint
      * @param C - unused
      * @param startElement - erstets Element der Route
@@ -46,7 +47,7 @@ public class WaypointStart extends SpotLocation implements IWaypoint,IPaintable 
      * @param xPixel int x-Zeichenpositon - nicht reale Position in der Streckenansicht.
      * @param yPixel int y-Zeichenpositon - nicht reale Position in der Streckenansicht.
      */
-    public WaypointStart(Chainage C, TrackElement startElement, SectionOfLine Section, int xPixel, int yPixel ) {
+    public WaypointStart(Chainage C, TrackEdge startElement, SectionOfLine Section, int xPixel, int yPixel ) {
         super(C,startElement,Section);
 
         this.x = xPixel;
@@ -84,12 +85,5 @@ public class WaypointStart extends SpotLocation implements IWaypoint,IPaintable 
         }
     }
 
-    /**
-     * Gibt TrackElment wider
-     * @return TrackElement
-     */
-    @Override
-    public TrackElement getTrackElement() {
-        return super.getTrackElement();
-    }
+
 }

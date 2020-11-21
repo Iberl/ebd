@@ -7,22 +7,23 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.ma.positioned.elements.NetEntity;
+import de.ibw.tms.ma.positioned.elements.SmartLogicArea;
 import de.ibw.tms.plan.elements.model.PlanData;
-import ebd.ConfigHandler;
-import ebd.core.util.server.GUIServer;
-import ebd.messageLibrary.util.ETCSVariables;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.payload.Payload_15;
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import ebd.core.util.server.GUIServer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SynchronousQueue;
 
@@ -35,7 +36,12 @@ import java.util.concurrent.SynchronousQueue;
  * @version 0.4
  * @since 2020-09-01
  */
-public class SmartLogic {
+public class SmartLogic extends NetEntity {
+    public static final String CLASS_IDENTIFIER = "smartLogic";
+
+    private SmartLogicArea smartLogicArea;
+
+
 
 
 
@@ -53,6 +59,10 @@ public class SmartLogic {
 
     private static SmartLogicLifecycleController LifeCycleController = new SmartLogicLifecycleController();
 
+    public SmartLogic() {
+        super(CLASS_IDENTIFIER);
+    }
+
     public static void addLifeCycleSubscriber(Flow.Subscriber S) {
         LifeCycleController.addSubscriber(S);
     }
@@ -64,7 +74,7 @@ public class SmartLogic {
     public static boolean isInShutdown = false;
 
     public static void shutdownSmartLogic() {
-        if(!ConfigHandler.getInstance().isInTestMode) {
+        if(!SlConfigHandler.getInstance().isInTestMode) {
             if(SmartLogic.EM != null) EM.log("Shudown of Smart Logic only allowed in Test-Mode.", SMART_LOGIC);
         }
         isInShutdown = true;
@@ -93,7 +103,9 @@ public class SmartLogic {
         }
         try {
             if (SL_UI_Server != null) {
-                SL_UI_Server.disconnect(null);
+
+                    SL_UI_Server.disconnect(null);
+
 
                 SL_UI_Server = null;
             }
@@ -188,12 +200,20 @@ public class SmartLogic {
      * Starten der SL
      */
     public static void startSmartLogic() {
+        if(EM != null) {
+            EM.log("Initialize smartLogic", getsModuleId(SMART_LOGIC));
+        }
         initSmartLogic();
         startSmartLogicModules();
         if(EM != null) {
-            EM.log("Smart Logic startet. Waiting for TMS", SMART_LOGIC);
+            EM.log("Smart Logic startet. Waiting for TMS 1", getsModuleId(SMART_LOGIC));
         }
 
+    }
+
+    @NotNull
+    public static String getsModuleId(String sKomponent) {
+        return sKomponent + " " + SmartLogic.iSmartId;
     }
 
     /**

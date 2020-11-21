@@ -3,7 +3,8 @@ package de.ibw.tms.speed.profile.view;
 import de.ibw.tms.co.CartesianPanel;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.location.LinearLocation;
+import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.speed.profile.controller.SegmentAddController;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
@@ -21,11 +22,11 @@ import java.util.List;
 import java.util.Objects;
 /**
  * Panel zum SSP Dialog
- *
+ * @deprecated
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-11
+ * @version 0.4
+ * @since 2020-11-09
  */
 public class SpeedPanel extends CartesianPanel {
 
@@ -88,29 +89,11 @@ public class SpeedPanel extends CartesianPanel {
                 float fSpeed = calcSpeed(y);
                 int iMeter = (int) fMeter;
                 int iEndMeter = SpeedPanel.this.WayEnd.getChainage().getiMeters();
-                TrackElement TeStart = SpeedPanel.this.WayStart.getTrackElement();
-                TrackElement TeEnd = SpeedPanel.this.WayEnd.getTrackElement();
+
                 int iSpeed = (int) fSpeed;
 
                 if(SpeedPanel.OpenAddDialog == null) {
-                    SpeedChange C1 = new SpeedChange(new Chainage(iMeter), TeStart, new SectionOfLine());
-                    SpeedChange C2 = new SpeedChange(new Chainage(iEndMeter), TeEnd, new SectionOfLine());
 
-                    SpeedSegment Segment = new SpeedSegment(C1,C2, ApplicationDirection.BOTH);
-                    ETCS_SPEED etcsSpeed = new ETCS_SPEED();
-                    etcsSpeed.bSpeed = (byte) (iSpeed / 5);
-                    Segment.setV_STATIC(etcsSpeed);
-                    SpeedSegmentViewModel Model = new SpeedSegmentViewModel(Segment);
-                    Model.setMinChainage(SpeedPanel.this.WayStart.getChainage());
-                    Model.setMaxChainage(SpeedPanel.this.WayEnd.getChainage());
-                    SegmentAddController Ctrl = new SegmentAddController();
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            SpeedPanel.OpenAddDialog = new AddSegmentDialog(Model, Ctrl);
-                            SpeedPanel.OpenAddDialog = null;
-                        }
-                    });
 
                 }
 
@@ -147,66 +130,17 @@ public class SpeedPanel extends CartesianPanel {
             if(EndConnectSegment == null) {
                 System.out.println("New Segment is whole track");
             } else {
-                SpotLocation BeginOfSegment = EndConnectSegment.getBegin();
-                BeginOfSegment.setChainage(InsertSegment.getSpeedChangeEnd().getChainage());
-                EndConnectSegment.setSpeedChangeBegin(BeginOfSegment);
-                newSegmentList.add(EndConnectSegment);
-                addRestSegments(segmentList, newSegmentList, EndConnectSegment);
+
             }
         } else if(EndConnectSegment == null) {
             addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
-
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
-            EndOfSegment.setChainage(InsertSegment.getBegin().getChainage());
-            BeginConnectSegment.setSpeedChangeEnd(EndOfSegment);
 
             newSegmentList.add(BeginConnectSegment);
             newSegmentList.add(InsertSegment);
 
         } else if(BeginConnectSegment == EndConnectSegment) {
-            int iStart = BeginConnectSegment.getBegin().getChainage().getiMeters();
-            int iMin = this.WayStart.getChainage().getiMeters();
-            int iEnd = EndConnectSegment.getSpeedChangeEnd().getChainage().getiMeters();
-            int iMax = this.WayEnd.getChainage().getiMeters();
-            if(iStart != iMin) {
-                addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
-            }
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
-            SpeedChange ScBeginLocation = new SpeedChange(new Chainage(iStart), EndOfSegment.getTrackElement(),
-                    new SectionOfLine());
-            SpeedSegment NewBeginSegment = new SpeedSegment(ScBeginLocation, InsertSegment.getBegin(), ApplicationDirection.BOTH);
-            NewBeginSegment.setV_STATIC(BeginConnectSegment.getV_STATIC());
-            newSegmentList.add(NewBeginSegment);
-
-            EndOfSegment.setChainage(InsertSegment.getBegin().getChainage());
-            BeginConnectSegment.setSpeedChangeEnd(EndOfSegment);
 
 
-            newSegmentList.add(InsertSegment);
-            Chainage ChEnd = new Chainage(iEnd);
-            SpeedChange SC = new SpeedChange(ChEnd, EndOfSegment.getTrackElement(), new SectionOfLine());
-            SpeedSegment NewEndSegment = new SpeedSegment(InsertSegment.getSpeedChangeEnd(),SC, ApplicationDirection.BOTH);
-            NewEndSegment.setV_STATIC(BeginConnectSegment.getV_STATIC());
-            newSegmentList.add(NewEndSegment);
-            if(iEnd != iMax) {
-                addRestSegments(segmentList, newSegmentList, EndConnectSegment);
-            }
-
-        } else {
-
-            addAllUntilInsertBegins(segmentList, newSegmentList, BeginConnectSegment);
-            SpotLocation EndOfSegment = BeginConnectSegment.getSpeedChangeEnd();
-            EndOfSegment.setChainage(InsertSegment.getBegin().getChainage());
-            BeginConnectSegment.setSpeedChangeEnd(EndOfSegment);
-
-            newSegmentList.add(BeginConnectSegment);
-            newSegmentList.add(InsertSegment);
-
-            SpotLocation BeginOfSegment = EndConnectSegment.getBegin();
-            BeginOfSegment.setChainage(InsertSegment.getSpeedChangeEnd().getChainage());
-            EndConnectSegment.setSpeedChangeBegin(BeginOfSegment);
-            newSegmentList.add(EndConnectSegment);
-            addRestSegments(segmentList, newSegmentList, EndConnectSegment);
 
         }
         NewProfile.setSpeedSegments(newSegmentList);
@@ -229,9 +163,7 @@ public class SpeedPanel extends CartesianPanel {
         boolean bEndConnectIsPassed = false;
         for(SpeedSegment S : segmentList) {
             if(bEndConnectIsPassed) {
-                SpeedSegment LastSegmentInOutputList = newSegmentList.get(newSegmentList.size() -1);
-                S.setSpeedChangeBegin(LastSegmentInOutputList.getSpeedChangeEnd());
-                newSegmentList.add(S);
+
             } else {
                 if(S == endConnectSegment) {
                     bEndConnectIsPassed = true;
@@ -242,19 +174,19 @@ public class SpeedPanel extends CartesianPanel {
     }
 
     private boolean endIsAfterEndOfInsert(SpeedSegment InsertSegment, SpeedSegment S) {
-        return S.getEnd().getChainage().getiMeters() > InsertSegment.getEnd().getChainage().getiMeters();
+        return false;
     }
 
     private boolean beginIsBeforeInsertEnd(SpeedSegment InsertSegment, SpeedSegment S) {
-        return S.getBegin().getChainage().getiMeters() <= InsertSegment.getEnd().getChainage().getiMeters();
+        return false;
     }
 
     private boolean beginIsBeforeBeginOfInsert(SpeedSegment InsertSegment, SpeedSegment S) {
-        return S.getBegin().getChainage().getiMeters() < InsertSegment.getBegin().getChainage().getiMeters();
+        return false;
     }
 
     private boolean endIsAfterBeginOfInsert(SpeedSegment InsertSegment, SpeedSegment end) {
-        return end.getEnd().getChainage().getiMeters() >= InsertSegment.getBegin().getChainage().getiMeters();
+        return false;
     }
 
     private float calcSpeed(int y) {
@@ -289,14 +221,8 @@ public class SpeedPanel extends CartesianPanel {
     }
 
     private SpeedSegment initDefaultSpeed() {
-        SpeedChange BeginnChange = new SpeedChange(WayStart.getChainage(), WayStart.getTrackElement(), new SectionOfLine());
-        //TODO SPEED Segment
-        SpeedChange EndChange = new SpeedChange(WayEnd.getChainage(), WayEnd.getTrackElement(), new SectionOfLine());
-        SpeedSegment Segment = new SpeedSegment(BeginnChange, EndChange, ApplicationDirection.BOTH);
-        ETCS_SPEED speed = new ETCS_SPEED();
-        speed.bSpeed = 32; // 160 km/h
-        Segment.setV_STATIC(speed);
-        return Segment;
+
+        return null;
     }
     private List<SpeedSegment> getSpeedSortedByXlocaton() {
         List<SpeedSegment> segments = new ArrayList<>();
@@ -314,13 +240,11 @@ public class SpeedPanel extends CartesianPanel {
             @Override
             public int compare(SpeedSegment lhs, SpeedSegment rhs) {
                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                if (lhs.getBegin().getChainage().getiMeters() > rhs.getBegin().getChainage().getiMeters()) return 1;
-                if (lhs.getBegin().getChainage().getiMeters() < rhs.getBegin().getChainage().getiMeters()) return -1;
-                if (lhs.getBegin().getChainage().getiMeters() == rhs.getBegin().getChainage().getiMeters()) {
+
                     if (lhs.getV_STATIC().bSpeed == 0) return 1;
                     else return -1;
-                }
-                return 0;
+
+
             }
         };
     }
@@ -330,8 +254,8 @@ public class SpeedPanel extends CartesianPanel {
 
 
 
-        this.WayStart = new WaypointStart(new Chainage(777),null,null,777,0);
-        this.WayEnd = new WaypointEnd(new Chainage(7777),null,null, 7777,0);
+        //this.WayStart = new WaypointStart(new Chainage(777),null,null,777,0);
+        //this.WayEnd = new WaypointEnd(new Chainage(7777),null,null, 7777,0);
     }
 
     @Override
@@ -368,8 +292,7 @@ public class SpeedPanel extends CartesianPanel {
 
             SpeedSegment Segment = segments.get(i);
             int iLastSpeed = -1;
-            int iBeginnMeter = Segment.getBegin().getChainage().getiMeters();
-            int iBeginnMeterNext = Segment.getEnd().getChainage().getiMeters();
+
             int iMeterNextPx = getiMeterFromSegment(iWayEnd, Segment);
             int iSpeed = Segment.getV_STATIC().bSpeed * 5;
             int iSpeedPx = getiSpeedPx(Segment);
@@ -407,8 +330,8 @@ public class SpeedPanel extends CartesianPanel {
     }
 
     protected int getiMeterFromSegment(float iWayEnd, SpeedSegment Segment) {
-        int iBeginnMeterNext = Segment.getEnd().getChainage().getiMeters();
-        return (int) Math.floor(SpeedPanel.X_AXIS_Y_COORD * iBeginnMeterNext / iWayEnd) + SpeedPanel.X_AXIS_FIRST_X_COORD;
+
+        return 0;
     }
 
 

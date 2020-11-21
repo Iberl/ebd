@@ -1,6 +1,5 @@
 package de.ibw.smart.logic.datatypes;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
@@ -13,21 +12,25 @@ import java.util.Objects;
 /**
  * Diese Klasse stellt Blockierte Gleisabschnitte dar.
  *
+ * @deprecated
+ *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-09-07
+ * @since 2020-11-10
  */
 public class BlockedArea {
 
     public ArrayList<BlockedArea> getListOfEdgeLimits() {
         ArrayList<BlockedArea> resultArea = new ArrayList<>();
         if(Edge == null) return resultArea;
-        if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.A, true)) {
+        /*if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.A, true)) {
             resultArea.add(new BlockedArea(Edge.A, Edge.A.TopNodeId));
         }
         if(checkIfBlockedAreaReachingToCrossoverLimits(this,Edge, Edge.B, false)) {
             resultArea.add(new BlockedArea(Edge.B, Edge.B.TopNodeId));
         }
+        */
+
         return resultArea;
     }
 
@@ -53,7 +56,7 @@ public class BlockedArea {
      * Single Element beeing blocked
      * it can not a track and an element be blocked in one Blocked Area
      */
-    private TrackElement BlockedElement;
+    //private TrackElement BlockedElement;
 
     /**
      * Node Id of Single Element beeing blocked
@@ -89,7 +92,7 @@ public class BlockedArea {
      * @param d_A_to_Block_Start - Distance a to Ma- or Block-Start
      * @param End_Ma - Q_Scale End
      * @param d_A_to_Block_End - Distence to Ma- or Block-End
-     */
+
     public BlockedArea(TopologyGraph.Edge E, BLOCK_Q_SCALE Start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE End_Ma,
                        int d_A_to_Block_End) {
         this.Edge = E;
@@ -97,12 +100,12 @@ public class BlockedArea {
         this.d_from_PointA_of_GeoEdge_to_BlockStartMa = d_A_to_Block_Start;
         this.q_scale_block_To_EndMa = End_Ma;
         this.d_from_PointA_of_GeoEdge_to_BlockEndMa = d_A_to_Block_End;
-    }
+    }*/
 
     /**
      * Dieser Konstruktor instanziiert eine Sperrzone auf ein einzelnes Element wie eine Weiche
-     * @param Element beeing Blocked
-     */
+
+
     public BlockedArea(TrackElement Element, String sId) {
         this.BlockedElement = Element;
         this.sIdOfElement = sId;
@@ -120,10 +123,8 @@ public class BlockedArea {
 
     /**
      * Vergleicht gefahren Punkte zweier BlockedAreas
-     * @param OtherArea {@link BlockedArea} Vergleichsobjekt
+
      * @return boolean - gibt an ob Gefahrenpunkte bestehen
-     */
-    public boolean compareIfIntersection(BlockedArea OtherArea) {
         boolean hasSameType = check4BeeingSameTrackElementType(OtherArea);
         if(!hasSameType)  return handleNotHavingSameType(OtherArea);
         else {
@@ -143,6 +144,7 @@ public class BlockedArea {
             }
         }
     }
+    public boolean compareIfIntersection(BlockedArea OtherArea) {
 
     private boolean handleNotHavingSameType(BlockedArea otherArea) {
         BlockedArea EdgeArea = null;
@@ -172,12 +174,9 @@ public class BlockedArea {
 
     /**
      * Pr&uuml;ft ob die Straße zu einem Grenzsignal einer Weiche reicht
-     * @param edgeArea {@link BlockedArea} - der blockierte Bereich
-     * @param e TopologyGraph.Edge - die Kante selbst
-     * @param n TopologyGraph.Node - der Knoten der auf ein Grenzsignal gepr&uuml;ft wird
-     * @param checkIfConnectedByA - Boolean, ob a oder b geprüft wird
+
      * @return boolean ob ein Grenzsignalbereich betreten wird
-     */
+
     private boolean checkIfBlockedAreaReachingToCrossoverLimits(BlockedArea edgeArea, TopologyGraph.Edge e, TopologyGraph.Node n, Boolean checkIfConnectedByA) {
         CrossingSwitch CS = (CrossingSwitch) n.NodeImpl;
         if(CS == null) return false;
@@ -198,7 +197,7 @@ public class BlockedArea {
             }
         }
         return false;
-    }
+    } */
 
     private Boolean checkifConnectedByA(TopologyGraph.Edge e, TopologyGraph.Node n) {
         if(e.A == n) return true;

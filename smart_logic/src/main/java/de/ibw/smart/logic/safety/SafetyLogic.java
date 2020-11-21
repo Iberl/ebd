@@ -1,29 +1,30 @@
 package de.ibw.smart.logic.safety;
 
 
+
 import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
+import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.EventBusManager;
-import de.ibw.smart.logic.datatypes.BlockedArea;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
+import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
-import de.ibw.util.UtilFunction;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
@@ -31,19 +32,25 @@ import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
+
+import static de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
-import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -52,9 +59,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static de.ibw.smart.logic.datatypes.BlockedArea.BLOCK_Q_SCALE.Q_SCALE_1M;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
 
 /**
@@ -64,7 +68,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-12
+ * @since 2020-11-13
  */
 public class SafetyLogic {
     /**
@@ -135,26 +139,26 @@ public class SafetyLogic {
      * Blockierte Abschnitte
      * Zugneutrale Abschnitte werden mit Zugnummer -1 blockiert
      */
-    private volatile ThreadedRepo<Integer, List<BlockedArea>> blockList = new ThreadedRepo<>();
+    private volatile ThreadedRepo<Integer, List<Occupation>> blockList = new ThreadedRepo<>();
 
     /**
      * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
      * @param iTrainId - nid-engineId des angeforderten Zuges
      * @return List - liste der belegten Abschnitte durch den Zug
      */
-    public synchronized List<BlockedArea> getAllAreaBlockedByOwn(int iTrainId) {
+    public synchronized List<Occupation> getAllAreaBlockedByOwn(int iTrainId) {
         return blockList.getModel(iTrainId);
     }
 
-    private synchronized List<BlockedArea> getAllAreaNotBlockedByOwn(int iTrainId) {
-        List<BlockedArea> ownBlocking = blockList.getModel(iTrainId);
+    private synchronized List<Occupation> getAllAreaNotBlockedByOwn(int iTrainId) {
+        List<Occupation> ownBlocking = blockList.getModel(iTrainId);
         if(ownBlocking == null) ownBlocking = new ArrayList<>();
-        Collection<List<BlockedArea>> all = blockList.getAll();
-        List<BlockedArea> result = Collections.synchronizedList(new ArrayList<>());
-        for(List<BlockedArea> trainset: all) {
+        Collection<List<Occupation>> all = blockList.getAll();
+        List<Occupation> result = Collections.synchronizedList(new ArrayList<>());
+        for(List<Occupation> trainset: all) {
             result.addAll(trainset);
         }
-        for(BlockedArea B : ownBlocking) {
+        for(Occupation B : ownBlocking) {
             result.remove(B);
         }
         return result;
@@ -170,9 +174,9 @@ public class SafetyLogic {
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, RouteDataSL requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
-        List<BlockedArea> toBlock = Collections.synchronizedList(new ArrayList<>());
+        List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
         int iQ_DirLength = -1;
         int iQ_Scale = -1;
@@ -202,20 +206,17 @@ public class SafetyLogic {
 
             AtomicInteger distanceFromTrainToNextNode = new AtomicInteger(0);
             int iRequestSize = requestedTrackElementList.size();
-            Pair<Route.TrackElementType, TrackElement> StartElement = requestedTrackElementList.get(0);
-            Pair<Route.TrackElementType, TrackElement> EndElement = requestedTrackElementList.get(iRequestSize -1);
-            BlockedArea StartArea = handleStartElement(dSumOfWholeMaTrack, StartElement, maRequest.Tm, iQ_DirLength, iQ_Scale
-                ,iDistance_LRBG, iNID_LRBG, iQ_DirLrbg, EndElement,iEoaQ_Scale, iSumSectionsLength,distanceFromTrainToNextNode);
-            // start Area is blocked
-            if(StartArea == null) return false; // returns false, das Startgebiet des Zuges ist blockiert
-            toBlock.add(StartArea);
+            Pair<Route.TrackElementType, ITopological> StartElement = requestedTrackElementList.get(0);
+            Pair<Route.TrackElementType, ITopological> EndElement = requestedTrackElementList.get(iRequestSize -1);
+
+
 
 
                 for(int i = 1; i < requestedTrackElementList.size() - 1; i++) {
                     // erstes und letztes Element wird nicht mit i referenziet letztes Element in letzter iteration
                     // => i + 1
-                    Pair<Route.TrackElementType, TrackElement> Element1 = requestedTrackElementList.get(i);
-                    Pair<Route.TrackElementType, TrackElement> Element2 = requestedTrackElementList.get(i + 1);
+                    Pair<Route.TrackElementType, ITopological> Element1 = requestedTrackElementList.get(i);
+                    Pair<Route.TrackElementType, ITopological> Element2 = requestedTrackElementList.get(i + 1);
                     // Waypoint between start and end have to be crossover nodes, ui is in this manner implemented
                     if(!Element1.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) return false;
                     if(!Element2.equals(EndElement)) {
@@ -226,24 +227,19 @@ public class SafetyLogic {
                         // also muss die Weiche als Blockiert eingetragen werden
                         TopologyGraph.Node N = (TopologyGraph.Node) Element1.getValue();
 
-                        toBlock.add(new BlockedArea(N, N.TopNodeId));
+
                         break;
                     }
                     TopologyGraph.Node N1 = (TopologyGraph.Node) Element1.getValue();
                     TopologyGraph.Node N2 = (TopologyGraph.Node) Element2.getValue();
                     TopologyGraph.Edge E = TopologyGraph.twoTopPointBelongsToEdgeRepo.
                             getModel(N1.TopNodeId).getModel(N2.TopNodeId);
-                    toBlock.add(new BlockedArea(N1, N1.TopNodeId));
-                    toBlock.add(new BlockedArea(N2, N2.TopNodeId));
-                    toBlock.add(new BlockedArea(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
+                    toBlock.add(new MARequestOccupation(E, Q_SCALE_1M, 0 , Q_SCALE_1M, (int) Math.floor(E.dTopLength)+ 1));
                     int iSumDistance = distanceFromTrainToNextNode.get();
                     iSumDistance += Math.floor(E.dTopLength);
                     distanceFromTrainToNextNode.set(iSumDistance);
                 }
-                if(EndElement.getKey().equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    TopologyGraph.Node NC = (TopologyGraph.Node) EndElement.getValue();
-                    toBlock.add(new BlockedArea(NC, NC.TopNodeId));
-                } else if(EndElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
+                if(EndElement.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                     if (StartElement.getValue().equals(EndElement.getValue())) {
                         // Es handelt sich um nur ein Gleisabschnitt ohne Topologischen Knoten
                         // Dieser wird im Start-Blocked-Area gespeichert
@@ -263,10 +259,10 @@ public class SafetyLogic {
                         bMovesToB = Ed.A.equals(N);
                         if (bMovesToB) {
 
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, 0,
+                            toBlock.add(new MARequestOccupation(Ed, Q_SCALE_1M, 0,
                                     Q_SCALE_1M, (int) dDistanceFromRecentNode));
                         } else {
-                            toBlock.add(new BlockedArea(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
+                            toBlock.add(new MARequestOccupation(Ed, Q_SCALE_1M, (int) dDistanceFromRecentNode, Q_SCALE_1M,
                                     (int) Math.ceil(Ed.dTopLength)));
                         }
                     }
@@ -274,9 +270,9 @@ public class SafetyLogic {
                 // TODO PositionData usage
                 toBlock = calcCrossoverSignals(toBlock);
 
-                List<BlockedArea> blockedAreas = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
-                for(BlockedArea ThisArea : toBlock)
-                for(BlockedArea OtherArea: blockedAreas) {
+                List<Occupation> occupations = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
+                for(Occupation ThisArea : toBlock)
+                for(Occupation OtherArea: occupations) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
 
                         return false;
@@ -305,11 +301,11 @@ public class SafetyLogic {
      * Berechnet Grenzzeichen, falls ein Zug sich im Grenzzeichen befindet.
      * @param toBlock - alle bisherigen Blockaden
      */
-    private ArrayList<BlockedArea> calcCrossoverSignals(List<BlockedArea> toBlock) {
-        ArrayList<BlockedArea> crossoverAreas = new ArrayList<>(toBlock);
-        for(BlockedArea BA : toBlock) {
-            ArrayList<BlockedArea> limitAreas = BA.getListOfEdgeLimits();
-            for(BlockedArea L_BA : limitAreas) {
+    private ArrayList<Occupation> calcCrossoverSignals(List<Occupation> toBlock) {
+        ArrayList<Occupation> crossoverAreas = new ArrayList<>(toBlock);
+        for(Occupation BA : toBlock) {
+            ArrayList<Occupation> limitAreas = BA.getListOfEdgeLimits();
+            for(Occupation L_BA : limitAreas) {
                 if(!crossoverAreas.contains(L_BA)) crossoverAreas.add(L_BA);
             }
         }
@@ -329,21 +325,39 @@ public class SafetyLogic {
     }
 */
 
-    private BlockedArea handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirLrbg, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+    /**
+     * @deprecated
+     * @param dSumOfWholeMaTrack
+     * @param startElement
+     * @param tm
+     * @param iQ_dirLength
+     * @param iQ_scale
+     * @param iDistance_lrbg
+     * @param iNID_lrbg
+     * @param iQ_DirLrbg
+     * @param endElement
+     * @param iEoaQ_Scale
+     * @param iSumSectionsLength
+     * @param distanceFromTrainToNextNode
+     * @return
+     */
+    private Occupation handleStartElement(BigDecimal dSumOfWholeMaTrack, Pair startElement, TrainModel tm, int iQ_dirLength, int iQ_scale, int iDistance_lrbg, int iNID_lrbg, int iQ_DirLrbg, Pair endElement, int iEoaQ_Scale, AtomicInteger iSumSectionsLength, AtomicInteger distanceFromTrainToNextNode) {
+        throw new NotImplementedException("deprecated");
+        /*
         int iTrainId = tm.iTrainId;
 
 
-        BlockedArea StartArea = null;
+        Occupation StartArea = null;
         Route.TrackElementType TET = (Route.TrackElementType) startElement.getKey();
         if (TET.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
             TopologyGraph.Node N = (TopologyGraph.Node) startElement.getValue();
-            StartArea = new BlockedArea(N, N.TopNodeId);
+            StartArea = new Occupation(N, N.TopNodeId);
             return StartArea;
         } else if (TET.equals(Route.TrackElementType.RAIL_TYPE)) {
             //TODO Check if Train is standing on trail still
             distanceFromTrainToNextNode.set((int) tm.getdDistanceToNodeRunningTo());
             iSumSectionsLength.set((int) tm.getdDistanceToNodeRunningTo());
-            TrackElement StartEL = (TrackElement) startElement.getValue();
+            PositioningNetElement StartEL = (PositioningNetElement) startElement.getValue();
             double distanceToA1 = 0;
             double distanceToA2 = 0;
             Balise B = Balise.baliseByNid_bg.getModel(iNID_lrbg);
@@ -353,7 +367,7 @@ public class SafetyLogic {
             //boolean bMovesToB = ETCSVariables.Q_DIRTRAIN_NOMINAL == iQ_DirTrain;
             String sIdOfEdgeOfTrain = tm.getEdgeTrainStandsOn().sId;
             String sIdStartEdgeOfMa = ((TopologyGraph.Edge)startElement.getValue()).sId;
-            TopologyGraph.Edge StartEdge = PlanData.topGraph.edgeRepo.get(sIdOfEdgeOfTrain);
+            TopologyGraph.Edge StartEdge = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
             boolean bMovesToB = calcIsMovingToB(sIdOfEdgeOfTrain, tm);
             if (!sIdOfEdgeOfTrain.equals(sIdStartEdgeOfMa)) {
 
@@ -390,12 +404,12 @@ public class SafetyLogic {
                     if(distanceToA2 > dCurrentTrackLength) distanceToA2 = dCurrentTrackLength;
                 }
                 distanceFromTrainToNextNode.set((int) Math.floor(distanceToA2 - distanceToA1) + 1);
-                StartArea = new BlockedArea((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+                StartArea = new Occupation((TopologyGraph.Edge) StartEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                         Q_SCALE_1M, (int) Math.ceil(distanceToA2));
             }
         }
-        List<BlockedArea> blockList = getAllAreaNotBlockedByOwn(iTrainId);
-        for(BlockedArea OtherArea: blockList) {
+        List<Occupation> blockList = getAllAreaNotBlockedByOwn(iTrainId);
+        for(Occupation OtherArea: blockList) {
             if(StartArea.compareIfIntersection(OtherArea)) {
                 // has intersection so SL reject
                 return null;
@@ -404,14 +418,24 @@ public class SafetyLogic {
 
 
         return StartArea;
+        */
+
     }
 
 
-    @NotNull
-    private BlockedArea handleMoveToA(TrainModel tm, BigDecimal dMaTrackLength, TopologyGraph.Edge startEL) {
+    /**
+     * @deprecated
+     * @param tm
+     * @param dMaTrackLength
+     * @param startEL
+     * @return
+     */
+    private Occupation handleMoveToA(TrainModel tm, BigDecimal dMaTrackLength, TopologyGraph.Edge startEL) {
+        throw new NotImplementedException("deprecated");
+        /*
         double distanceToA2;
         double distanceToA1;
-        BlockedArea StartArea;
+        Occupation StartArea;
         distanceToA2 = tm.getdDistanceToNodeRunningTo();
         distanceToA1 = distanceToA2 - dMaTrackLength.doubleValue();
         if(distanceToA1 < 0) distanceToA1 = 0;
@@ -419,16 +443,22 @@ public class SafetyLogic {
         distanceToA2 = distanceToA2 + tm.length;
         if(distanceToA2 > startEL.dTopLength) distanceToA2 = startEL.dTopLength;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+        StartArea = new Occupation(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
+        */
+
     }
 
-    @NotNull
-    private BlockedArea handleMovingToB(TrainModel tm, int iQ_scale, BigDecimal dMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+    /**
+     * @deprecated
+     */
+    private Occupation handleMovingToB(TrainModel tm, int iQ_scale, BigDecimal dMaTrackLength, int iTrainId, TopologyGraph.Edge startEL, double dDistanceBaliseFromA, TopologyGraph.Edge startEdge) {
+        throw new NotImplementedException("deprecated");
+        /*
         double distanceToA2;
         double distanceToA1;
-        BlockedArea StartArea;
+        Occupation StartArea;
         //double dTrainFront = calcTrainFront(iTrainId, iQ_scale, iMaTrackLength, dDistanceBaliseFromA, true);
         distanceToA1 = startEdge.dTopLength - tm.getdDistanceToNodeRunningTo();
         distanceToA2 = distanceToA1 + dMaTrackLength.doubleValue();
@@ -436,18 +466,30 @@ public class SafetyLogic {
         distanceToA1 = distanceToA1 - tm.length;
         if(distanceToA1 < 0) distanceToA1 = 0;
 
-        StartArea = new BlockedArea(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
+        StartArea = new Occupation(startEL, Q_SCALE_1M, (int) Math.floor(distanceToA1),
                 Q_SCALE_1M, (int) Math.ceil(distanceToA2));
         return StartArea;
+
+         */
     }
 
+    /**
+     * @deprecated
+     * @param sIdOfEdgeOfTrain
+     * @param tm
+     * @return
+     */
     private boolean calcIsMovingToB(String sIdOfEdgeOfTrain, TrainModel tm) {
-        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdOfEdgeOfTrain);
+        throw new NotImplementedException("deprecated");
+        /*
+        TopologyGraph.Edge E = PlanData.topGraph.EdgeRepo.get(sIdOfEdgeOfTrain);
         TopologyGraph.Node N = TopologyGraph.NodeRepo.get(tm.getsNodeIdTrainRunningTo());
         if(E == null) throw new InvalidParameterException("Edge of Train not found");
         if(E.A.equals(N)) return false;
         if(E.B.equals(N)) return true;
         throw new InvalidParameterException("Edge has not Node, which train running to.");
+
+         */
     }
 
     private double calcTrainFront(int iTrainId, int iQ_scale, int iDistance_lrbg, double dDistanceBaliseFromA, boolean bMovesToB) {
@@ -514,7 +556,9 @@ public class SafetyLogic {
 
     @Deprecated
     private synchronized void blockLastPositionReports(int iTrainId) {
-        List<BlockedArea> blockedAreasById = blockList.getModel(iTrainId);
+        throw new NotImplementedException("deprecated");
+        /*
+        List<Occupation> blockedAreasById = blockList.getModel(iTrainId);
         CircularFifoBuffer lastPositions = positionHistory.getModel(iTrainId);
         if(lastPositions == null) return;
         List<PositionInfo> lastInfo = new ArrayList<PositionInfo>(lastPositions).subList(0,10);
@@ -527,10 +571,12 @@ public class SafetyLogic {
             if(B == null) continue;
             CTOPKante BaliseEdge = B.getTopPositionOfDataPoint();
             TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(BaliseEdge.getIdentitaet().getWert());
-            BlockedArea BA = new BlockedArea(E, Q_SCALE_1M, 0, Q_SCALE_1M, 0);
+            Occupation BA = new Occupation(E, Q_SCALE_1M, 0, Q_SCALE_1M, 0);
             blockedAreasById.add(BA);
         }
         blockList.update(iTrainId, blockedAreasById);
+
+         */
     }
 
     /**
@@ -539,7 +585,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
      */
-    public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
         if(requestedTrackElementList == null) {
             throw new NullPointerException("Track List is null");
         } else if (requestedTrackElementList.isEmpty()) {
@@ -549,8 +595,8 @@ public class SafetyLogic {
         } else if(routeHasNullValue(requestedTrackElementList)) {
             throw new InvalidParameterException("Route must not have null value content");
         }
-        Pair<Route.TrackElementType, TrackElement> FirstElement = requestedTrackElementList.get(0);
-        Pair<Route.TrackElementType, TrackElement> LastElement = requestedTrackElementList.get(requestedTrackElementList.size() -1);
+        Pair<Route.TrackElementType, ITopological> FirstElement = requestedTrackElementList.get(0);
+        Pair<Route.TrackElementType, ITopological> LastElement = requestedTrackElementList.get(requestedTrackElementList.size() -1);
         try {
             if (requestedTrackElementList.size() == 2) {
                 if (bothElementsSameType(FirstElement, LastElement, Route.TrackElementType.RAIL_TYPE)) {
@@ -624,7 +670,7 @@ public class SafetyLogic {
         return true;
     }
 
-    private boolean handleDifferentialElements(Pair<Route.TrackElementType, TrackElement> edgeElement, Pair<Route.TrackElementType, TrackElement> nodeElement, TopologyGraph.Node N, TopologyGraph.Edge E) {
+    private boolean handleDifferentialElements(Pair<Route.TrackElementType, ITopological> edgeElement, Pair<Route.TrackElementType, ITopological> nodeElement, TopologyGraph.Node N, TopologyGraph.Edge E) {
         try {
             N = (TopologyGraph.Node) nodeElement.getRight();
 
@@ -640,7 +686,7 @@ public class SafetyLogic {
         return E.A.equals(N) || E.B.equals(N);
     }
 
-    private boolean firstOrLastElmentIsNOTconnectedWithMiddle(Pair<Route.TrackElementType, TrackElement> middleElement, Pair<Route.TrackElementType, TrackElement> firstOrLastElement) throws InvalidParameterException {
+    private boolean firstOrLastElmentIsNOTconnectedWithMiddle(Pair<Route.TrackElementType, ITopological> middleElement, Pair<Route.TrackElementType, ITopological> firstOrLastElement) throws InvalidParameterException {
         if(bothElementsSameType(firstOrLastElement, middleElement, Route.TrackElementType.RAIL_TYPE))
             return true;
 
@@ -678,7 +724,7 @@ public class SafetyLogic {
         return false;
     }
 
-    private void handleWrongElements(Pair<Route.TrackElementType, TrackElement> WrongTypeElement, boolean shallBeEdge) throws InvalidParameterException {
+    private void handleWrongElements(Pair<Route.TrackElementType, ITopological> WrongTypeElement, boolean shallBeEdge) throws InvalidParameterException {
         String sId;
         if(shallBeEdge) {
             sId = WrongTypeElement.getRight() instanceof TopologyGraph.Node ? ((TopologyGraph.Node) WrongTypeElement.getRight()).TopNodeId : null;
@@ -721,14 +767,14 @@ public class SafetyLogic {
      * @param type - type beeing same
      * @return
      */
-    private boolean bothElementsSameType(Pair<Route.TrackElementType, TrackElement> elementA,
-                                         Pair<Route.TrackElementType, TrackElement> elementB, Route.TrackElementType type) {
+    private boolean bothElementsSameType(Pair<Route.TrackElementType, ITopological> elementA,
+                                         Pair<Route.TrackElementType, ITopological> elementB, Route.TrackElementType type) {
         return elementA.getLeft().equals(type) && elementB.getLeft().equals(type);
     }
 
 
-    private boolean routeHasNullValue(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
-        for(Pair<Route.TrackElementType, TrackElement> RouteElement: requestedTrackElementList) {
+    private boolean routeHasNullValue(RouteDataSL requestedTrackElementList) {
+        for(Pair<Route.TrackElementType, ITopological> RouteElement: requestedTrackElementList) {
             if(RouteElement.getLeft() == null || RouteElement.getRight() == null) return true;
         }
         return false;
@@ -741,7 +787,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
      * @return boolean
      */
-    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
         //DBDClient dbdclient = new DBDClient();
         return true;
     }
@@ -767,7 +813,12 @@ public class SafetyLogic {
             iQ_Length = PosInf.q_length;
             trainInformation.update(iTrainId, P.trainInfo);
             lastPositionReport.update(iTrainId, PosInf);
-            new Thread(() -> handlePositionHistory(iTrainId, PosInf, PositionReport.getHeader())).start();
+            EBM.log("Position Report for MOB with engine-id " + iTrainId + " received",
+                    SmartLogic.getsModuleId(SMART_SAFETY));
+
+
+
+            new Thread(() -> handlePositionHistory(P.trainInfo, PosInf, PositionReport.getHeader())).start();
             unlockPassedElements(iTrainId, PosInf);
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
@@ -811,10 +862,10 @@ public class SafetyLogic {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    private void handlePositionHistory(int iTrainId, PositionInfo posInf, Message.Header header) {
+    private void handlePositionHistory(TrainInfo TI, PositionInfo posInf, Message.Header header) {
         PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                iTrainId, posInf);
-        BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
+                TI, posInf);
+        //BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
 
 
 
@@ -878,16 +929,16 @@ public class SafetyLogic {
 
     /**
      * Untersucht ob die SmartLogic richtig funktioniert
-     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
      * @return boolean - funktioniert SL
      */
-    public synchronized boolean slSelfCheck(RbcMaAdapter maAdapter) {
+    public synchronized boolean slSelfCheck() {
+        EBM.log("Start Selfcheck", SmartLogic.getsModuleId(SMART_SAFETY));
 
         if(smartLogicWorking()){
-            EBM.log("Self Test was successful. No Errors.", SMART_SAFETY);
+            EBM.log("Selfcheck successful", SmartLogic.getsModuleId(SMART_SAFETY));
             return true;
         }
-        EBM.log("Self Test was not successful.", SMART_SAFETY);
+        EBM.log("Self Test was not successful.", SmartLogic.getsModuleId(SMART_SAFETY));
 
         return false;
     }
@@ -941,7 +992,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert
@@ -952,14 +1003,15 @@ public class SafetyLogic {
 
     /**
      * Noch nicht implementiert
+     * @param requestedTrackElementList
      */
-    public synchronized void unlockElementsNotUsed(ArrayList<Pair<Route.TrackElementType, TrackElement>> requestedTrackElementList) {
+    public synchronized void unlockElementsNotUsed(RouteDataSL requestedTrackElementList) {
 
     }
 
     public static void main(String[] args) {
         SafetyLogic safety = SafetyLogic.getSmartSafety();
-        safety.slSelfCheck(null);
+        safety.slSelfCheck();
     }
 
     /**
@@ -970,11 +1022,11 @@ public class SafetyLogic {
      * Kann nur in Testkonfiguration aufgerufen werden.
      */
     public void resetAllBlockings() {
-        if(ConfigHandler.getInstance().isInTestMode) {
-            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", TRACK_SAFETY );
+        if(SlConfigHandler.getInstance().isInTestMode) {
+            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", SmartLogic.getsModuleId(TRACK_SAFETY) );
             this.blockList = new ThreadedRepo<>();
         } else {
-            EBM.log("Reset only allowed in Test Mode", TRACK_SAFETY );
+            EBM.log("Reset only allowed in Test Mode", SmartLogic.getsModuleId(TRACK_SAFETY) );
         }
 
     }
@@ -985,21 +1037,29 @@ public class SafetyLogic {
      * @param cdc
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
+        this.slSelfCheck();
         String checkSid = cdc.sId;
-        for(List<BlockedArea> l :this.blockList.getAll()) {
-            for(BlockedArea BA : l) {
+        EBM.log("Check if Infrastructure is occupied", SmartLogic.getsModuleId(SMART_SAFETY) );
+
+        for(List<Occupation> l :this.blockList.getAll()) {
+            for(Occupation BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
-                    sendResponseDbdCommandToTms(false, cdc.sCrossoverEbdName, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
+
+                    sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;
                 }
             }
         }
-        sendResponseDbdCommandToTms(true, cdc.sCrossoverEbdName,null);
+
+        sendResponseDbdCommandToTms(true,cdc.sId ,null);
+        EBM.log("Send request" + "{uuid}" + "to Object Controller: " + cdc.toString()  , SmartLogic.getsModuleId(SMART_SAFETY) );
+        EBM.log("Object Controller has to be implemented", SmartLogic.getsModuleId(SMART_SAFETY) );
+
     }
 
-    private void sendResponseDbdCommandToTms(boolean isSuccess, String sCrossoverEbdName, String sFailReason) {
-        long lPrio = ConfigHandler.getInstance().lCheckDbdReturn;
-        DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload(sCrossoverEbdName);
+    private void sendResponseDbdCommandToTms(boolean isSuccess, String sId, String sFailReason) {
+        long lPrio = SlConfigHandler.getInstance().lCheckDbdReturn;
+        DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload(sId);
         if(isSuccess) DbdPayload.setDbdSuccessfull();
         else DbdPayload.setErrorState(sFailReason);
         SmartServerMessage BlockMessage = new SmartServerMessage(DbdPayload.parseToJson(), lPrio);

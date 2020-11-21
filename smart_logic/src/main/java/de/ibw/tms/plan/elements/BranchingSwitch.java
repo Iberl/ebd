@@ -4,22 +4,25 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
+import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.*;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.ICrossover;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.CrossoverEnumModel;
 import de.ibw.tms.plan.elements.model.CrossoverMainModel;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
+import org.railMl.rtm4rail.TElementWithIDref;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -34,6 +37,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Flow;
 
 /**
@@ -78,7 +82,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private static BufferedImage img = null;
 
     private ViewType BranchViewTypeCurrent;
-    private CrossoverStatus LastState = CrossoverStatus.RIGHT;
+    private SwitchStatus LastState = SwitchStatus.RIGHT;
 
 
     private String sBrachName;
@@ -100,12 +104,12 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     public BufferedImage getImage() throws IOException {
         ClassLoader cl = this.getClass().getClassLoader();
-        CrossoverStatus CurrentStatus = this.getStatus();
+        SwitchStatus CurrentStatus = this.getStatus();
 
         try {
-            if( CurrentStatus == CrossoverStatus.BUSY || CurrentStatus == CrossoverStatus.UNSAFE) {
+            if( CurrentStatus == SwitchStatus.BUSY || CurrentStatus == SwitchStatus.UNSAFE) {
                 CurrentStatus = LastState;
-                if(LastState == CrossoverStatus.BUSY || LastState == CrossoverStatus.UNSAFE ) {
+                if(LastState == SwitchStatus.BUSY || LastState == SwitchStatus.UNSAFE ) {
                     return UiTools.handleImaging(cl, "images/StreightBranch.png");
 
                 }
@@ -115,7 +119,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             }
             switch(this.BranchViewTypeCurrent) {
                 case Branch_LRU: {
-                    if(CurrentStatus == CrossoverStatus.RIGHT || CurrentStatus == CrossoverStatus.UNSAFE_RIGHT) {
+                    if(CurrentStatus == SwitchStatus.RIGHT || CurrentStatus == SwitchStatus.UNSAFE_RIGHT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_LRU.png");
@@ -123,7 +127,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_ORL: {
-                    if(CurrentStatus == CrossoverStatus.LEFT || CurrentStatus == CrossoverStatus.UNSAFE_LEFT) {
+                    if(CurrentStatus == SwitchStatus.LEFT || CurrentStatus == SwitchStatus.UNSAFE_LEFT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_ORL.png");
@@ -132,7 +136,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_RLO: {
-                    if(CurrentStatus == CrossoverStatus.RIGHT || CurrentStatus == CrossoverStatus.UNSAFE_RIGHT) {
+                    if(CurrentStatus == SwitchStatus.RIGHT || CurrentStatus == SwitchStatus.UNSAFE_RIGHT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_RLO.png");
@@ -140,7 +144,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                     break;
                 }
                 case Branch_ULR: {
-                    if(CurrentStatus == CrossoverStatus.LEFT || CurrentStatus == CrossoverStatus.UNSAFE_LEFT) {
+                    if(CurrentStatus == SwitchStatus.LEFT || CurrentStatus == SwitchStatus.UNSAFE_LEFT) {
                         handleImaging(cl, "images/StreightBranch.png");
                     } else {
                         handleImaging(cl, "images/Branch_ULR.png");
@@ -215,17 +219,17 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
     public void sendDbdCommandToSL() {
-        long lPriority = ConfigHandler.getInstance().lCheckDbdCommand;
+        long lPriority = SlConfigHandler.getInstance().lCheckDbdCommand;
         Object OEnumField = BrachingStates.getSelectedItem();
         EnumModel.EnumField EF = (EnumModel.EnumField) OEnumField;
         if(((CrossingSwitch) this.Node.NodeImpl).isDKW()) {
             handleDKW();
             return;
         }
-        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle();
-        String sId = PlanData.SwitchIdRepo.getModel(this.Node);
+        String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
+        String sId = ISwitchHandler.getNodeId(this.Node);
         CheckDbdCommand DbdCommandPayload =
-                new CheckDbdCommand(sEbdName,sId, (CrossoverStatus) EF.Item, lPriority);
+                new CheckDbdCommand(sEbdName,sId, (SwitchStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
         try {
             SmartClientHandler.getInstance().sendCommand(DbdCommand);
@@ -284,20 +288,20 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     @Override
     public void onNext(CrossoverMainModel item) {
-        if(item.CrossoverStatus != Status) {
+        if(item.SwitchStatus != Status) {
             this.LastState = Status;
-            Status = item.CrossoverStatus;
+            Status = item.SwitchStatus;
         }
         this.fLinkageTimeInMs = item.fLinkageTimeInMs;
 
         this.BrachingStates.update(this.Status);
-        if(this.Status.equals(CrossoverStatus.RIGHT)) {
+        if(this.Status.equals(SwitchStatus.RIGHT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
             BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getRightPosition());
             handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
 
         }
-        if(this.Status.equals(CrossoverStatus.LEFT)) {
+        if(this.Status.equals(SwitchStatus.LEFT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
             BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getLeftPosition());
 
@@ -315,29 +319,31 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     private void handleOutputRelation(PositionedRelation outputRelation, Point_RemoteOperated remotePoint) {
         String sNodeIdOutput = "";
-        Trail Target = null;
+        /*Trail Target = null;
         Trail From = (Trail) outputRelation.getFrom();
-
-        Target = getTargetOfOutputChange(outputRelation, From);
-
-
-        String sSrc = PlanData.SwitchIdRepo.getModel(Node);
-        String sTarget;
+        */
+        //Target = getTargetOfOutputChange(outputRelation, From);
 
 
-        sTarget = getTargetOfOutputEdge(Target);
+        TElementWithIDref IdElementA = outputRelation.getElementA();
+        TElementWithIDref IdElementB = outputRelation.getElementB();
+        TopologyGraph.Edge NetElementA = (TopologyGraph.Edge) DefaultObject.topologyRepository.getModel(UUID.fromString(IdElementA.getRef()));
+        TopologyGraph.Edge NetElementB = (TopologyGraph.Edge) DefaultObject.topologyRepository.getModel(UUID.fromString(IdElementB.getRef()));
 
-
-
-
-        logger.info("Switch: " + sSrc + " points to " + sTarget + " now.\n");
+        logger.info("Switch: " + NetElementA.getRefId() + " points to " + NetElementB.getRefId() + " now.\n");
 
         ///
 
 
     }
 
-    private String getTargetOfOutputEdge(Trail target) {
+    /**
+     * @deprecated
+     * @return
+     */
+    private String getTargetOfOutputEdge(/*Trail target*/) {
+        throw new NotImplementedException("deprecated");
+        /*
         String sTarget;
         try {
 
@@ -352,7 +358,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
                 CS = (CrossingSwitch) ref.NodeImpl;
                 logger.info("Switched to " + target.getRail().getEdge().TopConnectFromA.value());
             }
-            sTarget = CS.getEbdTitle();
+            sTarget = CS.getEbdTitle(3,false,false);
 
         } catch ( Exception E) {
 
@@ -360,9 +366,17 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
         }
         return sTarget;
+
+         */
     }
 
+    /**
+     * @deprecated
+     * @return
+     */
     private String getThisNode() {
+        throw new NotImplementedException("deprecated");
+        /*
         String sSrc;
         try {
             CrossingSwitch CS = (CrossingSwitch) Node.NodeImpl;
@@ -371,9 +385,18 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             sSrc =  Node.TopNodeId;
         }
         return sSrc;
+
+         */
     }
 
-    private Trail getTargetOfOutputChange(PositionedRelation outputRelation, Trail from) {
+    /**
+     * @deprecated
+     * @param outputRelation
+     * @return
+     */
+    private /*Trail */ void getTargetOfOutputChange(PositionedRelation outputRelation/*, Trail from*/) {
+        throw new NotImplementedException("deprecated");
+        /*
         Trail Target;
         if(from.getRail().equals(PeekRail)) {
             Target = (Trail) outputRelation.getTo();
@@ -381,6 +404,8 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             Target = from;
         }
         return Target;
+
+         */
     }
 
     /**
@@ -495,19 +520,19 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
     /**
-     * Gibt Schlupf der Weiche wider
-     * @return TrackElement - {@link SlipConnectionPoint} Gipt Schlupf wider
+     * Gibt Topologischen Knoten als Modell der Ui wieder.
+     * @return Node - Logical Representation
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.BranchingPoint;
+    public TopologyGraph.Node getTrackReference() {
+        return this.Node;
     }
 
 
     /**
      * Status die eine Weiche haben kann
      */
-    public enum CrossoverStatus {
+    public enum SwitchStatus {
         RIGHT, LEFT, BUSY, UNSAFE, UNSAFE_RIGHT, UNSAFE_LEFT
     }
 
@@ -543,7 +568,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }*/
 
 
-    private CrossoverStatus Status = CrossoverStatus.RIGHT;
+    private SwitchStatus Status = SwitchStatus.RIGHT;
 
 
     private float fLinkageTimeInMs = 1000.0f;
@@ -585,9 +610,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     /**
      * Setzt den Weichenstatus
-     * @param status - {@link CrossoverStatus} der neue Status der Weiche
+     * @param status - {@link SwitchStatus} der neue Status der Weiche
      */
-    public void setStatus(CrossoverStatus status) {
+    public void setStatus(SwitchStatus status) {
         Status = status;
     }
 
@@ -595,7 +620,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      * Hold den aktuellen Status der Weiche
      * @return CrossoverStatus - Weichenstatus der widergegeben wird
      */
-    public CrossoverStatus getStatus() {
+    public SwitchStatus getStatus() {
         return this.Status;
     }
 

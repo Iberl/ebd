@@ -3,7 +3,7 @@ package de.ibw.tms.intf.cmd;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import de.ibw.tms.intf.TmsDbdCommand;
-import de.ibw.tms.intf.TmsMovementAuthority;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import ebd.rbc_tms.Payload;
 
 import java.io.Serializable;
@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
 
 /**
  * Dieser Klasse stellt einen Befehl in allgemeiner Form vom TMS an die SL dar.
- * Bisher gibt es nur {@link CheckMovementAuthority}.
+ * Bisher gibt es nur {@link CheckMovementPermission}.
  *
  *
  *
@@ -35,7 +35,7 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
      */
     public static Type getTypeByString(String sType) {
         if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
-            return new TypeToken<TmsMovementAuthority>(){}.getType();
+            return new TypeToken<TmsMovementPermissionRequest>(){}.getType();
         } else if(sType.equals(S_CHECK_DBD_COMMAND)) {
             return new TypeToken<TmsDbdCommand>(){}.getType();
         }
@@ -50,7 +50,7 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
      */
     public static Class getClassByString(String sType) {
         if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
-            return TmsMovementAuthority.class;
+            return TmsMovementPermissionRequest.class;
         } else if (sType.equals(S_CHECK_DBD_COMMAND))
             return TmsDbdCommand.class;
         return null;

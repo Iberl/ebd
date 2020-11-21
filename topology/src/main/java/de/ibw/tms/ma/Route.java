@@ -2,12 +2,12 @@ package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.Serializable;
 import java.security.InvalidParameterException;
@@ -47,7 +47,7 @@ public class Route implements Cloneable, Serializable {
         ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
         WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);
         WaypointDecorator WayEnd = (WaypointDecorator) waypoints.get(waypoints.size() -1);
-        TrackElement TrackElementOfEnd = WayEnd.getTrackElement();
+        TrackE TrackElementOfEnd = WayEnd.getTrackElement();
         TrackElementType TypeOfWaypoint = null;
         TypeOfWaypoint = TrackElementType.RAIL_TYPE;
         CrossoverModel EndModel = null;
@@ -148,8 +148,14 @@ public class Route implements Cloneable, Serializable {
 
     }
 
-    public IWaypoint retrieveWaypointOnTrack(TrackElement Element) {
-        return (IWaypoint) generateWaypointOnTrackMap().get(Element);
+    /**
+     * @deprecated
+     * @param Element
+     * @return
+     */
+    public IWaypoint retrieveWaypointOnTrack(TrackEdge Element) {
+        throw new NotImplementedException("deprecated");
+        //return (IWaypoint) generateWaypointOnTrackMap().get(Element);
     }
 
 

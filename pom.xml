@@ -117,11 +117,10 @@
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
-    <module>smart_logic</module>
     <module>messageLibrary</module>
     <module>rbc_tms</module>
     <module>etcsCore</module>
-    <module>topology</module>
+
 
     <!-- <module>baliseTelegramGenerator</module> -->
 

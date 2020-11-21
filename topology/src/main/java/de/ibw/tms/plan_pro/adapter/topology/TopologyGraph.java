@@ -2,7 +2,6 @@ package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.GeoCoordinates;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -78,7 +77,7 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    public static class Node extends TrackElement {
+    public static class Node extends Tr {
 
         /**
          * Knoten Bezeichnung

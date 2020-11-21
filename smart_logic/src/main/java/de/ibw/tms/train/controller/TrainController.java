@@ -5,12 +5,12 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.TmsMovementAuthority;
-import de.ibw.tms.intf.cmd.CheckMovementAuthority;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
@@ -195,7 +195,7 @@ public class TrainController extends SubmissionPublisher implements IController 
 
             RbcMA Ma = new RbcMA(Model.label);
             SpotLocation SL = R.getLocation().getEnd();
-            EoA Eoa = new EoA(SL.getChainage(), SL.getTrackElement(), new SectionOfLine());
+            /*EoA Eoa = new EoA(SL.getChainage(), SL.getTrackElement(), new SectionOfLine());
 
             Eoa.setV_EMA(0);
             Eoa.setDangerPoint(null);
@@ -207,16 +207,16 @@ public class TrainController extends SubmissionPublisher implements IController 
             Eoa.setQ_scale(null);
 
             Ma.setEndOfAuthority(Eoa);
-
+*/
             GradientProfile GrProfile = new GradientProfile(Ma);
             ETCS_GRADIENT etcs_gradient = new ETCS_GRADIENT();
             etcs_gradient.bGradient = 0;
 
-            GradientSegment GrSegment = new GradientSegment(R.getLocation().getBegin(), R.getLocation().getEnd(),
+            /*GradientSegment GrSegment = new GradientSegment(R.getLocation().getBegin(), R.getLocation().getEnd(),
                     ApplicationDirection.BOTH);
             GrSegment.setGradient(etcs_gradient, false);
             GrProfile.addSegment(GrSegment);
-
+*/
             Chainage EndCha =  SL.getChainage();
             //Chainage SvLCh = new Chainage(EndCha.getiMeters() + 400);
 
@@ -264,7 +264,7 @@ public class TrainController extends SubmissionPublisher implements IController 
                     MoProfile, null);
 
             MaAdapter = new RbcMaAdapter(SendMa);
-            CheckMovementAuthority CheckMoveAuthCommand = new CheckMovementAuthority(3L);
+            CheckMovementPermission CheckMoveAuthCommand = new CheckMovementPermission(3L);
             CheckMoveAuthCommand.MaRequest = requestWrapper;
             CheckMoveAuthCommand.MaAdapter = MaAdapter;
             CheckMoveAuthCommand.rbc_id = sRbcId;
@@ -274,10 +274,10 @@ public class TrainController extends SubmissionPublisher implements IController 
             E.sId = E.getRefId();
             CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
             TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
-            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(PlanData.SwitchIdRepo.getModel(N));
+            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
             CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
-            TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
+            TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
 
                 SmartClientHandler.getInstance().sendCommand(Msg);
@@ -361,16 +361,17 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
     private int addSpeedSegments(int iQ_SCALE, ArrayList<SpeedProfile.Section> etcsSpeedSectionList, SpeedSegment SpSegment) {
-        int iStart = SpSegment.speedChangeBegin.chainage.iMeters;
+        //int iStart = SpSegment.speedChangeBegin.chainage.iMeters;
         //int iEnd = SpSegment.speedChangeEnd.chainage.iMeters;
-        int v_Static = SpSegment.v_STATIC.bSpeed;
-        int i_D_STATIC = iStart;
-        if(i_D_STATIC > 32000) {
+        //int v_Static = SpSegment.v_STATIC.bSpeed;
+        //int i_D_STATIC = iStart;
+        //if(i_D_STATIC > 32000) {
             iQ_SCALE = ETCSVariables.Q_SCALE_10M;
-        }
-        SpeedProfile.Section SpeedSection = new SpeedProfile.Section(i_D_STATIC,v_Static, ETCSVariables.Q_FRONT_TRAIN_FRONT, new ArrayList<>());
-        etcsSpeedSectionList.add(SpeedSection);
-        return iQ_SCALE;
+        //}
+       // SpeedProfile.Section SpeedSection = new SpeedProfile.Section(i_D_STATIC,v_Static, ETCSVariables.Q_FRONT_TRAIN_FRONT, new ArrayList<>());
+        //etcsSpeedSectionList.add(SpeedSection);
+        //return iQ_SCALE;
+        return 0;
     }
 
     /**
@@ -432,7 +433,7 @@ public class TrainController extends SubmissionPublisher implements IController 
            SSP SpeedProfile = CSM.getStaticSpeedProfile();
            ArrayList<SpeedSegment> speedList = new ArrayList<>(SpeedProfile.getSpeedSegments());
            for(SpeedSegment Segment: speedList) {
-               int i_V = Segment.v_STATIC.bSpeed;
+               int i_V = Segment.getV_STATIC().bSpeed;
                if(iMaxResultSpeed < i_V) {
                    iMaxResultSpeed = i_V;
                }

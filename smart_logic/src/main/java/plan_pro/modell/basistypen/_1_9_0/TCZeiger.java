@@ -10,7 +10,7 @@ package plan_pro.modell.basistypen._1_9_0;
 
 import plan_pro.modell.verweise._1_9_0.*;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 
 /**

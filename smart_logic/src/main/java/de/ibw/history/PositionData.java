@@ -1,9 +1,16 @@
 package de.ibw.history;
 
-import de.ibw.smart.logic.datatypes.BlockedArea;
+import de.ibw.tms.ma.mob.position.SafeMOBPosition;
+import de.ibw.tms.ma.occupation.VehicleOccupation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
+import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
+import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
 import ebd.rbc_tms.util.PositionInfo;
+import ebd.rbc_tms.util.TrainInfo;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,9 +21,9 @@ import java.util.List;
  * @author iberl@verkehr.tu-darmstadt.de
  *
  * @version 0.4
- * @since 2020-09-30
+ * @since 2020-11-06
  */
-public class PositionData extends ArrayList<BlockedArea> implements List<BlockedArea> {
+public class PositionData extends VehicleOccupation {
     /** Timestamp Of Message Creation */
     private long rbc_timestamp;
 
@@ -32,12 +39,28 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
     private PositionInfo Pos;
 
 
-    private TopologicalPosition TrainHeadPosition;
+    public void mergeOtherOccupationIntoThis(VehicleOccupation VehicleOcc) {
+        List<TrackEdgeSection> sectionList = this.getTrackEdgeSections();
+        List<TrackEdgeSection> otherSections = VehicleOcc.getTrackEdgeSections();
+        if(otherSections == null) throw new InvalidParameterException("Sections must be defined");
+        if(sectionList == null) sectionList = new ArrayList<>();
+        if(sectionList.size() == 0) {
+            this.setTrackEdgeSections(otherSections);
+            return;
+        }
+        sectionList.addAll(otherSections);
+    }
 
-    private TopologicalPosition TrainEndPosition;
 
+    @Override
+    public MinSafeRearEnd getBegin() {
+        return super.getBegin();
+    }
 
-
+    @Override
+    public MaxSafeFrontEnd getEnd() {
+        return super.getEnd();
+    }
 
     public long getRbc_timestamp() {
         return rbc_timestamp;
@@ -47,20 +70,12 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
         return received_timestamp;
     }
 
-    public PositionData(long rbc_timestamp, long received_timestamp, int nid_engine, PositionInfo pos) {
+    public PositionData(long rbc_timestamp, long received_timestamp, TrainInfo TI, PositionInfo pos) {
+        super(TI,pos);
         this.rbc_timestamp = rbc_timestamp;
         this.received_timestamp = received_timestamp;
         this.nid_engine = nid_engine;
         Pos = pos;
-    }
-
-
-    public void setTrainHeadPosition(TopologicalPosition trainHeadPosition) {
-        TrainHeadPosition = trainHeadPosition;
-    }
-
-    public void setTrainEndPosition(TopologicalPosition trainEndPosition) {
-        TrainEndPosition = trainEndPosition;
     }
 
     public void setRbc_timestamp(long rbc_timestamp) {
@@ -82,13 +97,5 @@ public class PositionData extends ArrayList<BlockedArea> implements List<Blocked
 
     public PositionInfo getPos() {
         return Pos;
-    }
-
-    public TopologicalPosition getTrainHeadPosition() {
-        return TrainHeadPosition;
-    }
-
-    public TopologicalPosition getTrainEndPosition() {
-        return TrainEndPosition;
     }
 }

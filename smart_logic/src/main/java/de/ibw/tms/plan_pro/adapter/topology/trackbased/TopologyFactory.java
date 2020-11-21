@@ -2,7 +2,7 @@ package de.ibw.tms.plan_pro.adapter.topology.trackbased;
 
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
@@ -10,7 +10,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
@@ -19,11 +19,7 @@ import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.*;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
@@ -140,12 +136,12 @@ public class TopologyFactory implements ITopologyFactory {
 
             TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sNodeA);
             if(A == null) {
-                GeoCoordinates GeoA = getGeoCoordinate(nodeRepo,sNodeA);
+                GeometricCoordinate GeoA = null;//getGeoCoordinate(nodeRepo,sNodeA);
                 A = new TopologyGraph.Node("", sNodeA, GeoA);
             }
             TopologyGraph.Node B = TopologyGraph.NodeRepo.get(sNodeB);
             if(B == null) {
-                GeoCoordinates GeoB = getGeoCoordinate(nodeRepo,sNodeB);
+                GeometricCoordinate GeoB = null;//getGeoCoordinate(nodeRepo,sNodeB);
                 B = new TopologyGraph.Node("", sNodeB , GeoB);
             }
 
@@ -210,7 +206,7 @@ public class TopologyFactory implements ITopologyFactory {
                         continue;
                     }
                     NextGeoNode = (CGEOKnoten) geoPointRepo.getModel(sNextGeo);
-                    handleGeoEdges(A, currentGeo, NextGeoNode);
+                    //handleGeoEdges(A, currentGeo, NextGeoNode);
 
 
                 }
@@ -277,6 +273,7 @@ public class TopologyFactory implements ITopologyFactory {
                 A = (CWKrAnlage) crossingRepo.getModel(sAnlageId);
 
             }
+            if(A == null) continue;
             CrossingSwitch CS = new CrossingSwitch(A, Element, Comp, Signal);
             PlanData.RailSwitchList.add(CS);
         }
@@ -303,7 +300,7 @@ public class TopologyFactory implements ITopologyFactory {
         DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
         DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
 
-        ConfigHandler CH = ConfigHandler.getInstance();
+        SlConfigHandler CH = SlConfigHandler.getInstance();
 
 
         if(B_PRINT_BALISE_LIST) System.out.println("----Balise-List---");
@@ -317,13 +314,13 @@ public class TopologyFactory implements ITopologyFactory {
             CTOPKnoten N_B = (CTOPKnoten) topNodeRepo.getModel(sKnotenBid);
             CGEOKnoten GeoNodeA = (CGEOKnoten) geoPointRepo.getModel(N_A.getIDGEOKnoten().getWert());
             CGEOKnoten GeoNodeB = (CGEOKnoten) geoPointRepo.getModel(N_B.getIDGEOKnoten().getWert());
-            GeoCoordinates Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
-            GeoCoordinates Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
+            GeometricCoordinate Geo_A = PlanData.GeoNodeRepo.getModel(GeoNodeA.getIdentitaet().getWert());
+            GeometricCoordinate Geo_B = PlanData.GeoNodeRepo.getModel(GeoNodeB.getIdentitaet().getWert());
 
             TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(TopKante.getIdentitaet().getWert());
 
 
-            GeoCoordinates geoCoordinate;
+            GeometricCoordinate geoCoordinate;
             try {
                 boolean isAMissing;
                 boolean isBMissing;
@@ -404,8 +401,8 @@ public class TopologyFactory implements ITopologyFactory {
             // getGeoCoordinate()
 
 
-            B.setX(geoCoordinate.getX());
-            B.setY(geoCoordinate.getY());
+            //B.setX(geoCoordinate.getX());
+            //B.setY(geoCoordinate.getY());
 
             //UtilFunction.calcTargetGeoByStartPoint(B, dA, Geo_A, Geo_B);
 
@@ -421,7 +418,7 @@ public class TopologyFactory implements ITopologyFactory {
         Balise.baliseByNid_bg = tempBalises;
 
     }
-    private void printBaliseInfo(Balise B, CDatenpunkt DP, CTOPKante topKante, GeoCoordinates geo_A, GeoCoordinates geo_B) {
+    private void printBaliseInfo(Balise B, CDatenpunkt DP, CTOPKante topKante, GeometricCoordinate geo_A, GeometricCoordinate geo_B) {
         System.out.println("Nid-Bg: " + B.getHashcodeOfBaliseDp());
         System.out.println("TopKante-ID: " + topKante.getIdentitaet().getWert());
         System.out.println("DP Abstand: " + DP.getPunktObjektTOPKante().get(0).getAbstand().getWert());
@@ -454,7 +451,7 @@ public class TopologyFactory implements ITopologyFactory {
             if (GeoPunkt.getIDGEOKnoten() == null) continue;
             String sGeoKnotenId = GeoPunkt.getIDGEOKnoten().getWert();
 
-            GeoCoordinates GeoCoordTms = new GeoCoordinates();
+            GeometricCoordinate GeoCoordTms = new GeometricCoordinate();
             CGEOPunktAllg GeoPointData = GeoPunkt.getGEOPunktAllg();
             double x = GeoPointData.getGKX().getWert().doubleValue();
             double y = GeoPointData.getGKY().getWert().doubleValue();
@@ -474,7 +471,7 @@ public class TopologyFactory implements ITopologyFactory {
         for (CStreckePunkt Info : trackingInfos) {
             String sIdGeoNode = Info.getIDGEOKnoten().getWert();
             if (sIdGeoNode == null) continue;
-            GeoCoordinates GeoCoordTms = PlanData.GeoNodeRepo.getModel(sIdGeoNode);
+            GeometricCoordinate GeoCoordTms = PlanData.GeoNodeRepo.getModel(sIdGeoNode);
             if (GeoCoordTms == null) continue;
             CStrecke Track = this.trackRepo.getModel(Info.getIDStrecke().getWert());
             GeoCoordTms.setTrack(Track);
@@ -657,7 +654,7 @@ public class TopologyFactory implements ITopologyFactory {
     }
 
 
-    private static GeoCoordinates getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
+    private static GeometricCoordinate getGeoCoordinate(DefaultRepo<String, CBasisObjekt> nodeRepo, String sNodeA) {
         CTOPKnoten TopNode = (CTOPKnoten) nodeRepo.getModel(sNodeA);
         String sGeoNodeId = TopNode.getIDGEOKnoten().getWert();
         //CGEOKnoten geoPointOfNode = geoPointRepo.getModel(sGeoNodeId);

@@ -1,7 +1,7 @@
 package de.ibw.tms.ma.physical;
 
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 
 import java.util.concurrent.TimeUnit;
@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class Point_RemoteOperated extends Point {
     private PointState state;
     private PointOperationMode operationMode;
-    private BranchingSwitch.CrossoverStatus status;
+    private BranchingSwitch.SwitchStatus status;
     private Sollage sollagePosition;
     private PositionedRelation RightPosition = null;
     private PositionedRelation LeftPosition = null;
@@ -34,11 +34,11 @@ public class Point_RemoteOperated extends Point {
 
     public Point_RemoteOperated(Chainage C, PositionedRelation OutputRelation) {
         super(OutputRelation);
-        this.setChainageBeginn(C);
-        this.setChainageEnd(C);
+        //this.setChainageBeginn(C);
+        //this.setChainageEnd(C);
         this.state = PointState.WAIT_ON_COMMAND;
         this.operationMode = PointOperationMode.NORMAL;
-        this.status = BranchingSwitch.CrossoverStatus.RIGHT;
+        this.status = BranchingSwitch.SwitchStatus.RIGHT;
         this.sollagePosition = Sollage.RIGHT;
     }
 
@@ -48,19 +48,19 @@ public class Point_RemoteOperated extends Point {
     public void swing(Sollage sollagePosition) {
         if(this.sollagePosition == sollagePosition) return;
         else {
-            this.status = BranchingSwitch.CrossoverStatus.BUSY;
+            this.status = BranchingSwitch.SwitchStatus.BUSY;
             try {
                 TimeUnit.SECONDS.sleep(this.getOperationTime());
             } catch (InterruptedException e) {
-                this.status = BranchingSwitch.CrossoverStatus.RIGHT;
+                this.status = BranchingSwitch.SwitchStatus.RIGHT;
                 this.setTurnoutNeighbour(this.getRightPosition());
             }
             this.sollagePosition = sollagePosition;
             if(Sollage.RIGHT == this.sollagePosition) {
-                this.status = BranchingSwitch.CrossoverStatus.RIGHT;
+                this.status = BranchingSwitch.SwitchStatus.RIGHT;
                 this.setTurnoutNeighbour(this.getRightPosition());
             } else {
-                this.status = BranchingSwitch.CrossoverStatus.LEFT;
+                this.status = BranchingSwitch.SwitchStatus.LEFT;
                 this.setTurnoutNeighbour(this.getLeftPosition());
             }
 
@@ -85,7 +85,7 @@ public class Point_RemoteOperated extends Point {
         return operationMode;
     }
 
-    public BranchingSwitch.CrossoverStatus getCrossoverStatus() {
+    public BranchingSwitch.SwitchStatus getCrossoverStatus() {
         return status;
     }
 
@@ -97,7 +97,7 @@ public class Point_RemoteOperated extends Point {
         this.operationMode = operationMode;
     }
 
-    public void setStatus(BranchingSwitch.CrossoverStatus status) {
+    public void setStatus(BranchingSwitch.SwitchStatus status) {
         this.status = status;
     }
 

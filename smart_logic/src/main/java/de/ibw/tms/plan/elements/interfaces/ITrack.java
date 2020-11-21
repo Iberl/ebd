@@ -1,9 +1,9 @@
 package de.ibw.tms.plan.elements.interfaces;
 
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 
 public interface ITrack {
-    TrackElement getTrackReference();
+    TopologyGraph.Node getTrackReference();
 
 
 }

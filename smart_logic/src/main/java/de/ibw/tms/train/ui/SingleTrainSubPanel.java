@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Flow;
@@ -261,7 +262,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         SingleTrainSubPanel.this.applyModel();
         System.out.println("Label: " + SingleTrainSubPanel.this.Tm.label);
         RouteController RC = new RouteController(SingleTrainSubPanel.this.TGP.getRoutePort());
-        RC.setRouteData(new Route());
+        RC.setRouteData(new Route(new ArrayList<>()));
         RC.publish();
         SingleTrainSubPanel.this.Parent.repaint();
     }

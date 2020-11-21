@@ -1,7 +1,7 @@
 package de.ibw.tms.trackplan.ui;
 
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
@@ -20,10 +20,10 @@ import java.awt.event.ActionListener;
 /**
  * Verwaltet Distanzfeld des Routenendes auf dem letzten Gleis einer topologischen Kante.
  *
- *
+ * @deprecated
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-11
+ * @version 0.4
+ * @since 2020-11-10
  */
 public class LinearLocationWaypointSetWindow extends JDialog {
     private RouteController RouteController;
@@ -37,7 +37,7 @@ public class LinearLocationWaypointSetWindow extends JDialog {
      * @param RC {@link RouteController} - Verwaltung falls neue Route angelegt wird
      * @param startingPointTrain  {@link TrainModel} - Zug zu dieser MA
      */
-    public LinearLocationWaypointSetWindow(TrackElement TE, JFrame Frame, Point P, RouteController RC, TrainModel startingPointTrain) {
+    public LinearLocationWaypointSetWindow(TrackEdge TE, JFrame Frame, Point P, RouteController RC, TrainModel startingPointTrain) {
 
         super(Frame, "Set Linear Waypoint", true);
 
@@ -67,12 +67,12 @@ public class LinearLocationWaypointSetWindow extends JDialog {
 
                 //RouteComponent.calcTrackLengthUntilLastWayoint(startingPointTrain);
         double dMax = dMinimum + dTrackLength;
-        if(startingPointTrain.getEdgeTrainStandsOn().getRail().getTrailModel() == TE) {
+        /*if(startingPointTrain.getEdgeTrainStandsOn().getRail().getTrackSection() == TE) {
 
             dMinimum = 0;
             dMax = startingPointTrain.getdDistanceToNodeRunningTo();
         }
-
+*/
 
 
         // länge des Tracks bestimmen
@@ -97,7 +97,7 @@ public class LinearLocationWaypointSetWindow extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                LinearLocationWaypointSetWindow.this.getRouteModel().setEndSpot(TE, ChainageSlider.getValue());
+                //LinearLocationWaypointSetWindow.this.getRouteModel().setEndSpot(TE, ChainageSlider.getValue());
 
 
                 LinearLocationWaypointSetWindow.this.RouteController.publish();

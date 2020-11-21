@@ -1,7 +1,7 @@
 package de.ibw.tms.ma.physical;
 
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 
 import java.util.List;
 
@@ -13,8 +13,8 @@ public class SingleSlip extends SlipConnectionPoint {
 
     public SingleSlip(Chainage C) {
         super();
-        this.setChainageBeginn(C);
-        this.setChainageEnd(C);
+        //this.setChainageBeginn(C);
+        //this.setChainageEnd(C);
         this.RemotePoint = new Point_RemoteOperated(C, null);
 
     }
@@ -23,14 +23,7 @@ public class SingleSlip extends SlipConnectionPoint {
         return RemotePoint;
     }
 
-    @Override
-    public void updatePositionedRelation(List<PositionedRelation> relationList) {
-        super.updatePositionedRelation(relationList);
-        this.RemotePoint.updatePositionedRelation(relationList);
-        this.RemotePoint.setRightPosition(relationList.get(0));
-        this.RemotePoint.setLeftPosition(relationList.get(1));
 
-    }
 
     public void setOutputRelation(PositionedRelation Relation) {
         this.RemotePoint.setTurnoutNeighbour(Relation);
@@ -40,11 +33,10 @@ public class SingleSlip extends SlipConnectionPoint {
     }
 
 
-
-    @Override
     public String getViewName() {
-        if(this.sViewName.equals(" ")) return this.RemotePoint.getViewName();
-        else return this.sViewName;
+        //if(this.sViewName.equals(" ")) return this.RemotePoint.getViewName();
+       // else return this.sViewName;
+        return "";
     }
 
 

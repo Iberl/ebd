@@ -3,27 +3,20 @@ package de.ibw.tms.trackplan.ui;
 import de.ibw.feed.Balise;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.ma.GeoCoordinates;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.physical.ControlledTrackElement;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.RailConnector;
-import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.BranchingSwitch;
-import de.ibw.tms.plan.elements.CrossoverModel;
-import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
-import de.ibw.tms.trackplan.viewmodel.DijkstraAffineRoute;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
 
@@ -194,7 +187,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
 
         g2d.setPaint(Color.gray);
-        DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
+        DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
         HashMap edgeRepo = PlanData.topGraph.edgeRepo;
 
@@ -207,8 +200,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 if (geoEdge == null) continue;
                 double strokeFactor = Math.max(Zoom.getdZoomX(), Zoom.getdZoomY());
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
-                GeoCoordinates nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-                GeoCoordinates nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+                GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+                GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
 
 
@@ -255,27 +248,27 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         //g2d.translate(t_Model.getdMoveX(), t_Model.getdMoveY());
         
         g2d.setPaint(Color.cyan);
-        ConfigHandler CH = ConfigHandler.getInstance();
+        SlConfigHandler CH = SlConfigHandler.getInstance();
 
         for(Object OCrossover: PlanData.getInstance().branchingSwitchList) {
             BranchingSwitch C = (BranchingSwitch) OCrossover;
 
             //debug
-            SingleSlip SiBranch = (SingleSlip) C.getTrackReference();
 
-            CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel((ControlledTrackElement) SiBranch.getRemotePoint());
+
+           // CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel();
             String sTopId;
             String sTrackKilometers = "";
             try {
-                CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
-                sTopId = CS.getEbdTitle();
-                if(sTopId == null) {
-                    sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
-                }
+                //CrossingSwitch CS = (CrossingSwitch) TargetCrossoverModel.getNode().NodeImpl;
+                //sTopId = CS.getEbdTitle();
+                //if(sTopId == null) {
+                    //sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
+                //}
 
-                if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
+                //if(CH.showMeter) sTrackKilometers = retrieveTrackInfo(CS, true);
             } catch (Exception E) {
-                sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
+                //sTopId = PlanData.SwitchIdRepo.getModel(TargetCrossoverModel.getNode());
             }
 
 
@@ -299,7 +292,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(sTopId + sTrackKilometers, (float) (x - 5.0f), (float) y);
+                g2d.drawString(C.getViewName() + sTrackKilometers, (float) (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -374,19 +367,25 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         float x = 1;
         for(RailConnector RC: connectorList) {
             try {
-                x = ((float) RC.getPositionedRelations().get(0).getFrom().getChainageEnd().getiMeters()) / 10.0f;
+                //x = ((float) RC.getPositionedRelations().get(0).getFrom().getChainageEnd().getiMeters()) / 10.0f;
             } catch(Exception E) {
                 continue;
             }
             float y = 140.0f;
             g2d.setColor(new Color(0,150,150));
 
-            g2d.drawString(RC.getViewName(),x - 5.0f,(float) y);
+            //g2d.drawString(RC.getViewName(),x - 5.0f,(float) y);
         }
 
     }
 
+    /**
+     * @deprecated
+     * @param g2d
+     */
     private void paintRequestedMa(Graphics2D g2d) {
+        throw new NotImplementedException("deprecated");
+        /*
         Collection<MaRequestWrapper> maRequests = MaRepository.getMaList();
         System.out.println("CountRequest: " + maRequests.size());
         for(MaRequestWrapper Request: maRequests) {
@@ -407,6 +406,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             }
         }
+        */
     }
 
     private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
@@ -459,8 +459,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         for(i = 0; i < linkedGeo.getUsedEdgesSorted().size(); i++) {
             geoEdge = linkedGeo.getUsedEdgesSorted().get(i);
             geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
-            GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-            GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+            GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+            GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
 
 
@@ -472,12 +472,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
-                nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
+                //nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
             }
 
             // Last node
             if(prevDistance + geoEdgeLength > distanceA2) {
-                nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
+                //nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
             // Draw Line
@@ -502,7 +502,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * @param distanceA1 double - Abstand zum Referenzknoten
      * @return GeoCoordinates - Geographischer Punkt
      */
-    public static GeoCoordinates getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
+    public static GeometricCoordinate getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
         // Get TopEdge
         HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
@@ -515,10 +515,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
 
         if (geoEdgeList.isEmpty() || Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
-            GeoCoordinates nodeA = edge.A.getGeoCoordinates();
-            GeoCoordinates nodeB = edge.B.getGeoCoordinates();
+            GeometricCoordinate nodeA = edge.A.getGeoCoordinates();
+            GeometricCoordinate nodeB = edge.B.getGeoCoordinates();
 
-            if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            if(geoEdgeList.isEmpty()) return null;//createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
             else {
                 distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
             }
@@ -537,10 +537,19 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 if(distanceA1 <= prevDistance + geoEdgeLength) break;
                 prevDistance += geoEdgeLength;
             }
-            return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+            return null; //getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
     }
 
-    private static GeoCoordinates getGeoCoordinate(CGEOKante geoEdge, boolean b_fromA, double distance) {
+    /**
+     * @deprecated
+     * @param geoEdge
+     * @param b_fromA
+     * @param distance
+     * @return
+     */
+    private static GeometricCoordinate getGeoCoordinate(CGEOKante geoEdge, boolean b_fromA, double distance) {
+        throw new NotImplementedException("deprecated");
+        /*
         double geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
         if(geoEdgeLength < distance) {
             throw new IllegalArgumentException("The desired point must lay on the geo edge.");
@@ -552,9 +561,22 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         // Create a new Coordinates instance
         return createGeoCoordinates(b_fromA, geoEdgeLength, distance, nodeA, nodeB);
+
+         */
     }
 
-    private static GeoCoordinates createGeoCoordinates(boolean b_fromA, double edgeLength, double distance, GeoCoordinates nodeA, GeoCoordinates nodeB) {
+    /**
+     * @deprecated
+     * @param b_fromA
+     * @param edgeLength
+     * @param distance
+     * @param nodeA
+     * @param nodeB
+     * @return
+     */
+    private static GeometricCoordinate createGeoCoordinates(boolean b_fromA, double edgeLength, double distance, GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
+        throw new NotImplementedException("deprecated");
+        /*
         GeoCoordinates coordinates = new GeoCoordinates();
 
         double ratio = distance / edgeLength;
@@ -569,6 +591,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             coordinates.setY(nodeB.getY() + dy);
         }
         return coordinates;
+
+         */
     }
 
     private static void drawArrowHead(Graphics2D g2d, Line2D.Double line) {

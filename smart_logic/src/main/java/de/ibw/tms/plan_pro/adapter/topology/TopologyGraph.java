@@ -1,20 +1,22 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.ma.GeoCoordinates;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.intf.IEdge;
+import de.ibw.tms.plan_pro.adapter.topology.intf.INode;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
+import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+
 /**
  * Der Graph aus Knoten und Kanten der Topologie
  *
@@ -43,16 +45,21 @@ public class TopologyGraph {
     }
 
     /**
+     * @deprecated
      * Holt die X-coordinate des Startknotens
      * @return Double - X-coordinate
      */
     public static Double getXofCurrentLeftMostNode() {
+        throw new NotImplementedException("deprecated");
+        /*
         if(LeftmostNode == null) {
             return null;
         }
-        GeoCoordinates xy = LeftmostNode.getGeoCoordinates();
+        GeometricCoordinate xy = (GeometricCoordinate) LeftmostNode.getGeoCoordinates();
         if(xy == null) return null;
         return xy.getX();
+
+         */
     }
 
     /**
@@ -77,16 +84,16 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    public static class Node extends TrackElement {
+    public static class Node extends ArrayList<PositionedRelation> implements INode {
 
         /**
          * Knoten Bezeichnung
          */
-        public final String name;
+        public String name;
         /**
          * PlanPro Knoten Id
          */
-            public final String TopNodeId;
+        public String TopNodeId;
         /**
          * Knoten realisierung
          */
@@ -109,14 +116,15 @@ public class TopologyGraph {
          * Konstruktur zur instanziierung eines Knoten
          * @param name {@link String} - Bezeichnung des Knoten
          * @param topNodeId {@link String} - PlanPro Id des Knoten
-         * @param GeoCo {@link GeoCoordinates} - Coordinaten des Knotens
+         * @param GeoCo {@link GeometricCoordinate} - Coordinaten des Knotens
          */
-        public Node(String name, String topNodeId, GeoCoordinates GeoCo) {
+        public Node(String name, String topNodeId, GeometricCoordinate GeoCo) {
                 this.name = name;
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
                 outEdges = new HashSet<Edge>();
-                this.setGeoCoordinates(GeoCo);
+                // @TODO Relation having no Geo co
+                //this.setGeoCoordinates(GeoCo);
                 NodeRepo.put(this.TopNodeId, this);
 
             }
@@ -135,11 +143,13 @@ public class TopologyGraph {
         }
 
         /**
+         * @deprecated
          * Diese Methode zieht die Vermittlung zur Weiche
          * @return CrossoverModel - Vermittlung zur Logischen Weiche
          */
         public CrossoverModel getModel() {
-                return CrossoverModel.CrossoverRepo.getModel(this);
+            throw new NotImplementedException("deprecated");
+            //return CrossoverModel.CrossoverRepo.getModel(this);
             }
 
         /**
@@ -156,16 +166,32 @@ public class TopologyGraph {
          * Knotenname in Ansichten
          * @return String - Bezeichnung des Knoten
          */
-        @Override
         public String getViewName() {
             return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            if (!super.equals(o)) return false;
+            Node that = (Node) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(TopNodeId, that.TopNodeId) &&
+                    Objects.equals(NodeImpl, that.NodeImpl) &&
+                    Objects.equals(NodeType, that.NodeType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), name, TopNodeId, NodeImpl, NodeType);
         }
     }
 
     /**
      * Topologische Kante
      */
-    public static class Edge extends TrackElement {
+    public static class Edge extends TrackEdge implements IEdge {
 
 
 
@@ -214,7 +240,7 @@ public class TopologyGraph {
         }
 
         public String getRefId() {
-            return PlanData.getInstance().getRefIdOfEdge(this);
+            return PlanData.getRefIdOfEdge(this);
         }
 
         /**
@@ -234,7 +260,8 @@ public class TopologyGraph {
                 ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
                 ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
-                GeoCoordinates reference = A.getGeoCoordinates();
+                //TODO get Coordinate via implementation of node
+                GeometricCoordinate reference = (GeometricCoordinate) A.getGeoCoordinates();
 
                 /*boolean b_fromA;
                 CGEOKante firstEdge = paintListGeo.get(0);
@@ -252,8 +279,8 @@ public class TopologyGraph {
                 for(int i = 0; i < paintListGeo.size(); i++) {
                     CGEOKante edge = getNextGeoEdge(remainingGeoEdges, reference);
                     remainingGeoEdges.remove(edge);
-                    GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
-                    GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
+                    GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
+                    GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
 
                     if(reference.equals(nodeA)) {
                         sortedPaintListGeo.add(edge);
@@ -298,7 +325,7 @@ public class TopologyGraph {
                 this.paintListGeo = sortedPaintListGeo;
             }
 
-            private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeoCoordinates reference) {
+            private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeometricCoordinate reference) {
                 for(CGEOKante geoEdge : geoEdges) {
                     if(pointLaysOnEdge(geoEdge, reference)) {
                         return geoEdge;
@@ -307,13 +334,13 @@ public class TopologyGraph {
                 throw new IllegalArgumentException("No geo edge in given list starts at the reference point");
             }
 
-            private boolean pointLaysOnEdge(CGEOKante edge, GeoCoordinates point) {
-                GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
-                GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
+            private boolean pointLaysOnEdge(CGEOKante edge, GeometricCoordinate point) {
+                GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
+                GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
                 return point.equals(nodeA) || point.equals(nodeB);
             }
 
-            private double getDistanceBetween(GeoCoordinates nodeA, GeoCoordinates nodeB) {
+            private double getDistanceBetween(GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
                 double dx = Math.abs(nodeA.getX() - nodeB.getX());
                 double dy = Math.abs(nodeA.getY() - nodeB.getY());
                 return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
@@ -403,10 +430,10 @@ public class TopologyGraph {
          * Bezeichnung der Kante in Ansichten
          * @return String - Ansichtsname der Kante
          */
-        @Override
             public String getViewName() {
+                throw new NotImplementedException("not used");
                 //TODO:
-                return null;
+               //return null;
             }
 
         /**

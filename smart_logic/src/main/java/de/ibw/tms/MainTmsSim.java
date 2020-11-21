@@ -2,7 +2,6 @@ package de.ibw.tms;
 
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
-import de.ibw.smart.logic.intf.ui.ScenarioPanel;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.trackplan.controller.TrackController;
@@ -181,8 +180,7 @@ public class MainTmsSim {
     }
 
     private static void addSzenarioPanel() {
-        ScenarioPanel ScenPanel = new ScenarioPanel();
-        MainTmsSim.MainFrame.getContentPane().add(ScenPanel,BorderLayout.SOUTH);
+
 
     }
 

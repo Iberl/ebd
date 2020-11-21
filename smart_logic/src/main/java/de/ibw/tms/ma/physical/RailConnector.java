@@ -1,14 +1,11 @@
 package de.ibw.tms.ma.physical;
 
-public class RailConnector extends TrackElement {
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+
+public class RailConnector extends TrackEdge {
     private String sConnectorName = "Connector";
 
 
-
-    @Override
-    public String getViewName() {
-        return sConnectorName;
-    }
 
     public RailConnector(String s) {
         this.sConnectorName = s;

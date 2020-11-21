@@ -1,9 +1,8 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
@@ -20,8 +19,9 @@ import java.util.List;
  * Geographisches Gleis
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
+ * @deprecated
  */
 public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
@@ -34,14 +34,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * Name des Gleissegmentes
      */
     public String segmentName = " ";
-    private TopologyGraph.Edge Edge;
+    private TrackEdgeSection EdgeSection;
 
     /**
      * Gibt die Topologiesche Kante dieses Gleis wider
      * @return {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
      */
     public TopologyGraph.Edge getEdge() {
-        return Edge;
+        return (TopologyGraph.Edge) EdgeSection.getTrackEdge();
     }
 
     /**
@@ -49,7 +49,11 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @param edge {@link de.ibw.tms.plan_pro.adapter.topology.TopologyGraph.Edge}
      */
     public void setEdge(TopologyGraph.Edge edge) {
-        Edge = edge;
+
+    }
+
+    public void setTrackSection(TrackEdgeSection Section) {
+        this.EdgeSection = Section;
     }
 
     /**
@@ -57,14 +61,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      */
     public int iStroke = 3;
 
-    private Trail TrailModel;
+    private TrackEdgeSection TrackSection;
 
     /**
      * Gibt logisches Model des Gleises wieder
      * @return Trail
      */
-    public Trail getTrailModel() {
-        return TrailModel;
+    public TrackEdgeSection getTrackSection() {
+        return TrackSection;
     }
 
     /**
@@ -114,13 +118,14 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
     /**
      * Dieser Konstruktur erstellt ein Geographisches Gleis
+     * @deprecated
      * @param x1 - xPosition 1
      * @param y1 - yPosition 1
      * @param x2 - xPosition 2
      * @param y2 - yPosition 2
      * @param addTo {@link List} - Liste von Gleisen, die diese Gleis zugeordnet werden, nach erstellung
-     * @param IConA {@link TrackElement} - Anschluss A
-     * @param IConB {@link TrackElement} - Anschluss B
+     * @param IConA {@link } - Anschluss A
+     * @param IConB {@link} - Anschluss B
      * @param Cb - not used
      * @param Cc - not used
      * @param Navigal - {@link ApplicationDirection} von A zu B, oder B zu A, oder beides
@@ -140,8 +145,8 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
 
         ConA = IConA;
         ConB = IConB;
-        TrailModel = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
-        PlanData.TrackElementPositionCalc.put(TrailModel, this);
+        //TrackSection = new Trail(Cb, Cc, (TrackElement) ConA, (TrackElement) ConB, Navigal, vmax, Direction,  Status);
+        ///PlanData.TrackElementPositionCalc.put(TrackSection, this);
     }
 
 
@@ -172,7 +177,7 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @return Trail
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.getTrailModel();
+    public TopologyGraph.Node getTrackReference() {
+        return null;
     }
 }

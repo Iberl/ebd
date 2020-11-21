@@ -4,11 +4,10 @@ import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.gradient.profile.controller.GradientController;
 import de.ibw.tms.gradient.profile.viewmodel.GradientTableModel;
-import de.ibw.tms.ma.GradientSegment;
 import de.ibw.tms.ma.SectionOfLine;
-import de.ibw.tms.ma.SpotLocation;
-import de.ibw.tms.ma.physical.Trail;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
 
@@ -23,8 +22,9 @@ import java.util.ArrayList;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-09
+ * @deprecated
  */
 public class GradientFrame extends JFrame {
 
@@ -43,7 +43,7 @@ public class GradientFrame extends JFrame {
 
         CurrentTrailModel = currentTrailModel;
         ArrayList<GradientSegment> gradientList = PlanData.getInstance().GradientMap.get(CurrentTrailModel);
-
+        /*
         GradientTableModel GTM = new GradientTableModel(CurrentTrailModel);
 
         GradientTable.setModel(GTM.getTableModel());
@@ -55,7 +55,7 @@ public class GradientFrame extends JFrame {
 
 
 
-
+        */
 
         /*this.ScrollPane = new JScrollPane(GradientTable);
         this.ScrollPane.repaint();
@@ -117,6 +117,7 @@ public class GradientFrame extends JFrame {
         TrailList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                /*
                 GradientTableModel GTM;
                 GradientTrailModel GradientModel = GradientFrame.this.TrailList.getSelectedValue();
 
@@ -126,6 +127,8 @@ public class GradientFrame extends JFrame {
                 GTM.getTableModel().fireTableDataChanged();
                 GradientFrame.this.getContentPane().remove(GradientTable);
                 GradientFrame.this.getContentPane().add(GradientTable);
+
+                 */
             }
         });
         GradientTableModel GTM;
@@ -136,9 +139,9 @@ public class GradientFrame extends JFrame {
         }
         if(segments == null) segments = new ArrayList<GradientSegment>();
         System.out.println("Segmentprint" + segments.size());
-        GTM = new GradientTableModel(CurrentTrailModel);
+        /*GTM = new GradientTableModel(CurrentTrailModel);
         GradientTable = new JTable(GTM.getTableModel());
-
+        */
 
         this.getContentPane().remove(GradientTable);
         this.getContentPane().add(GradientTable);
@@ -160,7 +163,7 @@ public class GradientFrame extends JFrame {
             GradientSegment Segment;
             segmentList = new ArrayList<GradientSegment>();
             Rail R = railList.get(i);
-            Trail T = R.getTrailModel();
+            TrackEdgeSection T = R.getTrackSection();
             ETCS_GRADIENT defaultGrdient = new ETCS_GRADIENT();
             defaultGrdient.bGradient = 0;
             GradientTrailModel TrailModel = new GradientTrailModel(R);
@@ -169,11 +172,9 @@ public class GradientFrame extends JFrame {
             }
             SectionOfLine S = new SectionOfLine();
 
-            SpotLocation BeginLocation = new SpotLocation(T.getChainageBeginn(), T, S);
-
-            SpotLocation EndLocation = new SpotLocation(T.getChainageEnd(), T, S);
 
 
+            /*
             // Test Values
             if(i != 0) {
                 Segment = new GradientSegment(BeginLocation, EndLocation, ApplicationDirection.BOTH);
@@ -199,7 +200,7 @@ public class GradientFrame extends JFrame {
 
 
             PlanData.putGradientData(TrailModel, segmentList);
-
+            */
         }
 
 

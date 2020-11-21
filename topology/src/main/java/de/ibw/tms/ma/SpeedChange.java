@@ -1,7 +1,5 @@
 package de.ibw.tms.ma;
 
-import de.ibw.tms.ma.physical.TrackElement;
-
 import java.io.Serializable;
 
 public class SpeedChange extends SpotLocation implements Serializable {

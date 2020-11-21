@@ -1,8 +1,8 @@
 package de.ibw.tms.plan.elements;
 
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 
 import javax.swing.*;
 import java.awt.geom.Line2D;
@@ -40,7 +40,7 @@ public class TopRailReturn implements Iinteractable, ITrack {
     public int iStroke = 3;
 
     @Override
-    public TrackElement getTrackReference() {
+    public TopologyGraph.Node getTrackReference() {
         return null;
     }
 

@@ -2,7 +2,6 @@ package de.ibw.tms.ma;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.ma.physical.TrackElement;
 
 import java.io.Serializable;
 @JsonIgnoreProperties(value = {

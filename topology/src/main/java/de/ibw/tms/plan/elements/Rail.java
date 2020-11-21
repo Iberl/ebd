@@ -1,9 +1,7 @@
 package de.ibw.tms.plan.elements;
 
 import de.ibw.tms.ma.Chainage;
-import de.ibw.tms.ma.physical.TrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.physical.Trail;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
@@ -172,7 +170,7 @@ public class Rail extends Line2D.Double implements Iinteractable, ITrack {
      * @return Trail
      */
     @Override
-    public TrackElement getTrackReference() {
-        return this.getTrailModel();
+    public TopologyGraph.Node getTrackReference() {
+        return this.getTrackSection();
     }
 }

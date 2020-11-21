@@ -7,6 +7,10 @@ import java.util.ArrayList;
  * Bahnhof
  */
 public class PlatformEdge extends StopPosition {
+    public PlatformEdge(String sName) {
+        super(sName);
+    }
+
     public static class Entrances {
         private String sZugangsArt;
         private boolean isHauptzugang;

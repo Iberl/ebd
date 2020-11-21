@@ -1,6 +1,6 @@
 package de.ibw.tms.ma.physical;
 
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.interfaces.IConnectable;
 
 import java.io.Serializable;

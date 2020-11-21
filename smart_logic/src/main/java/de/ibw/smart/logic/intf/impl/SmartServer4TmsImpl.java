@@ -12,13 +12,20 @@ import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
-import de.ibw.tms.ma.physical.TrackElement;
+import de.ibw.tms.ma.common.NetworkResource;
+import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.plan.NodeInformation;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.MA;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -190,7 +197,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
         RouteDataSL requestedTrackElementList = new RouteDataSL();
-        bCheckOk = Safety.slSelfCheck(MaAdapter);
+        bCheckOk = Safety.slSelfCheck();
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
             sendMaResponseToTMS(MaReturnPayload, 1L);
@@ -210,17 +217,37 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 }
             }
         }
+        if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
         requestedTrackElementList = identifyRouteElements(MaRequest, requestedTrackElementList);
+        if(requestedTrackElementList == null) {
+            if(EBM != null) EBM.log("Route not existing", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
+            sendMaResponseToTMS(MaReturnPayload, 2L);
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            return;
+        } else {
+            if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+        }
         bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(MaRequest, MaAdapter,requestedTrackElementList);
         /**To Debug **/
         bIsOccupatonFree = true;
+        if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
         if(!bIsOccupatonFree) {
+            if(EBM != null) EBM.log("Route is not drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             return;
         } else {
-            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(), SMART_SERVER_MA_MODUL);
+            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         }
         bTrainStatusIsFresh = Safety.checkIfTrainStatusRequestIsFresh(MaRequest);
         if(!bTrainStatusIsFresh) {
@@ -288,10 +315,14 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         Message_21 MaMsg = new Message_21(uuid,tms_id, rbc_id, MaPayload);
 
+
+        if(EBM != null)
+            EBM.log("Search for RBCs", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
         PriorityMessage priorityMessage = new PriorityMessage(MaMsg, lPriority);
-
-
         ackQueues.createQueue(uuid);
+
         this.RbcClient.sendMessage(priorityMessage);
         try {
             bAcknowledgeMA = ackQueues.poll(uuid);
@@ -344,11 +375,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
-                Pair<Route.TrackElementType, TrackElement> TePair = null;
+                Pair<Route.TrackElementType, ITopological> TePair = null;
                 Route.TrackElementType T = typeList.get(i);
                 String sId  = idList.get(i);
                 if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
-                   TopologyGraph.Edge E =  PlanData.topGraph.edgeRepo.get(sId);
+                   TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 
@@ -357,12 +388,12 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
                 } else if(T.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    TopologyGraph.Node N = TopologyGraph.NodeRepo.get(sId);
+                    NodeInformation N = ISwitchHandler.getNodeInfoBySwitchId(sId);
                     if(N == null) {
                         if(EBM != null) EBM.log("Node Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
                         throw new NullPointerException("Some elements cannot be Identifed");
                     }
-                    TePair = new ImmutablePair<>(Route.TrackElementType.CROSSOVER_TYPE, N);
+                    TePair = new ImmutablePair<Route.TrackElementType, ITopological>(Route.TrackElementType.CROSSOVER_TYPE, (ITopological) N);
                 } else {
                     EBM.log("The given Element Type is not supported", ROUTE_COMPONENTS_IDENTIFY);
                     EBM.log("The Element Type has to be a Rail Or Crossover Type", ROUTE_COMPONENTS_IDENTIFY);
@@ -441,12 +472,21 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return requestedTrackElementList;
     }*/
 
-    private boolean handleWaypontsOnOneTrail(ArrayList<TrackElement> requestedTrackElementList, Waypoint wayStart, Waypoint wayEnd) {
+    /**
+     * @deprecated
+     * @param requestedTrackElementList
+     * @param wayStart
+     * @param wayEnd
+     * @return
+     */
+    private boolean handleWaypontsOnOneTrail(ArrayList<TrackEdge> requestedTrackElementList, Waypoint wayStart, Waypoint wayEnd) {
+        throw new NotImplementedException("deprecated");/*
         if(wayStart.getTrackElement() == wayEnd.getTrackElement()) {
             requestedTrackElementList.add(wayStart.getTrackElement());
             return true;
         }
         return false;
+        */
     }
 
 

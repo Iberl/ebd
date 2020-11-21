@@ -13,7 +13,7 @@ public class CrossoverMainModel {
     /**
      * Status der Weichenlage
      */
-    public BranchingSwitch.CrossoverStatus CrossoverStatus = BranchingSwitch.CrossoverStatus.RIGHT;
+    public BranchingSwitch.SwitchStatus SwitchStatus = BranchingSwitch.SwitchStatus.RIGHT;
     /**
      * Dauer der Umschaltzeit der Weiche beim Wechsel einer Weichenlage.
      */

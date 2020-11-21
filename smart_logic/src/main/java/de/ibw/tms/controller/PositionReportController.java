@@ -1,11 +1,12 @@
 package de.ibw.tms.controller;
 
 import de.ibw.feed.Balise;
+import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
+import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.physical.TrackElement;
-import de.ibw.tms.ma.topologie.PositionedRelation;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -14,7 +15,7 @@ import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.UtilFunction;
-import ebd.ConfigHandler;
+import ebd.SlConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
+
 
 import static ebd.messageLibrary.util.ETCSVariables.*;
 
@@ -73,9 +75,9 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
         if(iEngineId == 1) {
 
-            isNominal = ConfigHandler.getInstance().train1StartingInTrackDirection;
+            isNominal = SlConfigHandler.getInstance().train1StartingInTrackDirection;
         } else if(iEngineId == 2) {
-            isNominal = ConfigHandler.getInstance().train2StartingInTrackDirection;
+            isNominal = SlConfigHandler.getInstance().train2StartingInTrackDirection;
 
         } else return null;
         TopologyGraph.Node TargetNode;
@@ -168,10 +170,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         }
         SingleSlip Slip = CrossoverMod.getRailWaySlip();
         PositionedRelation PosRel = Slip.getOutputRelation();
-        TrackElement TE_From = PosRel.getFrom();
-        TrackElement TE_To = PosRel.getTo();
-        Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_From);
-        Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_To);
+        IRTMPositioningNetElement TE_From = PosRel.getFrom();
+        IRTMPositioningNetElement TE_To = PosRel.getTo();
+        Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic((PositioningNetElement) TE_From);
+        Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic((PositioningNetElement) TE_To);
         Rail R_Next = null;
         if(R_From == Rail_Current) {
             R_Next = R_To;

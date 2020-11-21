@@ -2,7 +2,7 @@ package de.ibw.tms.trackplan;
 
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.ma.GeoCoordinates;
+import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.plan.elements.Rail;
@@ -179,7 +179,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
                 drawCenteredString(g2d, yUpper.toString(), 25, 50, (float) 0);*/
 
         g2d.setPaint(Color.gray);
-        DefaultRepo<String, GeoCoordinates> geoPointRepo = PlanData.GeoNodeRepo;
+        DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
         HashMap edgeRepo = PlanData.topGraph.edgeRepo;
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
@@ -196,8 +196,8 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
                 }
                 double strokeFactor = Math.max(Zoom.getdZoomX(), Zoom.getdZoomY());
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
-                GeoCoordinates nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-                GeoCoordinates nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+                GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+                GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
                 g2d.draw(line);
             }
@@ -263,7 +263,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
             g2d.fill(new Ellipse2D.Float(ex, ey, diam, diam));
           */
 
-        this.RoutePort.paintRoute(g2d);
+        //this.RoutePort.paintRoute(g2d);
 
 
         }
