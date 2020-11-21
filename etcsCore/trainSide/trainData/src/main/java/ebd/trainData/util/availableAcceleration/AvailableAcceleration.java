@@ -39,6 +39,10 @@ public class AvailableAcceleration {
 
     private ForwardSpline fallingJoltCurve;
 
+    private ForwardSpline emergencyRisingJoltCurve;
+
+    private ForwardSpline emergencyFallingJoltCurve;
+
     private double targetAccelerationModification = 1d;
 
     private double targetBreakingModification = 1d;
@@ -55,6 +59,23 @@ public class AvailableAcceleration {
         this.eventBus = eventBus;
         this.rdv = this.eventBus.getStickyEvent(NewRouteDataVolatileEvent.class).routeDataVolatile;
         this.accGradientProfile = GradientProfileConverter.packet21ToAccGP(this.rdv.getPacket_21(),this.rdv.getCurrentGradient());
+
+        this.risingJoltCurve = new ForwardSpline(0);
+        this.risingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.breakFallTime));
+        this.risingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accRiseTime));
+
+        this.fallingJoltCurve = new ForwardSpline(0);
+        this.fallingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.breakRiseTime));
+        this.fallingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accFallTime));
+
+        this.emergencyRisingJoltCurve = new ForwardSpline(0);
+        this.emergencyRisingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.emBreakFallTime));
+        this.emergencyRisingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accRiseTime));
+
+        this.emergencyFallingJoltCurve = new ForwardSpline(0);
+        this.emergencyFallingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.emBreakRiseTime));
+        this.emergencyFallingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accFallTime));
+
         updateCurves();
 
         this.eventBus.register(this);
@@ -101,14 +122,6 @@ public class AvailableAcceleration {
         this.serviceBreakingCurve = BreakingPowerCurveCalculator.calculateServiceBreakingPower(this.eventBus);
         this.emergencyBreakingCurve = BreakingPowerCurveCalculator.calculateEmergencyBreakingPower(this.eventBus);
         this.resistanceCurve = ResistanceCurveCalculator.calculate(this.eventBus);
-
-        this.risingJoltCurve = new ForwardSpline(0);
-        this.risingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.breakFallTime));
-        this.risingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accRiseTime));
-
-        this.fallingJoltCurve = new ForwardSpline(0);
-        this.fallingJoltCurve.addKnotToCurve(new Knot(-1d, 1d/ch.breakRiseTime));
-        this.fallingJoltCurve.addKnotToCurve(new Knot(0d, 1d/ch.accFallTime));
     }
     @Subscribe
     public void clockTick(ClockTickEvent cte){
@@ -124,7 +137,7 @@ public class AvailableAcceleration {
                 if(this.curMod > 0) this.curMoveState = this.targetMoveState;
                 this.curTargetMod = this.targetAccelerationModification;
             }
-            case NORMAL_BREAKING, EMERGENCY_BREAKING, SERVICE_BREAKING -> {
+            case NORMAL_BREAKING, SERVICE_BREAKING -> {
                 if(this.curMod < 0) this.curMoveState = this.targetMoveState;
                 this.curTargetMod = -this.targetBreakingModification;
             }
@@ -135,20 +148,28 @@ public class AvailableAcceleration {
             }
         }
 
-        if(this.curMod > this.curTargetMod){
-            double jolt = fallingJoltCurve.getPointOnCurve(this.curMod);
-            double nextMod = this.curMod - jolt * deltaT;
-            this.curMod = Math.max(this.curTargetMod, nextMod);
+        if(this.curMoveState == MovementState.EMERGENCY_BREAKING) {
+            if (this.curMod > this.curTargetMod) {
+                double jolt = emergencyFallingJoltCurve.getPointOnCurve(this.curMod);
+                double nextMod = this.curMod - jolt * deltaT;
+                this.curMod = Math.max(this.curTargetMod, nextMod);
+            } else if (this.curMod < this.curTargetMod) {
+                double jolt = emergencyRisingJoltCurve.getPointOnCurve(this.curMod);
+                double nextMod = this.curMod + jolt * deltaT;
+                this.curMod = Math.min(this.curTargetMod, nextMod);
+            }
         }
-        else if(this.curMod < this.curTargetMod){
-            double jolt = risingJoltCurve.getPointOnCurve(this.curMod);
-            double nextMod = this.curMod + jolt * deltaT;
-            this.curMod = Math.min(this.curTargetMod, nextMod);
+        else {
+            if (this.curMod > this.curTargetMod) {
+                double jolt = fallingJoltCurve.getPointOnCurve(this.curMod);
+                double nextMod = this.curMod - jolt * deltaT;
+                this.curMod = Math.max(this.curTargetMod, nextMod);
+            } else if (this.curMod < this.curTargetMod) {
+                double jolt = risingJoltCurve.getPointOnCurve(this.curMod);
+                double nextMod = this.curMod + jolt * deltaT;
+                this.curMod = Math.min(this.curTargetMod, nextMod);
+            }
         }
-
-
-
-
     }
 
     @Subscribe
