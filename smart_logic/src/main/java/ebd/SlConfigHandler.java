@@ -43,6 +43,10 @@ public class SlConfigHandler {
     // Das Base Interface aller topologischer Modelle hat eine G&uuml;ltigkeit bis zu X-Monaten
     public int defaultAmountOfMonthBaseObjectIsValidTo = 3;
 
+
+    // Standard Dauer fuer Weichenstellvorgaenge in ms
+    public int defaultOperationTime = 500;
+
     /*
     longs
      */

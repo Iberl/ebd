@@ -1,5 +1,6 @@
 package de.ibw.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,6 +33,11 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
     @Override
     public synchronized void update(K key, V mapValue) {
         repo.update(key, mapValue);
+    }
+
+    @Override
+    public ArrayList<K> getKeys() {
+        return repo.getKeys();
     }
 
     /**

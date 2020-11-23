@@ -71,5 +71,7 @@ public class LocatedNetEntity extends NetEntity implements IRTMLocatedNetEntity,
         return locationList;
     }
 
-
+    public void setLocationList(List<IRTMEntityLocation> locationList) {
+        this.locationList = locationList;
+    }
 }

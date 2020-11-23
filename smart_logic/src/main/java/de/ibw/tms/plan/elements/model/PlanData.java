@@ -30,7 +30,9 @@ import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
+import ebd.TescModul;
 import ebd.dbd.client.extension.RealDbdClient;
+import jakarta.xml.bind.JAXBException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,10 +47,10 @@ import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.*;
@@ -334,7 +336,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setNodeToBranchingPoints();
             setEdges();
             System.out.println("Test");
-        } catch (ParseException | jakarta.xml.bind.JAXBException e) {
+            TescModul.getInstance().fetchIntialState();
+        } catch (ParseException | JAXBException | IOException e) {
             e.printStackTrace();
         }
     }

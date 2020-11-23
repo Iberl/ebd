@@ -36,6 +36,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>de.disposim</groupId>
+            <artifactId>dbd-net</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.41.Final</version>

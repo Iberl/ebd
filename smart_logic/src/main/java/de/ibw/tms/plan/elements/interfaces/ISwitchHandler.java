@@ -4,7 +4,7 @@ import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import plan_pro.modell.bahnuebergang._1_9_0.CBUEAnlage;
+import de.ibw.util.ThreadedRepo;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 
 import java.util.ArrayList;
@@ -21,6 +21,9 @@ public interface ISwitchHandler {
         return PlanData.SwitchIdRepo.getModel(N);
     }
 
+    static ThreadedRepo<CWKrAnlage, ArrayList<CrossingSwitch>> getAllSwitches() {
+        return PlanData.CrossingSwitchRepoByAnlage;
+    }
 
     static void registerNode(TopologyGraph.Node N, String switchId) {
         NodeInformation NI = getNodeInfoBySwitchId(switchId);

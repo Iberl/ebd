@@ -1,11 +1,15 @@
 package de.ibw.tms.ma.physical;
 
+import de.ibw.rtm.intf.IRTMEntityLocation;
+import de.ibw.tms.ma.Chainage;
 import de.ibw.tms.ma.physical.intf.IControlledElementStatus;
 
 import java.util.List;
 
 public class MovableTrackElement extends ControlledElement {
     public static final String CLASS_IDENTIFIER = "Movable_Track_Element";
+
+
 
     public TrackElementStatus getCurrentStatus() {
         return (TrackElementStatus) super.getStatus();

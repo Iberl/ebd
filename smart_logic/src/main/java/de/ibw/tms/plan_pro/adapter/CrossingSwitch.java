@@ -167,6 +167,17 @@ CrossingSwitch implements ICompareTrackMeter {
         }
     }
 
+    public Integer getLocalElementId() {
+        CWKrGspElement Element = getElement();
+        CBezeichnungElement B = Element.getBezeichnung();
+        if (B == null) return null;
+        System.out.println(Element.getIdentitaet().getWert());
+        try {
+            return Integer.parseInt(B.getBezeichnungLageplanKurz().getWert());
+        } catch (NullPointerException NPE) {
+            return null;
+        }
+    }
 
 
     public boolean isDKW() {
