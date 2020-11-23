@@ -37799,14 +37799,20 @@
               </Basis_Objekt_Allg>
               <Bezeichnung>
                 <Bezeichnung_Aussenanlage>
-                  <Wert>W</Wert>
+                  <Wert>12W77</Wert>
                 </Bezeichnung_Aussenanlage>
                 <Bezeichnung_Lageplan_Lang>
-                  <Wert>W</Wert>
+                  <Wert>77</Wert>
                 </Bezeichnung_Lageplan_Lang>
                 <Bezeichnung_Tabelle>
-                  <Wert>W</Wert>
+                  <Wert>12W77</Wert>
                 </Bezeichnung_Tabelle>
+                <Kennzahl>
+                  <Wert>12</Wert>
+                </Kennzahl>
+                <Oertlicher_Elementbezeichner>
+                  <Wert>77</Wert>
+                </Oertlicher_Elementbezeichner>
               </Bezeichnung>
               <W_Kr_Gsp_Element_Allg>
                 <Vorzugslage_Automatik>
@@ -37989,14 +37995,20 @@
               </Basis_Objekt_Allg>
               <Bezeichnung>
                 <Bezeichnung_Aussenanlage>
-                  <Wert>W</Wert>
+                  <Wert>12W87</Wert>
                 </Bezeichnung_Aussenanlage>
                 <Bezeichnung_Lageplan_Lang>
-                  <Wert>W</Wert>
+                  <Wert>12W87</Wert>
                 </Bezeichnung_Lageplan_Lang>
                 <Bezeichnung_Tabelle>
-                  <Wert>W</Wert>
+                  <Wert>12W87</Wert>
                 </Bezeichnung_Tabelle>
+                 <Kennzahl>
+                  <Wert>12</Wert>
+                </Kennzahl>
+                <Oertlicher_Elementbezeichner>
+                  <Wert>87</Wert>
+                </Oertlicher_Elementbezeichner>
               </Bezeichnung>
               <W_Kr_Gsp_Element_Allg>
                 <Vorzugslage_Automatik>
