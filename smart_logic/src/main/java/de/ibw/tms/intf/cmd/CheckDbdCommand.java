@@ -1,10 +1,12 @@
 package de.ibw.tms.intf.cmd;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Dieser Befehl entsteht im TMS und weist die SL an diesen Weichenstellbefehl zu prüfen.
@@ -15,7 +17,11 @@ import java.util.Objects;
  */
 public class CheckDbdCommand extends Commands {
 
-
+    /**
+     * UUid
+     */
+    @Expose
+    public UUID uuid;
 
     /**
      * Node-ID (Topologisch) der Weiche
@@ -27,7 +33,7 @@ public class CheckDbdCommand extends Commands {
      * Status der Weiche der gesetzt werden soll und von der SL gepr&uuml;ft werden soll
      */
     @Expose
-    public BranchingSwitch.SwitchStatus SwitchStatus;
+    public TrackElementStatus SwitchStatus;
 
     /**
      * Priorität des Befehls
@@ -40,7 +46,7 @@ public class CheckDbdCommand extends Commands {
      *
      * @param lPriority long - Priority dieses Befehls im TMS Postausgang.
      */
-    public CheckDbdCommand(String sCrossoverEbdName, String sId, BranchingSwitch.SwitchStatus Status , long lPriority) {
+    public CheckDbdCommand(String sCrossoverEbdName, String sId, TrackElementStatus Status , long lPriority) {
         super(lPriority);
         this.sId = sId;
         this.SwitchStatus = Status;
@@ -72,9 +78,6 @@ public class CheckDbdCommand extends Commands {
                 '}';
     }
 
-    public static void main(String[] args) throws MissingInformationException {
-        CheckDbdCommand DbdCmd = new CheckDbdCommand("TestW12","123", BranchingSwitch.SwitchStatus.LEFT, 1L);
-        System.out.println(DbdCmd.parseToJson());
-    }
+
 
 }

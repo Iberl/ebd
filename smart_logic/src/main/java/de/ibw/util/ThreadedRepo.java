@@ -36,8 +36,13 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
     }
 
     @Override
-    public ArrayList<K> getKeys() {
+    public synchronized ArrayList<K> getKeys() {
         return repo.getKeys();
+    }
+
+    @Override
+    public boolean containsKey(K Key) {
+        return repo.containsKey(Key);
     }
 
     /**

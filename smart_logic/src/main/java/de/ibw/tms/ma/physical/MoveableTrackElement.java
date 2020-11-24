@@ -3,7 +3,6 @@ package de.ibw.tms.ma.physical;
 import de.ibw.rtm.intf.IRTMEntityLocation;
 import de.ibw.tms.ma.Chainage;
 
-import javax.sound.midi.Track;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +22,9 @@ public class MoveableTrackElement extends ControlledElement {
         if(DefaultEwStates == null) {
             DefaultEwStates = new ArrayList<>();
             ArrayList<TrackElementStatus.Status> basicStatus = new ArrayList<>();
-            basicStatus.add(TrackElementStatus.Status.Unknown);
-            basicStatus.add(TrackElementStatus.Status.Left);
-            basicStatus.add(TrackElementStatus.Status.Right);
+            basicStatus.add(TrackElementStatus.Status.UNKNOWN);
+            basicStatus.add(TrackElementStatus.Status.LEFT);
+            basicStatus.add(TrackElementStatus.Status.RIGHT);
 
             for(TrackElementStatus.Status Stat : basicStatus) {
                 TrackElementStatus S = new TrackElementStatus();
@@ -42,11 +41,11 @@ public class MoveableTrackElement extends ControlledElement {
             DefaultDkwStates = new ArrayList<>();
             ArrayList<TrackElementStatus.Status> basicStatus = new ArrayList<>();
 
-            basicStatus.add(TrackElementStatus.Status.Left);
-            basicStatus.add(TrackElementStatus.Status.Right);
+            basicStatus.add(TrackElementStatus.Status.LEFT);
+            basicStatus.add(TrackElementStatus.Status.RIGHT);
             TrackElementStatus UnknownState = new TrackElementStatus();
-            UnknownState.statusList.add(0, TrackElementStatus.Status.Unknown);
-            UnknownState.statusList.add(1, TrackElementStatus.Status.Unknown);
+            UnknownState.statusList.add(0, TrackElementStatus.Status.UNKNOWN);
+            UnknownState.statusList.add(1, TrackElementStatus.Status.UNKNOWN);
             DefaultDkwStates.add(UnknownState);
             for(TrackElementStatus.Status S1 : basicStatus) {
                 for(TrackElementStatus.Status S2 : basicStatus) {

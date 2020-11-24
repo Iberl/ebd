@@ -20,7 +20,7 @@ public class SlDbdClient {
     public SlDbdClient() throws UnknownHostException, IOException {
         String sHost;
         int iPort;
-        if(ConfigHandler.getInstance().debug) {
+        if(!ConfigHandler.getInstance().useInfrastructureServer) {
             sHost = "localhost";
             iPort = 1436;
         } else {

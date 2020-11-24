@@ -16,7 +16,7 @@ public class DbdRequestReturnPayload implements ITypable {
 
 
     public static final String BLOCK_FAIL_REASON = "is blocked";
-
+    public static final String STATE_FOR_ELEMENT_NOT_POSSIBLE = "State not possible";
 
     /**
      * Definiert Nachrichtentyp, dadurch kann die Art der Nachricht vom TMS erkannt werden

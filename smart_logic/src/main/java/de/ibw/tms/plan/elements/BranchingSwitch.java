@@ -218,6 +218,9 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         BrachingStates.addActionListener(al);
     }
 
+    /**
+     * @deprecated
+     */
     public void sendDbdCommandToSL() {
         long lPriority = SlConfigHandler.getInstance().lCheckDbdCommand;
         Object OEnumField = BrachingStates.getSelectedItem();
@@ -228,6 +231,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         }
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
         String sId = ISwitchHandler.getNodeId(this.Node);
+        /*
         CheckDbdCommand DbdCommandPayload =
                 new CheckDbdCommand(sEbdName,sId, (SwitchStatus) EF.Item, lPriority);
         TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
@@ -235,7 +239,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
             SmartClientHandler.getInstance().sendCommand(DbdCommand);
         } catch (MissingInformationException missingInformationException) {
             missingInformationException.printStackTrace();
-        }
+        }*/
     }
 
     private void handleDKW() {

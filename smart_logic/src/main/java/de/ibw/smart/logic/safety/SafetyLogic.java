@@ -2,6 +2,8 @@ package de.ibw.smart.logic.safety;
 
 
 
+import de.disposim.dbd.io.SessionClosedException;
+import de.disposim.dbd.packet.IllegalNameLengthException;
 import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
@@ -25,6 +27,7 @@ import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.SlConfigHandler;
+import ebd.TescModul;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
@@ -1035,6 +1038,7 @@ public class SafetyLogic {
     /**
      * Check ob eine Weiche in der Blockierten Liste vorhanden ist.
      * @param cdc
+     *
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
         this.slSelfCheck();
@@ -1044,16 +1048,29 @@ public class SafetyLogic {
         for(List<Occupation> l :this.blockList.getAll()) {
             for(Occupation BA : l) {
                 if(BA.isSidBlocked(checkSid)) {
+                    EBM.log("DBD request" + cdc.uuid + " failed, Element blocked ", SmartLogic.getsModuleId(SMART_SAFETY) );
 
                     sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
                     return;
                 }
             }
         }
+        boolean isStatePossible = false;
+        try {
+            isStatePossible = TescModul.getInstance().setState(cdc.sId, cdc.SwitchStatus);
+        } catch (IOException | SessionClosedException | IllegalNameLengthException e) {
+            e.printStackTrace();
+            isStatePossible = false;
+        }
+        if(!isStatePossible) {
+                    EBM.log("DBD request" + cdc.uuid + " failed, State was not possible to set", SmartLogic.getsModuleId(SMART_SAFETY) );
 
+                    sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.STATE_FOR_ELEMENT_NOT_POSSIBLE);
+                    return;
+        }
         sendResponseDbdCommandToTms(true,cdc.sId ,null);
-        EBM.log("Send request" + "{uuid}" + "to Object Controller: " + cdc.toString()  , SmartLogic.getsModuleId(SMART_SAFETY) );
-        EBM.log("Object Controller has to be implemented", SmartLogic.getsModuleId(SMART_SAFETY) );
+        EBM.log("Send request" + cdc.uuid + "to Object Controller: " + cdc.toString()  , SmartLogic.getsModuleId(SMART_SAFETY) );
+        //EBM.log("Object Controller has to be implemented", SmartLogic.getsModuleId(SMART_SAFETY) );
 
     }
 

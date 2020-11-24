@@ -59,6 +59,67 @@ public class TescModul {
         getParellelLowerEbdId = new ThreadedRepo<>();
     }
 
+    public boolean setState(String sId, TrackElementStatus switchStatus) throws IOException, SessionClosedException, IllegalNameLengthException {
+        // Set Ist Lage "I" in Debug Moduls, sonst Sollage "S"
+        String sPostfix = ConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
+        String dbdId = sId + sPostfix;
+        if(ElementStateByIdRepository.containsKey(sId)) {
+            MoveableTrackElement EwElement = ElementStateByIdRepository.getModel(sId);
+            if(EwElement.getListOfPossibleStatus().contains(switchStatus)) {
+                startTescSession();
+                setStateOnInfrastructure(switchStatus, dbdId, 0);
+                return true;
+            } else return false;
+        } else if(DkwStateByRepo.containsKey(sId)) {
+            MoveableTrackElement DkwElement = DkwStateByRepo.getModel(sId);
+            NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(dbdId);
+            if(NI == null) {
+                EventBusManager.registerOrGetBus(1,false).
+                        log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
+                return false;
+            }
+            TopologyGraph.Node N1 = NI.get(0);
+            TopologyGraph.Node N2 = NI.get(1);
+            CrossingSwitch S1 = (CrossingSwitch) N1.NodeImpl;
+            CrossingSwitch S2 = (CrossingSwitch) N2.NodeImpl;
+            String sLower;
+            String sHigher;
+            if(S1.getLocalElementId() < S2.getLocalElementId()) {
+                sLower = S1.getEbdTitle(0,false, true);
+                sHigher = S2.getEbdTitle(0,false,true);
+            } else {
+                sLower = S2.getEbdTitle(0,false, true);
+                sHigher = S1.getEbdTitle(0,false,true);
+            }
+            if(DkwElement.getListOfPossibleStatus().contains(switchStatus)) {
+                startTescSession();
+                setStateOnInfrastructure(switchStatus, sLower, 0);
+                setStateOnInfrastructure(switchStatus, sHigher, 1);
+                return true;
+            } else return false;
+        } else {
+            EventBusManager.registerOrGetBus(1,false).
+                    log("Switch for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
+            return false;
+        }
+
+
+
+    }
+
+    private void setStateOnInfrastructure(TrackElementStatus switchStatus, String dbdId, int index) throws IOException, SessionClosedException, IllegalNameLengthException {
+        switch (switchStatus.statusList.get(index)) {
+            case UNKNOWN -> {
+                Session.set(dbdId, 0);
+            }
+            case LEFT -> {
+                Session.set(dbdId, 1);
+            } case RIGHT -> {
+                Session.set(dbdId, 2);
+            }
+        }
+    }
+
     /**
      * Input bei Tesc-Session des EBD-Anlagen-Control-Server
      * @param dbdId
@@ -126,8 +187,8 @@ public class TescModul {
     }
 
     private boolean handleBothStateUnknown(String idKey, TrackElementStatus currentStatus) {
-        currentStatus.statusList.add(TrackElementStatus.Status.Unknown);
-        currentStatus.statusList.add(1, TrackElementStatus.Status.Unknown);
+        currentStatus.statusList.add(TrackElementStatus.Status.UNKNOWN);
+        currentStatus.statusList.add(1, TrackElementStatus.Status.UNKNOWN);
         MoveableTrackElement MTE = ElementStateByIdRepository.getModel(idKey);
 
         MTE.setCurrentStatus(currentStatus);
@@ -187,15 +248,15 @@ public class TescModul {
     private void handleState(int state, TrackElementStatus newState,int index) {
         switch (state) {
             case 0 -> {
-                newState.statusList.set(index,TrackElementStatus.Status.Unknown);
+                newState.statusList.add(index,TrackElementStatus.Status.UNKNOWN);
 
             }
             case 1 -> {
-                newState.statusList.set(index, TrackElementStatus.Status.Left);
+                newState.statusList.add(index, TrackElementStatus.Status.LEFT);
 
             }
             case 2 -> {
-                newState.statusList.set(index, TrackElementStatus.Status.Right);
+                newState.statusList.add(index, TrackElementStatus.Status.RIGHT);
 
             }
             default -> {
@@ -256,17 +317,19 @@ public class TescModul {
     }
 
     private void startTescSession() throws IOException {
-        String sHost;
-        int iPort;
-        if(ConfigHandler.getInstance().debug) {
-            sHost = "localhost";
-            iPort = 1436;
-        } else {
-            sHost = ConfigHandler.getInstance().ipToInfrastructureServer;
-            iPort = Integer.parseInt(ConfigHandler.getInstance().portOfInfrastructureServer);
+        if(Session == null) {
+            String sHost;
+            int iPort;
+            if (!ConfigHandler.getInstance().useInfrastructureServer) {
+                sHost = "localhost";
+                iPort = 1436;
+            } else {
+                sHost = ConfigHandler.getInstance().ipToInfrastructureServer;
+                iPort = Integer.parseInt(ConfigHandler.getInstance().portOfInfrastructureServer);
+            }
+            Session = new TescSession(new Socket(sHost, iPort));
+            Session.start();
         }
-        Session = new TescSession(new Socket(sHost, iPort));
-        Session.start();
 
     }
 
@@ -280,7 +343,7 @@ public class TescModul {
             CrossingSwitch Switch = switchListByAnlage.get(0);
             if(Switch.getAnlage().getWKrAnlageAllg().getWKrArt().getWert().equals(ENUMWKrArt.EW)) {
                 TrackElementStatus CurrentStatus = new TrackElementStatus();
-                CurrentStatus.statusList.add(TrackElementStatus.Status.Unknown);
+                CurrentStatus.statusList.add(TrackElementStatus.Status.UNKNOWN);
                 String sLabel = Switch.getEbdTitle(0,false, true);
                 MoveableTrackElement MTE = MoveableTrackElement.genmMoveableElementFactory(sLabel, iOperationTime,
                         null, null, null,
@@ -298,8 +361,8 @@ public class TescModul {
                     }
                 }
                 TrackElementStatus CurrentStatus = new TrackElementStatus();
-                CurrentStatus.statusList.add(TrackElementStatus.Status.Unknown);
-                CurrentStatus.statusList.add(1,TrackElementStatus.Status.Unknown);
+                CurrentStatus.statusList.add(TrackElementStatus.Status.UNKNOWN);
+                CurrentStatus.statusList.add(1,TrackElementStatus.Status.UNKNOWN);
                 String sLabel = CsSmall.getEbdTitle(0,false,true);
                 MoveableTrackElement MTE = MoveableTrackElement.genmMoveableElementFactory(sLabel, iOperationTime,
                         null, null, null,
@@ -312,6 +375,7 @@ public class TescModul {
 
         }
     }
+
 
 
 }
