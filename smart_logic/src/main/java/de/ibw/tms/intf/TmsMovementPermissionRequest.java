@@ -9,8 +9,8 @@ import de.ibw.tms.intf.cmd.Commands;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-25
  */
 public class TmsMovementPermissionRequest extends TmsMessage implements Comparable<TmsMessage> {
 

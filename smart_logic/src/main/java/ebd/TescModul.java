@@ -72,25 +72,35 @@ public class TescModul {
             } else return false;
         } else if(DkwStateByRepo.containsKey(sId)) {
             MoveableTrackElement DkwElement = DkwStateByRepo.getModel(sId);
-            NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(dbdId);
+            NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(sId);
             if(NI == null) {
                 EventBusManager.registerOrGetBus(1,false).
                         log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
                 return false;
             }
             TopologyGraph.Node N1 = NI.get(0);
-            TopologyGraph.Node N2 = NI.get(1);
+
             CrossingSwitch S1 = (CrossingSwitch) N1.NodeImpl;
-            CrossingSwitch S2 = (CrossingSwitch) N2.NodeImpl;
+            CrossingSwitch LowerSwitch = S1;
+            CrossingSwitch HigherSwitch = S1;
             String sLower;
             String sHigher;
-            if(S1.getLocalElementId() < S2.getLocalElementId()) {
-                sLower = S1.getEbdTitle(0,false, true);
-                sHigher = S2.getEbdTitle(0,false,true);
-            } else {
-                sLower = S2.getEbdTitle(0,false, true);
-                sHigher = S1.getEbdTitle(0,false,true);
+            for(TopologyGraph.Node N : NI) {
+                CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
+                if(LowerSwitch.getLocalElementId() > CS.getLocalElementId()) {
+                    HigherSwitch = LowerSwitch;
+                    LowerSwitch = CS;
+                    break;
+                } else if (HigherSwitch.getLocalElementId() < CS.getLocalElementId()) {
+                    LowerSwitch = HigherSwitch;
+                    HigherSwitch = CS;
+                    break;
+                }
             }
+
+            sLower = LowerSwitch.getEbdTitle(0,false, true) + sPostfix;
+            sHigher = HigherSwitch.getEbdTitle(0,false,true) + sPostfix;
+
             if(DkwElement.getListOfPossibleStatus().contains(switchStatus)) {
                 startTescSession();
                 setStateOnInfrastructure(switchStatus, sLower, 0);
@@ -137,10 +147,10 @@ public class TescModul {
         String idKey = dbdId.replace("I", ""); // interface commits is-Value with I as postfix
         if(ElementStateByIdRepository.containsKey(idKey)) {
             handleEw(state, idKey);
-        } else if(DkwStateByRepo.containsKey(dbdId)) {
-           NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(dbdId);
+        } else if(DkwStateByRepo.containsKey(idKey)) {
+           NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(idKey);
            if(NI == null) {
-               StateChangesNotFound.update(dbdId, state);
+               StateChangesNotFound.update(idKey, state);
                String sLowerKey = getParellelLowerEbdId.getModel(dbdId);
                Integer state1 = StateChangesNotFound.getModel(sLowerKey);
                TrackElementStatus CurrentStatus = new TrackElementStatus();
@@ -155,44 +165,59 @@ public class TescModul {
                TopologyGraph.Node N1 = NI.get(0);
                TopologyGraph.Node N2 = NI.get(1);
                CrossingSwitch S1 = (CrossingSwitch) N1.NodeImpl;
-               CrossingSwitch S2 = (CrossingSwitch) N2.NodeImpl;
-               CrossingSwitch LowerSwitch;
-               CrossingSwitch HigherSwich;
-               if(S1.getLocalElementId() < S2.getLocalElementId()) {
+               CrossingSwitch LowerSwitch = S1;
+               CrossingSwitch HigherSwitch = S1;
 
-                   HigherSwich = S2;
-               } else {
-
-                   HigherSwich = S1;
-               }
-               String sHighKey = HigherSwich.getEbdTitle(0, false, true);
-               StateChangesNotFound.update(idKey, state);
-               getParellelLowerEbdId.update(sHighKey, dbdId);
-               Integer state2 = StateChangesNotFound.getModel(sHighKey);
-               TrackElementStatus CurrentStatus = new TrackElementStatus();
-
-               if(state2 != null) {
-                   if(state == 0 && state2 == 0) {
-                       return handleBothStateUnknown(idKey, CurrentStatus);
-                   } else {
-                       return handleDkwState(state, idKey, state2, CurrentStatus);
-
+               for(TopologyGraph.Node N : NI) {
+                   CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
+                   if(LowerSwitch.getLocalElementId() > CS.getLocalElementId()) {
+                       HigherSwitch = LowerSwitch;
+                       LowerSwitch = CS;
+                       break;
+                   } else if (HigherSwitch.getLocalElementId() < CS.getLocalElementId()) {
+                       LowerSwitch = HigherSwitch;
+                       HigherSwitch = CS;
+                       break;
                    }
                }
+               String sHighKey = HigherSwitch.getEbdTitle(0, false, true);
+               String sLowKey = LowerSwitch.getEbdTitle(0,false, true);
+               StateChangesNotFound.update(sLowKey, state);
+
+               getParellelLowerEbdId.update(sHighKey, sLowKey);
+               Integer state2 = StateChangesNotFound.getModel(sHighKey);
+               TrackElementStatus CurrentStatus = new TrackElementStatus();
+               if(state2 == null) state2 = 0;
+
+               if(state == 0 && state2 == 0) {
+                       return handleBothStateUnknown(sLowKey, CurrentStatus);
+               } else {
+                       return handleDkwState(state, sLowKey, state2, CurrentStatus);
+
+               }
+
            }
         } else {
-            StateChangesNotFound.update(dbdId, state);
+            String sLowKey = getParellelLowerEbdId.getModel(idKey);
+            StateChangesNotFound.update(idKey, state);
+            if(sLowKey != null) {
+                TrackElementStatus CurrentStatus = new TrackElementStatus();
+                int state2 = state;
+                Integer intState1 = StateChangesNotFound.getModel(sLowKey);
+                if(intState1 != null) {
+                    return handleDkwState(intState1, sLowKey, state2, CurrentStatus);
+                }
+            }
         }
         return false;
     }
 
     private boolean handleBothStateUnknown(String idKey, TrackElementStatus currentStatus) {
-        currentStatus.statusList.add(TrackElementStatus.Status.UNKNOWN);
-        currentStatus.statusList.add(1, TrackElementStatus.Status.UNKNOWN);
-        MoveableTrackElement MTE = ElementStateByIdRepository.getModel(idKey);
+
+        MoveableTrackElement MTE = DkwStateByRepo.getModel(idKey);
 
         MTE.setCurrentStatus(currentStatus);
-        ElementStateByIdRepository.update(idKey, MTE);
+        DkwStateByRepo.update(idKey, MTE);
         try {
             EventBusManager.registerOrGetBus(1,false).
                     log("Both state unknowwn for ID: " + idKey + " so set unknown.",
@@ -209,9 +234,9 @@ public class TescModul {
         } else {
             handleState(state, currentStatus, 0);
             handleState(state2, currentStatus, 1);
-            MoveableTrackElement MTE = ElementStateByIdRepository.getModel(idKey);
+            MoveableTrackElement MTE = DkwStateByRepo.getModel(idKey);
             MTE.setCurrentStatus(currentStatus);
-            ElementStateByIdRepository.update(idKey, MTE);
+            DkwStateByRepo.update(idKey, MTE);
             try {
                 EventBusManager.registerOrGetBus(1,false).
                         log("DKW: " + idKey + "set to states: " + state + ", " + state2,
@@ -246,17 +271,22 @@ public class TescModul {
     }
 
     private void handleState(int state, TrackElementStatus newState,int index) {
+        if(newState == null) newState = new TrackElementStatus();
+            while(index >= newState.statusList.size()) {
+                newState.statusList.add(TrackElementStatus.Status.UNKNOWN);
+            }
         switch (state) {
             case 0 -> {
-                newState.statusList.add(index,TrackElementStatus.Status.UNKNOWN);
+
+                newState.statusList.set(index,TrackElementStatus.Status.UNKNOWN);
 
             }
             case 1 -> {
-                newState.statusList.add(index, TrackElementStatus.Status.LEFT);
+                newState.statusList.set(index, TrackElementStatus.Status.LEFT);
 
             }
             case 2 -> {
-                newState.statusList.add(index, TrackElementStatus.Status.RIGHT);
+                newState.statusList.set(index, TrackElementStatus.Status.RIGHT);
 
             }
             default -> {
@@ -285,13 +315,38 @@ public class TescModul {
         startTescSession();
 
         watchedEbdIds.addAll(this.ElementStateByIdRepository.getKeys());
-        watchedEbdIds.addAll(this.DkwStateByRepo.getKeys());
+
         System.out.println("WatchSize: " + watchedEbdIds.size());
         subscribeAllScoped(watchedEbdIds);
+        subscribeDKW(this.DkwStateByRepo.getKeys());
 
         queryAllScoped(watchedEbdIds);
 
         System.out.println("Tesc-Module initiated successfully");
+
+    }
+
+    private void subscribeDKW(ArrayList<String> dkwKeys) {
+        for(String sEbdId : dkwKeys) {
+            System.out.println("Subscribed DKW: " + sEbdId + "I");
+
+            NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(sEbdId);
+
+            for(TopologyGraph.Node N : NI) {
+                CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
+                try {
+                    String ebdSubs = CS.getEbdTitle(0,false, true) + "I";
+                    Session.subscribe(ebdSubs);
+                    Session.query(ebdSubs);
+                    System.out.println("DKW Subelment Subscribed: " + ebdSubs);
+                } catch (InterruptedException | ExecutionException | SessionClosedException | IllegalNameLengthException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+
+        }
 
     }
 
@@ -368,7 +423,7 @@ public class TescModul {
                         null, null, null,
                         MoveableTrackElement.getDkwPossibleStates(), CurrentStatus);
                 DkwStateByRepo.update(sLabel, MTE);
-
+                System.out.println("DKW_Lable" + sLabel);
 
 
             }

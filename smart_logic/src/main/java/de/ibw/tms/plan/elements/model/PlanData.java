@@ -574,10 +574,23 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             N.NodeImpl = CS;
 
             switchId = CS.getEbdTitle(0,false, true);
+
             N.name = switchId;
             N.TopNodeId = switchId;
+
             if(switchId != null) {
-                ISwitchHandler.registerNode(N, switchId);
+                if(CS.isDKW()) {
+                    ArrayList<CrossingSwitch> switches = ISwitchHandler.getAllSwitches().getModel(CS.getAnlage());
+                    int iLowestId = CS.getLocalElementId();
+                    for(CrossingSwitch Switch : switches) {
+                        if(iLowestId > Switch.getLocalElementId()) {
+                            iLowestId = Switch.getLocalElementId();
+                        }
+                    }
+                    String sPrefix = switchId.split("W")[0];
+                    String sBetterId = sPrefix + "W" + iLowestId;
+                    ISwitchHandler.registerNode(N, sBetterId);
+                } else ISwitchHandler.registerNode(N, switchId);
             }
 
 
