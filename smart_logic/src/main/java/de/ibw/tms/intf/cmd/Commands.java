@@ -24,8 +24,10 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
      * String-Id der CheckMovementAuthority.
      * Dient zum Identifizieren in der SL welcher Befehlsart empfangen wurde
      */
-    public static final String S_CHECK_MOVEMENT_AUTHORITY = "checkMa";
-    protected static final String S_CHECK_DBD_COMMAND = "checkDBD";
+    public static final String S_CHECK_MOVEMENT_PERMISSION = "checkMovePerm";
+    public static final int I_CHECK_MOVEMENT_PERMISSION = 300;
+    public static final String S_CHECK_DBD_COMMAND = "checkDBD";
+    public static final int ICHECK_DBD_COMMAND = 302;
 
     /**
      * Gibt den Typ zur String Id wider. Ist im Json wichtig
@@ -34,7 +36,7 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
      * @return Type - Typ mit Klasse zu dem jeweiligen Befehl
      */
     public static Type getTypeByString(String sType) {
-        if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
+        if(sType.equals(S_CHECK_MOVEMENT_PERMISSION)) {
             return new TypeToken<TmsMovementPermissionRequest>(){}.getType();
         } else if(sType.equals(S_CHECK_DBD_COMMAND)) {
             return new TypeToken<TmsDbdCommand>(){}.getType();
@@ -49,7 +51,7 @@ public class Commands extends Payload implements Comparable<Commands>, Serializa
      * @return Type - Typ mit Klasse zu dem jeweiligen Befehl
      */
     public static Class getClassByString(String sType) {
-        if(sType.equals(S_CHECK_MOVEMENT_AUTHORITY)) {
+        if(sType.equals(S_CHECK_MOVEMENT_PERMISSION)) {
             return TmsMovementPermissionRequest.class;
         } else if (sType.equals(S_CHECK_DBD_COMMAND))
             return TmsDbdCommand.class;

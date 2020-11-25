@@ -70,7 +70,7 @@ public class CheckMovementPermission extends Commands {
     public CheckMovementPermission(long lPriority) {
         super(lPriority);
         this.lPriority = lPriority;
-        this.CommandType = Commands.S_CHECK_MOVEMENT_AUTHORITY;
+        this.CommandType = Commands.S_CHECK_MOVEMENT_PERMISSION;
     }
 
 

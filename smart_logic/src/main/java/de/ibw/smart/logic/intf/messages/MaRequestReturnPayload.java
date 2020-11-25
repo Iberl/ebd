@@ -20,7 +20,7 @@ public class MaRequestReturnPayload implements ITypable {
     /**
      * Definiert Nachrichtentyp, dadurch kann die Art der Nachricht vom TMS erkannt werden
      */
-    public static final String RETURN_TYPE = "MA_REQUEST_RETURN";
+    public static final String RETURN_TYPE = "MPERM_REQUEST_RETURN";
 
     /**
      * UUID die auch in Json gesendet wird

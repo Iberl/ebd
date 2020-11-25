@@ -48,8 +48,8 @@ public class TmsMessage extends Message<Commands> implements Serializable {
      * @param payload - {@link Commands} - Hat einen Payload eines TMS-Commands
      */
     protected TmsMessage(String tms_id, String rbc_id, Commands payload) {
-        super(0, tms_id, rbc_id, payload);
-        this.type = 0;
+        super(Commands.I_CHECK_MOVEMENT_PERMISSION, tms_id, rbc_id, payload);
+        this.type = Commands.I_CHECK_MOVEMENT_PERMISSION;
         this.tms_id = tms_id;
         this.rbc_id = rbc_id;
 
