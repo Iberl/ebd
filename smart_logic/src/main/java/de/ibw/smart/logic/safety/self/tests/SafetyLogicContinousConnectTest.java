@@ -63,7 +63,7 @@ public class SafetyLogicContinousConnectTest {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
 
         try {
-            ModulUnderTest.checkIfRouteIsContinuousConnected(null, null);
+            ModulUnderTest.checkIfRouteIsContinuousConnected(-1, null, null);
             // this assert shall not be called, since code above thorws Nullpointer
             assertEquals("Exception", false);
         } catch (Exception E) {
@@ -78,7 +78,7 @@ public class SafetyLogicContinousConnectTest {
     public void checkIfRouteIsContinuousWithEmptyTrackList() {
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
         try {
-            ModulUnderTest.checkIfRouteIsContinuousConnected(null, new RouteDataSL());
+            ModulUnderTest.checkIfRouteIsContinuousConnected(-1, null, new RouteDataSL());
             // this assert shall not be called, since code above thorws Nullpointer
             assertEquals("Exception", false);
         } catch (Exception E) {
@@ -97,7 +97,7 @@ public class SafetyLogicContinousConnectTest {
         try {
             RouteDataSL list1 = new RouteDataSL();
             list1.add(test1);
-            ModulUnderTest.checkIfRouteIsContinuousConnected(null, list1);
+            ModulUnderTest.checkIfRouteIsContinuousConnected(-1, null, list1);
             // this assert shall not be called, since code above thorws Nullpointer
             assertEquals("Exception", false);
         } catch (Exception E) {
@@ -106,7 +106,7 @@ public class SafetyLogicContinousConnectTest {
         try {
             RouteDataSL list2 = new RouteDataSL();
             list2.add(new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, this.pickRandomEdge()));
-            ModulUnderTest.checkIfRouteIsContinuousConnected(null, list2);
+            ModulUnderTest.checkIfRouteIsContinuousConnected(-1, null, list2);
             // this assert shall not be called, since code above thorws Nullpointer
             assertEquals("Exception", false);
         } catch (Exception E) {
@@ -132,7 +132,7 @@ public class SafetyLogicContinousConnectTest {
         for(RouteDataSL Route : testRoutes) {
             try {
                 Route = malifiyRouteWithNullEntry(Route);
-                ModulUnderTest.checkIfRouteIsContinuousConnected(null, Route);
+                ModulUnderTest.checkIfRouteIsContinuousConnected(-1 , null, Route);
                 // this assert shall not be called, since code above thorws Nullpointer
                 assertEquals("Exception", false);
             } catch (Exception E) {
@@ -158,7 +158,7 @@ public class SafetyLogicContinousConnectTest {
             }
         }
         for(RouteDataSL Route : testRoutes) {
-            boolean bResult = ModulUnderTest.checkIfRouteIsContinuousConnected(null, Route);
+            boolean bResult = ModulUnderTest.checkIfRouteIsContinuousConnected(-1 , null, Route);
 
             assertTrue(bResult);
         }
@@ -210,7 +210,7 @@ public class SafetyLogicContinousConnectTest {
 
             try {
 
-                boolean b = (ModulUnderTest.checkIfRouteIsContinuousConnected(null, Route));
+                boolean b = (ModulUnderTest.checkIfRouteIsContinuousConnected(-1 , null, Route));
                 if(b) {
                     System.out.println("bad result");
                 }

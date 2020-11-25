@@ -171,13 +171,13 @@ public class SafetyLogic {
     /**
      * Methode die untersucht ob auf der angeforderten MA blockierte Streckenabschnitte bestehen.
      * Es kann zum Beispiel durch einen anderen Zug auf der Strecke, blockierte Abschnitte bestehen.
-     * @param maRequest - {@link MaRequestWrapper } - Anfragedaten zur MA
+     *
      * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
      * @param requestedTrackElementList {@link ArrayList} - Eine Liste der Routenelemente die auch nicht blockiert
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter, RouteDataSL requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
@@ -191,7 +191,7 @@ public class SafetyLogic {
         Balise B = null;
         PositionInfo PosInfo = null;
         try {
-            PosInfo = guardCheckIfPositonReportIsOk(maRequest, maAdapter, iSumSectionsLength);
+            PosInfo = guardCheckIfPositonReportIsOk(iTrainId, R , maAdapter, iSumSectionsLength);
             dSumOfWholeMaTrack = maAdapter.calcLengthOfSection();
 
             int iEoaQ_Scale = maAdapter.q_scale;
@@ -273,7 +273,7 @@ public class SafetyLogic {
                 // TODO PositionData usage
                 toBlock = calcCrossoverSignals(toBlock);
 
-                List<Occupation> occupations = getAllAreaNotBlockedByOwn(maRequest.Tm.iTrainId);
+                List<Occupation> occupations = getAllAreaNotBlockedByOwn(iTrainId);
                 for(Occupation ThisArea : toBlock)
                 for(Occupation OtherArea: occupations) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
@@ -286,7 +286,7 @@ public class SafetyLogic {
 
 
 
-            blockList.update(maRequest.Tm.iTrainId, toBlock);
+            blockList.update(iTrainId, toBlock);
 
 
 
@@ -506,24 +506,24 @@ public class SafetyLogic {
         else return dDistanceBaliseFromA - (iDistance_lrbg * Math.pow(10, iQ_scale) / 10.0d - iMetersOnPassedTracks);
     }
 
-    private synchronized PositionInfo guardCheckIfPositonReportIsOk(MaRequestWrapper maRequest, RbcMaAdapter maAdapter, AtomicInteger iSumSectionsLength) throws Exception {
-        int iTrainId;
+    private synchronized PositionInfo guardCheckIfPositonReportIsOk(int iTrainId, Route R, RbcMaAdapter maAdapter, AtomicInteger iSumSectionsLength) throws Exception {
+
         int iNID_LRBG;
         Balise B;
         int iQ_DirTrain;
         int iQ_DirLength;
 
-        if(maRequest == null) {
+        if(R == null) {
             throw new InvalidParameterException("Ma Request is null");
         }
-        if(maRequest.Tm == null) throw new InvalidParameterException("Trainmodel of Request is null");
-        if(maRequest.Tm.iTrainId < 0) throw new InvalidParameterException("Train Id is negative");
+        ;
+        if(iTrainId < 0) throw new InvalidParameterException("Train Id is negative");
         if(maAdapter == null) throw new InvalidParameterException("Ma Adapter Util is null");
         if(maAdapter.eoa == null) throw new InvalidParameterException("Eoa of Ma is null");
         if(maAdapter.eoa.sections.isEmpty()) throw new InvalidParameterException("Eoa Sections are empty");
 
 
-        iTrainId = maRequest.Tm.iTrainId;
+
         // check if some elements blocked
         List<EoaSectionAdapter> sectionlist = maAdapter.eoa.sections;
         for(EoaSectionAdapter ES : sectionlist) {
@@ -584,11 +584,10 @@ public class SafetyLogic {
 
     /**
      * Diese Methode untersucht ob alle Routenelemente durchwegs verbunden sind.
-     * @param maRequest - {@link MaRequestWrapper} - Anfragedatend des TMS
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
      */
-    public synchronized boolean checkIfRouteIsContinuousConnected(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsContinuousConnected(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
         if(requestedTrackElementList == null) {
             throw new NullPointerException("Track List is null");
         } else if (requestedTrackElementList.isEmpty()) {
@@ -790,7 +789,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
      * @return boolean
      */
-    public synchronized boolean checkIfRouteElementStatusIsCorrect(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteElementStatusIsCorrect(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
         //DBDClient dbdclient = new DBDClient();
         return true;
     }
@@ -957,11 +956,11 @@ public class SafetyLogic {
 
     /**
      * Noch nicht implementiert
-     * @param maRequest
+     *
      * @param ma
      * @return
      */
-    public synchronized boolean verifyTrainID(MaRequestWrapper maRequest, MA ma) {
+    public synchronized boolean verifyTrainID(int iTrainid, MA ma) {
         //return maRequest.Tm.iTrainId > 0;
         return true;
     }
@@ -971,7 +970,7 @@ public class SafetyLogic {
      * @param maRequest
      * @return
      */
-    public synchronized boolean checkIfTrainStatusRequestIsFresh(MaRequestWrapper maRequest) {
+    public synchronized boolean checkIfTrainStatusRequestIsFresh(int iTrainId, Route R) {
         // check if Position Report is new 60S
         // Static var PositionReportTimeout
 
@@ -995,7 +994,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
+    public synchronized void handleFlankProtection(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert

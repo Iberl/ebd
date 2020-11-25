@@ -219,25 +219,7 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
     }
 
-    private void sendDummyCommand() {
-        CheckMovementPermission c = CheckMovementPermission.getDummyMovementAuthorityCommand();
-        TmsMovementPermissionRequest tmsCmd = new TmsMovementPermissionRequest("TMS_TEST_ID", "RBC_ID", c);
 
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    sleep(10000);
-                    sendCommand(tmsCmd);
-                } catch (InterruptedException | MissingInformationException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }.start();
-
-
-    }
 
     /**
      * Diese Methode gibt die TMS-Nachricht in den Postausgang an die SL.

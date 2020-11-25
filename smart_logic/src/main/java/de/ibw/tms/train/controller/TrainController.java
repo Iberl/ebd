@@ -265,17 +265,17 @@ public class TrainController extends SubmissionPublisher implements IController 
 
             MaAdapter = new RbcMaAdapter(SendMa);
             CheckMovementPermission CheckMoveAuthCommand = new CheckMovementPermission(3L);
-            CheckMoveAuthCommand.MaRequest = requestWrapper;
+
             CheckMoveAuthCommand.MaAdapter = MaAdapter;
             CheckMoveAuthCommand.rbc_id = sRbcId;
             CheckMoveAuthCommand.tms_id = sTmsId;
             CheckMoveAuthCommand.uuid = uuid;
-            TopologyGraph.Edge E = CheckMoveAuthCommand.MaRequest.Tm.getEdgeTrainStandsOn();
+            TopologyGraph.Edge E = null;
             E.sId = E.getRefId();
-            CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
-            TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
-            CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
-            CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
+            //CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
+            //TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
+            //CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
+            //CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
             TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
             try {
@@ -382,48 +382,7 @@ public class TrainController extends SubmissionPublisher implements IController 
      * @return BigDecimal - Entfernung
      */
     public static BigDecimal extractDistanceOfSelectedTrack(Route R, TrainModel TM) {
-        BigDecimal resultDistance = new BigDecimal(0d);
-        try {
-            int iLastIndex = -1;
-            if(TM == null || R == null) return resultDistance;
-
-            Integer iNid_Lrbg = TM.getNid_lrbg();
-
-            Balise B = Balise.baliseByNid_bg.getModel(iNid_Lrbg);
-            if(B == null) return resultDistance;
-            R.saveWaypointsForProcessing(false);
-
-            if(R.getElemetTypes().size() < 2) return resultDistance;
-            iLastIndex = R.getElemetTypes().size() -1;
-
-            if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
-            resultDistance = resultDistance.add(PositionReportController.calcDistanceToFirstNodeOfTrainViaBalise(TM));
-
-            for(int i = 2; i < R.getElemetTypes().size(); i++) {
-                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.CROSSOVER_TYPE) &&
-                R.getElemetTypes().get(i - 1).equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    String s1NodeId = R.getElementListIds().get(i);
-                    String s2NodeId = R.getElementListIds().get(i-1);
-
-
-                    DefaultRepo<String, TopologyGraph.Edge> drEdge = TopologyGraph.twoTopPointBelongsToEdgeRepo.getModel(s1NodeId);
-
-
-
-                    TopologyGraph.Edge E = drEdge.getModel(s2NodeId);
-
-                        // Start distanz wurde schon in result distanz gespeichert
-                    resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
-                    }
-                }
-
-
-            return resultDistance;
-        } catch(Exception E) {
-            E.printStackTrace();
-        }
-        return resultDistance;
-
+       return null;
     }
 
     private int extractMaxSpeed_V_LOA() {

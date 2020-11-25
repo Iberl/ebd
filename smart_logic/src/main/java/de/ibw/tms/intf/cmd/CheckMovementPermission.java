@@ -17,17 +17,20 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-10
+ * @version 0.4
+ * @since 2020-11-25
  */
 public class CheckMovementPermission extends Commands {
 
-    /**
-     * Ma to check
-     */
+    @Expose
+    public Route route;
 
     @Expose
-    public MaRequestWrapper MaRequest;
+    public int iTrainId;
+
+
+
+
 
     /**
      * Nachricht an das RBC
@@ -74,47 +77,38 @@ public class CheckMovementPermission extends Commands {
     }
 
 
-
-    /**
-     * Std String widergabe
-     * @return String - dieser Nachricht.
-     */
     @Override
     public String toString() {
-        return "CheckMovementAuthority{" +
-                "MaRequest=" + MaRequest +
+        return "CheckMovementPermission{" +
+                "route=" + route +
+                ", iTrainId=" + iTrainId +
                 ", MaAdapter=" + MaAdapter +
                 ", uuid=" + uuid +
                 ", tms_id='" + tms_id + '\'' +
                 ", rbc_id='" + rbc_id + '\'' +
                 ", lPriority=" + lPriority +
+                ", lPriority=" + lPriority +
+                ", CommandType='" + CommandType + '\'' +
                 '}';
     }
 
-    /**
-     * Hashcode dieser Nachricht
-     * @return int - hashcode
-     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CheckMovementPermission that = (CheckMovementPermission) o;
+        return iTrainId == that.iTrainId &&
+                route.equals(that.route) &&
+                MaAdapter.equals(that.MaAdapter) &&
+                uuid.equals(that.uuid) &&
+                tms_id.equals(that.tms_id) &&
+                rbc_id.equals(that.rbc_id) &&
+                lPriority.equals(that.lPriority);
+    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(CommandType, MaRequest, MaAdapter, uuid, tms_id, rbc_id, lPriority);
-    }
-
-    /**
-     * Vergleich ob dieser Befehl und o derselbe sei.
-     * @param o {@link Object} - Vergleichsobject
-     * @return boolean - ist dieser Befehl derselbe wie o
-     */
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        CheckMovementPermission that = (CheckMovementPermission) o;
-        return Objects.equals(CommandType, that.CommandType) && Objects.equals(MaRequest, that.MaRequest) &&
-                Objects.equals(MaAdapter, that.MaAdapter) && Objects.equals(uuid, that.uuid) && Objects.equals(tms_id, that.tms_id) &&
-                Objects.equals(rbc_id, that.rbc_id) && Objects.equals(lPriority, that.lPriority);
+        return Objects.hash(route, iTrainId, MaAdapter, uuid, tms_id, rbc_id, lPriority);
     }
 
     //testmain
@@ -123,6 +117,10 @@ public class CheckMovementPermission extends Commands {
         System.out.println(cma.parseToJson());
     }
 
+    /**
+     * @deprecated
+     * @return
+     */
     public static CheckMovementPermission getDummyMovementAuthorityCommand() {
         CheckMovementPermission cma = new CheckMovementPermission(3L);
         //return null;
@@ -141,9 +139,7 @@ public class CheckMovementPermission extends Commands {
         MA.setSpeedProfile(ssp);
 
         mar.setMa(MA);
-        TrainModel TM = TrainModel.getDefaultModel();
-        cma.MaRequest = new MaRequestWrapper(mar);
-        cma.MaRequest.Tm = TM;
+
         return cma;
 
 

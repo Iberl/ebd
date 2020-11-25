@@ -146,7 +146,7 @@ public class SmartServer extends RbcModul  {
                             }
                         }
 
-                        ServerImpl.checkMovementAuthority(CMA.MaRequest, CMA.MaAdapter, CMA.uuid, CMA.tms_id, CMA.rbc_id,
+                        ServerImpl.checkMovementAuthority(CMA.iTrainId, CMA.route, CMA.MaAdapter, CMA.uuid, CMA.tms_id, CMA.rbc_id,
                                 CMA.lPriority);
                     }
                 }.start();

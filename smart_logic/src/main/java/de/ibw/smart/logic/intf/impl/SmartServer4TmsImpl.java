@@ -172,7 +172,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     /**
      * Diese Methode checkt die Eingegangen MA vom TMS
-     * @param MaRequest - ein Request aus TMS
+     *
      * @param Ma - eien MA zum RBC
      * @param uuid - KommunikationsId mit RBC
      * @param tms_id - Id des TMS
@@ -181,7 +181,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      */
 
     @Override
-    public synchronized void checkMovementAuthority(MaRequestWrapper MaRequest, MA Ma, UUID uuid, String tms_id, String rbc_id,
+    public synchronized void checkMovementAuthority(int iTrainId, Route R, MA Ma, UUID uuid, String tms_id, String rbc_id,
                                        Long lPriority) {
         RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
         MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
@@ -209,7 +209,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 sendMaResponseToTMS(MaReturnPayload, 1L);
                 return;
             } else {
-                bTrainIdIsVerified = Safety.verifyTrainID(MaRequest, Ma);
+                bTrainIdIsVerified = Safety.verifyTrainID(iTrainId, Ma);
                 if(!bTrainIdIsVerified) {
                     MaReturnPayload.setErrorState(uuid, false, TRAIN_ID_NOT_VERIFIED_ERROR);
                     sendMaResponseToTMS(MaReturnPayload, 1L);
@@ -219,19 +219,19 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
-        requestedTrackElementList = identifyRouteElements(MaRequest, requestedTrackElementList);
+        requestedTrackElementList = identifyRouteElements(R, requestedTrackElementList);
         if(requestedTrackElementList == null) {
             if(EBM != null) EBM.log("Route not existing", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             return;
         } else {
             if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
         }
-        bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(MaRequest, MaAdapter,requestedTrackElementList);
+        bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList);
         /**To Debug **/
         bIsOccupatonFree = true;
         if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
@@ -242,29 +242,29 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
-            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+            if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             return;
         } else {
-            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + MaRequest.Tm.iTrainId + "UUID: " + uuid.toString(),
+            if(EBM != null) EBM.log("SL ELement-Reservation Successfull; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         }
-        bTrainStatusIsFresh = Safety.checkIfTrainStatusRequestIsFresh(MaRequest);
+        bTrainStatusIsFresh = Safety.checkIfTrainStatusRequestIsFresh(iTrainId, R);
         if(!bTrainStatusIsFresh) {
             // send and wait for position report
             // send set Status on block elements with timeout
         } else {
             // send set Status on block elements with timeout
         }
-        bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(MaRequest, requestedTrackElementList);
+        bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(iTrainId, R, requestedTrackElementList);
         if(!bRouteElementAreTheRightOnes) {
-            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
+            if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
             MaReturnPayload.setErrorState(uuid, true,NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR );
             sendMaResponseToTMS(MaReturnPayload, 2L);
             return;
-        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + MaRequest.Tm.iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
+        } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
 
-        bRouteElementStatusIsRight = Safety.checkIfRouteElementStatusIsCorrect(MaRequest, requestedTrackElementList);
+        bRouteElementStatusIsRight = Safety.checkIfRouteElementStatusIsCorrect(iTrainId, R, requestedTrackElementList);
         if(!bRouteElementStatusIsRight) {
             MaReturnPayload.setErrorState(uuid, true, STATUS_OF_ELEMENT_IS_WRONG_ERROR);
             sendMaResponseToTMS(MaReturnPayload, 2L);
@@ -280,7 +280,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             sendMaResponseToTMS(MaReturnPayload, 2L);
             return;
         }
-        Safety.handleFlankProtection(MaRequest, requestedTrackElementList);
+        Safety.handleFlankProtection(iTrainId, R, requestedTrackElementList);
 
 
         bSspCheckOk = Safety.checkSSP(Ma);
@@ -300,7 +300,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         Payload_21 MaPayload = null;
         if(uuid == null) uuid = UUID.randomUUID();
         try {
-            nid_engine_Id = MaRequest.getTm().getTrainId();
+            nid_engine_Id = iTrainId;
         } catch(Exception E) {
             E.printStackTrace();
             throw new InvalidParameterException("nid_engine_Id unknown");
@@ -356,29 +356,29 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     /**
      * Returns Route Elements in Train-Visiting-Order
-     * @param maRequest
+     *
      * @param requestedTrackElementList
      * @return ArrayList of Pair with TrackElement and Element Type
      */
-    private RouteDataSL identifyRouteElements(MaRequestWrapper maRequest, RouteDataSL requestedTrackElementList) {
+    private RouteDataSL identifyRouteElements(Route R, RouteDataSL requestedTrackElementList) {
         try{
 
             int iListCount = 0;
-            Route R = maRequest.Request.getRoute();
+
 
             System.out.println(R.getElementListIds().size());
-            System.out.println(R.getElemetTypes().size());
+
             System.out.println("check done");
 
             List<String> idList = R.getElementListIds();
-            List<Route.TrackElementType> typeList = R.getElemetTypes();
+
             int iIdCount = idList.size();
 
             for(int i = 0; i < iIdCount; i++) {
                 Pair<Route.TrackElementType, ITopological> TePair = null;
-                Route.TrackElementType T = typeList.get(i);
+
                 String sId  = idList.get(i);
-                if(T.equals(Route.TrackElementType.RAIL_TYPE)) {
+
                    TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
@@ -387,18 +387,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                    }
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
-                } else if(T.equals(Route.TrackElementType.CROSSOVER_TYPE)) {
-                    NodeInformation N = ISwitchHandler.getNodeInfoBySwitchId(sId);
-                    if(N == null) {
-                        if(EBM != null) EBM.log("Node Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
-                        throw new NullPointerException("Some elements cannot be Identifed");
-                    }
-                    TePair = new ImmutablePair<Route.TrackElementType, ITopological>(Route.TrackElementType.CROSSOVER_TYPE, (ITopological) N);
-                } else {
-                    EBM.log("The given Element Type is not supported", ROUTE_COMPONENTS_IDENTIFY);
-                    EBM.log("The Element Type has to be a Rail Or Crossover Type", ROUTE_COMPONENTS_IDENTIFY);
-                    throw new InvalidParameterException("Track Element Type not supportetd");
-                }
+
+
+
                 requestedTrackElementList.add(TePair);
 
             }

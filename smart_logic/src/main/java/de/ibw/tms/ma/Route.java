@@ -45,8 +45,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
     @Expose
     private List<String> elementListIds = new ArrayList<>();
-    @Expose
-    private List<TrackElementType> elemetTypes = new ArrayList<>();
+
 
     public List<RouteSection> getSections() {
         return sections;
@@ -68,20 +67,15 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         this.elementListIds = elementListIds;
     }
 
-    public void setElemetTypes(List<TrackElementType> elemetTypes) {
-        this.elemetTypes = elemetTypes;
-    }
+
 
     public List<String> getElementListIds() {
         return elementListIds;
     }
 
-    public List<TrackElementType> getElemetTypes() {
-        return elemetTypes;
-    }
 
     public void saveWaypointsForProcessing(boolean withEndpoint) {
-        elemetTypes = new ArrayList<>();
+
         elementListIds = new ArrayList<>();
         int iCountWaypoints = 0;
         ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
@@ -160,10 +154,7 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         //this.addWaypointIntoTransmission(TrackElementType.RAIL_TYPE, TE.getPlanProId());
     }
 
-    private void addWaypointIntoTransmission(TrackElementType TrackType, String sId) {
-        elemetTypes.add(TrackType);
-        elementListIds.add(sId);
-    }
+
 
     /**
      * @deprecated
