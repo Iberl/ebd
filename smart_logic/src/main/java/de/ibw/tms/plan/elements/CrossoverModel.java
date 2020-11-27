@@ -72,26 +72,6 @@ public class CrossoverModel {
 
     }
 
-    /**
-     * Verlinkt die Gleise mit dieser Weiche
-     */
-    public void createPositionedRelation() {
-        boolean isIndex_0_RightPosition = false;
-        HashSet<TopologyGraph.Edge> edges = this.Node.inEdges;
-        ArrayList<TopologyGraph.Edge> notPeekEdges = null;
-        edges.addAll(this.Node.outEdges);
-        notPeekEdges = new ArrayList<>(edges);
-        TopologyGraph.Edge PeekEdge = getPeekEdge(edges);
-        PeekRail = PeekEdge.getRail();
-        this.RailWaySwitch.setPeekRail(PeekRail);
-        this.RailWaySwitch.setNode(this.getNode());
-        notPeekEdges.remove(PeekEdge);
-
-
-
-
-
-    }
 
     private boolean checkCrossingSwitchIsFirstRight(ArrayList<TopologyGraph.Edge> notPeekEdges) throws Exception {
         TopologyGraph.Node N = this.Node;

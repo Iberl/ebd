@@ -16,6 +16,8 @@ import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Der Graph aus Knoten und Kanten der Topologie
@@ -195,7 +197,7 @@ public class TopologyGraph {
 
 
 
-            private Rail R = null;
+
 
             private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
         /**
@@ -242,6 +244,17 @@ public class TopologyGraph {
         public String getRefId() {
             return PlanData.getRefIdOfEdge(this);
         }
+
+        public int getLocalDescriptor() {
+            Pattern p = Pattern.compile("\\d+");
+            Matcher m = p.matcher(this.sId);
+            // overjump Bereichsbezeichner
+            m.find();
+            m.find(); // localDescriptor found
+            return Integer.parseInt(m.group());
+
+        }
+
 
         /**
          * Geographische Kanten dieser topologischen Kante
@@ -346,22 +359,9 @@ public class TopologyGraph {
                 return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
             }
 
-        /**
-         * Gleis-Model (geographisch) dieser Kante.
-         * Hat aber nicht die geographischen Subkanten.
-         * @return Rail - Gleis als Modell
-         */
-        public Rail getRail() {
-                return R;
-            }
 
-        /**
-         * Setzt das logische-geographische Gleis dieser topologischen Kante
-         * @param r - {@link Rail} - Das Gleis, das gesetzt wird.
-         */
-        public void setRail(Rail r) {
-                R = r;
-            }
+
+
 
             private CTOPKante PlanProEdge;
 

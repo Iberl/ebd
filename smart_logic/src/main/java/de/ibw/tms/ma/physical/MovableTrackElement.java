@@ -6,6 +6,9 @@ import de.ibw.tms.ma.physical.intf.IControlledElementStatus;
 
 import java.util.List;
 
+/**
+ * @deprecated
+ */
 public class MovableTrackElement extends ControlledElement {
     public static final String CLASS_IDENTIFIER = "Movable_Track_Element";
 

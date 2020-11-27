@@ -48,38 +48,7 @@ public class UtilFunction {
 
     }
 
-    private static TopologyGraph.Edge findNewTrainPosition(TopologyGraph.Edge newTrainPositionEdge, TopologyGraph.Node targetNode) throws Exception {
-        TopologyGraph.Node targetN = targetNode;
-        Rail Rail_Current = newTrainPositionEdge.getRail();
-        CrossoverModel CrossoverMod = CrossoverModel.CrossoverRepo.getModel(targetN);
-        if(CrossoverMod == null) {
-            // Train stands on endpoint.
 
-            System.out.println("Trains stands on Endpoint");
-            return newTrainPositionEdge;
-
-        }
-        SingleSlip Slip = CrossoverMod.getRailWaySlip();
-        PositionedRelation PosRel = Slip.getOutputRelation();
-        TrackEdge TE_From = (TrackEdge) PosRel.getFrom();
-        TrackEdge TE_To = (TrackEdge) PosRel.getTo();
-        Rail R_From = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_From);
-        Rail R_To = (Rail) PlanData.TrackElementPositionCalc.translateTeToGraphic(TE_To);
-        Rail R_Next = null;
-        if(R_From == Rail_Current) {
-            R_Next = R_To;
-        } else if (R_To == Rail_Current) {
-            R_Next = R_From;
-        } else {
-            throw new Exception("Next Rail for Position Report not found");
-        }
-        newTrainPositionEdge = R_Next.getEdge();
-        if(newTrainPositionEdge == null) {
-            throw new NullPointerException("Balise Not on Track in TopologyGraph");
-        }
-
-        return newTrainPositionEdge;
-    }
 
     private static BigDecimal calcDistanceFromDP(int q_scale, BigDecimal distance_from_dp) {
         Q_SCALE Q_S = Q_SCALE.getScale(q_scale);
@@ -209,7 +178,7 @@ public class UtilFunction {
 
             while(distance_from_dp.compareTo(distanceToNextTargetPoint) > 0 ) {
 
-                TopologyGraph.Edge TempPosEdge = findNewTrainPosition(NewTrainPositionEdge, TargetNode);
+                TopologyGraph.Edge TempPosEdge = null;
                 Tm.addPassedElement(NewTrainPositionEdge);
                 Tm.addPassedElement(TargetNode);
                 if(TempPosEdge.A == TargetNode) {

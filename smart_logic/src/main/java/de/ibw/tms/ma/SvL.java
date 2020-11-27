@@ -7,6 +7,8 @@ import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.spotsma.MASpots;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
+
 @JsonIgnoreProperties(value = {
         "movementAuthority",
         "trackElement"
@@ -15,7 +17,7 @@ public class SvL extends MASpots implements Serializable {
     public static final String CLASS_IDENTIFIER = "Supervised_Location";
     public MovementAuthority movementAuthority;
     @Expose
-    public int vmax = 0;
+    public int vmax = 0; // * 5 km/h
 
     @Expose
     public Chainage chainage;
@@ -48,6 +50,9 @@ public class SvL extends MASpots implements Serializable {
     }
 
     public void setVmax(int vmax) {
+        if(vmax < 0) {
+            throw new InvalidParameterException("V_Max must not be negative");
+        }
         this.vmax = vmax;
     }
 }

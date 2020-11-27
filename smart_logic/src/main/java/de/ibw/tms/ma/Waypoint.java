@@ -1,6 +1,7 @@
 package de.ibw.tms.ma;
 
 import de.ibw.tms.ma.physical.MovableTrackElement;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.SpotElement;
 
@@ -11,18 +12,18 @@ public class Waypoint extends SpotElement implements Serializable {
     public static final String CLASS_IDENTIFIER = "Waypoint";
 
 
-    private MovableTrackElement trackElement;
-    private List<TrackElementStatus> necessaryElementStatus;
+    private MoveableTrackElement trackElement;
+    private TrackElementStatus necessaryElementStatus;
 
-    public MovableTrackElement getTrackElement() {
+    public MoveableTrackElement getTrackElement() {
         return trackElement;
     }
 
-    public List<TrackElementStatus> getNecessaryElementStatus() {
+    public TrackElementStatus getNecessaryElementStatus() {
         return necessaryElementStatus;
     }
 
-    public Waypoint(MovableTrackElement trackElement, List<TrackElementStatus> elementStatus) {
+    public Waypoint(MoveableTrackElement trackElement, TrackElementStatus elementStatus) {
         super(CLASS_IDENTIFIER);
         this.trackElement = trackElement;
         necessaryElementStatus = elementStatus;

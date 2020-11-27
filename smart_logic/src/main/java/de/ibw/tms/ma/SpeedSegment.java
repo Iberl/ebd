@@ -44,6 +44,10 @@ public class SpeedSegment extends LinearContiguousTrackArea implements Serializa
 
     }
 
+    public SpeedSegment() {
+        super(CLASS_IDENTIFIER);
+    }
+
 
 
 

@@ -4,6 +4,7 @@ import de.ibw.history.PositionModul;
 import de.ibw.history.data.RouteDataSL;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.QueueUuidMapper;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.*;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
@@ -13,13 +14,19 @@ import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.physical.ITrackElement;
+import de.ibw.tms.ma.physical.MovableTrackElement;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
+import de.ibw.tms.ma.physical.TrackElementStatus;
+import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import ebd.TescModul;
 import ebd.radioBlockCenter.util.RBCModule;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
@@ -28,6 +35,7 @@ import ebd.rbc_tms.util.MA;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -35,6 +43,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Diese Klasse verwaltet die Serverroutine des SL Servers.
@@ -205,11 +215,27 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         Overlap O = null;
         SvL Svl = null;
-
+        SSP ssp = new SSP();
+        GradientProfile GP = new GradientProfile(null);
+        List<SpeedSegment> speedSegments = new ArrayList<>();
         eoaEndTimerDistance.sDistance = 0;
 
-        EoA slEoA = generateEoA(MaAdapter, EoaLocation, tEma, eoaQEndtimer, eoaQDangerPoint, eoaQOverlap,
+        EoA slEoA = generateEoA(R, MaAdapter, EoaLocation, tEma, eoaQEndtimer, eoaQDangerPoint, eoaQOverlap,
                 eoaEndTimerDistance, eoaEndTimer, eoaDangerPointDistance, eoaDangerPointSpeed);
+        if(slEoA.overlap != null) {
+            Svl = slEoA.overlap.getSvl();
+        }
+        /*List<GradientAdapter> listGradients = MaAdapter.gradientProfile.gradients;
+        for(GradientAdapter Gradient : listGradients) {
+            GradientSegment GS = new GradientSegment();
+            ETCS_GRADIENT etcs_gradient = new ETCS_GRADIENT();
+            etcs_gradient.bGradient = (byte) Gradient.g_a;
+            GS.setG_A(etcs_gradient);
+            GS.setQ_GDIR(Gradient.q_gdir);
+            GS.se
+        }*/
+        ModeChangeProfile ModeProfile = new ModeChangeProfile();
+
 
 
 
@@ -254,6 +280,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
         requestedTrackElementList = identifyRouteElements(R, requestedTrackElementList);
+
         if(requestedTrackElementList == null) {
             if(EBM != null) EBM.log("Route not existing", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
@@ -266,6 +293,15 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         }
         bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList);
+        // speed segments decission
+        // gradient segments decission
+        // Ma sections
+        // AxleLoadSpeedProfile stays null
+        // Mode sections
+        // Sustainability Data stays null
+        // Ma Occupation will be filled
+        // Flank Area stays null
+
         /**To Debug **/
         bIsOccupatonFree = true;
         if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
@@ -375,9 +411,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     }
 
-    private EoA generateEoA(RbcMaAdapter ma, SpotLocationIntrinsic eoaLocation, T_EMA tEma, boolean eoaQEndtimer, boolean eoaQDangerPoint, boolean eoaQOverlap, ETCS_DISTANCE eoaEndTimerDistance, ETCS_TIMER eoaEndTimer, ETCS_DISTANCE eoaDangerPointDistance, ETCS_SPEED eoaDangerPointSpeed) {
+    private EoA generateEoA(Route R, RbcMaAdapter ma, SpotLocationIntrinsic eoaLocation, T_EMA tEma, boolean eoaQEndtimer, boolean eoaQDangerPoint, boolean eoaQOverlap, ETCS_DISTANCE eoaEndTimerDistance, ETCS_TIMER eoaEndTimer, ETCS_DISTANCE eoaDangerPointDistance, ETCS_SPEED eoaDangerPointSpeed) {
         DangerPoint DP;
         Overlap O;
+
         if(eoaQEndtimer == false) {
             eoaEndTimerDistance = null;
             eoaEndTimer = null;
@@ -389,15 +426,12 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(eoaQDangerPoint == false) {
             DP = null;
         } else {
-            eoaDangerPointDistance.sDistance = (short) ma.eoa.dangerPoint.d_dp;
-            eoaDangerPointSpeed.bSpeed = (byte) ma.eoa.dangerPoint.v_releasedp;
-            DP = new DangerPoint(eoaDangerPointDistance, eoaDangerPointSpeed);
+            DP = generateDangerPoint(ma, eoaDangerPointDistance, eoaDangerPointSpeed);
         }
         if(eoaQOverlap == false) {
             O = null;
         } else {
-            O = new Overlap();
-            throw new NotImplementedException("Svl needs intrinisc coord");
+            O = generateOverlap(R, ma);
         }
         Q_SCALE qs = Q_SCALE.getScale(ma.eoa.q_scale);
         EoA smartLogicEoA = new EoA(eoaLocation, ma.eoa.v_loa, tEma, eoaQEndtimer,
@@ -405,11 +439,48 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return smartLogicEoA;
     }
 
+    @NotNull
+    private Overlap generateOverlap(Route r, RbcMaAdapter ma) {
+        SvL svl;
+        Overlap O;
+        O = new Overlap();
+        SpotLocationIntrinsic svlLocation = new SpotLocationIntrinsic();
+        svlLocation.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
+
+        svl = new SvL(svlLocation);
+        svl.setVmax(ma.eoa.overlap.v_releaseol);
+        O.setSvl(svl);
+        O.d_OL = new ETCS_DISTANCE();
+        O.d_OL.sDistance = (short) ma.eoa.overlap.d_ol;
+        O.d_STARTOL = new ETCS_DISTANCE();
+        O.d_STARTOL.sDistance = (short) ma.eoa.overlap.d_startol;
+        O.q_OL = Q_SCALE.getScale(ma.eoa.q_scale);
+        O.q_STARTOL = Q_SCALE.getScale(ma.eoa.q_scale);
+        O.t_OL = new ETCS_TIMER();
+        O.t_OL.sTimer = (short) ma.eoa.overlap.t_ol;
+        O.v_RELEASEOL = new ETCS_SPEED();
+        O.v_RELEASEOL.bSpeed = (byte) ma.eoa.overlap.v_releaseol;
+        return O;
+    }
+
+    @NotNull
+    private DangerPoint generateDangerPoint(RbcMaAdapter ma, ETCS_DISTANCE eoaDangerPointDistance, ETCS_SPEED eoaDangerPointSpeed) {
+        DangerPoint DP;
+        eoaDangerPointDistance.sDistance = (short) ma.eoa.dangerPoint.d_dp;
+        eoaDangerPointSpeed.bSpeed = (byte) ma.eoa.dangerPoint.v_releasedp;
+        DP = new DangerPoint(eoaDangerPointDistance, eoaDangerPointSpeed);
+        return DP;
+    }
+
     @Nullable
     private boolean guardMaCheck(Route r, MA ma, UUID uuid) {
         MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
-        RbcMaAdapter rbdMa = (RbcMaAdapter) ma;
-        if(r == null || rbdMa == null || rbdMa.eoa == null || rbdMa.eoa.sections == null || rbdMa.eoa.q_scale == null) {
+        RbcMaAdapter rbcMa = (RbcMaAdapter) ma;
+        if(r == null || r.getElementListIds() == null  || rbcMa == null || rbcMa.eoa == null ||
+                rbcMa.eoa.sections == null || rbcMa.eoa.q_scale == null || rbcMa.speedProfile == null ||
+                rbcMa.speedProfile.sections.isEmpty() ||
+                rbcMa.gradientProfile == null || rbcMa.gradientProfile.gradients.isEmpty()
+        ) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
             sendMaResponseToTMS(MaReturnPayload, 1L);
             return false;
@@ -463,9 +534,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
 
-
-
+                if(i > 0) {
+                    addWaypoint(requestedTrackElementList, E);
+                }
                 requestedTrackElementList.add(TePair);
+
 
             }
 
@@ -495,12 +568,160 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             */
 
 
-        } catch(Exception E) {
+        } catch(Exception | SmartLogicException E) {
             E.printStackTrace();
             return null;
         }
 
         return requestedTrackElementList;
+    }
+
+    private void addWaypoint(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
+        if(requestedTrackElementList.isEmpty()) throw new InvalidParameterException("Predeceeding Edge is missing");
+        TopologyGraph.Edge PredecessorEdge = getLastTrackEdge(requestedTrackElementList);
+        TopologyGraph.Node N = null;
+        Waypoint W;
+
+        // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
+        String dkwId = getInternalDkwIdforMovableTrackElements(e);
+
+        MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(dkwId);
+        if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
+            // DKW Waypoint added
+            return;
+        }
+
+
+
+        // Wenn PredecessorEdge zu einer DKW gehört return
+
+
+        TopologyConnect E_Connect = null;
+        TopologyConnect Predecessor_Connect = null;
+        // Kreiskanten bedueten zwei Knoten die sich von zwei Kanten treffen können
+        if(PredecessorEdge.A.equals(e.A) || PredecessorEdge.A.equals(e.B)) {
+            N = PredecessorEdge.A;
+            Predecessor_Connect = PredecessorEdge.TopConnectFromA;
+
+            if(PredecessorEdge.A.equals(e.A)) {
+                E_Connect = e.TopConnectFromA;
+            } else {
+                E_Connect = e.TopConnectFromB;
+            }
+        }
+        if(PredecessorEdge.B.equals(e.A) || PredecessorEdge.B.equals(e.B)) {
+            N = PredecessorEdge.B;
+            Predecessor_Connect = PredecessorEdge.TopConnectFromB;
+            if(PredecessorEdge.B.equals(e.A)) {
+                E_Connect = e.TopConnectFromA;
+            } else {
+                E_Connect = e.TopConnectFromB;
+            }
+        }
+
+
+
+        if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+
+        String sSwitchId = ISwitchHandler.getNodeId(N);
+        MoveableTrackElement SwitchElement = TescModul.MoveableTrackElementAccess.getElementById(sSwitchId);
+        TrackElementStatus TES = new TrackElementStatus();
+
+        if (handleTrackElementStatusInsertingWaypoint(requestedTrackElementList, e, PredecessorEdge, E_Connect, Predecessor_Connect, SwitchElement, TES))
+            return;
+
+        throw new SmartLogicException("Waypoint has to be found, but cannot");
+
+
+
+    }
+
+    private boolean handleDkwLinkage(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {
+        if(dkwElement != null) {
+            handleTrackEdgeOnDkw(requestedTrackElementList, e, dkwElement);
+            return true;
+        } else {
+            dkwElement = TescModul.MoveableTrackElementAccess.getDkwById(
+                    predecessorEdge.sId.substring(0, predecessorEdge.sId.length() - 2));
+            if(dkwElement == null) {
+                // vorhergehende Switch war dkw sodass die dKW mit den Knoten zur zweiten kante verbunden ist.
+                // die dkw ist bereits der Waypoint
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void handleTrackEdgeOnDkw(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, MoveableTrackElement dkwElement) throws SmartLogicException {
+        Waypoint W;
+        TrackElementStatus DkwStateRequested = new TrackElementStatus();
+        String last2Char = e.sId.substring(e.sId.length() - 2);
+        char c1 = last2Char.charAt(0);
+        char c2 = last2Char.charAt(1);
+        guardDirection(c1);
+        guardDirection(c2);
+        addDirectionState(DkwStateRequested, c1);
+        addDirectionState(DkwStateRequested, c2);
+        W = new Waypoint(dkwElement, DkwStateRequested);
+        requestedTrackElementList.dkwWaypointRepo.update(e,W);
+        return;
+    }
+
+    private boolean handleTrackElementStatusInsertingWaypoint(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, TopologyConnect e_Connect, TopologyConnect predecessor_Connect, MoveableTrackElement switchElement, TrackElementStatus TES) {
+        switch (predecessor_Connect) {
+            case RECHTS -> {
+                TES.statusList.add(TrackElementStatus.Status.RIGHT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+            case LINKS -> {
+                TES.statusList.add(TrackElementStatus.Status.LEFT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+        }
+        switch (e_Connect) {
+            case RECHTS -> {
+                TES.statusList.add(TrackElementStatus.Status.RIGHT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+            case LINKS -> {
+                TES.statusList.add(TrackElementStatus.Status.LEFT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void insertWaypointInRouteRequested(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement switchElement, TrackElementStatus TES) {
+        Waypoint W;
+        W = new Waypoint(switchElement, TES);
+        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.sId, e.sId);
+        Pair<String, String> keyReverse = new ImmutablePair<>(e.sId, predecessorEdge.sId);
+        requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(key, W);
+        requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(keyReverse, W);
+
+    }
+
+    @NotNull
+    private String getInternalDkwIdforMovableTrackElements(TopologyGraph.Edge e) {
+        return e.sId.substring(0, e.sId.length() - 2).replace("AB", "").
+                replace("CD", "");
+    }
+
+    private void addDirectionState(TrackElementStatus dkwStateRequested, char c) {
+        if(c == 'L') dkwStateRequested.statusList.add(TrackElementStatus.Status.LEFT);
+        else if(c == 'R') dkwStateRequested.statusList.add(TrackElementStatus.Status.RIGHT);
+    }
+
+    private void guardDirection(char c) throws SmartLogicException {
+        if(c != 'L' && c != 'R' ) throw new SmartLogicException("DKW direction must be 'L' or 'R', but is: " + c);
+    }
+
+    private TopologyGraph.Edge getLastTrackEdge(RouteDataSL requestedTrackElementList) {
+        return (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
     }
 
     /*private void handleWaypointsMore3Waypoints(ArrayList<Pair> requestedTrackElementList, int iListCount, ArrayList<Waypoint> wayList, Waypoint wayStart, Waypoint wayEnd) {

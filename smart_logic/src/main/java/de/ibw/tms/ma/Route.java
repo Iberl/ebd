@@ -83,41 +83,8 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
     }
 
 
-    public void saveWaypointsForProcessing(boolean withEndpoint) {
-
-        routeSectionIDs = new ArrayList<>();
-        int iCountWaypoints = 0;
-        ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
-        WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);
-        WaypointDecorator WayEnd = (WaypointDecorator) waypoints.get(waypoints.size() -1);
-        MovableTrackElement TrackElementOfEnd = WayEnd.getTrackElement();
-        TrackElementType TypeOfWaypoint = null;
-        TypeOfWaypoint = TrackElementType.RAIL_TYPE;
-        CrossoverModel EndModel = null;
-        handleRailWaypoint(WayBeginn.getTrackElement());
-        iCountWaypoints = waypoints.size() - 1;
 
 
-        // lastElement is regular BranchingPoint
-        if(!withEndpoint) iCountWaypoints++;
-
-
-        handleAllCrossoverWaypoints(iCountWaypoints, waypoints);
-        if(withEndpoint) handleEndWaypoint(TrackElementOfEnd);
-
-
-    }
-
-    private void handleAllCrossoverWaypoints(int iCountWaypoints, ArrayList<Waypoint> waypoints) {
-        for(int i = 1; i < iCountWaypoints; i++) {
-            Waypoint W = waypoints.get(i);
-
-
-
-            MovableTrackElement CTE = W.getTrackElement();
-            handleCrossoverWaypoint(CTE);
-        }
-    }
 
     /**
      * @deprecated

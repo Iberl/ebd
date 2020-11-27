@@ -370,7 +370,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 bIsShunting = iShuntingMode == JOptionPane.YES_OPTION;
 
                 try {
-                    R.saveWaypointsForProcessing(true);
+
                     SubController.requestMovementAuthority(RequestWrapper, R, sRBC, MainTmsSim.S_TMS_ID, uuid, bIsShunting);
                     SingleTrainSubPanel.this.Parent.dispatchEvent(new WindowEvent(SingleTrainSubPanel.this.Parent, WindowEvent.WINDOW_CLOSING));
                 } catch (IOException ex) {

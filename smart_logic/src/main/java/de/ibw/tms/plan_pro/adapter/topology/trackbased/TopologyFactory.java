@@ -149,7 +149,7 @@ public class TopologyFactory implements ITopologyFactory {
 
             TopologyConnect tcA = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussA().getWert().value());
             TopologyConnect tcB = TopologyConnect.fromValue(Edge.getTOPKanteAllg().getTOPAnschlussB().getWert().value());
-            if(Objects.equals(tcA, TopologyConnect.ENDE)) {
+            if(TopologyGraph.getLeftmostNode() == null) {
                 TopologyGraph.setLeftmostNode(A);
             }
 

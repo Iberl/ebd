@@ -35,6 +35,29 @@ public class TescModul {
 
     private static String MODULE_NAME = "TESC-MODULE";
 
+    public interface MoveableTrackElementAccess {
+        /**
+         * Moveable Track Element by Id 11W12 usw.
+         * DKWs retrieved by Lowest Index of DKW
+         * @param sId String id of MTE
+         * @return MoveableTrackElement result
+         */
+        static MoveableTrackElement getElementById(String sId) {
+            MoveableTrackElement Result = ElementStateByIdRepository.getModel(sId);
+            if(Result == null) Result = DkwStateByRepo.getModel(sId);
+            return Result;
+        }
+
+        /**
+         * only searches in dkw
+         * @param sLowerDkw String - like 11W12
+         * @return MoveableTrackElement DKW MoveableTrackElement
+         */
+        static MoveableTrackElement getDkwById(String sLowerDkw) {
+            return DkwStateByRepo.getModel(sLowerDkw);
+        }
+
+    }
 
     /**
      * Singleton
@@ -47,8 +70,8 @@ public class TescModul {
 
     private TescSession Session;
 
-    private ThreadedRepo<String, MoveableTrackElement> ElementStateByIdRepository;
-    private ThreadedRepo<String, MoveableTrackElement> DkwStateByRepo;
+    private static ThreadedRepo<String, MoveableTrackElement> ElementStateByIdRepository;
+    private static ThreadedRepo<String, MoveableTrackElement> DkwStateByRepo;
     private ThreadedRepo<String, Integer> StateChangesNotFound;
     private ThreadedRepo<String, String> getParellelLowerEbdId;
 
