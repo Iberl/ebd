@@ -279,6 +279,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
+        //continous connect
         requestedTrackElementList = identifyRouteElements(R, requestedTrackElementList);
 
         if(requestedTrackElementList == null) {
@@ -529,7 +530,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 
-                       throw new NullPointerException("Some elements cannot be Identifed");
+                       throw new NullPointerException("Edge Element cannot be Identifed: " + sId);
                    }
 
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
