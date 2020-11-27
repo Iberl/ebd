@@ -62,6 +62,10 @@ public class EoA extends MASpots implements Serializable {
         this.setDangerPoint(DP);
         this.setQ_OVERLAP(q_OLAP);
         this.setOverlap(O);
+        if(O != null) {
+            O.setEoa(this);
+        }
+
         this.setQ_scale(Q_S);
 
     }

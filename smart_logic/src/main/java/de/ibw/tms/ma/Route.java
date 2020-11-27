@@ -10,13 +10,9 @@ import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
-import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
-import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
-import de.ibw.tms.trackplan.ui.WaypointEnd;
-import de.ibw.tms.trackplan.ui.WaypointStart;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.Serializable;
@@ -44,7 +40,20 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
 
 
     @Expose
-    private List<String> elementListIds = new ArrayList<>();
+    private List<String> routeSectionIDs = new ArrayList<>();
+
+    @Expose
+    private double intrinsicCoordOfTargetTrackEdge;
+
+    public double getIntrinsicCoordOfTargetTrackEdge() {
+        return intrinsicCoordOfTargetTrackEdge;
+    }
+
+    public void setIntrinsicCoordOfTargetTrackEdge(double intrinsicCoordOfTargetTrackEdge) {
+        this.intrinsicCoordOfTargetTrackEdge = intrinsicCoordOfTargetTrackEdge;
+    }
+
+
 
 
     public List<RouteSection> getSections() {
@@ -64,19 +73,19 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
     }
 
     public void setElementListIds(List<String> elementListIds) {
-        this.elementListIds = elementListIds;
+        this.routeSectionIDs = elementListIds;
     }
 
 
 
     public List<String> getElementListIds() {
-        return elementListIds;
+        return routeSectionIDs;
     }
 
 
     public void saveWaypointsForProcessing(boolean withEndpoint) {
 
-        elementListIds = new ArrayList<>();
+        routeSectionIDs = new ArrayList<>();
         int iCountWaypoints = 0;
         ArrayList<Waypoint> waypoints = getAllWaypointsInOrder(withEndpoint);
         WaypointDecorator WayBeginn = (WaypointDecorator) waypoints.get(0);

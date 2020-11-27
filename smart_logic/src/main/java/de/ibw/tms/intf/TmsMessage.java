@@ -45,10 +45,11 @@ public class TmsMessage extends Message<Commands> implements Serializable {
      * Generelle Konstruktor-Definition f&uuml;r Kind-Klassen
      * @param tms_id {@link String} - Id des angefragten TMS
      * @param rbc_id {@link String} - Id des angefragten RBC
+     * @param icheckDbdCommand
      * @param payload - {@link Commands} - Hat einen Payload eines TMS-Commands
      */
-    protected TmsMessage(String tms_id, String rbc_id, Commands payload) {
-        super(Commands.I_CHECK_MOVEMENT_PERMISSION, tms_id, rbc_id, payload);
+    protected TmsMessage(String tms_id, String rbc_id, int icheckDbdCommand, Commands payload) {
+        super(icheckDbdCommand, tms_id, rbc_id, payload);
         this.type = Commands.I_CHECK_MOVEMENT_PERMISSION;
         this.tms_id = tms_id;
         this.rbc_id = rbc_id;

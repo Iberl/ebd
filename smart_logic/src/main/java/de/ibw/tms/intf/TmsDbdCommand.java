@@ -27,7 +27,7 @@ public class TmsDbdCommand extends TmsMessage implements Comparable<TmsMessage> 
      * @param payload - Inhalt der Nachricht
      */
     public TmsDbdCommand(String tms_id, String rbc_id, CheckDbdCommand payload) {
-            super(tms_id, rbc_id,payload);
+            super(tms_id, rbc_id, Commands.ICHECK_DBD_COMMAND, payload);
             this.payload = payload;
     }
 

@@ -1056,7 +1056,7 @@ public class SafetyLogic {
         }
         boolean isStatePossible = false;
         try {
-            isStatePossible = TescModul.getInstance().setState(cdc.sId, cdc.SwitchStatus);
+            isStatePossible = TescModul.getInstance().setState(cdc.sId, cdc.TrackElementStatus);
         } catch (IOException | SessionClosedException | IllegalNameLengthException e) {
             e.printStackTrace();
             isStatePossible = false;

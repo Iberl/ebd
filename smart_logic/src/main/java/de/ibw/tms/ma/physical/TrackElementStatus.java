@@ -2,6 +2,7 @@ package de.ibw.tms.ma.physical;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.physical.intf.IControlledElementStatus;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,5 +31,10 @@ public class TrackElementStatus implements Serializable, IControlledElementStatu
     }
 
 
-
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("statusList", statusList)
+                .toString();
+    }
 }

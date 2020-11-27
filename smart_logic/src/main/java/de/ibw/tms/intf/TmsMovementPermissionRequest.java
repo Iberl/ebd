@@ -27,7 +27,7 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
      * @param payload - Inhalt der Nachricht
      */
     public TmsMovementPermissionRequest(String tms_id, String rbc_id, CheckMovementPermission payload) {
-            super(tms_id, rbc_id,payload);
+            super(tms_id, rbc_id, Commands.I_CHECK_MOVEMENT_PERMISSION, payload);
             this.payload = payload;
     }
 

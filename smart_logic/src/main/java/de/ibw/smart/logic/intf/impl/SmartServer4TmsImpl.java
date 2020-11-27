@@ -8,11 +8,10 @@ import de.ibw.smart.logic.intf.*;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.Waypoint;
+import de.ibw.tms.etcs.*;
+import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.common.NetworkResource;
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.physical.ITrackElement;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.NodeInformation;
@@ -21,6 +20,7 @@ import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import ebd.radioBlockCenter.util.RBCModule;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
@@ -28,6 +28,7 @@ import ebd.rbc_tms.util.MA;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -183,8 +184,38 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     @Override
     public synchronized void checkMovementAuthority(int iTrainId, Route R, MA Ma, UUID uuid, String tms_id, String rbc_id,
                                        Long lPriority) {
-        RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
         MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
+        if(!guardMaCheck(R, Ma, uuid)) return;
+
+        RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
+
+        MovementAuthority smartLogicMa;
+        SpotLocationIntrinsic EoaLocation = new SpotLocationIntrinsic();
+        EoaLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+        T_EMA tEma = new T_EMA();
+        tEma.setTime((short) MaAdapter.eoa.t_loa);
+        boolean eoaQEndtimer = MaAdapter.eoa.endTimer != null;
+        boolean eoaQDangerPoint = MaAdapter.eoa.dangerPoint != null;
+        boolean eoaQOverlap = MaAdapter.eoa.overlap != null;
+        ETCS_DISTANCE eoaEndTimerDistance = new ETCS_DISTANCE();
+        ETCS_TIMER eoaEndTimer = new ETCS_TIMER();
+        ETCS_DISTANCE eoaDangerPointDistance = new ETCS_DISTANCE();
+        ETCS_SPEED eoaDangerPointSpeed = new ETCS_SPEED();
+        DangerPoint DP;
+
+        Overlap O = null;
+        SvL Svl = null;
+
+        eoaEndTimerDistance.sDistance = 0;
+
+        EoA slEoA = generateEoA(MaAdapter, EoaLocation, tEma, eoaQEndtimer, eoaQDangerPoint, eoaQOverlap,
+                eoaEndTimerDistance, eoaEndTimer, eoaDangerPointDistance, eoaDangerPointSpeed);
+
+
+
+
+
+        //RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
         SafetyLogic Safety = SafetyLogic.getSmartSafety();
         boolean bCheckOk = true;
         boolean bTmsIdentified = false;
@@ -197,6 +228,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
         RouteDataSL requestedTrackElementList = new RouteDataSL();
+
+        //smartLogicMa = new MovementAuthority();
+
         bCheckOk = Safety.slSelfCheck();
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
@@ -341,6 +375,47 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     }
 
+    private EoA generateEoA(RbcMaAdapter ma, SpotLocationIntrinsic eoaLocation, T_EMA tEma, boolean eoaQEndtimer, boolean eoaQDangerPoint, boolean eoaQOverlap, ETCS_DISTANCE eoaEndTimerDistance, ETCS_TIMER eoaEndTimer, ETCS_DISTANCE eoaDangerPointDistance, ETCS_SPEED eoaDangerPointSpeed) {
+        DangerPoint DP;
+        Overlap O;
+        if(eoaQEndtimer == false) {
+            eoaEndTimerDistance = null;
+            eoaEndTimer = null;
+        } else {
+            eoaEndTimerDistance.sDistance = (short) ma.eoa.endTimer.d_endtimerstartloc;
+            eoaEndTimer.sTimer = (short) ma.eoa.endTimer.t_endtimer;
+
+        }
+        if(eoaQDangerPoint == false) {
+            DP = null;
+        } else {
+            eoaDangerPointDistance.sDistance = (short) ma.eoa.dangerPoint.d_dp;
+            eoaDangerPointSpeed.bSpeed = (byte) ma.eoa.dangerPoint.v_releasedp;
+            DP = new DangerPoint(eoaDangerPointDistance, eoaDangerPointSpeed);
+        }
+        if(eoaQOverlap == false) {
+            O = null;
+        } else {
+            O = new Overlap();
+            throw new NotImplementedException("Svl needs intrinisc coord");
+        }
+        Q_SCALE qs = Q_SCALE.getScale(ma.eoa.q_scale);
+        EoA smartLogicEoA = new EoA(eoaLocation, ma.eoa.v_loa, tEma, eoaQEndtimer,
+                eoaEndTimerDistance, eoaEndTimer, eoaQDangerPoint, DP, eoaQOverlap,O,qs);
+        return smartLogicEoA;
+    }
+
+    @Nullable
+    private boolean guardMaCheck(Route r, MA ma, UUID uuid) {
+        MaRequestReturnPayload MaReturnPayload = new MaRequestReturnPayload();
+        RbcMaAdapter rbdMa = (RbcMaAdapter) ma;
+        if(r == null || rbdMa == null || rbdMa.eoa == null || rbdMa.eoa.sections == null || rbdMa.eoa.q_scale == null) {
+            MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
+            sendMaResponseToTMS(MaReturnPayload, 1L);
+            return false;
+        }
+        return true;
+    }
 
 
     private boolean handleDangerZones(UUID uuid) {

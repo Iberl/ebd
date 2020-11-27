@@ -1,5 +1,6 @@
 package ebd.rbc_tms.util;
 
+import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.annotations.CanBeNull;
 import ebd.rbc_tms.util.annotations.MinOneElem;
 

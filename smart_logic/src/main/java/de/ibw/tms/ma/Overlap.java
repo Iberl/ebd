@@ -16,6 +16,8 @@ public class Overlap implements Serializable {
     private EoA eoa;
     private SvL svl;
 
+
+
     @Override
     public String toString() {
         return "Overlap{" +
@@ -47,5 +49,13 @@ public class Overlap implements Serializable {
 
     public void setSvl(SvL svl) {
         this.svl = svl;
+    }
+
+    public EoA getEoa() {
+        return eoa;
+    }
+
+    public void setEoa(EoA eoa) {
+        this.eoa = eoa;
     }
 }

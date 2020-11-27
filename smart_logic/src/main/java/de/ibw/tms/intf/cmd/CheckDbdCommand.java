@@ -2,8 +2,6 @@ package de.ibw.tms.intf.cmd;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.plan.elements.BranchingSwitch;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -33,7 +31,7 @@ public class CheckDbdCommand extends Commands {
      * Status der Weiche der gesetzt werden soll und von der SL gepr&uuml;ft werden soll
      */
     @Expose
-    public TrackElementStatus SwitchStatus;
+    public TrackElementStatus TrackElementStatus;
 
     /**
      * Priorität des Befehls
@@ -49,7 +47,7 @@ public class CheckDbdCommand extends Commands {
     public CheckDbdCommand(String sCrossoverEbdName, String sId, TrackElementStatus Status , long lPriority) {
         super(lPriority);
         this.sId = sId;
-        this.SwitchStatus = Status;
+        this.TrackElementStatus = Status;
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_DBD_COMMAND;
     }
@@ -60,20 +58,20 @@ public class CheckDbdCommand extends Commands {
         if (o == null || getClass() != o.getClass()) return false;
         CheckDbdCommand that = (CheckDbdCommand) o;
         return sId.equals(that.sId) &&
-                SwitchStatus == that.SwitchStatus &&
+                TrackElementStatus == that.TrackElementStatus &&
                 lPriority.equals(that.lPriority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sId, SwitchStatus, lPriority);
+        return Objects.hash(sId, TrackElementStatus, lPriority);
     }
 
     @Override
     public String toString() {
         return "CheckDbdCommand{" +
                 "sId='" + sId + '\'' +
-                ", SwitchStatus=" + SwitchStatus +
+                ", TrackElementStatus=" + TrackElementStatus +
                 ", lPriority=" + lPriority +
                 '}';
     }
