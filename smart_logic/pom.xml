@@ -140,6 +140,17 @@
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.disposim</groupId>
+            <artifactId>edith</artifactId>
+            <version>5.2.4.Final</version>
+        </dependency>
 
     </dependencies>
     <build>

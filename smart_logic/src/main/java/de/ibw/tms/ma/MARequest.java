@@ -5,6 +5,7 @@ import de.ibw.tms.controller.TmsController;
 
 import java.io.Serializable;
 
+
 public class MARequest implements Serializable {
 
 

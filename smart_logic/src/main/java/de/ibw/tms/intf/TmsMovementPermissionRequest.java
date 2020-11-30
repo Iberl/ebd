@@ -4,14 +4,19 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
 
+import javax.persistence.Entity;
+
 /**
  * Nachricht an die SL diese Ma-Nachricht zu pr&uuml;fen
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-11-25
+ * @since 2020-11-30
+ *
+ *
  */
+@Entity
 public class TmsMovementPermissionRequest extends TmsMessage implements Comparable<TmsMessage> {
 
     /**
