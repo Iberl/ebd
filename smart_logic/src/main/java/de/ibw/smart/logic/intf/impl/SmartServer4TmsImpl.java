@@ -583,20 +583,6 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         TopologyGraph.Node N = null;
         Waypoint W;
 
-        // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
-        String dkwId = getInternalDkwIdforMovableTrackElements(e);
-
-        MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(dkwId);
-        if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
-            // DKW Waypoint added
-            return;
-        }
-
-
-
-        // Wenn PredecessorEdge zu einer DKW gehört return
-
-
         TopologyConnect E_Connect = null;
         TopologyConnect Predecessor_Connect = null;
         // Kreiskanten bedueten zwei Knoten die sich von zwei Kanten treffen können
@@ -624,6 +610,22 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
 
+        // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
+        String sCheckIfdkwId = N.TopNodeId;
+
+        MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(sCheckIfdkwId);
+        if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
+            // DKW Waypoint added
+            return;
+        }
+
+
+
+        // Wenn PredecessorEdge zu einer DKW gehört return
+
+
+
+
         String sSwitchId = ISwitchHandler.getNodeId(N);
         MoveableTrackElement SwitchElement = TescModul.MoveableTrackElementAccess.getElementById(sSwitchId);
         TrackElementStatus TES = new TrackElementStatus();
@@ -642,9 +644,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             handleTrackEdgeOnDkw(requestedTrackElementList, e, dkwElement);
             return true;
         } else {
-            dkwElement = TescModul.MoveableTrackElementAccess.getDkwById(
-                    predecessorEdge.sId.substring(0, predecessorEdge.sId.length() - 2));
-            if(dkwElement == null) {
+            Waypoint W = requestedTrackElementList.dkwWaypointRepo.getModel(predecessorEdge);
+            if(W != null) {
                 // vorhergehende Switch war dkw sodass die dKW mit den Knoten zur zweiten kante verbunden ist.
                 // die dkw ist bereits der Waypoint
                 return true;
@@ -706,11 +707,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     }
 
-    @NotNull
-    private String getInternalDkwIdforMovableTrackElements(TopologyGraph.Edge e) {
-        return e.sId.substring(0, e.sId.length() - 2).replace("AB", "").
-                replace("CD", "");
-    }
+
 
     private void addDirectionState(TrackElementStatus dkwStateRequested, char c) {
         if(c == 'L') dkwStateRequested.statusList.add(TrackElementStatus.Status.LEFT);

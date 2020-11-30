@@ -605,17 +605,29 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         TopologyGraph.Node B = E.B;
         CrossingSwitch CSA = (CrossingSwitch) A.NodeImpl;
         CrossingSwitch CSB = (CrossingSwitch) B.NodeImpl;
-        boolean isADominating = isADominating(CSA, CSB);
+        boolean isWithin = isADominating(CSA, CSB,true);
+        boolean isADominating = isADominating(CSA, CSB, false);
         CWKrGspElement RefElement = null;
-        if(isADominating) {
-            Ref =  initRef(CSA);
-            Ref = addOrientation(Ref, E.TopConnectFromA);
+        if(isWithin) {
+            if(isADominating) {
+                Ref =  initRef(CSA);
+                Ref = addOrientation(Ref, E.TopConnectFromA);
 
-            return addOrientation(Ref, E.TopConnectFromB);
+                return addOrientation(Ref, E.TopConnectFromB);
+            } else {
+                Ref = initRef(CSB);
+                Ref = addOrientation(Ref, E.TopConnectFromB);
+                return addOrientation(Ref, E.TopConnectFromA);
+            }
         } else {
-            Ref = initRef(CSB);
-            Ref = addOrientation(Ref, E.TopConnectFromB);
-            return addOrientation(Ref, E.TopConnectFromA);
+            if(isADominating) {
+                Ref =  initRef(CSA) + "AB";
+                return addOrientation(Ref,E.TopConnectFromA);
+            } else {
+                Ref = initRef(CSA) + "CD";
+                return addOrientation(Ref, E.TopConnectFromB);
+
+            }
         }
     }
 
@@ -629,7 +641,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             return Bez.getBezeichnungTabelle().getWert();
     }
 
-    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
+    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB, boolean checkSame) {
+        if(checkSame) return CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert().equals(
+                CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
         return Integer.parseInt(CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert())
                 < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
     }
