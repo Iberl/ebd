@@ -605,10 +605,10 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         TopologyGraph.Node B = E.B;
         CrossingSwitch CSA = (CrossingSwitch) A.NodeImpl;
         CrossingSwitch CSB = (CrossingSwitch) B.NodeImpl;
-        boolean isWithin = isADominating(CSA, CSB,true);
-        boolean isADominating = isADominating(CSA, CSB, false);
+
+        boolean isADominating = isADominating(CSA, CSB);
         CWKrGspElement RefElement = null;
-        if(isWithin) {
+
             if(isADominating) {
                 Ref =  initRef(CSA);
                 Ref = addOrientation(Ref, E.TopConnectFromA);
@@ -619,16 +619,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 Ref = addOrientation(Ref, E.TopConnectFromB);
                 return addOrientation(Ref, E.TopConnectFromA);
             }
-        } else {
-            if(isADominating) {
-                Ref =  initRef(CSA) + "AB";
-                return addOrientation(Ref,E.TopConnectFromA);
-            } else {
-                Ref = initRef(CSA) + "CD";
-                return addOrientation(Ref, E.TopConnectFromB);
 
-            }
-        }
+
+
     }
 
     @Nullable
@@ -641,9 +634,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             return Bez.getBezeichnungTabelle().getWert();
     }
 
-    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB, boolean checkSame) {
-        if(checkSame) return CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert().equals(
-                CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
+    private static boolean isADominating(CrossingSwitch CSA, CrossingSwitch CSB) {
+
         return Integer.parseInt(CSA.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert())
                 < Integer.parseInt(CSB.getElement().getBezeichnung().getBezeichnungLageplanKurz().getWert());
     }

@@ -8,19 +8,21 @@ import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
-import de.ibw.history.data.RouteDataSL;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
+import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
+import de.ibw.tms.ma.occupation.MTERouteOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
-import de.ibw.tms.ma.EoaSectionAdapter;
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
+import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.train.model.TrainModel;
@@ -177,7 +179,7 @@ public class SafetyLogic {
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter, ComposedRoute requestedTrackElementList) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
@@ -187,6 +189,11 @@ public class SafetyLogic {
         int iNID_LRBG = -1;
         BigDecimal dSumOfWholeMaTrack = new BigDecimal("0");
 
+        MARequestOccupation MAO = generateMAOcupation(iTrainId, requestedTrackElementList, R);
+        List<MTERouteOccupation> mteOccupations = Collections.synchronizedList(generateMTEOcc(requestedTrackElementList));
+
+        toBlock.add(MAO);
+        toBlock.addAll(mteOccupations);
 
         Balise B = null;
         PositionInfo PosInfo = null;
@@ -195,10 +202,10 @@ public class SafetyLogic {
             dSumOfWholeMaTrack = maAdapter.calcLengthOfSection();
 
             int iEoaQ_Scale = maAdapter.q_scale;
-            if(requestedTrackElementList.size() < 2) {
+            /*if(requestedTrackElementList.size() < 2) {
                 throw new InvalidParameterException(
                         "To Less Elements requested, there must be at least one End and one Start Track Element");
-            }
+            }*/
 
             iQ_DirLrbg = PosInfo.q_dirlrbg;
             iQ_DirLength = PosInfo.q_length;
@@ -207,6 +214,7 @@ public class SafetyLogic {
             iNID_LRBG = PosInfo.nid_lrbg;
 
 
+            /*
             AtomicInteger distanceFromTrainToNextNode = new AtomicInteger(0);
             int iRequestSize = requestedTrackElementList.size();
             Pair<Route.TrackElementType, ITopological> StartElement = requestedTrackElementList.get(0);
@@ -270,8 +278,11 @@ public class SafetyLogic {
                         }
                     }
                 }
+
+
+             */
                 // TODO PositionData usage
-                toBlock = calcCrossoverSignals(toBlock);
+                //toBlock = calcCrossoverSignals(toBlock);
 
                 List<Occupation> occupations = getAllAreaNotBlockedByOwn(iTrainId);
                 for(Occupation ThisArea : toBlock)
@@ -300,7 +311,70 @@ public class SafetyLogic {
 
     }
 
+    private ArrayList<MTERouteOccupation> generateMTEOcc(ComposedRoute requestedTrackElementList) {
+        ArrayList<MTERouteOccupation> occ = new ArrayList<>();
+        addWaypointsToOccupation(requestedTrackElementList, occ);
+
+        return occ;
+
+    }
+
+    private void addWaypointsToOccupation(ComposedRoute requestedTrackElementList, ArrayList<MTERouteOccupation> occ) {
+        for(Waypoint W : requestedTrackElementList.waypointsBetweentTwoTrackEdges.getAll()) {
+            MTERouteOccupation RO = new MTERouteOccupation(requestedTrackElementList, W.getTrackElement());
+            occ.add(RO);
+
+        }
+        for(Waypoint W : requestedTrackElementList.dkwWaypointRepo.getAll()) {
+            MTERouteOccupation RO = new MTERouteOccupation(requestedTrackElementList, W.getTrackElement());
+            occ.add(RO);
+        }
+    }
+
+    private MARequestOccupation generateMAOcupation(int iTrainId, ComposedRoute requestedTrackElementList, Route R) {
+        MARequestOccupation MAO = new MARequestOccupation();
+
+        PositionData CurrentPos = PositionModul.getInstance().getCurrentPosition(iTrainId);
+
+        if(CurrentPos == null || CurrentPos.getBegin() == null) {
+            setOccupatedSections(requestedTrackElementList, R, MAO, null);
+        } else {
+            setOccupatedSections(requestedTrackElementList, R, MAO, CurrentPos.getBegin());
+        }
+        return MAO;
+    }
+
+    private void setOccupatedSections(ComposedRoute requestedTrackElementList, Route r, MARequestOccupation MAO, MinSafeRearEnd MinSafeEnd) {
+        ArrayList<TrackEdgeSection> maSections = new ArrayList<>();
+        for(int i = 0; i < requestedTrackElementList.size(); i++) {
+            Pair<Route.TrackElementType, ITopological> trackingPair = requestedTrackElementList.get(i);
+            SpotLocationIntrinsic Begin = new SpotLocationIntrinsic();
+            if(MinSafeEnd == null) {
+                Begin.setIntrinsicCoord(0);
+            } else {
+                Begin = (SpotLocationIntrinsic) MinSafeEnd.getLocation();
+            }
+
+            SpotLocationIntrinsic End = new SpotLocationIntrinsic();
+
+            if(i + 1 == requestedTrackElementList.size()) {
+                End.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
+            } else {
+                End.setIntrinsicCoord(1);
+            }
+            TrackEdgeSection TES = new TrackEdgeSection();
+            TES.setBegin(Begin);
+            TES.setEnd(End);
+
+            TopologyGraph.Edge E = (TopologyGraph.Edge) trackingPair.getRight();
+            TES.setTrackEdge(E);
+            maSections.add(TES);
+        }
+        MAO.setTrackEdgeSections(maSections);
+    }
+
     /**
+     * @deprecated
      * Berechnet Grenzzeichen, falls ein Zug sich im Grenzzeichen befindet.
      * @param toBlock - alle bisherigen Blockaden
      */
@@ -587,7 +661,7 @@ public class SafetyLogic {
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
      */
-    public synchronized boolean checkIfRouteIsContinuousConnected(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsContinuousConnected(int iTrainId, Route R, ComposedRoute requestedTrackElementList) {
         if(requestedTrackElementList == null) {
             throw new NullPointerException("Track List is null");
         } else if (requestedTrackElementList.isEmpty()) {
@@ -775,7 +849,7 @@ public class SafetyLogic {
     }
 
 
-    private boolean routeHasNullValue(RouteDataSL requestedTrackElementList) {
+    private boolean routeHasNullValue(ComposedRoute requestedTrackElementList) {
         for(Pair<Route.TrackElementType, ITopological> RouteElement: requestedTrackElementList) {
             if(RouteElement.getLeft() == null || RouteElement.getRight() == null) return true;
         }
@@ -785,11 +859,10 @@ public class SafetyLogic {
     /**
      * Noch Nicht implementiert
      * Untersucht ob alle Status der Streckenelemente in Ordnung sind.
-     * @param maRequest - {@link MaRequestWrapper } - Anfragedaten zur MA
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die Statusuntersuchung erfordern.
      * @return boolean
      */
-    public synchronized boolean checkIfRouteElementStatusIsCorrect(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
+    public synchronized boolean checkIfRouteElementStatusIsCorrect(int iTrainId, Route R, ComposedRoute requestedTrackElementList) {
         //DBDClient dbdclient = new DBDClient();
         return true;
     }
@@ -872,6 +945,7 @@ public class SafetyLogic {
 
 
         PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+
     }
 
     private boolean checkQ_Length(int iQ_Length) {
@@ -967,7 +1041,6 @@ public class SafetyLogic {
 
     /**
      * Noch nicht implementiert
-     * @param maRequest
      * @return
      */
     public synchronized boolean checkIfTrainStatusRequestIsFresh(int iTrainId, Route R) {
@@ -994,7 +1067,7 @@ public class SafetyLogic {
     /**
      * Noch nicht implementiert
      */
-    public synchronized void handleFlankProtection(int iTrainId, Route R, RouteDataSL requestedTrackElementList) {
+    public synchronized void handleFlankProtection(int iTrainId, Route R, ComposedRoute requestedTrackElementList) {
     }
     /**
      * Noch nicht implementiert
@@ -1007,7 +1080,7 @@ public class SafetyLogic {
      * Noch nicht implementiert
      * @param requestedTrackElementList
      */
-    public synchronized void unlockElementsNotUsed(RouteDataSL requestedTrackElementList) {
+    public synchronized void unlockElementsNotUsed(ComposedRoute requestedTrackElementList) {
 
     }
 

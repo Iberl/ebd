@@ -2,23 +2,18 @@ package de.ibw.tms.ma.occupation;
 
 import de.ibw.feed.Balise;
 import de.ibw.history.PositionModul;
-import de.ibw.history.data.RouteDataSL;
-import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
-import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.UtilFunction;
-import ebd.globalUtils.position.Position;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
-import jdk.jshell.execution.Util;
-import org.junit.platform.engine.discovery.UriSelector;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import java.math.BigDecimal;
@@ -44,7 +39,7 @@ public class VehicleOccupation extends Occupation {
     public VehicleOccupation(TrainInfo TI, PositionInfo Pos) {
         super(CLASS_IDENTIFIER);
         Balise B = Balise.baliseByNid_bg.getModel(Pos.nid_lrbg);
-        RouteDataSL RDSL = PositionModul.getInstance().getRouteOfNidEngine(TI.nid_engine);
+        ComposedRoute RDSL = PositionModul.getInstance().getRouteOfNidEngine(TI.nid_engine);
         if(RDSL == null) {
             //handleVehicleWithoutMa(TI, Pos, B);
         } else {

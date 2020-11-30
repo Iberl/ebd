@@ -2,12 +2,11 @@ package de.ibw.history;
 
 import de.ibw.feed.Balise;
 import de.ibw.history.data.PositionEnterType;
-import de.ibw.history.data.RouteDataSL;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.ma.Route;
-import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -125,7 +124,7 @@ public class PositionModul implements IPositionModul {
     }
 
     private PositionData handleMovementAuthorities(PositionData pd, PositionEnterType enterType) {
-        RouteDataSL Route = this.getRouteOfNidEngine(pd.getNid_engine());
+        ComposedRoute Route = this.getRouteOfNidEngine(pd.getNid_engine());
         if(enterType == null) {
             return pd;
         }
@@ -138,7 +137,7 @@ public class PositionModul implements IPositionModul {
 
     }
 
-    private PositionData evaluatePositionReport(RouteDataSL route, PositionData PD) {
+    private PositionData evaluatePositionReport(ComposedRoute route, PositionData PD) {
         Boolean isTrainMovingNominal = null;
         int iDistanceToBalise = PD.getPos().d_lrbg;
 
@@ -377,11 +376,11 @@ public class PositionModul implements IPositionModul {
         }
     }
 
-    public void updateCurrentRoute(int iNidEngineId, RouteDataSL R) {
+    public void updateCurrentRoute(int iNidEngineId, ComposedRoute R) {
         this.routeByNidId.update(iNidEngineId, R);
     }
 
-    public RouteDataSL getRouteOfNidEngine(int iNidEngineId) {
+    public ComposedRoute getRouteOfNidEngine(int iNidEngineId) {
         return this.routeByNidId.getModel(iNidEngineId);
     }
 

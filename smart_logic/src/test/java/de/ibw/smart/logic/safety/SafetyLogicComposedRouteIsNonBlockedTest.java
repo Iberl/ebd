@@ -1,7 +1,7 @@
 package de.ibw.smart.logic.safety;
 
 import de.ibw.feed.Balise;
-import de.ibw.history.data.RouteDataSL;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.safety.self.tests.TestUtil;
 import de.ibw.tms.etcs.Q_SCALE;
@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 
 import java.math.BigDecimal;
@@ -33,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.
  * Dieser Test stellt die funktionale Korrektheit sicher
  */
-class SafetyLogicRouteDataSLIsNonBlockedTest {
+class SafetyLogicComposedRouteIsNonBlockedTest {
 
     @Spy
     SafetyLogic Safety = SafetyLogic.getSmartSafety();
@@ -61,7 +60,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
     public void checkIfMainNullError() throws InterruptedException {
 
         SafetyLogic ModulUnderTest = SafetyLogic.getSmartSafety();
-        RouteDataSL routenListe =
+        ComposedRoute routenListe =
             TestUtil.generateRandomContinousRoute(3, true, false
             , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         TopologyGraph.Edge E = (TopologyGraph.Edge) routenListe.get(0).getValue();
@@ -121,7 +120,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        RouteDataSL routenListe =
+        ComposedRoute routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true
                 , TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
@@ -132,7 +131,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         NodeRunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
+        ComposedRoute routenListeNEW4TEST = new ComposedRoute();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -258,7 +257,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        RouteDataSL routenListe =
+        ComposedRoute routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
@@ -269,7 +268,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
+        ComposedRoute routenListeNEW4TEST = new ComposedRoute();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -428,7 +427,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        RouteDataSL routenListe =
+        ComposedRoute routenListe =
                 TestUtil.generateRandomContinousRoute(7, true, true,
                         TestUtil.RouteConfig.BALISE_NEAR_CROSSING);
         Balise B = TestUtil.lastRandomBalise;
@@ -439,7 +438,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
+        ComposedRoute routenListeNEW4TEST = new ComposedRoute();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -590,7 +589,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         TopologyGraph.Edge TrainStandingOn = null;
         int q_dir = 1;
 
-        RouteDataSL routenListe;
+        ComposedRoute routenListe;
         Balise B;
         try {
             routenListe = TestUtil.generateRandomContinousRoute(7, true, true,
@@ -605,7 +604,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
         NodeTrain1RunningTo = (TopologyGraph.Node) FirstWaypoint.getValue();
 
 
-        RouteDataSL routenListeNEW4TEST = new RouteDataSL();
+        ComposedRoute routenListeNEW4TEST = new ComposedRoute();
         routenListeNEW4TEST.add(routenListe.get(0));
         routenListeNEW4TEST.add(routenListe.get(0));
 
@@ -931,7 +930,7 @@ class SafetyLogicRouteDataSLIsNonBlockedTest {
 
     }
     */
-    private int calcMaxLengthOfTrack(RouteDataSL routenListe) {
+    private int calcMaxLengthOfTrack(ComposedRoute routenListe) {
         int iResultLength = 0;
         Pair<Route.TrackElementType, ITopological> StartKomposition = routenListe.get(0);
         Pair<Route.TrackElementType, ITopological> EndKomposition = routenListe.get(routenListe.size() - 1);

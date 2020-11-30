@@ -22,7 +22,7 @@ public class TranslationModel {
         private static TrackplanEnvironment P_HausenEnv = new TrackplanEnvironment(PHausen, new ZoomModel(),
                 "customised/test_pHausen_l1.ppxml");
         private static TrackplanEnvironment EBDEnv = new TrackplanEnvironment(EBD, new ZoomModel(),
-                "customised/kaefertal.ppxml");
+                "customised/EBD_Martinstein_24_06V3.ppxml");
 
         /**
          * Gerade benutztes Strecken-Setting

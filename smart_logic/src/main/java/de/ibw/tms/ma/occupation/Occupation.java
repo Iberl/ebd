@@ -2,6 +2,7 @@ package de.ibw.tms.ma.occupation;
 
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
@@ -145,6 +146,11 @@ public class Occupation extends TrackArea {
      * @return boolean - gibt an ob Gefahrenpunkte bestehen
      */
     public boolean compareIfIntersection(Occupation OtherArea) {
+        if(this instanceof MTERouteOccupation) {
+            if(OtherArea instanceof MTERouteOccupation) {
+                return compareMTE((MTERouteOccupation) OtherArea);
+            } else return false;
+        }
         List<TrackEdgeSection> tesList = this.getTrackEdgeSections();
         List<TrackEdgeSection> otherList = OtherArea.getTrackEdgeSections();
         if(tesList == null || otherList == null)
@@ -160,6 +166,12 @@ public class Occupation extends TrackArea {
         }
         return false;
 
+
+    }
+
+    private boolean compareMTE(MTERouteOccupation otherArea) {
+        MoveableTrackElement thisElement = ((MTERouteOccupation)this).getElement();
+        return otherArea.getElement().equals(thisElement);
 
     }
 

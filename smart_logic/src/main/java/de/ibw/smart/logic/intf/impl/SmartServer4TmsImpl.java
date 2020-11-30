@@ -1,7 +1,7 @@
 package de.ibw.smart.logic.intf.impl;
 
 import de.ibw.history.PositionModul;
-import de.ibw.history.data.RouteDataSL;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
@@ -11,23 +11,16 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.etcs.*;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
-import de.ibw.tms.ma.physical.ITrackElement;
-import de.ibw.tms.ma.physical.MovableTrackElement;
 import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
-import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
-import de.ibw.tms.plan.elements.interfaces.ITrack;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import ebd.TescModul;
-import ebd.radioBlockCenter.util.RBCModule;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
@@ -43,8 +36,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Diese Klasse verwaltet die Serverroutine des SL Servers.
@@ -253,7 +244,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bRouteCriteriaCheck = false;
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
-        RouteDataSL requestedTrackElementList = new RouteDataSL();
+        ComposedRoute requestedTrackElementList = new ComposedRoute();
 
         //smartLogicMa = new MovementAuthority();
 
@@ -304,7 +295,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         // Flank Area stays null
 
         /**To Debug **/
-        bIsOccupatonFree = true;
+        //bIsOccupatonFree = true;
         if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
 
@@ -327,7 +318,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         } else {
             // send set Status on block elements with timeout
         }
+
         bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(iTrainId, R, requestedTrackElementList);
+        bRouteElementAreTheRightOnes = true;
         if(!bRouteElementAreTheRightOnes) {
             if(EBM != null) EBM.log("FAIL Route is not continuous connected. TrainId-> " + iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
             MaReturnPayload.setErrorState(uuid, true,NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR );
@@ -507,7 +500,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * @param requestedTrackElementList
      * @return ArrayList of Pair with TrackElement and Element Type
      */
-    private RouteDataSL identifyRouteElements(Route R, RouteDataSL requestedTrackElementList) {
+    private ComposedRoute identifyRouteElements(Route R, ComposedRoute requestedTrackElementList) {
         try{
 
             int iListCount = 0;
@@ -577,7 +570,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return requestedTrackElementList;
     }
 
-    private void addWaypoint(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
+    private void addWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
         if(requestedTrackElementList.isEmpty()) throw new InvalidParameterException("Predeceeding Edge is missing");
         TopologyGraph.Edge PredecessorEdge = getLastTrackEdge(requestedTrackElementList);
         TopologyGraph.Node N = null;
@@ -611,7 +604,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
 
         // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
-        String sCheckIfdkwId = N.TopNodeId;
+        String sCheckIfdkwId = e.getRefId().replace("L", "").replace("R", "");
 
         MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(sCheckIfdkwId);
         if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
@@ -639,9 +632,13 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     }
 
-    private boolean handleDkwLinkage(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {
+    private boolean handleDkwLinkage(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {
         if(dkwElement != null) {
-            handleTrackEdgeOnDkw(requestedTrackElementList, e, dkwElement);
+            try {
+                handleTrackEdgeOnDkw(requestedTrackElementList, e, dkwElement);
+            } catch (SmartLogicException Ex) {
+                return false;
+            }
             return true;
         } else {
             Waypoint W = requestedTrackElementList.dkwWaypointRepo.getModel(predecessorEdge);
@@ -654,10 +651,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return false;
     }
 
-    private void handleTrackEdgeOnDkw(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, MoveableTrackElement dkwElement) throws SmartLogicException {
+    private void handleTrackEdgeOnDkw(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, MoveableTrackElement dkwElement) throws SmartLogicException {
         Waypoint W;
         TrackElementStatus DkwStateRequested = new TrackElementStatus();
-        String last2Char = e.sId.substring(e.sId.length() - 2);
+        String sid = e.getRefId();
+        String last2Char = sid.substring(sid.length() - 2);
         char c1 = last2Char.charAt(0);
         char c2 = last2Char.charAt(1);
         guardDirection(c1);
@@ -669,7 +667,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return;
     }
 
-    private boolean handleTrackElementStatusInsertingWaypoint(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, TopologyConnect e_Connect, TopologyConnect predecessor_Connect, MoveableTrackElement switchElement, TrackElementStatus TES) {
+    private boolean handleTrackElementStatusInsertingWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, TopologyConnect e_Connect, TopologyConnect predecessor_Connect, MoveableTrackElement switchElement, TrackElementStatus TES) {
         switch (predecessor_Connect) {
             case RECHTS -> {
                 TES.statusList.add(TrackElementStatus.Status.RIGHT);
@@ -697,11 +695,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return false;
     }
 
-    private void insertWaypointInRouteRequested(RouteDataSL requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement switchElement, TrackElementStatus TES) {
+    private void insertWaypointInRouteRequested(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement switchElement, TrackElementStatus TES) {
         Waypoint W;
         W = new Waypoint(switchElement, TES);
-        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.sId, e.sId);
-        Pair<String, String> keyReverse = new ImmutablePair<>(e.sId, predecessorEdge.sId);
+        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.getRefId(), e.sId);
+        Pair<String, String> keyReverse = new ImmutablePair<>(e.getRefId(), predecessorEdge.getRefId());
         requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(key, W);
         requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(keyReverse, W);
 
@@ -718,7 +716,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(c != 'L' && c != 'R' ) throw new SmartLogicException("DKW direction must be 'L' or 'R', but is: " + c);
     }
 
-    private TopologyGraph.Edge getLastTrackEdge(RouteDataSL requestedTrackElementList) {
+    private TopologyGraph.Edge getLastTrackEdge(ComposedRoute requestedTrackElementList) {
         return (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
     }
 

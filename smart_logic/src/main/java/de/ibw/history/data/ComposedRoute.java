@@ -20,7 +20,7 @@ import java.util.Iterator;
  * @version 0.4
  * @since 2020-11-27
  */
-public class RouteDataSL extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
+public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
 
     // Waypoints auf einer Kante innerhalb einer DKW
     public DefaultRepo<TrackEdge, Waypoint> dkwWaypointRepo = new DefaultRepo<>();
