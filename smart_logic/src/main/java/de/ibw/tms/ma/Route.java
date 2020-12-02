@@ -15,12 +15,14 @@ import de.ibw.tms.trackplan.ui.IWaypoint;
 import de.ibw.tms.trackplan.ui.WaypointDecorator;
 import org.apache.commons.lang3.NotImplementedException;
 
+import javax.persistence.Entity;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Entity
 public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
     public static final String CLASS_IDENTIFIER = "Route";
 

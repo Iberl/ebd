@@ -1,0 +1,173 @@
+package de.ibw.tms.intf.cmd;
+
+import com.google.gson.annotations.Expose;
+import de.ibw.tms.intf.cmd.Commands;
+import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.topologie.ApplicationDirection;
+import ebd.rbc_tms.util.exception.MissingInformationException;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+/**
+ * Dieser Befehl entsteht im TMS und weist die SL die beinhaltete MA zu pr&uuml;fen.
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2020-11-25
+ */
+public class CheckMovementPermission extends Commands {
+
+    public static long DEFAULT_PRIO = 3L;
+
+
+    @Expose
+    public Route route;
+
+    @Expose
+    public int iTrainId;
+
+
+
+
+
+    /**
+     * Nachricht an das RBC
+     */
+
+    @Expose
+    public RbcMaAdapter MaAdapter;
+
+    /**
+     * Kommunikations UUid
+     */
+
+    @Expose
+    public UUID uuid;
+
+    /**
+     * Id des TMS
+     */
+
+    @Expose
+    public String tms_id;
+
+    /**
+     * Id des RBC
+     */
+
+    @Expose
+    public String rbc_id;
+    /**
+     * Priority dieser Nachricht im Postausgang des TMS
+     */
+    @Expose
+    public Long lPriority;
+
+    private String id;
+
+
+
+    /**
+     * Dieser Konstruktor erstellt einen neuen leeren Check-Befehl mit einer Priority
+     * @param lPriority long - Priority im TMS Postausgang
+     */
+    public CheckMovementPermission(long lPriority) {
+        super(lPriority);
+        this.lPriority = lPriority;
+        this.CommandType = Commands.S_CHECK_MOVEMENT_PERMISSION;
+    }
+
+    public CheckMovementPermission() {
+        super(DEFAULT_PRIO);
+    }
+
+
+
+    @Override
+    public String toString() {
+        return "CheckMovementPermission{" +
+                "route=" + route +
+                ", iTrainId=" + iTrainId +
+                ", MaAdapter=" + MaAdapter +
+                ", uuid=" + uuid +
+                ", tms_id='" + tms_id + '\'' +
+                ", rbc_id='" + rbc_id + '\'' +
+                ", lPriority=" + lPriority +
+                ", lPriority=" + lPriority +
+                ", CommandType='" + CommandType + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CheckMovementPermission that = (CheckMovementPermission) o;
+        return iTrainId == that.iTrainId &&
+                route.equals(that.route) &&
+                MaAdapter.equals(that.MaAdapter) &&
+                uuid.equals(that.uuid) &&
+                tms_id.equals(that.tms_id) &&
+                rbc_id.equals(that.rbc_id) &&
+                lPriority.equals(that.lPriority);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(route, iTrainId, MaAdapter, uuid, tms_id, rbc_id, lPriority);
+    }
+
+    //testmain
+    public static void main(String[] args) throws MissingInformationException {
+        CheckMovementPermission cma = getDummyMovementAuthorityCommand();
+        System.out.println(cma.parseToJson());
+    }
+
+    /**
+     * @deprecated
+     * @return
+     */
+    public static CheckMovementPermission getDummyMovementAuthorityCommand() {
+        CheckMovementPermission cma = new CheckMovementPermission(3L);
+        //return null;
+        MARequest mar = new MARequest();
+
+
+
+        MovementAuthority MA = new MovementAuthority();
+
+        SSP ssp = new SSP();
+        List<SpeedSegment> speedSegmentList = new ArrayList<>();
+        SpotLocation sl = new SpotLocation(new Chainage(100), null,null);
+        SpeedSegment speedSegment = new SpeedSegment(sl,sl, ApplicationDirection.BOTH);
+        speedSegmentList.add(speedSegment);
+        ssp.setSpeedSegments(speedSegmentList);
+        MA.setSpeedProfile(ssp);
+
+        mar.setMa(MA);
+
+        return cma;
+
+
+    }
+
+
+
+    public Long getlPriority() {
+        return lPriority;
+    }
+
+    public void setlPriority(Long lPriority) {
+        this.lPriority = lPriority;
+
+    }
+}
