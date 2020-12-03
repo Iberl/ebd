@@ -5,7 +5,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity(name = "CheckMovementPermission")
-public class CheckMovmentPermissionDAO {
+public class CheckMovementPermissionDAO {
     @Id
     private String id;
 

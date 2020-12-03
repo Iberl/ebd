@@ -296,7 +296,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         /**To Debug **/
         //bIsOccupatonFree = true;
-        if(bIsOccupatonFree) if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+        if(bIsOccupatonFree)
+            if(EBM != null) EBM.log("Route is drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
 
         if(!bIsOccupatonFree) {

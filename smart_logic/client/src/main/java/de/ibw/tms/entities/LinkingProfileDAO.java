@@ -2,10 +2,10 @@ package de.ibw.tms.entities;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.LinkAdapter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +26,7 @@ public class LinkingProfileDAO {
     public Integer q_dir;
 
     public Integer q_scale;
-    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL)
     public List<LinkDAO> links = new ArrayList();
 }

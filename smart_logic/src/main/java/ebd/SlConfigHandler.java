@@ -19,6 +19,8 @@ public class SlConfigHandler {
     /*
     Strings
     */
+    public String ipToSmartLogic4TMS = "127.0.0.1";
+    public String portOfSmartLogic4TMS = "33330";
     public String ipToGUIServer4SL = "127.0.0.1";
     public String portOfGUIServer4SL = "11112";
     public String ipToGUIServer4TMS = "127.0.0.1";

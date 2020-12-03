@@ -2,19 +2,17 @@ package de.ibw.main;
 
 import com.google.gson.Gson;
 import de.ibw.handler.ClientHandler;
-import de.ibw.tms.entities.CheckMovmentPermissionDAO;
+import de.ibw.tms.entities.CheckMovementPermissionDAO;
 import de.ibw.tms.entities.PermissionRepository;
+import de.ibw.tms.entities.converter.CheckPermissionConverter;
 import de.ibw.tms.intf.SmartClient;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import ebd.SlConfigHandler;
+import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.fileHandler.FileHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.util.stream.Collectors;
@@ -35,9 +33,8 @@ public class SmartLogicClient extends SmartClient {
 
     public ClientHandler CH = new ClientHandler();
 
-    public SmartLogicClient() {
-        super(null, 33330);
-    }
+    private PermissionRepository permissionRepository;
+
 
 
     /**
@@ -58,21 +55,31 @@ public class SmartLogicClient extends SmartClient {
      */
     public SmartLogicClient(PermissionRepository permissionRepository, String sHost, int iPort) {
         super(sHost, iPort);
-        clientBody(permissionRepository);
+        this.permissionRepository = permissionRepository;
     }
 
 
     /**
      * Default Konstruktor
      */
-    public SmartLogicClient(PermissionRepository permissionRepository) {
+    public SmartLogicClient() {
         super(null, 33330);
-        clientBody(permissionRepository);
+
     }
 
-    private void clientBody(PermissionRepository permissionRepository) {
-        for (CheckMovmentPermissionDAO MovePerm : permissionRepository.findAll()) {
+    private void evalRepo() {
+
+        for (CheckMovementPermissionDAO MovePerm : permissionRepository.findAll()) {
             System.out.println(MovePerm.getId());
+            try {
+                TmsMovementPermissionRequest TPR = new TmsMovementPermissionRequest("1", "1",
+                        CheckPermissionConverter.convert(MovePerm)
+                );
+                String sJson = TPR.parseToJson();
+                sendJsonWhenValid(sJson);
+            } catch (MissingInformationException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -102,13 +109,14 @@ public class SmartLogicClient extends SmartClient {
 
 
 
+
     public static void proceedTmsLogic(PermissionRepository repository) {
 
 
         BufferedReader R = new BufferedReader(new InputStreamReader(System.in));
         String jsonStringOrFileName = "";
         while (true) {
-            System.out.println("Enter Cmd or json: ");
+            System.out.println("Enter Cmd: ");
             try {
                 jsonStringOrFileName = R.readLine();
                 System.out.println("Entered: " + jsonStringOrFileName);
@@ -116,9 +124,11 @@ public class SmartLogicClient extends SmartClient {
                 e.printStackTrace();
             }
             if (jsonStringOrFileName.equals("start")) {
-                SlClient = new SmartLogicClient(repository);
+                String slHostIp = SlConfigHandler.getInstance().ipToSmartLogic4TMS;
+                int iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfSmartLogic4TMS);
+                SlClient = new SmartLogicClient(repository, slHostIp, iPort);
                 SlClient.start();
-                continue;
+                break;
             }
             String jsonString = null;
             try {
@@ -138,37 +148,38 @@ public class SmartLogicClient extends SmartClient {
             }
 
 
-            if (isJSONValid(jsonString)) {
 
-                String finalJsonString = jsonString;
-                if (SlClient == null) {
-                    SlClient = new SmartLogicClient(repository);
-                    SlClient.start();
-                }
-                new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-
-                            SlClient.CH.sendCommand(finalJsonString);
-                        } catch (MissingInformationException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }.start();
-
-
-            } else {
-                System.out.println("File: " + jsonStringOrFileName + " contains no json.");
-            }
         }
+        SlClient.evalRepo();
+
     }
 
+    private static void sendJsonWhenValid(String jsonString) {
+
+        if (isJSONValid(jsonString)) {
+
+            String finalJsonString = jsonString;
+            if (SlClient == null) {
+                SlClient = new SmartLogicClient();
+                SlClient.start();
+            }
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+
+                        SlClient.CH.sendCommand(finalJsonString);
+                    } catch (MissingInformationException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
 
 
-
-
-
+        } else {
+            System.out.println("Json inalid");
+        }
+    }
 
 
     private static String convertInputStreamToString(FileReader input)

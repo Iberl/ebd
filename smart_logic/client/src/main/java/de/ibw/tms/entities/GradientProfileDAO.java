@@ -2,10 +2,10 @@ package de.ibw.tms.entities;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.GradientAdapter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity(name = "GradientProfile")
@@ -24,7 +24,8 @@ public class GradientProfileDAO {
     public Integer q_dir;
 
     public Integer q_scale;
-    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL)
     public List<GradientDAO> gradients;
 
 

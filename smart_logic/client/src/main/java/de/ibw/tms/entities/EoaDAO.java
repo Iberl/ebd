@@ -5,11 +5,10 @@ import de.ibw.tms.ma.DangerPointAdapter;
 import de.ibw.tms.ma.EndTimerAdapter;
 import de.ibw.tms.ma.EoaSectionAdapter;
 import de.ibw.tms.ma.OverlapApdapter;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity(name = "EOA")
@@ -34,7 +33,8 @@ public class EoaDAO {
 
     public int t_loa;
 
-    @OneToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL)
     public List<EoaSectionDAO> sections;
 
     @OneToOne
