@@ -22,7 +22,7 @@ public class TmsJpaApp {
 
 
 	@Bean
-	public CommandLineRunner TmsRunner(PermissionRepository repository) {
+	public CommandLineRunner TmsRunner(TimeTaskRepository repository) {
 		return (args) -> {
 
 			SmartLogicClient.proceedTmsLogic(repository);

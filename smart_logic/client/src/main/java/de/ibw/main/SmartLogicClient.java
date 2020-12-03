@@ -2,11 +2,9 @@ package de.ibw.main;
 
 import com.google.gson.Gson;
 import de.ibw.handler.ClientHandler;
-import de.ibw.tms.entities.CheckMovementPermissionDAO;
-import de.ibw.tms.entities.PermissionRepository;
-import de.ibw.tms.entities.converter.CheckPermissionConverter;
+import de.ibw.schedule.TmsScheduler;
+import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.intf.SmartClient;
-import de.ibw.tms.intf.TmsMovementPermissionRequest;
 
 
 import ebd.SlConfigHandler;
@@ -32,12 +30,21 @@ public class SmartLogicClient extends SmartClient {
 
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
+    private TmsScheduler RequestScheduler;
 
 
-    public ClientHandler CH = new ClientHandler();
+    public ClientHandler CH = null;
 
-    private PermissionRepository permissionRepository;
+    private TimeTaskRepository timeTaskRepository;
 
+    private String sTmsId = "1";
+    private String sRbcId = "1";
+
+
+    public void startScheduler() throws MissingInformationException {
+
+        this.RequestScheduler.start();
+    }
 
 
     /**
@@ -56,34 +63,45 @@ public class SmartLogicClient extends SmartClient {
      * @param sHost - Host-ip der SmartLogic.
      * @param iPort - Port des SmartLogic-Host
      */
-    public SmartLogicClient(PermissionRepository permissionRepository, String sHost, int iPort) {
+    public SmartLogicClient(TimeTaskRepository timeTaskRepository, String sHost, int iPort) {
         super(sHost, iPort);
-        this.permissionRepository = permissionRepository;
+        this.timeTaskRepository = timeTaskRepository;
+        this.RequestScheduler = new TmsScheduler(this, this.timeTaskRepository);
+        this.CH = new ClientHandler(this);
     }
 
-
-    /**
-     * Default Konstruktor
-     */
-    public SmartLogicClient() {
-        super(null, 33330);
-
+    public String getsTmsId() {
+        return sTmsId;
     }
 
-    private void evalRepo() {
+    public void setsTmsId(String sTmsId) {
+        this.sTmsId = sTmsId;
+    }
 
-        for (CheckMovementPermissionDAO MovePerm : permissionRepository.findAll()) {
-            System.out.println(MovePerm.getId());
-            try {
-                TmsMovementPermissionRequest TPR = new TmsMovementPermissionRequest("1", "1",
-                        CheckPermissionConverter.convert(MovePerm)
-                );
-                String sJson = TPR.parseToJson();
-                sendJsonWhenValid(sJson);
-            } catch (MissingInformationException e) {
-                e.printStackTrace();
-            }
-        }
+    public String getsRbcId() {
+        return sRbcId;
+    }
+
+    public void setsRbcId(String sRbcId) {
+        this.sRbcId = sRbcId;
+    }
+
+    private void evalRepo(){
+
+        //for (CheckMovementPermissionDAO MovePerm : permissionRepository.findAll()) {
+            //System.out.println(MovePerm.getId());
+            //try {
+
+
+                //TmsMovementPermissionRequest TPR = new TmsMovementPermissionRequest("1", "1",
+               //         CheckPermissionConverter.convert(MovePerm)
+               // );
+               // String sJson = TPR.parseToJson();
+               // sendJsonWhenValid(sJson);
+           // } catch (MissingInformationException e) {
+           //     e.printStackTrace();
+           // }
+        //}
     }
 
     @Override
@@ -113,7 +131,7 @@ public class SmartLogicClient extends SmartClient {
 
 
 
-    public static void proceedTmsLogic(PermissionRepository repository) {
+    public static void proceedTmsLogic(TimeTaskRepository repository) {
 
 
         BufferedReader R = new BufferedReader(new InputStreamReader(System.in));
@@ -163,8 +181,12 @@ public class SmartLogicClient extends SmartClient {
 
             String finalJsonString = jsonString;
             if (SlClient == null) {
-                SlClient = new SmartLogicClient();
+                System.out.println("Client not startet");
+                String slHostIp = SlConfigHandler.getInstance().ipToSmartLogic4TMS;
+                Integer iPort = Integer.valueOf(SlConfigHandler.getInstance().ipToSmartLogic4TMS);
+                SlClient = new SmartLogicClient(SlClient.timeTaskRepository, slHostIp, iPort);
                 SlClient.start();
+                System.out.println("Client startet now.");
             }
             new Thread() {
                 @Override

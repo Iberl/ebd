@@ -4,18 +4,11 @@ import de.ibw.history.PositionModul;
 
 import de.ibw.main.SmartLogicClient;
 import de.ibw.smart.logic.intf.SmartLogic;
-import de.ibw.smart.logic.safety.SafetyLogic;
-import de.ibw.tms.intf.SmartClient;
-import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
-import de.ibw.util.DefaultRepo;
 import ebd.core.Core;
 import ebd.core.util.events.LoadEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 
 import java.util.ArrayList;
@@ -24,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VehicleOccupationComponentTest {
 
-    private SmartLogicClient SC = new SmartLogicClient();
+    private SmartLogicClient SC = null;
     private Core C = null;
 
     @Spy
