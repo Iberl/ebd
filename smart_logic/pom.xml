@@ -146,11 +146,7 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>de.disposim</groupId>
-            <artifactId>edith</artifactId>
-            <version>5.2.4.Final</version>
-        </dependency>
+
 
     </dependencies>
     <build>

@@ -7,14 +7,17 @@ import de.ibw.tms.entities.PermissionRepository;
 import de.ibw.tms.entities.converter.CheckPermissionConverter;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
+
+
 import ebd.SlConfigHandler;
-import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.fileHandler.FileHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 /**
@@ -131,7 +134,7 @@ public class SmartLogicClient extends SmartClient {
                 break;
             }
             String jsonString = null;
-            try {
+            /*try {
                 FileReader jsonReaded = FileHandler.readConfigurationFile("slClientCmd/" + jsonStringOrFileName);
                 try {
                     jsonString = convertInputStreamToString(jsonReaded);
@@ -145,7 +148,7 @@ public class SmartLogicClient extends SmartClient {
             } catch (IOException e) {
                 System.out.println("Json-File not found");
                 continue;
-            }
+            }*/
 
 
 
