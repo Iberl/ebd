@@ -12,6 +12,8 @@ public class TimeTaskDAO {
     @OneToOne
     public CheckMovementPermissionDAO CheckPermission;
 
+    @OneToOne
+    public DbdCommandDAO CheckDbd;
 
     public double SendTimeSinceStartInSeconds;
 

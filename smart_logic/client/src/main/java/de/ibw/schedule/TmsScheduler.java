@@ -4,8 +4,12 @@ import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.runner.PermissionRunnable;
 import de.ibw.tms.entities.TimeTaskDAO;
 import de.ibw.tms.entities.TimeTaskRepository;
+import de.ibw.tms.entities.converter.CheckDbdCmdConverter;
 import de.ibw.tms.entities.converter.CheckPermissionConverter;
+import de.ibw.tms.intf.TmsDbdCommand;
+import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
@@ -80,19 +84,19 @@ public class TmsScheduler {
                 TimeTaskDAO T = it.next();
                 long lTime = (long) (T.SendTimeSinceStartInSeconds * 1000 + System.currentTimeMillis());
                 Date dScheduledDate = new Date(lTime);
-                CheckMovementPermission CheckTask = CheckPermissionConverter.convert(T.CheckPermission);
-                TmsMovementPermissionRequest Tmp = new TmsMovementPermissionRequest(this.sTmsId, this.sRbcId, CheckTask);
 
-                ScheduledFuture sf = null;
-                try {
-                    sf = scheduler.schedule(new PermissionRunnable(this, Client, Tmp, lTaskCounter), dScheduledDate);
-                } catch (MissingInformationException e) {
-                    e.printStackTrace();
-                    futureTasks.update(lTaskCounter, sf);
-                    lTaskCounter++;
-                    throw new MissingInformationException(e.getMessage());
+                if(T.CheckDbd != null) {
+                    CheckDbdCommand DbdCmd = CheckDbdCmdConverter.convert(T.CheckDbd);
+                    TmsDbdCommand CheckDBD = new TmsDbdCommand(this.sTmsId, this.sRbcId, DbdCmd);
+                    startCommandsSchedule(dScheduledDate, CheckDBD);
                 }
-                futureTasks.update(lTaskCounter, sf);
+
+                if(T.CheckPermission != null) {
+
+                    CheckMovementPermission CheckTask = CheckPermissionConverter.convert(T.CheckPermission);
+                    TmsMovementPermissionRequest Tmp = new TmsMovementPermissionRequest(this.sTmsId, this.sRbcId, CheckTask);
+                    startCommandsSchedule(dScheduledDate, Tmp);
+                }
                 lTaskCounter++;
                 it.remove();
             }
@@ -100,6 +104,18 @@ public class TmsScheduler {
 
     }
 
+    private void startCommandsSchedule(Date dScheduledDate, TmsMessage Tmp) throws MissingInformationException {
+        ScheduledFuture sf = null;
+        try {
+            sf = scheduler.schedule(new PermissionRunnable(this, Client, Tmp, lTaskCounter), dScheduledDate);
+        } catch (MissingInformationException e) {
+            e.printStackTrace();
+            futureTasks.update(lTaskCounter, sf);
+            lTaskCounter++;
+            throw new MissingInformationException(e.getMessage());
+        }
+        futureTasks.update(lTaskCounter, sf);
+    }
 
 
 }

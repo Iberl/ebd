@@ -44,7 +44,7 @@ public class CheckDbdCommand extends Commands {
      *
      * @param lPriority long - Priority dieses Befehls im TMS Postausgang.
      */
-    public CheckDbdCommand(String sCrossoverEbdName, String sId, TrackElementStatus Status , long lPriority) {
+    public CheckDbdCommand(String sId, TrackElementStatus Status , long lPriority) {
         super(lPriority);
         this.sId = sId;
         this.TrackElementStatus = Status;

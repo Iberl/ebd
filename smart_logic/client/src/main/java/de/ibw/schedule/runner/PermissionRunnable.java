@@ -3,6 +3,7 @@ package de.ibw.schedule.runner;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.tms.entities.TimeTaskDAO;
+import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
@@ -12,7 +13,7 @@ public class PermissionRunnable implements Runnable {
     private String requestJson;
     private long lTaskId;
 
-    public PermissionRunnable(TmsScheduler tmsScheduler, SmartLogicClient client, TmsMovementPermissionRequest T,
+    public PermissionRunnable(TmsScheduler tmsScheduler, SmartLogicClient client, TmsMessage T,
                               long lTaskCounter) throws MissingInformationException {
         this.scheduler = tmsScheduler;
         this.client = client;
