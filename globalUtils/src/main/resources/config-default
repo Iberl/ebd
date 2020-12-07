@@ -48,6 +48,8 @@ tripProfileFolderPath = tripprofiles/
 useTrainConfiguratorTool = false
 
 # If true, the program will try to connect to the infrastructure server.
+# If successful, it WILL initialise AND take control over all trains specified in the initFile.
+# Only set to true if you are sure you want model trains to move.
 useInfrastructureServer = false
 
 # If true, the program will try to connect to the Train Manager System program.
@@ -112,7 +114,7 @@ timeBase = 1593522000000
 ###### Doubles with a dot, not a comma (1.2 instead of 1,2).
 ######
 # Train switches between accelerating/breaking etc. by using a rolling average. The span of this average is controlled by this value.
-averageTimeBetweenActions = 2
+averageTimeBetweenActions = 1
 
 #Controls the time between to dynamic state logging outputs if the train is faster than 1 m/s. In [s].
 timeBetweenDynLog = 2
@@ -173,6 +175,24 @@ V_warning_min = 38.89
 
 # Value of  MRSP where dV_warning stops to increase to dV_warning_max in [m/s]
 V_warning_max = 58.33
+
+# Rise time for acceleration in [s]
+accRiseTime = 2
+
+# Fall time for acceleration in [s]
+accFallTime = 1
+
+# Rise time for deceleration in [s]
+breakRiseTime = 5
+
+#Fall time for deceleration in [s]
+breakFallTime = 10
+
+#Rise time for emergency deceleration in [s]
+emBreakRiseTime = 3
+
+#Fall time for emergency deceleration in [s]
+emBreakFallTime = 10
 
 # Relative position confidence factor (This is multiplied with position increment to get a confidence intervall)
 d_Confidence = 0.01

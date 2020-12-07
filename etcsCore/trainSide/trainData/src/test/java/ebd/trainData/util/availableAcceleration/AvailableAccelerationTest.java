@@ -34,12 +34,7 @@ class AvailableAccelerationTest {
         eb.post(new RouteDataChangeEvent("test",target, "packet_21", getp21()));
         AvailableAcceleration aa = new AvailableAcceleration(eb);
         eb.post(new TrainDataChangeEvent("test", target, "availableAcceleration", aa));
-
-
-        assertEquals(0.44,aa.getAcceleration(0,0, MovementState.ACCELERATING),0.001);
-        assertEquals(0.43,aa.getAcceleration(50,150, MovementState.ACCELERATING),0.001);
-        assertEquals(-0.73,aa.getAcceleration(40,200, MovementState.SERVICE_BREAKING),0.001);
-        assertEquals(0.0,aa.getAcceleration(40,100, MovementState.CRUISE));
+        //TODO Make new tests
     }
 
     private Packet_21 getp21(){

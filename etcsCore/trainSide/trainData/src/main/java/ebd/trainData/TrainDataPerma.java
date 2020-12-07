@@ -1,6 +1,7 @@
 package ebd.trainData;
 
 import ebd.globalUtils.configHandler.ConfigHandler;
+import ebd.globalUtils.fileHandler.FileHandler;
 import ebd.trainData.util.dataConstructs.*;
 import ebd.trainData.util.exceptions.TDBadDataException;
 import org.jetbrains.annotations.NotNull;
@@ -180,11 +181,9 @@ public class TrainDataPerma {
      */
     private void setInstanceFromFile() throws IOException, TDBadDataException, ParseException {
         String fileName = this.trainConfigID + ".json";
-        String pathToTrainJSON = "configuration/trains/" + fileName;
+        String pathToTrainJSON = "trains/" + fileName;
 
-        fileSetup(pathToTrainJSON, fileName);
-
-        try (FileReader fileReader = new FileReader(pathToTrainJSON)) {
+        try (FileReader fileReader = FileHandler.readerConfigurationFileOrDefault(pathToTrainJSON,fileName)) {
             try (BufferedReader input = new BufferedReader(fileReader)) {
 
             /*
@@ -199,54 +198,6 @@ public class TrainDataPerma {
         } catch (NullPointerException npe) {
             npe.printStackTrace();
             throw npe;
-        }
-    }
-
-    private void fileSetup(String path, String filename) throws IOException {
-        /*
-        Setting up .json file if it does not already exists
-         */
-        File file = new File(path);
-
-        if (file.length() == 0) {
-            boolean createdDir = file.getParentFile().mkdir();
-            boolean createdFile = file.createNewFile();
-            if (!createdFile && !file.exists()) {
-                throw new IOException(path + " could not be created");
-            }
-
-            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)) {
-
-                if (inputStream == null) {
-                    throw new IOException("The train file stream could not be found");
-                }
-
-                try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                    int length;
-                    byte[] buffer = new byte[1024];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                } catch (IOException ioe) {
-                    throw new IOException("Train file could not be created. " + ioe.getMessage());
-                }
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-                try (FileInputStream inputStream = new FileInputStream(filename)) {
-
-                    try (FileOutputStream outputStream = new FileOutputStream(path)) {
-                        int length;
-                        byte[] buffer = new byte[1024];
-                        while ((length = inputStream.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                    } catch (IOException ioe3) {
-                        throw new IOException("Train file could not be created: " + ioe3.getMessage());
-                    }
-                } catch (IOException ioe2) {
-                    throw new IOException(ioe2.getMessage());
-                }
-            }
         }
     }
 

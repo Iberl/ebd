@@ -2,9 +2,9 @@ package ebd.breakingCurveCalculator.utils;
 
 import ebd.breakingCurveCalculator.BreakingCurveCalculator;
 import ebd.breakingCurveCalculator.utils.exceptions.SSPInvalidInputException;
+import ebd.coreUtils.enums.CurveType;
+import ebd.coreUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.configHandler.ConfigHandler;
-import ebd.globalUtils.enums.CurveType;
-import ebd.globalUtils.events.bcc.BreakingCurveRequestEvent;
 import ebd.globalUtils.spline.ForwardSpline;
 import ebd.globalUtils.spline.Knot;
 import ebd.messageLibrary.packet.trackpackets.Packet_27;

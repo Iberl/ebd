@@ -5,11 +5,10 @@ import ebd.breakingCurveCalculator.utils.CurveGroup;
 import ebd.breakingCurveCalculator.utils.EmptyCurveGroup;
 import ebd.breakingCurveCalculator.utils.StaticSpeedProfil;
 import ebd.breakingCurveCalculator.utils.exceptions.BreakingCurveOutOfRangeException;
-import ebd.globalUtils.enums.CurveType;
-import ebd.globalUtils.enums.SpeedSupervisionState;
-import ebd.globalUtils.location.InitalLocation;
-import ebd.globalUtils.location.Location;
-import ebd.globalUtils.spline.BackwardSpline;
+import ebd.coreUtils.location.Location;
+import ebd.coreUtils.enums.CurveType;
+import ebd.coreUtils.enums.SpeedSupervisionState;
+import ebd.coreUtils.location.InitalLocation;
 
 import java.util.Arrays;
 import java.util.Locale;

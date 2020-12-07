@@ -5,6 +5,19 @@ import java.io.*;
 public class FileHandler {
 
     public static FileReader readConfigurationFile(String filepath) throws IOException {
+        return readerConfigurationFileOrDefault(filepath, filepath);
+    }
+
+    public static FileReader readerConfigurationFileOrDefault(String filepath, String defaultResource) throws IOException {
+
+        return new FileReader(getFileFromConfigurationFolderOrDefault(filepath,defaultResource));
+    }
+
+    public static File getFileFromConfigurationFolder(String filepath) throws IOException {
+        return getFileFromConfigurationFolderOrDefault(filepath, filepath);
+    }
+
+    public static File getFileFromConfigurationFolderOrDefault(String filepath, String defaultResource) throws IOException {
         // does the path exist: configuration/scenario/
         File file = new File("configuration/" + filepath);
 
@@ -14,9 +27,9 @@ public class FileHandler {
             file.getParentFile().mkdir();
 
             // search in resource stream for filename
-            try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(filepath)) {
+            try(InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultResource)) {
                 if(inputStream == null) {
-                    throw new IOException("The stream " + filepath + " could not be found");
+                    throw new IOException("The stream " + defaultResource + " could not be found");
                 }
                 // write file in directory configuration/scenario
                 try(FileOutputStream outputStream = new FileOutputStream(file)) {
@@ -31,6 +44,7 @@ public class FileHandler {
             }
         }
 
-        return new FileReader(file);
+        return file;
     }
+
 }

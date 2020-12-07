@@ -3,6 +3,7 @@ package ebd.globalUtils.configHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.util.ExceptionEventTyp;
 import ebd.globalUtils.events.util.NotCausedByAEvent;
+import ebd.globalUtils.fileHandler.FileHandler;
 import ebd.messageLibrary.util.ETCSVariables;
 import org.greenrobot.eventbus.EventBus;
 
@@ -277,7 +278,7 @@ public class ConfigHandler {
     /**
      * Fall time for acceleration in [s]
      */
-    public double accFallTime = 0.1;
+    public double accFallTime = 1;
 
     /**
      * Rise time for deceleration in [s]
@@ -396,53 +397,6 @@ public class ConfigHandler {
      * @throws IOException If config.txt file was not found
      */
     private ConfigHandler() throws IOException {
-
-        /*
-        Setting up config.txt file if it does not already exists
-         */
-        File fileConfig = new File("configuration/config.txt");
-
-        if (fileConfig.length() == 0) {
-            boolean createdDir = fileConfig.getParentFile().mkdir();
-            boolean createdFile = fileConfig.createNewFile();
-            if(!createdFile && !fileConfig.exists()){
-                throw new IOException("Config.txt could not be created");
-            }
-
-            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config-default")) {
-
-                if(inputStream == null) {
-                    throw new IOException("The stream config-default could not be found");
-                }
-
-                try (FileOutputStream outputStream = new FileOutputStream(fileConfig)) {
-                    int length;
-                    byte[] buffer = new byte[1024];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                }catch (IOException ioe){
-                    throw new IOException("Configuration file could not be created. " + ioe.getMessage());
-                }
-            }catch (IOException ioe){
-                ioe.printStackTrace();
-                try(FileInputStream inputStream = new FileInputStream("config-default")) {
-
-                    try (FileOutputStream outputStream = new FileOutputStream("configuration/config.txt")) {
-                        int length;
-                        byte[] buffer = new byte[1024];
-                        while ((length = inputStream.read(buffer)) != -1){
-                            outputStream.write(buffer,0,length);
-                        }
-                    }catch (IOException ioe3){
-                        throw new IOException("Configuration file could not be created: " + ioe3.getMessage());
-                    }
-                }catch (IOException ioe2){
-                    throw new IOException(ioe2.getMessage());
-                }
-            }
-        }
-
         /*
         Loads the config
          */
@@ -546,7 +500,8 @@ public class ConfigHandler {
         if(!fromDefault) {
 
             try{
-                BufferedReader reader = new BufferedReader(new FileReader("configuration/config.txt"));
+                FileReader fileReader = FileHandler.readerConfigurationFileOrDefault("config.txt", "config-default");
+                BufferedReader reader = new BufferedReader(fileReader);
                 stringArray = reader.lines().toArray(String[]::new);
             } catch (IOException e) {
                 IOException ioe = new IOException("The config file could not be opened. " + e.getMessage());

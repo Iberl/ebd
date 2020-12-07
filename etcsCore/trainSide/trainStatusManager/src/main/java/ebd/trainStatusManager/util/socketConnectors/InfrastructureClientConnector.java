@@ -1,5 +1,6 @@
 package ebd.trainStatusManager.util.socketConnectors;
 
+import ebd.globalUtils.appTime.AppTime;
 import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.core.StopTrainEvent;
 import ebd.globalUtils.events.core.UpdatingInfrastructureEvent;
@@ -53,7 +54,7 @@ public class InfrastructureClientConnector {
         this.eventSource = "tsm;T=" + etcsID;
 
         this.updateMultiplier = ConfigHandler.getInstance().infrastructureUpdateMultiplier;
-        this.time = System.currentTimeMillis() / 1000.0;
+        this.time = AppTime.currentTimeInS();
     }
 
     /**
@@ -81,7 +82,7 @@ public class InfrastructureClientConnector {
         this.tickCounter = 1;
 
         double averageSpeed = 0;
-        double timeBetweenUpdates = (System.currentTimeMillis() / 1000.0) - this.time;
+        double timeBetweenUpdates = AppTime.currentTimeInS() - this.time;
 
         /*
          Needed are km/H, speeds are in m/s, so the speeds are multiply with 3.6.
@@ -110,7 +111,7 @@ public class InfrastructureClientConnector {
         this.speeds = new ArrayList<>();
         this.times = new ArrayList<>();
         this.globalEventBus.post(new UpdatingInfrastructureEvent(this.eventSource,this.target,this.infrastructureID,(int)curVlong));
-        this.time = System.currentTimeMillis() / 1000.0;
+        this.time = AppTime.currentTimeInS();
     }
 
     @Subscribe
