@@ -34,14 +34,6 @@ public class AppTime {
     }
 
     /**
-     * Changes unit of {@link AppTime#currentTimeMillis()} into seconds
-     * @return current app time in [s]
-     */
-    public static double currentTimeInS(){
-        return currentTimeMillis() / 1000.0;
-    }
-
-    /**
      * see {@link System#nanoTime()}
      * @return System.nanoTime() * {@link ConfigHandler#timeAccFactor}
      */

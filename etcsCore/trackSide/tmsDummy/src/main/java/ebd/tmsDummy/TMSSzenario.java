@@ -32,12 +32,12 @@ public class TMSSzenario {
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public TMSSzenario() {
-        System.out.println("Loading Scenario " + filename);
         try {
             communicator = new Communicator();
             communicator.start();
 
             sequences = Parser.parse(filename);
+            System.out.println("Loading Scenario " + filename);
 
             EventBus.getDefault().register(this);
         } catch(InvalidSequenceException e) {
