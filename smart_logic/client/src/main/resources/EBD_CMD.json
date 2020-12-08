@@ -1,0 +1,16 @@
+{
+"payload": {
+    "sId": "12W1",
+    "SwitchStatus" : {
+      "statusList" : [
+        "LEFT"
+      ]
+    },
+    "uuid": "72f5eee0-a90f-4c78-a704-86898dd0d7db",
+    "lPriority": 3,
+    "CommandType": "checkDBD"
+  },
+  "type": 0,
+  "tms_id": "1",
+  "rbc_id": "0"
+}
