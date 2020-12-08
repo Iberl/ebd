@@ -88,6 +88,9 @@ public class TopologyGraph {
      */
     public static class Node extends ArrayList<PositionedRelation> implements INode {
 
+        public static ArrayList<Node> nodesWithDigitalisedEnds =  new ArrayList<>();
+
+
         /**
          * Knoten Bezeichnung
          */
@@ -114,6 +117,10 @@ public class TopologyGraph {
         public final HashSet<Edge> outEdges;
             //public GeoCoordinates Coordinates;
 
+        private GeometricCoordinate geoCo = null;
+
+
+
         /**
          * Konstruktur zur instanziierung eines Knoten
          * @param name {@link String} - Bezeichnung des Knoten
@@ -126,23 +133,38 @@ public class TopologyGraph {
                 inEdges = new HashSet<Edge>();
                 outEdges = new HashSet<Edge>();
                 // @TODO Relation having no Geo co
-                //this.setGeoCoordinates(GeoCo);
+                geoCo = GeoCo;
                 NodeRepo.put(this.TopNodeId, this);
 
             }
+
+
 
         /**
          * Generiert eine Kante diesem und einem weiteren Knoten
          * @param Node {@link Node} - Weiterer Knoten zur Kante
          * @param E {@link Edge} - Kante aus beiden Knoten
+         * @param topConnectFromA
+         * @param topConnectFromB
          * @return Node - diesen Knoten
          */
-        public Node addEdge(Node Node, Edge E){
+        public Node addEdge(Node Node, Edge E, TopologyConnect topConnectFromA, TopologyConnect topConnectFromB){
                 //Edge e = new Edge(this, topConnectFromA, node, topConnectFromB, iTopLength);
                 outEdges.add(E);
                 Node.inEdges.add(E);
+                this.addConnectionType(topConnectFromA, E);
+                Node.addConnectionType(topConnectFromB, E);
                 return this;
         }
+
+        private void addConnectionType(TopologyConnect topConnectFrom, Edge e) {
+
+            if(topConnectFrom.equals(TopologyConnect.ENDE_BESTDIG)) {
+                nodesWithDigitalisedEnds.add(this);
+            }
+        }
+
+
 
         /**
          * @deprecated
@@ -387,7 +409,7 @@ public class TopologyGraph {
                 TopConnectFromA = topConnectFromA;
                 this.B = B;
                 TopConnectFromB = topConnectFromB;
-                A.addEdge(B,this);
+                A.addEdge(B,this, topConnectFromA, topConnectFromB);
                 this.PlanProEdge = Edge;
                 this.sId = Edge.getIdentitaet().getWert();
                 this.dTopLength = Edge.getTOPKanteAllg().

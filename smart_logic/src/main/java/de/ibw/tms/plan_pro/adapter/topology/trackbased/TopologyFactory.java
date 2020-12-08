@@ -136,12 +136,12 @@ public class TopologyFactory implements ITopologyFactory {
 
             TopologyGraph.Node A = TopologyGraph.NodeRepo.get(sNodeA);
             if(A == null) {
-                GeometricCoordinate GeoA = null;//getGeoCoordinate(nodeRepo,sNodeA);
+                GeometricCoordinate GeoA = getGeoCoordinate(nodeRepo,sNodeA);
                 A = new TopologyGraph.Node("", sNodeA, GeoA);
             }
             TopologyGraph.Node B = TopologyGraph.NodeRepo.get(sNodeB);
             if(B == null) {
-                GeometricCoordinate GeoB = null;//getGeoCoordinate(nodeRepo,sNodeB);
+                GeometricCoordinate GeoB = getGeoCoordinate(nodeRepo,sNodeB);
                 B = new TopologyGraph.Node("", sNodeB , GeoB);
             }
 
@@ -164,7 +164,7 @@ public class TopologyFactory implements ITopologyFactory {
 
 
         }
-
+        connectDigitalEndNodes();
         if(TopologyGraph.getLeftmostNode() == null) throw new NullPointerException("Not Edge with End in A defined");
 
         // filling topNodetoGeoNodeRepo with key:ID of geoNodes, value:topNodes
@@ -175,8 +175,14 @@ public class TopologyFactory implements ITopologyFactory {
             topNodeToGeoNodeRepo.update(topNode.getIdentitaet().getWert(), geoNode);
         }
 
+
+
+
         // filling geoEdgeToGeoNodeRepo with key:ID of geoNodes, value: geoEdge
         fillGeoEdgeRelateToGeoNodeRepo(geoPointRepo);
+
+
+
 
         // iterate over edges
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(TG.edgeRepo.values());

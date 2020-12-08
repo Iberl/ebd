@@ -335,11 +335,17 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
             setNodeToBranchingPoints();
             setEdges();
+
             System.out.println("Test");
             TescModul.getInstance().fetchIntialState();
         } catch (ParseException | JAXBException | IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void connectDigitalEnds() {
+
+
     }
 
     private void setEdges() {
