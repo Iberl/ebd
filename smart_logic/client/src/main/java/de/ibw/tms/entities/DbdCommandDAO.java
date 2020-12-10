@@ -2,13 +2,8 @@ package de.ibw.tms.entities;
 
 import de.ibw.tms.ma.physical.TrackElementStatus;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity(name = "DbdCommand")
 public class DbdCommandDAO {
@@ -31,8 +26,11 @@ public class DbdCommandDAO {
 
     public Long lPriority;
 
-    @ElementCollection
-    public List<TrackElementStatus.Status> statusList = new ArrayList<>();
+    @ElementCollection(targetClass=TrackElementStatus.Status.class)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "tesc_status", joinColumns =  @JoinColumn(name = "dbd_command_id"))
+    @OrderColumn()
+    public List<TrackElementStatus.Status> statusList;
 
 
 
