@@ -337,6 +337,13 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setEdges();
 
             System.out.println("Test");
+            System.out.println("Print 11W10L");
+
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+            System.out.println("Print 13W4S");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+            System.out.println("Print 13W1S");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1S").getPlanProId());
             TescModul.getInstance().fetchIntialState();
         } catch (ParseException | JAXBException | IOException e) {
             e.printStackTrace();
@@ -575,7 +582,17 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             } else if(E2.A.equals(E1.B) || E2.B.equals(E1.B)) {
                 N = E1.B;
             }
-            if(N == null) throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
+            if(N == null) {
+                if(E1.mergedNodes.contains(E2.A)) {
+                    N = E2.A;
+                } else if(E1.mergedNodes.contains(E2.B)) {
+                    N = E2.B;
+                } else if(E2.mergedNodes.contains(E1.A)) {
+                    N = E1.A;
+                } else if(E2.mergedNodes.contains(E1.B)) {
+                    N = E1.B;
+                } else throw new NullPointerException("Crossroad not between E1: " + E1.sId + " E2: " + E2.sId);
+            }
             N.NodeType = CrossingSwitch.class;
             N.NodeImpl = CS;
 

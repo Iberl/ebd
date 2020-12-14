@@ -403,7 +403,7 @@ public class TescModul {
                 iPort = 1436;
             } else {
                 sHost = ConfigHandler.getInstance().ipToInfrastructureServer;
-                iPort = Integer.parseInt(ConfigHandler.getInstance().portOfInfrastructureServer);
+                iPort = 1436;
             }
             Session = new TescSession(new Socket(sHost, iPort));
             Session.start();
@@ -427,6 +427,7 @@ public class TescModul {
                         null, null, null,
                         MoveableTrackElement.getEwPossibleStates(), CurrentStatus);
                 ElementStateByIdRepository.update(sLabel, MTE);
+                System.out.println("EW_Lable" + sLabel);
             } else if(Switch.isDKW()) {
                 System.out.println("DKW size = " + switchListByAnlage.size());
                 int iSmallestId = Switch.getLocalElementId();

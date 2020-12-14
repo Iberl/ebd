@@ -26,7 +26,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Diese Klasse dient zur Erzeugung eines Topologieschen Graphen
@@ -34,7 +33,7 @@ import java.util.Objects;
 public class TopologyFactory implements ITopologyFactory {
 
 
-    private static final boolean B_PRINT_BALISE_LIST = false;
+    private static final boolean B_PRINT_BALISE_LIST = true;
     /**
      * Dieses Feld gibt an, ob der erzeugte Graph in PlanData gespeichert werden soll
      */
@@ -59,6 +58,7 @@ public class TopologyFactory implements ITopologyFactory {
 
     private DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> crossingBundle = new DefaultRepo<>();
 
+    public static DefaultRepo<TopologyGraph.Node,DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> connections = new DefaultRepo<>();
 
 
     private DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>(); // output
@@ -164,7 +164,8 @@ public class TopologyFactory implements ITopologyFactory {
 
 
         }
-        connectDigitalEndNodes();
+        connectDigitalEndNodes(TG);
+
         if(TopologyGraph.getLeftmostNode() == null) throw new NullPointerException("Not Edge with End in A defined");
 
         // filling topNodetoGeoNodeRepo with key:ID of geoNodes, value:topNodes
@@ -228,6 +229,241 @@ public class TopologyFactory implements ITopologyFactory {
         if(shallAssignToActivePlanData) PlanData.topGraph = TG;
         return TG;
 
+
+    }
+
+    private void connectDigitalEndNodes(TopologyGraph TG) {
+
+        boolean bMergedSomething = true;
+
+        ArrayList<TopologyGraph.Node> connectedNodes = new ArrayList<>();
+        ArrayList<TopologyGraph.Node> unConnectedNodes = new ArrayList<>(TopologyGraph.Node.nodesWithDigitalisedEnds);
+        initconnections(connections, unConnectedNodes);
+        while(bMergedSomething) {
+                bMergedSomething = false;
+                for(int i = 0; i < unConnectedNodes.size(); i++) {
+                    for(int j = 0; j < unConnectedNodes.size(); j++) {
+                        TopologyGraph.Node N1 = unConnectedNodes.get(i);
+                        TopologyGraph.Node N2 = unConnectedNodes.get(j);
+                        if(connections.getModel(N1).getModel(N2) != null) continue;
+                            if(N1.equals(N2)) continue;
+                            if(isSamePosition(N1,N2)) {
+                                bMergedSomething = true;
+                                TopologyGraph.Edge E1 = getGivenEdge(N1,connections);
+                                TopologyGraph.Edge E2 = getGivenEdge(N2,connections);
+                                TopologyGraph.Node NewN1 = null;
+                                TopologyGraph.Node NewN2 = null;
+
+                                if (E1.A.equals(N1)) {
+                                    NewN1 = E1.B;
+                                } else {
+                                    NewN1 = E1.A;
+                                }
+                                if (E2.A.equals(N2)) {
+                                    NewN2 = E2.B;
+                                } else {
+                                    NewN2 = E2.A;
+                                }
+
+
+                                TopologyConnect TC1 = retrieveTopologyConnectNotBeeingEnd(E1);
+                                TopologyConnect TC2 = retrieveTopologyConnectNotBeeingEnd(E2);
+                                if (TC1 == null && TC2 == null) {
+                                    throw new InvalidParameterException("TC1 and TC2 not connected directly");
+                                }
+                                if (TC1 == null) {
+                                    TC1 = TopologyConnect.ENDE_BESTDIG;
+
+                                }
+                                if (TC2 == null) {
+                                    TC2 = TopologyConnect.ENDE_BESTDIG;
+
+                                }
+                                TopologyGraph.Edge MergedEdge = new TopologyGraph.Edge(NewN1, TC1, NewN2, TC2, E1.getPlanProEdge(), E2.getPlanProEdge());
+                                handleMergedNodes(MergedEdge, E1, E2);
+
+
+                                for (String sPlanProEdgeId : MergedEdge.getPlanProIds()) {
+                                    TG.edgeRepo.put(sPlanProEdgeId, MergedEdge);
+
+                                }
+                                updateConnections(connections, N1,N2, MergedEdge);
+
+
+
+                            }
+                    }
+                }
+
+        }
+
+        System.out.println("TestEnd");
+    }
+
+    private void updateConnections(DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge>> connections, TopologyGraph.Node n1, TopologyGraph.Node n2, TopologyGraph.Edge mergedEdge) {
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nA = connections.getModel(n1);
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nB = connections.getModel(n2);
+        nA.update(n2, mergedEdge );
+        nB.update(n1,mergedEdge);
+        connections.update(n1,nA);
+        connections.update(n2,nB);
+    }
+
+    private TopologyGraph.Edge getGivenEdge(TopologyGraph.Node n1, DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge>> connections) {
+
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> currentResult = connections.getModel(n1);
+        if(currentResult.getAll().isEmpty()) return retrieveFirstEdge(n1);
+        else {
+            return new ArrayList<>(currentResult.getAll()).get(0);
+        }
+    }
+
+    private void initconnections(DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge>> connections, ArrayList<TopologyGraph.Node> unConnectedNodes) {
+        for(TopologyGraph.Node N : unConnectedNodes) {
+            connections.update(N, new DefaultRepo<>());
+        }
+    }
+
+    /*private void connectEdgesAndRemoveOldEdges(TopologyGraph.Node n1, TopologyGraph.Node n2, TopologyGraph TG,
+                                              ArrayList<TopologyGraph.Node> notConnectedNodes) {
+ TopologyGraph.Edge E1 = retrieveFirstEdge(n1);
+        TopologyGraph.Edge E2 = retrieveFirstEdge(n2);
+        TopologyGraph.Node NewN1 = null;
+        TopologyGraph.Node NewN2 = null;
+
+        if (E1.A.equals(n1)) {
+            NewN1 = E1.B;
+        } else {
+            NewN1 = E1.A;
+        }
+        if (E2.A.equals(n2)) {
+            NewN2 = E2.B;
+        } else {
+            NewN2 = E2.A;
+        }
+
+
+        TopologyConnect TC1 = retrieveTopologyConnectNotBeeingEnd(E1);
+        TopologyConnect TC2 = retrieveTopologyConnectNotBeeingEnd(E2);
+        if (TC1 == null && TC2 == null) {
+            throw new InvalidParameterException("TC1 and TC2 not connected directly");
+        }
+        if (TC1 == null) {
+            TC1 = TopologyConnect.ENDE_BESTDIG;
+
+        }
+        if (TC2 == null) {
+            TC2 = TopologyConnect.ENDE_BESTDIG;
+
+        }
+
+
+        TopologyGraph.Edge MergeEdge = merge(n1, n2, TG, notConnectedNodes, E1, E2, NewN1, NewN2, TC1, TC2);
+
+        if (TC1.equals(TopologyConnect.ENDE_BESTDIG)) {
+            mergeAgain(n1, TG, notConnectedNodes, NewN1, MergeEdge);
+        } else if (TC2.equals(TopologyConnect.ENDE_BESTDIG)) {
+            mergeAgain(n2,TG, notConnectedNodes, NewN2,MergeEdge);
+        }
+
+        notConnectedNodes.remove(n1);
+        notConnectedNodes.remove(n2);
+
+
+
+
+
+    }
+*/
+    private void mergeAgain(TopologyGraph.Node n1, TopologyGraph TG, ArrayList<TopologyGraph.Node> notConnectedNodes, TopologyGraph.Node NewN1, TopologyGraph.Edge MergeEdge) {
+        TopologyGraph.Node NewN2;
+        TopologyConnect TC2;
+        TopologyConnect TC1;
+        notConnectedNodes.remove(n1);
+        ArrayList<TopologyGraph.Node> newConnections = new ArrayList(notConnectedNodes);
+        for(TopologyGraph.Node NotConnectNode : newConnections) {
+            if(NewN1.equals(NotConnectNode)) continue;
+            if(isSamePosition(NewN1,NotConnectNode)) {
+                TopologyGraph.Edge EndingEdge = retrieveNextEdge(NotConnectNode);
+                if (EndingEdge.A.equals(NotConnectNode)) {
+                    NewN2 = EndingEdge.B;
+                } else {
+                    NewN2 = EndingEdge.A;
+                }
+                TC1 = retrieveTopologyConnectNotBeeingEnd(MergeEdge);
+                TC2 = retrieveTopologyConnectNotBeeingEnd(EndingEdge);
+                merge(NewN1, NotConnectNode, TG, newConnections, MergeEdge,
+                        EndingEdge, n1, NewN2,  TC1, TC2);
+
+                return;
+            }
+        }
+    }
+
+    private TopologyGraph.Edge retrieveNextEdge(TopologyGraph.Node notConnectNode) {
+        ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(notConnectNode.inEdges);
+        edgeList.addAll(notConnectNode.outEdges);
+        for(TopologyGraph.Edge E : edgeList) {
+            if (!E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG)) return E;
+            if (!E.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) return E;
+
+        }
+        throw new InvalidParameterException("Edge not found");
+    }
+
+    private TopologyGraph.Edge merge(TopologyGraph.Node n1, TopologyGraph.Node n2, TopologyGraph TG, ArrayList<TopologyGraph.Node> notConnectedNodes, TopologyGraph.Edge E1, TopologyGraph.Edge E2, TopologyGraph.Node NewN1, TopologyGraph.Node NewN2, TopologyConnect TC1, TopologyConnect TC2) {
+        TopologyGraph.Edge MergedEdge = new TopologyGraph.Edge(NewN1, TC1, NewN2, TC2, E1.getPlanProEdge(), E2.getPlanProEdge());
+        handleMergedNodes(MergedEdge, E1, E2);
+
+
+        for (String sPlanProEdgeId : MergedEdge.getPlanProIds()) {
+            TG.edgeRepo.put(sPlanProEdgeId, MergedEdge);
+
+        }
+        return MergedEdge;
+    }
+
+    private void handleMergedNodes(TopologyGraph.Edge mergedEdge, TopologyGraph.Edge e1, TopologyGraph.Edge e2) {
+        mergedEdge.mergedNodes.addAll(e1.mergedNodes);
+        mergedEdge.mergedNodes.addAll(e2.mergedNodes);
+        if(!e1.A.equals(mergedEdge.A) && !e1.A.equals((mergedEdge.B))) mergedEdge.mergedNodes.add(e1.A);
+        if(!e1.B.equals(mergedEdge.A) && !e1.B.equals((mergedEdge.B))) mergedEdge.mergedNodes.add(e1.B);
+        if(!e2.A.equals(mergedEdge.A) && !e2.A.equals((mergedEdge.B))) mergedEdge.mergedNodes.add(e2.A);
+        if(!e2.B.equals(mergedEdge.A) && !e2.B.equals((mergedEdge.B))) mergedEdge.mergedNodes.add(e2.B);
+
+
+    }
+
+    /*private void rekursiveMerge(TopologyGraph.Node n1, TopologyGraph.Node n2, TopologyGraph TG, TopologyGraph.Edge E1, TopologyGraph.Edge E2, TopologyConnect TC) {
+        TopologyGraph.Edge MergedEdge = new TopologyGraph.Edge(n1, TopologyConnect.ENDE_BESTDIG, n2, TC, E1.getPlanProEdge(), E2.getPlanProEdge() );
+        TG.edgeRepo.put(MergedEdge.getPlanProId(), MergedEdge);
+        connectEdgesAndRemoveOldEdges(n1, n2, TG, connectedNodes);
+    }*/
+
+    private TopologyConnect retrieveTopologyConnectNotBeeingEnd(TopologyGraph.Edge e) {
+        if(e.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG) && e.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG))
+            return null;
+        if(e.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) return e.TopConnectFromB;
+        if(e.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG)) return e.TopConnectFromA;
+        return null;
+    }
+
+    private TopologyGraph.Edge retrieveFirstEdge(TopologyGraph.Node n) {
+        for(TopologyGraph.Edge E : n.inEdges)
+            return E;
+        for(TopologyGraph.Edge E : n.outEdges)
+            return E;
+        return null;
+    }
+
+    private boolean isSamePosition(TopologyGraph.Node n1, TopologyGraph.Node n2) {
+        BigDecimal x1 = BigDecimal.valueOf(n1.getGeoCoordinates().getX());
+        BigDecimal x2 = BigDecimal.valueOf(n2.getGeoCoordinates().getX());
+        BigDecimal y1 = BigDecimal.valueOf(n1.getGeoCoordinates().getY());
+        BigDecimal y2 = BigDecimal.valueOf(n2.getGeoCoordinates().getY());
+        if(x1.subtract(x2).abs().compareTo(new BigDecimal(1)) > 0) return false;
+        if(y1.subtract(y2).abs().compareTo(new BigDecimal(1)) > 0) return false;
+        return true;
 
     }
 
@@ -399,7 +635,8 @@ public class TopologyFactory implements ITopologyFactory {
 
 
             } catch(Exception Ex) {
-                geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+                Ex.printStackTrace();
+                //geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
             }
 
 

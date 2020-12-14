@@ -20,6 +20,8 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
+import de.ibw.util.DefaultRepo;
 import ebd.TescModul;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
@@ -602,7 +604,13 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
-        if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+
+
+
+        if(N == null) {
+            N = useTopFactory(e, PredecessorEdge);
+            if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+        }
 
         // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
         String sCheckIfdkwId = e.getRefId().replace("L", "").replace("R", "");
@@ -631,6 +639,25 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
+    }
+
+    private TopologyGraph.Node useTopFactory(TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge) {
+
+        DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> cons = TopologyFactory.connections;
+        TopologyGraph.Node nResult = null;
+        TopologyGraph.Edge E = null;
+        if(cons.getModel(e.A) != null) {
+            E = cons.getModel(e.A).getModel(predecessorEdge.A);
+            if(E == null) E = cons.getModel(e.A).getModel(predecessorEdge.B);
+
+
+        }
+        if(cons.getModel(e.B) != null) {
+            E = cons.getModel(e.B).getModel(predecessorEdge.A);
+            if(E == null) E = cons.getModel(e.B).getModel(predecessorEdge.A);
+            if(E != null) return e.B;
+        }
+        return null;
     }
 
     private boolean handleDkwLinkage(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {

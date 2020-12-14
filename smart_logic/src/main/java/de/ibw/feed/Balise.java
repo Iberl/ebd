@@ -67,6 +67,7 @@ public class Balise implements ICoord<Double> {
         try {
             String sKM = PlanProDataPoint.getPunktObjektStrecke().get(0).getStreckeKm().getWert();
             String sMeter = sKM.replace(".", "");
+            sMeter = sMeter.replace(",", "");
             return new BigDecimal(sMeter);
         } catch (Exception E) {
             E.printStackTrace();

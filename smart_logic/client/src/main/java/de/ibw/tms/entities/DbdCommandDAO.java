@@ -26,7 +26,7 @@ public class DbdCommandDAO {
 
     public Long lPriority;
 
-    @ElementCollection(targetClass=TrackElementStatus.Status.class)
+    @ElementCollection(fetch = FetchType.EAGER, targetClass=TrackElementStatus.Status.class)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "tesc_status", joinColumns =  @JoinColumn(name = "dbd_command_id"))
     @OrderColumn()

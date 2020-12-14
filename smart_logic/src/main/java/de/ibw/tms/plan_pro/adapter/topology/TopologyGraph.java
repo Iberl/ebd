@@ -14,6 +14,7 @@ import de.ibw.util.DefaultRepo;
 import org.apache.commons.lang3.NotImplementedException;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
+import plan_pro.modell.verweise._1_9_0.TCIDTOPKnoten;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -91,6 +92,8 @@ public class TopologyGraph {
         public static ArrayList<Node> nodesWithDigitalisedEnds =  new ArrayList<>();
 
 
+        public String sOldPlanProNodeId;
+
         /**
          * Knoten Bezeichnung
          */
@@ -119,7 +122,10 @@ public class TopologyGraph {
 
         private GeometricCoordinate geoCo = null;
 
-
+        @Override
+        public GeometricCoordinate getGeoCoordinates() {
+            return geoCo;
+        }
 
         /**
          * Konstruktur zur instanziierung eines Knoten
@@ -129,6 +135,7 @@ public class TopologyGraph {
          */
         public Node(String name, String topNodeId, GeometricCoordinate GeoCo) {
                 this.name = name;
+                this.sOldPlanProNodeId = topNodeId;
                 TopNodeId = topNodeId;
                 inEdges = new HashSet<Edge>();
                 outEdges = new HashSet<Edge>();
@@ -217,11 +224,12 @@ public class TopologyGraph {
      */
     public static class Edge extends TrackEdge implements IEdge {
 
+        /**
+         * PlanPro Edge
+         */
+        private CTOPKante PlanProEdge;
 
-
-
-
-            private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
+        private ArrayList<CGEOKante> paintListGeo = new ArrayList<>();
         /**
          * Knoten A der Kante
          */
@@ -241,15 +249,26 @@ public class TopologyGraph {
         /**
          * Kantenl&auml;nge in meter
          */
-            public final double dTopLength;
+
+        public double dTopLength;
         /**
-         * PlanPro KantenId
+         * Kanten Id nach Bahnschemata
          */
         @Expose
         public String sId;
 
+
+        public ArrayList<Node> mergedNodes = new ArrayList<>();
+
+        private ArrayList<String> planProIds = new ArrayList<>();
+
+        public ArrayList<String> getPlanProIds() {
+            return planProIds;
+        }
+
         /**
          * Diese Methode gibt an ob von Knotea A zum Knoten B dieser Kante in Streckenkilometrierung verl&auml;ft.
+         *
          * @return Boolean - gibt an ob Kante in Streckenorientierung
          */
         public Boolean isFromNodeAtoNodeBisInTrackDirection() {
@@ -257,7 +276,7 @@ public class TopologyGraph {
                 ICompareTrackMeter CSA = (ICompareTrackMeter) A.NodeImpl;
                 ICompareTrackMeter CSB = (ICompareTrackMeter) B.NodeImpl;
                 return CSA.thisHasLowerTrackMeter(CSB);
-            } catch(Exception E) {
+            } catch (Exception E) {
                 E.printStackTrace();
                 return null;
             }
@@ -277,26 +296,33 @@ public class TopologyGraph {
 
         }
 
+        public String getPlanProId() {
+            if (this.PlanProEdge == null) return null;
+            else return PlanProEdge.getIdentitaet().getWert();
+        }
 
         /**
          * Geographische Kanten dieser topologischen Kante
+         *
          * @return List - Geo-Kanten-Liste
          */
         public ArrayList<CGEOKante> getPaintListGeo() {
-                return paintListGeo;
+            return paintListGeo;
         }
 
         /**
          * Setzt die Geographische Kante dieser Topologischen Kante
+         *
          * @param paintListGeo - {@link List} - Geo-Kantenliste
          */
         public void setPaintListGeo(ArrayList<CGEOKante> paintListGeo) {
-                if(paintListGeo == null || paintListGeo.isEmpty()) throw new IllegalArgumentException("The list of geo edges is empty or null");
-                ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
-                ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
+            if (paintListGeo == null || paintListGeo.isEmpty())
+                throw new IllegalArgumentException("The list of geo edges is empty or null");
+            ArrayList<CGEOKante> remainingGeoEdges = new ArrayList<>(paintListGeo);
+            ArrayList<CGEOKante> sortedPaintListGeo = new ArrayList<>();
 
-                //TODO get Coordinate via implementation of node
-                GeometricCoordinate reference = (GeometricCoordinate) A.getGeoCoordinates();
+            //TODO get Coordinate via implementation of node
+            GeometricCoordinate reference = (GeometricCoordinate) A.getGeoCoordinates();
 
                 /*boolean b_fromA;
                 CGEOKante firstEdge = paintListGeo.get(0);
@@ -311,125 +337,173 @@ public class TopologyGraph {
 
                 int i = b_fromA ? 0 : paintListGeo.size();
                 for(; (b_fromA && i < paintListGeo.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {*/
-                for(int i = 0; i < paintListGeo.size(); i++) {
-                    CGEOKante edge = getNextGeoEdge(remainingGeoEdges, reference);
-                    remainingGeoEdges.remove(edge);
-                    GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
-                    GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
-
-                    if(reference.equals(nodeA)) {
-                        sortedPaintListGeo.add(edge);
-                        reference = nodeB;
-                    } else if(reference.equals(nodeB)){
-                        CGEOKante rotatedEdge = new CGEOKante();
-                        CGEOKanteAllg edgeGeneral = edge.getGEOKanteAllg();
-                        CGEOKanteAllg rotatedEdgeGeneral = new CGEOKanteAllg();
-
-                        rotatedEdgeGeneral.setGEOForm(edgeGeneral.getGEOForm());
-                        rotatedEdgeGeneral.setGEOLaenge(edgeGeneral.getGEOLaenge());
-
-                        if(edgeGeneral.getGEORadiusB() != null) {
-                            TCGEORadiusA newRadiusA = new TCGEORadiusA();
-                            newRadiusA.setWert(edgeGeneral.getGEORadiusB().getWert());
-                            rotatedEdgeGeneral.setGEORadiusA(newRadiusA);
-
-                            TCGEORadiusB newRadiusB = new TCGEORadiusB();
-                            newRadiusB.setWert(edgeGeneral.getGEORadiusA().getWert());
-                            rotatedEdgeGeneral.setGEORadiusB(newRadiusB);
-                        } else {
-                            rotatedEdgeGeneral.setGEORadiusA(edgeGeneral.getGEORadiusA());
-                            rotatedEdgeGeneral.setGEORadiusB(edgeGeneral.getGEORadiusB());
-                        }
-
-                        // TODO: Maybe Change Richtungswinkel
-                        rotatedEdgeGeneral.setGEORichtungswinkel(edgeGeneral.getGEORichtungswinkel());
-                        rotatedEdgeGeneral.setPlanQuelle(edgeGeneral.getPlanQuelle());
-                        rotatedEdge.setGEOKanteAllg(edge.getGEOKanteAllg());
-
-                        rotatedEdge.setIDGEOArt(edge.getIDGEOArt());
-                        rotatedEdge.setIDGEOKnotenA(edge.getIDGEOKnotenB());
-                        rotatedEdge.setIDGEOKnotenB(edge.getIDGEOKnotenA());
-                        sortedPaintListGeo.add(rotatedEdge);
-                        reference = nodeA;
-                    } else {
-                        throw new IllegalArgumentException("The list of geoedges is not in correct order");
-                    }
-
-                }
-
-                this.paintListGeo = sortedPaintListGeo;
-            }
-
-            private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeometricCoordinate reference) {
-                for(CGEOKante geoEdge : geoEdges) {
-                    if(pointLaysOnEdge(geoEdge, reference)) {
-                        return geoEdge;
-                    }
-                }
-                throw new IllegalArgumentException("No geo edge in given list starts at the reference point");
-            }
-
-            private boolean pointLaysOnEdge(CGEOKante edge, GeometricCoordinate point) {
+            for (int i = 0; i < paintListGeo.size(); i++) {
+                CGEOKante edge = getNextGeoEdge(remainingGeoEdges, reference);
+                remainingGeoEdges.remove(edge);
                 GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
                 GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
-                return point.equals(nodeA) || point.equals(nodeB);
+
+                if (reference.equals(nodeA)) {
+                    sortedPaintListGeo.add(edge);
+                    reference = nodeB;
+                } else if (reference.equals(nodeB)) {
+                    CGEOKante rotatedEdge = new CGEOKante();
+                    CGEOKanteAllg edgeGeneral = edge.getGEOKanteAllg();
+                    CGEOKanteAllg rotatedEdgeGeneral = new CGEOKanteAllg();
+
+                    rotatedEdgeGeneral.setGEOForm(edgeGeneral.getGEOForm());
+                    rotatedEdgeGeneral.setGEOLaenge(edgeGeneral.getGEOLaenge());
+
+                    if (edgeGeneral.getGEORadiusB() != null) {
+                        TCGEORadiusA newRadiusA = new TCGEORadiusA();
+                        newRadiusA.setWert(edgeGeneral.getGEORadiusB().getWert());
+                        rotatedEdgeGeneral.setGEORadiusA(newRadiusA);
+
+                        TCGEORadiusB newRadiusB = new TCGEORadiusB();
+                        newRadiusB.setWert(edgeGeneral.getGEORadiusA().getWert());
+                        rotatedEdgeGeneral.setGEORadiusB(newRadiusB);
+                    } else {
+                        rotatedEdgeGeneral.setGEORadiusA(edgeGeneral.getGEORadiusA());
+                        rotatedEdgeGeneral.setGEORadiusB(edgeGeneral.getGEORadiusB());
+                    }
+
+                    // TODO: Maybe Change Richtungswinkel
+                    rotatedEdgeGeneral.setGEORichtungswinkel(edgeGeneral.getGEORichtungswinkel());
+                    rotatedEdgeGeneral.setPlanQuelle(edgeGeneral.getPlanQuelle());
+                    rotatedEdge.setGEOKanteAllg(edge.getGEOKanteAllg());
+
+                    rotatedEdge.setIDGEOArt(edge.getIDGEOArt());
+                    rotatedEdge.setIDGEOKnotenA(edge.getIDGEOKnotenB());
+                    rotatedEdge.setIDGEOKnotenB(edge.getIDGEOKnotenA());
+                    sortedPaintListGeo.add(rotatedEdge);
+                    reference = nodeA;
+                } else {
+                    throw new IllegalArgumentException("The list of geoedges is not in correct order");
+                }
+
             }
 
-            private double getDistanceBetween(GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
-                double dx = Math.abs(nodeA.getX() - nodeB.getX());
-                double dy = Math.abs(nodeA.getY() - nodeB.getY());
-                return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            this.paintListGeo = sortedPaintListGeo;
+        }
+
+        private CGEOKante getNextGeoEdge(List<CGEOKante> geoEdges, GeometricCoordinate reference) {
+            for (CGEOKante geoEdge : geoEdges) {
+                if (pointLaysOnEdge(geoEdge, reference)) {
+                    return geoEdge;
+                }
             }
+            throw new IllegalArgumentException("No geo edge in given list starts at the reference point");
+        }
 
+        private boolean pointLaysOnEdge(CGEOKante edge, GeometricCoordinate point) {
+            GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenA().getWert());
+            GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(edge.getIDGEOKnotenB().getWert());
+            return point.equals(nodeA) || point.equals(nodeB);
+        }
 
+        private double getDistanceBetween(GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
+            double dx = Math.abs(nodeA.getX() - nodeB.getX());
+            double dy = Math.abs(nodeA.getY() - nodeB.getY());
+            return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        }
 
-
-
-            private CTOPKante PlanProEdge;
 
         /**
          * Gibt die Topologische Kante nach Definition in PlanPro wider
+         *
          * @return CTOPKante - PlanPro-Topologische-Kante
          */
         public CTOPKante getPlanProEdge() {
-                return PlanProEdge;
-            }
+            return PlanProEdge;
+        }
+
+        /**
+         * Merge Constructor
+         * @param A
+         * @param topConnectFromA
+         * @param B
+         * @param topConnectFromB
+         * @param planProEdgeA
+         * @param planProEdgeB
+         */
+        public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB,
+                    CTOPKante planProEdgeA, CTOPKante planProEdgeB) {
+
+            this.A = A;
+            TopConnectFromA = topConnectFromA;
+            this.B = B;
+            TopConnectFromB = topConnectFromB;
+            A.addEdge(B, this, topConnectFromA, topConnectFromB);
+            CTOPKante TakenOriginalEdge = planProEdgeA;
+            TCIDTOPKnoten IdNodeA = new TCIDTOPKnoten();
+            TCIDTOPKnoten IdNodeB = new TCIDTOPKnoten();
+            IdNodeA.setWert(A.sOldPlanProNodeId);
+            IdNodeB.setWert(B.sOldPlanProNodeId);
+            TakenOriginalEdge.setIDTOPKnotenA(IdNodeA);
+            TakenOriginalEdge.setIDTOPKnotenB(IdNodeB);
+            TCTOPLaenge TcLength = TakenOriginalEdge.getTOPKanteAllg().getTOPLaenge();
+            TcLength.setWert(planProEdgeA.getTOPKanteAllg().getTOPLaenge().getWert().add(planProEdgeB.getTOPKanteAllg().getTOPLaenge().getWert()));
+            CTOPKanteAllg CommonAttrb = TakenOriginalEdge.getTOPKanteAllg();
+            CommonAttrb.setTOPLaenge(TcLength);
+            TakenOriginalEdge.setTOPKanteAllg(CommonAttrb);
+            this.PlanProEdge = TakenOriginalEdge;
+            if(!this.planProIds.contains(planProEdgeA.getIdentitaet().getWert()))
+                this.planProIds.add(planProEdgeA.getIdentitaet().getWert());
+            if(!this.planProIds.contains(planProEdgeB.getIdentitaet().getWert()))
+                this.planProIds.add(planProEdgeB.getIdentitaet().getWert());
+            twoTopPointBelongsToEdgeRepo.removeKey(planProEdgeA.getIDTOPKnotenA().getWert());
+            twoTopPointBelongsToEdgeRepo.removeKey(planProEdgeA.getIDTOPKnotenB().getWert());
+            twoTopPointBelongsToEdgeRepo.removeKey(planProEdgeB.getIDTOPKnotenA().getWert());
+            twoTopPointBelongsToEdgeRepo.removeKey(planProEdgeB.getIDTOPKnotenB().getWert());
+            setCommonEdgeValues(this.PlanProEdge);
+        }
+
 
         /**
          * Dieser Konstruktur instanziiert eine Topologische Kante
-         * @param A {@link Node} - Topologischer Knoten A
+         *
+         * @param A               {@link Node} - Topologischer Knoten A
          * @param topConnectFromA {@link TopologyConnect} - Verbindungsart an A (Rechts, Links, Spitze)
-         * @param B {@link Node} - Topologischer Knoten B
+         * @param B               {@link Node} - Topologischer Knoten B
          * @param topConnectFromB {@link TopologyConnect} - Verbindungsart an B (Rechts, Links, Spitze)
-         * @param Edge - {@link CTOPKante} - PlanPro-Modell dieser Kante
+         * @param Edge            - {@link CTOPKante} - PlanPro-Modell dieser Kante
          */
-            public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB, CTOPKante Edge) {
-                this.A = A;
+        public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB, CTOPKante Edge) {
+            this.A = A;
 
-                TopConnectFromA = topConnectFromA;
-                this.B = B;
-                TopConnectFromB = topConnectFromB;
-                A.addEdge(B,this, topConnectFromA, topConnectFromB);
-                this.PlanProEdge = Edge;
-                this.sId = Edge.getIdentitaet().getWert();
-                this.dTopLength = Edge.getTOPKanteAllg().
-                        getTOPLaenge().getWert().doubleValue();
+            TopConnectFromA = topConnectFromA;
+            this.B = B;
+            TopConnectFromB = topConnectFromB;
+            A.addEdge(B, this, topConnectFromA, topConnectFromB);
+            this.PlanProEdge = Edge;
+            this.sId = Edge.getIdentitaet().getWert();
+            this.planProIds.add(Edge.getIdentitaet().getWert());
+            setCommonEdgeValues(Edge);
 
-                DefaultRepo<String, Edge> SecondPointToEdgeRepo = twoTopPointBelongsToEdgeRepo.getModel(Edge.getIDTOPKnotenA().getWert());
-                if(SecondPointToEdgeRepo == null) {
-                    SecondPointToEdgeRepo = new DefaultRepo<String, Edge>();
-                }
-                SecondPointToEdgeRepo.update(Edge.getIDTOPKnotenB().getWert(), this);
-                twoTopPointBelongsToEdgeRepo.update(Edge.getIDTOPKnotenA().getWert(), SecondPointToEdgeRepo);
+        }
 
-                SecondPointToEdgeRepo = twoTopPointBelongsToEdgeRepo.getModel(Edge.getIDTOPKnotenB().getWert());
-                if(SecondPointToEdgeRepo == null) {
-                    SecondPointToEdgeRepo = new DefaultRepo<String, Edge>();
-                }
-                SecondPointToEdgeRepo.update(Edge.getIDTOPKnotenA().getWert(), this);
-                twoTopPointBelongsToEdgeRepo.update(Edge.getIDTOPKnotenB().getWert(), SecondPointToEdgeRepo);
+        private void setCommonEdgeValues(CTOPKante Edge) {
 
+            this.dTopLength = Edge.getTOPKanteAllg().
+                    getTOPLaenge().getWert().doubleValue();
+
+            DefaultRepo<String, Edge> SecondPointToEdgeRepo = twoTopPointBelongsToEdgeRepo.getModel(Edge.getIDTOPKnotenA().getWert());
+            if(SecondPointToEdgeRepo == null) {
+                SecondPointToEdgeRepo = new DefaultRepo<String, Edge>();
             }
+            SecondPointToEdgeRepo.update(Edge.getIDTOPKnotenB().getWert(), this);
+            twoTopPointBelongsToEdgeRepo.update(Edge.getIDTOPKnotenA().getWert(), SecondPointToEdgeRepo);
+
+            SecondPointToEdgeRepo = twoTopPointBelongsToEdgeRepo.getModel(Edge.getIDTOPKnotenB().getWert());
+            if(SecondPointToEdgeRepo == null) {
+                SecondPointToEdgeRepo = new DefaultRepo<String, Edge>();
+            }
+            SecondPointToEdgeRepo.update(Edge.getIDTOPKnotenA().getWert(), this);
+            twoTopPointBelongsToEdgeRepo.update(Edge.getIDTOPKnotenB().getWert(), SecondPointToEdgeRepo);
+
+
+
+        }
 
         /**
          * Diese Method vergleicht zwei Kanten ob sie identisch sind
