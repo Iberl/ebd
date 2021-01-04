@@ -234,79 +234,103 @@ public class TopologyFactory implements ITopologyFactory {
 
     private void connectDigitalEndNodes(TopologyGraph TG) {
 
-        boolean bMergedSomething = true;
 
         ArrayList<TopologyGraph.Node> connectedNodes = new ArrayList<>();
         ArrayList<TopologyGraph.Node> unConnectedNodes = new ArrayList<>(TopologyGraph.Node.nodesWithDigitalisedEnds);
         initconnections(connections, unConnectedNodes);
-        while(bMergedSomething) {
-                bMergedSomething = false;
-                for(int i = 0; i < unConnectedNodes.size(); i++) {
-                    for(int j = 0; j < unConnectedNodes.size(); j++) {
-                        TopologyGraph.Node N1 = unConnectedNodes.get(i);
-                        TopologyGraph.Node N2 = unConnectedNodes.get(j);
-                        if(connections.getModel(N1).getModel(N2) != null) continue;
-                            if(N1.equals(N2)) continue;
-                            if(isSamePosition(N1,N2)) {
-                                bMergedSomething = true;
-                                TopologyGraph.Edge E1 = getGivenEdge(N1,connections);
-                                TopologyGraph.Edge E2 = getGivenEdge(N2,connections);
-                                TopologyGraph.Node NewN1 = null;
-                                TopologyGraph.Node NewN2 = null;
 
-                                if (E1.A.equals(N1)) {
-                                    NewN1 = E1.B;
-                                } else {
-                                    NewN1 = E1.A;
-                                }
-                                if (E2.A.equals(N2)) {
-                                    NewN2 = E2.B;
-                                } else {
-                                    NewN2 = E2.A;
-                                }
+        // break target when something connected
 
+            for (int i = 0; i < unConnectedNodes.size(); i++) {
+                for (int j = 0; j < unConnectedNodes.size(); j++) {
+                    if(handleUnconnectedNodes(TG, unConnectedNodes, i, j)) {
+                        // merged
 
-                                TopologyConnect TC1 = retrieveTopologyConnectNotBeeingEnd(E1);
-                                TopologyConnect TC2 = retrieveTopologyConnectNotBeeingEnd(E2);
-                                if (TC1 == null && TC2 == null) {
-                                    throw new InvalidParameterException("TC1 and TC2 not connected directly");
-                                }
-                                if (TC1 == null) {
-                                    TC1 = TopologyConnect.ENDE_BESTDIG;
-
-                                }
-                                if (TC2 == null) {
-                                    TC2 = TopologyConnect.ENDE_BESTDIG;
-
-                                }
-                                TopologyGraph.Edge MergedEdge = new TopologyGraph.Edge(NewN1, TC1, NewN2, TC2, E1.getPlanProEdge(), E2.getPlanProEdge());
-                                handleMergedNodes(MergedEdge, E1, E2);
-
-
-                                for (String sPlanProEdgeId : MergedEdge.getPlanProIds()) {
-                                    TG.edgeRepo.put(sPlanProEdgeId, MergedEdge);
-
-                                }
-                                updateConnections(connections, N1,N2, MergedEdge);
-
-
-
-                            }
+                        // start from begin
+                        i = 0;
+                        j = 0;
                     }
                 }
+            }
 
-        }
+
 
         System.out.println("TestEnd");
     }
 
+    private boolean handleUnconnectedNodes(TopologyGraph TG, ArrayList<TopologyGraph.Node> unConnectedNodes, int i, int j) {
+        TopologyGraph.Node N1 = unConnectedNodes.get(i);
+        TopologyGraph.Node N2 = unConnectedNodes.get(j);
+
+
+        if(N1.equals(N2)) return false;
+        if(isSamePosition(N1,N2)) {
+
+            TopologyGraph.Edge E1 = getGivenEdge(N1,connections);
+            TopologyGraph.Edge E2 = getGivenEdge(N2,connections);
+            TopologyGraph.Node NewN1 = null;
+            TopologyGraph.Node NewN2 = null;
+
+            if (E1.A.equals(N1)) {
+                NewN1 = E1.B;
+            } else {
+                NewN1 = E1.A;
+            }
+            if (E2.A.equals(N2)) {
+                NewN2 = E2.B;
+            } else {
+                NewN2 = E2.A;
+            }
+
+
+            TopologyConnect TC1 = retrieveTopologyConnectNotBeeingEnd(E1);
+            TopologyConnect TC2 = retrieveTopologyConnectNotBeeingEnd(E2);
+            if (TC1 == null && TC2 == null) {
+                throw new InvalidParameterException("TC1 and TC2 not connected directly");
+            }
+            if (TC1 == null) {
+                TC1 = TopologyConnect.ENDE_BESTDIG;
+                unConnectedNodes.add(NewN1);
+            }
+            if (TC2 == null) {
+                TC2 = TopologyConnect.ENDE_BESTDIG;
+                unConnectedNodes.add(NewN2);
+            }
+            TopologyGraph.Edge MergedEdge = new TopologyGraph.Edge(NewN1, TC1, NewN2, TC2, E1.getPlanProEdge(), E2.getPlanProEdge());
+            unConnectedNodes.remove(N1);
+            unConnectedNodes.remove(N2);
+            handleMergedNodes(MergedEdge, E1, E2);
+
+
+            for (String sPlanProEdgeId : MergedEdge.getPlanProIds()) {
+                TG.edgeRepo.put(sPlanProEdgeId, MergedEdge);
+
+            }
+            updateConnections(connections, N1,N2, MergedEdge);
+            return true;
+        }
+        return false;
+    }
+
+
     private void updateConnections(DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge>> connections, TopologyGraph.Node n1, TopologyGraph.Node n2, TopologyGraph.Edge mergedEdge) {
-        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nA = connections.getModel(n1);
-        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nB = connections.getModel(n2);
-        nA.update(n2, mergedEdge );
-        nB.update(n1,mergedEdge);
-        connections.update(n1,nA);
-        connections.update(n2,nB);
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nA = new DefaultRepo<>();
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> nB = new DefaultRepo<>();
+
+        // remove old connection
+        connections.removeKey(n1);
+        connections.removeKey(n2);
+
+
+        // prepare one Node of merged-edge
+        nA.update(mergedEdge.A, mergedEdge);
+        nB.update(mergedEdge.B, mergedEdge);
+
+        // mark connection from A to B of merged Edge
+        // link connection for each directin A -> B and B -> A
+        connections.update(mergedEdge.B, nA);
+        connections.update(mergedEdge.A, nB);
+
     }
 
     private TopologyGraph.Edge getGivenEdge(TopologyGraph.Node n1, DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge>> connections) {

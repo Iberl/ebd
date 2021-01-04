@@ -22,10 +22,10 @@ public class TranslationModel {
         private static TrackplanEnvironment P_HausenEnv = new TrackplanEnvironment(PHausen, new ZoomModel(),
                 "customised/test_pHausen_l1.ppxml");
 
-        private static TrackplanEnvironment MartinsteinEnv = new
-                TrackplanEnvironment(EBD, new ZoomModel(),"customised/EBD_Martinstein_24_06V3.ppxml" );
+        private static TrackplanEnvironment MartinsteinEnv =
+                new TrackplanEnvironment(EBD, new ZoomModel(),"customised/EBD_Martinstein_24_06V3.ppxml" );
         private static TrackplanEnvironment KaefWilhelmstalEnv =
-                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/KaefWilhelmstal1211.ppxml");
+                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/IS_WI_1712.ppxml");
 
 
         private static TrackplanEnvironment EBDEnv = KaefWilhelmstalEnv;
