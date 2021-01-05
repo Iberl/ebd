@@ -350,10 +350,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         }
     }
 
-    private void connectDigitalEnds() {
 
-
-    }
 
     private void setEdges() {
         Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();

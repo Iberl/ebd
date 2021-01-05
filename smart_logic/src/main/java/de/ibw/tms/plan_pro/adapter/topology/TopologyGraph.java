@@ -12,6 +12,7 @@ import de.ibw.tms.plan_pro.adapter.topology.intf.INode;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.ICompareTrackMeter;
 import de.ibw.util.DefaultRepo;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.verweise._1_9_0.TCIDTOPKnoten;
@@ -87,7 +88,23 @@ public class TopologyGraph {
     /**
      * Topologischer Knoten
      */
-    public static class Node extends ArrayList<PositionedRelation> implements INode {
+    public static class Node extends ArrayList<PositionedRelation> implements INode, Comparable<Node> {
+
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Node that = (Node) o;
+            return sOldPlanProNodeId.hashCode() == that.sOldPlanProNodeId.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(sOldPlanProNodeId);
+        }
 
         public static ArrayList<Node> nodesWithDigitalisedEnds =  new ArrayList<>();
 
@@ -202,20 +219,8 @@ public class TopologyGraph {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            if (!super.equals(o)) return false;
-            Node that = (Node) o;
-            return Objects.equals(name, that.name) &&
-                    Objects.equals(TopNodeId, that.TopNodeId) &&
-                    Objects.equals(NodeImpl, that.NodeImpl) &&
-                    Objects.equals(NodeType, that.NodeType);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(super.hashCode(), name, TopNodeId, NodeImpl, NodeType);
+        public int compareTo(@NotNull TopologyGraph.Node o) {
+            return this.TopNodeId.compareTo(o.TopNodeId);
         }
     }
 

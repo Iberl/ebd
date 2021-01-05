@@ -256,6 +256,11 @@ public class TopologyFactory implements ITopologyFactory {
 
 
         System.out.println("TestEnd");
+        for(DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> con : connections.getAll()) {
+            for(TopologyGraph.Node N : con.getKeys()) {
+                System.out.println(N.sOldPlanProNodeId);
+            }
+        }
     }
 
     private boolean handleUnconnectedNodes(TopologyGraph TG, ArrayList<TopologyGraph.Node> unConnectedNodes, int i, int j) {

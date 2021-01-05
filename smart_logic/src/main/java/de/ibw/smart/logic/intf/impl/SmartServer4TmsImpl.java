@@ -532,7 +532,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                     TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
 
                 if(i > 0) {
-                    addWaypoint(requestedTrackElementList, E);
+                    TePair = addWaypoint(requestedTrackElementList, E);
                 }
                 requestedTrackElementList.add(TePair);
 
@@ -573,7 +573,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return requestedTrackElementList;
     }
 
-    private void addWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
+    private Pair<Route.TrackElementType, ITopological> addWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
         if(requestedTrackElementList.isEmpty()) throw new InvalidParameterException("Predeceeding Edge is missing");
         TopologyGraph.Edge PredecessorEdge = getLastTrackEdge(requestedTrackElementList);
         TopologyGraph.Node N = null;
@@ -608,8 +608,36 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
         if(N == null) {
-            N = useTopFactory(e, PredecessorEdge);
-            if(N == null) throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+
+            PredecessorEdge = replaceEdgeByEdgeContainingDigitalEnd(PredecessorEdge);
+            e = replaceEdgeByEdgeContainingDigitalEnd(e);
+            if(PredecessorEdge.A.equals(e.A) || PredecessorEdge.A.equals(e.B)) {
+                N = PredecessorEdge.A;
+                Predecessor_Connect = PredecessorEdge.TopConnectFromA;
+
+                if(PredecessorEdge.A.equals(e.A)) {
+                    E_Connect = e.TopConnectFromA;
+                } else {
+                    E_Connect = e.TopConnectFromB;
+                }
+            }
+            if(PredecessorEdge.B.equals(e.A) || PredecessorEdge.B.equals(e.B)) {
+                N = PredecessorEdge.B;
+                Predecessor_Connect = PredecessorEdge.TopConnectFromB;
+                if(PredecessorEdge.B.equals(e.A)) {
+                    E_Connect = e.TopConnectFromA;
+                } else {
+                    E_Connect = e.TopConnectFromB;
+                }
+            }
+
+
+
+            if(N == null) {
+                System.err.println();
+                throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+            }
+
         }
 
         // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
@@ -618,7 +646,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(sCheckIfdkwId);
         if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
             // DKW Waypoint added
-            return;
+            return new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, e);
         }
 
 
@@ -633,7 +661,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         TrackElementStatus TES = new TrackElementStatus();
 
         if (handleTrackElementStatusInsertingWaypoint(requestedTrackElementList, e, PredecessorEdge, E_Connect, Predecessor_Connect, SwitchElement, TES))
-            return;
+            return new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, e);
 
         throw new SmartLogicException("Waypoint has to be found, but cannot");
 
@@ -644,12 +672,27 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     private TopologyGraph.Node useTopFactory(TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge) {
 
         DefaultRepo<TopologyGraph.Node, DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> cons = TopologyFactory.connections;
+
+        TopologyGraph.Edge E1 = predecessorEdge;;
+        TopologyGraph.Edge E2 = e;
+
+        E1 = replaceEdgeByEdgeContainingDigitalEnd(E1);
+        E2 = replaceEdgeByEdgeContainingDigitalEnd(E2);
+        if(E1.B.equals(E2.A) || E1.B.equals(E2.B)) {
+
+           return E1.B;
+        }
+        if(E1.A.equals(E2.A) || E1.A.equals(E2.B)) {
+            return E1.A;
+        }
+        return null;
+        /*
         TopologyGraph.Node nResult = null;
         TopologyGraph.Edge E = null;
         if(cons.getModel(e.A) != null) {
             E = cons.getModel(e.A).getModel(predecessorEdge.A);
             if(E == null) E = cons.getModel(e.A).getModel(predecessorEdge.B);
-
+            if(E != null) return e.A;
 
         }
         if(cons.getModel(e.B) != null) {
@@ -658,6 +701,26 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             if(E != null) return e.B;
         }
         return null;
+
+        */
+
+    }
+
+    private TopologyGraph.Edge replaceEdgeByEdgeContainingDigitalEnd(TopologyGraph.Edge e) {
+        DefaultRepo<TopologyGraph.Node,DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> cons = TopologyFactory.connections;
+        TopologyGraph.Edge E1 = e;
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> connectionRepo = null;
+        System.out.println();
+        if(e.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG)) {
+            System.out.println(e.A.sOldPlanProNodeId);
+             connectionRepo =  cons.getModel(e.A);
+        } else if(e.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) {
+            System.out.println(e.B.sOldPlanProNodeId);
+            connectionRepo =  cons.getModel(e.B);
+        }
+        if(connectionRepo == null) return e;
+        E1 = connectionRepo.sortValues().get(0);
+        return E1;
     }
 
     private boolean handleDkwLinkage(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {
@@ -726,7 +789,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     private void insertWaypointInRouteRequested(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement switchElement, TrackElementStatus TES) {
         Waypoint W;
         W = new Waypoint(switchElement, TES);
-        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.getRefId(), e.sId);
+        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.getRefId(), e.getRefId());
         Pair<String, String> keyReverse = new ImmutablePair<>(e.getRefId(), predecessorEdge.getRefId());
         requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(key, W);
         requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(keyReverse, W);
