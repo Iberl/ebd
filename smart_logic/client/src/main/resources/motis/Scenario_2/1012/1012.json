@@ -1,0 +1,128 @@
+{
+    "data": {
+        "allAbbringerfahrtzuordnung": [],
+        "allFahrtabschnitt": [
+            {
+                "abfahrt": {
+                    "abfahrtid": "1012_1",
+                    "abfahrtort": {
+                        "bezeichnung": "3",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "abfahrtzeit": "2020-07-22T08:20:00+02:00",
+                    "abfahrtzeitstatus": "FAHRPLAN",
+                    "allAbfahrtzuordnung": [],
+                    "bedarfshalt": false,
+                    "fahrgastwechsel": true,
+                    "haltestelle": {
+                        "bezeichnung": "K\u00e4fertal",
+                        "evanummer": "9000002",
+                        "haltestelleid": "",
+                        "rl100": "ZDK"
+                    },
+                    "planabfahrtort": {
+                        "bezeichnung": "3",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "planabfahrtzeit": "2020-07-22T08:20:00+02:00",
+                    "zusatzhalt": false
+                },
+                "allVereinigtmit": [],
+                "ankunft": {
+                    "allAnkunftzuordnung": [],
+                    "ankunftid": "",
+                    "ankunftort": {
+                        "bezeichnung": "3",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "ankunftzeit": "2020-24-22T08:24:45+02:00",
+                    "ankunftzeitstatus": "FAHRPLAN",
+                    "bedarfshalt": false,
+                    "fahrgastwechsel": true,
+                    "haltestelle": {
+                        "bezeichnung": "K\u00e4fertal",
+                        "evanummer": "9000002",
+                        "haltestelleid": "",
+                        "rl100": "ZDK"
+                    },
+                    "planankunftort": {
+                        "bezeichnung": "3",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "planankunftzeit": "2020-24-22T08:24:45+02:00",
+                    "zusatzhalt": false
+                },
+                "fahrtbezeichnung": "S 1012",
+                "fahrtname": "",
+                "fahrtnummer": "1012",
+                "gattungid": "",
+                "linieid": "",
+                "verwaltungid": "80"
+            }
+        ],
+        "allGattung": [
+            {
+                "code": "S",
+                "gattungid": "",
+                "name": "S-Bahn"
+            }
+        ],
+        "allLinie": [
+            {
+                "linieid": "",
+                "name": "S 1"
+            }
+        ],
+        "allVerwaltung": [
+            {
+                "betreiber": {
+                    "code": "---",
+                    "name": "DB"
+                },
+                "verwaltungid": "80"
+            }
+        ],
+        "allZubringerfahrtzuordnung": [],
+        "fahrtid": "",
+        "fahrtrelation": {
+            "startfahrtnummer": "1012",
+            "startgattung": "S",
+            "starthaltestelle": {
+                "bezeichnung": "K\u00e4fertal",
+                "evanummer": "9000002",
+                "haltestelleid": "",
+                "rl100": "ZDK"
+            },
+            "startlinie": "",
+            "startverwaltung": "80",
+            "startzeit": "2020-07-22T08:20:00+02:00",
+            "zielhaltestelle": {
+                "bezeichnung": "Wilhelmstal",
+                "evanummer": "9000001",
+                "haltestelleid": "",
+                "rl100": "ZDW"
+            },
+            "zielzeit": "2020-24-22T08:24:45+02:00"
+        },
+        "fahrttyp": "PLANFAHRT",
+        "kategorie": "SOLL",
+        "planstarttag": "2020-07-22",
+        "verkehrstag": "2020-07-22",
+        "zielzeit": "2020-24-22T08:24:45+02:00"
+    },
+    "meta": {
+        "correlation": [
+            ""
+        ],
+        "created": "-",
+        "format": "RIPL",
+        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "owner": "ri",
+        "sequence": 1595423025160,
+        "version": "v3"
+    }
+}

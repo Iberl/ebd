@@ -5,8 +5,6 @@ import de.ibw.handler.ClientHandler;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.intf.SmartClient;
-
-
 import ebd.SlConfigHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.slf4j.Logger;
