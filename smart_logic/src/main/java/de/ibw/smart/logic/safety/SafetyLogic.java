@@ -40,6 +40,7 @@ import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 
+import static de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl.SMART_SERVER_MA_MODUL;
 import static de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
@@ -58,10 +59,7 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -73,7 +71,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-11-13
+ * @since 2021-01-12
  */
 public class SafetyLogic {
     /**
@@ -146,6 +144,42 @@ public class SafetyLogic {
      */
     private volatile ThreadedRepo<Integer, List<Occupation>> blockList = new ThreadedRepo<>();
 
+    private volatile ThreadedRepo<UUID, List<Occupation>> blockListByMa = new ThreadedRepo<>();
+
+    /**
+     * Entferne für ZugId alle Blockaden
+     * Methode zur TimeoutRemoval ein Workaraound
+     * @param iTrain - Zugnummer die alle Blockaden nicht mehr beansprucht
+     */
+    public void removeOccupationsOfTrain(int iTrain) {
+        blockList.removeKey(iTrain);
+    }
+
+    /**
+     * reseverd MA of current Ma communicated by tms is written as blocked for all furhter MaRequest
+     * @param communicationID UUID - communicationID of the MA-Request
+     * @param trainId - Integer - Id of Train the MA-Request is refering to
+     *
+     *          !!!!sollte eigentlich einen Merge prüfen!!!!
+     *                wird als abkürzung angenommen das der aktuelle Request alle notwendigen Blockaden
+     *                untersucht hat
+     *
+     */
+    public void transferMaRequestBlockListIntoRealBlockList(UUID communicationID, int trainId) {
+
+        List<Occupation> occupationInMaRequestOfUUID = blockListByMa.getModel(communicationID);
+        //uncomment if and blocklist beneath
+        //if(occupationInMaRequestOfUUID == null) throw new InvalidParameterException("UUID is not mapped");
+        // merge is needed in later steps
+        //blockList.update(trainId, occupationInMaRequestOfUUID);
+
+    }
+
+    public void removeOccupationOfCommunication(UUID communicationId) {
+        blockListByMa.removeKey(communicationId);
+    }
+
+
     /**
      * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
      * @param iTrainId - nid-engineId des angeforderten Zuges
@@ -179,7 +213,9 @@ public class SafetyLogic {
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter, ComposedRoute requestedTrackElementList) {
+    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter,
+                                                         ComposedRoute requestedTrackElementList,
+                                                         UUID comminicationUUID) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
         int iQ_DirLrbg = -1;
@@ -190,6 +226,8 @@ public class SafetyLogic {
         BigDecimal dSumOfWholeMaTrack = new BigDecimal("0");
 
         MARequestOccupation MAO = generateMAOcupation(iTrainId, requestedTrackElementList, R);
+        EBM.log("Requested MA Occupation has length of " + MAO.getMeterLength().toString() + " (m).", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
         List<MTERouteOccupation> mteOccupations = Collections.synchronizedList(generateMTEOcc(requestedTrackElementList));
 
         toBlock.add(MAO);
@@ -297,7 +335,7 @@ public class SafetyLogic {
 
 
 
-            blockList.update(iTrainId, toBlock);
+            blockListByMa.update(comminicationUUID, toBlock);
 
 
 

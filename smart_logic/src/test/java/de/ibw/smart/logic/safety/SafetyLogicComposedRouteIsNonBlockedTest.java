@@ -25,6 +25,7 @@ import org.mockito.Spy;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -98,7 +99,7 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
     /**
      * Pr&uuml;ft ob Smart-Logic zwei uberlappende MAs auf einem Streckenabschnitt erkennt.
      */
-
+    @Deprecated
     public void checkIfTracksAreBlockedByTwoTrainsOnSameTrack() throws InterruptedException {
         this.initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke
@@ -220,8 +221,8 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
-        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST), "The first request must not have blockage");
-        assertFalse(Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST), "The second request have to have a blockage");
+        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
+        assertFalse(Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID()),"The second request have to have a blockage");
 
     }
 
@@ -232,6 +233,7 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
      * Es entsteht keine &Uuml;berlappung.
      * @throws InterruptedException
      */
+    @Deprecated
     @RepeatedTest(100)
     public void checkIfTwoTrainsNonIntersectingOnSameTrailAreSafe() throws InterruptedException {
         this.initTestEnv();
@@ -379,8 +381,8 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
-        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST), "The first request must not have blockage");
-        boolean isSuccess = Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST);
+        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
+        boolean isSuccess = Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID());
         if(isSuccess) {
 
         } else {

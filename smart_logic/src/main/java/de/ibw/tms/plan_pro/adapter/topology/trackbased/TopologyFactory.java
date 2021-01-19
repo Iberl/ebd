@@ -601,35 +601,7 @@ public class TopologyFactory implements ITopologyFactory {
                 if(isAMissing && isBMissing) {
                     throw new InvalidParameterException("Both Topology Nodes are End-Nodes");
                 } else if (!isAMissing && !isBMissing) {
-                    CrossingSwitch CSA = (CrossingSwitch) E.A.NodeImpl;
-                    CrossingSwitch CSB = (CrossingSwitch) E.B.NodeImpl;
-                    BigDecimal decA = CSA.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
-                    BigDecimal decB = CSB.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
-
-                    BigDecimal decDistanceFromA = null;
-
-
-                    if(decA.compareTo(decB) < 0) {
-
-                        // not beachten die Balise befindet sich nicht zwischen a und b
-                        if(!(decA.compareTo(decBalise) < 0 && decBalise.compareTo(decB) < 0)) throw new InvalidParameterException("Invalid Balise Data");
-
-                        decDistanceFromA = decBalise.subtract(decA);
-
-
-
-                    } else {
-                        // not beachten die Balise befindet sich nicht zwischen a und b
-                        if(!(decB.compareTo(decBalise) < 0 && decBalise.compareTo(decA) < 0)) throw new InvalidParameterException("Invalid Balise Data");
-
-                        decDistanceFromA = decA.subtract(decBalise);
-
-
-
-                    }
-
-                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
-
+                    bothMissing(B, TopKante, E, decBalise);
 
 
                 } else {
@@ -690,6 +662,39 @@ public class TopologyFactory implements ITopologyFactory {
         Balise.baliseByNid_bg = tempBalises;
 
     }
+    @Deprecated
+    private void bothMissing(Balise B, CTOPKante TopKante, TopologyGraph.Edge E, BigDecimal decBalise) {
+        GeometricCoordinate geoCoordinate;
+        CrossingSwitch CSA = (CrossingSwitch) E.A.NodeImpl;
+        CrossingSwitch CSB = (CrossingSwitch) E.B.NodeImpl;
+        BigDecimal decA = CSA.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+        BigDecimal decB = CSB.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+
+        BigDecimal decDistanceFromA = null;
+
+
+        if(decA.compareTo(decB) < 0) {
+
+            // not beachten die Balise befindet sich nicht zwischen a und b
+            if(!(decA.compareTo(decBalise) < 0 && decBalise.compareTo(decB) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+            decDistanceFromA = decBalise.subtract(decA);
+
+
+
+        } else {
+            // not beachten die Balise befindet sich nicht zwischen a und b
+            if(!(decB.compareTo(decBalise) < 0 && decBalise.compareTo(decA) < 0)) throw new InvalidParameterException("Invalid Balise Data");
+
+            decDistanceFromA = decA.subtract(decBalise);
+
+
+
+        }
+
+        geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
+    }
+
     private void printBaliseInfo(Balise B, CDatenpunkt DP, CTOPKante topKante, GeometricCoordinate geo_A, GeometricCoordinate geo_B) {
         System.out.println("Nid-Bg: " + B.getHashcodeOfBaliseDp());
         System.out.println("TopKante-ID: " + topKante.getIdentitaet().getWert());

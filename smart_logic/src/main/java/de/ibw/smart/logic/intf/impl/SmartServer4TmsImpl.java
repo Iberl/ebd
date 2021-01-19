@@ -286,7 +286,13 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
         }
-        bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList);
+        bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList, uuid);
+        // allways unblock workaround
+
+        // !Warning instable workaround WARNING
+        bIsOccupatonFree = true;
+        // PLEASE CHANGE above Line
+
         // speed segments decission
         // gradient segments decission
         // Ma sections
@@ -398,10 +404,12 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
+            Safety.transferMaRequestBlockListIntoRealBlockList(uuid, iTrainId);
             MaReturnPayload.setMaSuccessfull(uuid);
             PositionModul.getInstance().updateCurrentRoute(nid_engine_Id, requestedTrackElementList);
             sendMaResponseToTMS(MaReturnPayload, 3L);
         } else {
+            Safety.removeOccupationOfCommunication(uuid);
             MaReturnPayload.setErrorState(uuid,true, NO_ACK);
             sendMaResponseToTMS(MaReturnPayload, 2L);
         }

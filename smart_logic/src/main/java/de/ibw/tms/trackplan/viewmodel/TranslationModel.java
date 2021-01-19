@@ -25,7 +25,7 @@ public class TranslationModel {
         private static TrackplanEnvironment MartinsteinEnv =
                 new TrackplanEnvironment(EBD, new ZoomModel(),"customised/EBD_Martinstein_24_06V3.ppxml" );
         private static TrackplanEnvironment KaefWilhelmstalEnv =
-                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/IS_WI_1712.ppxml");
+                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/CR_Szenario1.ppxml");
 
 
         private static TrackplanEnvironment EBDEnv = KaefWilhelmstalEnv;

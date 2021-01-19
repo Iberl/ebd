@@ -6,7 +6,7 @@
                 "abfahrt": {
                     "abfahrtid": "2011_1",
                     "abfahrtort": {
-                        "bezeichnung": "2",
+                        "bezeichnung": "4",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
@@ -16,13 +16,13 @@
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
-                        "bezeichnung": "K\u00e4fertal",
-                        "evanummer": "9000002",
-                        "haltestelleid": "",
-                        "rl100": "ZDK"
+                        "bezeichnung": "Wilhelmstal",
+                        "evanummer": "9000001",
+                        "haltestelleid": "de:20001:9000001",
+                        "rl100": "ZDW"
                     },
                     "planabfahrtort": {
-                        "bezeichnung": "2",
+                        "bezeichnung": "4",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
@@ -32,9 +32,9 @@
                 "allVereinigtmit": [],
                 "ankunft": {
                     "allAnkunftzuordnung": [],
-                    "ankunftid": "",
+                    "ankunftid": "2011_2",
                     "ankunftort": {
-                        "bezeichnung": "5",
+                        "bezeichnung": "1",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
@@ -43,13 +43,13 @@
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
-                        "bezeichnung": "Wilhelmstal",
-                        "evanummer": "9000001",
-                        "haltestelleid": "",
-                        "rl100": "ZDW"
+                        "bezeichnung": "K\u00e4fertal",
+                        "evanummer": "9000002",
+                        "haltestelleid": "de:20002:9000002",
+                        "rl100": "ZDK"
                     },
                     "planankunftort": {
-                        "bezeichnung": "5",
+                        "bezeichnung": "1",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
@@ -59,52 +59,52 @@
                 "fahrtbezeichnung": "RE 2011",
                 "fahrtname": "",
                 "fahrtnummer": "2011",
-                "gattungid": "",
-                "linieid": "",
+                "gattungid": "RB.219",
+                "linieid": "RB.1",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "RE",
-                "gattungid": "",
+                "gattungid": "RB.219",
                 "name": "Regionalexpress"
             }
         ],
         "allLinie": [
             {
-                "linieid": "",
+                "linieid": "RB.1",
                 "name": "RE 1"
             }
         ],
         "allVerwaltung": [
             {
                 "betreiber": {
-                    "code": "---",
+                    "code": "DBRegio",
                     "name": "DB"
                 },
                 "verwaltungid": "80"
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "",
+        "fahrtid": "RB.20.2011.1",
         "fahrtrelation": {
             "startfahrtnummer": "2011",
             "startgattung": "RE",
             "starthaltestelle": {
-                "bezeichnung": "K\u00e4fertal",
-                "evanummer": "9000002",
-                "haltestelleid": "",
-                "rl100": "ZDK"
+                "bezeichnung": "Wilhelmstal",
+                "evanummer": "9000001",
+                "haltestelleid": "de:20001:9000001",
+                "rl100": "ZDW"
             },
-            "startlinie": "",
+            "startlinie": "RE 1",
             "startverwaltung": "80",
             "startzeit": "2020-07-22T08:09:00+02:00",
             "zielhaltestelle": {
-                "bezeichnung": "Wilhelmstal",
-                "evanummer": "9000001",
-                "haltestelleid": "",
-                "rl100": "ZDW"
+                "bezeichnung": "K\u00e4fertal",
+                "evanummer": "9000002",
+                "haltestelleid": "de:20002:9000002",
+                "rl100": "ZDK"
             },
             "zielzeit": "2020-07-22T08:12:50+02:00"
         },
@@ -116,9 +116,9 @@
     },
     "meta": {
         "correlation": [
-            ""
+            "Scenario3.2011"
         ],
-        "created": "-",
+        "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",
         "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
         "owner": "ri",

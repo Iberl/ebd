@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "",
+                        "haltestelleid": "de:20001:9000001",
                         "rl100": "ZDW"
                     },
                     "planabfahrtort": {
@@ -32,20 +32,20 @@
                 "allVereinigtmit": [],
                 "ankunft": {
                     "allAnkunftzuordnung": [],
-                    "ankunftid": "",
+                    "ankunftid": "1011_2",
                     "ankunftort": {
                         "bezeichnung": "3",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-04-22T08:04:45+02:00",
+                    "ankunftzeit": "2020-07-22T08:04:45+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "",
+                        "haltestelleid": "de:20002:9000002",
                         "rl100": "ZDK"
                     },
                     "planankunftort": {
@@ -53,48 +53,48 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-04-22T08:04:45+02:00",
+                    "planankunftzeit": "2020-07-22T08:04:45+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "S 1011",
                 "fahrtname": "",
                 "fahrtnummer": "1011",
-                "gattungid": "",
-                "linieid": "",
+                "gattungid": "S.423",
+                "linieid": "S1.0",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "S",
-                "gattungid": "",
+                "gattungid": "S.423",
                 "name": "S-Bahn"
             }
         ],
         "allLinie": [
             {
-                "linieid": "",
-                "name": "S 1"
+                "linieid": "S1.0",
+                "name": "S1"
             }
         ],
         "allVerwaltung": [
             {
                 "betreiber": {
-                    "code": "---",
+                    "code": "DBRegio",
                     "name": "DB"
                 },
                 "verwaltungid": "80"
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "",
+        "fahrtid": "S1.1011.1",
         "fahrtrelation": {
             "startfahrtnummer": "1011",
             "startgattung": "S",
             "starthaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "",
+                "haltestelleid": "de:20001:9000001",
                 "rl100": "ZDW"
             },
             "startlinie": "S1",
@@ -103,22 +103,22 @@
             "zielhaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "",
+                "haltestelleid": "de:20002:9000002",
                 "rl100": "ZDK"
             },
-            "zielzeit": "2020-04-22T08:04:45+02:00"
+            "zielzeit": "2020-07-22T08:04:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
         "planstarttag": "2020-07-22",
         "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-04-22T08:04:45+02:00"
+        "zielzeit": "2020-07-22T08:04:45+02:00"
     },
     "meta": {
         "correlation": [
-            ""
+            "Scenario2.1011"
         ],
-        "created": "-",
+        "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",
         "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
         "owner": "ri",

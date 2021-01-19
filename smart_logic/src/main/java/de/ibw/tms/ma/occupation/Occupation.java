@@ -49,6 +49,8 @@ public class Occupation extends TrackArea {
         return resultArea;
     }
 
+
+
     /**
      * Dieser Datentyp ist die Einheit der zugeordneten Distanzen von 10CM , 1M und 10M kann verwendet werden
      */

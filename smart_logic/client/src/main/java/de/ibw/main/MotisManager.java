@@ -1,7 +1,7 @@
 package de.ibw.main;
 
 
-import de.motis.intf.MotisFileIntf;
+import org.springframework.amqp.AmqpException;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -10,11 +10,16 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.Properties;
 
 
 public class MotisManager {
+
+
+
 
     private static FilenameFilter jsonFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
@@ -60,8 +65,14 @@ public class MotisManager {
                 if(child.isDirectory()) {
                     File[] jsonFiles = child.listFiles(jsonFilter);
                     for(File MotisJsonFile : jsonFiles) {
+                       Path path = Path.of(MotisJsonFile.getAbsolutePath());
+                       String msg = Files.readString(path);
 
-                        MotisFileIntf.put(MotisJsonFile);
+                       try {
+                           SmartLogicClient.MotisProducer.produceMsg(msg);
+                       } catch(AmqpException Aex) {
+                           Aex.printStackTrace();
+                       }
                     }
                 }
             }
@@ -71,7 +82,8 @@ public class MotisManager {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        sendMotisFiles();
+        MotisManager M = new MotisManager();
+        M.sendMotisFiles();
     }
 
 

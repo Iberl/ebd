@@ -5,6 +5,7 @@ import de.ibw.handler.ClientHandler;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.intf.SmartClient;
+import de.motis.producer.MotisProducer;
 import ebd.SlConfigHandler;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class SmartLogicClient extends SmartClient {
 
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
+    public static MotisProducer MotisProducer;
     private TmsScheduler RequestScheduler;
 
 

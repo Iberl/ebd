@@ -1,5 +1,6 @@
 package de.ibw.handler;
 
+import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
@@ -7,6 +8,10 @@ import de.ibw.tms.intf.SmartClientHandler;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 /**
  * Client Handler
  *
@@ -18,6 +23,7 @@ import io.netty.channel.ChannelHandlerContext;
 public class ClientHandler extends SmartClientHandler {
 
     SmartLogicClient Client = null;
+
 
     public ClientHandler(SmartLogicClient smartLogicClient) {
         Client = smartLogicClient;
@@ -42,6 +48,7 @@ public class ClientHandler extends SmartClientHandler {
             Message Msg = Message.generateFrom(smartServerMessage.getMsg());
             if (Msg.getHeader().type == 14) {
                 if(!TmsScheduler.started) {
+                    MotisManager.sendMotisFiles();
                     this.Client.startScheduler();
                 }
             }

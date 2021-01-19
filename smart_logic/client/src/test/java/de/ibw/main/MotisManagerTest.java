@@ -9,14 +9,5 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MotisManagerTest {
 
-    @Test
-    void sendMotisFiles() {
-        try {
-            MotisManager.sendMotisFiles();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

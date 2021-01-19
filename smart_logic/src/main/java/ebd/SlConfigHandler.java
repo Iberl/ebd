@@ -49,6 +49,12 @@ public class SlConfigHandler {
     // Standard Dauer fuer Weichenstellvorgaenge in ms
     public int defaultOperationTime = 500;
 
+
+
+    // Ma having timeout in seconds, after timeout ma deleted -1 ma valid for all time
+    public int ma_timeout = 60;
+
+
     /*
     longs
      */

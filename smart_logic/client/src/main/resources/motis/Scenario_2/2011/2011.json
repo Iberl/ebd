@@ -5,58 +5,58 @@
         "allGattung": [
             {
                 "code": "RE",
-                "gattungid": "",
+                "gattungid": "RB.219",
                 "name": "Regionalexpress"
             }
         ],
         "allLinie": [
             {
-                "linieid": "",
+                "linieid": "RB.1",
                 "name": "RE 1"
             }
         ],
         "allVerwaltung": [
             {
                 "betreiber": {
-                    "code": "---",
+                    "code": "DBRegio",
                     "name": "DB"
                 },
                 "verwaltungid": "80"
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "",
+        "fahrtid": "RB.20.2011.1",
         "fahrtrelation": {
             "startfahrtnummer": "2011",
             "startgattung": "RE",
             "starthaltestelle": {
-                "bezeichnung": "K\u00e4fertal",
-                "evanummer": "9000002",
-                "haltestelleid": "",
-                "rl100": "ZDK"
+                "bezeichnung": "Wilhelmstal",
+                "evanummer": "9000001",
+                "haltestelleid": "de:20001:9000001",
+                "rl100": "ZDW"
             },
-            "startlinie": "",
+            "startlinie": "RE 1",
             "startverwaltung": "80",
             "startzeit": "2020-07-22T08:07:00+02:00",
             "zielhaltestelle": {
-                "bezeichnung": "Wilhelmstal",
-                "evanummer": "9000001",
-                "haltestelleid": "",
-                "rl100": "ZDW"
+                "bezeichnung": "K\u00e4fertal",
+                "evanummer": "9000002",
+                "haltestelleid": "de:20002:9000002",
+                "rl100": "ZDK"
             },
-            "zielzeit": "2020-10-22T08:10:50+02:00"
+            "zielzeit": "2020-07-22T08:10:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
         "planstarttag": "2020-07-22",
         "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-10-22T08:10:50+02:00"
+        "zielzeit": "2020-07-22T08:10:45+02:00"
     },
     "meta": {
         "correlation": [
-            ""
+            "Scenario2.2011"
         ],
-        "created": "-",
+        "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",
         "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
         "owner": "ri",

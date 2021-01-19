@@ -337,6 +337,33 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setEdges();
 
             System.out.println("Test");
+
+            System.out.println("13W4S");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+
+            System.out.println("11W10L");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+
+            System.out.println("13W1R");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1R").getPlanProId());
+
+            System.out.println("11W5R");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W5R").getPlanProId());
+
+
+
+
+            System.out.println("13W3R");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W3R").getPlanProId());
+
+
+            System.out.println("13W2S");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W2S").getPlanProId());
+
+            System.out.println("Print 11W8L");
+
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W8L").getPlanProId());
+
             System.out.println("Print 11W10L");
 
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
@@ -344,6 +371,12 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
             System.out.println("Print 13W1S");
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1S").getPlanProId());
+            System.out.println("Print 13W4S");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+            System.out.println("Print 11W10L");
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+
+
             TescModul.getInstance().fetchIntialState();
         } catch (ParseException | JAXBException | IOException e) {
             e.printStackTrace();

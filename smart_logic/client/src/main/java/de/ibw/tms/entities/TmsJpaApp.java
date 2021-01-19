@@ -1,6 +1,8 @@
 package de.ibw.tms.entities;
 
 import de.ibw.main.SmartLogicClient;
+
+import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -8,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
 
 @SpringBootApplication
 @EnableJpaRepositories()
@@ -19,12 +22,16 @@ public class TmsJpaApp {
 		SpringApplication.run(TmsJpaApp.class);
 	}
 
+	@Bean
+	public MotisProducer getMotisProducer() {
+		return new MotisProducer();
+	}
 
 
 	@Bean
-	public CommandLineRunner TmsRunner(TimeTaskRepository repository) {
+	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M) {
 		return (args) -> {
-
+			SmartLogicClient.MotisProducer = M;
 			SmartLogicClient.proceedTmsLogic(repository);
 
 
@@ -33,11 +40,6 @@ public class TmsJpaApp {
 
 
 
-			// save a few customers
-
-			// for (Customer bauer : repository.findByLastName("Bauer")) {
-			// 	log.info(bauer.toString());
-			// }
 
 		};
 	}
