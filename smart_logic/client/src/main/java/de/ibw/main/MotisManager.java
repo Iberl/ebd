@@ -1,6 +1,7 @@
 package de.ibw.main;
 
 
+import org.springframework.amqp.AmqpConnectException;
 import org.springframework.amqp.AmqpException;
 
 import java.io.File;
@@ -64,16 +65,31 @@ public class MotisManager {
             for (File child : subDirectories) {
                 if(child.isDirectory()) {
                     File[] jsonFiles = child.listFiles(jsonFilter);
-                    for(File MotisJsonFile : jsonFiles) {
-                       Path path = Path.of(MotisJsonFile.getAbsolutePath());
-                       String msg = Files.readString(path);
 
-                       try {
-                           SmartLogicClient.MotisProducer.produceMsg(msg);
-                       } catch(AmqpException Aex) {
-                           Aex.printStackTrace();
-                       }
-                    }
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            for (File MotisJsonFile : jsonFiles) {
+
+
+                                Path path = Path.of(MotisJsonFile.getAbsolutePath());
+                                String msg = null;
+                                try {
+                                    msg = Files.readString(path);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                                try {
+                                    SmartLogicClient.MotisProducer.produceMsg(msg);
+                                } catch (AmqpConnectException Aex) {
+                                    Aex.printStackTrace();
+                                }
+                            }
+                        }
+                    }.start();
+
+
                 }
             }
         } else {

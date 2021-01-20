@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.SingleModeAdapter;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import java.util.List;
@@ -24,7 +25,7 @@ public class ModeDAO {
 
     public Integer q_scale;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     public List<SingleModeDAO> modes;
 
 }

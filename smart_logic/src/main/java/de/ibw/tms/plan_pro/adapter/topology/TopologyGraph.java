@@ -254,7 +254,6 @@ public class TopologyGraph {
         /**
          * Kantenl&auml;nge in meter
          */
-
         public double dTopLength;
         /**
          * Kanten Id nach Bahnschemata

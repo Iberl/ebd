@@ -26,7 +26,7 @@ public class SlConfigHandler {
     public String ipToGUIServer4TMS = "127.0.0.1";
     public String portOfGUIServer4TMS = "11114";
 
-    public String ipOfRBCServer = "127.0.0.1";
+    public String ipOfRBCServer = "localhost";
 
     //External Port for RBC
     public String portOfTMSServer = "22223";
