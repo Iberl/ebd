@@ -596,7 +596,7 @@ public class RbcModul extends Thread {
      * @throws InterruptedException - Kommunikation hatte einen Fehler verursacht
      */
     public void startTmsServer(String sHost) throws InterruptedException {
-        if(sHost == null) sHost = "localhost";
+        sHost = "0.0.0.0";
         this.iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfTMSServer);
         EventBusManager EM = null;
         try {
