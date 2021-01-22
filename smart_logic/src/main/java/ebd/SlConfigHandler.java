@@ -1,6 +1,7 @@
 package ebd;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.util.Properties;
 
 /**
  * This class holds the configuration parameters, which it reads out of the config.txt file.
@@ -19,28 +20,37 @@ public class SlConfigHandler {
     /*
     Strings
     */
+
+
+    public String ipToInfrastructureServer = "server1.ebd.signallabor.de";
+    public int portOfInfrastructureServer = 1436;
+
+
     public String ipToSmartLogic4TMS = "127.0.0.1";
     public String portOfSmartLogic4TMS = "33330";
-    public String ipToGUIServer4SL = "127.0.0.1";
+
     public String portOfGUIServer4SL = "11112";
-    public String ipToGUIServer4TMS = "127.0.0.1";
+
     public String portOfGUIServer4TMS = "11114";
 
-    public String ipOfRBCServer = "localhost";
+    public String ipOfRBCServer = "127.0.0.1";
 
     //External Port for RBC
     public String portOfTMSServer = "22223";
+
+    // debug prints
+    boolean isEventDebugPrint = false;
+
+
     // External Port To RBC
     public String portOfRBCServer = "22224";
 
-    //Name of the entity to be observed (rbc, trn, gb, all)
-    public String entityName = "all";
+
 
     /*
     ints
      */
-    //ID of the entity to be observed
-    public int entityID = 0;
+
 
     // Das Base Interface aller topologischer Modelle hat eine G&uuml;ltigkeit bis zu X-Monaten
     public int defaultAmountOfMonthBaseObjectIsValidTo = 3;
@@ -49,10 +59,6 @@ public class SlConfigHandler {
     // Standard Dauer fuer Weichenstellvorgaenge in ms
     public int defaultOperationTime = 500;
 
-
-
-    // Ma having timeout in seconds, after timeout ma deleted -1 ma valid for all time
-    public int ma_timeout = 60;
 
 
     /*
@@ -85,9 +91,10 @@ public class SlConfigHandler {
     boolean
      */
 
+    public boolean useInfrastructureServer = true;
+
     public boolean isInTestMode = true;
 
-    public boolean isSimulatingEbd = true;
     public boolean initCrossoversInRealdDbdClient = false;
     public boolean shallUserPrompt4SimulationFile = false;
     /*
@@ -97,10 +104,7 @@ public class SlConfigHandler {
     public boolean train2StartingInTrackDirection = false;
 
 
-    /*
-     show kilometrierung
-     */
-    public boolean showMeter = false;
+
 
 
     /*
@@ -123,57 +127,57 @@ public class SlConfigHandler {
      */
     private SlConfigHandler() throws IOException {
 
-        /*
-        Setting up config.txt file if it does not already exists
-         */
-        File fileConfig = new File("configuration/sl_config.txt");
 
-        if (fileConfig.length() == 0) {
-            boolean createdDir = fileConfig.getParentFile().mkdir();
-            boolean createdFile = fileConfig.createNewFile();
-            if(!createdFile && !fileConfig.exists()){
-                throw new IOException("Config.txt could not be created");
+            Properties prop = new Properties();
+
+            InputStream is = null;
+            try {
+                is = SlConfigHandler.class.getClassLoader().getResourceAsStream("application.properties");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                throw ex;
+            }
+            try {
+                prop.load(is);
+
+                initGlobalVar(prop);
+
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                throw ex;
             }
 
-            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("config-default")) {
 
-                if(inputStream == null) {
-                    throw new IOException("The stream config-default could not be found");
-                }
+    }
 
-                try (FileOutputStream outputStream = new FileOutputStream(fileConfig)) {
-                    int length;
-                    byte[] buffer = new byte[1024];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                }catch (IOException ioe){
-                    throw new IOException("Configuration file could not be created. " + ioe.getMessage());
-                }
-            }catch (IOException ioe){
-                ioe.printStackTrace();
-                System.err.println("First try of loading config did fail");
-                try(FileInputStream inputStream = new FileInputStream("config-default")) {
+    private void initGlobalVar(Properties prop) {
+        this.ipToSmartLogic4TMS = prop.getProperty("ipToSmartLogic4TMS");
+        this.portOfSmartLogic4TMS = prop.getProperty("portOfSmartLogic4TMS");
 
-                    try (FileOutputStream outputStream = new FileOutputStream("configuration/sl_config.txt")) {
-                        int length;
-                        byte[] buffer = new byte[1024];
-                        while ((length = inputStream.read(buffer)) != -1){
-                            outputStream.write(buffer,0,length);
-                        }
-                    }catch (IOException ioe3){
-                        throw new IOException("Configuration file could not be created: " + ioe3.getMessage());
-                    }
-                }catch (IOException ioe2){
-                    throw new IOException(ioe2.getMessage());
-                }
-            }
-        }
+        this.isEventDebugPrint = Boolean.parseBoolean(prop.getProperty("event_print_debug"));
+        this.portOfGUIServer4TMS = prop.getProperty("portOfGUIServer4TMS");
+        this.portOfGUIServer4SL = prop.getProperty("portOfGUIServer4SL");
+        this.ipOfRBCServer = prop.getProperty("ipOfRBCServer");
+        this.portOfRBCServer = prop.getProperty("portOfRBCServer");
 
-        /*
-        Loads the config
-         */
-        loadConfig(false);
+
+        this.portOfTMSServer = prop.getProperty("portOfTMSServer");
+
+        this.lCheckDbdReturn = Long.parseLong(prop.getProperty("lCheckDbdReturn"));
+        this.lCheckDbdCommand = Long.parseLong(prop.getProperty("lCheckDbdCommand"));
+        this.defaultAmountOfMonthBaseObjectIsValidTo = Integer.parseInt(prop.getProperty("defaultAmountOfMonthBaseObjectIsValidTo"));
+        this.useInfrastructureServer = Boolean.parseBoolean(prop.getProperty("useInfrastructureServer"));
+
+        this.ipToInfrastructureServer = prop.getProperty("ipToInfrastructureServer");
+        this.portOfInfrastructureServer = Integer.parseInt(prop.getProperty("portOfInfrastructureServer"));
+        this.initCrossoversInRealdDbdClient = Boolean.parseBoolean(prop.getProperty("initCrossoversInRealdDbdClient"));
+        this.shallUserPrompt4SimulationFile = Boolean.parseBoolean(prop.getProperty("shallUserPrompt4SimulationFile"));
+
+
+        this.defaultOperationTime = Integer.parseInt(prop.getProperty("defaultOperationTime"));
+
+        this.isInTestMode = Boolean.parseBoolean(prop.getProperty("isInTestMode"));
     }
 
     /**

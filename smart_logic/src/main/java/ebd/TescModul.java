@@ -84,7 +84,8 @@ public class TescModul {
 
     public boolean setState(String sId, TrackElementStatus switchStatus) throws IOException, SessionClosedException, IllegalNameLengthException {
         // Set Ist Lage "I" in Debug Moduls, sonst Sollage "S"
-        String sPostfix = ConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
+        //String sPostfix = ConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
+        String sPostfix = "S";
         String dbdId = sId + sPostfix;
         if(ElementStateByIdRepository.containsKey(sId)) {
             MoveableTrackElement EwElement = ElementStateByIdRepository.getModel(sId);
@@ -397,14 +398,15 @@ public class TescModul {
     private void startTescSession() throws IOException {
         if(Session == null) {
             String sHost;
-            int iPort;
-            if (!ConfigHandler.getInstance().useInfrastructureServer) {
+            int iPort = SlConfigHandler.getInstance().portOfInfrastructureServer;
+            if (!SlConfigHandler.getInstance().useInfrastructureServer) {
                 sHost = "localhost";
-                iPort = 1436;
+
             } else {
                 sHost = ConfigHandler.getInstance().ipToInfrastructureServer;
-                iPort = 1436;
+
             }
+
             Session = new TescSession(new Socket(sHost, iPort));
             Session.start();
         }

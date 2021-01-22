@@ -2,6 +2,7 @@ package de.ibw.tms.entities;
 
 import de.ibw.main.SmartLogicClient;
 
+import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,17 @@ public class TmsJpaApp {
 
 	private static final Logger log = LoggerFactory.getLogger(TmsJpaApp.class);
 
+	public static TmsConfig Config;
+
 	public static void main(String[] args) {
 		SpringApplication.run(TmsJpaApp.class);
+	}
+
+
+
+	@Bean
+	public TmsConfig getTmsConfig() {
+		return new TmsConfig();
 	}
 
 	@Bean
@@ -29,8 +39,9 @@ public class TmsJpaApp {
 
 
 	@Bean
-	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M) {
+	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C ) {
 		return (args) -> {
+			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
 			SmartLogicClient.proceedTmsLogic(repository);
 

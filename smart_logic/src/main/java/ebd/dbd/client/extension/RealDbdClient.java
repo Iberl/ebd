@@ -44,7 +44,7 @@ public abstract class RealDbdClient implements IDbdClientInterface {
         SlConfigHandler ch  = SlConfigHandler.getInstance();
         DefaultRepo<String, Integer> initStateRepo = null;
         if(instance == null) {
-            if (ch.isSimulatingEbd) {
+            if (!ch.useInfrastructureServer) {
                 initStateRepo = prompt4InitialStateSetting(ch);
                 instance = new SimulateDbdClient(initStateRepo);
             } else {

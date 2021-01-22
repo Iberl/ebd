@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import de.ibw.handler.ClientHandler;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.tms.entities.TimeTaskRepository;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.SmartClient;
 import de.motis.producer.MotisProducer;
 import ebd.SlConfigHandler;
@@ -145,8 +146,8 @@ public class SmartLogicClient extends SmartClient {
                 e.printStackTrace();
             }
             if (jsonStringOrFileName.equals("start")) {
-                String slHostIp = SlConfigHandler.getInstance().ipToSmartLogic4TMS;
-                int iPort = Integer.parseInt(SlConfigHandler.getInstance().portOfSmartLogic4TMS);
+                String slHostIp = TmsJpaApp.Config.getIpToSmartLogic4TMS();
+                int iPort = Integer.parseInt(TmsJpaApp.Config.getPortOfSmartLogic4TMS());
                 SlClient = new SmartLogicClient(repository, slHostIp, iPort);
                 SlClient.start();
                 break;
@@ -182,8 +183,8 @@ public class SmartLogicClient extends SmartClient {
             String finalJsonString = jsonString;
             if (SlClient == null) {
                 System.out.println("Client not startet");
-                String slHostIp = SlConfigHandler.getInstance().ipToSmartLogic4TMS;
-                Integer iPort = Integer.valueOf(SlConfigHandler.getInstance().ipToSmartLogic4TMS);
+                String slHostIp = TmsJpaApp.Config.getIpToSmartLogic4TMS();
+                Integer iPort = Integer.valueOf(TmsJpaApp.Config.getPortOfSmartLogic4TMS());
                 SlClient = new SmartLogicClient(SlClient.timeTaskRepository, slHostIp, iPort);
                 SlClient.start();
                 System.out.println("Client startet now.");

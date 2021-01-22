@@ -601,7 +601,7 @@ public class TopologyFactory implements ITopologyFactory {
                 if(isAMissing && isBMissing) {
                     throw new InvalidParameterException("Both Topology Nodes are End-Nodes");
                 } else if (!isAMissing && !isBMissing) {
-                    bothMissing(B, TopKante, E, decBalise);
+                    //bothMissing(B, TopKante, E, decBalise);
 
 
                 } else {
