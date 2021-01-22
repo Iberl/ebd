@@ -84,8 +84,7 @@ public class TescModul {
 
     public boolean setState(String sId, TrackElementStatus switchStatus) throws IOException, SessionClosedException, IllegalNameLengthException {
         // Set Ist Lage "I" in Debug Moduls, sonst Sollage "S"
-        //String sPostfix = ConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
-        String sPostfix = "S";
+        String sPostfix = SlConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
         String dbdId = sId + sPostfix;
         if(ElementStateByIdRepository.containsKey(sId)) {
             MoveableTrackElement EwElement = ElementStateByIdRepository.getModel(sId);
@@ -427,7 +426,7 @@ public class TescModul {
                 String sLabel = Switch.getEbdTitle(0,false, true);
                 MoveableTrackElement MTE = MoveableTrackElement.genmMoveableElementFactory(sLabel, iOperationTime,
                         null, null, null,
-                        MoveableTrackElement.getEwPossibleStates(), CurrentStatus);
+                        MoveableTrackElement.getEwPossibleStates(), CurrentStatus, Switch);
                 ElementStateByIdRepository.update(sLabel, MTE);
                 System.out.println("EW_Lable" + sLabel);
             } else if(Switch.isDKW()) {
@@ -447,7 +446,7 @@ public class TescModul {
                 String sLabel = CsSmall.getEbdTitle(0,false,true);
                 MoveableTrackElement MTE = MoveableTrackElement.genmMoveableElementFactory(sLabel, iOperationTime,
                         null, null, null,
-                        MoveableTrackElement.getDkwPossibleStates(), CurrentStatus);
+                        MoveableTrackElement.getDkwPossibleStates(), CurrentStatus, Switch);
                 DkwStateByRepo.update(sLabel, MTE);
                 System.out.println("DKW_Lable" + sLabel);
 

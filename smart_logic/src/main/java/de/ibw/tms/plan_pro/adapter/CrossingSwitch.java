@@ -1,5 +1,6 @@
 package de.ibw.tms.plan_pro.adapter;
 
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -106,7 +107,7 @@ CrossingSwitch implements ICompareTrackMeter {
      * @param E - {@link TopologyGraph.Edge} Die Kante zu der der Grenzbereich festgestellt werden soll
      * @return BigDecimal - Abstand von dieser Crossing-Switch der den Grenzbereich darstellt.
      */
-    public BigDecimal getInsecureRangeRelative(TopologyGraph.Edge E) {
+    public BigDecimal getInsecureRangeRelative(TopologyGraph.Edge E) throws SmartLogicException {
         CSignal Sig = this.getSignal();
 
         for(CPunktObjektTOPKante CTopKante : Sig.getPunktObjektTOPKante()) {
@@ -114,7 +115,7 @@ CrossingSwitch implements ICompareTrackMeter {
                 return CTopKante.getAbstand().getWert();
             }
         }
-        throw new InvalidParameterException("Edge has for this Switch no insecure Area");
+        throw new SmartLogicException("Edge has for this Switch no insecure Area "  + E.getRefId());
     }
 
     /**
