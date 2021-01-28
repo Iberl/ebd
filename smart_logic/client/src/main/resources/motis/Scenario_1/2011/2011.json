@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "de:20001:9000001",
+                        "haltestelleid": "ae934342-d81a-4087-8c05-ef45cbb40b81",
                         "rl100": "ZDW"
                     },
                     "planabfahrtort": {
@@ -45,7 +45,7 @@
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "de:20002:9000002",
+                        "haltestelleid": "493ccd57-5791-4cb8-acff-d09ca6c55819",
                         "rl100": "ZDK"
                     },
                     "planankunftort": {
@@ -59,21 +59,21 @@
                 "fahrtbezeichnung": "RE 2011",
                 "fahrtname": "",
                 "fahrtnummer": "2011",
-                "gattungid": "RB.219",
-                "linieid": "RB.1",
+                "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
+                "linieid": "",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "RE",
-                "gattungid": "RB.219",
+                "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
                 "name": "Regionalexpress"
             }
         ],
         "allLinie": [
             {
-                "linieid": "RB.1",
+                "linieid": "",
                 "name": "RE 1"
             }
         ],
@@ -87,14 +87,14 @@
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "RB.20.2011.1",
+        "fahrtid": "052bb6ee-a707-45da-8a2b-6de09fb560fd",
         "fahrtrelation": {
             "startfahrtnummer": "2011",
             "startgattung": "RE",
             "starthaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "de:20001:9000001",
+                "haltestelleid": "ae934342-d81a-4087-8c05-ef45cbb40b81",
                 "rl100": "ZDW"
             },
             "startlinie": "RE 1",
@@ -103,7 +103,7 @@
             "zielhaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "de:20002:9000002",
+                "haltestelleid": "493ccd57-5791-4cb8-acff-d09ca6c55819",
                 "rl100": "ZDK"
             },
             "zielzeit": "2020-07-22T08:10:45+02:00"
@@ -116,7 +116,7 @@
     },
     "meta": {
         "correlation": [
-            "Scenario1.2011"
+            "7704ab1d-a792-43b4-92da-e7a79fba9da9"
         ],
         "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",
