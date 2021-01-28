@@ -25,7 +25,6 @@ import de.ibw.tms.ma.occupation.MTERouteOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
-import de.ibw.tms.ma.spotsma.MASpots;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.train.model.TrainModel;
@@ -42,7 +41,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 
 import static de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl.SMART_SERVER_MA_MODUL;
-import static de.ibw.tms.ma.occupation.Occupation.BLOCK_Q_SCALE.Q_SCALE_1M;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
@@ -61,7 +59,6 @@ import org.railMl.rtm4rail.TApplicationDirection;
 
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -192,10 +189,10 @@ public class SafetyLogic {
         Overlap O = q_overlap ? genOverlap(rbcMa.eoa.overlap, q_scale, svl) : null;
         ETCS_DISTANCE d_etcs_eoa_to_last_spot = null;
         DangerPoint DP;
+
         if(O == null) {
             if(qDangerPoint) {
-               DP =  qDangerPoint ? genDangerPoint(rbcMa.eoa.dangerPoint, LastSpot) : null;
-               d_etcs_eoa_to_last_spot = DP.getD_OL();
+               DP =  genDangerPoint(rbcMa.eoa.dangerPoint, LastSpot);
 
 
             } else {
@@ -215,10 +212,7 @@ public class SafetyLogic {
                 d_etcs_eoa_to_last_spot.sDistance = O.d_OL.sDistance;
             }
         }
-        // handle d_etcs_eoa
 
-
-        SvL svl = new SvL(); // und dangerpoints
 
         T_EMA t_ema = new T_EMA();
         t_ema.setTime((short) rbcMa.eoa.t_loa);
@@ -272,60 +266,21 @@ public class SafetyLogic {
      * Overlap is last spot
      * @param dangerPoint
      * @param lastSpot
-     * @param d_etcs_eoa_to_last_spot
+     * @param d_etcs_eoa_to_endOfOverlap
      * @param requestedTrackElementList
      * @param i_QScale
      * @return
      */
     private DangerPoint genDangerPoint(EOA.DangerPoint dangerPoint, SpotLocationIntrinsic lastSpot,
-                                       ETCS_DISTANCE d_etcs_eoa_to_last_spot,
+                                       ETCS_DISTANCE d_etcs_eoa_to_endOfOverlap,
                                        ComposedRoute requestedTrackElementList,
                                        int i_QScale) throws SmartLogicException {
         DangerPoint DP = defineDangerPoint(dangerPoint);
-        Q_SCALE QS = Q_SCALE.getScale(i_QScale);
-        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
-        TopologyGraph.Edge CurrentEdge = LastEdge;
-        // distance from Top_Node to Last Spot of Track
-        BigDecimal d_lastSpotInTrack = new BigDecimal(LastEdge.dTopLength)
-                .multiply(new BigDecimal(lastSpot.getIntrinsicCoord()));
+        ETCS_DISTANCE etcs_goBack = new ETCS_DISTANCE();
+        etcs_goBack.sDistance = (short) (d_etcs_eoa_to_endOfOverlap.sDistance - dangerPoint.d_dp);
 
 
-        // distance from dp to overlap (overlap is last spot)
-        BigDecimal d_Meter_Go_Back = new BigDecimal(d_etcs_eoa_to_last_spot.sDistance).
-                subtract(new BigDecimal(DP.getD_OL().sDistance));
-        int index = 1;
-        BigDecimal CurrentLength = d_lastSpotInTrack;
-        BigDecimal percent_of_Track = new BigDecimal("0");
-        while(d_Meter_Go_Back.compareTo(new BigDecimal(0)) > 0) {
-
-            if(CurrentLength.compareTo(d_Meter_Go_Back) >= 0) {
-                percent_of_Track = CurrentLength.subtract(d_Meter_Go_Back)
-                        .divide(new BigDecimal(CurrentEdge.dTopLength), 14, RoundingMode.HALF_UP);
-                break;
-            } else {
-                d_Meter_Go_Back = d_Meter_Go_Back.subtract(CurrentLength);
-                 index++;
-            }
-
-
-
-            if(requestedTrackElementList.size() - index < 0)
-                throw new SmartLogicException("Route is not Long enough: for Danger Point: " + DP.toString());
-
-            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> CurrentElement = requestedTrackElementList.get(requestedTrackElementList.size() - index);
-            while(!CurrentElement.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
-                index++;
-                if(requestedTrackElementList.size() - index < 0)
-                    throw new SmartLogicException("Route is not Long enough: for Danger Point: " + DP.toString());
-                CurrentElement = requestedTrackElementList.get(requestedTrackElementList.size() - index);
-            }
-            CurrentEdge = (TopologyGraph.Edge) CurrentElement.getRight();
-            CurrentLength = new BigDecimal(CurrentEdge.dTopLength);
-        }
-        SpotLocationIntrinsic DP_Spot = new SpotLocationIntrinsic();
-        DP_Spot.setIntrinsicCoord(percent_of_Track.doubleValue());
-        DP_Spot.setNetElementRef(CurrentEdge.getId());
-        DP.setLocation(DP_Spot);
+        DP.setLocation(requestedTrackElementList.getPositionGoBackFromEndOfTrack(lastSpot,etcs_goBack,i_QScale));
         return DP;
 
     }
