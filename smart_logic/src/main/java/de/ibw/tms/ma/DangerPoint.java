@@ -27,6 +27,14 @@ public class DangerPoint extends MASpots implements Serializable {
         this.v_RELEASEDP = v_RELEASEDP;
     }
 
+    public ETCS_DISTANCE getD_OL() {
+        return d_OL;
+    }
+
+    public ETCS_SPEED getV_RELEASEDP() {
+        return v_RELEASEDP;
+    }
+
     @Override
     public String toString() {
         return "DangerPoint{" +

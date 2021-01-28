@@ -12,6 +12,7 @@ import de.ibw.smart.logic.safety.SafetyLogic;
 import de.ibw.tms.etcs.*;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
@@ -110,6 +111,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * Die weitergegebene MA wurde vom RBC nicht bes&auml;igt
      */
     public static final String NO_ACK = "NO_ACK";
+
+    public static final String INVALID_REQUEST = "INVALID_REQUEST";
 
 
 
@@ -213,11 +216,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         List<SpeedSegment> speedSegments = new ArrayList<>();
         eoaEndTimerDistance.sDistance = 0;
 
-        EoA slEoA = generateEoA(R, MaAdapter, EoaLocation, tEma, eoaQEndtimer, eoaQDangerPoint, eoaQOverlap,
+        /*EoA slEoA = generateEoA(R, MaAdapter, EoaLocation, tEma, eoaQEndtimer, eoaQDangerPoint, eoaQOverlap,
                 eoaEndTimerDistance, eoaEndTimer, eoaDangerPointDistance, eoaDangerPointSpeed);
         if(slEoA.overlap != null) {
             Svl = slEoA.overlap.getSvl();
-        }
+        }*/
         /*List<GradientAdapter> listGradients = MaAdapter.gradientProfile.gradients;
         for(GradientAdapter Gradient : listGradients) {
             GradientSegment GS = new GradientSegment();
@@ -247,7 +250,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         boolean bSspCheckOk = false;
         Boolean bAcknowledgeMA = null;
         ComposedRoute requestedTrackElementList = new ComposedRoute();
-
+        MA RbcMa = null;
         //smartLogicMa = new MovementAuthority();
 
         bCheckOk = Safety.slSelfCheck();
@@ -286,11 +289,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
         }
-        bIsOccupatonFree = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList, uuid);
-        // allways unblock workaround
+        MARequestOccupation MAO = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList, uuid);
+        // always unblock workaround
 
-        // !Warning instable workaround WARNING
-        bIsOccupatonFree = true;
+        bIsOccupatonFree = MAO != null;
         // PLEASE CHANGE above Line
 
         // speed segments decission
@@ -380,7 +382,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         }
         try {
-            MA RbcMa = MaAdapter.convertToRbcMA();
+            RbcMa = MaAdapter.convertToRbcMA();
             MaPayload = new Payload_21(nid_engine_Id, RbcMa);
         } catch (Exception E) {
             E.printStackTrace();
@@ -404,16 +406,37 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
-            Safety.transferMaRequestBlockListIntoRealBlockList(uuid, iTrainId);
-            MaReturnPayload.setMaSuccessfull(uuid);
-            PositionModul.getInstance().updateCurrentRoute(nid_engine_Id, requestedTrackElementList);
-            sendMaResponseToTMS(MaReturnPayload, 3L);
+            handleMaAckReceived(iTrainId, R, uuid, MaReturnPayload, requestedTrackElementList, RbcMa, MAO, nid_engine_Id);
         } else {
-            Safety.removeOccupationOfCommunication(uuid);
-            MaReturnPayload.setErrorState(uuid,true, NO_ACK);
-            sendMaResponseToTMS(MaReturnPayload, 2L);
+            handleInvalidRequest(uuid, MaReturnPayload, NO_ACK);
         }
 
+    }
+
+    private void handleMaAckReceived(int iTrainId, Route R, UUID uuid, MaRequestReturnPayload MaReturnPayload,  ComposedRoute requestedTrackElementList, MA RbcMa, MARequestOccupation MAO, int nid_engine_Id) {
+        try {
+            SafetyLogic.getSmartSafety().transferMaRequestBlockListIntoRealBlockList(iTrainId, MAO, RbcMa, R, requestedTrackElementList);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            if(EBM != null)
+                EBM.log("Ma Check has failure: " + e.getMessage(), SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+            return;
+        }
+        //
+        serveValidMa(uuid, MaReturnPayload, requestedTrackElementList, nid_engine_Id);
+    }
+
+    private void serveValidMa(UUID uuid, MaRequestReturnPayload MaReturnPayload, ComposedRoute requestedTrackElementList, int nid_engine_Id) {
+        MaReturnPayload.setMaSuccessfull(uuid);
+        PositionModul.getInstance().updateCurrentRoute(nid_engine_Id, requestedTrackElementList);
+        sendMaResponseToTMS(MaReturnPayload, 3L);
+    }
+
+    private void handleInvalidRequest(UUID uuid, MaRequestReturnPayload maReturnPayload, String errorReason) {
+        SafetyLogic.getSmartSafety().removeOccupationOfCommunication(uuid);
+        maReturnPayload.setErrorState(uuid,true, errorReason);
+        sendMaResponseToTMS(maReturnPayload, 2L);
     }
 
     private EoA generateEoA(Route R, RbcMaAdapter ma, SpotLocationIntrinsic eoaLocation, T_EMA tEma, boolean eoaQEndtimer, boolean eoaQDangerPoint, boolean eoaQOverlap, ETCS_DISTANCE eoaEndTimerDistance, ETCS_TIMER eoaEndTimer, ETCS_DISTANCE eoaDangerPointDistance, ETCS_SPEED eoaDangerPointSpeed) {

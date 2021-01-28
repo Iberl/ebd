@@ -221,8 +221,8 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
-        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
-        assertFalse(Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID()),"The second request have to have a blockage");
+        assertNotNull(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
+        assertNull(Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID()),"The second request have to have a blockage");
 
     }
 
@@ -381,8 +381,8 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
 
         //RbcMaAdapter RbcMa = TestUtil.preserveMA4NonBlockedTest()
 
-        assertTrue(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
-        boolean isSuccess = Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID());
+        assertNotNull(Safety.checkIfRouteIsNonBlocked(iTrainOne, MaRW_Train1.getRoute(), RbcMa_Train1, routenListeNEW4TEST, UUID.randomUUID()), "The first request must not have blockage");
+        boolean isSuccess = Safety.checkIfRouteIsNonBlocked(iTrainTwo, MaRW_Train2.getRoute(), RbcMa_Train2, routenListeNEW4TEST, UUID.randomUUID()) != null;
         if(isSuccess) {
 
         } else {

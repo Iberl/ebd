@@ -28,6 +28,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
 /**
  * Panel das eine Streckenkarte beinhaltet
@@ -181,7 +182,7 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
         g2d.setPaint(Color.gray);
         DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
         //TODO Carolin GeoKanten zeichnen
-        HashMap edgeRepo = PlanData.topGraph.edgeRepo;
+        ConcurrentHashMap edgeRepo = PlanData.topGraph.edgeRepo;
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
             // diese Liste zeichenen

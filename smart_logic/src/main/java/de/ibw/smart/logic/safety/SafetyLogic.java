@@ -10,10 +10,12 @@ import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
+import de.ibw.tms.etcs.*;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
@@ -23,6 +25,7 @@ import de.ibw.tms.ma.occupation.MTERouteOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
+import de.ibw.tms.ma.spotsma.MASpots;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.train.model.TrainModel;
@@ -33,9 +36,7 @@ import ebd.TescModul;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.MA;
-import ebd.rbc_tms.util.PositionInfo;
-import ebd.rbc_tms.util.TrainInfo;
+import ebd.rbc_tms.util.*;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -49,15 +50,18 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
+import org.railMl.rtm4rail.TApplicationDirection;
 
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -71,7 +75,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2021-01-12
+ * @since 2021-01-25
  */
 public class SafetyLogic {
     /**
@@ -157,21 +161,239 @@ public class SafetyLogic {
 
     /**
      * reseverd MA of current Ma communicated by tms is written as blocked for all furhter MaRequest
-     * @param communicationID UUID - communicationID of the MA-Request
-     * @param trainId - Integer - Id of Train the MA-Request is refering to
-     *
-     *          !!!!sollte eigentlich einen Merge prüfen!!!!
-     *                wird als abkürzung angenommen das der aktuelle Request alle notwendigen Blockaden
-     *                untersucht hat
+     *  @param trainId - Integer - Id of Train the MA-Request is refering to
+     * @param MAO - Request Occupation
+     * @param rbcMa - Ma send to RBC
+     * @param r - route Composed by tms
+     * @param requestedTrackElementList
      *
      */
-    public void transferMaRequestBlockListIntoRealBlockList(UUID communicationID, int trainId) {
+    public void transferMaRequestBlockListIntoRealBlockList(int trainId, MARequestOccupation MAO, MA rbcMa,
+                                                            Route r,
+                                                            ComposedRoute requestedTrackElementList)
+                                                            throws SmartLogicException {
+        guardTransfer(MAO, rbcMa,r);
+        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
+        int q_scale = rbcMa.q_scale;
+        
+        MAOccupation MaoOccup = new MAOccupation();
+        MaoOccup.setApplicationDirection(TApplicationDirection.BOTH);
+        MaoOccup.setTrackEdgeSections(MAO.getTrackEdgeSections());
+        MovementAuthority MA = new MovementAuthority();
+        SpotLocationIntrinsic LastSpot = new SpotLocationIntrinsic();
 
-        List<Occupation> occupationInMaRequestOfUUID = blockListByMa.getModel(communicationID);
+        LastSpot.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
+        LastSpot.setNetElementRef(LastEdge.getId());
+
+        SvL svl = new SvL(LastSpot);
+
+        boolean q_overlap = rbcMa.eoa.overlap != null;
+        boolean qDangerPoint = rbcMa.eoa.dangerPoint != null;
+        Overlap O = q_overlap ? genOverlap(rbcMa.eoa.overlap, q_scale, svl) : null;
+        ETCS_DISTANCE d_etcs_eoa_to_last_spot = null;
+        DangerPoint DP;
+        if(O == null) {
+            if(qDangerPoint) {
+               DP =  qDangerPoint ? genDangerPoint(rbcMa.eoa.dangerPoint, LastSpot) : null;
+               d_etcs_eoa_to_last_spot = DP.getD_OL();
+
+
+            } else {
+                DP = null;
+                d_etcs_eoa_to_last_spot = new ETCS_DISTANCE();
+                d_etcs_eoa_to_last_spot.sDistance = 0;
+
+            }
+        } else {
+            if(qDangerPoint) {
+                d_etcs_eoa_to_last_spot = new ETCS_DISTANCE();
+                d_etcs_eoa_to_last_spot.sDistance = O.d_OL.sDistance;
+                DP = genDangerPoint(rbcMa.eoa.dangerPoint, LastSpot, d_etcs_eoa_to_last_spot,
+                        requestedTrackElementList, q_scale);
+            } else {
+                d_etcs_eoa_to_last_spot = new ETCS_DISTANCE();
+                d_etcs_eoa_to_last_spot.sDistance = O.d_OL.sDistance;
+            }
+        }
+        // handle d_etcs_eoa
+
+
+        SvL svl = new SvL(); // und dangerpoints
+
+        T_EMA t_ema = new T_EMA();
+        t_ema.setTime((short) rbcMa.eoa.t_loa);
+
+        boolean qEndTimer = rbcMa.eoa.endTimer != null;
+        ETCS_DISTANCE D_ETCS_EndTimerStartLoc = qEndTimer ? genDistanceStartLoc(rbcMa.eoa.endTimer) : null;
+        ETCS_TIMER t_End = qEndTimer ? genEndTime(rbcMa.eoa.endTimer) : null;
+
+
+
+        Q_SCALE Q = Q_SCALE.getScale(q_scale);
+
+        EoA eoa = new EoA(eoaSpot,rbcMa.eoa.v_loa, t_ema,qEndTimer, D_ETCS_EndTimerStartLoc, t_End,
+                qDangerPoint, DP, q_overlap, O, Q);
+
+        SSP ssp = rbcMa.speedProfile == null ? null : new SSP();
+        if(ssp != null) {
+            List<SpeedProfile.Section> sections = rbcMa.speedProfile.sections;
+            if(sections == null || sections.isEmpty()) {
+                ssp = null;
+            } else {
+                for(SpeedProfile.Section S :sections) {
+                    if(S == null) throw new SmartLogicException("Section must not be null in sectionlist");
+                    ETCS_SPEED v_Static = new ETCS_SPEED();
+                    NC_CDDIFF nc_cddiff = new NC_CDDIFF();
+                    // categories
+                    v_Static.bSpeed = (byte) S.v_static;
+
+                    SpeedSegment Segment = new SpeedSegment();
+
+                }
+            }
+        }
+
+
+        MA.setEndOfAuthority(eoa);
+        MA.setSuperviesedLocation(svl);
+        MA.setSpeedProfile();
+
+
+
+
         //uncomment if and blocklist beneath
         //if(occupationInMaRequestOfUUID == null) throw new InvalidParameterException("UUID is not mapped");
         // merge is needed in later steps
         //blockList.update(trainId, occupationInMaRequestOfUUID);
+
+    }
+
+    /**
+     * Overlap is last spot
+     * @param dangerPoint
+     * @param lastSpot
+     * @param d_etcs_eoa_to_last_spot
+     * @param requestedTrackElementList
+     * @param i_QScale
+     * @return
+     */
+    private DangerPoint genDangerPoint(EOA.DangerPoint dangerPoint, SpotLocationIntrinsic lastSpot,
+                                       ETCS_DISTANCE d_etcs_eoa_to_last_spot,
+                                       ComposedRoute requestedTrackElementList,
+                                       int i_QScale) throws SmartLogicException {
+        DangerPoint DP = defineDangerPoint(dangerPoint);
+        Q_SCALE QS = Q_SCALE.getScale(i_QScale);
+        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
+        TopologyGraph.Edge CurrentEdge = LastEdge;
+        // distance from Top_Node to Last Spot of Track
+        BigDecimal d_lastSpotInTrack = new BigDecimal(LastEdge.dTopLength)
+                .multiply(new BigDecimal(lastSpot.getIntrinsicCoord()));
+
+
+        // distance from dp to overlap (overlap is last spot)
+        BigDecimal d_Meter_Go_Back = new BigDecimal(d_etcs_eoa_to_last_spot.sDistance).
+                subtract(new BigDecimal(DP.getD_OL().sDistance));
+        int index = 1;
+        BigDecimal CurrentLength = d_lastSpotInTrack;
+        BigDecimal percent_of_Track = new BigDecimal("0");
+        while(d_Meter_Go_Back.compareTo(new BigDecimal(0)) > 0) {
+
+            if(CurrentLength.compareTo(d_Meter_Go_Back) >= 0) {
+                percent_of_Track = CurrentLength.subtract(d_Meter_Go_Back)
+                        .divide(new BigDecimal(CurrentEdge.dTopLength), 14, RoundingMode.HALF_UP);
+                break;
+            } else {
+                d_Meter_Go_Back = d_Meter_Go_Back.subtract(CurrentLength);
+                 index++;
+            }
+
+
+
+            if(requestedTrackElementList.size() - index < 0)
+                throw new SmartLogicException("Route is not Long enough: for Danger Point: " + DP.toString());
+
+            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> CurrentElement = requestedTrackElementList.get(requestedTrackElementList.size() - index);
+            while(!CurrentElement.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
+                index++;
+                if(requestedTrackElementList.size() - index < 0)
+                    throw new SmartLogicException("Route is not Long enough: for Danger Point: " + DP.toString());
+                CurrentElement = requestedTrackElementList.get(requestedTrackElementList.size() - index);
+            }
+            CurrentEdge = (TopologyGraph.Edge) CurrentElement.getRight();
+            CurrentLength = new BigDecimal(CurrentEdge.dTopLength);
+        }
+        SpotLocationIntrinsic DP_Spot = new SpotLocationIntrinsic();
+        DP_Spot.setIntrinsicCoord(percent_of_Track.doubleValue());
+        DP_Spot.setNetElementRef(CurrentEdge.getId());
+        DP.setLocation(DP_Spot);
+        return DP;
+
+    }
+
+    private Overlap genOverlap(EOA.Overlap O_RBC, int q_scale, SvL svl) {
+        ETCS_DISTANCE d_etcs_dOL = new ETCS_DISTANCE();
+        ETCS_DISTANCE d_etcs_dStart = new ETCS_DISTANCE();
+        ETCS_TIMER t_etcs_tOL = new ETCS_TIMER();
+        ETCS_SPEED v_etcs_releaseOl = new ETCS_SPEED();
+
+
+        t_etcs_tOL.sTimer = (short) O_RBC.t_ol;
+        d_etcs_dOL.sDistance = (short) O_RBC.d_ol;
+        d_etcs_dStart.sDistance = (short) O_RBC.d_startol;
+        v_etcs_releaseOl.bSpeed = (byte) O_RBC.v_releaseol;
+
+        Overlap O = new Overlap();
+        O.setSvl(svl);
+        O.q_OL = Q_SCALE.getScale(q_scale);
+        O.d_OL = d_etcs_dOL;
+        O.t_OL = t_etcs_tOL;
+        O.q_STARTOL = Q_SCALE.getScale(q_scale);
+        O.d_STARTOL = d_etcs_dStart;
+        O.v_RELEASEOL = v_etcs_releaseOl;
+
+        return O;
+
+    }
+
+    private DangerPoint genDangerPoint(EOA.DangerPoint dangerPoint, SpotLocationIntrinsic lastSpot) {
+        DangerPoint DP = defineDangerPoint(dangerPoint);
+        DP.setLocation(lastSpot);
+        return DP;
+    }
+
+    @NotNull
+    private DangerPoint defineDangerPoint(EOA.DangerPoint dangerPoint) {
+        ETCS_DISTANCE d_etcs_danger_distance = new ETCS_DISTANCE();
+        ETCS_SPEED s_etcs_release_speed = new ETCS_SPEED();
+        d_etcs_danger_distance.sDistance = (short) dangerPoint.d_dp;
+        s_etcs_release_speed.bSpeed = (byte) dangerPoint.v_releasedp;
+        DangerPoint DP = new DangerPoint(d_etcs_danger_distance, s_etcs_release_speed);
+        return DP;
+    }
+
+    private ETCS_TIMER genEndTime(EOA.EndTimer endTimer) {
+        ETCS_TIMER T = new ETCS_TIMER();
+        T.sTimer = (short) endTimer.t_endtimer;
+        return T;
+    }
+
+    private ETCS_DISTANCE genDistanceStartLoc(EOA.EndTimer endTimer) {
+        ETCS_DISTANCE d_StartLocTimer = new ETCS_DISTANCE();
+        d_StartLocTimer.sDistance = (short) endTimer.d_endtimerstartloc;
+        return d_StartLocTimer;
+    }
+
+    private void guardTransfer(MARequestOccupation mao, MA rbcMa, Route r) throws SmartLogicException {
+        if(mao == null) throw new SmartLogicException("MARequestOccupation must not be null");
+        if(mao.getTrackEdgeSections() == null || mao.getTrackEdgeSections().size() == 0) throw new SmartLogicException("MARequestionOccupation must have sections");
+        if(rbcMa.eoa == null) throw new SmartLogicException("MA Eoa must not be null");
+        if(rbcMa.speedProfile == null) throw new SmartLogicException("MA SpeedProfile must not be null");
+        if(rbcMa.gradientProfile == null) throw new SmartLogicException("MA Gradient Profile must not be null");
+        if(rbcMa.modeProfile == null) throw new SmartLogicException("MA Mode Profile must not be null");
+        if(r == null) throw new SmartLogicException("Route must not be null");
+
+
+        // further checks in need
 
     }
 
@@ -213,7 +435,7 @@ public class SafetyLogic {
      *                                                   sein sollten. Das untersucht diese Methode.
      * @return - hat die Route keine blockierten Elemente oder Abschnitte
      */
-    public synchronized boolean checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter,
+    public synchronized MARequestOccupation checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter,
                                                          ComposedRoute requestedTrackElementList,
                                                          UUID comminicationUUID) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
@@ -327,7 +549,7 @@ public class SafetyLogic {
                 for(Occupation OtherArea: occupations) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
 
-                        return false;
+                        return null;
                     }
 
                 }
@@ -341,10 +563,10 @@ public class SafetyLogic {
 
 
             // block Elements as successful
-            return true;
+            return MAO;
         } catch (Exception E) {
             E.printStackTrace();
-            return false;
+            return null;
         }
 
     }
@@ -407,8 +629,13 @@ public class SafetyLogic {
             TopologyGraph.Edge E = (TopologyGraph.Edge) trackingPair.getRight();
             TES.setTrackEdge(E);
             maSections.add(TES);
+            List<MARequestOccupation> occupations =  E.areaHandler.getMaRequestOccupations();
+            occupations.add(MAO);
+            E.areaHandler.setMaRequestOccupations(occupations);
+            // EdgeRepo
         }
         MAO.setTrackEdgeSections(maSections);
+
     }
 
     /**

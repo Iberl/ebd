@@ -18,6 +18,7 @@ import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.verweise._1_9_0.TCIDTOPKnoten;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,7 +77,7 @@ public class TopologyGraph {
     /**
      * HashMap die f&uuml;r die PlanPro-Kanten ID die Topologische Kante speichert
      */
-    public HashMap<String, Edge> edgeRepo = new HashMap<>();
+    public ConcurrentHashMap<String, Edge> edgeRepo = new ConcurrentHashMap<>();
         // String is TopNode_ID
     /**
      * HashMap die f&uuml;r die PlanPro-Knoten ID einen Topologische Knoten speichert
@@ -262,6 +263,8 @@ public class TopologyGraph {
         public String sId;
 
 
+        public TrackAreaHandler areaHandler;
+
         public ArrayList<Node> mergedNodes = new ArrayList<>();
 
         private ArrayList<String> planProIds = new ArrayList<>();
@@ -432,7 +435,7 @@ public class TopologyGraph {
          */
         public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB,
                     CTOPKante planProEdgeA, CTOPKante planProEdgeB) {
-
+            super();
             this.A = A;
             TopConnectFromA = topConnectFromA;
             this.B = B;
@@ -473,6 +476,7 @@ public class TopologyGraph {
          * @param Edge            - {@link CTOPKante} - PlanPro-Modell dieser Kante
          */
         public Edge(Node A, TopologyConnect topConnectFromA, Node B, TopologyConnect topConnectFromB, CTOPKante Edge) {
+            super();
             this.A = A;
 
             TopConnectFromA = topConnectFromA;
@@ -483,6 +487,8 @@ public class TopologyGraph {
             this.sId = Edge.getIdentitaet().getWert();
             this.planProIds.add(Edge.getIdentitaet().getWert());
             setCommonEdgeValues(Edge);
+
+            areaHandler = new TrackAreaHandler(this);
 
         }
 

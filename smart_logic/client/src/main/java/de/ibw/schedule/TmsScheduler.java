@@ -67,15 +67,11 @@ public class TmsScheduler {
             }
         }
     }
-
-
     public void cancelTask(long taskId) {
         boolean mayInterruptIfRunning = true;
         ScheduledFuture sf = futureTasks.getModel(taskId);
         sf.cancel(mayInterruptIfRunning);
     }
-
-
     public void start() throws MissingInformationException {
             if(started) return;
             started = true;
@@ -98,8 +94,6 @@ public class TmsScheduler {
 
                 it.remove();
             }
-
-
     }
 
     private void scheduleMessage(Date dScheduledDate, TmsMessage Tmp) throws MissingInformationException {
