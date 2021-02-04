@@ -35,7 +35,7 @@ class TescModulTest {
 
     }
 
-    @Test
+
     void checkDKW() throws IllegalNameLengthException, SessionClosedException, IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         initTest();
         new Thread() {
@@ -67,7 +67,7 @@ class TescModulTest {
         assertEquals(TrackElementStatus.Status.LEFT, TES.statusList.get(1));
     }
 
-    @Test
+
     void checkDKWRR() throws IllegalNameLengthException, SessionClosedException, IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         initTest();
         new Thread() {

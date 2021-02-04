@@ -23,7 +23,7 @@ class ITopologyFactoryTest {
     private DefaultRepo<String, TopologyGraph.Edge> edgeByReadableId = new DefaultRepo<>();
     private ArrayList<TopologyGraph.Edge> multible = new ArrayList<>();
 
-    @Test
+
     void printBereichsnamen() {
         PlanData.getInstance();
         Collection<TopologyGraph.Edge> edges = PlanData.topGraph.edgeRepo.values();

@@ -234,7 +234,6 @@ class SafetyLogicComposedRouteIsNonBlockedTest {
      * @throws InterruptedException
      */
     @Deprecated
-    @RepeatedTest(100)
     public void checkIfTwoTrainsNonIntersectingOnSameTrailAreSafe() throws InterruptedException {
         this.initTestEnv();
         // zwei Züge blockieren auf der gleichen Strecke
