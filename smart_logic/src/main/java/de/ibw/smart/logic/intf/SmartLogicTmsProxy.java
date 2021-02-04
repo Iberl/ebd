@@ -215,7 +215,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
             sTms_id = msgFromRbc.getHeader().tms_id;
         } catch(Exception E) {
             E.printStackTrace();
-            throw E;
+            //throw E;
 
         }
         return RbcModul.createResponseMessage(iErrorCode, sRbc_id, uuid, sTms_id, null);
