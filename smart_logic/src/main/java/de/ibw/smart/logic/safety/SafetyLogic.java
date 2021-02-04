@@ -181,7 +181,7 @@ public class SafetyLogic {
 
         LastSpot.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
         LastSpot.setNetElementRef(LastEdge.getId());
-
+        SpotLocationIntrinsic eoaSpot = null;
         SvL svl = new SvL(LastSpot);
 
         boolean q_overlap = rbcMa.eoa.overlap != null;
@@ -193,7 +193,8 @@ public class SafetyLogic {
         if(O == null) {
             if(qDangerPoint) {
                DP =  genDangerPoint(rbcMa.eoa.dangerPoint, LastSpot);
-
+                d_etcs_eoa_to_last_spot = new ETCS_DISTANCE();
+                d_etcs_eoa_to_last_spot.sDistance = DP.getD_OL().sDistance;
 
             } else {
                 DP = null;
@@ -212,7 +213,7 @@ public class SafetyLogic {
                 d_etcs_eoa_to_last_spot.sDistance = O.d_OL.sDistance;
             }
         }
-
+        eoaSpot = requestedTrackElementList.getPositionGoBackFromEndOfTrack(LastSpot, d_etcs_eoa_to_last_spot, q_scale);
 
         T_EMA t_ema = new T_EMA();
         t_ema.setTime((short) rbcMa.eoa.t_loa);
