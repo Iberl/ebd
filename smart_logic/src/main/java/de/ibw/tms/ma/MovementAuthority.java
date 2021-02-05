@@ -1,8 +1,14 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.history.data.ComposedRoute;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
+import de.ibw.tms.etcs.ETCS_DISTANCE;
+import de.ibw.tms.etcs.ETCS_SPEED;
+import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.ma.flanking.FlankArea;
 import de.ibw.tms.ma.occupation.MAOccupation;
+import ebd.rbc_tms.util.SpeedProfile;
 
 import java.io.Serializable;
 import java.util.List;
@@ -24,6 +30,7 @@ public class MovementAuthority implements Serializable {
         private List<MAOccupation> maOccupationList;
         private FlankArea FlArea;
 
+        private ComposedRoute RouteOfMa;
 
 
         public MovementAuthority() {
@@ -43,6 +50,14 @@ public class MovementAuthority implements Serializable {
                 this.RS = RS;
                 this.maOccupationList = maOccupationList;
                 FlArea = flArea;
+        }
+
+        public ComposedRoute getRouteOfMa() {
+                return RouteOfMa;
+        }
+
+        public void setRouteOfMa(ComposedRoute routeOfMa) {
+                RouteOfMa = routeOfMa;
         }
 
         public EoA getEndOfAuthority() {
@@ -65,8 +80,45 @@ public class MovementAuthority implements Serializable {
                 return speedProfile;
         }
 
+        /**
+         * set speedProfile with TMS SSP
+         * @param speedProfile
+         */
         public void setSpeedProfile(SSP speedProfile) {
                 this.speedProfile = speedProfile;
+        }
+
+        /**
+         * set speedProfile with RBC SSP
+         * @param speedProfile
+         */
+        public void setSpeedProfile(SpeedProfile speedProfile) throws SmartLogicException {
+                SSP ssp = speedProfile == null ? null : new SSP();
+                if(ssp != null) {
+                        List<SpeedProfile.Section> sections = speedProfile.sections;
+                        if(sections == null || sections.isEmpty()) {
+                                ssp = null;
+                        } else {
+                                for(SpeedProfile.Section S :sections) {
+                                        boolean q_front = S.q_front;
+                                        if(S == null) throw new SmartLogicException("Section must not be null in sectionlist");
+                                        ETCS_SPEED v_Static = new ETCS_SPEED();
+                                        ETCS_DISTANCE d_Static = new ETCS_DISTANCE();
+                                        NC_CDDIFF nc_cddiff = new NC_CDDIFF();
+                                        // categories
+                                        v_Static.bSpeed = (byte) S.v_static;
+
+                                        SpeedSegment tmsSegment = new SpeedSegment();
+                                        tmsSegment.setCategories(S.categories);
+                                        d_Static.sDistance = (short) S.d_static;
+                                        S.
+
+                                }
+                                ssp.setMovementAuthority(this);
+                        }
+                }
+
+
         }
 
         public GradientProfile getGradientProfile() {
@@ -96,4 +148,6 @@ public class MovementAuthority implements Serializable {
                         ", speedProfile=" + speedProfile +
                         '}';
         }
+
+
 }

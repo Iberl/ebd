@@ -7,11 +7,13 @@ import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.DefaultRepo;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.transaction.reactive.TransactionalOperatorExtensionsKt;
 
 import javax.swing.*;
 import java.math.BigDecimal;
@@ -22,8 +24,8 @@ import java.util.Iterator;
 /**
  * Routendatenverarbeitung innerhalb der smartLogic
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-11-27
+ * @version 0.5
+ * @since 2021-02-04
  */
 public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
 
@@ -51,6 +53,14 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
     }
 
+    /**
+     * This route will be gone back referenced on lastSpot on the last Trackedge
+     * @param lastSpot - end point beeing refered
+     * @param dMeterGoBack - distance to go back onto route
+     * @param i_QScale
+     * @return SpotLocationIntrinsic - Spot on route when gone back for "dMeterGoBack" meter
+     * @throws SmartLogicException - distance gone back is longer than track section in scope of last spot
+     */
     public SpotLocationIntrinsic getPositionGoBackFromEndOfTrack(SpotLocationIntrinsic lastSpot,
                                                                  ETCS_DISTANCE dMeterGoBack,
                                                                  int i_QScale) throws SmartLogicException {
@@ -104,6 +114,19 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
         return Spot;
     }
 
+    /**
+     * retrives Subroute as Trackarea, result - TrackArea "result" determines subtype of Trackarea beeing returned
+     * @param lastSpot
+     * @param dMeterGoBack
+     * @param i_QScale
+     * @param result
+     * @return
+     */
+    public TrackArea createSubRoute(SpotLocationIntrinsic lastSpot,
+                                    ETCS_DISTANCE dMeterGoBack,
+                                    int i_QScale, TrackArea result) {
+        return result;
+    }
 
 
 }

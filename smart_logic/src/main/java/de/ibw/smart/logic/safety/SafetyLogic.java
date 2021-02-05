@@ -177,12 +177,15 @@ public class SafetyLogic {
         MaoOccup.setApplicationDirection(TApplicationDirection.BOTH);
         MaoOccup.setTrackEdgeSections(MAO.getTrackEdgeSections());
         MovementAuthority MA = new MovementAuthority();
+        MA.setRouteOfMa(requestedTrackElementList);
         SpotLocationIntrinsic LastSpot = new SpotLocationIntrinsic();
 
         LastSpot.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
         LastSpot.setNetElementRef(LastEdge.getId());
         SpotLocationIntrinsic eoaSpot = null;
         SvL svl = new SvL(LastSpot);
+        SSP ssp;
+
 
         boolean q_overlap = rbcMa.eoa.overlap != null;
         boolean qDangerPoint = rbcMa.eoa.dangerPoint != null;
@@ -211,6 +214,7 @@ public class SafetyLogic {
             } else {
                 d_etcs_eoa_to_last_spot = new ETCS_DISTANCE();
                 d_etcs_eoa_to_last_spot.sDistance = O.d_OL.sDistance;
+                DP = null;
             }
         }
         eoaSpot = requestedTrackElementList.getPositionGoBackFromEndOfTrack(LastSpot, d_etcs_eoa_to_last_spot, q_scale);
@@ -229,29 +233,13 @@ public class SafetyLogic {
         EoA eoa = new EoA(eoaSpot,rbcMa.eoa.v_loa, t_ema,qEndTimer, D_ETCS_EndTimerStartLoc, t_End,
                 qDangerPoint, DP, q_overlap, O, Q);
 
-        SSP ssp = rbcMa.speedProfile == null ? null : new SSP();
-        if(ssp != null) {
-            List<SpeedProfile.Section> sections = rbcMa.speedProfile.sections;
-            if(sections == null || sections.isEmpty()) {
-                ssp = null;
-            } else {
-                for(SpeedProfile.Section S :sections) {
-                    if(S == null) throw new SmartLogicException("Section must not be null in sectionlist");
-                    ETCS_SPEED v_Static = new ETCS_SPEED();
-                    NC_CDDIFF nc_cddiff = new NC_CDDIFF();
-                    // categories
-                    v_Static.bSpeed = (byte) S.v_static;
 
-                    SpeedSegment Segment = new SpeedSegment();
-
-                }
-            }
-        }
 
 
         MA.setEndOfAuthority(eoa);
         MA.setSuperviesedLocation(svl);
-        MA.setSpeedProfile();
+
+        MA.setSpeedProfile(rbcMa.speedProfile);
 
 
 
