@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "de:20002:9000002",
+                        "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                         "rl100": "ZDK"
                     },
                     "planabfahrtort": {
@@ -45,7 +45,7 @@
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "de:20001:9000001",
+                        "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                         "rl100": "ZDW"
                     },
                     "planankunftort": {
@@ -59,21 +59,21 @@
                 "fahrtbezeichnung": "S 1012",
                 "fahrtname": "",
                 "fahrtnummer": "1012",
-                "gattungid": "S.423",
-                "linieid": "S1.0",
+                "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
+                "linieid": "",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "S",
-                "gattungid": "S.423",
+                "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
                 "name": "S-Bahn"
             }
         ],
         "allLinie": [
             {
-                "linieid": "S1.0",
+                "linieid": "",
                 "name": "S1"
             }
         ],
@@ -87,14 +87,14 @@
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "S1.1012.1",
+        "fahrtid": "920911a2-4717-4730-9a50-fc2987a21a1d",
         "fahrtrelation": {
             "startfahrtnummer": "1012",
             "startgattung": "S",
             "starthaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "de:20002:9000002",
+                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                 "rl100": "ZDK"
             },
             "startlinie": "S1",
@@ -103,7 +103,7 @@
             "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "de:20001:9000001",
+                "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
             "zielzeit": "2020-07-22T08:24:45+02:00"
@@ -116,7 +116,7 @@
     },
     "meta": {
         "correlation": [
-            "Scenario3.1011"
+            "e62ee930-b31c-4d59-89f6-72fc561bd880"
         ],
         "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",

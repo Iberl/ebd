@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "de:20002:9000002",
+                        "haltestelleid": "5b2d9d59-bf25-4e0f-983f-21aa043e5f13",
                         "rl100": "ZDK"
                     },
                     "planabfahrtort": {
@@ -45,7 +45,7 @@
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "de:20001:9000001",
+                        "haltestelleid": "feb18554-ff20-4188-ba90-f05b1178ac6f",
                         "rl100": "ZDW"
                     },
                     "planankunftort": {
@@ -59,21 +59,21 @@
                 "fahrtbezeichnung": "RE 2012",
                 "fahrtname": "",
                 "fahrtnummer": "2012",
-                "gattungid": "RB.219",
-                "linieid": "RB.1",
+                "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
+                "linieid": "",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "RE",
-                "gattungid": "RB.219",
+                "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
                 "name": "Regionalexpress"
             }
         ],
         "allLinie": [
             {
-                "linieid": "RB.1",
+                "linieid": "",
                 "name": "RE 1"
             }
         ],
@@ -87,14 +87,14 @@
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "RB.20.2012.1",
+        "fahrtid": "17ce569a-bc79-4e98-8914-9dc50291f162",
         "fahrtrelation": {
             "startfahrtnummer": "2012",
             "startgattung": "RE",
             "starthaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "de:20002:9000002",
+                "haltestelleid": "5b2d9d59-bf25-4e0f-983f-21aa043e5f13",
                 "rl100": "ZDK"
             },
             "startlinie": "RE 1",
@@ -103,7 +103,7 @@
             "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "de:20001:9000001",
+                "haltestelleid": "feb18554-ff20-4188-ba90-f05b1178ac6f",
                 "rl100": "ZDW"
             },
             "zielzeit": "2020-07-22T08:10:50+02:00"
@@ -116,7 +116,7 @@
     },
     "meta": {
         "correlation": [
-            "Scenario3.2012"
+            "7e0d8540-4b61-402f-84e6-8b05aa8d02cb"
         ],
         "created": "2019-01-22T08:00:00+02:00",
         "format": "RIPL",
