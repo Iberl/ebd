@@ -402,7 +402,7 @@ public class TescModul {
                 sHost = "localhost";
 
             } else {
-                sHost = ConfigHandler.getInstance().ipToInfrastructureServer;
+                sHost = SlConfigHandler.getInstance().ipToInfrastructureServer;
 
             }
 

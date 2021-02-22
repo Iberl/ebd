@@ -63,7 +63,11 @@ public class EventBusManager {
 
     private EventBusManager(int id, String prefix) throws IOException {
         LocalBus = new EventBus();
+
         logger = new Logging(LocalBus, id, prefix);
+
+
+
     }
 
     /**
