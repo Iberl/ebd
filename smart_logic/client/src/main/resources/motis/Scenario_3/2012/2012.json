@@ -10,7 +10,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-07-22T08:07:00+02:00",
+                    "abfahrtzeit": "2020-08-05T08:07:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
                     "bedarfshalt": false,
@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "5b2d9d59-bf25-4e0f-983f-21aa043e5f13",
+                        "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                         "rl100": "ZDK"
                     },
                     "planabfahrtort": {
@@ -26,7 +26,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planabfahrtzeit": "2020-07-22T08:07:00+02:00",
+                    "planabfahrtzeit": "2020-08-05T08:07:00+02:00",
                     "zusatzhalt": false
                 },
                 "allVereinigtmit": [],
@@ -38,14 +38,14 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-07-22T08:10:50+02:00",
+                    "ankunftzeit": "2020-08-05T08:10:50+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "feb18554-ff20-4188-ba90-f05b1178ac6f",
+                        "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                         "rl100": "ZDW"
                     },
                     "planankunftort": {
@@ -53,14 +53,14 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-07-22T08:10:50+02:00",
+                    "planankunftzeit": "2020-08-05T08:10:50+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "RE 2012",
                 "fahrtname": "",
                 "fahrtnummer": "2012",
                 "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
-                "linieid": "",
+                "linieid": "63322033-cca0-4465-9eb0-47b0f11cd1a5",
                 "verwaltungid": "80"
             }
         ],
@@ -73,7 +73,7 @@
         ],
         "allLinie": [
             {
-                "linieid": "",
+                "linieid": "63322033-cca0-4465-9eb0-47b0f11cd1a5",
                 "name": "RE 1"
             }
         ],
@@ -94,33 +94,33 @@
             "starthaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "5b2d9d59-bf25-4e0f-983f-21aa043e5f13",
+                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                 "rl100": "ZDK"
             },
             "startlinie": "RE 1",
             "startverwaltung": "80",
-            "startzeit": "2020-07-22T08:07:00+02:00",
+            "startzeit": "2020-08-05T08:07:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "feb18554-ff20-4188-ba90-f05b1178ac6f",
+                "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
-            "zielzeit": "2020-07-22T08:10:50+02:00"
+            "zielzeit": "2020-08-05T08:10:50+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-07-22",
-        "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-07-22T08:10:50+02:00"
+        "planstarttag": "2020-08-05",
+        "verkehrstag": "2020-08-05",
+        "zielzeit": "2020-08-05T08:10:50+02:00"
     },
     "meta": {
         "correlation": [
             "7e0d8540-4b61-402f-84e6-8b05aa8d02cb"
         ],
-        "created": "2019-01-22T08:00:00+02:00",
+        "created": "2020-08-05T07:52:10+02:00",
         "format": "RIPL",
-        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "id": "7f0ba869-1662-43b9-a8c7-c0033c746bd0",
         "owner": "ri",
         "sequence": 1595423025160,
         "version": "v3"

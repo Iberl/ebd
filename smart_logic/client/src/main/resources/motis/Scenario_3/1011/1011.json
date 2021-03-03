@@ -10,7 +10,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-07-22T08:00:00+02:00",
+                    "abfahrtzeit": "2020-08-05T08:00:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
                     "bedarfshalt": false,
@@ -26,7 +26,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planabfahrtzeit": "2020-07-22T08:00:00+02:00",
+                    "planabfahrtzeit": "2020-08-05T08:00:00+02:00",
                     "zusatzhalt": false
                 },
                 "allVereinigtmit": [],
@@ -38,7 +38,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-07-22T08:04:45+02:00",
+                    "ankunftzeit": "2020-08-05T08:04:45+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
@@ -53,14 +53,14 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-07-22T08:04:45+02:00",
+                    "planankunftzeit": "2020-08-05T08:04:45+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "S 1011",
                 "fahrtname": "",
                 "fahrtnummer": "1011",
                 "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
-                "linieid": "",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "verwaltungid": "80"
             }
         ],
@@ -73,7 +73,7 @@
         ],
         "allLinie": [
             {
-                "linieid": "",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "name": "S1"
             }
         ],
@@ -99,28 +99,28 @@
             },
             "startlinie": "S1",
             "startverwaltung": "80",
-            "startzeit": "2020-07-22T08:00:00+02:00",
+            "startzeit": "2020-08-05T08:00:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
                 "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                 "rl100": "ZDK"
             },
-            "zielzeit": "2020-07-22T08:04:45+02:00"
+            "zielzeit": "2020-08-05T08:04:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-07-22",
-        "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-07-22T08:04:45+02:00"
+        "planstarttag": "2020-08-05",
+        "verkehrstag": "2020-08-05",
+        "zielzeit": "2020-08-05T08:04:45+02:00"
     },
     "meta": {
         "correlation": [
             "1592638c-ece1-495e-b2c4-f07d809b1e4e"
         ],
-        "created": "2019-01-22T08:00:00+02:00",
+        "created": "2020-08-05T07:49:40+02:00",
         "format": "RIPL",
-        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "id": "82bc28ab-31e6-4ff6-bb20-c59a51917998",
         "owner": "ri",
         "sequence": 1595423025160,
         "version": "v3"

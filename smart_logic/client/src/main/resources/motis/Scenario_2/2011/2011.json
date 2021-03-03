@@ -5,13 +5,13 @@
         "allGattung": [
             {
                 "code": "RE",
-                "gattungid": "RB.219",
+                "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
                 "name": "Regionalexpress"
             }
         ],
         "allLinie": [
             {
-                "linieid": "RB.1",
+                "linieid": "63322033-cca0-4465-9eb0-47b0f11cd1a5",
                 "name": "RE 1"
             }
         ],
@@ -32,33 +32,33 @@
             "starthaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "de:20001:9000001",
+                "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
             "startlinie": "RE 1",
             "startverwaltung": "80",
-            "startzeit": "2020-07-22T08:07:00+02:00",
+            "startzeit": "2020-08-04T08:07:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "de:20002:9000002",
+                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                 "rl100": "ZDK"
             },
-            "zielzeit": "2020-07-22T08:10:45+02:00"
+            "zielzeit": "2020-08-04T08:10:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-07-22",
-        "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-07-22T08:10:45+02:00"
+        "planstarttag": "2020-08-04",
+        "verkehrstag": "2020-08-04",
+        "zielzeit": "2020-08-04T08:10:45+02:00"
     },
     "meta": {
         "correlation": [
-            "Scenario2.2011"
+            "1304577d-921c-41d1-a83d-71c1ff929ee6"
         ],
-        "created": "2019-01-22T08:00:00+02:00",
+        "created": "2020-08-04T07:49:20+02:00",
         "format": "RIPL",
-        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "id": "74b09ad2-4430-475f-a726-a49ae144b888",
         "owner": "ri",
         "sequence": 1595423025160,
         "version": "v3"

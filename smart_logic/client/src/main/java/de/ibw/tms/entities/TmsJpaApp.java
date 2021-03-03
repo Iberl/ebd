@@ -1,5 +1,6 @@
 package de.ibw.tms.entities;
 
+import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
 import de.motis.config.TmsConfig;
@@ -11,6 +12,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import java.io.IOException;
 
 
 @SpringBootApplication
@@ -45,6 +48,10 @@ public class TmsJpaApp {
 			SmartLogicClient.MotisProducer = M;
 			SmartLogicClient.proceedTmsLogic(repository);
 
+			log.info("TMS is up");
+			log.info("TMS send planed Train-Timetable");
+			sendTrainTimeTable();
+			log.info("Time-Table send");
 
 			log.info("Finished");
 			while (true);
@@ -53,6 +60,17 @@ public class TmsJpaApp {
 
 
 		};
+	}
+
+	private void sendTrainTimeTable() {
+		try {
+			MotisManager.sendSzenarioToMotis("Scenario_1");
+			log.info("Time-Table send");
+		} catch (IOException e) {
+			e.printStackTrace();
+			log.error("Time-Table Error sending");
+		}
+
 	}
 
 	public void printPermission(CheckMovementPermissionDAO P) {

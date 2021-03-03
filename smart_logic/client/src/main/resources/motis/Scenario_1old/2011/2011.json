@@ -4,42 +4,15 @@
         "allFahrtabschnitt": [
             {
                 "abfahrt": {
-                    "abfahrtid": "2012_1",
+                    "abfahrtid": "2011_1",
                     "abfahrtort": {
-                        "bezeichnung": "2",
+                        "bezeichnung": "4",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-08-04T08:07:00+02:00",
+                    "abfahrtzeit": "2020-08-03T08:07:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
-                    "bedarfshalt": false,
-                    "fahrgastwechsel": true,
-                    "haltestelle": {
-                        "bezeichnung": "K\u00e4fertal",
-                        "evanummer": "9000002",
-                        "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
-                        "rl100": "ZDK"
-                    },
-                    "planabfahrtort": {
-                        "bezeichnung": "2",
-                        "ortid": "",
-                        "orttyp": "GLEIS"
-                    },
-                    "planabfahrtzeit": "2020-08-04T08:07:00+02:00",
-                    "zusatzhalt": false
-                },
-                "allVereinigtmit": [],
-                "ankunft": {
-                    "allAnkunftzuordnung": [],
-                    "ankunftid": "2012_2",
-                    "ankunftort": {
-                        "bezeichnung": "5",
-                        "ortid": "",
-                        "orttyp": "GLEIS"
-                    },
-                    "ankunftzeit": "2020-08-04T08:10:50+02:00",
-                    "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
@@ -48,17 +21,44 @@
                         "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                         "rl100": "ZDW"
                     },
-                    "planankunftort": {
-                        "bezeichnung": "5",
+                    "planabfahrtort": {
+                        "bezeichnung": "4",
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-08-04T08:10:50+02:00",
+                    "planabfahrtzeit": "2020-08-03T08:07:00+02:00",
                     "zusatzhalt": false
                 },
-                "fahrtbezeichnung": "RE 2012",
+                "allVereinigtmit": [],
+                "ankunft": {
+                    "allAnkunftzuordnung": [],
+                    "ankunftid": "2011_2",
+                    "ankunftort": {
+                        "bezeichnung": "1",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "ankunftzeit": "2020-08-03T08:10:45+02:00",
+                    "ankunftzeitstatus": "FAHRPLAN",
+                    "bedarfshalt": false,
+                    "fahrgastwechsel": true,
+                    "haltestelle": {
+                        "bezeichnung": "K\u00e4fertal",
+                        "evanummer": "9000002",
+                        "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
+                        "rl100": "ZDK"
+                    },
+                    "planankunftort": {
+                        "bezeichnung": "1",
+                        "ortid": "",
+                        "orttyp": "GLEIS"
+                    },
+                    "planankunftzeit": "2020-08-03T08:10:45+02:00",
+                    "zusatzhalt": false
+                },
+                "fahrtbezeichnung": "RE 2011",
                 "fahrtname": "",
-                "fahrtnummer": "2012",
+                "fahrtnummer": "2011",
                 "gattungid": "a1d0b9e0-c1cf-49ad-80d0-0239bd03bbe9",
                 "linieid": "63322033-cca0-4465-9eb0-47b0f11cd1a5",
                 "verwaltungid": "80"
@@ -87,40 +87,40 @@
             }
         ],
         "allZubringerfahrtzuordnung": [],
-        "fahrtid": "17ce569a-bc79-4e98-8914-9dc50291f162",
+        "fahrtid": "052bb6ee-a707-45da-8a2b-6de09fb560fd",
         "fahrtrelation": {
-            "startfahrtnummer": "2012",
+            "startfahrtnummer": "2011",
             "startgattung": "RE",
             "starthaltestelle": {
-                "bezeichnung": "K\u00e4fertal",
-                "evanummer": "9000002",
-                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
-                "rl100": "ZDK"
-            },
-            "startlinie": "",
-            "startverwaltung": "80",
-            "startzeit": "2020-08-04T08:07:00+02:00",
-            "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
                 "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
-            "zielzeit": "2020-08-04T08:10:50+02:00"
+            "startlinie": "RE 1",
+            "startverwaltung": "80",
+            "startzeit": "2020-08-03T08:07:00+02:00",
+            "zielhaltestelle": {
+                "bezeichnung": "K\u00e4fertal",
+                "evanummer": "9000002",
+                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
+                "rl100": "ZDK"
+            },
+            "zielzeit": "2020-08-03T08:10:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-08-04",
-        "verkehrstag": "2020-08-04",
-        "zielzeit": "2020-08-04T08:10:50+02:00"
+        "planstarttag": "2020-08-03",
+        "verkehrstag": "2020-08-03",
+        "zielzeit": "2020-08-03T08:10:45+02:00"
     },
     "meta": {
         "correlation": [
-            "7e0d8540-4b61-402f-84e6-8b05aa8d02cb"
+            "7704ab1d-a792-43b4-92da-e7a79fba9da9"
         ],
-        "created": "2019-02-25T08:00:00+02:00",
+        "created": "2019-01-24T08:00:00+02:00",
         "format": "RIPL",
-        "id": "32e34fc6-6d04-4b3e-8388-69c9da8e4c80",
+        "id": "114372ec-b434-4bb1-bb08-7d4be3b800c9",
         "owner": "ri",
         "sequence": 1595423025160,
         "version": "v3"
