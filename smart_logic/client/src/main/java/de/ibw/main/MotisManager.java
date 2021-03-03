@@ -3,11 +3,11 @@ package de.ibw.main;
 
 import org.springframework.amqp.AmqpConnectException;
 import org.springframework.amqp.AmqpException;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 
 public class MotisManager {
@@ -50,47 +51,62 @@ public class MotisManager {
     private static File getScenarioDirectory() throws IOException, URISyntaxException {
         String scenarioID = getScenarioName();
         ClassLoader classLoader = MotisManager.class.getClassLoader();
-        URL url = classLoader.getResource("motis/" + scenarioID);
+        String url = classLoader.getResource("motis/" + scenarioID).toExternalForm();
 
-        return new File(new URI(url.toString()));
+        return new File(url);
     }
 
 
 
 
     public static void sendMotisFiles() throws IOException, URISyntaxException {
-        File ScenarioDirectory = getScenarioDirectory();
-        File[] subDirectories = ScenarioDirectory.listFiles();
-        if (subDirectories != null) {
-            for (File child : subDirectories) {
-                if(child.isDirectory()) {
-                    File[] jsonFiles = child.listFiles(jsonFilter);
+
+
+        String scenarioID = getScenarioName();
+        // abort it is in timetable
+        if(scenarioID.equals("Scenario_1")) return;
+
+
+        sendSzenarioToMotis(scenarioID);
+    }
+
+    public static void sendSzenarioToMotis(String scenarioID) throws IOException {
+        ClassLoader classLoader = MethodHandles.lookup().getClass().getClassLoader();
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
+
+
+        Resource[] motisResources = resolver.getResources("classpath:motis/" + scenarioID + "/*/*.json");
+        if (motisResources != null && motisResources.length > 0) {
+            for (Resource MotisResource : motisResources) {
+
+
 
                     new Thread() {
                         @Override
                         public void run() {
-                            for (File MotisJsonFile : jsonFiles) {
 
 
-                                Path path = Path.of(MotisJsonFile.getAbsolutePath());
-                                String msg = null;
+
+                            String msg = null;
                                 try {
-                                    msg = Files.readString(path);
+                                    BufferedReader reader = new BufferedReader(new InputStreamReader(MotisResource.getInputStream()));
+                                    msg = reader.lines().collect(Collectors.joining("\n"));
+
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
 
                                 try {
                                     SmartLogicClient.MotisProducer.produceMsg(msg);
-                                } catch (AmqpConnectException Aex) {
+                                } catch (Exception Aex) {
                                     Aex.printStackTrace();
                                 }
                             }
-                        }
+
                     }.start();
 
 
-                }
+
             }
         } else {
             throw new InvalidParameterException("Scenario-Directory is not valid");

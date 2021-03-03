@@ -10,7 +10,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-07-22T08:00:00+02:00",
+                    "abfahrtzeit": "2020-08-04T08:00:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
                     "bedarfshalt": false,
@@ -18,7 +18,7 @@
                     "haltestelle": {
                         "bezeichnung": "Wilhelmstal",
                         "evanummer": "9000001",
-                        "haltestelleid": "de:20001:9000001",
+                        "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                         "rl100": "ZDW"
                     },
                     "planabfahrtort": {
@@ -26,7 +26,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planabfahrtzeit": "2020-07-22T08:00:00+02:00",
+                    "planabfahrtzeit": "2020-08-04T08:00:00+02:00",
                     "zusatzhalt": false
                 },
                 "allVereinigtmit": [],
@@ -38,14 +38,14 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-07-22T08:04:45+02:00",
+                    "ankunftzeit": "2020-08-04T08:04:45+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
                     "haltestelle": {
                         "bezeichnung": "K\u00e4fertal",
                         "evanummer": "9000002",
-                        "haltestelleid": "de:20002:9000002",
+                        "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                         "rl100": "ZDK"
                     },
                     "planankunftort": {
@@ -53,27 +53,27 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-07-22T08:04:45+02:00",
+                    "planankunftzeit": "2020-08-04T08:04:45+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "S 1011",
                 "fahrtname": "",
                 "fahrtnummer": "1011",
-                "gattungid": "S.423",
-                "linieid": "S1.0",
+                "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "verwaltungid": "80"
             }
         ],
         "allGattung": [
             {
                 "code": "S",
-                "gattungid": "S.423",
+                "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
                 "name": "S-Bahn"
             }
         ],
         "allLinie": [
             {
-                "linieid": "S1.0",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "name": "S1"
             }
         ],
@@ -94,35 +94,35 @@
             "starthaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
-                "haltestelleid": "de:20001:9000001",
+                "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
             "startlinie": "S1",
             "startverwaltung": "80",
-            "startzeit": "2020-07-22T08:00:00+02:00",
+            "startzeit": "2020-08-04T08:00:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "K\u00e4fertal",
                 "evanummer": "9000002",
-                "haltestelleid": "de:20002:9000002",
+                "haltestelleid": "59fd5cee-ed78-48a7-985e-53eaea0895e6",
                 "rl100": "ZDK"
             },
-            "zielzeit": "2020-07-22T08:04:45+02:00"
+            "zielzeit": "2020-08-04T08:04:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-07-22",
-        "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-07-22T08:04:45+02:00"
+        "planstarttag": "2020-08-04",
+        "verkehrstag": "2020-08-04",
+        "zielzeit": "2020-08-04T08:04:45+02:00"
     },
     "meta": {
         "correlation": [
-            "Scenario2.1011"
+            "d05a8661-0beb-4420-8969-02acb7d62f2d"
         ],
-        "created": "2019-01-22T08:00:00+02:00",
+        "created": "2020-08-04T07:50:00+02:00",
         "format": "RIPL",
-        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "id": "3068fbf3-5410-4cd3-8e3b-bcfb315d1fcb",
         "owner": "ri",
         "sequence": 1595423025160,
-        "version": "v3"
+        "version": "v4"
     }
 }

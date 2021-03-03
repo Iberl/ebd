@@ -10,7 +10,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-08-04T08:07:00+02:00",
+                    "abfahrtzeit": "2020-08-05T08:07:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
                     "bedarfshalt": false,
@@ -26,7 +26,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planabfahrtzeit": "2020-08-04T08:07:00+02:00",
+                    "planabfahrtzeit": "2020-08-05T08:07:00+02:00",
                     "zusatzhalt": false
                 },
                 "allVereinigtmit": [],
@@ -38,7 +38,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-08-04T08:10:50+02:00",
+                    "ankunftzeit": "2020-08-05T08:10:50+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
@@ -53,7 +53,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-08-04T08:10:50+02:00",
+                    "planankunftzeit": "2020-08-05T08:10:50+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "RE 2012",
@@ -99,26 +99,26 @@
             },
             "startlinie": "",
             "startverwaltung": "80",
-            "startzeit": "2020-08-04T08:07:00+02:00",
+            "startzeit": "2020-08-05T08:07:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
                 "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
-            "zielzeit": "2020-08-04T08:10:50+02:00"
+            "zielzeit": "2020-08-05T08:10:50+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-08-04",
-        "verkehrstag": "2020-08-04",
-        "zielzeit": "2020-08-04T08:10:50+02:00"
+        "planstarttag": "2020-08-05",
+        "verkehrstag": "2020-08-05",
+        "zielzeit": "2020-08-05T08:10:50+02:00"
     },
     "meta": {
         "correlation": [
             "7e0d8540-4b61-402f-84e6-8b05aa8d02cb"
         ],
-        "created": "2019-02-25T08:00:00+02:00",
+        "created": "2019-03-25T08:00:00+02:00",
         "format": "RIPL",
         "id": "32e34fc6-6d04-4b3e-8388-69c9da8e4c80",
         "owner": "ri",

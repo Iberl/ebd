@@ -10,7 +10,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "abfahrtzeit": "2020-07-22T08:20:00+02:00",
+                    "abfahrtzeit": "2020-08-04T08:20:00+02:00",
                     "abfahrtzeitstatus": "FAHRPLAN",
                     "allAbfahrtzuordnung": [],
                     "bedarfshalt": false,
@@ -26,7 +26,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planabfahrtzeit": "2020-07-22T08:20:00+02:00",
+                    "planabfahrtzeit": "2020-08-04T08:20:00+02:00",
                     "zusatzhalt": false
                 },
                 "allVereinigtmit": [],
@@ -38,7 +38,7 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "ankunftzeit": "2020-07-22T08:24:45+02:00",
+                    "ankunftzeit": "2020-08-04T08:24:45+02:00",
                     "ankunftzeitstatus": "FAHRPLAN",
                     "bedarfshalt": false,
                     "fahrgastwechsel": true,
@@ -53,14 +53,14 @@
                         "ortid": "",
                         "orttyp": "GLEIS"
                     },
-                    "planankunftzeit": "2020-07-22T08:24:45+02:00",
+                    "planankunftzeit": "2020-08-04T08:24:45+02:00",
                     "zusatzhalt": false
                 },
                 "fahrtbezeichnung": "S 1012",
                 "fahrtname": "",
                 "fahrtnummer": "1012",
                 "gattungid": "823c3260-1eb9-4c7c-ae30-792de10c1b21",
-                "linieid": "",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "verwaltungid": "80"
             }
         ],
@@ -73,7 +73,7 @@
         ],
         "allLinie": [
             {
-                "linieid": "",
+                "linieid": "9ae7735a-7b9b-47aa-8045-5cbeefd3c52d",
                 "name": "S1"
             }
         ],
@@ -99,28 +99,28 @@
             },
             "startlinie": "S1",
             "startverwaltung": "80",
-            "startzeit": "2020-07-22T08:20:00+02:00",
+            "startzeit": "2020-08-04T08:20:00+02:00",
             "zielhaltestelle": {
                 "bezeichnung": "Wilhelmstal",
                 "evanummer": "9000001",
                 "haltestelleid": "b740c9f7-3a00-40d5-8f3e-2121dddad193",
                 "rl100": "ZDW"
             },
-            "zielzeit": "2020-07-22T08:24:45+02:00"
+            "zielzeit": "2020-08-04T08:24:45+02:00"
         },
         "fahrttyp": "PLANFAHRT",
         "kategorie": "SOLL",
-        "planstarttag": "2020-07-22",
-        "verkehrstag": "2020-07-22",
-        "zielzeit": "2020-07-22T08:24:45+02:00"
+        "planstarttag": "2020-08-04",
+        "verkehrstag": "2020-08-04",
+        "zielzeit": "2020-08-04T08:24:45+02:00"
     },
     "meta": {
         "correlation": [
             "e62ee930-b31c-4d59-89f6-72fc561bd880"
         ],
-        "created": "2019-01-22T08:00:00+02:00",
+        "created": "2019-02-23T08:00:00+02:00",
         "format": "RIPL",
-        "id": "443f45e2-c4f2-4fa6-89ef-736039a3706c",
+        "id": "e792d338-590d-47dc-ab04-8c31af0a18eb",
         "owner": "ri",
         "sequence": 1595423025160,
         "version": "v3"
