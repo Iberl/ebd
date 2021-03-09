@@ -9,12 +9,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.swing.*;
 import java.io.IOException;
 
+/**
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.5
+ * @since 2021-03-09
+ */
 
 @SpringBootApplication
 @EnableJpaRepositories()
@@ -24,10 +35,11 @@ public class TmsJpaApp {
 
 	public static TmsConfig Config;
 
+	public static TmsFramer TmsFramer = null;
+
 	public static void main(String[] args) {
 		SpringApplication.run(TmsJpaApp.class);
 	}
-
 
 
 	@Bean
@@ -41,8 +53,9 @@ public class TmsJpaApp {
 	}
 
 
+
 	@Bean
-	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C ) {
+	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C) {
 		return (args) -> {
 			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
@@ -54,9 +67,7 @@ public class TmsJpaApp {
 			log.info("Time-Table send");
 
 			log.info("Finished");
-			while (true);
-
-
+			while (true) ;
 
 
 		};
@@ -86,4 +97,60 @@ public class TmsJpaApp {
 		log.info(P.route.getId());
 	}
 
+
+	@RestController
+	@EnableAutoConfiguration
+	@Order(value=3)
+	@Component
+	public class TmsServiceController {
+		/*@RequestMapping(value="/blade", method= RequestMethod.GET)
+		public ModelAndView getProduct() {
+			ConfigurableApplicationContext context = new SpringApplicationBuilder(TmsJpaApp.class).headless(false).run(null);
+			TmsFrame tmsFrame = context.getBean(TmsFrame.class);
+
+			ModelAndView modelAndView = new ModelAndView();
+
+			modelAndView.setViewName("hallo");
+			return modelAndView;
+
+
+		}
+	*/
+		@GetMapping(path = "/")
+		public String home() { // <== changed return type, added parameter
+
+
+			if(TmsJpaApp.this.TmsFramer.tmsFrame != null) {
+				TmsJpaApp.this.TmsFramer.tmsFrame.setVisible(true);
+			}
+
+
+
+			return "Hello world!"; // view name, aka template base name
+		}
+
+
+	}
+
+	@Component
+	@Order(value=2)
+	public class TmsFramer implements CommandLineRunner {
+
+
+
+		public JFrame tmsFrame = null;
+
+		@Override
+		public void run(String... args) throws Exception {
+			TmsJpaApp.TmsFramer = this;
+			System.setProperty("java.awt.headless", "false");
+			SwingUtilities.invokeLater(() -> {
+				if(tmsFrame == null) tmsFrame = new JFrame();
+
+			});
+		}
+
+
+
+	}
 }
