@@ -213,7 +213,7 @@ public class TopologyFactory implements ITopologyFactory {
                         continue;
                     }
                     NextGeoNode = (CGEOKnoten) geoPointRepo.getModel(sNextGeo);
-                    //handleGeoEdges(A, currentGeo, NextGeoNode);
+                    handleGeoEdges(A, currentGeo, NextGeoNode);
 
 
                 }
@@ -600,44 +600,45 @@ public class TopologyFactory implements ITopologyFactory {
                 isBMissing = E.TopConnectFromB.equals(TopologyConnect.ENDE) || E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG);
                 if(isAMissing && isBMissing) {
                     throw new InvalidParameterException("Both Topology Nodes are End-Nodes");
-                } else if (!isAMissing && !isBMissing) {
-                    //bothMissing(B, TopKante, E, decBalise);
-
-
                 } else {
                     Boolean isUpwardToEdge = null;
                     CrossingSwitch CS = null;
                     BigDecimal decResult = null;
-                    if(isAMissing) {
+                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(
+                            TopKante.getIdentitaet().getWert(),
+                            !isAMissing,
+                            B.getBalisenPositionFromNodeA().doubleValue());
+                    
+                    /*if(isAMissing) {
                         CS = (CrossingSwitch) E.B.NodeImpl;
 
                     } else {
                         CS = (CrossingSwitch) E.A.NodeImpl;
 
 
-                    }
-                    BigDecimal dec = CS.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
-                    if(B.getPlanProTrack().getBezeichnung().getBezeichnungStrecke().getWert().equals("2000")) {
+                    }*/
+                    //BigDecimal dec = CS.getTrackMeterByTrackId(B.getPlanProTrack().getIdentitaet().getWert());
+                    /*if(B.getPlanProTrack().getBezeichnung().getBezeichnungStrecke().getWert().equals("2000")) {
                         if(B.getHashcodeOfBaliseDp() == 4731) {
                             isUpwardToEdge = CH.isTrackPosition_2000_4731_Upward;
                         }
-                    }
+                    }*/
 
-                    if(isUpwardToEdge == null) throw new InvalidParameterException("No Setting for Balise prepared.");
-                    if(isUpwardToEdge) {
+                    //if(isUpwardToEdge == null) throw new InvalidParameterException("No Setting for Balise prepared.");
+                    /*if(isUpwardToEdge) {
 
-                        decResult = dec.add(decBalise);
+                        //decResult = dec.add(decBalise);
 
                     } else {
-                        decResult = dec.subtract(decBalise);
-                    }
-                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), !isAMissing, decResult.doubleValue());
+                        //decResult = dec.subtract(decBalise);
+                    }*/
+
                 }
 
 
             } catch(Exception Ex) {
                 Ex.printStackTrace();
-                //geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+                geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
             }
 
 
@@ -645,8 +646,8 @@ public class TopologyFactory implements ITopologyFactory {
             // getGeoCoordinate()
 
 
-            //B.setX(geoCoordinate.getX());
-            //B.setY(geoCoordinate.getY());
+            B.setX(geoCoordinate.getX());
+            B.setY(geoCoordinate.getY());
 
             //UtilFunction.calcTargetGeoByStartPoint(B, dA, Geo_A, Geo_B);
 

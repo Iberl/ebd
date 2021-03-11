@@ -385,7 +385,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * @param g2d
      */
     private void paintRequestedMa(Graphics2D g2d) {
-        throw new NotImplementedException("deprecated");
+        System.err.println("Paint Ma not implemented");
+        //throw new NotImplementedException("deprecated");
         /*
         Collection<MaRequestWrapper> maRequests = MaRepository.getMaList();
         System.out.println("CountRequest: " + maRequests.size());
@@ -538,7 +539,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 if(distanceA1 <= prevDistance + geoEdgeLength) break;
                 prevDistance += geoEdgeLength;
             }
-            return null; //getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+            return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
     }
 
     /**
@@ -549,21 +550,21 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * @return
      */
     private static GeometricCoordinate getGeoCoordinate(CGEOKante geoEdge, boolean b_fromA, double distance) {
-        throw new NotImplementedException("deprecated");
-        /*
+
+
         double geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
         if(geoEdgeLength < distance) {
             throw new IllegalArgumentException("The desired point must lay on the geo edge.");
         }
 
         // Helper values for calculating the coordinates
-        GeoCoordinates nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
-        GeoCoordinates nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+        GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+        GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
         // Create a new Coordinates instance
         return createGeoCoordinates(b_fromA, geoEdgeLength, distance, nodeA, nodeB);
 
-         */
+
     }
 
     /**
@@ -576,9 +577,9 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * @return
      */
     private static GeometricCoordinate createGeoCoordinates(boolean b_fromA, double edgeLength, double distance, GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
-        throw new NotImplementedException("deprecated");
-        /*
-        GeoCoordinates coordinates = new GeoCoordinates();
+
+
+        GeometricCoordinate coordinates = new GeometricCoordinate();
 
         double ratio = distance / edgeLength;
         double dx = ratio * (b_fromA ?  nodeB.getX() - nodeA.getX() : nodeA.getX() - nodeB.getX());
@@ -593,7 +594,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
         return coordinates;
 
-         */
+
     }
 
     private static void drawArrowHead(Graphics2D g2d, Line2D.Double line) {

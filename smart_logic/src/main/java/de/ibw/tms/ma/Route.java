@@ -22,6 +22,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
+/**
+ *
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.4
+ * @since 2021-01-25
+ */
+
 @Entity
 public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
     public static final String CLASS_IDENTIFIER = "Route";

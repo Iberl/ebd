@@ -18,7 +18,15 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-
+/**
+ * Ein Punkt im Topologischen Netz
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.5
+ * @since 2021-03-04
+ */
 public class SpotLocation extends EntityLocation implements IRTMSpotLocation, Serializable {
 
     public static final String CLASS_IDENTIFIER = "Spot_Location";

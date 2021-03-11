@@ -3,6 +3,8 @@ package de.ibw.tms.entities;
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
+import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.ui.TmsFrameUtil;
 import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
@@ -24,7 +26,7 @@ import java.io.IOException;
 /**
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.5
- * @since 2021-03-09
+ * @since 2021-03-10
  */
 
 @SpringBootApplication
@@ -120,9 +122,14 @@ public class TmsJpaApp {
 		public String home() { // <== changed return type, added parameter
 
 
-			if(TmsJpaApp.this.TmsFramer.tmsFrame != null) {
-				TmsJpaApp.this.TmsFramer.tmsFrame.setVisible(true);
-			}
+				System.setProperty("java.awt.headless", "false");
+				SwingUtilities.invokeLater(() -> {
+					if(TmsJpaApp.this.TmsFramer.tmsFrame == null) TmsJpaApp.this.TmsFramer.tmsFrame =
+							TmsFrameUtil.createTmsFrame();
+					TmsJpaApp.this.TmsFramer.tmsFrame.setVisible(true);
+
+
+				});
 
 
 
@@ -143,11 +150,11 @@ public class TmsJpaApp {
 		@Override
 		public void run(String... args) throws Exception {
 			TmsJpaApp.TmsFramer = this;
-			System.setProperty("java.awt.headless", "false");
-			SwingUtilities.invokeLater(() -> {
-				if(tmsFrame == null) tmsFrame = new JFrame();
-
-			});
+//			System.setProperty("java.awt.headless", "false");
+//			SwingUtilities.invokeLater(() -> {
+//				if(tmsFrame == null) tmsFrame = new JFrame();
+//
+//			});
 		}
 
 

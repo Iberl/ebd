@@ -15,7 +15,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
+/**
+ * Eine lineare Ausdehnungsangabe im Gleisnetz
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.5
+ * @since 2021-03-04
+ */
 public class LinearLocation extends EntityLocation implements IRTMLinearLocation, Serializable {
     private static final String CLASS_IDENTIFIER = "Linear_Location";
 

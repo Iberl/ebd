@@ -8,11 +8,22 @@ import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.ma.flanking.FlankArea;
 import de.ibw.tms.ma.occupation.MAOccupation;
+import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import ebd.rbc_tms.util.SpeedProfile;
 
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Die MA ist eine Modellklasse für MovementAuthorities im ETCS-System.
+ * Der Inhalt von MA-Objekten werden auch an das RBC &uuml;betrtragen
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.5
+ * @since 2021-03-04
+ */
 public class MovementAuthority implements Serializable {
         @Expose
         public EoA endOfAuthority;
@@ -32,10 +43,25 @@ public class MovementAuthority implements Serializable {
 
         private ComposedRoute RouteOfMa;
 
-
+        /**
+         * Default Constructor wird gebraucht und sollte vorhanden bleiben
+         */
         public MovementAuthority() {
         }
 
+        /**
+         * @deprecated
+         * @param endOfAuthority
+         * @param superviesedLocation
+         * @param speedProfile
+         * @param gradientProfile
+         * @param sections
+         * @param axleLoadProfile
+         * @param modeChanges
+         * @param RS
+         * @param maOccupationList
+         * @param flArea
+         */
         public MovementAuthority(EoA endOfAuthority, SvL superviesedLocation, SSP speedProfile,
                                  GradientProfile gradientProfile, List<MASection> sections,
                                  AxleLoadSpeedProfile axleLoadProfile, ModeChangeProfile modeChanges,
@@ -100,8 +126,9 @@ public class MovementAuthority implements Serializable {
                                 ssp = null;
                         } else {
                                 for(SpeedProfile.Section S :sections) {
-                                        boolean q_front = S.q_front;
                                         if(S == null) throw new SmartLogicException("Section must not be null in sectionlist");
+                                        boolean q_front = S.q_front;
+
                                         ETCS_SPEED v_Static = new ETCS_SPEED();
                                         ETCS_DISTANCE d_Static = new ETCS_DISTANCE();
                                         NC_CDDIFF nc_cddiff = new NC_CDDIFF();
@@ -111,7 +138,10 @@ public class MovementAuthority implements Serializable {
                                         SpeedSegment tmsSegment = new SpeedSegment();
                                         tmsSegment.setCategories(S.categories);
                                         d_Static.sDistance = (short) S.d_static;
-                                        S.
+                                        tmsSegment.setV_STATIC(v_Static);
+
+                                        //this.getRouteOfMa().createSubRoute()
+
 
                                 }
                                 ssp.setMovementAuthority(this);
@@ -126,7 +156,7 @@ public class MovementAuthority implements Serializable {
         }
 
         public void setGradientProfile(GradientProfile gradientProfile) {
-                // nicht auskommentieren am Donnerstag
+
                 this.gradientProfile = gradientProfile;
         }
 

@@ -7,6 +7,9 @@ import de.ibw.tms.train.model.TrainModel;
 
 import java.util.ArrayList;
 
+/**
+ *
+ */
 public class MaRequestWrapper {
 
     private static int iRequestCount = 0;

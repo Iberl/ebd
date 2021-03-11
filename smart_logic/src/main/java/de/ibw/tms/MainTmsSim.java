@@ -48,7 +48,7 @@ public class MainTmsSim {
     /**
      * Horcht auf Befehl neuzuzeichnen
      */
-    public static Flow.Subscriber<String> MainSubscriber = new Flow.Subscriber<String>() {
+    /*public static Flow.Subscriber<String> MainSubscriber = new Flow.Subscriber<String>() {
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
             MainTmsSim.MaSubscription = subscription;
@@ -79,7 +79,7 @@ public class MainTmsSim {
 
         }
     };
-
+*/
 
     private static boolean bFakeReceiver = true;
     private static boolean bSendRbcRequest = false;

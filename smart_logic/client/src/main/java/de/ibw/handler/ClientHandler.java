@@ -5,7 +5,9 @@ import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.ui.PositionReportController;
 import ebd.rbc_tms.Message;
+import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,7 @@ public class ClientHandler extends SmartClientHandler {
                     MotisManager.sendMotisFiles();
                     this.Client.startScheduler();
                 }
+                PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader().rbc_id);
             }
         }
 

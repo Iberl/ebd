@@ -301,15 +301,15 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         this.BrachingStates.update(this.Status);
         if(this.Status.equals(SwitchStatus.RIGHT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
-            BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getRightPosition());
-            handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
+            //BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getRightPosition());
+            //handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
 
         }
         if(this.Status.equals(SwitchStatus.LEFT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
-            BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getLeftPosition());
+            //BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getLeftPosition());
 
-            handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
+            //handleOutputRelation(BranchPoint.getOutputRelation(), BranchPoint.getRemotePoint());
         }
 
 

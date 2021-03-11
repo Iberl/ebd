@@ -15,9 +15,23 @@ import ebd.rbc_tms.util.SpeedProfile;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Ein Segment des Static Speed Profile einer MovementAuthority (an das RBC)
+ *
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 0.5
+ * @since 2021-03-04
+ */
+
 @JsonIgnoreProperties(value = {
         "ssp"
 })
+
+/**
+ *
+ */
 public class SpeedSegment extends LinearContiguousTrackArea implements Serializable {
     public static final String CLASS_IDENTIFIER = "Speed_Segment";
     private SSP ssp;
@@ -38,11 +52,19 @@ public class SpeedSegment extends LinearContiguousTrackArea implements Serializa
 
     private List<SpeedProfile.Section.Category> categories;
 
-
+    /**
+     * wird derzeit über Categories abgeildet siehe oben
+     */
     private SpeedChange ChangeA;
     private SpeedChange ChangeB;
 
-
+    /**
+     * @deprecated
+     * Ein Segement mit start und endpunkt und Richtung der G&uuml;ltigkeit
+     * @param begin - Startort dieses Segmentes
+     * @param end - Endort dieses Segmentes
+     * @param direction - Richtung der G&uuml;ltigkeit des Segmentes
+     */
     public SpeedSegment(de.ibw.tms.ma.location.SpotLocation begin, de.ibw.tms.ma.location.SpotLocation end, ApplicationDirection direction) {
         super(CLASS_IDENTIFIER);
 
@@ -50,6 +72,9 @@ public class SpeedSegment extends LinearContiguousTrackArea implements Serializa
 
     }
 
+    /**
+     * recommented constructor
+     */
     public SpeedSegment() {
         super(CLASS_IDENTIFIER);
     }

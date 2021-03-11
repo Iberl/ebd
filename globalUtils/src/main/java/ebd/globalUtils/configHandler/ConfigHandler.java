@@ -72,7 +72,7 @@ public class ConfigHandler {
     /**
      * If true, the program will try to connect to the infrastructure server.
      */
-    public boolean useInfrastructureServer = false;
+    public boolean useInfrastructureServer = true;
     /**
      * If true, the program will try to connect to the Train Manager System program.
      */

@@ -23,8 +23,8 @@ import java.util.List;
  * Diese Klasse stellt eine Balise mit deren Koordinaten dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-10-07
+ * @version 0.51
+ * @since 2021-03-11
  */
 public class Balise implements ICoord<Double> {
     /**
@@ -101,10 +101,15 @@ public class Balise implements ICoord<Double> {
         return this.getPlanProDataPoint().getDatenpunktAllg().getDatenpunktLaenge().getWert();
     }
 
+    /**
+     * Get the distance from A-Node
+     * @return BigDecimal - distance in Meter
+     */
     public BigDecimal getBalisenPositionFromNodeA() {
         BigDecimal dResult = this.PlanProDataPoint.getPunktObjektTOPKante().get(0).getAbstand().getWert();
-        if(isNominalTriggeredToNodeB()) return dResult;
-        else return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert().subtract(dResult);
+        //if(isNominalTriggeredToNodeB()) return dResult;
+        //else return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert().subtract(dResult);
+        return dResult;
     }
 
 

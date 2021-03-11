@@ -5,6 +5,9 @@ import de.ibw.tms.etcs.ETCS_DISTANCE;
 
 import java.util.ArrayList;
 
+/**
+ *
+ */
 public class RouteSuitabilityData extends ArrayList<ETCSRouteSuitabilityDataPoint> {
     private boolean q_trackinit;
     private ETCS_DISTANCE d_trackinit;

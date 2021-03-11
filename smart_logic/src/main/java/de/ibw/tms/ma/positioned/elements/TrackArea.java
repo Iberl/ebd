@@ -8,6 +8,9 @@ import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+/**
+ *
+ */
 public class TrackArea extends LinearElement {
     TApplicationDirection applicationDirection;
     List<TrackEdgeSection> trackEdgeSections;

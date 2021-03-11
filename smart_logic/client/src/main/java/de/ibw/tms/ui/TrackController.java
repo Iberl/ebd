@@ -1,6 +1,9 @@
-package de.ibw.tms.trackplan.controller;
+package de.ibw.tms.ui;
+
+
 
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.Rail;
@@ -46,7 +49,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
      */
     public static TrackController getInstance(TrackplanGraphicPanel TrackPanel) {
 
-            return new TrackController(TrackPanel);
+        return new TrackController(TrackPanel);
 
 
     }
@@ -72,7 +75,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MaCreatingFrame(new MaRequestWrapper(null), MainTmsSim.MainFrame);
+                new MaCreatingFrame(new MaRequestWrapper(null), TmsJpaApp.TmsFramer.tmsFrame);
             }
         });
     }
@@ -91,31 +94,31 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
             }
         });
         emptyLabel.addMouseListener(new MouseListener() {
-                                        @Override
-                                        public void mouseClicked(MouseEvent mouseEvent) {
-                                            TrackController.this.EditMaMenu.setVisible(false);
-                                        }
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                TrackController.this.EditMaMenu.setVisible(false);
+            }
 
-                                        @Override
-                                        public void mousePressed(MouseEvent mouseEvent) {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
 
-                                        }
+            }
 
-                                        @Override
-                                        public void mouseReleased(MouseEvent mouseEvent) {
+            @Override
+            public void mouseReleased(MouseEvent mouseEvent) {
 
-                                        }
+            }
 
-                                        @Override
-                                        public void mouseEntered(MouseEvent mouseEvent) {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
 
-                                        }
+            }
 
-                                        @Override
-                                        public void mouseExited(MouseEvent mouseEvent) {
+            @Override
+            public void mouseExited(MouseEvent mouseEvent) {
 
-                                        }
-                                    });
+            }
+        });
         EditMaMenu = new JPopupMenu();
         Collection<MaRequestWrapper> maRequest = MaRepository.getMaList();
         EditMaMenu.setLocation(300, 100);
@@ -132,7 +135,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                new MaCreatingFrame(Request, MainTmsSim.MainFrame);
+                                new MaCreatingFrame(Request, TmsJpaApp.TmsFramer.tmsFrame);
                             }
                         });
 
@@ -194,7 +197,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         }
         JFrame jFscopeFrame;
         if(isMainWindow) {
-            jFscopeFrame = MainTmsSim.MainFrame;
+            jFscopeFrame = TmsJpaApp.TmsFramer.tmsFrame;
         } else {
             jFscopeFrame = MaCreatingFrame.CurrentMaCreatingFrame;
         }
@@ -233,7 +236,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         List<Flow.Subscriber> returnList = new ArrayList<Flow.Subscriber>();
-        //returnList.add(TmsFrameUtil.Ma);
+        returnList.add(TmsFrameUtil.MainSubscriber);
         return returnList;
     }
 
@@ -255,7 +258,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         CloseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                TrackController.this.DeleteMaMenu.setVisible(false);
+                DeleteMaMenu.setVisible(false);
             }
         });
         emptyLabel.addMouseListener(new MouseListener() {

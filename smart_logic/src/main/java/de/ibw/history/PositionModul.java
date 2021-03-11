@@ -5,6 +5,7 @@ import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.history.data.RouteMap;
 import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.occupation.Occupation;
@@ -91,7 +92,11 @@ public class PositionModul implements IPositionModul {
      */
     public synchronized void addPositionData(PositionData PD, PositionEnterType EnterType) {
         if(PD == null) throw new NullPointerException("Position Data must not be Null");
-        PD = handleMovementAuthorities(PD, EnterType);
+        try {
+            PD = handleMovementAuthorities(PD, EnterType);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+        }
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
         log("Update occupation of MOB " + PD.getNid_engine());
         if(NewestData == null) {
@@ -123,7 +128,7 @@ public class PositionModul implements IPositionModul {
         }
     }
 
-    private PositionData handleMovementAuthorities(PositionData pd, PositionEnterType enterType) {
+    private PositionData handleMovementAuthorities(PositionData pd, PositionEnterType enterType) throws SmartLogicException {
         ComposedRoute Route = this.getRouteOfNidEngine(pd.getNid_engine());
         if(enterType == null) {
             return pd;
@@ -137,7 +142,7 @@ public class PositionModul implements IPositionModul {
 
     }
 
-    private PositionData evaluatePositionReport(ComposedRoute route, PositionData PD) {
+    private PositionData evaluatePositionReport(ComposedRoute route, PositionData PD) throws SmartLogicException {
         Boolean isTrainMovingNominal = null;
         int iDistanceToBalise = PD.getPos().d_lrbg;
 

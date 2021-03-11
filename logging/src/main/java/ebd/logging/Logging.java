@@ -33,40 +33,39 @@ public class Logging{
 
     static {
         //format of logs is defined in resources/logging.properties
-        File propertyFile = new File("configuration/logging.properties");
+        //File propertyFile = new File("configuration/logging.properties");
         try{
-            if(!propertyFile.exists() || propertyFile.length() == 0){
-                String pathToPropertyFile = Thread.currentThread().getContextClassLoader().getResource("logging.properties").getFile();
-                boolean createdDir = propertyFile.getParentFile().mkdir();
-                boolean createdFile = propertyFile.createNewFile();
-                if(!createdFile && !propertyFile.exists()){
-                    throw new IOException("logging.properties could not be created");
-                }
-                try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
 
-                    if(inputStream == null) {
+//                String pathToPropertyFile = Thread.currentThread().getContextClassLoader().getResource("logging.properties").getFile();
+//                boolean createdDir = propertyFile.getParentFile().mkdir();
+//                boolean createdFile = propertyFile.createNewFile();
+//                if(!createdFile && !propertyFile.exists()){
+//                    throw new IOException("logging.properties could not be created");
+//                }
+                InputStream is = Logging.class.getClassLoader().getResourceAsStream("logging.properties");
+                //try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("logging.properties")) {
+
+                    if(is == null) {
                         throw new IOException("The stream logging.properties could not be found");
                     }
 
-                    try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
-                        int length;
-                        byte[] buffer = new byte[1024];
-                        while ((length = inputStream.read(buffer)) != -1) {
-                            outputStream.write(buffer, 0, length);
-                        }
-                    }catch (IOException ioe){
-                        throw new IOException("logging.properties could not be created. " + ioe.getMessage());
-                    }
-                }catch (IOException ioe){
-                    throw ioe;
-                }
-            }
+//                    try (FileOutputStream outputStream = new FileOutputStream(propertyFile)) {
+//                        int length;
+//                        byte[] buffer = new byte[1024];
+//                        while ((length = inputStream.read(buffer)) != -1) {
+//                            outputStream.write(buffer, 0, length);
+//                        }
+//                    }catch (IOException ioe){
+//                        throw new IOException("logging.properties could not be created. " + ioe.getMessage());
+//                    }
+
+
         }catch (IOException e){
             e.printStackTrace();
         }
 
 
-        System.setProperty("java.util.logging.config.file", propertyFile.getPath());
+        //System.setProperty("java.util.logging.config.file", propertyFile.getPath());
         File logDirectory = new File("log/");
         System.out.println(logDirectory.getAbsolutePath());
         if(!logDirectory.exists()){
@@ -75,7 +74,7 @@ public class Logging{
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmmss");
         logDateTime = LocalDateTime.now().format(dateTimeFormatter);
         try {
-            fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
+            //fileHandlerAll = new FileHandler("log/" + logDateTime +" AllEventBuses.log");
             pipeHandler = new PipeHandler();
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,10 +93,10 @@ public class Logging{
         String trainIDwlZeros = String.format("%05d", trainID);
         logPrefix = prefix + trainIDwlZeros;
         logger = Logger.getLogger(logPrefix);
-        logger.addHandler(fileHandlerAll);
+        //logger.addHandler(fileHandlerAll);
         logger.addHandler(pipeHandler);
-        Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
-        logger.addHandler(fileHandler);
+        //Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
+        //logger.addHandler(fileHandler);
 
         this.eventBus = eventBus;
         this.eventBus.register(this);

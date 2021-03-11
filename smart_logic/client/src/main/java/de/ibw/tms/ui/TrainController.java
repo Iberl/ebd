@@ -1,22 +1,19 @@
-package de.ibw.tms.train.controller;
+package de.ibw.tms.ui;
 
 import de.ibw.feed.Balise;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.TmsMovementPermissionRequest;
-import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
-import de.ibw.tms.train.ui.SingleTrainSubPanel;
+import de.ibw.tms.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.*;
@@ -32,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
+
 /**
  * Controller der die Metadaten zu dem Zug verwaltet
  * Das kann im MA-Beantragungsfenster unterhalb der Karte editiert werden.
@@ -74,7 +72,7 @@ public class TrainController extends SubmissionPublisher implements IController 
     @Override
     public List<Flow.Subscriber> getSubscriberList() {
         ArrayList result = new ArrayList();
-        //result.add(MainTmsSim.MainSubscriber);
+        result.add(TmsFrameUtil.MainSubscriber);
         return result;
     }
 
@@ -118,6 +116,7 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
     /**
+     * @deprecated
      * Schicht MA zur SmartLogic
      * @param requestWrapper {@link MaRequestWrapper} - Die Anfrage einer MA an die SL
      * @param R {@link Route} - die angeforderte Route
@@ -131,7 +130,7 @@ public class TrainController extends SubmissionPublisher implements IController 
         boolean m_ack = true;
         RbcMaAdapter MaAdapter = null;
         Integer nid_lrbg = extractNidBaliseId(requestWrapper);
-
+        Double dDistanceToBalise = extractDistanceToBalise(requestWrapper);
         EOA.EndTimer TimerEnd = new EOA.EndTimer(ETCSVariables.T_ENDTIMER_INFINITY, ETCSVariables.D_ENDTIMERSTARTLOC);
         LinkingProfileAdapter LPA = null;
         int Q_DIR = extractQ_DIR(requestWrapper);
@@ -181,109 +180,102 @@ public class TrainController extends SubmissionPublisher implements IController 
         }
         if(R.getLocation().getBegin() != null && R.getLocation().getEnd() != null) {
             System.out.println("Track has start and end");
-            requestWrapper.setRoute(R);
-            requestWrapper.save();
-            this.publish();
-
-
-
-
-            // return to parent
-            //parent.dispose();
-
-
-
-            RbcMA Ma = new RbcMA(Model.label);
-            SpotLocation SL = R.getLocation().getEnd();
-            /*EoA Eoa = new EoA(SL.getChainage(), SL.getTrackElement(), new SectionOfLine());
-
-            Eoa.setV_EMA(0);
-            Eoa.setDangerPoint(null);
-            Eoa.setQ_DANGERPOINT(false);
-            Eoa.setQ_OVERLAP(false);
-            Eoa.setOverlap(null);
-            Eoa.setD_ENDTIMERSTARTLOC(null);
-            Eoa.setT_ENDTIMER(null); // unendlich TODO
-            Eoa.setQ_scale(null);
-
-            Ma.setEndOfAuthority(Eoa);
-*/
-            GradientProfile GrProfile = new GradientProfile(Ma);
-            ETCS_GRADIENT etcs_gradient = new ETCS_GRADIENT();
-            etcs_gradient.bGradient = 0;
-
-            /*GradientSegment GrSegment = new GradientSegment(R.getLocation().getBegin(), R.getLocation().getEnd(),
-                    ApplicationDirection.BOTH);
-            GrSegment.setGradient(etcs_gradient, false);
-            GrProfile.addSegment(GrSegment);
-*/
-            Chainage EndCha =  SL.getChainage();
-            //Chainage SvLCh = new Chainage(EndCha.getiMeters() + 400);
-
-
-
-            // 0 vmax
-            SvL SuperVL = RouteComponent.svl;
-            if(SuperVL == null) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(TrainController.this.TrainSubPanel);
-
-                        JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
-                        return;
-                    }
-                });
-
-            }
-
-            SuperVL.setMovementAuthority(Ma);
-            SuperVL.setVmax(0);
-            Ma.setSuperviesedLocation(SuperVL);
-
-            TrainMovement TM = new TrainMovement();
-
-            Ma.setTrainMovement(TM);
-            Ma.setSpeedProfile(CSM.getStaticSpeedProfile());
-            Ma.setGradientProfile(GrProfile);
-
-            ModeProfile MoProfile = handleModeProfile(bIsShunting, Q_DIR, Q_SCALE, EndCha);
-
-            LPA = extractLinkingProfile(R);
-            
-            
-            /*Scenario ScCustom = new Scenario("Custom");
-            ScCustom.addMa(Ma);
-            ScCustom.runCustomSzenario();
-            */
-            // send MA
-            eoaRbcIntf = new EOA(Q_DIR, EOA_Q_SCALE, V_LimitOfAuthority,T_LOA,eoaSections, TimerEnd, null, null);
-
-
-            SendMa = new MA(m_ack, nid_lrbg, Q_DIR, Q_SCALE, T_LOA, eoaRbcIntf, GradProfile, RbcSpeedProfil,
-                    MoProfile, null);
-
-            MaAdapter = new RbcMaAdapter(SendMa);
-            CheckMovementPermission CheckMoveAuthCommand = new CheckMovementPermission(3L);
-
-            CheckMoveAuthCommand.MaAdapter = MaAdapter;
-            CheckMoveAuthCommand.rbc_id = sRbcId;
-            CheckMoveAuthCommand.tms_id = sTmsId;
-            CheckMoveAuthCommand.uuid = uuid;
-            TopologyGraph.Edge E = null;
-            E.sId = E.getRefId();
-            //CheckMoveAuthCommand.MaRequest.Tm.setEdgeTrainStandsOn(E);
-            //TopologyGraph.Node N = CheckMoveAuthCommand.MaRequest.Tm.getNodeTrainRunningTo();
-            //CheckMoveAuthCommand.MaRequest.Tm.setsNodeIdTrainRunningTo(ISwitchHandler.getNodeId(N));
-            //CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
-
-            TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
-            try {
-
-                SmartClientHandler.getInstance().sendCommand(Msg);
-            } catch (MissingInformationException e) {
-                e.printStackTrace();
-            }
+//            requestWrapper.setRoute(R);
+//            requestWrapper.save();
+//            this.publish();
+//
+//
+//
+//
+//            // return to parent
+//            //parent.dispose();
+//
+//
+//
+//            RbcMA Ma = new RbcMA(Model.label);
+//            SpotLocation SL = R.getLocation().getEnd();
+//            EoA Eoa = new EoA(SL.getChainage(), SL.getTrackElement(), new SectionOfLine());
+//
+//            Eoa.setV_EMA(0);
+//            Eoa.setDangerPoint(null);
+//            Eoa.setQ_DANGERPOINT(false);
+//            Eoa.setQ_OVERLAP(false);
+//            Eoa.setOverlap(null);
+//            Eoa.setD_ENDTIMERSTARTLOC(null);
+//            Eoa.setT_ENDTIMER(null); // unendlich TODO
+//            Eoa.setQ_scale(null);
+//
+//            Ma.setEndOfAuthority(Eoa);
+//
+//            GradientProfile GrProfile = new GradientProfile(Ma);
+//            ETCS_GRADIENT etcs_gradient = new ETCS_GRADIENT();
+//            etcs_gradient.bGradient = 0;
+//
+//            GradientSegment GrSegment = new GradientSegment(R.getLocation().getBegin(), R.getLocation().getEnd(),
+//                    ApplicationDirection.BOTH);
+//            GrSegment.setGradient(etcs_gradient, false);
+//            GrProfile.addSegment(GrSegment);
+//
+//            Chainage EndCha =  SL.getChainage();
+//            //Chainage SvLCh = new Chainage(EndCha.getiMeters() + 400);
+//
+//
+//
+//            // 0 vmax
+//            SvL SuperVL = RouteComponent.svl;
+//            if(SuperVL == null) {
+//                SwingUtilities.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(TrainController.this.TrainSubPanel);
+//
+//                        JOptionPane.showMessageDialog(topFrame, "Svl not found", "No Svl defined", JOptionPane.ERROR_MESSAGE );
+//                        return;
+//                    }
+//                });
+//
+//            }
+//
+//            SuperVL.setMovementAuthority(Ma);
+//            SuperVL.setVmax(0);
+//            Ma.setSuperviesedLocation(SuperVL);
+//
+//            TrainMovement TM = new TrainMovement();
+//
+//            Ma.setTrainMovement(TM);
+//            Ma.setSpeedProfile(CSM.getStaticSpeedProfile());
+//            Ma.setGradientProfile(GrProfile);
+//
+//            ModeProfile MoProfile = handleModeProfile(bIsShunting, Q_DIR, Q_SCALE, EndCha);
+//
+//            LPA = extractLinkingProfile(R);
+//
+//
+//            /*Scenario ScCustom = new Scenario("Custom");
+//            ScCustom.addMa(Ma);
+//            ScCustom.runCustomSzenario();
+//            */
+//            // send MA
+//            eoaRbcIntf = new EOA(Q_DIR, EOA_Q_SCALE, V_LimitOfAuthority,T_LOA,eoaSections, TimerEnd, null, null);
+//
+//
+//            SendMa = new MA(m_ack, nid_lrbg, Q_DIR, Q_SCALE, T_LOA, eoaRbcIntf, GradProfile, RbcSpeedProfil,
+//                    MoProfile, null);
+//
+//            MaAdapter = new RbcMaAdapter(SendMa);
+//            CheckMovementAuthority CheckMoveAuthCommand = new CheckMovementAuthority(3L);
+//            CheckMoveAuthCommand.MaRequest = requestWrapper;
+//            CheckMoveAuthCommand.MaAdapter = MaAdapter;
+//            CheckMoveAuthCommand.rbc_id = sRbcId;
+//            CheckMoveAuthCommand.tms_id = sTmsId;
+//            CheckMoveAuthCommand.uuid = uuid;
+//            TmsMovementAuthority Msg = new TmsMovementAuthority(sTmsId, sRbcId,CheckMoveAuthCommand);
+//            try {
+//
+//                SmartClientHandler.getInstance().sendCommand(Msg);
+//            } catch (MissingInformationException e) {
+//                e.printStackTrace();
+//            }
 
         }
     }
@@ -360,21 +352,28 @@ public class TrainController extends SubmissionPublisher implements IController 
         return ResultProfile;
     }
 
+    /**
+     * @deprecated
+     * @param iQ_SCALE
+     * @param etcsSpeedSectionList
+     * @param SpSegment
+     * @return
+     */
     private int addSpeedSegments(int iQ_SCALE, ArrayList<SpeedProfile.Section> etcsSpeedSectionList, SpeedSegment SpSegment) {
-        //int iStart = SpSegment.speedChangeBegin.chainage.iMeters;
+        int iStart = 0;
         //int iEnd = SpSegment.speedChangeEnd.chainage.iMeters;
-        //int v_Static = SpSegment.v_STATIC.bSpeed;
-        //int i_D_STATIC = iStart;
-        //if(i_D_STATIC > 32000) {
+        int v_Static = SpSegment.getV_STATIC().bSpeed;
+        int i_D_STATIC = iStart;
+        if(i_D_STATIC > 32000) {
             iQ_SCALE = ETCSVariables.Q_SCALE_10M;
-        //}
-       // SpeedProfile.Section SpeedSection = new SpeedProfile.Section(i_D_STATIC,v_Static, ETCSVariables.Q_FRONT_TRAIN_FRONT, new ArrayList<>());
-        //etcsSpeedSectionList.add(SpeedSection);
-        //return iQ_SCALE;
-        return 0;
+        }
+        SpeedProfile.Section SpeedSection = new SpeedProfile.Section(i_D_STATIC,v_Static, ETCSVariables.Q_FRONT_TRAIN_FRONT, new ArrayList<>());
+        etcsSpeedSectionList.add(SpeedSection);
+        return iQ_SCALE;
     }
 
     /**
+     * @deprecated
      * Extrahiert distanz von Referenzbalise Topologischen End-Knoten ACHTUNG nicht für letztes Wegst&uuml;ck gedacht.
      * Deshalb ohne letzten Gleisabschnitt
      * @param R {@link Route} - die angeforderte Route
@@ -382,7 +381,48 @@ public class TrainController extends SubmissionPublisher implements IController 
      * @return BigDecimal - Entfernung
      */
     public static BigDecimal extractDistanceOfSelectedTrack(Route R, TrainModel TM) {
-       return null;
+        BigDecimal resultDistance = new BigDecimal(0d);
+//        try {
+//            int iLastIndex = -1;
+//            if(TM == null || R == null) return resultDistance;
+//
+//            Integer iNid_Lrbg = TM.getNid_lrbg();
+//
+//            Balise B = Balise.baliseByNid_bg.getModel(iNid_Lrbg);
+//            if(B == null) return resultDistance;
+//            R.saveWaypointsForProcessing(false);
+//
+//            if(R.getElemetTypes().size() < 2) return resultDistance;
+//            iLastIndex = R.getElemetTypes().size() -1;
+//
+//            if(!R.getElemetTypes().get(iLastIndex).equals(Route.TrackElementType.CROSSOVER_TYPE)) return resultDistance;
+//            resultDistance = resultDistance.add(PositionReportController.calcDistanceToFirstNodeOfTrainViaBalise(TM));
+//
+//            for(int i = 2; i < R.getElemetTypes().size(); i++) {
+//                if(R.getElemetTypes().get(i).equals(Route.TrackElementType.CROSSOVER_TYPE) &&
+//                R.getElemetTypes().get(i - 1).equals(Route.TrackElementType.CROSSOVER_TYPE)) {
+//                    String s1NodeId = R.getElementListIds().get(i);
+//                    String s2NodeId = R.getElementListIds().get(i-1);
+//
+//
+//                    DefaultRepo<String, TopologyGraph.Edge> drEdge = TopologyGraph.twoTopPointBelongsToEdgeRepo.getModel(s1NodeId);
+//
+//
+//
+//                    TopologyGraph.Edge E = drEdge.getModel(s2NodeId);
+//
+//                        // Start distanz wurde schon in result distanz gespeichert
+//                    resultDistance = resultDistance.add(new BigDecimal(E.dTopLength));
+//                    }
+//                }
+//
+
+            return resultDistance;
+//        } catch(Exception E) {
+//            E.printStackTrace();
+//        }
+//        return resultDistance;
+
     }
 
     private int extractMaxSpeed_V_LOA() {
@@ -413,7 +453,14 @@ public class TrainController extends SubmissionPublisher implements IController 
         return ETCSVariables.Q_DIR_BOTH;
     }
 
-
+    private Double extractDistanceToBalise(MaRequestWrapper requestWrapper) {
+        try {
+            return requestWrapper.Tm.getdDistanceToBalise();
+        } catch (Exception E ) {
+            E.printStackTrace();
+        }
+        return null;
+    }
 
     private Integer extractNidBaliseId(MaRequestWrapper requestWrapper) {
         try {
