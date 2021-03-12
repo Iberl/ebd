@@ -1,6 +1,7 @@
 package de.ibw.schedule;
 
 import de.ibw.main.SmartLogicClient;
+import de.ibw.modules.MaModul;
 import de.ibw.schedule.runner.PermissionRunnable;
 import de.ibw.tms.entities.TimeTaskDAO;
 import de.ibw.tms.entities.TimeTaskRepository;
@@ -90,6 +91,7 @@ public class TmsScheduler {
                     CheckMovementPermission CheckTask = CheckPermissionConverter.convert(T.CheckPermission);
                     TmsMessage MPR = new TmsMovementPermissionRequest(this.sTmsId, this.sRbcId, CheckTask);
                     scheduleMessage(dScheduledDate, MPR);
+                    MaModul.getInstance().addMovementPermissionAuthorityRequest(T.CheckPermission);
                 }
 
                 it.remove();

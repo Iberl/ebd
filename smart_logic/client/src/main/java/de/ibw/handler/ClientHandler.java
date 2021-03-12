@@ -2,7 +2,12 @@ package de.ibw.handler;
 
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
+import de.ibw.modules.MaModul;
 import de.ibw.schedule.TmsScheduler;
+import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
+import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
+import de.ibw.smart.logic.intf.messages.ITypable;
+import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.ui.PositionReportController;
@@ -13,6 +18,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * Client Handler
@@ -31,6 +38,9 @@ public class ClientHandler extends SmartClientHandler {
         Client = smartLogicClient;
     }
 
+
+
+
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
         super.channelActive(channelHandlerContext);
@@ -39,6 +49,33 @@ public class ClientHandler extends SmartClientHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause) {
         super.exceptionCaught(channelHandlerContext, cause);
+    }
+
+    private void handleMaResponse(MaRequestReturnPayload msgFromSL) {
+        UUID maID = msgFromSL.getUuid();
+
+        //MaModul.getInstance().storeMaReturnPayload(msgFromSL);
+
+        if(msgFromSL.isMaSuccessfull()) {
+            logger.info("Ma successfull. UUID: " + maID.toString() + "\n");
+
+
+
+        } else {
+            if(msgFromSL.getFailureCodes().contains(SmartServer4TmsImpl.ELEMENT_RESERVATION_ERROR))
+                logger.error("MA not successful. UUID: " + maID.toString() + " There were reserved elements accessed.\n");
+            if(msgFromSL.getFailureCodes().contains(SmartServer4TmsImpl.NO_ACK))
+                logger.error("MA not successful. UUID: " + maID.toString() + " Ma has not been Acknowledged.\n");
+
+        }
+
+    }
+
+    private void handleDbdResponse(DbdRequestReturnPayload msgFromSL) {
+        if(msgFromSL.isDbdCommandSuccessfull()) {
+            logger.info("Dbd Command successfull on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n");
+        } else logger.info("Dbd Command failed on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n" +
+                "DBD Command failed for Reason: " + msgFromSL.getsFailreason() + "\n");
     }
 
     @Override
@@ -54,6 +91,14 @@ public class ClientHandler extends SmartClientHandler {
                     this.Client.startScheduler();
                 }
                 PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader().rbc_id);
+            } else {
+                ITypable MsgFromSL = SmartServerMessage.generateFromSlJson(smartServerMessage.getMsg());
+                if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
+                    handleMaResponse((MaRequestReturnPayload)MsgFromSL);
+
+                } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
+                    handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
+                }
             }
         }
 

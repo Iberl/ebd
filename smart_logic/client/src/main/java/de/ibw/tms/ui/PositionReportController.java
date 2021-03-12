@@ -179,8 +179,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                 //isNominal = ConfigHandler.getInstance().train2StartingInTrackDirection;
                 isNominal = null;
             } else return;
+            if(isNominal == null) {
+                isNominal = true;
 
-            if(isNominal) {
+            } if(isNominal) {
                 TargetNode = NewTrainPositionEdge.B;
 
 
