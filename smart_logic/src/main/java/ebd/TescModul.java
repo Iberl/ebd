@@ -26,8 +26,8 @@ import java.util.concurrent.ExecutionException;
 /**
  * Interaktion mit dem EBD Stellwerk oder sp&auml;ter weiteren Stellelemente
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-11-23
+ * @version MVP5
+ * @since 2021-03-12
  */
 public class TescModul {
 
@@ -70,6 +70,10 @@ public class TescModul {
 
     private TescSession Session;
 
+    public void setSession(TescSession S) {
+        Session = S;
+    }
+
     private static ThreadedRepo<String, MoveableTrackElement> ElementStateByIdRepository;
     private static ThreadedRepo<String, MoveableTrackElement> DkwStateByRepo;
     private ThreadedRepo<String, Integer> StateChangesNotFound;
@@ -82,6 +86,17 @@ public class TescModul {
         getParellelLowerEbdId = new ThreadedRepo<>();
     }
 
+    /**
+     * changes state of switch,
+     * throws exception when operation controller cannot perform request
+     * @param sId String - 11W45 for instances a valid switch shortage
+     * @param switchStatus {@link TrackElementStatus} - status switch shall after changement
+     * @return boolean - true for operation successful, even when the switch state has been the same than requested
+     *                  - false, when requested status is not possible for switch
+     * @throws IOException
+     * @throws SessionClosedException
+     * @throws IllegalNameLengthException
+     */
     public boolean setState(String sId, TrackElementStatus switchStatus) throws IOException, SessionClosedException, IllegalNameLengthException {
         // Set Ist Lage "I" in Debug Moduls, sonst Sollage "S"
         String sPostfix = SlConfigHandler.getInstance().useInfrastructureServer ? "S" : "I";
@@ -96,20 +111,36 @@ public class TescModul {
         } else if(DkwStateByRepo.containsKey(sId)) {
             MoveableTrackElement DkwElement = DkwStateByRepo.getModel(sId);
             NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(sId);
-            if(NI == null) {
-                EventBusManager.registerOrGetBus(1,false).
+            if (NI == null) {
+                EventBusManager.registerOrGetBus(1, false).
                         log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
                 return false;
             }
             TopologyGraph.Node N1 = NI.get(0);
+            CrossingSwitch CS_Refered = null;
+            for (TopologyGraph.Node N : NI) {
+                CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
+                if (sId.endsWith(String.valueOf(CS.getLocalElementId()))) {
+                    CS_Refered = CS;
+                }
+            }
+            if (CS_Refered == null) {
+                EventBusManager.registerOrGetBus(1, false).
+                        log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
 
-            CrossingSwitch S1 = (CrossingSwitch) N1.NodeImpl;
-            CrossingSwitch LowerSwitch = S1;
-            CrossingSwitch HigherSwitch = S1;
+                return false;
+            }
+
+
+            CrossingSwitch LowerSwitch = CS_Refered;
+            CrossingSwitch HigherSwitch = CS_Refered;
             String sLower;
             String sHigher;
             for(TopologyGraph.Node N : NI) {
                 CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
+                // only neighbour local ids are relevant
+                if(Math.abs(LowerSwitch.getLocalElementId() - CS.getLocalElementId()) != 1) continue;
+                // neighbouring ok
                 if(LowerSwitch.getLocalElementId() > CS.getLocalElementId()) {
                     HigherSwitch = LowerSwitch;
                     LowerSwitch = CS;

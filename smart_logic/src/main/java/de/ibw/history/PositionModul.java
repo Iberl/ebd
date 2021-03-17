@@ -416,6 +416,9 @@ public class PositionModul implements IPositionModul {
 
 
     @Override
+    /**
+     * @deprecated
+     */
     public Collection<PositionData> getCurrentPositions(Integer iNidEngine, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
         if(hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
             if (dFromRangeStart.compareTo(dToRangeEnd) > 0)
@@ -439,7 +442,7 @@ public class PositionModul implements IPositionModul {
         if(hasRangeFilter(dFromRangeStart, dToRangeEnd)) {
             if(dFromRangeStart.compareTo(dToRangeEnd) > 0) throw new InvalidParameterException("Start after End Range");
             // entfernt alle daten, die keine Schnittfläche zwischen Anfrage und Tatsächlichen Positionsangabe haben
-            results.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge, dFromRangeStart, dToRangeEnd));
+            //results.removeIf(PD -> !checkIfPositionContainsTopEdge(PD, sIdTopEdge, dFromRangeStart, dToRangeEnd));
         }
         return results;
 
@@ -450,19 +453,35 @@ public class PositionModul implements IPositionModul {
     public boolean hasRangeFilter(BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
         return dFromRangeStart != null && dToRangeEnd != null;
     }
+
+    /**
+     * @deprecated
+     * @param pd
+     * @param sIdTopEdge
+     * @param dFromRangeStart
+     * @param dToRangeEnd
+     * @return
+     */
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
         TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdge);
         if(E == null) return false;
         Occupation RequestArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                 dFromRangeStart.intValue(), Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) dToRangeEnd.intValue(), Occupation.CLASS_IDENTIFIER);
-        return pd.compareIfIntersection(RequestArea);
+        return false;
     }
+
+    /**
+     * @deprecated
+     * @param pd
+     * @param sIdTopEdge
+     * @return
+     */
     private boolean checkIfPositionContainsTopEdge(PositionData pd, String sIdTopEdge) {
         TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(sIdTopEdge);
         if(E == null) return false;
         Occupation RequestArea = new Occupation(E, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M,
                 0, Occupation.BLOCK_Q_SCALE.Q_SCALE_1M, (int) E.dTopLength, Occupation.CLASS_IDENTIFIER);
-        return pd.compareIfIntersection(RequestArea);
+        return false;
     }
 
     @Override
@@ -482,6 +501,9 @@ public class PositionModul implements IPositionModul {
 
 
     @Override
+    /**
+     * @deprecated
+     */
     public Collection<PositionData> getAllPositions(Integer iNidEngine, String sIdTopEdge, BigDecimal dFromRangeStart, BigDecimal dToRangeEnd) {
         Collection<PositionData> data = getAllPositions();
         if(iNidEngine != null) {

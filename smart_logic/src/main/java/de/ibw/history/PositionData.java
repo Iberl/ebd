@@ -23,7 +23,7 @@ import java.util.List;
  * @version 0.4
  * @since 2020-11-06
  */
-public class PositionData extends VehicleOccupation {
+public class PositionData {
     /** Timestamp Of Message Creation */
     private long rbc_timestamp;
 
@@ -38,9 +38,12 @@ public class PositionData extends VehicleOccupation {
      */
     private PositionInfo Pos;
 
-
+    /**
+     * @deprecated
+     * @param VehicleOcc
+     */
     public void mergeOtherOccupationIntoThis(VehicleOccupation VehicleOcc) {
-        List<TrackEdgeSection> sectionList = this.getTrackEdgeSections();
+        /*List<TrackEdgeSection> sectionList = this.getTrackEdgeSections();
         List<TrackEdgeSection> otherSections = VehicleOcc.getTrackEdgeSections();
         if(otherSections == null) throw new InvalidParameterException("Sections must be defined");
         if(sectionList == null) sectionList = new ArrayList<>();
@@ -49,18 +52,11 @@ public class PositionData extends VehicleOccupation {
             return;
         }
         sectionList.addAll(otherSections);
+        */
+
     }
 
 
-    @Override
-    public MinSafeRearEnd getBegin() {
-        return super.getBegin();
-    }
-
-    @Override
-    public MaxSafeFrontEnd getEnd() {
-        return super.getEnd();
-    }
 
     public long getRbc_timestamp() {
         return rbc_timestamp;
@@ -71,7 +67,7 @@ public class PositionData extends VehicleOccupation {
     }
 
     public PositionData(long rbc_timestamp, long received_timestamp, TrainInfo TI, PositionInfo pos) {
-        super(TI,pos);
+
         this.rbc_timestamp = rbc_timestamp;
         this.received_timestamp = received_timestamp;
         this.nid_engine = nid_engine;

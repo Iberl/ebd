@@ -540,11 +540,11 @@ public class SafetyLogic {
 
         PositionData CurrentPos = PositionModul.getInstance().getCurrentPosition(iTrainId);
 
-        if(CurrentPos == null || CurrentPos.getBegin() == null) {
+        /*if(CurrentPos == null || CurrentPos.getBegin() == null) {
             setOccupatedSections(requestedTrackElementList, R, MAO, null);
         } else {
             setOccupatedSections(requestedTrackElementList, R, MAO, CurrentPos.getBegin());
-        }
+        }*/
         return MAO;
     }
 

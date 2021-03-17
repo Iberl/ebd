@@ -3,6 +3,7 @@ package de.ibw.smart.logic.datatypes;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.util.ThreadedRepo;
 
+import java.security.InvalidParameterException;
 import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +23,7 @@ public class QueueUuidMapper {
      * @param uuid - Id des Kommunikationsverlaufs
      */
     public void createQueue(UUID uuid) {
+        if(uuid == null) throw new InvalidParameterException("Uuid must not be null");
         queue4UUid.update(uuid, new SynchronousQueue<>());
     }
 
@@ -32,7 +34,10 @@ public class QueueUuidMapper {
      * @return Boolean - ist Acknowledge eingegangen
      * @throws InterruptedException - wird geworfen, wenn beim poll der Warteschlange es Interrupt gab
      */
-    public Boolean poll(UUID uuid) throws InterruptedException {
+    public Boolean poll(UUID uuid) throws InterruptedException, InvalidParameterException {
+        if(uuid == null) throw new InvalidParameterException("Uuid must not be null");
+        if(queue4UUid.getModel(uuid) == null)
+            throw new InvalidParameterException("Uuid of message is not known in system");
         Boolean b = queue4UUid.getModel(uuid).poll(SmartLogic.TIMEOUT_SETTING_WAITING_MA_ACK_IN_SECONDS, TimeUnit.SECONDS);
         return b;
     }
@@ -43,7 +48,9 @@ public class QueueUuidMapper {
      * @param b - Der Erfolg eines Acknowledge
      * @throws InterruptedException - wird geworfen wenn beim offer ein Interrupt erfolgt
      */
-    public void offer(UUID uuid, Boolean b) throws InterruptedException {
+    public void offer(UUID uuid, boolean b) throws InterruptedException, InvalidParameterException {
+        if(uuid == null) throw new InvalidParameterException("uuid must not be null");
+        if(queue4UUid.getModel(uuid) == null) throw new InvalidParameterException("uuid unknown in system");
         queue4UUid.getModel(uuid).offer(b, SmartLogic.TIMEOUT_SETTING_WAITING_MA_ACK_IN_SECONDS, TimeUnit.SECONDS);
     }
 }

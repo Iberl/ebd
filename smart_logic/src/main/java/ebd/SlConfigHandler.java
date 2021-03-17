@@ -1,6 +1,7 @@
 package ebd;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.security.InvalidParameterException;
 import java.util.Properties;
 
 /**
@@ -12,8 +13,27 @@ import java.util.Properties;
  * Test for this parameters type in the loadConfig method. If the value of the variable is not represented by its toString
  * method (for example lists), it also has to be included in the saveCurrent method, for special handling.
  * @author Lars Schulze-Falck
+ * Weiterentwickelt von
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @since 12.03.2021
+ * @version 1.0
+ *
  */
 public class SlConfigHandler {
+
+
+    private static String sPropFileName = "application.properties";
+    /**
+     * do not change
+     * @return properties file name
+     */
+    public static String getAppPropFile() {
+        return sPropFileName;
+    }
+    public static void setAppPropFileName(String sName) {
+        sPropFileName = sName;
+    }
+
 
     private static SlConfigHandler single_instance = null;
 
@@ -132,11 +152,12 @@ public class SlConfigHandler {
 
             InputStream is = null;
             try {
-                is = SlConfigHandler.class.getClassLoader().getResourceAsStream("application.properties");
+                is = SlConfigHandler.class.getClassLoader().getResourceAsStream(getAppPropFile());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 throw ex;
             }
+            if(is == null) throw new InvalidParameterException("application.properties not in resources");
             try {
                 prop.load(is);
 

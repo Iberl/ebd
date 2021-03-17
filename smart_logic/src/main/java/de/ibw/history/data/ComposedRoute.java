@@ -38,6 +38,7 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
     public DefaultRepo<Pair<String, String>, Waypoint> waypointsBetweentTwoTrackEdges = new DefaultRepo<>();
 
     private SpotLocationIntrinsic lastSpot = null;
+    private SpotLocationIntrinsic firstSpot = null;
 
     private BigDecimal dRouteLength = null;
 

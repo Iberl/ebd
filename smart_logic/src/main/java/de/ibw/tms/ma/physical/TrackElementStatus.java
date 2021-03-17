@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version MVP5
+ * @since 2021-03-12
+ */
 public class TrackElementStatus implements Serializable, IControlledElementStatus {
 
     public enum Status {
