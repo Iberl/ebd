@@ -5,6 +5,7 @@ import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.SynchronousQueue;
@@ -13,8 +14,8 @@ import java.util.concurrent.SynchronousQueue;
  * Diese Klasse verwaltet die Senderoutine sowohl aus TMS zu SL als auch von SL zum TMS. Der Nachrichtentyp wird durch den Templateparameter T bestimmt
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 1.0
+ * @since 2021-03-21
  */
 public class TmsOuputWorker<T> extends Thread {
 
@@ -31,7 +32,7 @@ public class TmsOuputWorker<T> extends Thread {
      */
     public static TmsOuputWorker<String> TmsToSmartWorker;
 
-    private ExecutorService executor = Executors.newCachedThreadPool();
+
     private final SynchronousQueue<T> queue;
     private final ChannelHandlerContext ctx;
 
@@ -40,8 +41,9 @@ public class TmsOuputWorker<T> extends Thread {
      * @param queue - Warteschlange für Nachrichtenausgang
      * @param ctx - Kontext der Nachrichten einstellt
      */
-    public TmsOuputWorker(SynchronousQueue<T> queue, ChannelHandlerContext ctx) {
-
+    public TmsOuputWorker(SynchronousQueue<T> queue, ChannelHandlerContext ctx) throws InvalidParameterException {
+        if(queue == null) throw new InvalidParameterException("Message queue must not be null");
+        if(ctx == null) throw new InvalidParameterException("Message channel handler must not be null");
         this.queue = queue;
         this.ctx = ctx;
 
@@ -52,10 +54,13 @@ public class TmsOuputWorker<T> extends Thread {
      * start der Senderoutine
      */
     public void run() {
+
         try {
             EventBusManager EBM = null;
+
             while ( true ) {
                 T Message = queue.take();
+                if (Message == null) continue;
                 if(this == SmartToTmsWorker) {
                     if(EBM == null) {
                         try {
@@ -85,6 +90,7 @@ public class TmsOuputWorker<T> extends Thread {
         }
         catch ( InterruptedException ie ) {
             ie.printStackTrace();
+
         }
     }
 }

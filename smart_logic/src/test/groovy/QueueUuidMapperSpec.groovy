@@ -7,6 +7,11 @@ import spock.lang.Specification
 
 import java.security.InvalidParameterException
 
+/**
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @since 17.03.20201
+ * @version 1.0
+ */
 class QueueUuidMapperSpec extends Specification {
     @Shared resultAct = null;
 
