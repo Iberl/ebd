@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
+import java.security.InvalidParameterException;
+
 /**
  * Diese Klasse stellt eine Anwort des SL an das TMS f&uuml;r eine DBD-Anforderung dar.
  *
@@ -72,6 +74,7 @@ public class DbdRequestReturnPayload implements ITypable {
     public void setDbdSuccessfull() {
 
         this.dbdCommandSuccessfull = true;
+        this.sFailreason = "";
 
     }
 
@@ -105,7 +108,9 @@ public class DbdRequestReturnPayload implements ITypable {
         return dbdCommandSuccessfull;
     }
 
-    public String getsDbdCommandTargetName() {
+    public String getsDbdCommandTargetName() throws InvalidParameterException {
+        if(sDbdCommandTargetName == null)
+            throw new InvalidParameterException("DBD Id must not be null");
         return sDbdCommandTargetName;
     }
 

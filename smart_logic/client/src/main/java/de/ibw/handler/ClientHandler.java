@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.security.InvalidParameterException;
 import java.util.UUID;
 
 /**
@@ -72,10 +73,14 @@ public class ClientHandler extends SmartClientHandler {
     }
 
     private void handleDbdResponse(DbdRequestReturnPayload msgFromSL) {
-        if(msgFromSL.isDbdCommandSuccessfull()) {
-            logger.info("Dbd Command successfull on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n");
-        } else logger.info("Dbd Command failed on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n" +
-                "DBD Command failed for Reason: " + msgFromSL.getsFailreason() + "\n");
+        try {
+            if (msgFromSL.isDbdCommandSuccessfull()) {
+                logger.info("Dbd Command successfull on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n");
+            } else logger.info("Dbd Command failed on Item: " + msgFromSL.getsDbdCommandTargetName() + "\n" +
+                    "DBD Command failed for Reason: " + msgFromSL.getsFailreason() + "\n");
+        } catch(InvalidParameterException IPE) {
+            IPE.printStackTrace();
+        }
     }
 
     @Override
