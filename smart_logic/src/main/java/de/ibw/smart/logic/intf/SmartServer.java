@@ -48,6 +48,10 @@ public class SmartServer extends RbcModul  {
      */
     private SmartServerHandler SmartHandler = null;
 
+    public SmartServerFromTmsIntf getSmartTms() {
+        return SmartTms;
+    }
+
     /**
      * Handling Requests
      */

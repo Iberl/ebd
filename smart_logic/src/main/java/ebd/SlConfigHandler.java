@@ -15,7 +15,7 @@ import java.util.Properties;
  * @author Lars Schulze-Falck
  * Weiterentwickelt von
  * @author iberl@verkehr.tu-darmstadt.de
- * @since 12.03.2021
+ * @since 22.03.2021
  * @version 1.0
  *
  */
@@ -115,6 +115,8 @@ public class SlConfigHandler {
 
     public boolean isInTestMode = true;
 
+    public boolean checkPlanPro = false;
+
     public boolean initCrossoversInRealdDbdClient = false;
     public boolean shallUserPrompt4SimulationFile = false;
     /*
@@ -185,6 +187,8 @@ public class SlConfigHandler {
 
         this.portOfTMSServer = prop.getProperty("portOfTMSServer");
 
+
+
         this.lCheckDbdReturn = Long.parseLong(prop.getProperty("lCheckDbdReturn"));
         this.lCheckDbdCommand = Long.parseLong(prop.getProperty("lCheckDbdCommand"));
         this.defaultAmountOfMonthBaseObjectIsValidTo = Integer.parseInt(prop.getProperty("defaultAmountOfMonthBaseObjectIsValidTo"));
@@ -199,6 +203,7 @@ public class SlConfigHandler {
         this.defaultOperationTime = Integer.parseInt(prop.getProperty("defaultOperationTime"));
 
         this.isInTestMode = Boolean.parseBoolean(prop.getProperty("isInTestMode"));
+        this.checkPlanPro = Boolean.parseBoolean((prop.getProperty("checkPlanPro")));
     }
 
     /**

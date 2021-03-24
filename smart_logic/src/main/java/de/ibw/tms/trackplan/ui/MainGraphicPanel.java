@@ -532,7 +532,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             double    geoEdgeLength = 0;
             CGEOKante geoEdge       = null;
 
-            int i = b_fromA ? 0 : geoEdgeList.size();
+            int i = b_fromA ? 0 : geoEdgeList.size() - 1;
             for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
                 geoEdge = geoEdgeList.get(i);
                 geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();

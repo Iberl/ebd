@@ -336,6 +336,20 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             setNodeToBranchingPoints();
             setEdges();
 
+            handlePrintings();
+
+
+            TescModul.getInstance().fetchIntialState();
+        } catch (ParseException | JAXBException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handlePrintings() {
+        if(TranslationModel.TrackplanEnvironment.CurrentEnvironment.
+                equals(TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv)) {
+
+
             System.out.println("Test");
 
             System.out.println("13W4S");
@@ -349,8 +363,6 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
             System.out.println("11W5R");
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W5R").getPlanProId());
-
-
 
 
             System.out.println("13W3R");
@@ -375,14 +387,8 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
             System.out.println("Print 11W10L");
             System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
-
-
-            TescModul.getInstance().fetchIntialState();
-        } catch (ParseException | JAXBException | IOException e) {
-            e.printStackTrace();
         }
     }
-
 
 
     private void setEdges() {

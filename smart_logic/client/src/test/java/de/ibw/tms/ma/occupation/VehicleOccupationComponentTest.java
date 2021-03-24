@@ -54,8 +54,8 @@ class VehicleOccupationComponentTest {
         assertTrue(PosMod.getCurrentPositions().size() > 0,
                 "Es wurden keine Züge registriert FEHLER." );
         System.out.println("Vehicle Report Count: " + PosMod.getCurrentPositions().size());
-        VehicleOccupation VO = new ArrayList<>(PosMod.getCurrentPositions()).get(0);
-        testprint(VO);
+        //VehicleOccupation VO = new ArrayList<>(PosMod.getCurrentPositions()).get(0);
+        //testprint(VO);
 
 
     }

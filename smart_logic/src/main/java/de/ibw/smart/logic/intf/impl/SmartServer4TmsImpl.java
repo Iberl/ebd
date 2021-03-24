@@ -253,6 +253,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         MA RbcMa = null;
         //smartLogicMa = new MovementAuthority();
 
+        // SmartLogicException Invalid PLan Pro
         bCheckOk = Safety.slSelfCheck();
         if(!bCheckOk) {
             MaReturnPayload.setErrorState(uuid, false, SL_SELF_CHECK_ERROR);
