@@ -7,12 +7,15 @@ import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.DefaultRepo;
+import ebd.TescModul;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
@@ -28,7 +31,7 @@ import java.util.Iterator;
  * Routendatenverarbeitung innerhalb der smartLogic
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.5
- * @since 2021-02-04
+ * @since 2021-03-24
  */
 public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
 
@@ -37,6 +40,9 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
     // Waypoints zwischen zwei TrackEdges je String id
     public DefaultRepo<Pair<String, String>, Waypoint> waypointsBetweentTwoTrackEdges = new DefaultRepo<>();
 
+
+    // Diese Werte müssen bei jeder Route gesetzt werden, weil sonst das Start und das Ende der Route bestimmt
+    // Werden kann
     private SpotLocationIntrinsic lastSpot = null;
     private SpotLocationIntrinsic firstSpot = null;
 
@@ -153,7 +159,12 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
     /**
      *
+     * Die Meter-Angabe auf der Strecke erfolgen immer entlang der Route:
+     *
      * @param dStartMeter - Beginn des Streckenabschnitts auf der Route
+     *                    - dStartMeter ist eine Angebae der Lage vom nicht angefahrenen Knoten aus gemessen
+     *
+     *
      * @param dEndMeter - Ende des Streckenabschnitts auf der Route
      * @param i_QScale - Massfaktor
      * @param result - TrackArea dieser Berechnung
@@ -179,24 +190,78 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
         // defines how many meters being iterater to find start edge
         BigDecimal d_Current = new BigDecimal(0);
         ArrayList<TrackEdgeSection> sections = new ArrayList<>();
-        for(Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> Current : this) {
+        TopologyGraph.Edge StartEdge = null;
+        for(int i = 0 ; i < this.size(); i++) {
+            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> Current = this.get(i);
+            if(StartEdge == null) {
+                StartEdge = (TopologyGraph.Edge) Current.getRight();
+            }
+            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> Next = null;
+            TopologyGraph.Edge NextEdge = null;
+            if(i + 1 < this.size()) {
+                Next = this.get(i + 1);
+                NextEdge = (TopologyGraph.Edge) Next.getRight();
+            }
+
 
             TopologyGraph.Edge CurrentEdge = (TopologyGraph.Edge) Current.getRight();
             BigDecimal d_Start = new BigDecimal(String.valueOf(d_Current));
             d_Current = d_Current.add(BigDecimal.valueOf(CurrentEdge.dTopLength));
+
+            // Die Start Meter reichen in diese Kante d_Current hinein. Und die End-Meter sind noch nicht erreicht.
             if(d_Start_Meter.compareTo(d_Current) < 0 && d_End_Meter.compareTo(d_Start) > 0) {
-                BigDecimal dBeginPercent;
-                BigDecimal dEndPercent;
+                BigDecimal dBeginPercent = null;
+                BigDecimal dEndPercent = null;
                 if(CurrentEdge.dTopLength == 0) {
                     dBeginPercent = BigDecimal.valueOf(0);
                     dEndPercent = BigDecimal.valueOf(1);
                 } else {
-                    //TODO
+                    if(StartEdge == CurrentEdge && NextEdge == null) {
+                        // Start-Kante ist die letzte Kante
+                        if(firstSpot.getIntrinsicCoord().compareTo(lastSpot.getIntrinsicCoord()) == 0) {
+                           dBeginPercent = BigDecimal.valueOf(firstSpot.getIntrinsicCoord());
+                           dEndPercent = BigDecimal.valueOf(firstSpot.getIntrinsicCoord());
+                        } else if( firstSpot.getIntrinsicCoord().compareTo(lastSpot.getIntrinsicCoord() ) < 0) {
+                            // Zug fährt in nominaler richtung
+                            BigDecimal edgesStart =
+                                    BigDecimal.valueOf(CurrentEdge.dTopLength)
+                                            .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()))
+                                            .add(d_Start_Meter);
+                            dBeginPercent = edgesStart.divide(BigDecimal.valueOf(CurrentEdge.dTopLength),
+                                    RoundingMode.HALF_UP);
+                            BigDecimal edgeEnd = BigDecimal.valueOf(CurrentEdge.dTopLength)
+                                    .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()))
+                                    .add(d_End_Meter);
+                            dEndPercent = edgeEnd.divide(BigDecimal.valueOf(CurrentEdge.dTopLength),
+                                    RoundingMode.HALF_UP);
+                        } else {
+                            // Zug fährt reverse
+                            BigDecimal edgesStart =
+                                    BigDecimal.valueOf(CurrentEdge.dTopLength)
+                                            .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()))
+                                            .subtract(d_Start_Meter);
+                            BigDecimal edgeEnd =  BigDecimal.valueOf(CurrentEdge.dTopLength)
+                                    .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()))
+                                    .subtract(d_End_Meter);
+                            dBeginPercent = edgesStart.divide(BigDecimal.valueOf(CurrentEdge.dTopLength),
+                                    RoundingMode.HALF_UP);
+                            dEndPercent = edgeEnd.divide(BigDecimal.valueOf(CurrentEdge.dTopLength),
+                                    RoundingMode.HALF_UP);
+                        }
+                    } else if (StartEdge == CurrentEdge) {
+                        // Route erstreckt sich übermehrere Kanten. Es wird gerade die Start-Kante untersucht.
+                    }
+
+
+
+                    /* String sSwitchId = ISwitchHandler.getNodeId(N);
+                    MoveableTrackElement SwitchElement = TescModul.MoveableTrackElementAccess.getElementById(sSwitchId);
+                */
                 }
                 SpotLocationIntrinsic beginLocation = new SpotLocationIntrinsic();
-                //beginLocation.setIntrinsicCoord(0.0d);
+                beginLocation.setIntrinsicCoord(dBeginPercent.doubleValue());
                 SpotLocationIntrinsic endLocation = new SpotLocationIntrinsic();
-                //beginLocation.setIntrinsicCoord(dEndPercent.doubleValue());
+                beginLocation.setIntrinsicCoord(dEndPercent.doubleValue());
                 TrackEdgeSection TES = new TrackEdgeSection();
                 TES.setTrackEdge(CurrentEdge);
                 TES.setBegin(beginLocation);

@@ -17,6 +17,7 @@ import plan_pro.modell.basisobjekte._1_9_0.CPunktObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.verweise._1_9_0.TCIDTOPKnoten;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -273,6 +274,10 @@ public class TopologyGraph {
             return planProIds;
         }
 
+
+
+
+
         /**
          * Diese Methode gibt an ob von Knotea A zum Knoten B dieser Kante in Streckenkilometrierung verl&auml;ft.
          *
@@ -289,8 +294,21 @@ public class TopologyGraph {
             }
         }
 
+        /**
+         * gibt die BereichsId anhand der Knoten, die Weichen darstellen wieder
+         * @return String - BereichsId
+         */
         public String getRefId() {
             return PlanData.getRefIdOfEdge(this);
+        }
+
+        /**
+         * Bestimmt den Referenzknoten anhand der Dominierenden Weichenid für diese Kante
+         * @return TopologyGraph.Node - Referenzknoten
+         * @throws InvalidParameterException - falls keine Referenz hergestellt werden kann
+         */
+        public TopologyGraph.Node getRefNode() throws InvalidParameterException {
+            return PlanData.getRefNode(this);
         }
 
         public int getLocalDescriptor() {

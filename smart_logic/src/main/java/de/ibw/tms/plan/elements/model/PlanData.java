@@ -52,6 +52,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Flow;
@@ -427,6 +428,59 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         }
     }
+
+
+    /**
+     * Bestimmt den Referenzknoten anhand der Dominierenden Weichenid
+     * @param e - TopologyGraph.Edge - Kante für die der Referenz-Knoten ermittelt wird.
+     * @return TopologyGraph.Node - Referenzknoten
+     * @throws InvalidParameterException - falls keine Referenz hergestellt werden kann
+     */
+    public static TopologyGraph.Node getRefNode(TopologyGraph.Edge e) throws InvalidParameterException {
+        TopologyGraph.Node A = e.A;
+        TopologyGraph.Node B = e.B;
+        if(checkSameAnlage(A,B,true)) return getRefNodeSameAnlage(e);
+        String aId = SwitchIdRepo.getModel(A);
+        String bId = SwitchIdRepo.getModel(B);
+        if(aId == null && bId == null) throw new InvalidParameterException("Both nodes are not switches");
+        boolean isDKW;
+        if(aId == null) {
+            return e.B;
+        } else if(bId == null) {
+            return e.A;
+
+        } else {
+
+
+            int aCrossingNumber = generateCrossingNumber(aId);
+            int bCrossingNumber = generateCrossingNumber(bId);
+            if(aCrossingNumber < bCrossingNumber) {
+               return e.A;
+            } else {
+               return e.B;
+            }
+
+
+        }
+
+    }
+
+    private static TopologyGraph.Node getRefNodeSameAnlage(TopologyGraph.Edge e) {
+        TopologyGraph.Node A = e.A;
+        TopologyGraph.Node B = e.B;
+        CrossingSwitch CSA = (CrossingSwitch) A.NodeImpl;
+        CrossingSwitch CSB = (CrossingSwitch) B.NodeImpl;
+
+        boolean isADominating = isADominating(CSA, CSB);
+
+
+        if(isADominating) {
+            return A;
+        } else {
+            return B;
+        }
+    }
+
 
     /**
      * Holt aus der Edge die Bereichs-ID
