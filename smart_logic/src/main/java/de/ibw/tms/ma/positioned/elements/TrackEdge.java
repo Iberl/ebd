@@ -7,6 +7,7 @@ public class TrackEdge extends SpotElement {
 
     private List<TrackArea> trackAreas;
 
+
     public TrackEdge() {
         super(CLASS_IDENTIFIER);
     }

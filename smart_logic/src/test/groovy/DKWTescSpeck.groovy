@@ -10,7 +10,7 @@ import spock.lang.Specification
 /**
  * @author iberl@verkehr.tu-darmstadt.de
  * @since 2021-03-17
- * @version 1.0b
+ * @version 1.0
  *
  */
 class DKWTescSpeck extends Specification {
@@ -26,8 +26,8 @@ class DKWTescSpeck extends Specification {
 
 
 
-    def "DKW check: set State on simulated EBD on DKW with Valid status for DWK-Weiche"() {
-        given:
+   def "DKW check: set State on simulated EBD on DKW with Valid status for DWK-Weiche"() {
+            given:
 
         SlConfigHandler.getInstance().useInfrastructureServer = useInfra;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment =

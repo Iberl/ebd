@@ -19,7 +19,12 @@ import spock.lang.Specification
 
 import java.lang.reflect.Array
 import java.lang.reflect.Field
-
+/**
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @since 2021-03-30
+ * @version 1.0
+ *
+ */
 class ComposedRouteSpec extends Specification {
 
     private void addNode(ArrayList<TopologyGraph.Node> nodeList) {
@@ -65,7 +70,7 @@ class ComposedRouteSpec extends Specification {
                     set(StubTE, "A", nodeList.get(0));
                     set(StubTE, "TopConnectFromA", TopologyConnect.ENDE);
                     set(StubTE, "B", nodeList.get(1));
-                    set(StubTE, "TopConnectFromA", TopologyConnect.ENDE);
+                    set(StubTE, "TopConnectFromB", TopologyConnect.ENDE);
 
                 } else {
                     // Erste Edge aber nicht letzte
@@ -75,7 +80,7 @@ class ComposedRouteSpec extends Specification {
                     set(StubTE, "A", nodeList.get(0));
                     set(StubTE, "TopConnectFromA", TopologyConnect.ENDE);
                     set(StubTE, "B", nodeList.get(1));
-                    set(StubTE, "TopConnectFromA", TopologyConnect.SPITZE);
+                    set(StubTE, "TopConnectFromB", TopologyConnect.SPITZE);
                 }
 
 
@@ -90,7 +95,7 @@ class ComposedRouteSpec extends Specification {
                     set(StubTE, "A", LastTE.B);
                     set(StubTE, "TopConnectFromA", TopologyConnect.LINKS);
                     set(StubTE, "B", LastN);
-                    set(StubTE, "TopConnectFromA", TopologyConnect.ENDE);
+                    set(StubTE, "TopConnectFromB", TopologyConnect.ENDE);
 
                 } else {
                     // Mitte
@@ -100,7 +105,7 @@ class ComposedRouteSpec extends Specification {
                     set(StubTE, "A", LastTE.B);
                     set(StubTE, "TopConnectFromA", TopologyConnect.LINKS);
                     set(StubTE, "B", LastN);
-                    set(StubTE, "TopConnectFromA", TopologyConnect.SPITZE);
+                    set(StubTE, "TopConnectFromB", TopologyConnect.SPITZE);
 
                 }
 
@@ -216,12 +221,12 @@ class ComposedRouteSpec extends Specification {
 
         where:
         lOfElments      | trackOrd   | startperc    | endperc | startMeter  | endMeter | scale | expectation
-//        [100]           | [1]        | 0.2          | 0.6     | 20          | 70       | 0     | [[0.22, 0.53]]
-        [0, 30]         | [0, 0]     | 0.2          | 0       | 3           | 24       | 1     | [[0.1, 0.8] ]
-        [100, 200]      | [1, 1]     | 0            | 1       | 250         | 20       | 1     | [[ 0.25, 0.9 ]]
-        [100, 200]      | [1, 1]     | 0            | 1       |  50         | 20      | 1     | [[ 0.5 , 1 ],[0, 0.9]]
-
-
+         [100]           | [1]        | 0.2          | 0.6     | 20          | 70       | 0     | [[0.22, 0.53]]
+         [0, 30]         | [0, 0]     | 0.2          | 0       | 3           | 24       | 1     | [[0.8, 0.9] ]
+         [100, 200]      | [1, 1]     | 0            | 1       | 250         | 20       | 1     | [[ 0.75, 0.9 ]]
+         [100, 200]      | [1, 1]     | 0            | 1       |  50         | 20      | 1     | [[ 0.5 , 1 ],[0, 0.9]]
+         [100, 200, 100] | [1, 0, 1]  | 0.5          | 0.5     | 275         | 25      | 1     | [ [ 0.25, 0.25 ] ]
+         [100, 200, 100] | [0, 0, 1]  | 0.75         | 0.75    | 50          | 50      | 1     | [[0, 0.25],[0,1],[0, 0.25]]
     }
 
 }

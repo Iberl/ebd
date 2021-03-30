@@ -87,6 +87,22 @@ public class TopologyGraph {
         @Deprecated
         public static HashMap<CPunktObjekt, Node> NodeMap = new HashMap<>();
 
+    public static Node getNodeBetweenTwoEdges(Edge startEdge, Edge nextEdge) throws InvalidParameterException {
+        if(startEdge == null) throw new InvalidParameterException("Start Edge must not be null");
+        if(nextEdge == null) throw new InvalidParameterException("End Edge must not be null");
+        if(isNodeSame(startEdge.A, nextEdge.A)) return startEdge.A;
+        if(isNodeSame(startEdge.A, nextEdge.B)) return startEdge.A;
+        if(isNodeSame(startEdge.B, nextEdge.A)) return startEdge.B;
+        if(isNodeSame(startEdge.B, nextEdge.B)) return startEdge.B;
+        throw new InvalidParameterException("Edges are not connected");
+    }
+
+    private static boolean isNodeSame(Node a, Node b) {
+        if(a == null || b == null) return false;
+        return a.equals(b);
+    }
+
+
     /**
      * Topologischer Knoten
      */
