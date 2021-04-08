@@ -63,6 +63,7 @@ public class TmsJpaApp {
 			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
 			PlanData.getInstance();
+
 			SmartLogicClient.proceedTmsLogic(repository);
 
 			log.info("TMS is up");
@@ -124,7 +125,7 @@ public class TmsJpaApp {
 		public String home() { // <== changed return type, added parameter
 
 
-				System.setProperty("java.awt.headless", "false");
+
 				SwingUtilities.invokeLater(() -> {
 					if(TmsJpaApp.this.TmsFramer.tmsFrame == null) TmsJpaApp.this.TmsFramer.tmsFrame =
 							TmsFrameUtil.createTmsFrame();
@@ -152,11 +153,20 @@ public class TmsJpaApp {
 		@Override
 		public void run(String... args) throws Exception {
 			TmsJpaApp.TmsFramer = this;
+			System.setProperty("java.awt.headless", "false");
+			System.out.println("Java can open Dialogs: " + java.awt.GraphicsEnvironment.isHeadless());
 //			System.setProperty("java.awt.headless", "false");
 //			SwingUtilities.invokeLater(() -> {
 //				if(tmsFrame == null) tmsFrame = new JFrame();
 //
 //			});
+		}
+
+		public void repaint() {
+			if(tmsFrame != null) {
+				tmsFrame.repaint();
+				TmsFrameUtil.updateSubViews();
+			}
 		}
 
 

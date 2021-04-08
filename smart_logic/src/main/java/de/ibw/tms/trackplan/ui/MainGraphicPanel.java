@@ -1,8 +1,16 @@
 package de.ibw.tms.trackplan.ui;
 
 import de.ibw.feed.Balise;
+import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.occupation.VehicleOccupation;
+import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.RailConnector;
 import de.ibw.tms.plan.elements.BranchingSwitch;
@@ -15,6 +23,7 @@ import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import ebd.SlConfigHandler;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
@@ -32,6 +41,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
 
@@ -102,24 +112,59 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         Collection<TrainModel> models = TrainModel.TrainRepo.getAll();
         for(TrainModel TM: models) {
             try {
-                double d1 = 0;
-
-                String sId = TM.getEdgeTrainStandsOn().sId;
-
-                TrainDistance TD = TM.getDistanceRefPointOfEdge();
-                if (TD == null) {
-                    logger.error("Train-Modul: TrainId: " + TM.iTrainId + " cannot be painted.\n");
-                    continue;
+                MovableObject Mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(TM.iTrainId));
+                if(Mo == null) {
+                    throw new Exception("No Vehicle with trainid: " + TM.iTrainId + " found");
                 }
-                if(TD.getdDistance1() < 0 ) {
-                    d1 = 0;
-                } else {
-                    d1 = TD.getdDistance1();
+                VehicleOccupation O = null;
+               Collection<ArrayList<Occupation>> trainOccList =
+                        TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, Mo).getAll();
+                if(trainOccList.size() == 0) throw new Exception("No Occupation for trainId: " + TM.iTrainId + " found");
+                for(ArrayList<Occupation> occs: trainOccList) {
+                    if(occs.size() == 0) continue;
+                    O = (VehicleOccupation) occs.get(0);
+                    if(O != null) break;
                 }
+                if(O == null) throw new Exception("No Occupation for trainId: " + TM.iTrainId + " found");
+                List<TrackEdgeSection> sectionList = O.getTrackEdgeSections();
                 g2d.setPaint(TM.RepresentedColor);
-                System.out.println(sId + " - D1: " + d1 + " - D2" + TD.getdDistance2());
-                paintGeo(g2d, sId,TD.isIsfromA(), d1, TD.getdDistance2(), TM.RepresentedColor,
-                        BS);
+                for(TrackEdgeSection TES : sectionList) {
+                    TopologyGraph.Edge E = (TopologyGraph.Edge) TES.getTrackEdge();
+                    SpotLocationIntrinsic begin = TES.getBegin();
+                    SpotLocationIntrinsic end = TES.getEnd();
+                    Double d1 = null;
+                    Double d2 = 1d;
+
+                    boolean isFromA = true;
+                    if(E == null) {
+                        System.err.println("For trainId: " + TM.iTrainId + " Edge not found");
+                        continue;
+                    }
+                    String sID = E.sId;
+                    if(sID == null) {
+                        System.err.println("For trainId: " + TM.iTrainId + " sid null");
+                        continue;
+                    }
+                    if(begin == null) {
+                        System.err.println("For trainId: " + TM.iTrainId + " begin not found");
+                        continue;
+                    }
+                    if(end == null) {
+                        System.err.println("For trainId: " + TM.iTrainId + " end not found");
+                        continue;
+                    }
+                    d1 = begin.getIntrinsicCoord();
+                    d2 = end.getIntrinsicCoord();
+                    if(d1 == null) d1 = 0d;
+                    if(d2 == null) d2 = 1.0d;
+                    isFromA = E.getRefNode() == E.A;
+                    System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
+                    paintGeo(g2d, sID,isFromA, d1, d2, TM.RepresentedColor,
+                            BS);
+                }
+
+
+
             } catch(Exception E) {
                 E.printStackTrace();
                 logger.error("Train-Modul: TrainId: " + TM.iTrainId + " cannot be painted.\n");

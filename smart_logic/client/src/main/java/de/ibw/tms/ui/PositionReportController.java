@@ -26,6 +26,7 @@ import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
@@ -48,8 +49,8 @@ import static ebd.messageLibrary.util.ETCSVariables.*;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-08-25
+ * @version 0.5
+ * @since 2021-04-08
  */
 public class PositionReportController extends SubmissionPublisher implements IController {
 
@@ -124,7 +125,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     /**
      * Verwaltet eingehenden PositionReport
      * @param PositonReport - {@link Payload_14} - Informationen des Position-Reports
-     * @param sRBC {@link String} - Name des RBC
+     *
      */
     public synchronized void servePositionReport(Payload_14 PositonReport, Message.Header header) {
         //oldPositionReportHandler(PositonReport, sRBC);
@@ -137,18 +138,15 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                     PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
                             TI, posInf);
                     PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+                    TmsJpaApp.TmsFramer.repaint();
+                    getTrainModel(TI.nid_engine);
                 } catch(InvalidParameterException IPE) {
                     IPE.printStackTrace();
                 }
             }
         }.start();
 
-        String sRbc = header.rbc_id;
-        TrainInfo TI = PositonReport.trainInfo;
-        PositionInfo posInf = PositonReport.positionInfo;
-        PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                TI, posInf);
-        PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+
 
     }
 
@@ -162,11 +160,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             boolean b_A_IsTarget = false;
             iEngineId = PositonReport.trainInfo.nid_engine;
             BigDecimal distanceToNextTargetPoint = null;
-            Tm = TrainModel.TrainRepo.getModel(iEngineId);
-
-            if (Tm == null) {
-                Tm = initTrainModel(iEngineId);
-            }
+            Tm = getTrainModel(iEngineId);
             int q_scale = PositonReport.positionInfo.q_scale;
             BigDecimal distance_from_dp = new BigDecimal(PositonReport.positionInfo.d_lrbg);
             System.out.println("TMS " + "Engine ID: " + iEngineId + " POS_REP_Distance: " + distance_from_dp);
@@ -376,6 +370,18 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             this.publish();
         }
         TmsJpaApp.TmsFramer.tmsFrame.repaint();
+    }
+
+    @NotNull
+    private TrainModel getTrainModel(Integer iEngineId) {
+        TrainModel Tm;
+        Tm = TrainModel.TrainRepo.getModel(iEngineId);
+
+        if (Tm == null) {
+            Tm = initTrainModel(iEngineId);
+            TrainModel.TrainRepo.update(iEngineId, Tm);
+        }
+        return Tm;
     }
 
     private BigDecimal calcNextTargetPointDistanc(BigDecimal distanceToNextTargetPoint, TopologyGraph.Edge newTrainPositionEdge, TrainModel tm) {
