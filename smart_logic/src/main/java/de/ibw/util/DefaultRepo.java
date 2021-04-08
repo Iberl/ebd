@@ -7,12 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
- * @since 2020-08-12
+ * @version 0.5
+ * @since 2021-04-06
  */
-public class DefaultRepo<K, V> {
+public class DefaultRepo<K, V> implements Cloneable {
 
-    private ConcurrentHashMap<K, V> repo = new ConcurrentHashMap<K, V>();
+    protected ConcurrentHashMap<K, V> repo = new ConcurrentHashMap<K, V>();
+
+    protected DefaultRepo(ConcurrentHashMap<K, V> repo) {
+        this.repo = repo;
+    }
+    public DefaultRepo(){
+
+    }
 
     /**
      * Gibt zu einem Key einen Wert in die HashMap zu.
@@ -76,5 +83,17 @@ public class DefaultRepo<K, V> {
             // do something
         }
         return result;
+    }
+
+
+    @Override
+    /**
+     * Klont den Inhalt dieses Repositories ( Nützlich um nur Kopien wiederzugeben, sodass die eigentlichen Inhalte
+     * readonly bleiben )
+     */
+    public Object clone() throws CloneNotSupportedException {
+        super.clone();
+        ConcurrentHashMap<K, V> clonedContent = new ConcurrentHashMap<K, V>(this.repo);
+        return new DefaultRepo<K,V>(clonedContent);
     }
 }

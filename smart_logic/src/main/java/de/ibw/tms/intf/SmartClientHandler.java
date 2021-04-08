@@ -1,5 +1,8 @@
 package de.ibw.tms.intf;
 
+import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
+import de.ibw.history.data.PositionEnterType;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
@@ -10,6 +13,8 @@ import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
+import ebd.rbc_tms.util.PositionInfo;
+import ebd.rbc_tms.util.TrainInfo;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -210,8 +215,13 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         try {
             Payload_14 PositonReport = (Payload_14) msg.getPayload();
             String sRbc = msg.getHeader().rbc_id;
-
-            PositionReportController.getInstance().servePositionReport(PositonReport, sRbc);
+            Message.Header header = msg.getHeader();
+            TrainInfo TI = PositonReport.trainInfo;
+            PositionInfo posInf = PositonReport.positionInfo;
+            PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
+                    TI, posInf);
+            PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+            //PositionReportController.getInstance().servePositionReport(PositonReport, sRbc);
         } catch(Exception E) {
             E.printStackTrace();
         }

@@ -1,6 +1,8 @@
 package de.ibw.tms.controller;
 
 import de.ibw.feed.Balise;
+import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
 import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
@@ -113,6 +115,11 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     public synchronized void servePositionReport(Payload_14 PositionReport, String sRBC) {
         boolean bSaveable = true;
         Integer iEngineId = null;
+
+
+
+
+        //Old function
         TrainModel Tm = UtilFunction.servePositionReport(PositionReport, sRBC);
 
 

@@ -3,6 +3,9 @@ package de.ibw.tms.ui;
 
 
 import de.ibw.feed.Balise;
+import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
+import de.ibw.history.data.PositionEnterType;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
 import de.ibw.tms.entities.TmsJpaApp;
@@ -19,8 +22,10 @@ import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.DoubleCoord;
 import de.ibw.util.UtilFunction;
+import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
+import ebd.rbc_tms.util.TrainInfo;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
@@ -29,6 +34,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 import javax.swing.*;
 import java.awt.geom.Line2D;
 import java.math.BigDecimal;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
@@ -120,13 +126,36 @@ public class PositionReportController extends SubmissionPublisher implements ICo
      * @param PositonReport - {@link Payload_14} - Informationen des Position-Reports
      * @param sRBC {@link String} - Name des RBC
      */
-    public synchronized void servePositionReport(Payload_14 PositonReport, String sRBC) {
+    public synchronized void servePositionReport(Payload_14 PositonReport, Message.Header header) {
+        //oldPositionReportHandler(PositonReport, sRBC);
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    TrainInfo TI = PositonReport.trainInfo;
+                    PositionInfo posInf = PositonReport.positionInfo;
+                    PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
+                            TI, posInf);
+                    PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+                } catch(InvalidParameterException IPE) {
+                    IPE.printStackTrace();
+                }
+            }
+        }.start();
+
+        String sRbc = header.rbc_id;
+        TrainInfo TI = PositonReport.trainInfo;
+        PositionInfo posInf = PositonReport.positionInfo;
+        PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
+                TI, posInf);
+        PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+
+    }
+
+    private void oldPositionReportHandler(Payload_14 PositonReport, String sRBC) {
         boolean bSaveable = true;
         Integer iEngineId = null;
         TrainModel Tm = null;
-
-
-
 
 
         try {

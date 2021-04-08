@@ -4,6 +4,7 @@ import de.ibw.feed.Balise;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
@@ -80,7 +81,7 @@ public class TestUtil {
         Tm.setNodeTrainRunningTo(N);
         Tm.length = iLengthOfTrain;
 
-        MARequest MaR = new MARequest();
+        MARequest MaR = new MARequest(null, new MARequestOccupation());
 
         MaRequestWrapper Result = new MaRequestWrapper(MaR);
         Result.Tm = Tm;

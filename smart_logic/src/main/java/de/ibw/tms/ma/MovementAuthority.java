@@ -7,6 +7,7 @@ import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.ma.flanking.FlankArea;
+import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import ebd.rbc_tms.util.SpeedProfile;
@@ -42,6 +43,7 @@ public class MovementAuthority implements Serializable {
         private FlankArea FlArea;
 
         private ComposedRoute RouteOfMa;
+        private MovableObject MOB;
 
         /**
          * Default Constructor wird gebraucht und sollte vorhanden bleiben
@@ -104,6 +106,14 @@ public class MovementAuthority implements Serializable {
 
         public SSP getSpeedProfile() {
                 return speedProfile;
+        }
+
+        public MovableObject getMOB() {
+                return MOB;
+        }
+
+        public void setMOB(MovableObject MOB) {
+                this.MOB = MOB;
         }
 
         /**

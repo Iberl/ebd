@@ -128,7 +128,7 @@ public class CheckMovementPermission extends Commands {
     public static CheckMovementPermission getDummyMovementAuthorityCommand() {
         CheckMovementPermission cma = new CheckMovementPermission(3L);
         //return null;
-        MARequest mar = new MARequest();
+
 
 
 
@@ -142,7 +142,7 @@ public class CheckMovementPermission extends Commands {
         ssp.setSpeedSegments(speedSegmentList);
         MA.setSpeedProfile(ssp);
 
-        mar.setMa(MA);
+
 
         return cma;
 

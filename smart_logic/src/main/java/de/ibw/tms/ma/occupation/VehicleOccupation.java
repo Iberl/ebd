@@ -4,7 +4,11 @@ import de.ibw.feed.Balise;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.position.MOBPosition;
+import de.ibw.tms.ma.mob.position.MOBPositionClasses;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
+import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeFrontEnd;
@@ -23,10 +27,10 @@ import java.math.BigDecimal;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-11-12
+ * @since 2021-03-31
  *
  */
-public class VehicleOccupation extends Occupation {
+public class VehicleOccupation extends Occupation implements IMoveable {
     public static final String CLASS_IDENTIFIER = "Vehicle_Occupation";
 
     private SafeMOBPosition Position;
@@ -47,6 +51,14 @@ public class VehicleOccupation extends Occupation {
         }
     }
 
+    public MovableObject getTargetMoveableObject() {
+        if(Position == null) return null;
+        MOBPosition positionLink = Position.getLinkToMobileObject();
+        if(positionLink == null) return null;
+        return positionLink.getMovableObject();
+    }
+
+    @Deprecated
     private void handleVehicleWithoutMa(TrainInfo TI, PositionInfo Pos, Balise B) {
         int iDistanceFormBalise = Pos.d_lrbg;
         BigDecimal dDistanceFromA = new BigDecimal(0);
@@ -121,9 +133,9 @@ public class VehicleOccupation extends Occupation {
 
 
     }
-
+    @Deprecated
     public void initVehicleOccupation(TopologyGraph.Edge e, BLOCK_Q_SCALE qScale1mStart, int iStart, BLOCK_Q_SCALE qScale1mEnd, int iEnd) {
-        SafeMOBPosition SafePosition = new SafeMOBPosition(this);
+        SafeMOBPosition SafePosition = new SafeMOBPosition();
         TrackEdgeSection TES = new TrackEdgeSection();
         SpotLocationIntrinsic BeginLocation = new SpotLocationIntrinsic();
         SpotLocationIntrinsic EndLocation = new SpotLocationIntrinsic();

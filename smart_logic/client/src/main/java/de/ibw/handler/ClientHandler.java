@@ -95,15 +95,15 @@ public class ClientHandler extends SmartClientHandler {
                     MotisManager.sendMotisFiles();
                     this.Client.startScheduler();
                 }
-                PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader().rbc_id);
-            } else {
-                ITypable MsgFromSL = SmartServerMessage.generateFromSlJson(smartServerMessage.getMsg());
-                if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
-                    handleMaResponse((MaRequestReturnPayload)MsgFromSL);
+                PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader());
+            }
+        } else {
+            ITypable MsgFromSL = SmartServerMessage.generateFromSlJson(smartServerMessage.getMsg());
+            if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
+                handleMaResponse((MaRequestReturnPayload)MsgFromSL);
 
-                } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
-                    handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
-                }
+            } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
+                handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
             }
         }
 

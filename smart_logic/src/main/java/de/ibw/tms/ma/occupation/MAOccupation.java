@@ -1,6 +1,8 @@
 package de.ibw.tms.ma.occupation;
 
 import de.ibw.tms.ma.MovementAuthority;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.occupation.intf.IMoveable;
 
 /**
  * Ein von einer MA belegter Abschnitt
@@ -10,7 +12,7 @@ import de.ibw.tms.ma.MovementAuthority;
  * @version 0.4
  * @since 2020-10-30
  */
-public class MAOccupation extends Occupation {
+public class MAOccupation extends Occupation implements IMoveable {
     public static final String CLASS_IDENTIFIER = "MA_Occupation";
 
     private MovementAuthority MA;
@@ -25,5 +27,10 @@ public class MAOccupation extends Occupation {
 
     public void setMA(MovementAuthority MA) {
         this.MA = MA;
+    }
+
+    @Override
+    public MovableObject getTargetMoveableObject() {
+       return MA.getMOB();
     }
 }

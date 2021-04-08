@@ -1,17 +1,24 @@
 package de.ibw.history.data;
 
+import de.ibw.history.PositionData;
+import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
@@ -28,7 +35,7 @@ import java.util.ListIterator;
  * Routendatenverarbeitung innerhalb der smartLogic
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.0
- * @since 2021-03-30
+ * @since 2021-03-31
  */
 public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
 
@@ -38,13 +45,35 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
     public DefaultRepo<Pair<String, String>, Waypoint> waypointsBetweentTwoTrackEdges = new DefaultRepo<>();
 
 
-    // Diese Werte müssen bei jeder Route gesetzt werden, weil sonst das Start und das Ende der Route bestimmt
+    // Diese Werte müssen bei jeder Route gesetzt werden, weil dann das Start und das Ende der Route bestimmt
     // Werden kann
     private SpotLocationIntrinsic lastSpot = null;
     private SpotLocationIntrinsic firstSpot = null;
+    // Position of Train and Time of MA acceptance
+    private PositionData startPosition = null;
+
 
     private BigDecimal dRouteLength = null;
 
+
+    public PositionData getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(PositionData startPosition, int iTrainId) {
+        this.startPosition = startPosition;
+        MovableObject MO = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
+        try {
+            ThreadedRepo<TrackEdge, ArrayList<Occupation>> VehicleMap =
+                    TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
+            VehicleOccupation VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
+            this.firstSpot = (SpotLocationIntrinsic) VO.getBegin().getLocation();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     public SpotLocationIntrinsic getLastSpot() {
         return lastSpot;
@@ -81,8 +110,12 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
                 result = result.add(BigDecimal.valueOf(E.dTopLength));
             }
         }
-        this.dRouteLength = result.subtract(getLengthOfTrackAreasNotBetweenStartAndEnd(true, true));
-
+        try {
+            this.dRouteLength = result.subtract(getLengthOfTrackAreasNotBetweenStartAndEnd(true, true));
+        } catch(InvalidParameterException IPE) {
+            IPE.printStackTrace();
+            throw new SmartLogicException(IPE.getMessage());
+        }
         return dRouteLength;
     }
 
@@ -347,7 +380,7 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
             d_Current = d_Current.add(realCurrentEdgeLength);
 
             // Die Start Meter reichen in diese Kante d_Current hinein. Und die End-Meter sind noch nicht erreicht.
-            if(d_Start_Meter.compareTo(d_Current) < 0 && d_End_Meter.compareTo(d_Start) > 0) {
+            if(d_Start_Meter.compareTo(d_Current) <= 0 && d_End_Meter.compareTo(d_Start) >= 0) {
 
                 BigDecimal dBeginPercent = null;
                 BigDecimal dEndPercent = null;

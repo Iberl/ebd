@@ -1,6 +1,8 @@
 package de.ibw.smart.logic.intf.impl;
 
+import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
+import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.QueueUuidMapper;
@@ -35,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +101,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * Gefahrzonen konnten nicht abgerufen werden
      */
     public static final String NO_DANGERZONE_RETRIEVAL_ERROR = "011";
+
+    public static final String NO_TRAIN_INFORMATION = "013";
 
     /**
      * Der Zug in seinem Status kann die Anforderung nicht ausf&uuml;hren
@@ -275,7 +280,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             }
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
-
+        setTrainForStartPositionOfRoute(iTrainId, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
         //continous connect
         requestedTrackElementList = identifyRouteElements(R, requestedTrackElementList);
 
@@ -290,7 +295,19 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
         }
+
+
+        ETCS_DISTANCE NoDistance = new ETCS_DISTANCE();
+        NoDistance.sDistance = 0;
         MARequestOccupation MAO = Safety.checkIfRouteIsNonBlocked(iTrainId, R, MaAdapter,requestedTrackElementList, uuid);
+        try {
+            MAO = (MARequestOccupation) requestedTrackElementList.createSubRoute(NoDistance, NoDistance, 1, MAO);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            MAO = null;
+        }
+
+
         // always unblock workaround
 
         bIsOccupatonFree = MAO != null;
@@ -414,6 +431,30 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     }
 
+    private void setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
+        PositionModul.getInstance().resetTimeFilter();
+        PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(iTrainId);
+
+        if(TrainPosition == null || TrainPosition.getPos() == null) {
+            if(EBM != null) EBM.log("Train Position Unknown", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            MaReturnPayload.setErrorState(uuid, false,NO_TRAIN_INFORMATION );
+            sendMaResponseToTMS(MaReturnPayload, 2L);
+            if(EBM != null) EBM.log("SL Train-Status FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+        } else {
+            if(MaAdapter.nid_lrbg != TrainPosition.getPos().nid_lrbg) {
+                if(EBM != null) EBM.log("Train Position Unknown (REFERRED BALISE CHANGED)", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+                MaReturnPayload.setErrorState(uuid, false,NO_TRAIN_INFORMATION );
+                sendMaResponseToTMS(MaReturnPayload, 2L);
+                if(EBM != null) EBM.log("SL Train-Status (REFERRED BALISE CHANGED) FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
+                        SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            } else {
+                // TODO ????!!!
+                requestedTrackElementList.setStartPosition(TrainPosition, iTrainId);
+            }
+        }
+    }
+
     private void handleMaAckReceived(int iTrainId, Route R, UUID uuid, MaRequestReturnPayload MaReturnPayload,  ComposedRoute requestedTrackElementList, MA RbcMa, MARequestOccupation MAO, int nid_engine_Id) {
         try {
             SafetyLogic.getSmartSafety().transferMaRequestBlockListIntoRealBlockList(iTrainId, MAO, RbcMa, R, requestedTrackElementList);
@@ -422,9 +463,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             if(EBM != null)
                 EBM.log("Ma Check has failure: " + e.getMessage(), SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
-            return;
+
         }
-        //
+
         serveValidMa(uuid, MaReturnPayload, requestedTrackElementList, nid_engine_Id);
     }
 
@@ -539,6 +580,15 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         try{
 
             int iListCount = 0;
+            TopologyGraph.Edge PreviousEdge = null;
+            TopologyGraph.Edge LastEdge = null;
+            TopologyGraph.Edge FirstEdge = null;
+            TopologyGraph.Edge NextEdge = null;
+            SpotLocationIntrinsic LastLocation = new SpotLocationIntrinsic();
+
+
+
+
 
 
             System.out.println(R.getElementListIds().size());
@@ -555,6 +605,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 String sId  = idList.get(i);
 
                    TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
+
                    if(E == null){
                         if(EBM != null) EBM.log("Edge Element (ID: " + sId + ") cannot be Identified", ROUTE_COMPONENTS_IDENTIFY);
 
@@ -567,9 +618,23 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                     TePair = addWaypoint(requestedTrackElementList, E);
                 }
                 requestedTrackElementList.add(TePair);
+                if(FirstEdge == null) FirstEdge = E;
+                else if(NextEdge == null) NextEdge = E;
 
+                PreviousEdge = LastEdge;
+                LastEdge = E;
 
             }
+            if(PreviousEdge != null) {
+                if(!TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge).equals(LastEdge.getRefNode())) {
+                    LastLocation.setIntrinsicCoord(1 - R.getIntrinsicCoordOfTargetTrackEdge());
+                } else {
+                    LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+                }
+            } else LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+
+            requestedTrackElementList.setLastSpot(LastLocation);
+
 
 
             //ArrayList<Waypoint> wayList = R.getAllWaypointsInOrder();

@@ -70,7 +70,7 @@ public class PositionData {
 
         this.rbc_timestamp = rbc_timestamp;
         this.received_timestamp = received_timestamp;
-        this.nid_engine = nid_engine;
+        this.nid_engine = TI.nid_engine;
         Pos = pos;
     }
 

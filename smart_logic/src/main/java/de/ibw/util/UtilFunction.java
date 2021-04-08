@@ -22,6 +22,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.security.InvalidParameterException;
 
 import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_DRIVER;
@@ -396,7 +397,7 @@ public class UtilFunction {
         BigDecimal dExponent = new BigDecimal(scale.getiScaleValue() - 1);
         BigDecimal dPartDistance = dDistance.multiply(new BigDecimal(10).pow(dExponent.intValue()));
         if(dPartDistance.compareTo(new BigDecimal(0)) >= 0 && dPartDistance.compareTo(dTop) <= 0) {
-           return dPartDistance.divide(dTop).doubleValue();
+           return dPartDistance.divide(dTop, MathContext.DECIMAL32).doubleValue();
         }
         throw new InvalidParameterException("Subdistance has to be larger than 0 but smaller than whole Edgelength");
     }

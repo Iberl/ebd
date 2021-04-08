@@ -142,8 +142,9 @@ class ComposedRouteSpec extends Specification {
     def "getLengthCheck"() {
         given:
 
-        ComposedRoute MUT = new ComposedRoute();
-        init(MUT, lOfElments, trackOrd, startperc as double, endperc as double)
+        ComposedRoute MUT = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
+                startperc as double, endperc as double)
+
         expect:
 
         BigDecimal result = MUT.getRouteLength()
@@ -162,8 +163,8 @@ class ComposedRouteSpec extends Specification {
     def "getBackCheck"() {
         given:
 
-        ComposedRoute MUT = new ComposedRoute();
-        init(MUT, lOfElments, trackOrd, startperc as double, endperc as double)
+        ComposedRoute MUT = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
+                startperc as double, endperc as double)
         ETCS_DISTANCE dMeterGoBack = new ETCS_DISTANCE()
         dMeterGoBack.sDistance = (short) meterGoBack;
         int i_scale = scale;
@@ -186,8 +187,8 @@ class ComposedRouteSpec extends Specification {
     def "createSubRoutCheck"() {
         given:
 
-        ComposedRoute MUT = new ComposedRoute();
-        init(MUT, lOfElments, trackOrd, startperc as double, endperc as double)
+        ComposedRoute MUT = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
+                startperc as double, endperc as double)
         ETCS_DISTANCE dStartMeter = new ETCS_DISTANCE()
         dStartMeter.sDistance = (short) startMeter;
         ETCS_DISTANCE dEndMeter = new ETCS_DISTANCE();

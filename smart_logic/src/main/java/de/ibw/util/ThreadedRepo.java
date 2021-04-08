@@ -3,6 +3,7 @@ package de.ibw.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Ein Threadsicheres DefaultRepo
@@ -10,8 +11,8 @@ import java.util.List;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2020-09-30
+ * @version 0.5
+ * @since 2021-04-06
  */
 public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
 
@@ -21,9 +22,16 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      * Intialisiert dieses Reposiotory
      */
     public ThreadedRepo() {
+        super();
         repo = new DefaultRepo<K, V>();
 
     }
+
+    public ThreadedRepo(DefaultRepo<K, V> r) {
+        super(r.repo);
+        this.repo = r;
+    }
+
     /**
      * Gibt zu einem Key einen Wert in die HashMap zu.
      * Wenn der Key schon existiert, wird dieser &Uuml;berschrieben
@@ -82,4 +90,17 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
         return repo.sortValues();
     }
 
+
+    @Override
+    /**
+     * Klont den Inhalt dieses Repositories ( Nützlich um nur Kopien wiederzugeben, sodass die eigentlichen Inhalte
+     * readonly bleiben )
+     */
+    public Object clone() throws CloneNotSupportedException {
+         super.clone();
+         DefaultRepo<K, V> cloned = (DefaultRepo<K, V>) repo.clone();
+         return new ThreadedRepo<K, V>(cloned);
+
+
+    }
 }

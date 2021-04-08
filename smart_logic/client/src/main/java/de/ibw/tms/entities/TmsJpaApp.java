@@ -4,6 +4,7 @@ import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.ui.TmsFrameUtil;
 import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
@@ -61,6 +62,7 @@ public class TmsJpaApp {
 		return (args) -> {
 			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
+			PlanData.getInstance();
 			SmartLogicClient.proceedTmsLogic(repository);
 
 			log.info("TMS is up");

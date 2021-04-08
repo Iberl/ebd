@@ -117,6 +117,8 @@ public class SlConfigHandler {
 
     public boolean checkPlanPro = false;
 
+    public boolean sendMotisFiles = true;
+
     public boolean initCrossoversInRealdDbdClient = false;
     public boolean shallUserPrompt4SimulationFile = false;
     /*
@@ -204,6 +206,7 @@ public class SlConfigHandler {
 
         this.isInTestMode = Boolean.parseBoolean(prop.getProperty("isInTestMode"));
         this.checkPlanPro = Boolean.parseBoolean((prop.getProperty("checkPlanPro")));
+        this.sendMotisFiles = Boolean.parseBoolean((prop.getProperty("sendMotisFiles")));
     }
 
     /**

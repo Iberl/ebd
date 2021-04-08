@@ -24,8 +24,8 @@ import java.util.Objects;
  * Diese Klasse stellt Blockierte Gleisabschnitte dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-10-30
+ * @version 0.5
+ * @since 2021-04-07
  */
 public class Occupation extends TrackArea {
     public static final String CLASS_IDENTIFIER = "Occupation";
@@ -283,11 +283,11 @@ public class Occupation extends TrackArea {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Occupation that = (Occupation) o;
-        return (that.getTrackEdgeSections().equals(((Occupation) o).getTrackEdgeSections()));
+        return (this.getId().equals(that.getId()));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getName(), this.getTrackEdgeSections());
+        return Objects.hash(this.getId());
     }
 }

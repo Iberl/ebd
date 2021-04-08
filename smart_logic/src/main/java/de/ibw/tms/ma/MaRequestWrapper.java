@@ -2,6 +2,8 @@ package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.controller.TmsController;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.train.model.TrainModel;
 
@@ -28,12 +30,17 @@ public class MaRequestWrapper {
 
     private void init() {
         if(this.Request == null) {
-            this.Request = new MARequest();
+            this.Request = new MARequest(new MovementAuthority(), null);
             this.Request.setRoute(new Route(new ArrayList<>()));
-            this.Request.setMa(new MovementAuthority());
+
             this.Request.setTms(TmsController.getInstance());
             this.Request.setTrain(new TrainMovement());
+            if(Tm == null) return;
 
+            NID_ENGINE nid_engine = new NID_ENGINE(Tm.iTrainId);
+            MovableObject MOB = MovableObject.ObjectRepo.getModel(nid_engine);
+            if(MOB == null) return;
+            MOB.setMA(this.Request.ma);
         }
     }
 

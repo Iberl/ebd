@@ -1,6 +1,7 @@
 package de.ibw.main;
 
 
+import ebd.SlConfigHandler;
 import org.springframework.amqp.AmqpConnectException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.core.io.Resource;
@@ -71,6 +72,9 @@ public class MotisManager {
     }
 
     public static void sendSzenarioToMotis(String scenarioID) throws IOException {
+
+        if(!SlConfigHandler.getInstance().sendMotisFiles) return;
+
         ClassLoader classLoader = MethodHandles.lookup().getClass().getClassLoader();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
 

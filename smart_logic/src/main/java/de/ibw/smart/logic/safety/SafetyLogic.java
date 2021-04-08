@@ -7,6 +7,7 @@ import de.disposim.dbd.packet.IllegalNameLengthException;
 import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
+import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
@@ -19,6 +20,8 @@ import de.ibw.tms.etcs.*;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.MTERouteOccupation;
@@ -177,6 +180,10 @@ public class SafetyLogic {
         MaoOccup.setApplicationDirection(TApplicationDirection.BOTH);
         MaoOccup.setTrackEdgeSections(MAO.getTrackEdgeSections());
         MovementAuthority MA = new MovementAuthority();
+        NID_ENGINE nid_engine = new NID_ENGINE(trainId);
+
+        MovableObject movableObject = MovableObject.ObjectRepo.getModel(nid_engine);
+        if(movableObject == null) throw new SmartLogicException("Movable Object (Train) must exist");
         MA.setRouteOfMa(requestedTrackElementList);
         SpotLocationIntrinsic LastSpot = new SpotLocationIntrinsic();
 
@@ -239,9 +246,16 @@ public class SafetyLogic {
         MA.setEndOfAuthority(eoa);
         MA.setSuperviesedLocation(svl);
 
-        MA.setSpeedProfile(rbcMa.speedProfile);
+
+        MA.setMOB(MovableObject.ObjectRepo.getModel(new NID_ENGINE(trainId)));
+
+        MaoOccup.setMA(MA);
 
 
+
+        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
+                MAOccupation.class,
+                MaoOccup);
 
 
         //uncomment if and blocklist beneath
