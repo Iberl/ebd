@@ -2,7 +2,10 @@ package de.ibw.tms.intf;
 
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
+import de.ibw.history.TrackAndOccupationManager;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.history.data.PositionEnterType;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
@@ -10,7 +13,14 @@ import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.controller.PositionReportController;
+import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
+import de.ibw.tms.intf.cmd.Commands;
+import de.ibw.tms.ma.MARequest;
+import de.ibw.tms.ma.MovementAuthority;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
@@ -131,6 +141,8 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
     }
 
     /**
+     *  Diese Methode wird bisher im smartLogicClient (TMS) komplett überschrieben
+     *
      * Definiert, was das TMS unternimmt, wenn eine Nachricht der SL eintrifft.
      * Bisher wird hier unterschieden ob die SL eine Nachricht des RBC weitergegeben hat.
      * Oder eine Nachricht der SL eintrifft, weil eine MA akzeptiert oder verworfen wurde.
@@ -238,9 +250,54 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
      */
     public void sendCommand(TmsMessage TmsCmd) throws MissingInformationException {
         try {
+            if(TmsCmd.type == Commands.I_CHECK_MOVEMENT_PERMISSION) {
+                markOccupationForBeeingRequested((TmsMovementPermissionRequest) TmsCmd);
+            }
+
             this.tmsCommandQueue.put(TmsCmd.parseToJson());
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void markOccupationForBeeingRequested(TmsMovementPermissionRequest TmsCmd) throws MissingInformationException {
+        TmsMovementPermissionRequest tmpr = TmsCmd;
+        NID_ENGINE nid_engine = new NID_ENGINE(tmpr.getTrainId());
+        MovableObject mo = MovableObject.ObjectRepo.getModel(nid_engine);
+        PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(tmpr.getTrainId());
+        ETCS_DISTANCE noDistance = new ETCS_DISTANCE();
+        noDistance.sDistance = 0;
+
+        if(mo == null || TrainPosition == null)
+            throw new MissingInformationException("Position of train id: " + tmpr.getTrainId() + " unknown.");
+        if(tmpr.payload == null)
+            throw new MissingInformationException("No Payload for Movement-Authority-Permission-Request given");
+
+        if(tmpr.payload.route == null)
+            throw new MissingInformationException("No Route for Movement-Authority-Permission-Request given");
+
+
+        MovementAuthority movementAuthority = new MovementAuthority();
+        movementAuthority.setMOB(mo);
+        MARequestOccupation maRequestOccupation = new MARequestOccupation();
+        new MARequest(movementAuthority, maRequestOccupation);
+        ComposedRoute cr = new ComposedRoute();
+        try {
+            cr.generateFromRoute(tmpr.payload.route);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            throw new MissingInformationException(e.getMessage());
+        }
+
+        cr.setStartPosition(TrainPosition, tmpr.getTrainId());
+        try {
+            maRequestOccupation = (MARequestOccupation) cr.createSubRoute(noDistance, noDistance, 1, maRequestOccupation);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            throw new MissingInformationException(e.getMessage());
+        }
+        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
+                MARequestOccupation.class, maRequestOccupation);
     }
 }

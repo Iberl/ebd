@@ -50,7 +50,7 @@ public class TmsMessage extends Message<Commands> implements Serializable {
      */
     protected TmsMessage(String tms_id, String rbc_id, int icheckDbdCommand, Commands payload) {
         super(icheckDbdCommand, tms_id, rbc_id, payload);
-        this.type = Commands.I_CHECK_MOVEMENT_PERMISSION;
+        this.type = icheckDbdCommand;
         this.tms_id = tms_id;
         this.rbc_id = rbc_id;
 

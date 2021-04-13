@@ -10,14 +10,14 @@ import ebd.rbc_tms.util.exception.MissingInformationException;
 public class PermissionRunnable implements Runnable {
     private TmsScheduler scheduler;
     private SmartLogicClient client;
-    private String requestJson;
+    private TmsMessage requestMessage;
     private long lTaskId;
 
     public PermissionRunnable(TmsScheduler tmsScheduler, SmartLogicClient client, TmsMessage T,
                               long lTaskCounter) throws MissingInformationException {
         this.scheduler = tmsScheduler;
         this.client = client;
-        this.requestJson = T.parseToJson();
+        this.requestMessage = T;
         this.lTaskId = lTaskCounter;
     }
 
@@ -27,7 +27,7 @@ public class PermissionRunnable implements Runnable {
     public void run() {
 
         try {
-            client.CH.sendCommand(requestJson);
+            client.CH.sendCommand(requestMessage);
         } catch (MissingInformationException e) {
             e.printStackTrace();
 

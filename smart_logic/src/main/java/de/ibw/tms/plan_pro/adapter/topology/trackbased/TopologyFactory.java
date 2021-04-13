@@ -11,6 +11,8 @@ import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
@@ -20,6 +22,9 @@ import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 import jakarta.xml.bind.*;
+
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
@@ -108,7 +113,7 @@ public class TopologyFactory implements ITopologyFactory {
      * Construktor das die Factory intialisiert
      * @throws JAXBException - wenn die PlanPro Datei nicht verarbeitet werde konnte
      */
-    public TopologyFactory() throws JAXBException {
+    public TopologyFactory() throws JAXBException, IOException {
         aCrossingKeys = new Class[]  {
                 CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
         };
@@ -703,7 +708,7 @@ public class TopologyFactory implements ITopologyFactory {
         System.out.println("Geo_A_x: " + geo_A.getX() + " Geo_A_y: " + geo_A.getY());
         System.out.println("Geo_B_x: " + geo_B.getX() + " Geo_B_y: " + geo_B.getY());
     }
-    private void initFromFile() throws JAXBException {
+    private void initFromFile() throws JAXBException, IOException {
         PlanProDefinition = getcPlanProSchnittstelle();
         topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
         handleSignals();
@@ -808,18 +813,21 @@ public class TopologyFactory implements ITopologyFactory {
         }
     }
 
-    private CPlanProSchnittstelle getcPlanProSchnittstelle() throws JAXBException {
+    private CPlanProSchnittstelle getcPlanProSchnittstelle() throws JAXBException, IOException {
         JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
 
         //2. Use JAXBContext instance to create the Unmarshaller.
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
+        ClassLoader classLoader = MethodHandles.lookup().getClass().getClassLoader();
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
+        String sResLocation = TranslationModel.TrackplanEnvironment.CurrentEnvironment.resourceLocation;
+        Resource PlanProFile = resolver.getResource("classpath:" + sResLocation);
+
         //3. Use the Unmarshaller to unmarshal the XML document to get an instance of JAXBElement.
         JAXBElement<CPlanProSchnittstelle> unmarshalledObject =
                 (JAXBElement<CPlanProSchnittstelle>)unmarshaller.unmarshal(
-                        ClassLoader.getSystemResourceAsStream(
-                                TranslationModel.TrackplanEnvironment.CurrentEnvironment.resourceLocation));
-
+                PlanProFile.getInputStream());
         //4. Get the instance of the required JAXB Root Class from the JAXBElement.
         return unmarshalledObject.getValue();
 

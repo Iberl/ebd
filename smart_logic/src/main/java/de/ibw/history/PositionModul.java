@@ -123,6 +123,8 @@ public class PositionModul implements IPositionModul {
         PositionInfo Position = PD.getPos();
         if(Position.l_trainint != null) {
             trainLengthMeter = BigDecimal.valueOf(Position.l_trainint);
+        } else {
+            throw new InvalidParameterException("Train not supported: No Length information");
         }
 
         ComposedRoute Route = this.getRouteOfNidEngine(PD.getNid_engine());

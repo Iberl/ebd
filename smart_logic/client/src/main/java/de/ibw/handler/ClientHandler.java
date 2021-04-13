@@ -24,11 +24,12 @@ import java.util.UUID;
 
 /**
  * Client Handler
+ * sendet Nachricht über Vaterklasse SmartClientHandler
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-12-03
+ * @version 1.0
+ * @since 2021-04-13
  */
 public class ClientHandler extends SmartClientHandler {
 
@@ -109,11 +110,5 @@ public class ClientHandler extends SmartClientHandler {
 
     }
 
-    public void sendCommand(String sJson) throws MissingInformationException {
-        try {
-            this.tmsCommandQueue.put(sJson);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        }
+
 }

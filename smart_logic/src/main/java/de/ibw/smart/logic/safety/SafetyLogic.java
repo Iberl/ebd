@@ -1166,9 +1166,12 @@ public class SafetyLogic {
         //BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
 
 
-
-        PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
-
+        try {
+            PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+        } catch( InvalidParameterException IPE) {
+            IPE.printStackTrace();
+            System.exit(-1);
+        }
     }
 
     private boolean checkQ_Length(int iQ_Length) {

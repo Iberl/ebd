@@ -92,6 +92,7 @@ public class TmsScheduler {
                     TmsMessage MPR = new TmsMovementPermissionRequest(this.sTmsId, this.sRbcId, CheckTask);
                     scheduleMessage(dScheduledDate, MPR);
                     MaModul.getInstance().addMovementPermissionAuthorityRequest(T.CheckPermission);
+
                 }
 
                 it.remove();

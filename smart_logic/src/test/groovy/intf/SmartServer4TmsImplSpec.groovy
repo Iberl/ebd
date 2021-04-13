@@ -30,9 +30,12 @@ import java.security.InvalidParameterException
 import java.util.concurrent.SynchronousQueue
 
 /**
- * @auther iberl@verkehr.tu-darmstadt.de
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.0
  * @since 18.03.2021
+ *
+ * Diese Klasse muss aktualisiert werden oder zur not loeschen
  */
 class SmartServer4TmsImplSpec extends Specification {
 
@@ -71,7 +74,10 @@ class SmartServer4TmsImplSpec extends Specification {
         RbcMA result = new RbcMA("1");
 
     }
-
+    /**
+     * @deprecated
+     * @return
+     */
     def "guardMACheck"() {
         given:
             Route InvalidRoute = new Route(null);

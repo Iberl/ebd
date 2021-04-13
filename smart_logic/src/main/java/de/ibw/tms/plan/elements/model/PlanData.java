@@ -73,7 +73,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private ITopologyFactory topologyFactory;
 
-    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException {
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException, IOException {
         if(topologyFactory == null) {
             this.topologyFactory = new TopologyFactory();
         }

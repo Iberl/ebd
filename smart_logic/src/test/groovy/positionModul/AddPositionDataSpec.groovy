@@ -41,7 +41,7 @@ class AddPositionDataSpec extends Specification {
         SlConfigHandler.getInstance().useInfrastructureServer = false;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv;
         PlanData.getInstance();
-        PositionInfo TestPosition = new PositionInfo(1,dummyBaliseId,null, 0, 1, 1, 1, 1, 5 , null, 1 , 1 , 1, 1, null)
+        PositionInfo TestPosition = new PositionInfo(1,dummyBaliseId,null, 0, 1, 1, 1, 1, 5 , 14, 1 , 1 , 1, 1, null)
         PositionData TestData = new PositionData(1L,1L,TestInfo, TestPosition)
         MUT.addPositionData(TestData, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 

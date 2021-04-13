@@ -87,6 +87,9 @@ public class SmartLogicClient extends SmartClient {
         this.sRbcId = sRbcId;
     }
 
+    /**
+     * @deprecated
+     */
     private void evalRepo(){
 
         //for (CheckMovementPermissionDAO MovePerm : permissionRepository.findAll()) {
@@ -172,10 +175,14 @@ public class SmartLogicClient extends SmartClient {
 
 
         }
-        SlClient.evalRepo();
+        //SlClient.evalRepo();
 
     }
 
+    /**
+     * @deprecated
+     * @param jsonString
+     */
     private static void sendJsonWhenValid(String jsonString) {
 
         if (isJSONValid(jsonString)) {
@@ -189,6 +196,7 @@ public class SmartLogicClient extends SmartClient {
                 SlClient.start();
                 System.out.println("Client startet now.");
             }
+            /*
             new Thread() {
                 @Override
                 public void run() {
@@ -202,6 +210,8 @@ public class SmartLogicClient extends SmartClient {
             }.start();
 
 
+
+             */
         } else {
             System.out.println("Json inalid");
         }

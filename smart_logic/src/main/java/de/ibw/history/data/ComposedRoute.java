@@ -12,13 +12,21 @@ import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
+import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackArea;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
+import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
+import ebd.TescModul;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
@@ -29,6 +37,7 @@ import java.math.RoundingMode;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 
 /**
@@ -54,6 +63,98 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
 
     private BigDecimal dRouteLength = null;
+
+    public void generateFromRoute(Route R) throws SmartLogicException {
+        try{
+
+            int iListCount = 0;
+            TopologyGraph.Edge PreviousEdge = null;
+            TopologyGraph.Edge LastEdge = null;
+            TopologyGraph.Edge FirstEdge = null;
+            TopologyGraph.Edge NextEdge = null;
+            SpotLocationIntrinsic LastLocation = new SpotLocationIntrinsic();
+
+
+
+
+
+
+            System.out.println(R.getElementListIds().size());
+
+            System.out.println("check done");
+
+            List<String> idList = R.getElementListIds();
+
+            int iIdCount = idList.size();
+
+            for(int i = 0; i < iIdCount; i++) {
+                Pair<Route.TrackElementType, ITopological> TePair = null;
+
+                String sId  = idList.get(i);
+
+                TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
+
+                if(E == null){
+                    System.err.println("Edge Element (ID: " + sId + ") cannot be Identified");
+
+                    throw new NullPointerException("Edge Element cannot be Identifed: " + sId);
+                }
+
+                TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
+
+                if(i > 0) {
+                    TePair = addWaypoint(this, E);
+                }
+                this.add(TePair);
+                if(FirstEdge == null) FirstEdge = E;
+                else if(NextEdge == null) NextEdge = E;
+
+                PreviousEdge = LastEdge;
+                LastEdge = E;
+
+            }
+            if(PreviousEdge != null) {
+                if(!TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge).equals(LastEdge.getRefNode())) {
+                    LastLocation.setIntrinsicCoord(1 - R.getIntrinsicCoordOfTargetTrackEdge());
+                } else {
+                    LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+                }
+            } else LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+
+            this.setLastSpot(LastLocation);
+
+
+
+            //ArrayList<Waypoint> wayList = R.getAllWaypointsInOrder();
+           /* Waypoint WayStart = wayList.get(0);
+            Waypoint WayEnd = wayList.get(wayList.size() - 1);
+
+            if (handleWaypontsOnOneTrail(requestedTrackElementList, WayStart, WayEnd)) {
+                return requestedTrackElementList;
+            }
+            wayList.remove(WayStart);
+            wayList.remove(WayEnd);
+            iListCount = wayList.size();
+
+
+            if(iListCount == 1) {
+                //one Waypoint plus start and End
+                return handle3Waypoints(requestedTrackElementList, wayList, WayStart, WayEnd);
+            } else {
+                handleWaypointsMore3Waypoints(requestedTrackElementList, iListCount, wayList, WayStart, WayEnd);
+            }
+
+
+
+
+            */
+
+
+        } catch(Exception | SmartLogicException E) {
+            E.printStackTrace();
+            throw E;
+        }
+    }
 
 
     public PositionData getStartPosition() {
@@ -117,6 +218,205 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
             throw new SmartLogicException(IPE.getMessage());
         }
         return dRouteLength;
+    }
+
+    private TopologyGraph.Edge getLastTrackEdge(ComposedRoute requestedTrackElementList) {
+        return (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
+    }
+
+    private TopologyGraph.Edge replaceEdgeByEdgeContainingDigitalEnd(TopologyGraph.Edge e) {
+        DefaultRepo<TopologyGraph.Node,DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> cons = TopologyFactory.connections;
+        TopologyGraph.Edge E1 = e;
+        DefaultRepo<TopologyGraph.Node, TopologyGraph.Edge> connectionRepo = null;
+        System.out.println();
+        if(e.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG)) {
+            System.out.println(e.A.sOldPlanProNodeId);
+            connectionRepo =  cons.getModel(e.A);
+        } else if(e.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) {
+            System.out.println(e.B.sOldPlanProNodeId);
+            connectionRepo =  cons.getModel(e.B);
+        }
+        if(connectionRepo == null) return e;
+        E1 = connectionRepo.sortValues().get(0);
+        return E1;
+    }
+
+    private void addDirectionState(TrackElementStatus dkwStateRequested, char c) {
+        if(c == 'L') dkwStateRequested.statusList.add(TrackElementStatus.Status.LEFT);
+        else if(c == 'R') dkwStateRequested.statusList.add(TrackElementStatus.Status.RIGHT);
+    }
+
+    private void guardDirection(char c) throws SmartLogicException {
+        if(c != 'L' && c != 'R' ) throw new SmartLogicException("DKW direction must be 'L' or 'R', but is: " + c);
+    }
+
+    private void handleTrackEdgeOnDkw(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, MoveableTrackElement dkwElement) throws SmartLogicException {
+        Waypoint W;
+        TrackElementStatus DkwStateRequested = new TrackElementStatus();
+        String sid = e.getRefId();
+        String last2Char = sid.substring(sid.length() - 2);
+        char c1 = last2Char.charAt(0);
+        char c2 = last2Char.charAt(1);
+        guardDirection(c1);
+        guardDirection(c2);
+        addDirectionState(DkwStateRequested, c1);
+        addDirectionState(DkwStateRequested, c2);
+        W = new Waypoint(dkwElement, DkwStateRequested);
+        requestedTrackElementList.dkwWaypointRepo.update(e,W);
+        return;
+    }
+
+    private boolean handleDkwLinkage(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement dkwElement) throws SmartLogicException {
+        if(dkwElement != null) {
+            try {
+                handleTrackEdgeOnDkw(requestedTrackElementList, e, dkwElement);
+            } catch (SmartLogicException Ex) {
+                return false;
+            }
+            return true;
+        } else {
+            Waypoint W = requestedTrackElementList.dkwWaypointRepo.getModel(predecessorEdge);
+            if(W != null) {
+                // vorhergehende Switch war dkw sodass die dKW mit den Knoten zur zweiten kante verbunden ist.
+                // die dkw ist bereits der Waypoint
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Pair<Route.TrackElementType, ITopological> addWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e) throws SmartLogicException {
+        if(requestedTrackElementList.isEmpty()) throw new InvalidParameterException("Predeceeding Edge is missing");
+        TopologyGraph.Edge PredecessorEdge = getLastTrackEdge(requestedTrackElementList);
+        TopologyGraph.Node N = null;
+        Waypoint W;
+
+        TopologyConnect E_Connect = null;
+        TopologyConnect Predecessor_Connect = null;
+        // Kreiskanten bedueten zwei Knoten die sich von zwei Kanten treffen können
+        if(PredecessorEdge.A.equals(e.A) || PredecessorEdge.A.equals(e.B)) {
+            N = PredecessorEdge.A;
+            Predecessor_Connect = PredecessorEdge.TopConnectFromA;
+
+            if(PredecessorEdge.A.equals(e.A)) {
+                E_Connect = e.TopConnectFromA;
+            } else {
+                E_Connect = e.TopConnectFromB;
+            }
+        }
+        if(PredecessorEdge.B.equals(e.A) || PredecessorEdge.B.equals(e.B)) {
+            N = PredecessorEdge.B;
+            Predecessor_Connect = PredecessorEdge.TopConnectFromB;
+            if(PredecessorEdge.B.equals(e.A)) {
+                E_Connect = e.TopConnectFromA;
+            } else {
+                E_Connect = e.TopConnectFromB;
+            }
+        }
+
+
+
+
+
+
+        if(N == null) {
+
+            PredecessorEdge = replaceEdgeByEdgeContainingDigitalEnd(PredecessorEdge);
+            e = replaceEdgeByEdgeContainingDigitalEnd(e);
+            if(PredecessorEdge.A.equals(e.A) || PredecessorEdge.A.equals(e.B)) {
+                N = PredecessorEdge.A;
+                Predecessor_Connect = PredecessorEdge.TopConnectFromA;
+
+                if(PredecessorEdge.A.equals(e.A)) {
+                    E_Connect = e.TopConnectFromA;
+                } else {
+                    E_Connect = e.TopConnectFromB;
+                }
+            }
+            if(PredecessorEdge.B.equals(e.A) || PredecessorEdge.B.equals(e.B)) {
+                N = PredecessorEdge.B;
+                Predecessor_Connect = PredecessorEdge.TopConnectFromB;
+                if(PredecessorEdge.B.equals(e.A)) {
+                    E_Connect = e.TopConnectFromA;
+                } else {
+                    E_Connect = e.TopConnectFromB;
+                }
+            }
+
+
+
+            if(N == null) {
+                System.err.println();
+                throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+            }
+
+        }
+
+        // Wenn e zu einer DKW gehört DKW Waypoint speichern und return
+        String sCheckIfdkwId = e.getRefId().replace("L", "").replace("R", "");
+
+        MoveableTrackElement DkwElement = TescModul.MoveableTrackElementAccess.getDkwById(sCheckIfdkwId);
+        if(handleDkwLinkage(requestedTrackElementList, e, PredecessorEdge, DkwElement)) {
+            // DKW Waypoint added
+            return new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, e);
+        }
+
+
+
+        // Wenn PredecessorEdge zu einer DKW gehört return
+
+
+
+
+        String sSwitchId = ISwitchHandler.getNodeId(N);
+        MoveableTrackElement SwitchElement = TescModul.MoveableTrackElementAccess.getElementById(sSwitchId);
+        TrackElementStatus TES = new TrackElementStatus();
+
+        if (handleTrackElementStatusInsertingWaypoint(requestedTrackElementList, e, PredecessorEdge, E_Connect, Predecessor_Connect, SwitchElement, TES))
+            return new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, e);
+
+        throw new SmartLogicException("Waypoint has to be found, but cannot");
+
+
+
+    }
+
+    private boolean handleTrackElementStatusInsertingWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, TopologyConnect e_Connect, TopologyConnect predecessor_Connect, MoveableTrackElement switchElement, TrackElementStatus TES) {
+        switch (predecessor_Connect) {
+            case RECHTS -> {
+                TES.statusList.add(TrackElementStatus.Status.RIGHT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+            case LINKS -> {
+                TES.statusList.add(TrackElementStatus.Status.LEFT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+        }
+        switch (e_Connect) {
+            case RECHTS -> {
+                TES.statusList.add(TrackElementStatus.Status.RIGHT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+            case LINKS -> {
+                TES.statusList.add(TrackElementStatus.Status.LEFT);
+                insertWaypointInRouteRequested(requestedTrackElementList, e, predecessorEdge, switchElement, TES);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void insertWaypointInRouteRequested(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, MoveableTrackElement switchElement, TrackElementStatus TES) {
+        Waypoint W;
+        W = new Waypoint(switchElement, TES);
+        Pair<String, String> key = new ImmutablePair<>(predecessorEdge.getRefId(), e.getRefId());
+        Pair<String, String> keyReverse = new ImmutablePair<>(e.getRefId(), predecessorEdge.getRefId());
+        requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(key, W);
+        requestedTrackElementList.waypointsBetweentTwoTrackEdges.update(keyReverse, W);
+
     }
 
     private void guardLengthParams() throws SmartLogicException {

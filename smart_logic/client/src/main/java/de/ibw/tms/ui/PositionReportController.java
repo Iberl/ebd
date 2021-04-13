@@ -32,6 +32,7 @@ import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
+import javax.security.auth.callback.TextInputCallback;
 import javax.swing.*;
 import java.awt.geom.Line2D;
 import java.math.BigDecimal;
@@ -142,6 +143,8 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                     getTrainModel(TI.nid_engine);
                 } catch(InvalidParameterException IPE) {
                     IPE.printStackTrace();
+                    System.err.println("TMS is Shuting down");
+                    System.exit(-1);
                 }
             }
         }.start();

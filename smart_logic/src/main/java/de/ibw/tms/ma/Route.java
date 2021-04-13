@@ -33,7 +33,6 @@ import java.util.List;
  * @since 2021-01-25
  */
 
-@Entity
 public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
     public static final String CLASS_IDENTIFIER = "Route";
 

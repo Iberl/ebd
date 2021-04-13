@@ -16,7 +16,6 @@ import javax.persistence.Entity;
  *
  *
  */
-@Entity
 public class TmsMovementPermissionRequest extends TmsMessage implements Comparable<TmsMessage> {
 
     /**
@@ -34,6 +33,10 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
     public TmsMovementPermissionRequest(String tms_id, String rbc_id, CheckMovementPermission payload) {
             super(tms_id, rbc_id, Commands.I_CHECK_MOVEMENT_PERMISSION, payload);
             this.payload = payload;
+    }
+
+    public int getTrainId() {
+        return payload.iTrainId;
     }
 
     /**

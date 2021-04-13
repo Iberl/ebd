@@ -10,6 +10,7 @@ import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
@@ -118,7 +119,7 @@ public class TrainController extends SubmissionPublisher implements IController 
     }
 
     /**
-     * Schicht MA zur SmartLogic
+     * Schickt MA zur SmartLogic
      * @param requestWrapper {@link MaRequestWrapper} - Die Anfrage einer MA an die SL
      * @param R {@link Route} - die angeforderte Route
      * @param sRbcId {@link String} - Ziel RBC Id
@@ -278,6 +279,9 @@ public class TrainController extends SubmissionPublisher implements IController 
             //CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
             TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
+
+
+
             try {
 
                 SmartClientHandler.getInstance().sendCommand(Msg);
