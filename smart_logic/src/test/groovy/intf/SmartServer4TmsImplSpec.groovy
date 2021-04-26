@@ -1,10 +1,15 @@
 package intf
 
+import data.MovementPermissionRequestProvider
+import de.ibw.history.TrackAndOccupationManager
+import de.ibw.smart.logic.intf.SmartLogic
 import de.ibw.smart.logic.intf.SmartServer
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl
 import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker
 import de.ibw.smart.logic.intf.messages.SmartServerMessage
 import de.ibw.smart.logic.safety.SafetyLogic
+import de.ibw.tms.intf.TmsMovementPermissionRequest
+import de.ibw.tms.intf.cmd.CheckMovementPermission
 import de.ibw.tms.ma.EoaAdapter
 import de.ibw.tms.ma.GradientProfileAdapter
 import de.ibw.tms.ma.LinkingProfileAdapter
@@ -15,6 +20,11 @@ import de.ibw.tms.ma.Route
 import de.ibw.tms.ma.SpeedProfileAdapter
 import de.ibw.tms.ma.SpeedSegment
 import de.ibw.tms.ma.dynamic.RouteSection
+import de.ibw.tms.ma.mob.MovableObject
+import de.ibw.tms.ma.mob.common.NID_ENGINE
+import de.ibw.tms.ma.mob.position.MOBPosition
+import de.ibw.tms.ma.mob.position.SafeMOBPosition
+import de.ibw.tms.ma.occupation.MAOccupation
 import ebd.rbc_tms.util.EOA
 import ebd.rbc_tms.util.GradientProfile
 import ebd.rbc_tms.util.LinkingProfile
@@ -39,7 +49,7 @@ import java.util.concurrent.SynchronousQueue
  */
 class SmartServer4TmsImplSpec extends Specification {
 
-    @Shared SmartServer ServerMock = Spy(new SmartServer(null, 33330));
+
 
 
     def "start smart server"() {
@@ -74,10 +84,41 @@ class SmartServer4TmsImplSpec extends Specification {
         RbcMA result = new RbcMA("1");
 
     }
-    /**
+
+
+
+    def "checkMovementAuthority"() {
+        given:
+        SmartServer ServerMock = Spy(new SmartServer(null, 33330));
+        SmartServer4TmsImpl MUT = Spy(SmartServer4TmsImpl.instance);
+        TmsMovementPermissionRequest Request = new MovementPermissionRequestProvider().getTestRequest();
+        CheckMovementPermission CMA = Request.getPayload();
+        MovableObject MO = new MovableObject(new NID_ENGINE(1), new MOBPosition(new SafeMOBPosition()));
+        new Thread() {
+            @Override
+            void run() {
+                MUT.checkMovementAuthority(CMA.iTrainId, CMA.route, CMA.MaAdapter, CMA.uuid, CMA.tms_id, CMA.rbc_id,
+                        CMA.lPriority);
+
+            }
+        }.start()
+
+
+
+        expect:
+        Thread.sleep(3000);
+        SmartServer4TmsImpl.ackQueues.offer(Request.header.uuid, true);
+
+        SmartServer4TmsImpl.instance != null;
+        TrackAndOccupationManager.getReadOnly(MAOccupation.class, MO).getAll().iterator().next().size() == 1
+
+    }
+
+
+    /*
      * @deprecated
      * @return
-     */
+     *
     def "guardMACheck"() {
         given:
             Route InvalidRoute = new Route(null);
@@ -94,7 +135,7 @@ class SmartServer4TmsImplSpec extends Specification {
             invalidMa.add(getWithEmptySpeedSections());
             invalidMa.add(getGradientProfileNull());
             invalidMa.add(getGradientsNull());
-            invalidMa.add(getEmptyGradients());*/
+            invalidMa.add(getEmptyGradients());
 
 
         when:
@@ -106,7 +147,7 @@ class SmartServer4TmsImplSpec extends Specification {
 
 
     }
-
+    */
 
     /*def "guard check null context"() {
         given:

@@ -29,10 +29,12 @@ public class QueueUuidMapper {
 
     /**
      * Diese Methode wartet bis zu einem Timeout auf ein Acknowledge und gibt Erfolg oder eine Fehlen einer Antowort als
-     * Boolean zurück.
+     * Boolean zur&uuml;ck.
      * @param uuid - Id der verfolgten Kommunikation
      * @return Boolean - ist Acknowledge eingegangen
-     * @throws InterruptedException - wird geworfen, wenn beim poll der Warteschlange es Interrupt gab
+     * @throws InterruptedException - wird geworfen, wenn beim poll der Warteschlange es Interrupts gab
+     * @throws InvalidParameterException - wird geworfen wenn uuid null gesetzt wurde oder keine Warteschlange für die
+     *                                      uuid angegeben wurde
      */
     public Boolean poll(UUID uuid) throws InterruptedException, InvalidParameterException {
         if(uuid == null) throw new InvalidParameterException("Uuid must not be null");
@@ -47,6 +49,7 @@ public class QueueUuidMapper {
      * @param uuid - Der Kommunikationsverlauf
      * @param b - Der Erfolg eines Acknowledge
      * @throws InterruptedException - wird geworfen wenn beim offer ein Interrupt erfolgt
+     * @throws InvalidParameterException - wird geworfen, wenn kene Warteschlange mit der uuid registriert wurde
      */
     public void offer(UUID uuid, boolean b) throws InterruptedException, InvalidParameterException {
         if(uuid == null) throw new InvalidParameterException("uuid must not be null");

@@ -97,13 +97,13 @@ public class PositionModul implements IPositionModul {
 
     }
 
-    private static PositionModul instance = null;
+    private volatile static PositionModul instance = null;
 
     /**
      * Singleton f&uuml;r dieses Modul
      * @return PositionModul
      */
-    public static PositionModul getInstance() {
+    public static synchronized PositionModul getInstance() {
         if(instance == null) {
             instance = new PositionModul();
         }
@@ -169,33 +169,13 @@ public class PositionModul implements IPositionModul {
             ArrayList<TrackEdgeSection> sectionList = new ArrayList<>();
             SpotLocationIntrinsic begin = new SpotLocationIntrinsic();
             begin.setIntrinsicCoord(0.0d);
+
             SpotLocationIntrinsic end = new SpotLocationIntrinsic();
             end.setIntrinsicCoord(1.0d);
-            VehicleOccupation VO = new VehicleOccupation();
-            int nid_lrbg = Position.nid_lrbg;
-            Balise LrbgBalise = Balise.baliseByNid_bg.getModel(nid_lrbg);
-            if(LrbgBalise == null) throw new InvalidParameterException("LrbgBalise not found (Nid):" + nid_lrbg);
-            TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(LrbgBalise.getTopPositionOfDataPoint().getIdentitaet()
-                    .getWert());
+            VehicleOccupation VO = VehicleOccupation.generateVehicleOccupation(Position, nid_engine, SafePosition,
+                    sectionList, begin, end);
+            MAOccupation maOcc = new MAOccupation();
 
-            TrackEdgeSection TES = new TrackEdgeSection();
-            TES.setTrackEdge(E);
-            TES.setBegin(begin);
-            TES.setEnd(end);
-            sectionList.add(TES);
-            beginTrain = new MinSafeRearEnd();
-            beginTrain.setLocation(begin);
-            endTrain = new MaxSafeFrontEnd();
-            endTrain.setLocation(end);
-            SafePosition.setTrackEdgeSections(sectionList);
-            SafePosition.setBegin(beginTrain);
-            SafePosition.setEnd(endTrain);
-            MovableObject MO = MovableObject.ObjectRepo.getModel(nid_engine);
-            MOBPosition P = new MOBPosition(SafePosition);
-            if(MO == null) MO = new MovableObject(nid_engine, P);
-            MO.setPosition(P);
-
-            SafePosition.setOccupation(VO);
             TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
                     VehicleOccupation.class, VO);
 
@@ -227,6 +207,8 @@ public class PositionModul implements IPositionModul {
 
         positionModuls.add(PD);
     }
+
+
 
     private void handleSameBaliseGroup(BigDecimal trainLengthMeter, BigDecimal dVehicleEndOffset, PositionInfo Position, ComposedRoute Route, NID_ENGINE nid_engine, PositionInfo MaPositionInfo) {
         MAOccupation MaSmalled;

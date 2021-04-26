@@ -1,8 +1,10 @@
 package de.ibw.history.data;
 
 import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
+import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.Route;
@@ -10,6 +12,7 @@ import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.physical.MoveableTrackElement;
@@ -30,15 +33,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
+import org.railMl.rtm4rail.TNavigability;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * Routendatenverarbeitung innerhalb der smartLogic
@@ -64,8 +65,16 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
     private BigDecimal dRouteLength = null;
 
-    public void generateFromRoute(Route R) throws SmartLogicException {
+    public void generateFromRoute(Route R, int iTrainId) throws SmartLogicException {
         try{
+            PositionData CurrentPos = guard(R, iTrainId);
+            MovableObject MO = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
+
+            ThreadedRepo<TrackEdge, ArrayList<Occupation>> VehicleMap =
+                    TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
+            VehicleOccupation VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
+            this.setStartPosition(CurrentPos, VO);
+
 
             int iListCount = 0;
             TopologyGraph.Edge PreviousEdge = null;
@@ -123,7 +132,15 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
             this.setLastSpot(LastLocation);
 
+            if(firstSpot == null || firstSpot.getNetElementRef() == null || VO.getBegin() == null ||
+                    VO.getBegin().getLocation() == null || VO.getBegin().getLocation().getNetElementRef() == null) {
+                throw new SmartLogicException(SmartServer4TmsImpl.START_POINT_NOT_ON_ROUTE);
 
+
+
+            } else if(!firstSpot.getNetElementRef().equals(VO.getBegin().getLocation().getNetElementRef())) {
+                throw new SmartLogicException(SmartServer4TmsImpl.START_POINT_NOT_ON_ROUTE);
+            }
 
             //ArrayList<Waypoint> wayList = R.getAllWaypointsInOrder();
            /* Waypoint WayStart = wayList.get(0);
@@ -152,8 +169,19 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
         } catch(Exception | SmartLogicException E) {
             E.printStackTrace();
-            throw E;
+            throw new SmartLogicException(E.getMessage());
         }
+    }
+
+
+
+    private PositionData guard(Route r, int iTrainId) {
+        if(r == null) throw new InvalidParameterException("Route must not be null");
+        if(r.getElementListIds() == null) throw new InvalidParameterException("Route must have element List in Id form");
+        PositionData position = PositionModul.getInstance().getCurrentPosition(iTrainId);
+        if(position == null)
+            throw new InvalidParameterException("Train this Route is belonging cannot be located");
+        return position;
     }
 
 
@@ -161,17 +189,11 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
         return startPosition;
     }
 
-    public void setStartPosition(PositionData startPosition, int iTrainId) {
+    public void setStartPosition(PositionData startPosition, VehicleOccupation VO) {
         this.startPosition = startPosition;
-        MovableObject MO = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
-        try {
-            ThreadedRepo<TrackEdge, ArrayList<Occupation>> VehicleMap =
-                    TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
-            VehicleOccupation VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
+
             this.firstSpot = (SpotLocationIntrinsic) VO.getBegin().getLocation();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+
 
 
     }
@@ -347,7 +369,32 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
             if(N == null) {
                 System.err.println();
-                throw new SmartLogicException("Two Track-Edges cannot be connected by a Waypoint");
+                throw new SmartLogicException(SmartServer4TmsImpl.TRACK_EDGE_NOT_CONNECTED_WITH_NEXT_TRACK_EDGE);
+            } else {
+                boolean related = false;
+
+                for(PositionedRelation rel : N) {
+
+                    if(rel.checkIfEdgesRelated(PredecessorEdge, e)) {
+
+                        if(!rel.getNavigability().equals(TNavigability.BOTH)) {
+                            if(checkPositionedRelation(e, PredecessorEdge, N).equals(rel.getNavigability())) {
+                                related = true;
+                                break;
+                            }
+
+                        } else {
+                            related = true;
+                            break;
+                        }
+
+                    }
+                }
+                if(!related) {
+                    throw new SmartLogicException(SmartServer4TmsImpl.TRACK_EDGE_NOT_CONNECTED_WITH_NEXT_TRACK_EDGE);
+                }
+
+
             }
 
         }
@@ -379,6 +426,68 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
 
 
+    }
+
+    private TNavigability checkPositionedRelation(TopologyGraph.Edge e, TopologyGraph.Edge PredecessorEdge, TopologyGraph.Node N) throws SmartLogicException {
+        Boolean preHasPriority = null;
+        TNavigability routeDriveNav = TNavigability.NONE;
+        ArrayList<Integer> prePriority = new ArrayList<>();
+        ArrayList<Integer> followingPriority = new ArrayList<>();
+        prePriority.add(1000);
+        prePriority.add(1000);
+        followingPriority.add(1000);
+        followingPriority.add(1000);
+
+        String idPredecessor = PredecessorEdge.getRefId();
+        String idFollowing = PredecessorEdge.getRefId();
+        if(!idPredecessor.contains("W") && !idFollowing.contains("W"))
+            throw new SmartLogicException(SmartServer4TmsImpl.TRACK_EDGE_CONNECTION_IS_NOT_TRAFFICALLY);
+        if(idPredecessor.contains("W")) {
+            retrieveSwitchNumber(idPredecessor, prePriority);
+        }
+        if(idFollowing.contains("W")) {
+            retrieveSwitchNumber(idFollowing, followingPriority);
+        }
+        if(prePriority.get(0).equals(followingPriority.get(0))) {
+            if(prePriority.get(1).equals(followingPriority.get(1))) {
+                throw new SmartLogicException(SmartServer4TmsImpl.TRACK_EDGE_CONNECTION_IS_NOT_TRAFFICALLY);
+            } else {
+                preHasPriority = prePriority.get(1) < followingPriority.get(1);
+            }
+        } else {
+            preHasPriority = prePriority.get(0) < followingPriority.get(0);
+        }
+        if(preHasPriority) {
+            routeDriveNav = predecessorIsDrivenNominal(PredecessorEdge, N)
+                    ? TNavigability.AB : TNavigability.BA;
+        } else {
+            routeDriveNav = followingEdgeIsDrivenNominal(e, N) ? TNavigability.AB : TNavigability.BA;
+        }
+        return routeDriveNav;
+    }
+
+    private boolean followingEdgeIsDrivenNominal(TopologyGraph.Edge e, TopologyGraph.Node n) {
+        return e.getRefNode().equals(n);
+    }
+
+    private boolean predecessorIsDrivenNominal(TopologyGraph.Edge predecessorEdge, TopologyGraph.Node n) {
+        return !predecessorEdge.getRefNode().equals(n);
+    }
+
+    private void retrieveSwitchNumber(String idPredecessor, ArrayList<Integer> prioList) {
+
+        String[] pre = idPredecessor.split("W");
+        try {
+            prioList.set(1, Integer.parseInt(pre[0]));
+        } catch(NumberFormatException NFE) {
+            NFE.printStackTrace();
+        }
+        try {
+            prioList.set(0,  Integer.parseInt(pre[1].replace("L", "").replace("R", "").
+                    replace("S", "")));
+        } catch(NumberFormatException NFE) {
+            NFE.printStackTrace();
+        }
     }
 
     private boolean handleTrackElementStatusInsertingWaypoint(ComposedRoute requestedTrackElementList, TopologyGraph.Edge e, TopologyGraph.Edge predecessorEdge, TopologyConnect e_Connect, TopologyConnect predecessor_Connect, MoveableTrackElement switchElement, TrackElementStatus TES) {
@@ -535,7 +644,7 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
      */
     public SpotLocationIntrinsic getPositionGoBackFromEndOfTrack(SpotLocationIntrinsic lastSpot,
                                                                  ETCS_DISTANCE dMeterGoBack,
-                                                                 int i_QScale) throws SmartLogicException {
+                                                                 int i_QScale) throws InvalidParameterException {
         Q_SCALE QS = Q_SCALE.getScale(i_QScale);
         int i_Exponent = i_QScale - 1;
         if(QS.equals(Q_SCALE.SPARE)) {
@@ -568,13 +677,13 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
 
             if(this.size() - index < 0)
-                throw new SmartLogicException("Route is not Long enough for going back: " + d_Meter_Go_Back.doubleValue());
+                throw new InvalidParameterException("Route is not Long enough for going back: " + d_Meter_Go_Back.doubleValue());
 
             Pair<Route.TrackElementType, ITopological> CurrentElement = this.get(this.size() - index);
             while(!CurrentElement.getLeft().equals(Route.TrackElementType.RAIL_TYPE)) {
                 index++;
                 if(this.size() - index < 0)
-                    throw new SmartLogicException("Route is not Long enough for going back: " + d_Meter_Go_Back.doubleValue());
+                    throw new InvalidParameterException("Route is not Long enough for going back: " + d_Meter_Go_Back.doubleValue());
                 CurrentElement = this.get(this.size() - index);
             }
             CurrentEdge = (TopologyGraph.Edge) CurrentElement.getRight();

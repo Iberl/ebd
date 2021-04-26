@@ -1,8 +1,6 @@
 package de.ibw.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,20 +14,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
 
-    private volatile DefaultRepo<K,V>  repo;
+
 
     /**
      * Intialisiert dieses Reposiotory
      */
     public ThreadedRepo() {
         super();
-        repo = new DefaultRepo<K, V>();
+
 
     }
 
     public ThreadedRepo(DefaultRepo<K, V> r) {
         super(r.repo);
-        this.repo = r;
+
     }
 
     /**
@@ -40,16 +38,17 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      */
     @Override
     public synchronized void update(K key, V mapValue) {
-        repo.update(key, mapValue);
+        if(mapValue == null) return;
+        this.repo.compute(key, (k,v)-> mapValue);
     }
 
     @Override
     public synchronized ArrayList<K> getKeys() {
-        return repo.getKeys();
+        return new ArrayList<K>(this.repo.keySet());
     }
 
     @Override
-    public boolean containsKey(K Key) {
+    public synchronized boolean containsKey(K Key) {
         return repo.containsKey(Key);
     }
 
@@ -60,7 +59,8 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      */
     @Override
     public synchronized V getModel(K key) {
-        return repo.getModel(key);
+        if(key == null) return null;
+        return this.repo.get(key);
     }
 
     /**
@@ -69,7 +69,7 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      */
     @Override
     public synchronized void removeKey(K key) {
-        repo.removeKey(key);
+        this.repo.remove(key);
     }
 
     /**
@@ -78,16 +78,25 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      */
     @Override
     public synchronized Collection<V> getAll() {
-        return repo.getAll();
+        return this.repo.values();
     }
 
+    public synchronized void setInitial(ConcurrentHashMap<K,V> initRepo) {
+        this.repo = initRepo;
+    }
 
     /**
      * Sortiert dieses Reposiotry nach den Keys der Hashmap
      */
     @Override
     public synchronized List<V> sortValues() {
-        return repo.sortValues();
+        SortedSet<K> keys = new TreeSet<K>(repo.keySet());
+        ArrayList<V> result = new ArrayList<>();
+        for (K key : keys) {
+            result.add(repo.get(key));
+            // do something
+        }
+        return result;
     }
 
 
@@ -98,8 +107,10 @@ public class ThreadedRepo<K, V> extends DefaultRepo<K, V> {
      */
     public Object clone() throws CloneNotSupportedException {
          super.clone();
-         DefaultRepo<K, V> cloned = (DefaultRepo<K, V>) repo.clone();
-         return new ThreadedRepo<K, V>(cloned);
+         ThreadedRepo<K,V> clone = new ThreadedRepo<>();
+         clone.setInitial(this.repo);;
+
+         return clone;
 
 
     }

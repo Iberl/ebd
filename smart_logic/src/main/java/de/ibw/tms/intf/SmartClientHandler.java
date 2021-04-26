@@ -31,6 +31,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
 
+import java.security.InvalidParameterException;
 import java.util.UUID;
 import java.util.concurrent.SynchronousQueue;
 
@@ -250,15 +251,22 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
      */
     public void sendCommand(TmsMessage TmsCmd) throws MissingInformationException {
         try {
+            guardCommandSender(TmsCmd);
             if(TmsCmd.type == Commands.I_CHECK_MOVEMENT_PERMISSION) {
                 markOccupationForBeeingRequested((TmsMovementPermissionRequest) TmsCmd);
             }
 
             this.tmsCommandQueue.put(TmsCmd.parseToJson());
 
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | InvalidParameterException e) {
             e.printStackTrace();
         }
+    }
+
+    private void guardCommandSender(TmsMessage tmsCmd) throws InvalidParameterException{
+        if(tmsCmd == null) throw new InvalidParameterException("Command must not be null");
+        if(tmsCmd.header == null) throw new InvalidParameterException("Header of Command must not be null");
+        if(tmsCmd.header.uuid == null) throw new InvalidParameterException("UUID of Command-Message must not be null");
     }
 
     private void markOccupationForBeeingRequested(TmsMovementPermissionRequest TmsCmd) throws MissingInformationException {
@@ -280,24 +288,24 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
 
         MovementAuthority movementAuthority = new MovementAuthority();
         movementAuthority.setMOB(mo);
-        MARequestOccupation maRequestOccupation = new MARequestOccupation();
-        new MARequest(movementAuthority, maRequestOccupation);
-        ComposedRoute cr = new ComposedRoute();
+        ComposedRoute CR = new ComposedRoute();
         try {
-            cr.generateFromRoute(tmpr.payload.route);
+            CR.generateFromRoute(tmpr.payload.route, tmpr.getTrainId());
+            PositionData Current = PositionModul.getInstance().getCurrentPosition(tmpr.getTrainId());
+            if(Current == null) {
+                throw new MissingInformationException("Zug #" + tmpr.getTrainId() + " cannot be located.");
+            }
         } catch (SmartLogicException e) {
             e.printStackTrace();
-            throw new MissingInformationException(e.getMessage());
+            throw new MissingInformationException("Route cannot be created: " + e.getMessage());
         }
-
-        cr.setStartPosition(TrainPosition, tmpr.getTrainId());
-        try {
-            maRequestOccupation = (MARequestOccupation) cr.createSubRoute(noDistance, noDistance, 1, maRequestOccupation);
-        } catch (SmartLogicException e) {
-            e.printStackTrace();
-            throw new MissingInformationException(e.getMessage());
-        }
-        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
-                MARequestOccupation.class, maRequestOccupation);
+        TmsCmd.setMaRequestOccupation(new MARequestOccupation(CR, movementAuthority, true));
+        // speichere request nach ACHTUNG! UUID der Kommunikation nicht nach UUID als Element der Occupation
+        TrackAndOccupationManager.RequestManager.update(TmsCmd.header.uuid, TmsCmd);
     }
+
+
+
+
+
 }

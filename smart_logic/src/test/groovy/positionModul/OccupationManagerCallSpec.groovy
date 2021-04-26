@@ -17,6 +17,7 @@ import de.ibw.tms.ma.occupation.VehicleOccupation
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
 import ebd.rbc_tms.util.PositionInfo
+import ebd.rbc_tms.util.TrainInfo
 import spock.lang.Specification
 
 /**
@@ -50,19 +51,24 @@ class OccupationManagerCallSpec extends Specification {
 
         PositionInfo PI = new PositionInfo(1,dummyBaliseId, null, distanceFromBaliseToNewPos,1,1,0,0,1, trainLength,
                 v_train, 1, 0, 0, null);
-        PositionData PosDataInput = new PositionData(1L, 1L , null, PI);
+
+        TrainInfo TI = new TrainInfo(inidEngine,1,1L)
+
+        PositionData PosDataInput = new PositionData(1L, 1L , TI, PI);
         PosDataInput.nid_engine = inidEngine;
 
         PositionInfo PreviousPosition = new PositionInfo(1,dummyBaliseId, null, distanceBetweenBaliseAndBeginOfMa,1,1,0,0,1, trainLength,
                 v_train, 1, 0, 0, null);
-        PositionData StartMaPosition = new PositionData(1L, 1L , null, PreviousPosition);
-        StartMaPosition.nid_engine = inidEngine;
+        PositionData StartMaPosition = new PositionData(1L, 1L , TI, PreviousPosition);
 
 
-        ComposedRoute Route = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
-                startperc as double, endperc as double);
 
-        Route.setStartPosition(StartMaPosition, inidEngine);
+        ComposedRoute CR = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
+                startperc as double, endperc as double)
+
+        ComposedRoute SpyRoute = Spy(CR);
+        SpyRoute.getStartPosition() >> StartMaPosition
+
         NID_ENGINE nid_engine = new NID_ENGINE(inidEngine);
         MOBPositionClasses positionClasses = new SafeMOBPosition();
         MOBPosition mobPos = new MOBPosition(positionClasses);
@@ -77,7 +83,7 @@ class OccupationManagerCallSpec extends Specification {
 
 
 
-        MUT.getRouteOfNidEngine(4) >> Route
+        MUT.getRouteOfNidEngine(4) >> SpyRoute
 
         MUT.addPositionData(PosDataInput, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 
@@ -85,8 +91,6 @@ class OccupationManagerCallSpec extends Specification {
         // Track And Occupation Manger received 1 VehicleOccupation and 1 MAOccupation
         TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MobObject).getAll().iterator().next().size() == 1;
         TrackAndOccupationManager.getReadOnly(MAOccupation.class, MobObject).getAll().iterator().next().size() == 1;
-
-
 
 
     }

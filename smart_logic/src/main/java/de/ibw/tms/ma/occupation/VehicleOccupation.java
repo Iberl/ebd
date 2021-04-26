@@ -5,6 +5,7 @@ import de.ibw.history.PositionModul;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.mob.position.MOBPosition;
 import de.ibw.tms.ma.mob.position.MOBPositionClasses;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
@@ -13,14 +14,18 @@ import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
+import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.UtilFunction;
 import ebd.rbc_tms.util.PositionInfo;
 import ebd.rbc_tms.util.TrainInfo;
+import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
 import java.math.BigDecimal;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
 
 /**
  * Belegung durch Fahrzeug
@@ -32,6 +37,40 @@ import java.math.BigDecimal;
  */
 public class VehicleOccupation extends Occupation implements IMoveable {
     public static final String CLASS_IDENTIFIER = "Vehicle_Occupation";
+
+    // TODO
+    public static VehicleOccupation generateVehicleOccupation(PositionInfo Position, NID_ENGINE nid_engine, SafeMOBPosition SafePosition, ArrayList<TrackEdgeSection> sectionList, SpotLocationIntrinsic begin, SpotLocationIntrinsic end) {
+        TrainPositionSpots beginTrain;
+        TrainPositionSpots endTrain;
+        VehicleOccupation VO = new VehicleOccupation();
+        int nid_lrbg = Position.nid_lrbg;
+        Balise LrbgBalise = Balise.baliseByNid_bg.getModel(nid_lrbg);
+        if(LrbgBalise == null) throw new InvalidParameterException("LrbgBalise not found (Nid):" + nid_lrbg);
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(LrbgBalise.getTopPositionOfDataPoint().getIdentitaet()
+                .getWert());
+        begin.setNetElementRef(E.getId());
+        end.setNetElementRef(E.getId());
+        TrackEdgeSection TES = new TrackEdgeSection();
+        TES.setTrackEdge(E);
+        TES.setBegin(begin);
+        TES.setEnd(end);
+        sectionList.add(TES);
+        beginTrain = new MinSafeRearEnd();
+        beginTrain.setLocation(begin);
+        endTrain = new MaxSafeFrontEnd();
+        endTrain.setLocation(end);
+        SafePosition.setTrackEdgeSections(sectionList);
+        SafePosition.setBegin(beginTrain);
+        SafePosition.setEnd(endTrain);
+        MovableObject MO = MovableObject.ObjectRepo.getModel(nid_engine);
+        MOBPosition P = new MOBPosition(SafePosition);
+        if(MO == null) MO = new MovableObject(nid_engine, P);
+        MO.setPosition(P);
+
+        SafePosition.setOccupation(VO);
+        return VO;
+    }
+
 
     private SafeMOBPosition Position;
 

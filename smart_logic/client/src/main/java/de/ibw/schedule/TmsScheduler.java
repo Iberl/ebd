@@ -95,7 +95,7 @@ public class TmsScheduler {
 
                 }
 
-                it.remove();
+
             }
     }
 

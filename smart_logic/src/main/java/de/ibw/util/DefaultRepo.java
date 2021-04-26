@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultRepo<K, V> implements Cloneable {
 
-    protected ConcurrentHashMap<K, V> repo = new ConcurrentHashMap<K, V>();
+    protected volatile ConcurrentHashMap<K, V> repo = new ConcurrentHashMap<K, V>();
 
     protected DefaultRepo(ConcurrentHashMap<K, V> repo) {
         this.repo = repo;
@@ -28,6 +28,7 @@ public class DefaultRepo<K, V> implements Cloneable {
      * @param mapValue V - Das Value-Object
      */
     public void update(K key, V mapValue) {
+
         this.repo.put(key, mapValue);
     }
 

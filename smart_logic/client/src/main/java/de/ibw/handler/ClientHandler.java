@@ -1,24 +1,37 @@
 package de.ibw.handler;
 
+import de.ibw.history.TrackAndOccupationManager;
+import de.ibw.history.data.ComposedRoute;
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.modules.MaModul;
 import de.ibw.schedule.TmsScheduler;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.tms.intf.SmartClientHandler;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.net.elements.INetElement;
+import de.ibw.tms.ma.occupation.MAOccupation;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ui.PositionReportController;
 import ebd.rbc_tms.Message;
+import ebd.rbc_tms.Payload;
 import ebd.rbc_tms.payload.Payload_14;
+import ebd.rbc_tms.util.MA;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.InvalidParameterException;
 import java.util.UUID;
 
@@ -53,14 +66,28 @@ public class ClientHandler extends SmartClientHandler {
         super.exceptionCaught(channelHandlerContext, cause);
     }
 
-    private void handleMaResponse(MaRequestReturnPayload msgFromSL) {
+    private void handleMaResponse(MaRequestReturnPayload msgFromSL) throws InvalidParameterException {
         UUID maID = msgFromSL.getUuid();
 
         //MaModul.getInstance().storeMaReturnPayload(msgFromSL);
 
         if(msgFromSL.isMaSuccessfull()) {
+            int iTrainId = 0;
             logger.info("Ma successfull. UUID: " + maID.toString() + "\n");
-
+            TmsMovementPermissionRequest moveRequest = TrackAndOccupationManager.RequestManager.getModel(maID);
+            MARequestOccupation mao = moveRequest.getMaRequestOccupation();
+            MovableObject mo = mao.getTargetMoveableObject();
+            iTrainId = mo.getNid_Engine().getId();
+            MA rbcMa = moveRequest.payload.MaAdapter.convertToRbcMA();
+            Route R = moveRequest.payload.route;
+            ComposedRoute CR = new ComposedRoute();
+            try {
+                CR.generateFromRoute(R, iTrainId);
+            } catch (SmartLogicException e) {
+                e.printStackTrace();
+                System.err.println("Route cannot be transferred into connected Route-Element-List");
+            }
+            TrackAndOccupationManager.transferMaRequestBlockListIntoRealBlockList(iTrainId, mao, rbcMa, R, CR);
 
 
         } else {
@@ -86,27 +113,58 @@ public class ClientHandler extends SmartClientHandler {
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, SmartServerMessage smartServerMessage) throws Exception {
-        String received = smartServerMessage.toString();
-        System.out.println("TMS received: " + received);
-        if(!smartServerMessage.isbIsFromSL()) {
-            // is from RBC
-            Message Msg = Message.generateFrom(smartServerMessage.getMsg());
-            if (Msg.getHeader().type == 14) {
-                if(!TmsScheduler.started) {
-                    MotisManager.sendMotisFiles();
-                    this.Client.startScheduler();
-                }
-                PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader());
-            }
-        } else {
-            ITypable MsgFromSL = SmartServerMessage.generateFromSlJson(smartServerMessage.getMsg());
-            if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
-                handleMaResponse((MaRequestReturnPayload)MsgFromSL);
+        new Thread() {
+            @Override
+            public void run() {
+                String received = smartServerMessage.toString();
+                System.out.println("TMS received: " + received);
+                if(!smartServerMessage.isbIsFromSL()) {
+                    // is from RBC
+                    Message<Payload> Msg = null;
+                    try {
+                        Msg = Message.generateFrom(smartServerMessage.getMsg());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
 
-            } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
-                handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
+                    if (Msg.getHeader().type == 14) {
+                        PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader());
+                        if(!TmsScheduler.started) {
+                            try {
+                                MotisManager.sendMotisFiles();
+                            } catch (IOException | URISyntaxException e) {
+                                System.err.println("Motis files cannot be send: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                            try {
+                                ClientHandler.this.Client.startScheduler();
+                            } catch (MissingInformationException e) {
+                                System.err.println("Request Scheduler to smart Logic cannot be started: "
+                                + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+                } else {
+                    ITypable MsgFromSL = null;
+                    try {
+                        MsgFromSL = SmartServerMessage.generateFromSlJson(smartServerMessage.getMsg());
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if (MsgFromSL != null) {
+                        if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
+                            handleMaResponse((MaRequestReturnPayload)MsgFromSL);
+
+                        } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {
+                            handleDbdResponse((DbdRequestReturnPayload) MsgFromSL);
+                        }
+                    }
+                }
             }
-        }
+        }.start();
+
 
     }
 

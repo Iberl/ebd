@@ -3,6 +3,7 @@ package de.ibw.tms.intf;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
+import de.ibw.tms.ma.occupation.MARequestOccupation;
 
 import javax.persistence.Entity;
 
@@ -24,6 +25,10 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
     @Expose
     public CheckMovementPermission payload;
 
+    // Belegung dieses Requests
+    private MARequestOccupation maRequestOccupation = null;
+
+
     /**
      * Konstruktur eine TMS-Ma-Nachricht an die SL
      * @param tms_id - eigene Id des TMS
@@ -33,10 +38,20 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
     public TmsMovementPermissionRequest(String tms_id, String rbc_id, CheckMovementPermission payload) {
             super(tms_id, rbc_id, Commands.I_CHECK_MOVEMENT_PERMISSION, payload);
             this.payload = payload;
+            this.header.uuid = payload.uuid;
     }
 
     public int getTrainId() {
         return payload.iTrainId;
+    }
+
+
+    public MARequestOccupation getMaRequestOccupation() {
+        return maRequestOccupation;
+    }
+
+    public void setMaRequestOccupation(MARequestOccupation maRequestOccupation) {
+        this.maRequestOccupation = maRequestOccupation;
     }
 
     /**

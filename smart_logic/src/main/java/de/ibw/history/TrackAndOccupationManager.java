@@ -1,6 +1,13 @@
 package de.ibw.history;
 
+import de.ibw.history.data.ComposedRoute;
+import de.ibw.smart.logic.exceptions.SmartLogicException;
+import de.ibw.tms.etcs.*;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.ma.*;
+import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
@@ -8,15 +15,21 @@ import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.ThreadedRepo;
+import ebd.rbc_tms.util.EOA;
+import ebd.rbc_tms.util.MA;
+import org.jetbrains.annotations.NotNull;
+import org.railMl.rtm4rail.TApplicationDirection;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.UUID;
 
 /**
- * Manager for occupations on Track
+ * Manager der occupations auf Tracks verwaltet
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.0
@@ -25,8 +38,35 @@ import java.util.Iterator;
  */
 public class TrackAndOccupationManager {
 
+
+    /**
+     * reseverd MA of current Ma communicated by tms is written as blocked for all furhter MaRequest
+     *  @param trainId - Integer - Id of Train the MA-Request is refering to
+     * @param MAO - Request Occupation
+     * @param rbcMa - Ma send to RBC
+     * @param r - route Composed by tms
+     * @param requestedTrackElementList - Composed Route updated
+     *
+     */
+    public static void transferMaRequestBlockListIntoRealBlockList(int trainId, MARequestOccupation MAO, MA rbcMa, Route r, ComposedRoute requestedTrackElementList) throws InvalidParameterException {
+        guardTransfer(MAO, rbcMa,r);
+        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
+        int q_scale = rbcMa.q_scale;
+
+        MAOccupation MaoOccup = MAOccupation.generateMaOccupation(trainId, MAO, rbcMa, r, requestedTrackElementList, LastEdge, q_scale);
+
+
+        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
+                MAOccupation.class,
+                MaoOccup);
+
+    }
+
+
+
     public static class VehicleStorage extends ThreadedRepo<Class<?>, VehicleStorageItem> { }
     private static class VehicleStorageItem extends ThreadedRepo<MovableObject, ThreadedRepo<TrackEdge, ArrayList<Occupation>>> { }
+
 
     public static enum Operations {
         StoreOperation, RemoveOperation
@@ -42,6 +82,10 @@ public class TrackAndOccupationManager {
     private static ThreadedRepo<Class<?>, ThreadedRepo<TrackEdge, ArrayList<Occupation>>> Storage = new ThreadedRepo<>();
 
     private static VehicleStorage VehicleOccStorage = new VehicleStorage();
+
+    // speichert Occupation nach Kommunikation - (UUID) UND NICHT nach der UUID zur Identifizierung der Occupation
+    public static ThreadedRepo<UUID, TmsMovementPermissionRequest> RequestManager = new ThreadedRepo<>();
+
 
     static {
         if(Storage == null) Storage = new ThreadedRepo<>();
@@ -301,5 +345,22 @@ public class TrackAndOccupationManager {
         }
     }
 
+
+
+
+
+    private static void guardTransfer(MARequestOccupation mao, MA rbcMa, Route r) throws InvalidParameterException {
+        if(mao == null) throw new InvalidParameterException("MARequestOccupation must not be null");
+        if(mao.getTrackEdgeSections() == null || mao.getTrackEdgeSections().size() == 0) throw new InvalidParameterException("MARequestionOccupation must have sections");
+        if(rbcMa.eoa == null) throw new InvalidParameterException("MA Eoa must not be null");
+        if(rbcMa.speedProfile == null) throw new InvalidParameterException("MA SpeedProfile must not be null");
+        if(rbcMa.gradientProfile == null) throw new InvalidParameterException("MA Gradient Profile must not be null");
+        if(rbcMa.modeProfile == null) throw new InvalidParameterException("MA Mode Profile must not be null");
+        if(r == null) throw new InvalidParameterException("Route must not be null");
+
+
+        // further checks in need
+
+    }
 
 }

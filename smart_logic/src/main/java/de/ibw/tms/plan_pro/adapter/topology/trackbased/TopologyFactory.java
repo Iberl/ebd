@@ -2,7 +2,9 @@ package de.ibw.tms.plan_pro.adapter.topology.trackbased;
 
 import de.ibw.feed.Balise;
 import de.ibw.feed.BaliseExtractor;
+import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
+import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
@@ -11,6 +13,7 @@ import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
+import org.railMl.rtm4rail.TNavigability;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
@@ -170,6 +173,7 @@ public class TopologyFactory implements ITopologyFactory {
 
         }
         connectDigitalEndNodes(TG);
+        connectPositionedRelations(TG);
 
         if(TopologyGraph.getLeftmostNode() == null) throw new NullPointerException("Not Edge with End in A defined");
 
@@ -235,6 +239,51 @@ public class TopologyFactory implements ITopologyFactory {
         return TG;
 
 
+    }
+
+    private void connectPositionedRelations(TopologyGraph tg) {
+        for(TopologyGraph.Node N : TopologyGraph.NodeRepo.values()) {
+            ArrayList<TopologyGraph.Edge> edges = new ArrayList<>();
+            edges.addAll(N.inEdges);
+            edges.addAll(N.outEdges);
+            for(int i = 0; i < edges.size(); i++)
+                for(int j = 0; j < edges.size() && i != j; j++) {
+                    TopologyGraph.Edge A = edges.get(i);
+                    TopologyGraph.Edge B = edges.get(j);
+                    if(A.equals(B)) continue;
+                    if(!TopologyGraph.getNodeBetweenTwoEdges(A, B).equals(N)) continue;
+                    if(A.A.equals(N)) {
+                        if(A.TopConnectFromA.equals(TopologyConnect.SPITZE)) {
+                            addRelation(A, B,N);
+                            continue;
+                        }
+                    } else if(A.B.equals(N)) {
+                        if(A.TopConnectFromB.equals((TopologyConnect.SPITZE))) {
+                            addRelation(A,B,N);
+                            continue;
+                        }
+                    }
+                    if(B.A.equals(N)) {
+                        if(B.TopConnectFromA.equals(TopologyConnect.SPITZE)) {
+                            addRelation(A,B,N);
+
+                        }
+                    } else if(B.B.equals(N)) {
+                        if(B.TopConnectFromB.equals(TopologyConnect.SPITZE)) {
+                            addRelation(A, B,N);
+
+                        }
+                    }
+
+                }
+        }
+    }
+
+    private void addRelation(TopologyGraph.Edge A, TopologyGraph.Edge B, TopologyGraph.Node N) {
+        PositionedRelation Pos = new PositionedRelation();
+        TNavigability nav = TNavigability.BOTH;
+        Pos.createPositionedRelation(A, B,nav, 300, ApplicationDirection.BOTH);
+        N.add(Pos);
     }
 
     private void connectDigitalEndNodes(TopologyGraph TG) {

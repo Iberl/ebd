@@ -1,5 +1,6 @@
 package clienthandler
 
+import data.MovementPermissionRequestProvider
 import de.disposim.dbd.trainpos.TrainPosition
 import de.ibw.handler.ClientHandler
 import de.ibw.history.PositionData
@@ -21,6 +22,7 @@ import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.MOBPosition
 import de.ibw.tms.ma.mob.position.MOBPositionClasses
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
+import de.ibw.tms.ma.occupation.MAOccupation
 import de.ibw.tms.ma.occupation.MARequestOccupation
 import de.ibw.tms.ma.occupation.Occupation
 import de.ibw.tms.ma.positioned.elements.TrackEdge
@@ -36,6 +38,7 @@ import ebd.rbc_tms.util.SpeedProfile
 import ebd.rbc_tms.util.TrainInfo
 import io.netty.channel.ChannelHandlerContext
 import spock.lang.Specification
+
 
 import java.lang.reflect.Field
 import java.util.concurrent.SynchronousQueue
@@ -61,48 +64,7 @@ class ClientHandlerSpec extends Specification {
 
     private static SynchronousQueue<String> queue = null;
 
-    private static TmsMovementPermissionRequest getTestRequest() {
-        EOA.EndTimer Timer = new EOA.EndTimer(1023, 0);
 
-        EOA.DangerPoint DP = new EOA.DangerPoint(252, 8);
-        EOA eoa = new EOA(1, 1, 0, 1023, Timer,DP, null );
-        GradientProfile.Gradient G = new GradientProfile.Gradient(0,true,0);
-        ArrayList<GradientProfile.Gradient> gradients = new ArrayList<>();
-        gradients.add(G);
-        GradientProfile GP = new GradientProfile(1, 1, gradients);
-        SpeedProfile.Section S = new SpeedProfile.Section(0,12, true);
-        S.categories = new ArrayList<>();
-        ArrayList<SpeedProfile.Section> sections = new ArrayList<>();
-        sections.add(S);
-        SpeedProfile SP = new SpeedProfile(1,1, sections);
-        ModeProfile.Mode M = new ModeProfile.Mode(10050, 1, 0, 0, 32767, true);
-        ArrayList<ModeProfile.Mode> modes = new ArrayList<>();
-        modes.add(M);
-        ModeProfile modeProfile = new ModeProfile(1,1, modes);
-        MA ma = new MA(true, 12778, 1,1, eoa, GP, SP, modeProfile, null) ;
-        RbcMaAdapter adapter = new RbcMaAdapter(ma);
-        CheckMovementPermission permission = new CheckMovementPermission(1L);
-        String[] sectionNames = new String[] {
-            "11W10L", "11W13R", "11W40S", "11W41S", "11W42L",
-            "11W43S", "13W1S", "13W1L", "13W2S", "13W3L",
-            "13W4S"
-        }
-        ArrayList<String> routeSections = new ArrayList<>();
-        routeSections.addAll(sectionNames);
-        Route R = new Route(new ArrayList<RouteSection>());
-        R.setElementListIds(routeSections);
-        R.setIntrinsicCoordOfTargetTrackEdge(0.6634920635d);
-        permission.iTrainId = 1;
-        permission.lPriority = 1;
-        permission.rbc_id = 1;
-        permission.tms_id = 1;
-        permission.uuid = UUID.randomUUID();
-        permission.MaAdapter = adapter;
-        permission.route = R;
-
-        TmsMovementPermissionRequest request = new TmsMovementPermissionRequest("1", "1", permission)
-        return request;
-    }
 
     def "sendMovementPermissionRequest"() {
         given:
@@ -135,12 +97,12 @@ class ClientHandlerSpec extends Specification {
             PositionModul.getInstance().addPositionData(TrainPosition, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 
 
-            MUT.sendCommand(getTestRequest());
+            MUT.sendCommand(new MovementPermissionRequestProvider().getTestRequest());
         expect:
-        ThreadedRepo<TrackEdge, ArrayList<Occupation>> requestedOccupations =
-                TrackAndOccupationManager.getReadOnly(MARequestOccupation.class, MovableObject.ObjectRepo.getModel(
-                new NID_ENGINE(1)))
-        requestedOccupations.getAll().iterator().next().size() == 1;
+
+        TrackAndOccupationManager.RequestManager.getAll().size() == 1;
+
+        TrackAndOccupationManager.getReadOnly(MARequestOccupation.class, MobObject).getAll().iterator().next().size() == 1
 
 
     }

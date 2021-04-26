@@ -7,6 +7,7 @@ import de.ibw.tms.ma.common.INetResource;
 import de.ibw.tms.ma.common.NetworkResource;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import org.railMl.rtm4rail.TElementWithID;
 import org.railMl.rtm4rail.TElementWithIDref;
 import org.railMl.rtm4rail.TNavigability;
@@ -21,7 +22,7 @@ import java.util.UUID;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
- * @since 2020-10-14
+ * @since 2020-04-23
  */
 public class PositionedRelation extends NetworkResource implements IRTMRelation {
     public static final String CLASS_IDENTIFIER = "Positioned_Relation";
@@ -43,9 +44,9 @@ public class PositionedRelation extends NetworkResource implements IRTMRelation 
     /**
      * Relation muss mindestens ein Element enhalten
      *
-     * @param elements - Liste mit mindestens einem Element
+     *
      */
-    public PositionedRelation(List<INetElement> elements) {
+    public PositionedRelation() {
         super(CLASS_IDENTIFIER);
         defaultInit("PositionedRelation");
     }
@@ -189,4 +190,9 @@ public class PositionedRelation extends NetworkResource implements IRTMRelation 
     }
 
 
+    public boolean checkIfEdgesRelated(TopologyGraph.Edge predecessorEdge, TopologyGraph.Edge e) {
+        if(predecessorEdge.equals(elementA) && e.equals(elementB)) return true;
+        if(predecessorEdge.equals(elementB) && e.equals(elementA)) return true;
+        return false;
+    }
 }
