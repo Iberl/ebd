@@ -7,6 +7,7 @@ import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
+import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
@@ -290,13 +291,38 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             g2d.setStroke(new BasicStroke((float) (R.iStroke / strokeFactor)));
             g2d.draw(R);
         }*/
+
+        paintApprovedMa(g2d);
         paintRequestedMa(g2d);
+
         paintTrains(g2d);
 
         paintConnectors(g2d);
 
         // disable zoom for images
 
+    }
+
+    private void paintApprovedMa(Graphics2D g2d) {
+        BasicStroke BS = initPainting(g2d);
+
+        Collection<TrainModel> models = TrainModel.TrainRepo.getAll();
+        for(TrainModel TM: models) {
+            try {
+                MovableObject Mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(TM.iTrainId));
+                if (Mo == null) {
+                    throw new InvalidParameterException("No Vehicle with trainid: " + TM.iTrainId + " found");
+                }
+                Collection<ArrayList<Occupation>> trainOccList =
+                        TrackAndOccupationManager.getReadOnly(MAOccupation.class, Mo).getAll();
+                if (trainOccList.size() == 0)
+                    throw new InvalidParameterException("No Occupation for trainId: " + TM.iTrainId + " found");
+                paintOccupationList(g2d, BS, Color.GREEN, TM.iTrainId, trainOccList);
+            } catch (Exception E) {
+                E.printStackTrace();
+
+            }
+        }
     }
 
     /**

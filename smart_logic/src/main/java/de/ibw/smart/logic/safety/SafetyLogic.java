@@ -20,6 +20,9 @@ import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.occupation.*;
 import de.ibw.tms.ma.occupation.intf.IMoveable;
+import de.ibw.tms.ma.physical.MoveableTrackElement;
+import de.ibw.tms.ma.physical.TrackElementStatus;
+import de.ibw.tms.ma.positioned.elements.DriveProtectionSection;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
@@ -63,25 +66,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
- * Dieses Modul stellt alle Tests dar, die die SmartLogic bei eingehenden Anfragen des TMS unternehmen muss.
+ * Dieses Modul stellt alle Tests dar, die die smartLogic bei eingehenden Anfragen des TMS unternehmen muss.
  *
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2021-01-25
+ * @version 0.5
+ * @since 2021-04-28
  */
 public class SafetyLogic {
     /**
-     * Modulname der Smart-Safety im Logging
+     * Modulname der Safety-Logic im Logging
      */
-    public static final String SMART_SAFETY = "SMART-SAFETY";
+    public static final String SMART_SAFETY = "SAFETY-LOGIC";
     /**
-     * Untermodul der Routenanalyse der Smart-Safety im Logging
+     * Untermodul der Routenanalyse der Safety-Logic im Logging
      */
     public static final String TRACK_SAFETY = "TRACK-SAFETY";
     /**
-     * Untermodul der Selbstuntersuchung der Smart-Logic
+     * Untermodul der Selbstuntersuchung der Safety-Logic
      */
     public static final String SELF_CHECK = "SELF-CHECK";
     /**
@@ -89,27 +92,6 @@ public class SafetyLogic {
      */
     public static final String UNKNOWN_TRACK_ELEMENT_GIVEN = "Input Track Element Is Unknowed (Only Edges and Nodes allowed)";
     private static SafetyLogic instance;
-    /**
-     * Ein Repository, dass durch eine ZugId die Positionsdaten des Zuges speichert.
-     */
-    public static DefaultRepo<Integer, PositionInfo> lastPositionReport = new DefaultRepo<>();
-    /**
-     * Ein Repository, dass durch eine ZugId, die Zugdaten zum Zug speichert.
-     */
-    public static DefaultRepo<Integer, TrainInfo> trainInformation = new DefaultRepo<>();
-    /**
-     * Ein Repository, dass durch eine ZugId, vergangene Positionsdaten speichert.
-     *
-     */
-    @Deprecated
-    public static DefaultRepo<Integer, CircularFifoBuffer> positionHistory  = new DefaultRepo<Integer, CircularFifoBuffer>();
-    // when trespass new Trail between new Endnode save meters of passed tracks form balise on
-    // if balise is not on current trail we know how far it is away
-    // First Integer is Train ID // Second Integer is meter of from balise to nearest point of currentTrack
-    /**
-     * Ein Repository, das f&uuml;r eine Zug Id, die Meter ab der letzten Balise speichert
-     */
-    public static DefaultRepo<Integer, Integer> passedMetersSinceLrbg = new DefaultRepo<>();
 
     private EventBusManager EBM = null;
 
@@ -146,65 +128,9 @@ public class SafetyLogic {
      */
     private volatile ThreadedRepo<Integer, List<Occupation>> blockList = new ThreadedRepo<>();
 
-    private volatile ThreadedRepo<UUID, List<Occupation>> blockListByMa = new ThreadedRepo<>();
-
-    /**
-     * Entferne für ZugId alle Blockaden
-     * Methode zur TimeoutRemoval ein Workaraound
-     * @param iTrain - Zugnummer die alle Blockaden nicht mehr beansprucht
-     */
-    public void removeOccupationsOfTrain(int iTrain) {
-        blockList.removeKey(iTrain);
-    }
-
-
-    public void removeOccupationOfCommunication(UUID communicationId) {
-        blockListByMa.removeKey(communicationId);
-    }
-
-
-    /**
-     * Gibt eine Liste der blockierten Elemente dieses Zuges wieder
-     * @param iTrainId - nid-engineId des angeforderten Zuges
-     * @return List - liste der belegten Abschnitte durch den Zug
-     */
-    public synchronized List<Occupation> getAllAreaBlockedByOwn(int iTrainId) {
-        return blockList.getModel(iTrainId);
-    }
-
-    private synchronized List<Occupation> getAllAreaNotBlockedByOwn(int iTrainId) {
-        List<Occupation> ownBlocking = blockList.getModel(iTrainId);
-        if(ownBlocking == null) ownBlocking = new ArrayList<>();
-        Collection<List<Occupation>> all = blockList.getAll();
-        List<Occupation> result = Collections.synchronizedList(new ArrayList<>());
-        for(List<Occupation> trainset: all) {
-            result.addAll(trainset);
-        }
-        for(Occupation B : ownBlocking) {
-            result.remove(B);
-        }
-        return result;
-
-    }
-
-    /**
-     * Methode die untersucht ob auf der angeforderten MA blockierte Streckenabschnitte bestehen.
-     * Es kann zum Beispiel durch einen anderen Zug auf der Strecke, blockierte Abschnitte bestehen.
-     *
-     * @deprecated
-     * @param maAdapter {@link RbcMaAdapter } - Daten die zum RBC gesendet werden sollen, wenn die Anfrage ok ist.
-     * @param requestedTrackElementList {@link ArrayList} - Eine Liste der Routenelemente die auch nicht blockiert
-     *                                                   sein sollten. Das untersucht diese Methode.
-     * @return - hat die Route keine blockierten Elemente oder Abschnitte
-     */
-    public synchronized MARequestOccupation checkIfRouteIsNonBlocked(int iTrainId, Route R, RbcMaAdapter maAdapter,
-                                                         ComposedRoute requestedTrackElementList,
-                                                         UUID comminicationUUID) {
-        return oldImplementation(iTrainId, R, maAdapter, requestedTrackElementList, comminicationUUID);
-
-    }
 
     @Nullable
+    @Deprecated
     private MARequestOccupation oldImplementation(int iTrainId, Route R, RbcMaAdapter maAdapter, ComposedRoute requestedTrackElementList, UUID comminicationUUID) {
         AtomicInteger iSumSectionsLength = new AtomicInteger(0);
         List<Occupation> toBlock = Collections.synchronizedList(new ArrayList<>());
@@ -226,7 +152,7 @@ public class SafetyLogic {
         Balise B = null;
         PositionInfo PosInfo = null;
         try {
-            PosInfo = guardCheckIfPositonReportIsOk(iTrainId, R, maAdapter, iSumSectionsLength);
+            PosInfo = null; //guardCheckIfPositonReportIsOk(iTrainId, R, maAdapter, iSumSectionsLength);
             dSumOfWholeMaTrack = maAdapter.calcLengthOfSection();
 
             int iEoaQ_Scale = maAdapter.q_scale;
@@ -312,7 +238,7 @@ public class SafetyLogic {
                 // TODO PositionData usage
                 //toBlock = calcCrossoverSignals(toBlock);
 
-                List<Occupation> occupations = getAllAreaNotBlockedByOwn(iTrainId);
+                List<Occupation> occupations = null; //getAllAreaNotBlockedByOwn(iTrainId);
                 for(Occupation ThisArea : toBlock)
                 for(Occupation OtherArea: occupations) {
                     if(ThisArea.compareIfIntersection(OtherArea)) {
@@ -325,7 +251,7 @@ public class SafetyLogic {
 
 
 
-            blockListByMa.update(comminicationUUID, toBlock);
+
 
 
 
@@ -371,39 +297,7 @@ public class SafetyLogic {
         return MAO;
     }
 
-    private void setOccupatedSections(ComposedRoute requestedTrackElementList, Route r, MARequestOccupation MAO, MinSafeRearEnd MinSafeEnd) {
-        ArrayList<TrackEdgeSection> maSections = new ArrayList<>();
-        for(int i = 0; i < requestedTrackElementList.size(); i++) {
-            Pair<Route.TrackElementType, ITopological> trackingPair = requestedTrackElementList.get(i);
-            SpotLocationIntrinsic Begin = new SpotLocationIntrinsic();
-            if(MinSafeEnd == null) {
-                Begin.setIntrinsicCoord(0);
-            } else {
-                Begin = (SpotLocationIntrinsic) MinSafeEnd.getLocation();
-            }
 
-            SpotLocationIntrinsic End = new SpotLocationIntrinsic();
-
-            if(i + 1 == requestedTrackElementList.size()) {
-                End.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
-            } else {
-                End.setIntrinsicCoord(1);
-            }
-            TrackEdgeSection TES = new TrackEdgeSection();
-            TES.setBegin(Begin);
-            TES.setEnd(End);
-
-            TopologyGraph.Edge E = (TopologyGraph.Edge) trackingPair.getRight();
-            TES.setTrackEdge(E);
-            maSections.add(TES);
-            List<MARequestOccupation> occupations =  E.areaHandler.getMaRequestOccupations();
-            occupations.add(MAO);
-            E.areaHandler.setMaRequestOccupations(occupations);
-            // EdgeRepo
-        }
-        MAO.setTrackEdgeSections(maSections);
-
-    }
 
     /**
      * @deprecated
@@ -603,7 +497,7 @@ public class SafetyLogic {
 
     private double calcTrainFront(int iTrainId, int iQ_scale, int iDistance_lrbg, double dDistanceBaliseFromA, boolean bMovesToB) {
         int iMetersOnPassedTracks = 0;
-        Integer iPassedMetersSinceLrbg = passedMetersSinceLrbg.getModel(iTrainId);
+        Integer iPassedMetersSinceLrbg = null;//passedMetersSinceLrbg.getModel(iTrainId);
         if(iPassedMetersSinceLrbg != null) {
             iMetersOnPassedTracks = iPassedMetersSinceLrbg;
         }
@@ -611,7 +505,7 @@ public class SafetyLogic {
         if(bMovesToB) return dDistanceBaliseFromA + (iDistance_lrbg * Math.pow(10, iQ_scale) / 10.0d -iMetersOnPassedTracks);
         else return dDistanceBaliseFromA - (iDistance_lrbg * Math.pow(10, iQ_scale) / 10.0d - iMetersOnPassedTracks);
     }
-
+    @Deprecated
     private synchronized PositionInfo guardCheckIfPositonReportIsOk(int iTrainId, Route R, RbcMaAdapter maAdapter, AtomicInteger iSumSectionsLength) throws Exception {
 
         int iNID_LRBG;
@@ -639,7 +533,7 @@ public class SafetyLogic {
             iSumSectionsLength.set(iSum);
         }
         if(iSumSectionsLength.get() == 0) throw new InvalidParameterException("Sum of EOA-Sections is 0 meter");
-        PositionInfo CurrentPosition = lastPositionReport.getModel(iTrainId);
+        PositionInfo CurrentPosition = null; //lastPositionReport.getModel(iTrainId);
         if(CurrentPosition == null) {
             throw new Exception("No Position Info for Train");
         }
@@ -689,6 +583,8 @@ public class SafetyLogic {
     }
 
     /**
+     * @deprecated
+     * wird über ComposedRoute realisiert
      * Diese Methode untersucht ob alle Routenelemente durchwegs verbunden sind.
      * @param requestedTrackElementList - {@link ArrayList} - Eine Liste der Routenelemente die verbunden sein sollten.
      * @return boolean - ist Route durchwegs verbunden
@@ -901,7 +797,7 @@ public class SafetyLogic {
 
 
     /**
-     * Untersucht ob der PositionReport valide ist
+     * Untersucht ob der PositionReport valide ist und speist den Report in das Position-Modul ein
      * @param PositionReport {@link Message} - RBC - PositionReport
      * @return boolean - ist Positionsangabe valide
      */
@@ -918,15 +814,15 @@ public class SafetyLogic {
             PositionInfo PosInf = P.positionInfo;
             iQ_DirTrain = PosInf.q_dirtrain;
             iQ_Length = PosInf.q_length;
-            trainInformation.update(iTrainId, P.trainInfo);
-            lastPositionReport.update(iTrainId, PosInf);
+
+            //lastPositionReport.update(iTrainId, PosInf);
             EBM.log("Position Report for MOB with engine-id " + iTrainId + " received",
                     SmartLogic.getsModuleId(SMART_SAFETY));
 
 
 
             new Thread(() -> handlePositionHistory(P.trainInfo, PosInf, PositionReport.getHeader())).start();
-            unlockPassedElements(iTrainId, PosInf);
+
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
             if(true != checkNidBg(iNidLrbg)) {
@@ -952,13 +848,7 @@ public class SafetyLogic {
         }
     }
 
-    private void unlockPassedElements(int iTrainId, PositionInfo posInf) {
-        double dDistanceToLrbg = posInf.d_lrbg;
-        dDistanceToLrbg = dDistanceToLrbg * Math.pow(10.0d, posInf.q_scale) / 10.0d;
-        passedMetersSinceLrbg.update(iTrainId, (int) dDistanceToLrbg);
 
-
-    }
 
     private boolean checkQ_Scale(int iQ_scale) {
         return iQ_scale == ETCSVariables.Q_SCALE_1M || iQ_scale == ETCSVariables.Q_SCALE_10CM ||
@@ -1124,22 +1014,6 @@ public class SafetyLogic {
         safety.slSelfCheck();
     }
 
-    /**
-     * Methode zum Testen gegen dieses Modul.
-     * Es l&ouml;scht s&auml;mtliche Eintr&auml;ge
-     *
-     * NUR F&Uuml;r TESTZWEICKE.
-     * Kann nur in Testkonfiguration aufgerufen werden.
-     */
-    public void resetAllBlockings() {
-        if(SlConfigHandler.getInstance().isInTestMode) {
-            EBM.log("CHECK Blockings Dumped from memory. ONLY FOR TESTS ALLOWED.", SmartLogic.getsModuleId(TRACK_SAFETY) );
-            this.blockList = new ThreadedRepo<>();
-        } else {
-            EBM.log("Reset only allowed in Test Mode", SmartLogic.getsModuleId(TRACK_SAFETY) );
-        }
-
-    }
 
 
     /**
@@ -1148,20 +1022,33 @@ public class SafetyLogic {
      *
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
+        if(cdc == null) throw new InvalidParameterException("DBD Check Command must not be null");
+        if(cdc.sId == null) throw new InvalidParameterException("Check Command must have a valid Node Id of Switch" +
+                ", but it is null");
         this.slSelfCheck();
         String checkSid = cdc.sId;
         EBM.log("Check if Infrastructure is occupied", SmartLogic.getsModuleId(SMART_SAFETY) );
 
-        for(List<Occupation> l :this.blockList.getAll()) {
-            for(Occupation BA : l) {
-                if(BA.isSidBlocked(checkSid)) {
-                    EBM.log("DBD request" + cdc.uuid + " failed, Element blocked ", SmartLogic.getsModuleId(SMART_SAFETY) );
+        MoveableTrackElement MteToCheck = TescModul.MoveableTrackElementAccess.getElementById(cdc.sId);
+        if(MteToCheck == null) throw new InvalidParameterException("Sid of Switch to be Checked are not registered as " +
+                "Moveable Track Element");
 
-                    sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
-                    return;
-                }
-            }
+        DriveProtectionSection protectionSection = MteToCheck.getProtectionSection();
+        if(protectionSection == null) {
+            throw new InvalidParameterException("PortectionSection of Switch must be defined, but it is null");
         }
+        boolean isCollision = true;
+        try {
+            isCollision = checkDriveProtectionSectionHavingCollision(protectionSection);
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            isCollision = true;
+        }
+        if(isCollision) {
+            sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
+            return;
+        }
+
         boolean isStatePossible = false;
         try {
             isStatePossible = TescModul.getInstance().setState(cdc.sId, cdc.TrackElementStatus);
@@ -1181,6 +1068,53 @@ public class SafetyLogic {
 
     }
 
+    @Nullable
+    private boolean checkDriveProtectionSectionHavingCollision(DriveProtectionSection protectionSection) throws CloneNotSupportedException {
+        for(TrackEdgeSection TES : protectionSection.getTrackEdgeSections()) {
+            TrackEdge requestedTE = TES.getTrackEdge();
+            for(Class<?> occupationType : occupationTypesCanBlock) {
+                ArrayList<Occupation> occupationsOnScopedTE = retrieveOccupationOnTE(requestedTE, occupationType);
+                if (occupationsOnScopedTE == null) return true;
+                if(occupationsOnScopedTE == null) continue;
+                for(Occupation O : occupationsOnScopedTE) {
+                    ArrayList<TrackEdgeSection> targetSections = (ArrayList<TrackEdgeSection>) O.getTrackEdgeSections();
+                    for(TrackEdgeSection targetSection : targetSections) {
+                        TrackEdge TargetTE = targetSection.getTrackEdge();
+                        if(TargetTE.equals(requestedTE)) {
+                            if(TES.getBegin().getIntrinsicCoord() <=
+                                    targetSection.getBegin().getIntrinsicCoord() &&
+                                    targetSection.getBegin().getIntrinsicCoord() <=
+                                            TES.getEnd().getIntrinsicCoord()) return true;
+                            // Inverse der andere Bereich hat zwischen start und ende einen Fremdbeginn
+                            if(targetSection.getBegin().getIntrinsicCoord() <=
+                                    TES.getBegin().getIntrinsicCoord() &&
+                                    TES.getBegin().getIntrinsicCoord() <=
+                                            targetSection.getEnd().getIntrinsicCoord()) return true;
+
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+        return false;
+    }
+
+    @Nullable
+    private ArrayList<Occupation> retrieveOccupationOnTE(TrackEdge requestedTE, Class<?> occupationType) throws CloneNotSupportedException {
+        ThreadedRepo<TrackEdge, ArrayList<Occupation>> occupation = null;
+        try {
+            occupation = TrackAndOccupationManager.getReadOnly(occupationType, null);
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        ArrayList<Occupation> occupationsOnScopedTE = occupation.getModel(requestedTE);
+        return occupationsOnScopedTE;
+    }
+
     private void sendResponseDbdCommandToTms(boolean isSuccess, String sId, String sFailReason) {
         long lPrio = SlConfigHandler.getInstance().lCheckDbdReturn;
         DbdRequestReturnPayload  DbdPayload = new DbdRequestReturnPayload(sId);
@@ -1196,9 +1130,9 @@ public class SafetyLogic {
     }
 
     /**
-     * Prüft ob mao mit irgendeiner anderen Occupation kollidiert
+     * Pr&uuml;ft ob mao mit irgendeiner anderen Occupation kollidiert
      * @param mao - die occupation die zugelassen werden soll
-     * @return boolean - true wenn die Occupation zugelassen werden kann - false bei kollisionen
+     * @return boolean - true wenn die Occupation zugelassen werden kann - false bei Kollisionen
      */
     public boolean checkIfRouteIsNonBlocked(MARequestOccupation mao) {
         boolean isValidRequest = guard(mao);
@@ -1208,8 +1142,13 @@ public class SafetyLogic {
         for(TrackEdgeSection requestedSection: mao.getTrackEdgeSections()) {
             TrackEdge requestedTE = requestedSection.getTrackEdge();
             for(Class<?> occupationType : occupationTypesCanBlock) {
-                if (hasOneTypeOfOccupationCollision(mao, unrelevantOccupations, requestedTE, occupationType))
-                    return false;
+                try {
+                    if (hasOneTypeOfOccupationCollision(mao, unrelevantOccupations, requestedTE, occupationType))
+                        return false;
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                        return false;
+                }
             }
         }
         return true;
@@ -1221,15 +1160,8 @@ public class SafetyLogic {
         return true;
     }
 
-    private boolean hasOneTypeOfOccupationCollision(MARequestOccupation mao, ArrayList<Occupation> unrelevantOccupations, TrackEdge requestedTE, Class<?> occupationType) {
-        ThreadedRepo<TrackEdge, ArrayList<Occupation>> occupation = null;
-        try {
-            occupation = TrackAndOccupationManager.getReadOnly(occupationType, null);
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            return true;
-        }
-        ArrayList<Occupation> occupationsOnScopedTE = occupation.getModel(requestedTE);
+    private boolean hasOneTypeOfOccupationCollision(MARequestOccupation mao, ArrayList<Occupation> unrelevantOccupations, TrackEdge requestedTE, Class<?> occupationType) throws CloneNotSupportedException {
+        ArrayList<Occupation> occupationsOnScopedTE = retrieveOccupationOnTE(requestedTE, occupationType);
         if(occupationsOnScopedTE == null) return false;
         for(Occupation O : occupationsOnScopedTE) {
             if(unrelevantOccupations.contains(O)) continue;

@@ -40,6 +40,8 @@ public class TmsOuputWorker<T> extends Thread {
      * Konstruktor zum Instanziiern einer Senderoutine
      * @param queue - Warteschlange für Nachrichtenausgang
      * @param ctx - Kontext der Nachrichten einstellt
+     *
+     * @throws InvalidParameterException - wenn ein Parameter null ist, wird eine Exception geworfen
      */
     public TmsOuputWorker(SynchronousQueue<T> queue, ChannelHandlerContext ctx) throws InvalidParameterException {
         if(queue == null) throw new InvalidParameterException("Message queue must not be null");

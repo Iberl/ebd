@@ -70,12 +70,12 @@ public class ClientHandler extends SmartClientHandler {
         UUID maID = msgFromSL.getUuid();
 
         //MaModul.getInstance().storeMaReturnPayload(msgFromSL);
-
+        TmsMovementPermissionRequest moveRequest = TrackAndOccupationManager.RequestManager.getModel(maID);
+        MARequestOccupation mao = moveRequest.getMaRequestOccupation();
         if(msgFromSL.isMaSuccessfull()) {
             int iTrainId = 0;
             logger.info("Ma successfull. UUID: " + maID.toString() + "\n");
-            TmsMovementPermissionRequest moveRequest = TrackAndOccupationManager.RequestManager.getModel(maID);
-            MARequestOccupation mao = moveRequest.getMaRequestOccupation();
+
             MovableObject mo = mao.getTargetMoveableObject();
             iTrainId = mo.getNid_Engine().getId();
             MA rbcMa = moveRequest.payload.MaAdapter.convertToRbcMA();
@@ -95,6 +95,8 @@ public class ClientHandler extends SmartClientHandler {
                 logger.error("MA not successful. UUID: " + maID.toString() + " There were reserved elements accessed.\n");
             if(msgFromSL.getFailureCodes().contains(SmartServer4TmsImpl.NO_ACK))
                 logger.error("MA not successful. UUID: " + maID.toString() + " Ma has not been Acknowledged.\n");
+            TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.RemoveOperation,
+                    MARequestOccupation.class, mao);
 
         }
 

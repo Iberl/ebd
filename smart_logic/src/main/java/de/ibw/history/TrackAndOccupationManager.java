@@ -33,7 +33,7 @@ import java.util.UUID;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.0
- * @since 2021-04-07
+ * @since 2021-04-27
  *
  */
 public class TrackAndOccupationManager {
@@ -59,6 +59,7 @@ public class TrackAndOccupationManager {
         TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
                 MAOccupation.class,
                 MaoOccup);
+        TrackAndOccupationManager.removeOccupation(MARequestOccupation.class, MAO);
 
     }
 
@@ -232,6 +233,7 @@ public class TrackAndOccupationManager {
             VehicleStorageItem StoreItem = VehicleOccStorage.getModel(OccupationType);
             if(StoreItem == null) StoreItem = new VehicleStorageItem();
             StoreItem.update(((IMoveable) O).getTargetMoveableObject(), mainStorage);
+            VehicleOccStorage.update(OccupationType, StoreItem);
         }
 
 

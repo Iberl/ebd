@@ -232,6 +232,10 @@ public class MoveableTrackElement extends ControlledElement {
         }
     }
 
+    public DriveProtectionSection getProtectionSection() {
+        return protectionSection;
+    }
+
     public int getOperationTime() {
         return operationTime;
     }

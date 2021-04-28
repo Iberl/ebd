@@ -420,7 +420,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         } else {
             // send set Status on block elements with timeout
         }
-
+        /*
         bRouteElementAreTheRightOnes = Safety.checkIfRouteIsContinuousConnected(iTrainId, R, requestedTrackElementList);
         bRouteElementAreTheRightOnes = true;
         if(!bRouteElementAreTheRightOnes) {
@@ -429,7 +429,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             sendMaResponseToTMS(MaReturnPayload, 2L);
             return;
         } else if(EBM != null) EBM.log("SUCCESSFUL Route is continuous connected. TrainId-> " + iTrainId + "UUID-> " + uuid.toString(), SafetyLogic.TRACK_SAFETY );
-
+        */
         bRouteElementStatusIsRight = Safety.checkIfRouteElementStatusIsCorrect(iTrainId, R, requestedTrackElementList);
         if(!bRouteElementStatusIsRight) {
             MaReturnPayload.setErrorState(uuid, true, STATUS_OF_ELEMENT_IS_WRONG_ERROR);
@@ -588,7 +588,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
     private void handleInvalidRequest(UUID uuid, MaRequestReturnPayload maReturnPayload, String errorReason) {
-        SafetyLogic.getSmartSafety().removeOccupationOfCommunication(uuid);
+
         maReturnPayload.setErrorState(uuid,true, errorReason);
         sendMaResponseToTMS(maReturnPayload, 2L);
     }

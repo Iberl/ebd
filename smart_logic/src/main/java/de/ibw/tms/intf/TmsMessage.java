@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.intf.cmd.Commands;
+
 import ebd.rbc_tms.Message;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 

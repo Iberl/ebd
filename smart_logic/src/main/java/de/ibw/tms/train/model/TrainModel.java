@@ -32,11 +32,33 @@ public class TrainModel {
      * Verwaltet benutzte Zugbezeichner als Liste
      */
     public static ArrayList<String> usedLabelList = new ArrayList<String>();
+
+
+
+    public static boolean similarTo(Color c){
+
+        for(Color MainColor : usedColorList) {
+            double distance = (c.getRed() - MainColor.getRed()) * (c.getRed() - MainColor.getRed())
+                    + (c.getGreen() - MainColor.getGreen()) * (c.getGreen() - MainColor.getGreen()) +
+                    (c.getBlue() - MainColor.getBlue()) * (c.getBlue() - MainColor.getBlue());
+            if(distance < similarFactor) return true;
+        }
+        return false;
+    }
+
+    public static int similarFactor = 50;
+
     /**
      * Verwaltet bentzte Zugfarben als Liste
      */
-    public static ArrayList<Color> usedColorList = new ArrayList<Color>();
+    public static ArrayList<Color> usedColorList;
+    static {
+        if(usedColorList == null) usedColorList = new ArrayList<>();
+        usedColorList.add(Color.YELLOW);
+        usedColorList.add(Color.GREEN);
+        usedColorList.add(Color.RED);
 
+    }
 
     /**
      * Gibt ein Standard-Zug wider
@@ -53,7 +75,7 @@ public class TrainModel {
         Tm.length = 700.0;
         Tm.iSpeedMax = 120;
         Color C = genColor();
-        while(usedColorList.contains(C)) {
+        while(similarTo(C)) {
             C = genColor();
         }
         Tm.RepresentedColor = C;

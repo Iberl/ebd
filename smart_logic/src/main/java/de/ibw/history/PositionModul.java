@@ -271,9 +271,15 @@ public class PositionModul implements IPositionModul {
             e.printStackTrace();
             throw new InvalidParameterException(e.getMessage());
         }
-
-        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
-                MAOccupation.class, MaSmalled);
+            System.out.println("Train: " + nid_engine.getId() + " Smalled MA having Length (m) : " +
+                    MaSmalled.getMeterLength());
+            if(MaSmalled.getMeterLength().compareTo(BigDecimal.valueOf(0.1d)) < 0) {
+                TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.RemoveOperation,
+                        MAOccupation.class, MaSmalled);
+            } else {
+                TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
+                        MAOccupation.class, MaSmalled);
+            }
     }
 
 
