@@ -35,7 +35,7 @@ public class TrainModel {
 
 
 
-    public static boolean similarTo(Color c){
+    public static synchronized boolean similarTo(Color c){
 
         for(Color MainColor : usedColorList) {
             double distance = (c.getRed() - MainColor.getRed()) * (c.getRed() - MainColor.getRed())

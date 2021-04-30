@@ -155,11 +155,6 @@ public class PositionModul implements IPositionModul {
                 throw new InvalidParameterException("Referred Balise Change not supported");
             }
         } else {
-            // TODO ohne Route
-
-
-
-
             // WORKAROUND StartEdge is completele vehicle occupated
             SafeMOBPosition SafePosition = new SafeMOBPosition();
             TrainPositionSpots beginTrain;

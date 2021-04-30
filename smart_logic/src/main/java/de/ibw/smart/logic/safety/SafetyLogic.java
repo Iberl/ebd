@@ -66,13 +66,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
- * Dieses Modul stellt alle Tests dar, die die smartLogic bei eingehenden Anfragen des TMS unternehmen muss.
+ * Dieses Modul beinhaltet alle Tests, die die smartLogic bei eingehenden Anfragen des TMS unternehmen muss.
  *
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.5
- * @since 2021-04-28
+ * @version 1.0
+ * @since 2021-04-29
  */
 public class SafetyLogic {
     /**
@@ -96,6 +96,7 @@ public class SafetyLogic {
     private EventBusManager EBM = null;
 
     private final ArrayList<Class<?>> occupationTypesCanBlock = new ArrayList<>();
+    private final ArrayList<Class<?>> occupationTypesCanBlockTESC = new ArrayList<>();
 
     /**
      * Ein Singleton, dass Sicherheitslogic der SmartLogic widergibt.
@@ -120,6 +121,8 @@ public class SafetyLogic {
         }
         occupationTypesCanBlock.add(VehicleOccupation.class);
         occupationTypesCanBlock.add(MAOccupation.class);
+        occupationTypesCanBlockTESC.addAll(occupationTypesCanBlock);
+        occupationTypesCanBlockTESC.add(MARequestOccupation.class);
     }
 
     /**
@@ -1017,8 +1020,9 @@ public class SafetyLogic {
 
 
     /**
-     * Check ob eine Weiche in der Blockierten Liste vorhanden ist.
-     * @param cdc
+     * Check ob eine Weiche in der Blockierten Liste (Track and Occupationmanager) vorhanden ist.
+     * Untersucht ob Wunsch-Lage umsetzbar ist
+     * @param cdc - DBD Request
      *
      */
     public void checkIfDbdElementIsNotBlocked(CheckDbdCommand cdc) {
@@ -1072,9 +1076,8 @@ public class SafetyLogic {
     private boolean checkDriveProtectionSectionHavingCollision(DriveProtectionSection protectionSection) throws CloneNotSupportedException {
         for(TrackEdgeSection TES : protectionSection.getTrackEdgeSections()) {
             TrackEdge requestedTE = TES.getTrackEdge();
-            for(Class<?> occupationType : occupationTypesCanBlock) {
+            for(Class<?> occupationType : occupationTypesCanBlockTESC) {
                 ArrayList<Occupation> occupationsOnScopedTE = retrieveOccupationOnTE(requestedTE, occupationType);
-                if (occupationsOnScopedTE == null) return true;
                 if(occupationsOnScopedTE == null) continue;
                 for(Occupation O : occupationsOnScopedTE) {
                     ArrayList<TrackEdgeSection> targetSections = (ArrayList<TrackEdgeSection>) O.getTrackEdgeSections();
