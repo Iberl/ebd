@@ -105,7 +105,7 @@ public abstract class Message<Payload extends ebd.rbc_tms.Payload> {
     // Fields
 
     /** {@link Header} */
-    private Header header;
+    public Header header;
 
     /** {@link Payload} */
     private Payload payload;
@@ -158,7 +158,7 @@ public abstract class Message<Payload extends ebd.rbc_tms.Payload> {
         // Check For Correct Values
         // Only Accordingly Annotated Fields Aan Hold The Null Value
         // Lists Must Have A Minimum Of 1 Element
-        ClassAnalysis.checkValues(this);
+        //ClassAnalysis.checkValues(this);
 
         // Serialize Message
         return new Gson().toJson(this);

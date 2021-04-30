@@ -19,6 +19,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>ebd</groupId>
+      <artifactId>messageLibrary</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>5.4.2</version>
@@ -94,6 +100,8 @@
         </plugin>
 
 
+
+
       </plugins>
     </pluginManagement>
 
@@ -119,9 +127,9 @@
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
+       <module>rbc_tms</module>
     <module>messageLibrary</module>
-    <module>rbc_tms</module>
-    <module>etcsCore</module>
+   <!--    <module>etcsCore</module>-->
 
 
     <!-- <module>baliseTelegramGenerator</module> -->

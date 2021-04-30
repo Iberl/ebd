@@ -1,6 +1,7 @@
 package ebd.globalUtils.events.tmsDummy;
 
-import ebd.rbc_tms.Message;
+
+import ebd.messageLibrary.message.Message;
 
 /**
  * @author Christopher Bernjus
