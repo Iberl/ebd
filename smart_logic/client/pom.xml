@@ -14,7 +14,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ebd</groupId>
     <artifactId>smarLogicClient</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <name>smartLogicClient</name>
     <packaging>jar</packaging>
 
@@ -192,6 +192,11 @@
             <version>2.1</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>3.6.3</version>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
@@ -276,16 +281,17 @@
             <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>smartLogic</groupId>
-            <artifactId>smart_logic</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
 
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>smartLogic</groupId>
+            <artifactId>smart_logic</artifactId>
+            <version>1.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

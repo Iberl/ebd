@@ -10,6 +10,7 @@ import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.ma.positioned.elements.NetEntity;
 import de.ibw.tms.ma.positioned.elements.SmartLogicArea;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.util.UtilFunction;
 import ebd.SlConfigHandler;
 import ebd.rbc_tms.message.Message_14;
 import ebd.rbc_tms.message.Message_15;
@@ -415,6 +416,11 @@ public class SmartLogic extends NetEntity {
      */
     public static void main(String[] args) {
         //startSmartLogic();
+        String version  = SmartLogic.class.getPackage().getImplementationVersion();
+        System.out.println("Starting smartLogic version " + UtilFunction.showVersionString());
+
+
+
         startSmartLogicStd();
 
 

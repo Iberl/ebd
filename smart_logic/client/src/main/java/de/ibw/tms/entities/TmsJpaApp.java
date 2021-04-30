@@ -6,6 +6,7 @@ import de.ibw.main.SmartLogicClient;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.ui.TmsFrameUtil;
+import de.ibw.util.UtilFunction;
 import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
@@ -60,6 +61,9 @@ public class TmsJpaApp {
 	@Bean
 	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C) {
 		return (args) -> {
+
+			log.info("Starting TMS version" + UtilFunction.showVersionString());
+
 			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
 			PlanData.getInstance();

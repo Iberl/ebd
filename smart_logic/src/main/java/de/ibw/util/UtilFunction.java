@@ -16,11 +16,17 @@ import de.ibw.tms.train.model.TrainModel;
 import ebd.SlConfigHandler;
 import ebd.rbc_tms.payload.Payload_14;
 import ebd.rbc_tms.util.PositionInfo;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.security.InvalidParameterException;
@@ -34,10 +40,47 @@ import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITO
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2020-11-05
+ * @version 0.5
+ * @since 2021-04-30
  */
 public class UtilFunction {
+
+
+    public static Model getMavenModel() throws IOException, XmlPullParserException {
+        MavenXpp3Reader reader = new MavenXpp3Reader();
+        return reader.read(new FileReader("pom.xml"));
+    }
+    public static String getMavenVersion() throws IOException, XmlPullParserException {
+        return getMavenModel().getVersion();
+    }
+
+    public static String getVersionDate() throws XmlPullParserException, IOException {
+        String date = getMavenModel().getProperties().getProperty("version.date");
+        if(date == null) return "";
+        return date;
+    }
+
+    public static String showVersionString() {
+        String resultString = "";
+        try {
+            Model M = getMavenModel();
+            String date = M.getProperties().getProperty("version.date");
+            if(date == null) date = "";
+            else date = "@" + date;
+            resultString = M.getVersion() + date;
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+        }
+
+        return resultString;
+
+    }
+
+
+
+
+
+
 
     private static BigDecimal calcNextTargetPointDistance(BigDecimal distanceToNextTargetPoint, TopologyGraph.Edge newTrainPositionEdge, TrainModel tm) {
         BigDecimal result = null;
