@@ -12,8 +12,10 @@ import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.net.elements.INetElement;
@@ -68,6 +70,9 @@ public class ClientHandler extends SmartClientHandler {
 
     private void handleMaResponse(MaRequestReturnPayload msgFromSL) throws InvalidParameterException {
         UUID maID = msgFromSL.getUuid();
+
+
+        TmsJpaApp.TmsMessenger.log(msgFromSL);
 
         //MaModul.getInstance().storeMaReturnPayload(msgFromSL);
         TmsMovementPermissionRequest moveRequest = TrackAndOccupationManager.RequestManager.getModel(maID);
@@ -157,6 +162,7 @@ public class ClientHandler extends SmartClientHandler {
                     }
                     if (MsgFromSL != null) {
                         if(MsgFromSL.getType().equals(MaRequestReturnPayload.RETURN_TYPE)) {
+
                             handleMaResponse((MaRequestReturnPayload)MsgFromSL);
 
                         } else if(MsgFromSL.getType().equals(DbdRequestReturnPayload.RETURN_TYPE)) {

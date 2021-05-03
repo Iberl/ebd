@@ -3,8 +3,10 @@ package de.ibw.schedule.runner;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
 import de.ibw.tms.entities.TimeTaskDAO;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
 public class PermissionRunnable implements Runnable {
@@ -28,6 +30,9 @@ public class PermissionRunnable implements Runnable {
 
         try {
             client.CH.sendCommand(requestMessage);
+            if(requestMessage instanceof TmsMovementPermissionRequest) {
+                TmsJpaApp.TmsMessenger.log((IMovementMessengerIntf) requestMessage);
+            }
         } catch (MissingInformationException e) {
             e.printStackTrace();
 

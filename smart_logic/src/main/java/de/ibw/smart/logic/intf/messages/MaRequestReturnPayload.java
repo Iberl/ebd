@@ -3,6 +3,7 @@ package de.ibw.smart.logic.intf.messages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -12,10 +13,10 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 0.5
+ * @since 2021-04-30
  */
-public class MaRequestReturnPayload implements ITypable {
+public class MaRequestReturnPayload implements ITypable, IMovementMessengerIntf {
 
     /**
      * Definiert Nachrichtentyp, dadurch kann die Art der Nachricht vom TMS erkannt werden
@@ -118,5 +119,31 @@ public class MaRequestReturnPayload implements ITypable {
 
     public boolean isMaSuccessfull() {
         return maSuccessfull;
+    }
+
+    @Override
+    public String showOnMovementMessenger() {
+        String logEntry = "-------\n";
+        if(isValidMessage()) {
+            logEntry = logEntry + "UUID: " + this.uuid;
+            if(isMaSuccessfull()) {
+                logEntry = logEntry + " Movement-Request was successful";
+            } else {
+                logEntry = logEntry + " Movement-Request failed, because:";
+                for(String sCode : getFailureCodes()) {
+                    logEntry = logEntry + " [" + sCode + "] ";
+                }
+            }
+
+        } else {
+            logEntry = logEntry + "Message invalid: " + this.parseToJson();
+        }
+        logEntry = logEntry + "\n-------\n";
+        return logEntry;
+    }
+
+    private boolean isValidMessage() {
+        if(uuid == null) return false;
+        return true;
     }
 }

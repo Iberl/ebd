@@ -31,6 +31,7 @@ public class SmartLogicClient extends SmartClient {
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
     public static MotisProducer MotisProducer;
+
     private TmsScheduler RequestScheduler;
 
 

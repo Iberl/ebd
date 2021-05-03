@@ -4,7 +4,10 @@ import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.MovementMessengerIntf;
+import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.ui.MovmentMessengerFrame;
 import de.ibw.tms.ui.TmsFrameUtil;
 import de.ibw.util.UtilFunction;
 import de.motis.config.TmsConfig;
@@ -40,6 +43,8 @@ public class TmsJpaApp {
 	public static TmsConfig Config;
 
 	public static TmsFramer TmsFramer = null;
+
+	public static TmsMessenger TmsMessenger = null;
 
 	public static void main(String[] args) {
 		SpringApplication.run(TmsJpaApp.class);
@@ -109,7 +114,7 @@ public class TmsJpaApp {
 
 	@RestController
 	@EnableAutoConfiguration
-	@Order(value=3)
+	@Order(value=4)
 	@Component
 	public class TmsServiceController {
 		/*@RequestMapping(value="/blade", method= RequestMethod.GET)
@@ -172,6 +177,48 @@ public class TmsJpaApp {
 				TmsFrameUtil.updateSubViews();
 			}
 		}
+
+
+
+	}@Component
+	@Order(value=3)
+	public class TmsMessenger implements CommandLineRunner {
+
+
+
+		public MovmentMessengerFrame messageFrame = null;
+
+
+
+		public void log(IMovementMessengerIntf msg) {
+
+				SwingUtilities.invokeLater(() -> {
+					logAndRepaint(msg);
+				});
+
+
+
+		}
+
+		private void logAndRepaint(IMovementMessengerIntf msg) {
+			MovmentMessengerFrame.getInstance().log(msg);
+			MovmentMessengerFrame.getInstance().setVisible(true);
+			MovmentMessengerFrame.getInstance().repaint();
+		}
+
+		@Override
+		public void run(String... args) throws Exception {
+			TmsJpaApp.TmsMessenger = this;
+			System.setProperty("java.awt.headless", "false");
+			System.out.println("Java can open Dialogs: " + java.awt.GraphicsEnvironment.isHeadless());
+//			System.setProperty("java.awt.headless", "false");
+//			SwingUtilities.invokeLater(() -> {
+//				if(tmsFrame == null) tmsFrame = new JFrame();
+//
+//			});
+		}
+
+
 
 
 
