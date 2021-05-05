@@ -4,7 +4,7 @@ import de.ibw.tms.entities.*;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import ebd.rbc_tms.util.*;
 import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 
 import java.util.ArrayList;
 import java.util.List;

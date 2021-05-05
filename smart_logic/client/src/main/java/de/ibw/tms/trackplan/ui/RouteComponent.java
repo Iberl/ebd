@@ -1,19 +1,11 @@
 package de.ibw.tms.trackplan.ui;
 
-import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.ControlledTrackElement;
-import de.ibw.tms.ma.physical.TrackElementStatus;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.plan.elements.CrossoverModel;
-import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
-import de.ibw.tms.speed.profile.view.SpeedDialog;
 import de.ibw.tms.trackplan.controller.RouteController;
-import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.UtilFunction;
@@ -23,7 +15,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Stack;
 import java.util.concurrent.Flow;
 /**
  * Dieses Panel stellt ein Kontextmenu dar.

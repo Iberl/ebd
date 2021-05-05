@@ -1,6 +1,5 @@
 package de.ibw.tms.trackplan.ui;
 
-import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;

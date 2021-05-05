@@ -1,6 +1,7 @@
-package de.ibw.tms.ma;
+package de.ibw.tms.trackplan.ui;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
@@ -12,7 +13,6 @@ import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.IWaypoint;
-import de.ibw.tms.trackplan.ui.WaypointDecorator;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.persistence.Entity;

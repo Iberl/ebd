@@ -1,42 +1,22 @@
 package clienthandler
 
 import data.MovementPermissionRequestProvider
-import de.disposim.dbd.trainpos.TrainPosition
 import de.ibw.handler.ClientHandler
 import de.ibw.history.PositionData
 import de.ibw.history.PositionModul
 import de.ibw.history.TrackAndOccupationManager
 import de.ibw.history.data.PositionEnterType
-import de.ibw.tms.etcs.ETCS_DISTANCE
-import de.ibw.tms.etcs.ETCS_SPEED
 import de.ibw.tms.intf.SmartClientHandler
-import de.ibw.tms.intf.TmsMovementPermissionRequest
-import de.ibw.tms.intf.cmd.CheckMovementPermission
-import de.ibw.tms.ma.DangerPoint
 import de.ibw.tms.ma.MovementAuthority
-import de.ibw.tms.ma.RbcMaAdapter
-import de.ibw.tms.ma.Route
-import de.ibw.tms.ma.dynamic.RouteSection
 import de.ibw.tms.ma.mob.MovableObject
 import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.MOBPosition
 import de.ibw.tms.ma.mob.position.MOBPositionClasses
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
-import de.ibw.tms.ma.occupation.MAOccupation
 import de.ibw.tms.ma.occupation.MARequestOccupation
-import de.ibw.tms.ma.occupation.Occupation
-import de.ibw.tms.ma.positioned.elements.TrackEdge
 import de.ibw.tms.plan.elements.model.PlanData
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter
-import de.ibw.util.ThreadedRepo
-import ebd.rbc_tms.util.EOA
-import ebd.rbc_tms.util.GradientProfile
-import ebd.rbc_tms.util.MA
-import ebd.rbc_tms.util.ModeProfile
 import ebd.rbc_tms.util.PositionInfo
-import ebd.rbc_tms.util.SpeedProfile
 import ebd.rbc_tms.util.TrainInfo
-import io.netty.channel.ChannelHandlerContext
 import spock.lang.Specification
 
 

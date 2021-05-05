@@ -27,7 +27,6 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.ITopologyFactory;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import de.ibw.tms.train.ui.SingleTrainSubPanel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;

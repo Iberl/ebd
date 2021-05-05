@@ -8,10 +8,9 @@ import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.EoaAdapter;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.RbcMaAdapter;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
-import de.ibw.util.DefaultRepo;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.PositionInfo;
@@ -19,15 +18,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.mockito.Spy;
 
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Die Smart-Logic hat ein Submodul, das pr&uuml;ft, ob blockierte Elemente vorhanden sind.

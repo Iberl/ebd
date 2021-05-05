@@ -1,8 +1,5 @@
 package de.ibw.tms.train.controller;
 
-import de.ibw.feed.Balise;
-import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
@@ -10,15 +7,13 @@ import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.GradientProfile;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
-import de.ibw.tms.ma.occupation.MARequestOccupation;
-import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
-import de.ibw.util.DefaultRepo;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.rbc_tms.util.*;
 import ebd.rbc_tms.util.ModeProfile.Mode;

@@ -1,7 +1,7 @@
 package data
 
 import de.ibw.history.data.ComposedRoute
-import de.ibw.tms.ma.Route
+import de.ibw.tms.trackplan.ui.Route
 import de.ibw.tms.ma.common.DefaultObject
 import de.ibw.tms.ma.location.SpotLocationIntrinsic
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect

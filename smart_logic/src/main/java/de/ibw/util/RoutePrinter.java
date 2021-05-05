@@ -3,7 +3,7 @@ package de.ibw.util;
 import de.ibw.feed.Balise;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;

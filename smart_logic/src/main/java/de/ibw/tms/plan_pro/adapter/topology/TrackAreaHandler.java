@@ -1,8 +1,6 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
-import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.dynamic.MOBPositionSection;
-import de.ibw.tms.ma.dynamic.RouteSection;
 import de.ibw.tms.ma.flanking.FlankArea;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
 import de.ibw.tms.ma.occupation.FlankOccupation;

@@ -4,7 +4,6 @@ import de.ibw.feed.Balise;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.SmartClient;
 import de.ibw.tms.intf.SmartClientHandler;
 import de.ibw.tms.ma.positioned.elements.NetEntity;
@@ -291,7 +290,7 @@ public class SmartLogic extends NetEntity {
         if(bWithUi) {
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    MainTmsSim.MainFrame = MainTmsSim.createTmsFrame(MainTmsSim.TmsMode.Normal);
+                    //MainTmsSim.MainFrame = MainTmsSim.createTmsFrame(MainTmsSim.TmsMode.Normal);
                 }
             });
         }

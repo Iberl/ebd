@@ -1,13 +1,8 @@
 package de.ibw.history;
 
 import de.ibw.history.data.ComposedRoute;
-import de.ibw.smart.logic.exceptions.SmartLogicException;
-import de.ibw.tms.etcs.*;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
-import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
-import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
@@ -16,11 +11,9 @@ import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.util.ThreadedRepo;
-import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.MA;
-import org.jetbrains.annotations.NotNull;
-import org.railMl.rtm4rail.TApplicationDirection;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;

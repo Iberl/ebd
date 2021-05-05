@@ -1,12 +1,8 @@
 package de.ibw.tms.speed.profile.model;
 
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.dynamic.RouteSection;
-import de.ibw.tms.plan.elements.BranchingSwitch;
-import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.model.PlanData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DummyRoute extends Route {

@@ -7,7 +7,7 @@ import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
@@ -47,7 +47,7 @@ import java.util.*;
  * @version 1.0
  * @since 2021-03-31
  */
-public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> {
+public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopological>> {
 
     // Waypoints auf einer Kante innerhalb einer DKW
     public DefaultRepo<TrackEdge, Waypoint> dkwWaypointRepo = new DefaultRepo<>();
@@ -225,9 +225,9 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
 
         if(dRouteLength != null) return dRouteLength;
         BigDecimal result = new BigDecimal("0");
-        Iterator<Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological>> it = this.iterator();
+        Iterator<Pair<Route.TrackElementType, ITopological>> it = this.iterator();
         while(it.hasNext()) {
-            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> element = it.next();
+            Pair<Route.TrackElementType, ITopological> element = it.next();
             if(element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
                 TopologyGraph.Edge E = (TopologyGraph.Edge) element.getValue();
                 result = result.add(BigDecimal.valueOf(E.dTopLength));
@@ -762,10 +762,10 @@ public class ComposedRoute extends ArrayList<Pair<de.ibw.tms.ma.Route.TrackEleme
         TopologyGraph.Edge StartEdge = null;
         TopologyGraph.Edge PrevEdge = null;
         for(int i = 0 ; i < this.size(); i++) {
-            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> Current = this.get(i);
+            Pair<Route.TrackElementType, ITopological> Current = this.get(i);
             TopologyGraph.Edge CurrentEdge = (TopologyGraph.Edge) Current.getRight();
 
-            Pair<de.ibw.tms.ma.Route.TrackElementType, ITopological> Next = null;
+            Pair<Route.TrackElementType, ITopological> Next = null;
             TopologyGraph.Edge NextEdge = null;
             BigDecimal shortageOnCurrentEdge = null;
             if(i + 1 < this.size()) {

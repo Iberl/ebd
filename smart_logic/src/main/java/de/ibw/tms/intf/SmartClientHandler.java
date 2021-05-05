@@ -12,7 +12,6 @@ import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.ITypable;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
-import de.ibw.tms.controller.PositionReportController;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;

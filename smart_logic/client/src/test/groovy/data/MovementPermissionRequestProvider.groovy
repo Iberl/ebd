@@ -3,7 +3,7 @@ package data
 import de.ibw.tms.intf.TmsMovementPermissionRequest
 import de.ibw.tms.intf.cmd.CheckMovementPermission
 import de.ibw.tms.ma.RbcMaAdapter
-import de.ibw.tms.ma.Route
+import de.ibw.tms.trackplan.ui.Route
 import de.ibw.tms.ma.dynamic.RouteSection
 import ebd.rbc_tms.util.*
 import spock.lang.Specification

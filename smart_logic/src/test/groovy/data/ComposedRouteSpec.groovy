@@ -2,7 +2,7 @@ package data
 
 import de.ibw.history.data.ComposedRoute
 import de.ibw.tms.etcs.ETCS_DISTANCE
-import de.ibw.tms.ma.Route
+import de.ibw.tms.trackplan.ui.Route
 import de.ibw.tms.ma.common.DefaultObject
 import de.ibw.tms.ma.location.SpotLocationIntrinsic
 import de.ibw.tms.ma.positioned.elements.TrackArea
@@ -12,12 +12,8 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological
 import org.apache.commons.lang3.tuple.ImmutablePair
 import org.apache.commons.lang3.tuple.Pair
-import plan_pro.modell.geodaten._1_9_0.CTOPKante
-import plan_pro.modell.geodaten._1_9_0.CTOPKanteAllg
-import spock.lang.Shared
 import spock.lang.Specification
 
-import java.lang.reflect.Array
 import java.lang.reflect.Field
 /**
  * @author iberl@verkehr.tu-darmstadt.de

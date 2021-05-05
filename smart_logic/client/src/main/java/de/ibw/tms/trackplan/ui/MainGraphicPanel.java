@@ -4,6 +4,7 @@ import de.ibw.feed.Balise;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
@@ -22,6 +23,7 @@ import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainModel;
+import de.ibw.tms.ui.TmsFrameUtil;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
 import org.apache.log4j.Logger;
@@ -93,9 +95,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         PlanData PD = PlanData.getInstance();
         for(BranchingSwitch BS :PD.branchingSwitchList) {
 
-            BS.getController().publish();
+
 
         }
+        TmsFrameUtil.updateFrame();
     }
 
     /**
@@ -614,18 +617,18 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         }
 
-            double    prevDistance  = 0;
-            double    geoEdgeLength = 0;
-            CGEOKante geoEdge       = null;
+        double    prevDistance  = 0;
+        double    geoEdgeLength = 0;
+        CGEOKante geoEdge       = null;
 
-            int i = b_fromA ? 0 : geoEdgeList.size() - 1;
-            for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
-                geoEdge = geoEdgeList.get(i);
-                geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
-                if(distanceA1 <= prevDistance + geoEdgeLength) break;
-                prevDistance += geoEdgeLength;
-            }
-            return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+        int i = b_fromA ? 0 : geoEdgeList.size() - 1;
+        for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
+            geoEdge = geoEdgeList.get(i);
+            geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+            if(distanceA1 <= prevDistance + geoEdgeLength) break;
+            prevDistance += geoEdgeLength;
+        }
+        return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
     }
 
     /**

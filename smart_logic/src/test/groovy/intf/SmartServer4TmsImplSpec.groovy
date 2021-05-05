@@ -2,24 +2,13 @@ package intf
 
 import data.MovementPermissionRequestProvider
 import de.ibw.history.TrackAndOccupationManager
-import de.ibw.smart.logic.intf.SmartLogic
 import de.ibw.smart.logic.intf.SmartServer
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl
-import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker
-import de.ibw.smart.logic.intf.messages.SmartServerMessage
-import de.ibw.smart.logic.safety.SafetyLogic
 import de.ibw.tms.intf.TmsMovementPermissionRequest
 import de.ibw.tms.intf.cmd.CheckMovementPermission
 import de.ibw.tms.ma.EoaAdapter
-import de.ibw.tms.ma.GradientProfileAdapter
-import de.ibw.tms.ma.LinkingProfileAdapter
-import de.ibw.tms.ma.ModeAdapter
 import de.ibw.tms.ma.RbcMA
 import de.ibw.tms.ma.RbcMaAdapter
-import de.ibw.tms.ma.Route
-import de.ibw.tms.ma.SpeedProfileAdapter
-import de.ibw.tms.ma.SpeedSegment
-import de.ibw.tms.ma.dynamic.RouteSection
 import de.ibw.tms.ma.mob.MovableObject
 import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.MOBPosition
@@ -31,13 +20,7 @@ import ebd.rbc_tms.util.LinkingProfile
 import ebd.rbc_tms.util.MA
 import ebd.rbc_tms.util.ModeProfile
 import ebd.rbc_tms.util.SpeedProfile
-import io.netty.channel.ChannelHandlerContext
-
-import spock.lang.Shared
 import spock.lang.Specification
-
-import java.security.InvalidParameterException
-import java.util.concurrent.SynchronousQueue
 
 /**
  *

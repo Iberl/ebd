@@ -9,7 +9,6 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
@@ -34,6 +33,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Diese Klasse dient zur Erzeugung eines Topologieschen Graphen
@@ -68,6 +68,106 @@ public class TopologyFactory implements ITopologyFactory {
 
     public static DefaultRepo<TopologyGraph.Node,DefaultRepo<TopologyGraph.Node,TopologyGraph.Edge>> connections = new DefaultRepo<>();
 
+    /**
+     * @deprecated
+     * @param geoEdge
+     * @param b_fromA
+     * @param distance
+     * @return
+     */
+    private static GeometricCoordinate getGeoCoordinate(CGEOKante geoEdge, boolean b_fromA, double distance) {
+
+
+        double geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+        if(geoEdgeLength < distance) {
+            throw new IllegalArgumentException("The desired point must lay on the geo edge.");
+        }
+
+        // Helper values for calculating the coordinates
+        GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+        GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+
+        // Create a new Coordinates instance
+        return createGeoCoordinates(b_fromA, geoEdgeLength, distance, nodeA, nodeB);
+
+
+    }
+
+    /**
+     * @deprecated
+     * @param b_fromA
+     * @param edgeLength
+     * @param distance
+     * @param nodeA
+     * @param nodeB
+     * @return
+     */
+    private static GeometricCoordinate createGeoCoordinates(boolean b_fromA, double edgeLength, double distance, GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
+
+
+        GeometricCoordinate coordinates = new GeometricCoordinate();
+
+        double ratio = distance / edgeLength;
+        double dx = ratio * (b_fromA ?  nodeB.getX() - nodeA.getX() : nodeA.getX() - nodeB.getX());
+        double dy = ratio * (b_fromA ?  nodeB.getY() - nodeA.getY() : nodeA.getY() - nodeB.getY());
+
+        if(b_fromA) {
+            coordinates.setX(nodeA.getX() + dx);
+            coordinates.setY(nodeA.getY() + dy);
+        } else {
+            coordinates.setX(nodeB.getX() + dx);
+            coordinates.setY(nodeB.getY() + dy);
+        }
+        return coordinates;
+
+
+    }
+
+
+    /**
+     * Berechnet die GeoCoordinate zu einer Topologischen Kante mit Bezug zu einem Knoten mit distanz.
+     * @param TopKanteId {@link String} - Knoten Id PlanPro
+     * @param b_fromA boolean - ist von A gemessen worden
+     * @param distanceA1 double - Abstand zum Referenzknoten
+     * @return GeoCoordinates - Geographischer Punkt
+     */
+    public static GeometricCoordinate getGeoCoordinate(String TopKanteId, boolean b_fromA, double distanceA1) {
+        // Get TopEdge
+        ConcurrentHashMap edgeRepo = PlanData.topGraph.edgeRepo;
+        TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
+        if(edge.dTopLength < distanceA1) throw new IllegalArgumentException("The desired point must lay on the top edge.");
+        ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
+
+        double lengthOfGeoEdges = 0;
+        for(CGEOKante geoEdge : geoEdgeList) {
+            lengthOfGeoEdges += geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+        }
+
+        if (geoEdgeList.isEmpty() || Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
+            GeometricCoordinate nodeA = edge.A.getGeoCoordinates();
+            GeometricCoordinate nodeB = edge.B.getGeoCoordinates();
+
+            if(geoEdgeList.isEmpty()) return null;//createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            else {
+                distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+            }
+
+
+        }
+
+        double    prevDistance  = 0;
+        double    geoEdgeLength = 0;
+        CGEOKante geoEdge       = null;
+
+        int i = b_fromA ? 0 : geoEdgeList.size() - 1;
+        for(; (b_fromA && i < geoEdgeList.size() || !b_fromA && i > 0); i = b_fromA ? (i + 1) : (i - 1)) {
+            geoEdge = geoEdgeList.get(i);
+            geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+            if(distanceA1 <= prevDistance + geoEdgeLength) break;
+            prevDistance += geoEdgeLength;
+        }
+        return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+    }
 
     private DefaultRepo<String, CStrecke> trackRepo = new DefaultRepo<>(); // output
 
@@ -658,7 +758,7 @@ public class TopologyFactory implements ITopologyFactory {
                     Boolean isUpwardToEdge = null;
                     CrossingSwitch CS = null;
                     BigDecimal decResult = null;
-                    geoCoordinate = MainGraphicPanel.getGeoCoordinate(
+                    geoCoordinate = getGeoCoordinate(
                             TopKante.getIdentitaet().getWert(),
                             !isAMissing,
                             B.getBalisenPositionFromNodeA().doubleValue());
@@ -692,7 +792,7 @@ public class TopologyFactory implements ITopologyFactory {
 
             } catch(Exception Ex) {
                 Ex.printStackTrace();
-                geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+                geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
             }
 
 
@@ -747,7 +847,7 @@ public class TopologyFactory implements ITopologyFactory {
 
         }
 
-        geoCoordinate = MainGraphicPanel.getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
+        geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, decDistanceFromA.doubleValue());
     }
 
     private void printBaliseInfo(Balise B, CDatenpunkt DP, CTOPKante topKante, GeometricCoordinate geo_A, GeometricCoordinate geo_B) {

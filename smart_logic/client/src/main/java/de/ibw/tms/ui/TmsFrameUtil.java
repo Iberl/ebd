@@ -99,6 +99,11 @@ public class TmsFrameUtil {
         return frame;
     }
 
+    public static void updateFrame() {
+        TmsJpaApp.TmsFramer.tmsFrame.revalidate();
+        updateSubViews();
+    }
+
     /**
      * Horcht auf Befehl neuzuzeichnen
      */

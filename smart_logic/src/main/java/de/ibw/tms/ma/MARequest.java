@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.controller.TmsController;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
+import de.ibw.tms.trackplan.ui.Route;
 
 import java.io.Serializable;
 

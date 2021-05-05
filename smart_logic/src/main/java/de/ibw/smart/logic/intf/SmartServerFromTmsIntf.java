@@ -1,7 +1,6 @@
 package de.ibw.smart.logic.intf;
 
-import de.ibw.tms.ma.MaRequestWrapper;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import ebd.rbc_tms.util.MA;
 
 import java.util.UUID;

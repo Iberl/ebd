@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.*;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import de.ibw.tms.train.model.TrainModel;
+import de.ibw.tms.trackplan.ui.Route;
 import ebd.rbc_tms.util.exception.MissingInformationException;
 
 import java.util.ArrayList;

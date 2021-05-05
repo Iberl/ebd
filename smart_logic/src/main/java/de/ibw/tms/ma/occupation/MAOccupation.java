@@ -8,13 +8,11 @@ import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.trackplan.ui.Route;
 import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.MA;
-import org.apache.poi.hpsf.IllegalVariantTypeException;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.security.InvalidParameterException;
 
 /**

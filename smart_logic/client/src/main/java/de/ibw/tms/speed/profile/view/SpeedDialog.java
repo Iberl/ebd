@@ -2,7 +2,7 @@ package de.ibw.tms.speed.profile.view;
 
 import de.ibw.tms.co.CartesianDialog;
 import de.ibw.tms.co.CartesianPanel;
-import de.ibw.tms.ma.Route;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.speed.profile.model.CartesianSpeedModel;
 import de.ibw.tms.trackplan.MaCreatingFrame;
 import de.ibw.tms.trackplan.ui.RouteComponent;
