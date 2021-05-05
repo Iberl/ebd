@@ -1,11 +1,13 @@
 package de.ibw.tms.trackplan.controller;
 
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.MaCreatingFrame;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
@@ -14,6 +16,7 @@ import de.ibw.tms.trackplan.ui.TrackPanel;
 import de.ibw.tms.trackplan.ui.TrackWindow;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
+import de.ibw.tms.ui.geometric.GeoEdgePainted;
 
 import javax.swing.*;
 import java.awt.*;
@@ -171,6 +174,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         ClickPoint = TranslatedPoint;
         ArrayList panels = new ArrayList();
         Iterator shapes= DataModel.getInteractable().iterator();
+        ArrayList<TopologyGraph.Edge> edgesHavingMenuItem = new ArrayList<>();
         for (int i= 1; shapes.hasNext(); i++) {
             Shape S = (Shape) shapes.next();
             if(S.contains(TranslatedPoint)) {
@@ -180,9 +184,13 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                     panels.add(TrackUtilPanel);
                 }
             }
-            if(S instanceof Line2D) {
-                Line2D LineRail = (Line2D) S;
-                if(LineRail.ptSegDist(TranslatedPoint) < Rail.dRailTolerance) {
+            if(S instanceof GeoEdgePainted) {
+                GeoEdgePainted LineRail = (GeoEdgePainted) S;
+                TopologyGraph.Edge TopEdgeOfRail = LineRail.getTopEdge();
+
+                if(LineRail.ptSegDist(TranslatedPoint) < GeoEdgePainted.dRailTolerance) {
+                    if(edgesHavingMenuItem.contains(TopEdgeOfRail)) continue;
+                    edgesHavingMenuItem.add(TopEdgeOfRail);
                     de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
                     panels.add(TrackUtilPanel);
                 }
@@ -194,7 +202,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         }
         JFrame jFscopeFrame;
         if(isMainWindow) {
-            jFscopeFrame = MainTmsSim.MainFrame;
+            jFscopeFrame = TmsJpaApp.TmsFramer.tmsFrame;
         } else {
             jFscopeFrame = MaCreatingFrame.CurrentMaCreatingFrame;
         }
@@ -210,7 +218,6 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
             });
         }
     }
-
 
     /**
      * Ma ver&auml;nderung wird weitergegeben

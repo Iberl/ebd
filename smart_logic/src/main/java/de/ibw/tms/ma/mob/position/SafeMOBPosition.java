@@ -1,8 +1,10 @@
 package de.ibw.tms.ma.mob.position;
 
+import de.ibw.feed.Balise;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
+import de.ibw.tms.ma.Route;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
@@ -11,6 +13,9 @@ import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import ebd.rbc_tms.util.PositionInfo;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
 
@@ -101,5 +106,29 @@ public class SafeMOBPosition extends MOBPositionClasses {
             throw new InvalidParameterException("End has to be of Type MinSafeFrontEnd");
         }
         super.setEnd(end);
+    }
+
+    public void calcByOffset(BigDecimal newOffset, PositionInfo position) throws InvalidParameterException {
+        Route R = new Route(null);
+        R.setIntrinsicCoordOfTargetTrackEdge(1.0d);
+        BigDecimal offsetPassed = new BigDecimal("0.0");
+        int iLrbg = position.nid_lrbg;
+        Balise B = Balise.baliseByNid_bg.getModel(iLrbg);
+        if(B == null) throw new InvalidParameterException("Balised refered not available.");
+        if(B.getTopPositionOfDataPoint() == null || B.getTopPositionOfDataPoint().getIdentitaet() == null ||
+                B.getTopPositionOfDataPoint().getIdentitaet().getWert() == null) throw new InvalidParameterException("Balise " +
+                "providing not enough information.");
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(B.getTopPositionOfDataPoint().getIdentitaet()
+                .getWert());
+        if(E == null) throw new InvalidParameterException("Edge of Balise not found");
+
+        while(offsetPassed.compareTo(newOffset) < 0 ) {
+
+        }
+
+
+
+        ComposedRoute CR = new ComposedRoute();
+
     }
 }

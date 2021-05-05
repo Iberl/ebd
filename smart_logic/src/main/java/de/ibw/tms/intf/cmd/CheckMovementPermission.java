@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 /**
- * Dieser Befehl entsteht im TMS und weist die SL die beinhaltete MA zu pr&uuml;fen.
+ * Dieser Befehl entsteht im TMS und weist die smartLogic an, die beinhaltete MA zu pr&uuml;fen.
  *
  *
  *

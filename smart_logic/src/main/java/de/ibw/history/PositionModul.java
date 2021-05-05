@@ -157,9 +157,15 @@ public class PositionModul implements IPositionModul {
         } else {
             // WORKAROUND StartEdge is completele vehicle occupated
             SafeMOBPosition SafePosition = new SafeMOBPosition();
+
+            int iMaQscale = Position.q_scale;
+
+            int iNewPosExponent = getExponent(Position.q_scale);
+            BigDecimal NewOffset =
+                    new BigDecimal(Position.d_lrbg).multiply(new BigDecimal(10).pow(iNewPosExponent, MathContext.DECIMAL32));
             TrainPositionSpots beginTrain;
             TrainPositionSpots endTrain;
-
+            SafePosition.calcByOffset(NewOffset, Position);
 
             ArrayList<TrackEdgeSection> sectionList = new ArrayList<>();
             SpotLocationIntrinsic begin = new SpotLocationIntrinsic();

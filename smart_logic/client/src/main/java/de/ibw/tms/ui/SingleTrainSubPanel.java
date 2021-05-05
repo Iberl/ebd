@@ -302,7 +302,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                new GradientController().showGradientSettings();
+                //new GradientController().showGradientSettings();
             }
         });
     }
@@ -403,7 +403,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         LengthField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SubController.changeLength(LengthField.getText());
+                /*SubController.changeLength(LengthField.getText());*/
             }
         });
     }
@@ -414,7 +414,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         SpeedField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SubController.changeSpeed(SpeedField.getText());
+                //SubController.changeSpeed(SpeedField.getText());
             }
         });
 
@@ -428,7 +428,7 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         CategoryComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SubController.changeCategory((String) CategoryComboBox.getSelectedItem());
+               // SubController.changeCategory((String) CategoryComboBox.getSelectedItem());
             }
         });
     }
@@ -450,13 +450,14 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
         LabelField = new JTextField(Tm.label, 7);
         LabelField.setBackground(Tm.RepresentedColor);
         LabelField.setForeground(Color.WHITE);
-        LabelField.addActionListener(new ActionListener() {
+        LabelField.setEditable(false);
+        /* LabelField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 SubController.changeLabel(LabelField.getText());
             }
-        });
+        });*/
     }
 
     /**

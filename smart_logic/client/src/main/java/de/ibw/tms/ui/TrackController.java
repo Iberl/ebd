@@ -9,6 +9,7 @@ import de.ibw.tms.ma.repo.MaRepository;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.MaCreatingFrame;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
@@ -17,6 +18,7 @@ import de.ibw.tms.trackplan.ui.TrackPanel;
 import de.ibw.tms.trackplan.ui.TrackWindow;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
+import de.ibw.tms.ui.geometric.GeoEdgePainted;
 
 import javax.swing.*;
 import java.awt.*;
@@ -156,61 +158,6 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         this.DataModel = PlanData.getInstance();
         if(TrackPanel != null) {
             this.RoutePort = TrackPanel.getRoutePort();
-        }
-    }
-
-    /**
-     * Verwaltet Clicks auf der Zeichenebene.
-     * @param point {@link Point} Stelle an die geclickt wurde
-     * @param isMainWindow - wurde auf dem Hauptfenster geclickt.
-     */
-    public void handleMousePress(Point point, boolean isMainWindow) {
-        TranslationModel MapTranslation = TranslationModel.getInstance();
-        ZoomModel Zoom = TranslationModel.TrackplanEnvironment.CurrentEnvironment.Zoom;
-        Point TranslatedPoint = new Point();
-
-        TranslatedPoint.x = (int) (point.x / Zoom.getdZoomX()  - MapTranslation.getdMoveX());
-        TranslatedPoint.y = (int) (point.y / Zoom.getdZoomY() - MapTranslation.getdMoveY()) * -1;
-        ClickPoint = TranslatedPoint;
-        ArrayList panels = new ArrayList();
-        Iterator shapes= DataModel.getInteractable().iterator();
-        for (int i= 1; shapes.hasNext(); i++) {
-            Shape S = (Shape) shapes.next();
-            if(S.contains(TranslatedPoint)) {
-                if(S instanceof Iinteractable) {
-                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable)
-                            S, this.RoutePort, isMainWindow);
-                    panels.add(TrackUtilPanel);
-                }
-            }
-            if(S instanceof Line2D) {
-                Line2D LineRail = (Line2D) S;
-                if(LineRail.ptSegDist(TranslatedPoint) < Rail.dRailTolerance) {
-                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
-                    panels.add(TrackUtilPanel);
-                }
-            }
-
-
-
-
-        }
-        JFrame jFscopeFrame;
-        if(isMainWindow) {
-            jFscopeFrame = TmsJpaApp.TmsFramer.tmsFrame;
-        } else {
-            jFscopeFrame = MaCreatingFrame.CurrentMaCreatingFrame;
-        }
-        if(panels.size() > 0) {
-
-            SwingUtilities.invokeLater(new Runnable() {
-
-
-                @Override
-                public void run() {
-                    new TrackWindow(jFscopeFrame, panels, point);
-                }
-            });
         }
     }
 

@@ -1,9 +1,15 @@
 package de.ibw.tms.train.ui;
 
+import de.ibw.history.PositionData;
+import de.ibw.history.PositionModul;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.gradient.profile.controller.GradientController;
+import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.MaRequestWrapper;
+import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.ma.Route;
+import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.speed.profile.view.SpeedDialog;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.RouteController;
@@ -11,7 +17,7 @@ import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.util.EOA;
+import ebd.rbc_tms.util.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,10 +26,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Flow;
+
 /**
  * Das Panel unterhalb der Karte beim Erstellen einer MA
  *
@@ -349,6 +357,33 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 boolean bIsShunting = false;
                 UUID uuid = UUID.randomUUID();
                 Route R = SingleTrainSubPanel.this.TGP.getRouteModel();
+                CheckMovementPermission permissionToBeChecked = new CheckMovementPermission();
+                permissionToBeChecked.uuid = uuid;
+                int nid_lrbg = 0;
+                try {
+                    permissionToBeChecked.iTrainId = getIdFromTrainSelector();
+
+                } catch (InvalidParameterException IPE) {
+                    IPE.printStackTrace();
+                    JOptionPane.showMessageDialog(SingleTrainSubPanel.this.Parent,
+                            "Es wurde kein Zug ausgewählt");
+                    return;
+                }
+                PositionData PD = PositionModul.getInstance().getCurrentPosition(permissionToBeChecked.iTrainId);
+                if(PD == null) {
+                    handleUnknownPosition();
+                    return;
+                }
+                PositionInfo PI = PD.getPos();
+                if(PI == null) {
+                    handleUnknownPosition();
+                    return;
+                }
+                nid_lrbg = PI.nid_lrbg;
+
+
+                permissionToBeChecked.lPriority = 3L;
+                permissionToBeChecked.route = null; // ERROR Range the Train is going into last trackedge
                 try {
 
 
@@ -370,7 +405,28 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
                 bIsShunting = iShuntingMode == JOptionPane.YES_OPTION;
 
                 try {
+                    EOA.EndTimer Timer = new EOA.EndTimer(1023, 0);
 
+                    EOA.DangerPoint DP = new EOA.DangerPoint(0, 8);
+                    EOA eoa = new EOA(1, 1, 0, 1023, Timer,DP, null );
+                    GradientProfile.Gradient G = new GradientProfile.Gradient(0,true,0);
+                    ArrayList<GradientProfile.Gradient> gradients = new ArrayList<>();
+                    gradients.add(G);
+                    GradientProfile GP = new GradientProfile(1, 1, gradients);
+                    SpeedProfile.Section S = new SpeedProfile.Section(0,12, true);
+                    S.categories = new ArrayList<>();
+                    ArrayList<SpeedProfile.Section> sections = new ArrayList<>();
+                    sections.add(S);
+                    SpeedProfile SP = new SpeedProfile(1,1, sections);
+                    ModeProfile.Mode M = new ModeProfile.Mode(10050, 1, 0, 0, 32767, true);
+                    ArrayList<ModeProfile.Mode> modes = new ArrayList<>();
+                    modes.add(M);
+                    ModeProfile modeProfile = new ModeProfile(1,1, modes);
+                    MA ma = new MA(true, nid_lrbg, 1,1, eoa, GP, SP, modeProfile, null) ;
+                    RbcMaAdapter maForRBC = new RbcMaAdapter(ma);
+
+                    permissionToBeChecked.MaAdapter = maForRBC; //ERROR balise und speedprofile
+                    TmsMovementPermissionRequest request = new TmsMovementPermissionRequest("1", "1", permissionToBeChecked);
                     SubController.requestMovementAuthority(RequestWrapper, R, sRBC, MainTmsSim.S_TMS_ID, uuid, bIsShunting);
                     SingleTrainSubPanel.this.Parent.dispatchEvent(new WindowEvent(SingleTrainSubPanel.this.Parent, WindowEvent.WINDOW_CLOSING));
                 } catch (IOException ex) {
@@ -382,6 +438,18 @@ public class SingleTrainSubPanel extends JPanel implements Flow.Subscriber<Train
 
             }
         });
+    }
+
+    private void handleUnknownPosition() {
+        JOptionPane.showMessageDialog(SingleTrainSubPanel.this.Parent,
+                "Zugposition nicht abrufbar. Es kann keine Movement Permission gestellt werden.");
+    }
+
+    private int getIdFromTrainSelector() throws InvalidParameterException {
+        TrainModel TM = (TrainModel) this.TrainBox.getSelectedItem();
+        if(TM == null) throw new InvalidParameterException("No Trainmodel selected");
+        return TM.iTrainId;
+
     }
 
     private void genColorButton() {

@@ -106,8 +106,9 @@ public class TrainController extends SubmissionPublisher implements IController 
     public void changeTraincolor(Color RepresentedColor) {
         Color TrainColor = JColorChooser.showDialog(
                 this.TrainSubPanel, "Choose Train Color", RepresentedColor);
-        if(null == TrainColor || TrainModel.usedColorList.contains(TrainColor)) {
-            JOptionPane.showMessageDialog(null, "The traincolor was already chosen.");
+        if(null == TrainColor || TrainModel.similarTo(TrainColor)) {
+            JOptionPane.showMessageDialog(null, "The traincolor was already chosen or is it a" +
+                    " system color.");
         } else {
             this.Model.RepresentedColor = TrainColor;
         }

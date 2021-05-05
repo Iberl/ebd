@@ -11,7 +11,6 @@ import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
-import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.ma.physical.RailConnector;
@@ -22,12 +21,9 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
-import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
-import de.ibw.util.ThreadedRepo;
 import ebd.SlConfigHandler;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
@@ -44,7 +40,6 @@ import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
@@ -503,8 +498,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
     private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
         // Get TopEdge
-        ConcurrentHashMap edgeRepo = PlanData.topGraph.edgeRepo;
-        TopologyGraph.Edge edge = (TopologyGraph.Edge) edgeRepo.get(TopKanteId);
+        ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
+        TopologyGraph.Edge edge = edgeRepo.get(TopKanteId);
         distanceA1 = edge.dTopLength * distanceA1;
         distanceA2 = edge.dTopLength * distanceA2;
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
