@@ -186,6 +186,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         //this.TmsProxy = new SmartLogicTmsProxy(smartServer);
     }
 
+
+
     private void sendMessageToTMS(SmartServerMessage SmartMessage) {
         try {
             SmartLogic.outputQueue.put(SmartMessage);
@@ -231,6 +233,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         MovementAuthority smartLogicMa;
         SpotLocationIntrinsic EoaLocation = new SpotLocationIntrinsic();
+        EoaLocation.setNetElementRef(R.getLastEdge().getId());
         EoaLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
         T_EMA tEma = new T_EMA();
         tEma.setTime((short) MaAdapter.eoa.t_loa);
@@ -629,6 +632,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         O = new Overlap();
         SpotLocationIntrinsic svlLocation = new SpotLocationIntrinsic();
         svlLocation.setIntrinsicCoord(r.getIntrinsicCoordOfTargetTrackEdge());
+        svlLocation.setNetElementRef(r.getLastEdge().getId());
 
         svl = new SvL(svlLocation);
         svl.setVmax(ma.eoa.overlap.v_releaseol);

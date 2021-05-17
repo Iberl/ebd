@@ -52,6 +52,8 @@ class MovementPermissionRequestProvider extends Specification {
         permission.MaAdapter = adapter;
         permission.route = R;
 
+        R
+
         TmsMovementPermissionRequest request = new TmsMovementPermissionRequest("1", "1", permission)
         return request;
     }

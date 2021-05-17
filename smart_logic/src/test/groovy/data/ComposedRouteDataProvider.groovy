@@ -26,7 +26,11 @@ class ComposedRouteDataProvider extends Specification {
         nodeList.add(new TopologyGraph.Node(nodeName, nodeName, null));
     }
 
-
+    public void setStatic(Class<?> target, String fieldName, Object newValue) {
+        Field field = target.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(null, newValue);
+    }
 
     public  boolean set(Object object, String fieldName, Object fieldValue) {
         Class<?> clazz = object.getClass();

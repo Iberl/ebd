@@ -58,11 +58,11 @@ public class TrackArea extends LinearElement {
                     BigDecimal endPercent = new BigDecimal(dEnd);
                     if(startPercent.compareTo(new BigDecimal(0)) < 0 ||
                             startPercent.compareTo(new BigDecimal(1)) > 0) {
-                        throw new InvalidParameterException("Treck Edge Section begin-value have to be percentage.");
+                        throw new InvalidParameterException("Track Edge Section begin-value have to be percentage.");
                     }
                     if(endPercent.compareTo(new BigDecimal(0)) < 0 ||
                             endPercent.compareTo(new BigDecimal(1)) > 0) {
-                        throw new InvalidParameterException("Treck Edge Section end-value have to be percentage.");
+                        throw new InvalidParameterException("Track Edge Section end-value have to be percentage.");
                     }
                     BigDecimal usedFactor = endPercent.subtract(startPercent).abs();
                     result = result.add(dEdgeLength.abs().multiply(usedFactor));

@@ -9,7 +9,7 @@ class MaRequestReturnPayloadSpec extends Specification {
 
     def "json parse test"() {
         given:
-        def MUT = new MaRequestReturnPayload("test");
+        def MUT = new MaRequestReturnPayload();
 
         expect:
 

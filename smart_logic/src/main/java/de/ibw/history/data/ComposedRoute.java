@@ -7,6 +7,9 @@ import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
+import de.ibw.tms.ma.common.DefaultObject;
+import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.Waypoint;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
@@ -29,6 +32,7 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +49,7 @@ import java.util.*;
  * Routendatenverarbeitung innerhalb der smartLogic
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.0
- * @since 2021-03-31
+ * @since 2021-05-11
  */
 public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopological>> {
 
@@ -59,6 +63,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
     // Werden kann
     private SpotLocationIntrinsic lastSpot = null;
     private SpotLocationIntrinsic firstSpot = null;
+    private TopologyGraph.Edge firstSpotEdge = null;
     // Position of Train and Time of MA acceptance
     private PositionData startPosition = null;
 
@@ -70,10 +75,16 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
             PositionData CurrentPos = guard(R, iTrainId);
             MovableObject MO = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
 
+            VehicleOccupation VO = null;
+
             ThreadedRepo<TrackEdge, ArrayList<Occupation>> VehicleMap =
                     TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
-            VehicleOccupation VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
-            this.setStartPosition(CurrentPos, VO);
+            if(VehicleMap.getAll().size() != 0) {
+                VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
+                this.setStartPosition(CurrentPos, VO);
+            } else {
+                this.setStartPosition(CurrentPos, null);
+            }
 
 
             int iListCount = 0;
@@ -102,6 +113,21 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                 String sId  = idList.get(i);
 
                 TopologyGraph.Edge E =  PlanData.EdgeIdLookupRepo.getModel(sId);
+                if(E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG) || E.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) {
+                    TopologyGraph.Node NextNode = null;
+                    ArrayList<TopologyGraph.Edge> edgeCandidates = new ArrayList<>();
+                    TopologyGraph.Node LastNode = TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge);
+                    // geo opposite node
+                    NextNode = LastEdge.A.equals(LastNode) ? LastEdge.B : LastEdge.A;
+                    edgeCandidates.addAll(NextNode.outEdges);
+                    edgeCandidates.addAll(NextNode.inEdges);
+                    for(TopologyGraph.Edge eCandidate : edgeCandidates) {
+                        if(eCandidate.getRefId().equals(sId)) {
+                            E = eCandidate;
+                            break;
+                        }
+                    }
+                }
 
                 if(E == null){
                     System.err.println("Edge Element (ID: " + sId + ") cannot be Identified");
@@ -123,13 +149,18 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
             }
             if(PreviousEdge != null) {
-                if(!TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge).equals(LastEdge.getRefNode())) {
+                try {
+                    if (!TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge).equals(LastEdge.getRefNode())) {
+                        LastLocation.setIntrinsicCoord(1 - R.getIntrinsicCoordOfTargetTrackEdge());
+                    } else {
+                        LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+                    }
+                } catch(InvalidParameterException IPE) {
                     LastLocation.setIntrinsicCoord(1 - R.getIntrinsicCoordOfTargetTrackEdge());
-                } else {
-                    LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
                 }
             } else LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
-
+            if(LastEdge == null) throw new SmartLogicException("Route must consist of one edge at least");
+            LastLocation.setNetElementRef(LastEdge.getId());
             this.setLastSpot(LastLocation);
 
             if(firstSpot == null || firstSpot.getNetElementRef() == null || VO.getBegin() == null ||
@@ -192,7 +223,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
     public void setStartPosition(PositionData startPosition, VehicleOccupation VO) {
         this.startPosition = startPosition;
 
-            this.firstSpot = (SpotLocationIntrinsic) VO.getBegin().getLocation();
+            if(VO != null) this.firstSpot = (SpotLocationIntrinsic) VO.getBegin().getLocation();
 
 
 
@@ -555,7 +586,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         if(StartEdge == EndEdge) {
 
             BigDecimal routeFactor =
-                    BigDecimal.valueOf(1.0d - (this.lastSpot.getIntrinsicCoord() - this.firstSpot.getIntrinsicCoord()));
+                    BigDecimal.valueOf(1.0d).subtract(BigDecimal.valueOf(this.lastSpot.getIntrinsicCoord() - this.firstSpot.getIntrinsicCoord()).abs());
             return BigDecimal.valueOf(StartEdge.dTopLength).multiply(routeFactor).abs();
         } else {
 
@@ -757,7 +788,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
         // defines how many meters being iterater to find start edge
         BigDecimal d_Current = new BigDecimal(0);
-        BigDecimal d_MeterTillEndOfSubroute = new BigDecimal(0);
+
         ArrayList<TrackEdgeSection> sections = new ArrayList<>();
         TopologyGraph.Edge StartEdge = null;
         TopologyGraph.Edge PrevEdge = null;
@@ -853,9 +884,18 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                         }
                         if (!CurrentEdge.getRefNode().equals(PrevNode)) {
                             // Die Intrinsische Koordinate wird von NextNode aus gemessen. Das enspricht einer Reversed Zugfahrt.
-                            dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
-                            dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_Start,
-                                    CurrentEdge, sections.isEmpty(), false);
+                            if(d_Start.compareTo(d_Start_Meter) <= 0) {
+                                BigDecimal dEndMeterDiff = d_Start_Meter.subtract(d_Start);
+                                // bisherige hatten noch keine Kantenlaenge und unterleigen dStartMeter
+                                dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_End_Meter.subtract(dEndMeterDiff),
+                                        CurrentEdge, sections.isEmpty(), false);
+
+                            } else {
+                                dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_End_Meter.subtract(d_Start),
+                                        CurrentEdge, sections.isEmpty(), false);
+                            }
+                            dBeginPercent = getReversedStartIntrinsic(d_End_Meter,
+                                    d_Start, d_Current, CurrentEdge);
 
                         } else {
                             // Nominale Zugfahrt
@@ -868,7 +908,9 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                 }
                 SpotLocationIntrinsic beginLocation = new SpotLocationIntrinsic();
                 beginLocation.setIntrinsicCoord(dBeginPercent.doubleValue());
+                beginLocation.setNetElementRef(CurrentEdge.getId());
                 SpotLocationIntrinsic endLocation = new SpotLocationIntrinsic();
+                endLocation.setNetElementRef(CurrentEdge.getId());
                 endLocation.setIntrinsicCoord(dEndPercent.doubleValue());
                 TrackEdgeSection TES = new TrackEdgeSection();
                 TES.setTrackEdge(CurrentEdge);
@@ -891,7 +933,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
     @NotNull
     private BigDecimal getReversedStartIntrinsic(BigDecimal d_End_Meter, BigDecimal d_Start_Of_Track,
                                                  BigDecimal d_End_Of_Track, TopologyGraph.Edge currentEdge) {
-        if(d_End_Meter.compareTo(d_End_Of_Track) >= 0) {
+        if(d_End_Meter.compareTo(d_End_Of_Track) > 0) {
             // Ende ist nicht auf diesr Kante
             // return 0 % als Ende der Kante
             // das bedeutet seit dem Start, wird die Ganze Kante dem Subbereich angeordnet
@@ -901,20 +943,18 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
         TopologyGraph.Edge StartEdge = retrieveNextEdgeAfterGivenOne(null, false);
         if(StartEdge.equals(currentEdge)) {
-            BigDecimal edgeEnd = BigDecimal.valueOf(currentEdge.dTopLength)
-                    .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()))
-                    .subtract(d_End_Meter.subtract(d_Start_Of_Track));
-            dEndPercent = edgeEnd.divide(BigDecimal.valueOf(currentEdge.dTopLength),
-                    RoundingMode.HALF_UP);
+            return BigDecimal.valueOf(lastSpot.getIntrinsicCoord());
         } else {
-            BigDecimal dUnusedMetersAtStart = BigDecimal.valueOf(currentEdge.dTopLength)
-                    .multiply(BigDecimal.valueOf(1 - firstSpot.getIntrinsicCoord()));
+            BigDecimal dEdgeLength = BigDecimal.valueOf(currentEdge.dTopLength);
 
-            dEndPercent = d_End_Meter.divide(BigDecimal.valueOf(currentEdge.dTopLength));
+            if(dEdgeLength.compareTo(d_End_Meter) < 0) return BigDecimal.valueOf(0.0d);
+
+            return dEdgeLength.subtract(d_End_Meter).divide(dEdgeLength, MathContext.DECIMAL32);
+
         }
 
 
-        return BigDecimal.valueOf(1).subtract(dEndPercent);
+
     }
 
     @NotNull
@@ -923,10 +963,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                                boolean is_StartEdge) {
         BigDecimal startingSpot = new BigDecimal(1);
         BigDecimal dEndPercent;
-        if(!empty) {
-            // Bereich beginnt am Ende des Tracks
-            return new BigDecimal(1);
-        }
+
         if(is_StartEdge) {
             startingSpot = BigDecimal.valueOf(currentEdge.dTopLength)
                     .multiply(BigDecimal.valueOf(firstSpot.getIntrinsicCoord()));
@@ -939,22 +976,21 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
             startingSpot = BigDecimal.valueOf(currentEdge.dTopLength);
         }
 
+        if(startingSpot.compareTo(d_Start_Of_Track ) <= 0)  return new BigDecimal(1.0d);
 
-        BigDecimal edgesStart =
-                startingSpot.subtract(d_Start_Meter.subtract(d_Start_Of_Track));
-        dEndPercent = edgesStart.divide(BigDecimal.valueOf(currentEdge.dTopLength),
+        return startingSpot.subtract(d_Start_Of_Track).divide(BigDecimal.valueOf(currentEdge.dTopLength),
                 MathContext.DECIMAL32);
-        return dEndPercent;
+
     }
 
     @NotNull
     private BigDecimal getNominalEndIntrinsic(BigDecimal d_End_Meter, BigDecimal d_Start_Of_Track,
                                               BigDecimal d_End_Of_Track, TopologyGraph.Edge currentEdge) {
-        if(d_End_Meter.compareTo(d_End_Of_Track) >= 0) {
+        if(d_End_Meter.compareTo(d_End_Of_Track) > 0) {
             // Ende ist nicht auf diesr Kante
             // return 100 % als Ende der Kante
             // das bedeutet seit dem Start, wird die Ganze Kante dem Subbereich angeordnet
-            return new BigDecimal(1);
+            return BigDecimal.valueOf(1.0d);
         }
         BigDecimal dEndPercent;
         BigDecimal edgeEnd;
@@ -978,7 +1014,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                                TopologyGraph.Edge currentEdge, boolean empty,
                                                boolean is_StartEdge) {
         BigDecimal edgesStart = new BigDecimal(0);
-        if(!empty) return new BigDecimal(0);
+        if(!empty) return new BigDecimal(0.0d);
         if(!is_StartEdge) {
             edgesStart  = d_Start_Meter.subtract(d_Start_Of_Track);
         } else {
@@ -1024,10 +1060,12 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         BigDecimal RouteLength = this.getRouteLength();
 
         if(start_meter.compareTo(RouteLength) > 0)
-            throw new InvalidParameterException("Start distance in Meter must not larger than Route Length");
+            throw new InvalidParameterException("Start distance in Meter must not larger than Route Length: "
+                    + RouteLength);
 
         if(end_meter.compareTo(RouteLength) > 0)
-            throw new InvalidParameterException("End distance in Meter must not larger than Route Length");
+            throw new InvalidParameterException("End distance in Meter must not larger than Route Length: "
+                    + RouteLength);
 
 
 
@@ -1038,4 +1076,94 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
     }
 
 
+    public void mergeWithPrecedingReverseRoute(ComposedRoute reverseRoute) {
+        DefaultRepo<TrackEdge, Waypoint> dkwWaypointRepo = reverseRoute.dkwWaypointRepo;
+        DefaultRepo<Pair<String, String>, Waypoint> twoEdgeWaypoint = reverseRoute.waypointsBetweentTwoTrackEdges;
+        SpotLocationIntrinsic newFirstSpot = reverseRoute.lastSpot;
+
+        this.dRouteLength = null;
+        for(TrackEdge edgeDKW: dkwWaypointRepo.getKeys()) {
+            TopologyGraph.Edge e = (TopologyGraph.Edge) edgeDKW;
+            this.dkwWaypointRepo.update(e, dkwWaypointRepo.getModel(e));
+        }
+        for(Pair<String, String> edgesIdPair : twoEdgeWaypoint.getKeys()) {
+            waypointsBetweentTwoTrackEdges.update(edgesIdPair, twoEdgeWaypoint.getModel(edgesIdPair));
+        }
+        newFirstSpot.setIntrinsicCoord(1-newFirstSpot.getIntrinsicCoord());
+        this.firstSpot = newFirstSpot;
+        // index 0 left out it is already set
+        for(int i = reverseRoute.size() - 1 ; i != 0; i--) {
+            this.add(0, reverseRoute.get(i));
+        }
+    }
+
+    public void removeRouteNominalFromBegin(ComposedRoute nominalRouteToBegin) {
+        DefaultRepo<TrackEdge, Waypoint> dkwWaypointRepo = nominalRouteToBegin.dkwWaypointRepo;
+        DefaultRepo<Pair<String, String>, Waypoint> twoEdgeWaypoint = nominalRouteToBegin.waypointsBetweentTwoTrackEdges;
+        SpotLocationIntrinsic newFirstSpot = nominalRouteToBegin.lastSpot;
+
+        this.dRouteLength = null;
+        this.firstSpot = newFirstSpot;
+
+        Iterator<Pair<Route.TrackElementType, ITopological>> it = this.iterator();
+        while(it.hasNext()) {
+            Pair<Route.TrackElementType, ITopological> routePart = it.next();
+            if(!routePart.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
+                // route-part is no track edge
+                it.remove();
+            } else {
+                // Route Part is an edge
+                if (handldeEdgeNotInRouteRemoval(it, routePart)) break; // break wenn der Startpunkt
+                                                                        // der Route erreicht wird
+                                                                        // dann muessen keine elemente von der Balise
+                                                                        // aus mehr enfernt werden
+            }
+        }
+
+
+
+
+
+    }
+
+    private boolean handldeEdgeNotInRouteRemoval(Iterator<Pair<Route.TrackElementType, ITopological>> it,
+                                                 Pair<Route.TrackElementType, ITopological> routePart) {
+        TopologyGraph.Edge edgeScoped = (TopologyGraph.Edge) routePart.getRight();
+        String sNominalRefId = edgeScoped.getRefId();
+        if(this.firstSpotEdge == null) {
+            firstSpotEdge = (TopologyGraph.Edge) DefaultObject.topologyRepository.getModel(
+                    UUID.fromString(firstSpot.getNetElementRef())
+            );
+        }
+
+
+        if(firstSpotEdge.getRefId().equals(edgeScoped.getRefId())) {
+            if(firstSpot.getIntrinsicCoord().equals(1.0d)) {
+                removeEdge(it, edgeScoped, sNominalRefId);
+            }
+            return true;
+        } else {
+            removeEdge(it, edgeScoped, sNominalRefId);
+        }
+        return false;
+    }
+
+    private void removeEdge(Iterator<Pair<Route.TrackElementType, ITopological>> it, TopologyGraph.Edge edgeScoped, String sNominalRefId) {
+        int iRemovalCounter = 0;
+        this.dkwWaypointRepo.removeKey(edgeScoped);
+        for(Pair<String, String> edgeIdKeys : this.waypointsBetweentTwoTrackEdges.getKeys()) {
+            if(edgeIdKeys.getLeft().equals(sNominalRefId) ||
+                    edgeIdKeys.getRight().equals(sNominalRefId)) {
+                this.waypointsBetweentTwoTrackEdges.removeKey(edgeIdKeys);
+                iRemovalCounter++;
+                // jede kante wird mit der verlinkten nachfolge kante entfernt
+                // dabei kann die id reihenfolge vertauscht auch eingetragen werden
+                // die kante wird also zweimal entfernt
+                if(iRemovalCounter == 2) break;
+
+
+            }
+        }
+        it.remove();
+    }
 }

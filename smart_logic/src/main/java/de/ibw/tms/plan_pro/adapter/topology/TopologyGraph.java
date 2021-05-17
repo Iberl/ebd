@@ -591,7 +591,16 @@ public class TopologyGraph {
             }
 
 
+        public TopologyConnect getConnectionOnNode(Node N) throws InvalidParameterException {
+                if(this.A.equals(N)) {
+                    return this.TopConnectFromA;
+                } else if(this.B.equals(N)) {
+                    return this.TopConnectFromB;
+                } else {
+                    throw new InvalidParameterException("Given Node must be part of the Edge");
+                }
         }
+    }
 
         public static void main(String[] args) {
            /* Node seven = new Node("7", topNodeId);

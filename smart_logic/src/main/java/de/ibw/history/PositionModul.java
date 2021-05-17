@@ -20,7 +20,6 @@ import de.ibw.tms.ma.occupation.MAOccupation;
 import de.ibw.tms.ma.occupation.Occupation;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
-import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
@@ -47,8 +46,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2021-04-05
+ * @version 0.5
+ * @since 2021-05-10
  */
 public class PositionModul implements IPositionModul {
      public static String POSITION_MODUL = "POSITION-MODUL";
@@ -101,6 +100,10 @@ public class PositionModul implements IPositionModul {
         return instance;
     }
 
+    public static void setInstance(PositionModul instance) {
+        PositionModul.instance = instance;
+    }
+
     /**
      * Nimmt ein Positionsdatum auf und aktualisiert Occupations
      * @param PD - {@link PositionData}  - Postionsangabe die aufgenommen wird
@@ -110,8 +113,9 @@ public class PositionModul implements IPositionModul {
         BigDecimal trainLengthMeter = null;
         // Abstand vom ende der MA zur Zugspitze bei forwardfahrt
         BigDecimal dVehicleEndOffset = new BigDecimal(0);
-        MAOccupation MaSmalled = null;
+
         PositionInfo Position = PD.getPos();
+        savePositionReport(PD);
         if(Position.l_trainint != null) {
             trainLengthMeter = BigDecimal.valueOf(Position.l_trainint);
         } else {
@@ -126,50 +130,63 @@ public class PositionModul implements IPositionModul {
             PositionData StartPositionOnMa = Route.getStartPosition();
             PositionInfo MaPositionInfo = StartPositionOnMa.getPos();
             if(MaPositionInfo == null) throw new InvalidParameterException("MA is invalid");
-            BigDecimal diff = new BigDecimal(0);
             if(Position.nid_lrbg == MaPositionInfo.nid_lrbg) {
                 handleSameBaliseGroup(trainLengthMeter, dVehicleEndOffset, Position, Route, nid_engine, MaPositionInfo);
 
-
-
-
-
-
-
-                /*if(Position.q_dirtrain == MaPositionInfo.q_dirtrain) {
-                    diff = NewOffset.subtract(OldOffset);
-
-                } else {
-                    throw InvalidParameterException('')
-                }*/
             } else {
                 throw new InvalidParameterException("Referred Balise Change not supported");
             }
         } else {
-            // WORKAROUND StartEdge is completele vehicle occupated
+
             SafeMOBPosition SafePosition = new SafeMOBPosition();
 
-            int iMaQscale = Position.q_scale;
+
 
             int iNewPosExponent = getExponent(Position.q_scale);
             BigDecimal NewOffset =
                     new BigDecimal(Position.d_lrbg).multiply(new BigDecimal(10).pow(iNewPosExponent, MathContext.DECIMAL32));
-            TrainPositionSpots beginTrain;
-            TrainPositionSpots endTrain;
-            SafePosition.calcByOffset(NewOffset, Position);
 
-            ArrayList<TrackEdgeSection> sectionList = new ArrayList<>();
-            SpotLocationIntrinsic begin = new SpotLocationIntrinsic();
-            begin.setIntrinsicCoord(0.0d);
+            try {
+                Route = SafePosition.calcByOffset(nid_engine, NewOffset, Position, false);
 
-            SpotLocationIntrinsic end = new SpotLocationIntrinsic();
-            end.setIntrinsicCoord(1.0d);
-            VehicleOccupation VO = VehicleOccupation.generateVehicleOccupation(Position, nid_engine, SafePosition,
+                ETCS_DISTANCE distanceDiff = new ETCS_DISTANCE();
+                ETCS_DISTANCE distanceEndDif = new ETCS_DISTANCE();
+                distanceEndDif.sDistance = 0;
+                if(Route.getFirstSpot() == null) {
+                    try {
+                        dVehicleEndOffset = NewOffset.subtract(trainLengthMeter);
+                        if (dVehicleEndOffset.compareTo(BigDecimal.valueOf(0.0d)) < 0) {
+                            ComposedRoute referseRoute = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset.negate(),
+                                    Position, true);
+                            Route.mergeWithPrecedingReverseRoute(referseRoute);
+                        } else {
+                            ComposedRoute nominalRouteToBegin = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset,
+                                    Position, false);
+                            Route.removeRouteNominalFromBegin(nominalRouteToBegin);
+                        }
+
+
+                    } catch (SmartLogicException e) {
+                        e.printStackTrace();
+                        throw new InvalidParameterException(e.getMessage());
+                    }
+                }
+
+
+                int iScale = 1;
+
+                safeNewVehiclePosition(new BigDecimal(0), Route, nid_engine, SafePosition, distanceDiff, iScale);
+            } catch (SmartLogicException e) {
+                e.printStackTrace();
+            }
+
+
+            /*VehicleOccupation VO = VehicleOccupation.generateVehicleOccupation(Position, nid_engine, SafePosition,
                     sectionList, begin, end);
-            MAOccupation maOcc = new MAOccupation();
+            //MAOccupation maOcc = new MAOccupation();
 
             TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
-                    VehicleOccupation.class, VO);
+                    VehicleOccupation.class, VO);*/
 
 
         }
@@ -179,6 +196,10 @@ public class PositionModul implements IPositionModul {
         } catch (SmartLogicException e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void savePositionReport(PositionData PD) {
         PositionData NewestData = CurrentPositionsByNidId.getModel(PD.getNid_engine());
         log("Update occupation of MOB " + PD.getNid_engine());
         if(NewestData == null) {
@@ -200,6 +221,33 @@ public class PositionModul implements IPositionModul {
         positionModuls.add(PD);
     }
 
+    private void safeNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, NID_ENGINE nid_engine,
+                                        SafeMOBPosition NewPosition, ETCS_DISTANCE distanceDiff, int iScale) {
+        SpotLocationIntrinsic beginSpot = null;
+        SpotLocationIntrinsic endSpot = null;
+        try {
+            NewPosition.defineNewVehiclePosition(dVehicleEndOffset, Route, distanceDiff, iScale);
+            beginSpot = (SpotLocationIntrinsic) NewPosition.getBegin().getLocation();
+            endSpot = (SpotLocationIntrinsic) NewPosition.getEnd().getLocation();
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            throw new InvalidParameterException(e.getMessage());
+        }
+        PositionData CurrentPosition = this.getCurrentPosition(nid_engine.getId());
+        MOBPosition newMobPosition = new MOBPosition(NewPosition);
+        MovableObject train = MovableObject.ObjectRepo.getModel(nid_engine);
+        ETCS_DISTANCE NoEndOffset = new ETCS_DISTANCE();
+        NoEndOffset.sDistance = 0;
+        if(train == null) {
+            train = new MovableObject(nid_engine,newMobPosition);
+        } else  { train.setPosition(newMobPosition); }
+        VehicleOccupation occupationGenerated =
+                VehicleOccupation.generateVehicleOccupation(CurrentPosition.getPos(), nid_engine, NewPosition,
+                        (ArrayList<TrackEdgeSection>) NewPosition.getTrackEdgeSections(), beginSpot, endSpot);
+        NewPosition.setOccupation(occupationGenerated);
+        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
+                VehicleOccupation.class, occupationGenerated);
+    }
 
 
     private void handleSameBaliseGroup(BigDecimal trainLengthMeter, BigDecimal dVehicleEndOffset, PositionInfo Position, ComposedRoute Route, NID_ENGINE nid_engine, PositionInfo MaPositionInfo) {
@@ -216,6 +264,7 @@ public class PositionModul implements IPositionModul {
 
         diff = NewOffset.subtract(OldOffset).abs();
         ETCS_DISTANCE distanceDiff = new ETCS_DISTANCE();
+        distanceDiff.sDistance = 0;
         ETCS_DISTANCE distanceEndDif = new ETCS_DISTANCE();
         distanceEndDif.sDistance = 0;
         if(trainLengthMeter != null) {
@@ -234,23 +283,11 @@ public class PositionModul implements IPositionModul {
             distanceDiff.sDistance = diff.divide(BigDecimal.valueOf(10)).setScale(0, RoundingMode.HALF_DOWN).shortValueExact();
             iScale = 2;
         }
-        try {
-            NewPosition.defineNewVehiclePosition(dVehicleEndOffset, Route, distanceDiff, iScale);
-
-        } catch (SmartLogicException e) {
-            e.printStackTrace();
-            throw new InvalidParameterException(e.getMessage());
-        }
-        MOBPosition newMobPosition = new MOBPosition(NewPosition);
         MovableObject train = MovableObject.ObjectRepo.getModel(nid_engine);
         ETCS_DISTANCE NoEndOffset = new ETCS_DISTANCE();
         NoEndOffset.sDistance = 0;
-        if(train == null) throw new InvalidParameterException("Train is unknown");
-        train.setPosition(newMobPosition);
-        VehicleOccupation occupationGenerated = new VehicleOccupation();
-        NewPosition.setOccupation(occupationGenerated);
-        TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
-                VehicleOccupation.class, occupationGenerated);
+        safeNewVehiclePosition(dVehicleEndOffset, Route, nid_engine, NewPosition, distanceDiff, iScale);
+
 
         MaSmalled = new MAOccupation();
 

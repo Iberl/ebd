@@ -50,11 +50,11 @@ public class VehicleOccupation extends Occupation implements IMoveable {
                 .getWert());
         begin.setNetElementRef(E.getId());
         end.setNetElementRef(E.getId());
-        TrackEdgeSection TES = new TrackEdgeSection();
+        /*TrackEdgeSection TES = new TrackEdgeSection();
         TES.setTrackEdge(E);
         TES.setBegin(begin);
         TES.setEnd(end);
-        sectionList.add(TES);
+        sectionList.add(TES);*/
         beginTrain = new MinSafeRearEnd();
         beginTrain.setLocation(begin);
         endTrain = new MaxSafeFrontEnd();
@@ -153,7 +153,7 @@ public class VehicleOccupation extends Occupation implements IMoveable {
 
     }
 
-    public VehicleOccupation() {
+    private VehicleOccupation() {
         super(CLASS_IDENTIFIER);
     }
 
@@ -179,6 +179,7 @@ public class VehicleOccupation extends Occupation implements IMoveable {
         SpotLocationIntrinsic BeginLocation = new SpotLocationIntrinsic();
         SpotLocationIntrinsic EndLocation = new SpotLocationIntrinsic();
         BeginLocation.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, qScale1mStart, iStart));
+
         EndLocation.setIntrinsicCoord(UtilFunction.generateIntrinsic(e.dTopLength, qScale1mEnd, iEnd));
         MinSafeRearEnd TrainBeginSpot = new MinSafeRearEnd();
         MinSafeFrontEnd TrainEndSpot = new MinSafeFrontEnd();

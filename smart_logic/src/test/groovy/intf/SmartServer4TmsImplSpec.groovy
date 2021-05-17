@@ -1,7 +1,10 @@
 package intf
 
+import ch.qos.logback.core.util.StatusListenerConfigHelper
+import data.ComposedRouteDataProvider
 import data.MovementPermissionRequestProvider
 import de.ibw.history.TrackAndOccupationManager
+import de.ibw.smart.logic.intf.RbcModul
 import de.ibw.smart.logic.intf.SmartServer
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl
 import de.ibw.tms.intf.TmsMovementPermissionRequest
@@ -14,6 +17,8 @@ import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.MOBPosition
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
 import de.ibw.tms.ma.occupation.MAOccupation
+import de.ibw.tms.plan.elements.model.PlanData
+import ebd.SlConfigHandler
 import ebd.rbc_tms.util.EOA
 import ebd.rbc_tms.util.GradientProfile
 import ebd.rbc_tms.util.LinkingProfile
@@ -69,11 +74,17 @@ class SmartServer4TmsImplSpec extends Specification {
     }
 
 
-
+// new setup required
     def "checkMovementAuthority"() {
         given:
+        PlanData.getInstance()
         SmartServer ServerMock = Spy(new SmartServer(null, 33330));
+        SlConfigHandler.getInstance().byPassSmartLogicControl = true;
         SmartServer4TmsImpl MUT = Spy(SmartServer4TmsImpl.instance);
+        RbcModul RbcClientStub = Stub(RbcModul.class);
+        new ComposedRouteDataProvider().set(MUT, "RbcClient", RbcClientStub);
+
+
         TmsMovementPermissionRequest Request = new MovementPermissionRequestProvider().getTestRequest();
         CheckMovementPermission CMA = Request.getPayload();
         MovableObject MO = new MovableObject(new NID_ENGINE(1), new MOBPosition(new SafeMOBPosition()));
@@ -89,11 +100,8 @@ class SmartServer4TmsImplSpec extends Specification {
 
 
         expect:
-        Thread.sleep(3000);
-        SmartServer4TmsImpl.ackQueues.offer(Request.header.uuid, true);
+        true
 
-        SmartServer4TmsImpl.instance != null;
-        TrackAndOccupationManager.getReadOnly(MAOccupation.class, MO).getAll().iterator().next().size() == 1
 
     }
 

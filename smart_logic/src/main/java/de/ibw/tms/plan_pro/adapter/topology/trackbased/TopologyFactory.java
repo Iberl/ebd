@@ -37,6 +37,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Diese Klasse dient zur Erzeugung eines Topologieschen Graphen
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ *
+ * @version 1.0
+ * @since 2021-05-10
  */
 public class TopologyFactory implements ITopologyFactory {
 

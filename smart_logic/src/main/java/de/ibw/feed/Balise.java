@@ -102,7 +102,7 @@ public class Balise implements ICoord<Double> {
     }
 
     /**
-     * Get the distance from A-Node
+     * Distanz von Knoten A
      * @return BigDecimal - distance in Meter
      */
     public BigDecimal getBalisenPositionFromNodeA() {
@@ -116,15 +116,15 @@ public class Balise implements ICoord<Double> {
     /**
      * Gibt den angefragten Knoten der Balisengruppe wieder. Es wird der Knoten der in angegebenr Richtung angefragt
      * wiedergegeben.
-     * @param isNominalDirectionOfBg - true bedeutet es wird der Knoten wiedergegeben, der von von Balise 1 &uuml;ber
-     *                               Balise 2 durchfahren wird.
+     * @param q_dlrbg_IsNominal - true bedeutet es wird der Knoten wiedergegeben, der von von Balise 1 &uuml;ber
+     *                               Balise 2 an- oder durchfahren wird.
      *                               - false bedeutet es wird der Knoten wiedergegeben, der von Balise 2 &uumL;ber
-     *                               Balise 1 durchfahren wird.
+     *                               Balise 1 an- oder durchfahren wird.
      * @return Node - der Knoten, der der angegebenen Richtung entspricht.
      */
-    public TopologyGraph.Node getNodeInDirectionOfBaliseGroup(boolean isNominalDirectionOfBg ) {
+    public TopologyGraph.Node getNodeInDirectionOfBaliseGroup(boolean q_dlrbg_IsNominal ) {
         String sNodeId = null;
-        if(isDatapointNominal() == isNominalDirectionOfBg) {
+        if(isDatapointNominal() == q_dlrbg_IsNominal) {
             sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenB().getWert();
         } else {
             sNodeId = this.TopPositionOfDataPoint.getIDTOPKnotenA().getWert();

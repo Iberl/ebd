@@ -570,7 +570,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         return ref + "E";
     }
 
-    private static String getLinkNameToDKW(CrossingSwitch cs, List<CrossingSwitch> switchList) {
+    public static String getLinkNameToDKW(CrossingSwitch cs, List<CrossingSwitch> switchList) {
         String sResult = cs.getElement().getBezeichnung().getKennzahl().getWert() + "W";
         Integer iLowerNumber = null;
         int iSearchedNumber = -1;

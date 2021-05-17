@@ -11,6 +11,8 @@ import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.IWaypoint;
 import org.apache.commons.lang3.NotImplementedException;
@@ -66,6 +68,12 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
     }
 
 
+    public TopologyGraph.Edge getLastEdge() {
+        if(routeSectionIDs == null) return null;
+        String sid = routeSectionIDs.get(routeSectionIDs.size() -1);
+        if(sid == null) return null;
+        return PlanData.EdgeIdLookupRepo.getModel(sid);
+    }
 
 
     public List<RouteSection> getSections() {

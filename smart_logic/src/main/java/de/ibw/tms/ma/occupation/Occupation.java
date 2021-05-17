@@ -92,6 +92,7 @@ public class Occupation extends TrackArea {
 
 
     /**
+     * @Deprecated
      * Dieser Konstruktor instanziiiert eine Sperrzone auf einer Kante E von einem Startpunkt bis zu einem Endpunkt
      * @param E Edge beeing blocked
      * @param Start_Ma - Q_Scale Start
@@ -106,6 +107,14 @@ public class Occupation extends TrackArea {
 
     }
 
+    /**
+     * @Deprecated
+     * @param e
+     * @param start_Ma
+     * @param d_A_to_Block_Start
+     * @param end_Ma
+     * @param d_A_to_Block_End
+     */
     public void initOccupation(TopologyGraph.Edge e, BLOCK_Q_SCALE start_Ma, int d_A_to_Block_Start, BLOCK_Q_SCALE end_Ma, int d_A_to_Block_End) {
         this.setApplicationDirection(TApplicationDirection.BOTH);
         TrackEdgeSection EdgeSection = new TrackEdgeSection();

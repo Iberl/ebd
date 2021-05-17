@@ -222,8 +222,10 @@ public class MoveableTrackElement extends ControlledElement {
 
             SpotLocationIntrinsic BeginLoc = new SpotLocationIntrinsic();
             BeginLoc.setIntrinsicCoord(dStart);
+            BeginLoc.setNetElementRef(E.getId());
             SpotLocationIntrinsic EndLoc = new SpotLocationIntrinsic();
             EndLoc.setIntrinsicCoord(dEnd);
+            EndLoc.setNetElementRef(E.getId());
             TrackEdgeSection TES = new TrackEdgeSection();
             TES.setTrackEdge(E);
             TES.setBegin(BeginLoc);
