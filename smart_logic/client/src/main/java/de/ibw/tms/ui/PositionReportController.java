@@ -135,12 +135,14 @@ public class PositionReportController extends SubmissionPublisher implements ICo
             public void run() {
                 try {
                     TrainInfo TI = PositonReport.trainInfo;
+
                     PositionInfo posInf = PositonReport.positionInfo;
                     PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
                             TI, posInf);
                     PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
                     TmsJpaApp.TmsFramer.repaint();
                     getTrainModel(TI.nid_engine);
+                    logTrain(TI, posInf);
                 } catch(InvalidParameterException IPE) {
                     IPE.printStackTrace();
                     System.err.println("TMS is Shuting down");
@@ -150,6 +152,11 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         }.start();
 
 
+
+    }
+
+    private void logTrain(TrainInfo ti, PositionInfo posInf) {
+        System.out.println("Train " + ti.nid_engine + " has length: " + posInf.l_trainint);
 
     }
 
@@ -376,7 +383,7 @@ public class PositionReportController extends SubmissionPublisher implements ICo
     }
 
     @NotNull
-    private TrainModel getTrainModel(Integer iEngineId) {
+    private synchronized TrainModel getTrainModel(Integer iEngineId) {
         TrainModel Tm;
         Tm = TrainModel.TrainRepo.getModel(iEngineId);
 

@@ -314,7 +314,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 Collection<ArrayList<Occupation>> trainOccList =
                         TrackAndOccupationManager.getReadOnly(MAOccupation.class, Mo).getAll();
                 if (trainOccList.size() == 0)
-                    throw new InvalidParameterException("No Occupation for trainId: " + TM.iTrainId + " found");
+                    throw new InvalidParameterException("No Ma-Occupation for trainId: " + TM.iTrainId + " found");
                 paintOccupationList(g2d, BS, Color.GREEN, TM.iTrainId, trainOccList);
             } catch (Exception E) {
                 E.printStackTrace();

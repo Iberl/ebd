@@ -188,9 +188,11 @@ public class TrackAndOccupationManager {
     private static synchronized void storeOccupation(Class<?> OccupationType, Occupation O) {
         if(checkIfVehicleOccupation(OccupationType)) {
             VehicleStorageItem StoreItem = VehicleOccStorage.getModel(OccupationType);
-            if(StoreItem == null) StoreItem = new VehicleStorageItem();
+            if(StoreItem == null) {
+                StoreItem = new VehicleStorageItem();
+            }
             storeVehicleOccupation(OccupationType, StoreItem,  O);
-            VehicleOccStorage.update(OccupationType, StoreItem);
+
         } else {
             useMainStorage(OccupationType, O);
         }
@@ -271,31 +273,31 @@ public class TrackAndOccupationManager {
         if(MO == null) throw new InvalidParameterException("Vehicle Occupation must have a link to a movable Object");
         ThreadedRepo<TrackEdge, ArrayList<Occupation>> existingOcc = StoreItem.getModel(MO);
         if(existingOcc == null) {
-
-            storeVehicleOcc(VO,mainStorage);
-        } else {
-            handleExistingOcc(VO, mainStorage, existingOcc);
-
+            existingOcc = new ThreadedRepo<>();
         }
+        handleExistingOcc(VO, mainStorage, existingOcc, MO, StoreItem);
+
         Storage.update(occupationType, mainStorage);
-        StoreItem.update(MO, mainStorage);
+
+        VehicleOccStorage.update(occupationType, StoreItem);
     }
 
     private static void handleExistingOcc(Occupation VO, ThreadedRepo mainStorage, ThreadedRepo<TrackEdge,
-            ArrayList<Occupation>> existingOcc) {
+            ArrayList<Occupation>> existingOcc, MovableObject MO, VehicleStorageItem storeItem) {
         ArrayList<Occupation> deleteOccupations = new ArrayList<>();
         ArrayList<TrackEdge> deleteLocations = existingOcc.getKeys();
-        for( ArrayList<Occupation> occupations : existingOcc.getAll()) {
-            for(Occupation OccToDelete : occupations) {
+        for( ArrayList occupations : existingOcc.getAll()) {
+            for(Object OccToDelete : occupations) {
                 if(!deleteOccupations.contains(OccToDelete)) {
-                    deleteOccupations.add(OccToDelete);
+                    deleteOccupations.add((Occupation) OccToDelete);
                 }
             }
         }
-        storeVehicleOcc( VO, mainStorage);
         for(TrackEdge EdgeOfDeleteLocation : deleteLocations) {
             deleteOccupationOnEdge(mainStorage, deleteOccupations, EdgeOfDeleteLocation);
         }
+        storeVehicleOcc(VO, mainStorage, MO, storeItem);
+
     }
 
     private static void deleteOccupationOnEdge(ThreadedRepo mainStorage,
@@ -309,8 +311,10 @@ public class TrackAndOccupationManager {
         mainStorage.update(EdgeOfDeleteLocation, occList);
     }
 
-    private static void storeVehicleOcc(Occupation VO, ThreadedRepo mainStorage) {
+    private static void storeVehicleOcc(Occupation VO, ThreadedRepo mainStorage, MovableObject MO,
+                                        VehicleStorageItem storeItem) {
 
+        ThreadedRepo currentStorageForMo = new ThreadedRepo();
         ArrayList<TrackEdge> relatedEdges = new ArrayList<>();
 
         ArrayList<Occupation> vehicleOccupations = new ArrayList<>();
@@ -320,10 +324,17 @@ public class TrackAndOccupationManager {
             TrackEdge T = S.getTrackEdge();
             if(!relatedEdges.contains(T)) {
                 storeVehicleOccupation(VO, mainStorage, relatedEdges, T);
-
+                MovableObject AcutalMO = ((IMoveable) VO).getTargetMoveableObject();
+                if(MO.equals(AcutalMO)) {
+                    ArrayList<Occupation> occList = (ArrayList<Occupation>) currentStorageForMo.getModel(T);
+                    if(occList == null) occList = new ArrayList<>();
+                    occList.add(VO);
+                    currentStorageForMo.update(T,occList);
+                }
             }
 
         }
+        storeItem.update(MO, currentStorageForMo);
 
     }
 
