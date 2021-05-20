@@ -32,7 +32,9 @@ import java.util.UUID;
 
 /**
  * Client Handler
- * sendet Nachricht über Vaterklasse SmartClientHandler
+ * sendet Nachricht über Vaterklasse SmartClientHandler.
+ *
+ * Handler definieren das Verhalten bei Nachrichteingang oder wenn eine Nachricht gesendet werden sollen.
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
@@ -41,25 +43,40 @@ import java.util.UUID;
  */
 public class ClientHandler extends SmartClientHandler {
 
+    /**
+     * Ein Client zur Kommunikation mit dem Server innerhalb des smartLogic-Moduls
+     */
     SmartLogicClient Client = null;
 
-
+    /**
+     * Konstruktor dieses Client Handlers
+     * @param smartLogicClient - Modul das den Netzwerkverkehr vermittelt
+     */
     public ClientHandler(SmartLogicClient smartLogicClient) {
         Client = smartLogicClient;
     }
 
 
-
-
+    /**
+     * Verwaltet Logic solaange ein Kanal offen ist.
+     * @param channelHandlerContext - Netty-Context
+     * @throws Exception - kann eine Fehler werfen
+     */
     @Override
     public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
         super.channelActive(channelHandlerContext);
     }
 
+    /**
+     * Verwaltet Verhalten im Fehlerfall
+     * @param channelHandlerContext - Netty-Context
+     * @param cause - Fehler der auftrat
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause) {
         super.exceptionCaught(channelHandlerContext, cause);
     }
+
 
     private void handleMaResponse(MaRequestReturnPayload msgFromSL) throws InvalidParameterException {
         UUID maID = msgFromSL.getUuid();

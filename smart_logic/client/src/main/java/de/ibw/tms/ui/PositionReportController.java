@@ -139,6 +139,10 @@ public class PositionReportController extends SubmissionPublisher implements ICo
                     PositionInfo posInf = PositonReport.positionInfo;
                     PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
                             TI, posInf);
+                    System.out.println("Train " + TI.nid_engine + ": distance " + PD.getPos().d_lrbg + " to " +
+                            PD.getPos().nid_lrbg + "StartDir: " + PD.getPos().q_dlrbg
+
+                    );
                     PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
                     TmsJpaApp.TmsFramer.repaint();
                     getTrainModel(TI.nid_engine);

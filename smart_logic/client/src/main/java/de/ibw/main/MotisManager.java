@@ -18,7 +18,12 @@ import java.security.InvalidParameterException;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-
+/**
+ *  Verwaltet die Nachrichtengenerierung an den Motis-Web-Service
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-19
+ */
 public class MotisManager {
 
 
@@ -58,8 +63,11 @@ public class MotisManager {
     }
 
 
-
-
+    /**
+     * sendet die Dateien, die in den Ressourcen bereitgestellt wurden
+     * @throws IOException - kann Fehler werfen
+     * @throws URISyntaxException -kann Fehler werfen
+     */
     public static void sendMotisFiles() throws IOException, URISyntaxException {
 
 
@@ -71,6 +79,11 @@ public class MotisManager {
         sendSzenarioToMotis(scenarioID);
     }
 
+    /**
+     * sendet Dateien zu Motis fuer das angegebenen Szenario
+     * @param scenarioID - Name des zu verwendeten Szenarios - "Scenario_1" e.g.
+     * @throws IOException - wirft Fehler wenn zur scenarioId kein Dateipfad in den Ressourcen passt
+     */
     public static void sendSzenarioToMotis(String scenarioID) throws IOException {
 
         if(!SlConfigHandler.getInstance().sendMotisFiles) return;
@@ -117,6 +130,12 @@ public class MotisManager {
         }
     }
 
+    /**
+     * Test Methode unused
+     * @param args
+     * @throws IOException
+     * @throws URISyntaxException
+     */
     public static void main(String[] args) throws IOException, URISyntaxException {
         MotisManager M = new MotisManager();
         M.sendMotisFiles();

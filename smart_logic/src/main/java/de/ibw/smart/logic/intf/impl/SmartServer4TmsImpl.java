@@ -22,12 +22,14 @@ import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.Route;
+import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
 import ebd.rbc_tms.message.Message_21;
 import ebd.rbc_tms.payload.Payload_21;
 import ebd.rbc_tms.util.EOA;
 import ebd.rbc_tms.util.MA;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -508,7 +510,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 }
 
                 for (int i = 0; i < neededStatus.statusList.size(); i++) {
+
                     if(!neededStatus.statusList.get(i).equals(MTE.getCurrentStatus().statusList.get(i))) {
+                        printError(requestedTrackElementList.waypointsBetweentTwoTrackEdges, w);
+
+
                         throw new SmartLogicException(SmartServer4TmsImpl.MTE_HAS_NOT_REQUIERED_STATUS);
                     }
                 }
@@ -517,6 +523,19 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
+
+
+    }
+
+    private void printError(DefaultRepo<Pair<String, String>, Waypoint> waypointsBetweentTwoTrackEdges, Waypoint w) {
+
+        for(Pair<String, String> locationBetweenEdges : waypointsBetweentTwoTrackEdges.getKeys()) {
+            if(w.equals(waypointsBetweentTwoTrackEdges.getModel(locationBetweenEdges))) {
+                System.err.println("Switch Waypoint having wrong status at between: "
+                        + locationBetweenEdges.getLeft() + " and " + locationBetweenEdges.getRight());
+                break;
+            }
+        }
 
 
     }

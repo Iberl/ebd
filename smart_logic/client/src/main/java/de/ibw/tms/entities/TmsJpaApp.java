@@ -31,7 +31,9 @@ import java.io.IOException;
 /**
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.5
- * @since 2021-03-10
+ * @since 2021-05-19
+ *
+ * Hauptklasse des TMS
  */
 
 @SpringBootApplication
@@ -40,29 +42,58 @@ public class TmsJpaApp {
 
 	private static final Logger log = LoggerFactory.getLogger(TmsJpaApp.class);
 
+	/**
+	 * Configurationen aus dem SL-Config-Handler
+	 */
 	public static TmsConfig Config;
 
+	/**
+	 * Verwaltet die Nicht-Html-Oberflaeche des TMS
+	 */
 	public static TmsFramer TmsFramer = null;
 
+	/**
+	 * Verwaltet des Fenster fuer Movement-Authority Nachrichten an das smartLogic
+	 * Visualisiert Antworten der smartLogic
+	 */
 	public static TmsMessenger TmsMessenger = null;
 
+	/**
+	 * main-Entry-Point
+	 * @param args - unused
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(TmsJpaApp.class);
 	}
 
 
+	/**
+	 * Default Bean zum Erstellen der TMS-Konfiguration
+	 * @return TmsConfig - Default Konfigurations-Modul
+	 */
 	@Bean
 	public TmsConfig getTmsConfig() {
 		return new TmsConfig();
 	}
 
+	/**
+	 * Erstellt eine Senderoutine fuer den Motis-Fahrplan-Service
+	 * @return MotisProducer - Standard Sende-Modul fuer Motis
+	 */
 	@Bean
 	public MotisProducer getMotisProducer() {
 		return new MotisProducer();
 	}
 
 
-
+	/**
+	 * Hauptprogramm des TMS, das neben der UI laeuft
+	 * @param repository - Szenario, das zeitgesteuert abgearbeitet wird, es wird damit auf die TMS-Datenbank
+	 *                   zugegriffen
+	 * @param M - Senderouting an Motis
+	 * @param C - Default TMS Konfiguration
+	 * @return CommandLineRunner - Konsolenanwendung starten
+	 */
 	@Bean
 	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C) {
 		return (args) -> {
@@ -98,6 +129,10 @@ public class TmsJpaApp {
 
 	}
 
+	/**
+	 * unused
+	 * @param P
+	 */
 	public void printPermission(CheckMovementPermissionDAO P) {
 		log.info("P: " + P.getId());
 		log.info(P.CommandType);
@@ -112,6 +147,9 @@ public class TmsJpaApp {
 	}
 
 
+	/**
+	 * Modul, das eine Rest-Webservice zur TMS Verwaltung startet
+	 */
 	@RestController
 	@EnableAutoConfiguration
 	@Order(value=4)
@@ -130,6 +168,11 @@ public class TmsJpaApp {
 
 		}
 	*/
+
+		/**
+		 * Rest-Web-Service, Hauptpfad
+		 * @return
+		 */
 		@GetMapping(path = "/")
 		public String home() { // <== changed return type, added parameter
 
@@ -151,14 +194,24 @@ public class TmsJpaApp {
 
 	}
 
+	/**
+	 * Oberflaeche des TMS (Swing-basiert)
+	 */
 	@Component
 	@Order(value=2)
 	public class TmsFramer implements CommandLineRunner {
 
 
-
+		/**
+		 * Hauptfenster des TMS
+		 */
 		public JFrame tmsFrame = null;
 
+		/**
+		 * Bereitstellen der Oberflaeche zum spaeteren oeffnen.
+		 * @param args - unused
+		 * @throws Exception - kann eine Fehler werfen (noch nicht aufgetreten)
+		 */
 		@Override
 		public void run(String... args) throws Exception {
 			TmsJpaApp.TmsFramer = this;
@@ -171,6 +224,9 @@ public class TmsJpaApp {
 //			});
 		}
 
+		/**
+		 * Zeichnet Hauptfenster neu
+		 */
 		public void repaint() {
 			if(tmsFrame != null) {
 				tmsFrame.repaint();
@@ -180,16 +236,20 @@ public class TmsJpaApp {
 
 
 
-	}@Component
+	}
+
+	/**
+	 * Nachrichtenverwaltung TMS - smartLogic
+	 */
+	@Component
 	@Order(value=3)
 	public class TmsMessenger implements CommandLineRunner {
 
 
-
-		public MovmentMessengerFrame messageFrame = null;
-
-
-
+		/**
+		 * loggt eine Nachricht in den Messenger ein
+		 * @param msg - Nachricht die eingeloggt werden soll
+		 */
 		public void log(IMovementMessengerIntf msg) {
 
 				SwingUtilities.invokeLater(() -> {
@@ -206,6 +266,11 @@ public class TmsJpaApp {
 			MovmentMessengerFrame.getInstance().repaint();
 		}
 
+		/**
+		 * Bereitet Messenger Window fuer spaeteren Abruf vor
+		 * @param args - unused
+		 * @throws Exception - kann Fehler werfen (nicht aufgetreten)
+		 */
 		@Override
 		public void run(String... args) throws Exception {
 			TmsJpaApp.TmsMessenger = this;

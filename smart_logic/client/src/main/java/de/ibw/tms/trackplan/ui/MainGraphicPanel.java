@@ -184,7 +184,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             d2 = end.getIntrinsicCoord();
             if(d1 == null) d1 = 0d;
             if(d2 == null) d2 = 1.0d;
-            isFromA = E.getRefNode() == E.A;
+            //isFromA = E.getRefNode() == E.A;
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
             paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
                     BS);
@@ -563,12 +563,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
-                //nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
+                nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
             }
 
             // Last node
             if(prevDistance + geoEdgeLength > distanceA2) {
-                //nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
+                nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
             // Draw Line

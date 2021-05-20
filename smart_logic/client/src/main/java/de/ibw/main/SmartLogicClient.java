@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
 /**
- * Client(TMS) zur SmartLogic
+ * Client(TMS) zur smartLogic
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
@@ -30,11 +30,18 @@ public class SmartLogicClient extends SmartClient {
 
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
+
+    /**
+     * Motis Anbindung
+     */
     public static MotisProducer MotisProducer;
+
 
     private TmsScheduler RequestScheduler;
 
-
+    /**
+     * Verwaltet Kommunikation vom TMS mit der smartLogic
+     */
     public ClientHandler CH = null;
 
     private TimeTaskRepository timeTaskRepository;
@@ -42,7 +49,10 @@ public class SmartLogicClient extends SmartClient {
     private String sTmsId = "1";
     private String sRbcId = "1";
 
-
+    /**
+     * starte Scheduler zum senden der Tms-Befehle in der Datenbank
+     * @throws MissingInformationException - kann Fehler werfen
+     */
     public void startScheduler() throws MissingInformationException {
 
         this.RequestScheduler.start();
@@ -50,7 +60,7 @@ public class SmartLogicClient extends SmartClient {
 
 
     /**
-     * Dieser Konstruktor erstellt den Client.
+     * Dieser Konstruktor erstellt den Client. unused
      *
      * @param sHost - Host-ip der SmartLogic.
      * @param iPort - Port des SmartLogic-Host
@@ -62,6 +72,7 @@ public class SmartLogicClient extends SmartClient {
     /**
      * Dieser Konstruktor erstellt den Client.
      *
+     * @param timeTaskRepository
      * @param sHost - Host-ip der SmartLogic.
      * @param iPort - Port des SmartLogic-Host
      */
@@ -120,7 +131,11 @@ public class SmartLogicClient extends SmartClient {
 
     private static final Gson gson = new Gson();
 
-
+    /**
+     * Pruefmethode ob ein Json-String Valide ist
+     * @param jsonInString - String der zu pruefen ist
+     * @return boolean - true wenn der String valide ist.
+     */
     public static boolean isJSONValid(String jsonInString) {
         try {
             gson.fromJson(jsonInString, Object.class);
@@ -133,9 +148,11 @@ public class SmartLogicClient extends SmartClient {
     private static SmartLogicClient SlClient = null;
 
 
-
-
-
+    /**
+     * uebernimmt buisness logic und Steuereingaben in der Konsole.
+     * Sobald start eingegeben wurde, wird die TMS-Datenbank eingelesen und die Verbindung zur smartLogic aufgebaut.
+     * @param repository - verwaltet TMS Datenbank-Anbindung
+     */
     public static void proceedTmsLogic(TimeTaskRepository repository) {
 
 

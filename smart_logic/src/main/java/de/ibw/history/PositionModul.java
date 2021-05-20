@@ -419,7 +419,7 @@ public class PositionModul implements IPositionModul {
                                             BigDecimal(E.dTopLength).subtract(B.getBalisenPositionFromNodeA());
 
                                     while(StartDistance.compareTo(CurrentDistance) >= 0) {
-                                        tempDistance = new BigDecimal(CurrentDistance.doubleValue());
+                                        tempDistance = BigDecimal.valueOf(CurrentDistance.doubleValue());
 
                                         Pair<Route.TrackElementType, ITopological> Element = it.next();
                                         if(Element.getKey().equals(Route.TrackElementType.RAIL_TYPE)) {
