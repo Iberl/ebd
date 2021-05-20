@@ -50,7 +50,7 @@ public class SmartLogicClient extends SmartClient {
     private String sRbcId = "1";
 
     /**
-     * starte Scheduler zum senden der Tms-Befehle in der Datenbank
+     * startet Scheduler zum senden der Tms-Befehle in der Datenbank
      * @throws MissingInformationException - kann Fehler werfen
      */
     public void startScheduler() throws MissingInformationException {

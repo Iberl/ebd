@@ -27,6 +27,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
 /**
+ * Der TMS-Scheduler verwaltet die Szenario-Nachrichten, die an die smartLogic nach einen relativ zum Szenario-Start
+ * bezogennen Zeitpunkt in Sekunden die Nachrichten schickt.
+ *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
  * @since 03.12.2020
@@ -35,6 +38,9 @@ public class TmsScheduler {
 
     private static long lTaskCounter = 1L;
 
+    /**
+     * ein flag das anzeigt, ob der TMS-Scheduler bereits aktiv gestartet wurde
+     */
     public static boolean started = false;
 
     private TimeTaskRepository TaskRepo;
@@ -50,9 +56,11 @@ public class TmsScheduler {
     private String sRbcId;
 
 
-
-
-
+    /**
+     * Schon im Konstruktor des TMS-Schedulers wird die Datenbank nach Befehlen gelesen und vorbereitet.
+     * @param smartLogicClient - ein Client der Nachrichten an die smartLogic senden kann
+     * @param timeTaskRepository - ein Repository das die Nachrichten der Datenbank haelt
+     */
     public TmsScheduler(SmartLogicClient smartLogicClient, TimeTaskRepository timeTaskRepository)
                          {
         this.sTmsId = smartLogicClient.getsTmsId();
@@ -68,11 +76,22 @@ public class TmsScheduler {
             }
         }
     }
+
+    /**
+     * Entfernt eine Nachricht (nach senden) aus dem Scheduler.
+     * Das unterbindet mehrmaliges senden der gleichen Nachricht
+     * @param taskId - id der Nachricht
+     */
     public void cancelTask(long taskId) {
         boolean mayInterruptIfRunning = true;
         ScheduledFuture sf = futureTasks.getModel(taskId);
         sf.cancel(mayInterruptIfRunning);
     }
+
+    /**
+     * Startet den Scheduler
+     * @throws MissingInformationException -- wenn uebergebene Parameter invalid sind
+     */
     public void start() throws MissingInformationException {
             if(started) return;
             started = true;
@@ -101,14 +120,7 @@ public class TmsScheduler {
 
     private void scheduleMessage(Date dScheduledDate, TmsMessage Tmp) throws MissingInformationException {
         ScheduledFuture sf = null;
-        try {
-            sf = scheduler.schedule(new PermissionRunnable(this, Client, Tmp, lTaskCounter), dScheduledDate);
-        } catch (MissingInformationException e) {
-            e.printStackTrace();
-            futureTasks.update(lTaskCounter, sf);
-            lTaskCounter++;
-            throw new MissingInformationException(e.getMessage());
-        }
+        sf = scheduler.schedule(new PermissionRunnable(this, Client, Tmp, lTaskCounter), dScheduledDate);
         futureTasks.update(lTaskCounter, sf);
         lTaskCounter++;
     }

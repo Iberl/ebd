@@ -22,13 +22,13 @@ public class PermissionRunnable implements Runnable {
      * Der Befehl wird beim Erstellen Komponenten zugeteilt, um den Befehl als gesendet zu kennzeichnen und ihn seden
      * zu koennen
      * @param tmsScheduler - wird benutzt um einen Befehl als bereits gesendet markieren zu koennen
-     * @param client -
-     * @param T
-     * @param lTaskCounter
-     * @throws MissingInformationException
+     * @param client - Netzwerk Cleint zur Verbindung zur smartLogic
+     * @param T - Nachricht, die an die smartLogic gesendet werden soll
+     * @param lTaskCounter - Zeitoffset in sekunden. Gibt an nach wieviel Sekunden nach Szenariostart die Nachricht
+     *                     gesendet werden soll
      */
     public PermissionRunnable(TmsScheduler tmsScheduler, SmartLogicClient client, TmsMessage T,
-                              long lTaskCounter) throws MissingInformationException {
+                              long lTaskCounter) {
         this.scheduler = tmsScheduler;
         this.client = client;
         this.requestMessage = T;
@@ -36,7 +36,9 @@ public class PermissionRunnable implements Runnable {
     }
 
 
-
+    /**
+     * sendet Befehl und loggt Nachricht in das MA Messenger-Fenster des TMS
+     */
     @Override
     public void run() {
 

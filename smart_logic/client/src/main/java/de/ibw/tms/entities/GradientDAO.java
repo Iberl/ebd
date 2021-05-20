@@ -5,6 +5,10 @@ import com.google.gson.annotations.Expose;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+/**
+ * Bestandteil des Neigungsprofil in der Datenbank der Strecke, die der Zug anfahren soll.
+ * Der Gradient ist eine Neigung des Profils
+ */
 @Entity(name = "Gradient")
 public class GradientDAO {
 
@@ -19,10 +23,23 @@ public class GradientDAO {
     public String getId() {
         return id;
     }
+
+    /**
+     * Inkrimentale !!!!!!! Distanz vom Start des gesamten Profilbandes zur naechsten Abweichung von diesem Gradienten
+     */
     public int d_gradient;
 
+    /**
+     * Gibt an ob der Gradient abwaerts oder aufwaerts verlaeuft
+     * false := abwaerts
+     * true := aufwaerts
+     */
     public boolean q_gdir;
 
+    /**
+     * Gradient in permil (Prozent / 10 =: Promille)
+     * 125 / 1000 = 12,5 % oder 125 Promil
+     */
     public int g_a;
 
 

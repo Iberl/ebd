@@ -34,8 +34,6 @@ import static ebd.messageLibrary.util.ETCSVariables.*;
 /**
  * Diese Komponente implementiert, was das TMS bei eingehenden PositionReports unternimmt.
  *
- *
- *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 0.4
  * @since 2020-08-25

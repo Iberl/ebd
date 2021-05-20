@@ -8,9 +8,21 @@ import de.ibw.tms.trackplan.ui.Route;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Ein Konverter - er setzt den Datenbank-Movement-Permission-Request-Befehl in eine Klasse um,
+ * die ueber das Netzwerk and die smartLogic
+ * geschickt werden kann
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 1.0
+ * @since 2021-05-20
+ */
 public class CheckPermissionConverter {
-
+    /**
+     * konvertiert das Datenbankobjekt eines Movement-Permission-Requests
+     * @param CMP_DB - Datenbankobject des Movement-Permission-Requests
+     * @return allgemeines Object des Movement-Permission-Requests
+     */
     public static CheckMovementPermission convert(CheckMovementPermissionDAO CMP_DB) {
         CheckMovementPermission result = new CheckMovementPermission();
         Route R = convertRoute(CMP_DB.route);

@@ -8,6 +8,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import javax.persistence.*;
 import java.util.List;
 
+
 @Entity(name = "GradientProfile")
 public class GradientProfileDAO {
     @Id
