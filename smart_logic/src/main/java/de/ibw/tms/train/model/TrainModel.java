@@ -3,6 +3,7 @@ package de.ibw.tms.train.model;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
+import de.ibw.tms.train.model.intf.ITrainColorIntf;
 import de.ibw.util.ThreadedRepo;
 
 import java.awt.*;
@@ -14,8 +15,8 @@ import java.util.Random;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2020-08-12
+ * @version 1.0
+ * @since 2020-05-21
  */
 public class TrainModel {
 
@@ -33,6 +34,8 @@ public class TrainModel {
      */
     public static ArrayList<String> usedLabelList = new ArrayList<String>();
 
+
+    public static ITrainColorIntf TrainColorManager = null;
 
 
     public static synchronized boolean similarTo(Color c){

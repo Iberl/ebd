@@ -34,6 +34,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
 import javax.security.auth.callback.TextInputCallback;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
@@ -505,12 +506,23 @@ public class PositionReportController extends SubmissionPublisher implements ICo
         Tm = TrainModel.getDefaultModel();
         Tm.label = String.valueOf(iEngineId);
         Tm.iTrainId = iEngineId;
+        if(TmsJpaApp.colorsOfEtcsTrains != null) {
+            try {
+
+                Color etcsColor = TmsJpaApp.colorsOfEtcsTrains.getColorForEtcsString(String.valueOf(iEngineId));
+                Tm.RepresentedColor = etcsColor;
+            } catch (InvalidParameterException IPE) {
+                IPE.printStackTrace();
+            }
+
+        }
         Tm.category = "Freight";
         //Package Train Data
         Tm.iSpeedMax = 200;
         Tm.length = 100;
         return Tm;
     }
+
 
     /**
      * Dieser Controller sendet Nachricht an alle Komponenten des TMS, die sich eingeschrieben haben,

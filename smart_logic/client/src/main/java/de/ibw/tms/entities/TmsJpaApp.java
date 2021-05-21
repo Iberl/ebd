@@ -3,6 +3,7 @@ package de.ibw.tms.entities;
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
+import de.ibw.tms.ColorProperties;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.MovementMessengerIntf;
 import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
@@ -14,10 +15,14 @@ import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -38,6 +43,7 @@ import java.io.IOException;
 
 @SpringBootApplication
 @EnableJpaRepositories()
+@EnableConfigurationProperties(ColorProperties.class)
 public class TmsJpaApp {
 
 	private static final Logger log = LoggerFactory.getLogger(TmsJpaApp.class);
@@ -57,6 +63,11 @@ public class TmsJpaApp {
 	 * Visualisiert Antworten der smartLogic
 	 */
 	public static TmsMessenger TmsMessenger = null;
+
+	/**
+	 * Colors of EtcsTrain
+	 */
+	public static ColorProperties colorsOfEtcsTrains = null;
 
 	/**
 	 * main-Entry-Point
@@ -95,10 +106,14 @@ public class TmsJpaApp {
 	 * @return CommandLineRunner - Konsolenanwendung starten
 	 */
 	@Bean
-	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C) {
+	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C,
+									   ColorProperties CP) {
 		return (args) -> {
 
+
 			log.info("Starting TMS version" + UtilFunction.showVersionString());
+
+			TmsJpaApp.colorsOfEtcsTrains = CP;
 
 			TmsJpaApp.Config = C;
 			SmartLogicClient.MotisProducer = M;
