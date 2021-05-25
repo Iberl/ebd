@@ -1035,7 +1035,10 @@ public class SafetyLogic {
 
         DriveProtectionSection protectionSection = MteToCheck.getProtectionSection();
         if(protectionSection == null) {
-            throw new InvalidParameterException("PortectionSection of Switch must be defined, but it is null");
+            EBM.log("Element " + cdc.sId + " : Section having not protection Section so the request is denied",
+                    SmartLogic.getsModuleId(SMART_SAFETY));
+            sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
+            throw new InvalidParameterException("Protection Section of Switch must be defined, but it is null");
         }
         boolean isCollision = true;
         try {

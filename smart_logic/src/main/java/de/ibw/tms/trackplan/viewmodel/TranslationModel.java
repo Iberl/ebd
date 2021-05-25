@@ -30,7 +30,7 @@ public class TranslationModel {
 
 
         public static TrackplanEnvironment KaefWilhelmstalEnv =
-                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/CR_Szenario1.ppxml");
+                new TrackplanEnvironment(EBD, new ZoomModel(), "customised/GB_Szenario1.ppxml");
 
 
         private static TrackplanEnvironment EBDEnv = KaefWilhelmstalEnv;

@@ -33,7 +33,7 @@
                                                   </Datum_Regelwerk>
                                               </Basis_Objekt_Allg>
                                               <ID_Datenpunkt>
-                                                  <Wert>F0CE56CB-6B87-49A1-9aB0-3AD7D0DF2344</Wert>
+                                                  <Wert>C0DD4341-1ADE-413C-BD0B-DD7C2348DADE</Wert>
                                               </ID_Datenpunkt>
                                               <Balise_Allg>
                                                   <Anordnung_im_DP>
@@ -43,7 +43,7 @@
                                           </Balise>
                                           <Datenpunkt>
                                           <Identitaet>
-                                              <Wert>F0CE56CB-6B87-49A1-9aB0-3AD7D0DF2344</Wert>
+                                              <Wert>C0DD4341-1ADE-413C-BD0B-DD7C2348DADE</Wert>
                                           </Identitaet>
                                           <Basis_Objekt_Allg>
                                               <Datum_Regelwerk>
@@ -119,7 +119,7 @@
                                         </Datum_Regelwerk>
                                     </Basis_Objekt_Allg>
                                     <ID_Datenpunkt>
-                                        <Wert>C0DD4341-1ADE-413C-BD0B-DD7C2348DADE</Wert>
+                                        <Wert>F0CE56CB-6B87-49A1-9aB0-3AD7D0DF2344</Wert>
                                     </ID_Datenpunkt>
                                     <Balise_Allg>
                                         <Anordnung_im_DP>
@@ -129,7 +129,7 @@
                                 </Balise>
                                 <Datenpunkt>
                                 <Identitaet>
-                                    <Wert>C0DD4341-1ADE-413C-BD0B-DD7C2348DADE</Wert>
+                                    <Wert>F0CE56CB-6B87-49A1-9aB0-3AD7D0DF2344</Wert>
                                 </Identitaet>
                                 <Basis_Objekt_Allg>
                                     <Datum_Regelwerk>

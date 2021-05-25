@@ -226,6 +226,7 @@ public class PositionModul implements IPositionModul {
         SpotLocationIntrinsic beginSpot = null;
         SpotLocationIntrinsic endSpot = null;
         try {
+            System.out.println("Vehicle End Offset " + dVehicleEndOffset);
             NewPosition.defineNewVehiclePosition(dVehicleEndOffset, Route, distanceDiff, iScale);
             beginSpot = (SpotLocationIntrinsic) NewPosition.getBegin().getLocation();
             endSpot = (SpotLocationIntrinsic) NewPosition.getEnd().getLocation();

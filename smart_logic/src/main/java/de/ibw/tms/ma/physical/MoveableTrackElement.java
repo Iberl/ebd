@@ -157,6 +157,7 @@ public class MoveableTrackElement extends ControlledElement {
             }
 
         }
+
         protectEdge(protectedSections, edges, CS, Sig);
         DS.setTrackEdgeSections(protectedSections);
         DS.setApplicationDirection(TApplicationDirection.BOTH);
@@ -188,6 +189,7 @@ public class MoveableTrackElement extends ControlledElement {
 
     private void protectEdge(ArrayList<TrackEdgeSection> protectedSections, ArrayList<TopologyGraph.Edge> edges, CrossingSwitch CS, CSignal Sig) {
         for(TopologyGraph.Edge E : edges) {
+            System.out.println("Protect Edge: " + E.getRefId());
             if (E == null) continue;
             double dStart = 0.0d;
             double dEnd = 1.0d;
@@ -202,16 +204,27 @@ public class MoveableTrackElement extends ControlledElement {
                     }
                     for(TopologyGraph.Node N : NiToProtect) {
 
-                        if(E.A.equals(N)) {
+                        if(E.A.equals(N) ) {
                             dEnd = insecureAreaRelativeToEdge.divide(new BigDecimal(E.dTopLength), 14, RoundingMode.HALF_UP)
                                     .doubleValue();
+                            if(!E.A.equals(E.getRefNode())) {
+                                dStart = 1 - dEnd;
+                                dEnd = 1.0d;
+                            }
                             break;
                         } else if(E.B.equals(N)) {
                             BigDecimal TotalEdgeLength =  new BigDecimal(E.dTopLength);
-                            dStart = TotalEdgeLength.subtract(insecureAreaRelativeToEdge)
-                                    .divide(TotalEdgeLength, 14, RoundingMode.HALF_DOWN).doubleValue();
 
+                            dStart = insecureAreaRelativeToEdge
+                                    .divide(TotalEdgeLength, 14, RoundingMode.HALF_DOWN).doubleValue();
+                            dEnd = 1.0d;
+                            if(!E.A.equals(E.getRefNode())) {
+                               dEnd = 1 - dStart;
+                               dStart = 0.0d;
+                            }
+                            break;
                         }
+
                     }
                 } catch(SmartLogicException Ex) {
                     Ex.printStackTrace();
