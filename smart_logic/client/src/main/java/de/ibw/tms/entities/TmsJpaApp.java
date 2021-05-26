@@ -35,8 +35,8 @@ import java.io.IOException;
 
 /**
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.5
- * @since 2021-05-19
+ * @version 1.0
+ * @since 2021-05-26
  *
  * Hauptklasse des TMS
  */
@@ -101,7 +101,7 @@ public class TmsJpaApp {
 	 * Hauptprogramm des TMS, das neben der UI laeuft
 	 * @param repository - Szenario, das zeitgesteuert abgearbeitet wird, es wird damit auf die TMS-Datenbank
 	 *                   zugegriffen
-	 * @param M - Senderouting an Motis
+	 * @param M - Sender-Logic for communication to Motis
 	 * @param C - Default TMS Konfiguration
 	 * @return CommandLineRunner - Konsolenanwendung starten
 	 */
@@ -163,7 +163,7 @@ public class TmsJpaApp {
 
 
 	/**
-	 * Modul, das eine Rest-Webservice zur TMS Verwaltung startet
+	 * Modul, das einen Rest-Webservice zur TMS Verwaltung startet
 	 */
 	@RestController
 	@EnableAutoConfiguration
@@ -186,6 +186,7 @@ public class TmsJpaApp {
 
 		/**
 		 * Rest-Web-Service, Hauptpfad
+		 * Startet Streckenansicht
 		 * @return
 		 */
 		@GetMapping(path = "/")

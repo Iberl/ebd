@@ -5,6 +5,10 @@ import javax.persistence.*;
 import java.util.UUID;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
+ *
  * Eine Datenbank-Darstellung eines Movmement-Permission-Requests
  */
 @Entity(name = "CheckMovementPermission")

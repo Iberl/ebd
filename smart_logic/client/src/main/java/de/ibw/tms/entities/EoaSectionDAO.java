@@ -6,6 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 /**
+ *
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
  * Eine aus der Datenbank bezogene Untersektion der EOA
  */
 @Entity(name = "EoaSection")

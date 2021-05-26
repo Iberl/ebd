@@ -1,5 +1,6 @@
 package de.ibw.handler;
 
+import de.ibw.history.PositionModul;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.main.MotisManager;
@@ -88,21 +89,7 @@ public class ClientHandler extends SmartClientHandler {
         TmsMovementPermissionRequest moveRequest = TrackAndOccupationManager.RequestManager.getModel(maID);
         MARequestOccupation mao = moveRequest.getMaRequestOccupation();
         if(msgFromSL.isMaSuccessfull()) {
-            int iTrainId = 0;
-            logger.info("Ma successfull. UUID: " + maID.toString() + "\n");
-
-            MovableObject mo = mao.getTargetMoveableObject();
-            iTrainId = mo.getNid_Engine().getId();
-            MA rbcMa = moveRequest.payload.MaAdapter.convertToRbcMA();
-            Route R = moveRequest.payload.route;
-            ComposedRoute CR = new ComposedRoute();
-            try {
-                CR.generateFromRoute(R, iTrainId);
-            } catch (SmartLogicException e) {
-                e.printStackTrace();
-                System.err.println("Route cannot be transferred into connected Route-Element-List");
-            }
-            TrackAndOccupationManager.transferMaRequestBlockListIntoRealBlockList(iTrainId, mao, rbcMa, R, CR);
+            handleMaSuccessful(maID, moveRequest, mao);
 
 
         } else {
@@ -115,6 +102,27 @@ public class ClientHandler extends SmartClientHandler {
 
         }
 
+    }
+
+    private void handleMaSuccessful(UUID maID, TmsMovementPermissionRequest moveRequest, MARequestOccupation mao) {
+        int iTrainId = 0;
+        logger.info("Ma successfull. UUID: " + maID.toString() + "\n");
+
+        MovableObject mo = mao.getTargetMoveableObject();
+        iTrainId = mo.getNid_Engine().getId();
+
+
+        MA rbcMa = moveRequest.payload.MaAdapter.convertToRbcMA();
+        Route R = moveRequest.payload.route;
+        ComposedRoute CR = new ComposedRoute();
+        try {
+            CR.generateFromRoute(R, iTrainId);
+            PositionModul.getInstance().updateCurrentRoute(iTrainId, CR);
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            System.err.println("Route cannot be transferred into connected Route-Element-List");
+        }
+        TrackAndOccupationManager.transferMaRequestBlockListIntoRealBlockList(iTrainId, mao, rbcMa, R, CR);
     }
 
     private void handleDbdResponse(DbdRequestReturnPayload msgFromSL) {

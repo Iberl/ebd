@@ -292,7 +292,8 @@ public class PositionModul implements IPositionModul {
 
         MaSmalled = new MAOccupation();
 
-        MovementAuthority MA = train.getMA();
+        MovementAuthority MA = new MovementAuthority();
+        train.setMA(MA);
         MaSmalled.setMA(MA);
         MaSmalled.setApplicationDirection(TApplicationDirection.BOTH);
         try {
@@ -301,8 +302,9 @@ public class PositionModul implements IPositionModul {
             e.printStackTrace();
             throw new InvalidParameterException(e.getMessage());
         }
+
             System.out.println("Train: " + nid_engine.getId() + " Smalled MA having Length (m) : " +
-                    MaSmalled.getMeterLength());
+                    MaSmalled.getMeterLength() + "distance: " + distanceDiff.sDistance);
             if(MaSmalled.getMeterLength().compareTo(BigDecimal.valueOf(0.1d)) < 0) {
                 TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.RemoveOperation,
                         MAOccupation.class, MaSmalled);

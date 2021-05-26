@@ -51,8 +51,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2021-04-13
+ * @version 1.0
+ * @since 2021-05-26
  */
 public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private static Logger logger = Logger.getLogger( MainGraphicPanel.class );
@@ -123,6 +123,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
 
     }
+
 
     @NotNull
     private static BasicStroke initPainting(Graphics2D g2d) {
@@ -587,6 +588,8 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     }
 
     /**
+     * unused
+     *
      * Berechnet die GeoCoordinate zu einer Topologischen Kante mit Bezug zu einem Knoten mit distanz.
      * @param TopKanteId {@link String} - Knoten Id PlanPro
      * @param b_fromA boolean - ist von A gemessen worden
@@ -721,7 +724,6 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * Schreibt sich ein als Impuls wann neugezeichnet werden soll
      * @param subscription
      */
-
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.subscription = subscription;
@@ -742,7 +744,6 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
      * Fehler beim Neuzeichnen
      * @param throwable - Fehler
      */
-
     @Override
     public void onError(Throwable throwable) {
         throwable.printStackTrace();

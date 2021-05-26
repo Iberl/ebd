@@ -6,6 +6,9 @@ import javax.persistence.*;
 import java.util.*;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
  * Ein Stellbefehl in der Datenbankdarstellung. Er geht vom TMS an die smartLogic zur Pruefung und wird dann
  * im Stellwerk umgesetzt.
  */

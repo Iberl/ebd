@@ -6,6 +6,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
  * Datenbank-Objekt eines Danger Points in der Angabe eines MA-Requests
  */
 @Entity(name = "DangerPoint")

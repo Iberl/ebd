@@ -12,6 +12,10 @@ import javax.persistence.*;
 import java.util.List;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
+ *
  * Diese Klasse realisiert Datenbank fuer die End of Movement Authority
  */
 @Entity(name = "EOA")

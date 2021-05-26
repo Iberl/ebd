@@ -27,6 +27,14 @@ public class LinkedGeo {
         return usedEdges;
     }
 
+    /**
+     * Verlinkt alle Geographischen Kanten vom Start eine Topologischen Kante bis zum Ende der Topologischen Kante
+     * @param geoEdgeList - alle Kanten von edge
+     * @param b_fromA - true := Startpunkt ist der Topologische Knoten A auf edge
+     *                - false := Startpunkt ist der Topologische Knoten B auf edge
+     * @param edge - Topologische Kanten fuer die die Geographie verknuepft werden soll
+     * @throws Exception - wirft Fehler wenn vom Start nicht zum Ziel gelangt werden kann
+     */
     public LinkedGeo(ArrayList<CGEOKante> geoEdgeList, boolean b_fromA, TopologyGraph.Edge edge) throws Exception {
 
         boolean isEndReached = false;
@@ -76,10 +84,22 @@ public class LinkedGeo {
 
     }
 
+    /**
+     * unused
+     * @param geoCo
+     * @return
+     */
     public CGEOKante getNextEdge(GeometricCoordinate geoCo) {
         return this.linkage.getModel(geoCo);
     }
 
+    /**
+     * gibt für eine Geographische Kante an, ob die Kante von Geoknoten A von Richtung des Topologischen Knoten A
+     * betreten wird
+     * @param GeoEdge - die Geographische Kante die untersucht wird
+     * @return true := GeoEdge wird von Geo-Knoten A durchlaufen
+     *         false := GeoEdge wird von Geo-Knoten B durchlaufen
+     */
     public boolean isNextAccessedFromA(CGEOKante GeoEdge) {
         return this.isAccessedFromA.getModel(GeoEdge);
     }

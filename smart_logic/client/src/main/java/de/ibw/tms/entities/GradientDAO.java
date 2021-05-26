@@ -6,6 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
+ *
  * Bestandteil des Neigungsprofil in der Datenbank der Strecke, die der Zug anfahren soll.
  * Der Gradient ist eine Neigung des Profils
  */

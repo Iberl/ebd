@@ -15,7 +15,7 @@ import java.util.concurrent.SubmissionPublisher;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
+ * @version 1.0
  * @since 2020-08-11
  */
 public class MoveController extends SubmissionPublisher implements IController {

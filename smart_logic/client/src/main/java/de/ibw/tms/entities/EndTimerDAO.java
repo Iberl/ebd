@@ -4,6 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 /**
+ *  @author iberl@verkehr.tu-darmstadt.de
+ *  @version 1.0
+ *  @since 2021-05-25
  * Ein Datenbankobjekt, das angibt wie lange die Endsektion der Movement-Authority gueltig ist
  */
 @Entity(name = "EndTimer")
