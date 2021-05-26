@@ -2,8 +2,8 @@ package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.etcs.Q_SCALE;
-import ebd.rbc_tms.util.LinkingProfile;
-import ebd.rbc_tms.util.MA;
+import ebd.internal.util.LinkingProfile;
+import ebd.internal.util.MA;
 
 import java.math.BigDecimal;
 

@@ -11,7 +11,7 @@ import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.exception.MissingInformationException;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;

@@ -1,19 +1,10 @@
 package de.ibw.history;
 
-import de.ibw.tms.ma.mob.position.SafeMOBPosition;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
-import de.ibw.tms.ma.positioned.elements.TrackEdge;
-import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
-import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
-import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
-import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologicalPosition;
-import ebd.rbc_tms.util.PositionInfo;
-import ebd.rbc_tms.util.TrainInfo;
+import ebd.internal.util.PositionInfo;
+import ebd.internal.util.TrainInfo;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Speichert Positionsdaten aus Positionreport mit Gleis-Id und Topologischen Abstand zum Knoten A

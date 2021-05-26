@@ -1,7 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.ModeProfile;
+import ebd.internal.util.ModeProfile;
 
 public class SingleModeAdapter extends ModeProfile.Mode {
     @Expose

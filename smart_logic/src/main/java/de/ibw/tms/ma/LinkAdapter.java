@@ -1,7 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.LinkingProfile;
+import ebd.internal.util.LinkingProfile;
 
 public class LinkAdapter extends LinkingProfile.Link {
     @Expose

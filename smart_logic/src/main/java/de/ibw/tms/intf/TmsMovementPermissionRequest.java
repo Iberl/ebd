@@ -5,10 +5,7 @@ import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.cmd.Commands;
 import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
-import ebd.rbc_tms.util.exception.MissingInformationException;
-
-import javax.imageio.metadata.IIOMetadataController;
-import javax.persistence.Entity;
+import ebd.internal.util.exception.MissingInformationException;
 
 /**
  * Nachricht an die SL diese Ma-Nachricht zu pr&uuml;fen

@@ -5,11 +5,11 @@ import de.ibw.tms.intf.cmd.CheckMovementPermission
 import de.ibw.tms.ma.RbcMaAdapter
 import de.ibw.tms.trackplan.ui.Route
 import de.ibw.tms.ma.dynamic.RouteSection
-import ebd.rbc_tms.util.EOA
-import ebd.rbc_tms.util.GradientProfile
-import ebd.rbc_tms.util.MA
-import ebd.rbc_tms.util.ModeProfile
-import ebd.rbc_tms.util.SpeedProfile
+import ebd.internal.util.EOA
+import ebd.internal.util.GradientProfile
+import ebd.internal.util.MA
+import ebd.internal.util.ModeProfile
+import ebd.internal.util.SpeedProfile
 import spock.lang.Specification
 
 class MovementPermissionRequestProvider extends Specification {

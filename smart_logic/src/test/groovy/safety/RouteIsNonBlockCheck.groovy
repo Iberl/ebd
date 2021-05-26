@@ -12,22 +12,16 @@ import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
 import de.ibw.tms.ma.occupation.MAOccupation
 import de.ibw.tms.ma.occupation.MARequestOccupation
-import de.ibw.tms.ma.occupation.Occupation
 import de.ibw.tms.ma.occupation.VehicleOccupation
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
 import ebd.SlConfigHandler
-import ebd.rbc_tms.util.MA
-import ebd.rbc_tms.util.PositionInfo
-import org.apache.commons.text.translate.OctalUnescaper
-import plan_pro.modell.signalbegriffe_ril_301._1_9.MsRt
+import ebd.internal.util.PositionInfo
 import spock.lang.Specification
 import trackAndOccupationManager.ManagerSpecification
 
-import javax.print.attribute.standard.MediaSize
-import javax.sound.midi.Track
 import java.security.InvalidParameterException
 
 /**

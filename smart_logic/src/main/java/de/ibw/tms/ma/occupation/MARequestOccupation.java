@@ -1,7 +1,5 @@
 package de.ibw.tms.ma.occupation;
 
-import de.ibw.history.PositionData;
-import de.ibw.history.PositionModul;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
@@ -11,7 +9,6 @@ import de.ibw.tms.ma.MovementAuthority;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 
 public class MARequestOccupation extends Occupation implements IMoveable {
     public static final String CLASS_IDENTIFIER = "MA_Request_Occupation";

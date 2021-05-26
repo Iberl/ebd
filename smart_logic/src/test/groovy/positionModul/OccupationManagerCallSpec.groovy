@@ -16,8 +16,8 @@ import de.ibw.tms.ma.occupation.MAOccupation
 import de.ibw.tms.ma.occupation.VehicleOccupation
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
-import ebd.rbc_tms.util.PositionInfo
-import ebd.rbc_tms.util.TrainInfo
+import ebd.internal.util.PositionInfo
+import ebd.internal.util.TrainInfo
 import spock.lang.Specification
 
 /**

@@ -1,40 +1,26 @@
 package position.safe
 
 import data.ComposedRouteDataProvider
-import data.MovementPermissionRequestProvider
 import data.ScenarioDataProvider
 import de.ibw.history.PositionData
 import de.ibw.history.PositionModul
 import de.ibw.history.TrackAndOccupationManager
-import de.ibw.history.data.ComposedRoute
 import de.ibw.history.data.PositionEnterType
-import de.ibw.smart.logic.exceptions.SmartLogicException
-import de.ibw.smart.logic.intf.SmartLogic
-import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl
-import de.ibw.smart.logic.intf.impl.threads.TmsOuputWorker
-import de.ibw.tms.intf.TmsMovementPermissionRequest
-import de.ibw.tms.intf.cmd.CheckMovementPermission
 import de.ibw.tms.ma.mob.MovableObject
 import de.ibw.tms.ma.mob.common.NID_ENGINE
-import de.ibw.tms.ma.mob.position.SafeMOBPosition
 import de.ibw.tms.ma.occupation.Occupation
 import de.ibw.tms.ma.occupation.VehicleOccupation
 import de.ibw.tms.ma.physical.MoveableTrackElement
-import de.ibw.tms.ma.physical.TrackElementStatus
 import de.ibw.tms.ma.positioned.elements.TrackEdge
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph
 import de.ibw.util.ThreadedRepo
 import ebd.TescModul
-import ebd.rbc_tms.util.PositionInfo
-import ebd.rbc_tms.util.TrainInfo
+import ebd.internal.util.PositionInfo
+import ebd.internal.util.TrainInfo
 import spock.lang.Specification
 import trackAndOccupationManager.ManagerSpecification
-
-import java.lang.reflect.Array
-import java.util.function.BiConsumer
-
 
 class CalcByOffsetSpec extends Specification {
 

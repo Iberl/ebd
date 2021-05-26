@@ -9,8 +9,7 @@ import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.ma.flanking.FlankArea;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MAOccupation;
-import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
-import ebd.rbc_tms.util.SpeedProfile;
+import ebd.internal.util.SpeedProfile;
 
 import java.io.Serializable;
 import java.util.List;

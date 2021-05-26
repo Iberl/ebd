@@ -1,7 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.GradientProfile;
+import ebd.internal.util.GradientProfile;
 
 public class GradientAdapter extends GradientProfile.Gradient {
     @Expose

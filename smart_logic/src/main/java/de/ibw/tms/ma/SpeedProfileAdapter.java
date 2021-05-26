@@ -1,7 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.SpeedProfile;
+import ebd.internal.util.SpeedProfile;
 
 import java.util.ArrayList;
 import java.util.List;

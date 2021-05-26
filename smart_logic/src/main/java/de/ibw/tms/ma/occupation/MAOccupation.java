@@ -9,7 +9,7 @@ import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.intf.IMoveable;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.Route;
-import ebd.rbc_tms.util.EOA;
+import ebd.internal.util.EOA;
 import org.jetbrains.annotations.NotNull;
 import org.railMl.rtm4rail.TApplicationDirection;
 
@@ -29,7 +29,7 @@ public class MAOccupation extends Occupation implements IMoveable {
     private MovementAuthority MA;
 
 
-    public static MAOccupation generateMaOccupation(int trainId, MARequestOccupation MAO, ebd.rbc_tms.util.MA rbcMa,
+    public static MAOccupation generateMaOccupation(int trainId, MARequestOccupation MAO, ebd.internal.util.MA rbcMa,
                                                     Route r, ComposedRoute requestedTrackElementList,
                                                     TopologyGraph.Edge LastEdge, int q_scale)
                                                     throws InvalidParameterException {
@@ -108,7 +108,7 @@ public class MAOccupation extends Occupation implements IMoveable {
         return MaoOccup;
     }
 
-    private static void guardGenerator(MARequestOccupation mao, ebd.rbc_tms.util.MA rbcMa, Route r,
+    private static void guardGenerator(MARequestOccupation mao, ebd.internal.util.MA rbcMa, Route r,
                                        ComposedRoute requestedTrackElementList, TopologyGraph.Edge lastEdge)
                                         throws InvalidParameterException {
         if(mao == null) throw new InvalidParameterException("The request occupation must not be null");

@@ -11,13 +11,13 @@ import de.ibw.tms.ma.positioned.elements.SmartLogicArea;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.util.UtilFunction;
 import ebd.SlConfigHandler;
-import ebd.rbc_tms.message.Message_14;
-import ebd.rbc_tms.message.Message_15;
-import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.payload.Payload_15;
+import ebd.internal.message.Message_14;
+import ebd.internal.message.Message_15;
+import ebd.internal.payload.Payload_14;
+import ebd.internal.payload.Payload_15;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.util.PositionInfo;
-import ebd.rbc_tms.util.TrainInfo;
+import ebd.internal.util.PositionInfo;
+import ebd.internal.util.TrainInfo;
 import ebd.core.util.server.GUIServer;
 import org.jetbrains.annotations.NotNull;
 
@@ -236,12 +236,15 @@ public class SmartLogic extends NetEntity {
             RemoteRbcReceiver = new RbcReceiver(null, 22224);
         }
         if (bSendRbcRequest) {
-            TrainInfo Info = new TrainInfo(0, 0, 0L);
+           // not supported
+           /* TrainInfo Info = new TrainInfo(0, 0, 0L);
             PositionInfo PosInfo = generatePositionInfo(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             Payload_15 MaRequestLoad = new Payload_15(Info, PosInfo, 0);
             Message_15 RbcMaRequest = new Message_15(UUID.randomUUID(), "TMS_A1", "RBC_1", MaRequestLoad);
 
             RbcClient = new RbcModul(RbcMaRequest, null, 22223);
+
+            */
         }
         SmartLogic.startSmartLogic();
         if(bStartTms) {
@@ -297,6 +300,7 @@ public class SmartLogic extends NetEntity {
     }
 
     /**
+     * @deprecated
      * Dummy PositionReport Generator
      * @param iCount - int with number of Position Reports
      */
@@ -341,8 +345,8 @@ public class SmartLogic extends NetEntity {
 
 
             Message_14 PositionMessage = new Message_14(UUID.randomUUID(), "TMS_A1", "RBC_1", MaRequestLoad);
-            RbcModul RbcClient = new RbcModul(PositionMessage, null, 22223);
-            RbcClient.start();
+            //RbcModul RbcClient = new RbcModul(PositionMessage, null, 22223);
+            //RbcClient.start();
         }
 
     }
@@ -368,6 +372,7 @@ public class SmartLogic extends NetEntity {
     }
 
     /**
+     * @deprecated
      * Test Utility Sendet als RBC einen PositionReport
      */
     public static void sendDummyPositionReport() {
@@ -380,8 +385,8 @@ public class SmartLogic extends NetEntity {
         PositionInfo PosInfo = generatePositionInfo(i_BaliseId, ETCSVariables.Q_SCALE_1M, 300, ETCSVariables.Q_DIRLRBG_NOMINAL, ETCSVariables.Q_DLRBG_NOMINAL, ETCSVariables.INTEGER_NOVALUE, ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITORING_DEVICE, 70, 10, ETCSVariables.Q_DIRTRAIN_NOMINAL, ETCSVariables.M_MODE_FULL_SUPERVISION, ETCSVariables.M_LEVEL_3);
         Payload_14 PositionPayload = new Payload_14(TrInfo, PosInfo);
         Message_14 PositionReport = new Message_14("TMS_1", "RBC_1", PositionPayload);
-        RbcModul RbcClient = new RbcModul(PositionReport, null, 22223);
-        RbcClient.start();
+        //RbcModul RbcClient = new RbcModul(PositionReport, null, 22223);
+        //RbcClient.start();
     }
 
     /**

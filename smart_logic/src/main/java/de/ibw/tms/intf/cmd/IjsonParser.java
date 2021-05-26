@@ -2,7 +2,7 @@ package de.ibw.tms.intf.cmd;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.exception.MissingInformationException;
 
 public interface IjsonParser {
 

@@ -8,9 +8,10 @@ import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.train.model.TrainModel;
+import ebd.internal.util.GradientProfile;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.util.MA;
-import ebd.rbc_tms.util.SpeedProfile;
+import ebd.internal.util.MA;
+import ebd.internal.util.SpeedProfile;
 
 import java.util.ArrayList;
 
@@ -98,9 +99,9 @@ public class TestUtil {
 
         int iLength = eoaAda.sections.get(0).l_section;
 
-        ArrayList<ebd.rbc_tms.util.GradientProfile.Gradient> gradients = new ArrayList<>();
-        gradients.add(new ebd.rbc_tms.util.GradientProfile.Gradient(iLength, ETCSVariables.Q_GDIR_UPHILL, 0));
-        ebd.rbc_tms.util.GradientProfile GradProfile = new ebd.rbc_tms.util.GradientProfile(1,
+        ArrayList<GradientProfile.Gradient> gradients = new ArrayList<>();
+        gradients.add(new GradientProfile.Gradient(iLength, ETCSVariables.Q_GDIR_UPHILL, 0));
+        GradientProfile GradProfile = new GradientProfile(1,
                 Q_SCALE.SCALE_1_M.flag, gradients);
         SpeedProfile SpeedProfile = new SpeedProfile(1, Q_SCALE.SCALE_1_M.flag);
         MA Ma = new MA(false,0,0, iQScale, eoaAda,GradProfile, SpeedProfile,null,null );

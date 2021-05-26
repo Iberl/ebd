@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
-import ebd.rbc_tms.Payload;
+import ebd.internal.Payload;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;

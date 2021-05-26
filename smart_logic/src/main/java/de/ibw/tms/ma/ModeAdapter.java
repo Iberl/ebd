@@ -1,7 +1,7 @@
 package de.ibw.tms.ma;
 
 import com.google.gson.annotations.Expose;
-import ebd.rbc_tms.util.ModeProfile;
+import ebd.internal.util.ModeProfile;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package de.ibw.smart.logic.intf;
 
-import ebd.rbc_tms.Message;
+import ebd.rbc_tms.message.Message;
 
 import java.security.InvalidParameterException;
 /**

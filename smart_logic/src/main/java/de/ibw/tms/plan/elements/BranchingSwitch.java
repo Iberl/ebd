@@ -1,8 +1,5 @@
 package de.ibw.tms.plan.elements;
 
-import de.ibw.tms.intf.SmartClientHandler;
-import de.ibw.tms.intf.TmsDbdCommand;
-import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
@@ -18,7 +15,6 @@ import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import ebd.SlConfigHandler;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.railMl.rtm4rail.TElementWithIDref;

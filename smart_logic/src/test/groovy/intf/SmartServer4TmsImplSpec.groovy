@@ -1,9 +1,8 @@
 package intf
 
-import ch.qos.logback.core.util.StatusListenerConfigHelper
+
 import data.ComposedRouteDataProvider
 import data.MovementPermissionRequestProvider
-import de.ibw.history.TrackAndOccupationManager
 import de.ibw.smart.logic.intf.RbcModul
 import de.ibw.smart.logic.intf.SmartServer
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl
@@ -16,15 +15,14 @@ import de.ibw.tms.ma.mob.MovableObject
 import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.mob.position.MOBPosition
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
-import de.ibw.tms.ma.occupation.MAOccupation
 import de.ibw.tms.plan.elements.model.PlanData
 import ebd.SlConfigHandler
-import ebd.rbc_tms.util.EOA
-import ebd.rbc_tms.util.GradientProfile
-import ebd.rbc_tms.util.LinkingProfile
-import ebd.rbc_tms.util.MA
-import ebd.rbc_tms.util.ModeProfile
-import ebd.rbc_tms.util.SpeedProfile
+import ebd.internal.util.EOA
+import ebd.internal.util.GradientProfile
+import ebd.internal.util.LinkingProfile
+import ebd.internal.util.MA
+import ebd.internal.util.ModeProfile
+import ebd.internal.util.SpeedProfile
 import spock.lang.Specification
 
 /**

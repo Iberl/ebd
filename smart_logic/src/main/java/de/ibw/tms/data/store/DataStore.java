@@ -2,7 +2,7 @@ package de.ibw.tms.data.store;
 
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
-import ebd.rbc_tms.payload.Payload_14;
+import ebd.internal.payload.Payload_14;
 
 import java.security.InvalidParameterException;
 /**

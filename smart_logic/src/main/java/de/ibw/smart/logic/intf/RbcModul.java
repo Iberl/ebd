@@ -2,17 +2,20 @@ package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
 import ebd.SlConfigHandler;
+import ebd.messageLibrary.util.exception.*;
+import ebd.rbc_tms.message.Message;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.Message;
-import ebd.rbc_tms.Payload;
-import ebd.rbc_tms.message.Message_00;
-import ebd.rbc_tms.message.Message_21;
-import ebd.rbc_tms.payload.Payload_00;
-import ebd.rbc_tms.payload.Payload_21;
-import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.MA;
-import ebd.rbc_tms.util.TrainInfo;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.Payload;
+import ebd.internal.message.Message_00;
+import ebd.internal.message.Message_21;
+import ebd.internal.payload.Payload_00;
+import ebd.internal.payload.Payload_21;
+import ebd.internal.util.EOA;
+import ebd.internal.util.MA;
+import ebd.internal.util.TrainInfo;
+import ebd.internal.util.exception.MissingInformationException;
+import ebd.rbc_tms.message.general.Response;
+import ebd.rbc_tms.util.exception.InvalidHashException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
@@ -31,6 +34,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
+
+import ebd.rbc_tms.Serializer;
 /**
  * Ein RBC Modul sendet mithilfe des Netty-Framweorks an das RBC. Kann Nachrichten aus dem RBC erhalten. Wird deshalb zweimal instanziiert.
  *
@@ -50,7 +55,7 @@ public class RbcModul extends Thread {
      * Das ist die Modulbezeichnung im Log.
      */
     public static final String TMS_PROXY = "TMS-PROXY";
-    private ebd.rbc_tms.Message Message = null;
+    private ebd.rbc_tms.message.Message Message = null;
     private PriorityBlockingQueue<PriorityMessage> outputQueue = new PriorityBlockingQueue<>();
     /**
      * Kommunikationstunnel in Netty
@@ -198,8 +203,8 @@ public class RbcModul extends Thread {
                         SlThread.start();
                         if(EM != null) {
                             try {
-                                EM.log("Send Message to RBC: " + M.parseToJson(), RBC_MODUL);
-                            } catch (MissingInformationException e) {
+                                EM.log("Send Message to RBC: " + Serializer.serialize(PM.getMsg()), RBC_MODUL);
+                            } catch (NotSerializableException | FieldTypeNotSupportedException | ebd.messageLibrary.util.exception.MissingInformationException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -292,12 +297,20 @@ public class RbcModul extends Thread {
             if(M != null) {
                 if(EM != null) EM.log("Successfully connected to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
-                String sSend = M.parseToJson() + "\n";
-                channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sSend, CharsetUtil.UTF_8));
-                EM.log("SL has send message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
+                String sSend = null;
+                try {
+                    sSend = Serializer.serialize(M) + "\n";
+                    channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sSend, CharsetUtil.UTF_8));
+                    EM.log("SL has send message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
+                } catch (NotSerializableException | FieldTypeNotSupportedException | ebd.messageLibrary.util.exception.MissingInformationException e) {
+                    e.printStackTrace();
+                    if(EM != null) EM.log("SL cannot parse Message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
+                }
+
 
             } else {
-                if(EM != null) EM.log("SL trys sending Message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
+                if(EM != null) EM.log("SL trys sending Message to RBC not working",
+                        SmartLogic.getsModuleId(RBC_MODUL));
 
             }
         }
@@ -383,9 +396,7 @@ public class RbcModul extends Thread {
 
                         serverHandleJson(ctx, received);
                         inBuffer.release();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (MissingInformationException e) {
+                    } catch (ClassNotFoundException | MissingInformationException e) {
                         e.printStackTrace();
                     }
                 }
@@ -419,50 +430,78 @@ public class RbcModul extends Thread {
     }
 
     private synchronized void serverHandleJson(ChannelHandlerContext writeCtx, String received) throws ClassNotFoundException, MissingInformationException {
-        Message<Payload> msgFromRbc = Message.generateFrom(received);
+        //Message<Payload> msgFromRbc = Message.generateFrom(received);
+        ebd.rbc_tms.message.Message msgFromRbc = null;
+
+        try {
+            msgFromRbc = Serializer.deserialize(received);
+        } catch (NotDeserializableException | ClassNotSupportedException | ValueNotSupportedException | InvalidHashException e) {
+            e.printStackTrace();
+            Response responseError = new Response(null, 1, 1 );
+            SmartLogic.getRbcClient().sendMessage(new PriorityMessage(responseError, 3L));
+            return;
+        }
+
         if (msgFromRbc == null) return;
-        int iType = msgFromRbc.getHeader().type;
+        int iType = msgFromRbc.type;
+        ebd.rbc_tms.message.Message finalMsgFromRbc = msgFromRbc;
         new Thread() {
             @Override
             public void run() {
                 switch (iType) {
                     case (0): {
-
-                        TmsHandler.handleNoError(msgFromRbc);
+                        Response RbyRBC = (Response) finalMsgFromRbc;
+                        if(RbyRBC.errorCode == 0) {
+                            TmsHandler.handleNoError(finalMsgFromRbc);
+                        } else {
+                            System.err.println("RBC send Error Message: " + RbyRBC.errorMessage);
+                        }
                         break;
                     }
-                    case (1): {
-                        Message WriteBack = TmsHandler.handleRegister(msgFromRbc);
+                    case (10): {
+                        Message WriteBack = TmsHandler.handleRegister(finalMsgFromRbc);
                         SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
                         //writeCtx.write(Unpooled.copiedBuffer(WriteBack.parseToJson(), CharsetUtil.UTF_8));
                         break;
                     }
 
-                    case (10): {
-                        Message WriteBack = TmsHandler.handleLogin(msgFromRbc);
+                    case (12): {
+                        Message WriteBack = TmsHandler.handleLogin(finalMsgFromRbc);
                         SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
                         break;
                     }
-                    case (14): {
-                        Message WriteBack = TmsHandler.handlePositionReport(msgFromRbc);
+                    case (30): {
+                        Message WriteBack = TmsHandler.handlePositionReport(finalMsgFromRbc);
                         SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
                         break;
                     }
-                    case (15): {
 
-                        Message WriteBack = TmsHandler.handleMaRequest(msgFromRbc);
+                    default: {
+                        Response ResOkay = new Response(finalMsgFromRbc.uuid, 1, finalMsgFromRbc.rbc_id);
+                        SmartLogic.getRbcClient().sendMessage(new PriorityMessage(ResOkay, 3L));
+                    }
+
+                    /*case (15): {
+
+                        Message WriteBack = TmsHandler.handleMaRequest(finalMsgFromRbc);
                         SmartLogic.getRbcClient().sendMessage(new PriorityMessage(WriteBack, 3L));
 
                         break;
-                    }
+                    }*/
                 }
             }
         }.start();
     }
 
-    private void handleMaRequest(ChannelHandlerContext writeCtx, Message<Payload> msgFromRbc) throws MissingInformationException {
+    /**
+     * @deprecated
+     * @param writeCtx
+     * @param msgFromRbc
+     * @throws MissingInformationException
+     */
+    private void handleMaRequest(ChannelHandlerContext writeCtx, Message msgFromRbc) throws MissingInformationException {
         //TODO save messages 4 rasking by UUID
-        String rbc_id = msgFromRbc.getHeader().rbc_id;
+        /*String rbc_id = msgFromRbc.getHeader().rbc_id;
         int i15KMh = 3;
         int d300 = 300; // 300 meter bei Qscale 1m
         EOA.EndTimer EoaTimer = new EOA.EndTimer(ETCSVariables.T_ENDTIMER_INFINITY, d300 );
@@ -477,6 +516,8 @@ public class RbcModul extends Thread {
         Payload_21 SendMaPayload = new Payload_21(0,Ma);
         Message_21 SendMA = new Message_21(UUID.randomUUID(), "TMS_A1", rbc_id, SendMaPayload);
         writeCtx.write(Unpooled.copiedBuffer(SendMA.parseToJson(), CharsetUtil.UTF_8));
+
+         */
     }
 
     public void shutdown() {

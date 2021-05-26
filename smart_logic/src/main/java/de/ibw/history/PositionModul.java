@@ -25,7 +25,7 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.util.ThreadedRepo;
 import de.ibw.util.UtilFunction;
-import ebd.rbc_tms.util.PositionInfo;
+import ebd.internal.util.PositionInfo;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

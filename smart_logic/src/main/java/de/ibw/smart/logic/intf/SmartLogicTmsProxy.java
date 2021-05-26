@@ -4,12 +4,16 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
-import ebd.rbc_tms.Message;
-import ebd.rbc_tms.Payload;
-import ebd.rbc_tms.payload.Payload_00;
-import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.TrainInfo;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
+import ebd.messageLibrary.util.exception.NotSerializableException;
+import ebd.rbc_tms.Serializer;
+import ebd.rbc_tms.message.Message;
+import ebd.internal.Payload;
+import ebd.internal.payload.Payload_00;
+import ebd.internal.payload.Payload_14;
+import ebd.internal.util.TrainInfo;
+import ebd.internal.util.exception.MissingInformationException;
+import ebd.rbc_tms.message.general.Response;
 
 import java.util.UUID;
 
@@ -19,8 +23,8 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 1.1
+ * @since 2020-05-26
  */
 public class SmartLogicTmsProxy implements TmsIntf {
 
@@ -72,31 +76,34 @@ public class SmartLogicTmsProxy implements TmsIntf {
      */
 
     @Override
-    public Message handleMaRequest(Message<Payload> msgFromRbc) {
+    public Message handleMaRequest(Message msgFromRbc) {
         return handleMessageAsProxy(msgFromRbc);
     }
 
-    private Message handleMessageAsProxy(Message<Payload> msgFromRbc) {
+    private Message handleMessageAsProxy(Message msgFromRbc) {
+
+
         try {
+        String strMessage = Serializer.serialize(msgFromRbc);
             if(EM != null) {
                 EM.log("TMS Output Queue has " + SmartLogic.outputQueue.size() + "Elements", TMS_PROXY);
-                EM.log("SL Sends To TMS: " + msgFromRbc.parseToJson(), TMS_PROXY);
 
+                EM.log("SL Sends To TMS: " + strMessage, TMS_PROXY);
             }
             try {
-                SmartLogic.outputQueue.put(new SmartServerMessage(msgFromRbc.parseToJson(), this.lPriority));
+                SmartLogic.outputQueue.put(new SmartServerMessage(strMessage, this.lPriority));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
 
             return getResponseMessage(0, msgFromRbc, null);
-        } catch (MissingInformationException e) {
-            if(EM != null) {
-                EM.log("ERROR: JSON has missing information: " + msgFromRbc.toString(), TMS_PROXY);
-            }
-            return getResponseMessage(2, msgFromRbc, e);
+        } catch (NotSerializableException | FieldTypeNotSupportedException | ebd.messageLibrary.util.exception.MissingInformationException e) {
+            e.printStackTrace();
         }
+        return null;
+
+
     }
 
     /**
@@ -107,7 +114,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
      */
 
     @Override
-    public Message handleRegister(Message<Payload> msgFromRbc) {
+    public Message handleRegister(Message msgFromRbc) {
         return handleMessageAsProxy(msgFromRbc);
     }
 
@@ -119,7 +126,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
      */
 
     @Override
-    public Message handleLogin(Message<Payload> msgFromRbc) {
+    public Message handleLogin(Message msgFromRbc) {
         return handleMessageAsProxy(msgFromRbc);
     }
 
@@ -129,19 +136,23 @@ public class SmartLogicTmsProxy implements TmsIntf {
      * Es wird dabei die SmartLogic das Ack verwalten und dann an das TMS weiterleiten
      * @param msgFromRbc Message - Nachricht des RBC
      */
-
     @Override
-    public void handleNoError(Message<Payload> msgFromRbc) {
+    public void handleNoError(Message msgFromRbc) {
 
-        Payload_00 P = (Payload_00) msgFromRbc.getPayload();
-        handleAck(msgFromRbc.getHeader(), P);
+
+        handleAck(msgFromRbc);
 
         handleMessageAsProxy(msgFromRbc);
     }
 
-    private void handleAck(Message.Header header, Payload_00 p) {
-        UUID uuid = header.uuid;
-        int iCode = p.errorCode;
+
+    private void handleAck(Message mRbc) {
+        UUID uuid = mRbc.uuid;
+
+        // type prüfen
+
+        Response rRbc = (Response) mRbc;
+        int iCode = mRbc.errorCode;
 
 
             if(iCode == 0) {

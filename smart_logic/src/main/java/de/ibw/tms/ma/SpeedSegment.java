@@ -2,15 +2,13 @@ package de.ibw.tms.ma;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.annotations.Expose;
-import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.ETCS_SPEED;
 import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.etcs.NC_DIFF;
-import de.ibw.tms.ma.location.LinearLocation;
 import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.ma.topologie.ApplicationDirection;
-import ebd.rbc_tms.util.SpeedProfile;
+import ebd.internal.util.SpeedProfile;
 
 import java.io.Serializable;
 import java.util.List;

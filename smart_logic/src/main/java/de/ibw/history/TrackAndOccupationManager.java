@@ -13,7 +13,7 @@ import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.util.ThreadedRepo;
-import ebd.rbc_tms.util.MA;
+import ebd.internal.util.MA;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
