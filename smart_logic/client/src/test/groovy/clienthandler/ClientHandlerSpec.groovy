@@ -15,8 +15,8 @@ import de.ibw.tms.ma.mob.position.MOBPositionClasses
 import de.ibw.tms.ma.mob.position.SafeMOBPosition
 import de.ibw.tms.ma.occupation.MARequestOccupation
 import de.ibw.tms.plan.elements.model.PlanData
-import ebd.rbc_tms.util.PositionInfo
-import ebd.rbc_tms.util.TrainInfo
+import ebd.internal.util.PositionInfo
+import ebd.internal.util.TrainInfo
 import spock.lang.Specification
 
 

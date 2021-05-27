@@ -14,10 +14,10 @@ import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.train.ui.SingleTrainSubPanel;
+import ebd.internal.util.*;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.util.*;
-import ebd.rbc_tms.util.ModeProfile.Mode;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.ModeProfile.Mode;
+import ebd.internal.util.exception.MissingInformationException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -138,7 +138,7 @@ public class TrainController extends SubmissionPublisher implements IController 
                 //extractMaxSpeed_V_LOA();
         int T_LOA = ETCSVariables.T_LOA_INFINITY;
         int L_SECTION = 0;
-        ebd.rbc_tms.util.GradientProfile GradProfile = null;
+        ebd.internal.util.GradientProfile GradProfile = null;
         EOA eoaRbcIntf = null;
         MA SendMa = null;
         ArrayList<EOA.Section> eoaSections = new ArrayList<>();
@@ -151,9 +151,9 @@ public class TrainController extends SubmissionPublisher implements IController 
             } else {
                 L_SECTION = (int) dLengthOfEoaSectionsAsOnce;
             }
-            ArrayList<ebd.rbc_tms.util.GradientProfile.Gradient> gradients = new ArrayList<>();
-            gradients.add(new ebd.rbc_tms.util.GradientProfile.Gradient(L_SECTION, ETCSVariables.Q_GDIR_UPHILL, 0));
-            GradProfile = new ebd.rbc_tms.util.GradientProfile(Q_DIR, EOA_Q_SCALE, gradients);
+            ArrayList<ebd.internal.util.GradientProfile.Gradient> gradients = new ArrayList<>();
+            gradients.add(new ebd.internal.util.GradientProfile.Gradient(L_SECTION, ETCSVariables.Q_GDIR_UPHILL, 0));
+            GradProfile = new ebd.internal.util.GradientProfile(Q_DIR, EOA_Q_SCALE, gradients);
             EOA.Section OneSection = new EOA.Section(L_SECTION, ETCSVariables.Q_SECTIONTIMER_NO_INFO, null, null);
 
 

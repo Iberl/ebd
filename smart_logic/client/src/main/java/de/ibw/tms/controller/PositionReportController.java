@@ -1,25 +1,16 @@
 package de.ibw.tms.controller;
 
 import de.ibw.feed.Balise;
-import de.ibw.history.PositionData;
-import de.ibw.history.PositionModul;
-import de.ibw.rtm.intf.IRTMPositioningNetElement;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
-import de.ibw.tms.ma.net.elements.PositioningNetElement;
-import de.ibw.tms.ma.physical.SingleSlip;
-import de.ibw.tms.ma.net.elements.PositionedRelation;
-import de.ibw.tms.plan.elements.CrossoverModel;
-import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.UtilFunction;
 import ebd.SlConfigHandler;
-import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.PositionInfo;
+import ebd.internal.payload.Payload_14;
+import ebd.internal.util.PositionInfo;
 
 import javax.swing.*;
 import java.math.BigDecimal;

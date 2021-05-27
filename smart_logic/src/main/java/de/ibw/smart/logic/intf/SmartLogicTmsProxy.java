@@ -2,8 +2,11 @@ package de.ibw.smart.logic.intf;
 
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
+import de.ibw.smart.logic.intf.messages.Converter;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
+import de.ibw.tms.train.model.TrainModel;
+import ebd.messageLibrary.packet.trainpackets.PositionPacket;
 import ebd.messageLibrary.util.exception.FieldTypeNotSupportedException;
 import ebd.messageLibrary.util.exception.NotSerializableException;
 import ebd.rbc_tms.Serializer;
@@ -14,7 +17,10 @@ import ebd.internal.payload.Payload_14;
 import ebd.internal.util.TrainInfo;
 import ebd.internal.util.exception.MissingInformationException;
 import ebd.rbc_tms.message.general.Response;
+import ebd.rbc_tms.message.rbc.ETCSTrainMessage;
+import org.apache.poi.ss.formula.functions.T;
 
+import java.lang.reflect.Field;
 import java.util.UUID;
 
 /**
@@ -32,6 +38,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
      * Die Komponentenbezeichnung im Logging
      */
     public static final String TMS_PROXY = "TMS-PROXY";
+
     private SmartServer server;
     private EventBusManager EM = null;
 
@@ -152,7 +159,7 @@ public class SmartLogicTmsProxy implements TmsIntf {
         // type prüfen
 
         Response rRbc = (Response) mRbc;
-        int iCode = mRbc.errorCode;
+        int iCode = rRbc.errorCode;
 
 
             if(iCode == 0) {
@@ -185,18 +192,35 @@ public class SmartLogicTmsProxy implements TmsIntf {
     @Override
     public Message handlePositionReport(Message msgFromRbc) {
         boolean is4TMS;
-
+        int nidTrain = -1;
         TrainInfo TI = null;
-        is4TMS = SafetyLogic.getSmartSafety().handlePositionReport(msgFromRbc);
-        if(is4TMS) return handleMessageAsProxy(msgFromRbc); // sends also to tms
+        PositionPacket PosPacket = null;
+        ETCSTrainMessage P_PosWithinTrainMessage = (ETCSTrainMessage) msgFromRbc;
+        nidTrain = P_PosWithinTrainMessage.nid_engine;
+        ebd.messageLibrary.message.Message LibMessage = P_PosWithinTrainMessage.etcsMessage;
+        try {
+           PosPacket = Converter.retrievePosPacket(LibMessage);
+            is4TMS = SafetyLogic.getSmartSafety().handlePositionReport(nidTrain, PosPacket, msgFromRbc);
+            if(is4TMS) return handleMessageAsProxy(msgFromRbc);// sends also to tms
+            else {
+                TI = new TrainInfo(nidTrain, nidTrain, msgFromRbc.timestamp);
+                return getResponseMessage(-1, msgFromRbc,TI, new MissingInformationException("Position Report Invalid"));
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+
+        }
+        TI = new TrainInfo(nidTrain, nidTrain, msgFromRbc.timestamp);
+        return getResponseMessage(-1, msgFromRbc,TI, new MissingInformationException("Position Report Invalid"));
+
+
+
 
         // send not to tms but generate an error
-        else {
-            Payload_14 P_Pos = (Payload_14) msgFromRbc.getPayload();
-            TI = P_Pos.trainInfo;
-            return getResponseMessage(2, msgFromRbc,TI, new MissingInformationException("Position Report Invalid"));
-        }
+
     }
+
+
 
     private Message getResponseMessage(int iErrorCode, Message msgFromRbc, TrainInfo TI, MissingInformationException e) {
         if(e != null) e.printStackTrace();
@@ -204,9 +228,9 @@ public class SmartLogicTmsProxy implements TmsIntf {
         UUID uuid = null;
         String sTms_id = null;
         try {
-            sRbc_id = msgFromRbc.getHeader().rbc_id;
-            uuid = msgFromRbc.getHeader().uuid;
-            sTms_id = msgFromRbc.getHeader().tms_id;
+            sRbc_id = String.valueOf(msgFromRbc.rbc_id);
+            uuid = msgFromRbc.uuid;
+            sTms_id = String.valueOf(msgFromRbc.tms_id);
         } catch(Exception E) {
             E.printStackTrace();
             throw E;
@@ -214,16 +238,16 @@ public class SmartLogicTmsProxy implements TmsIntf {
         }
         return RbcModul.createResponseMessage(iErrorCode, sRbc_id, uuid, sTms_id,TI);
     }
-    private Message getResponseMessage(int iErrorCode, Message<Payload> msgFromRbc, MissingInformationException e) {
+    private Message getResponseMessage(int iErrorCode, Message msgFromRbc, MissingInformationException e) {
         if(e != null) e.printStackTrace();
 
         String sRbc_id = null;
         UUID uuid = null;
         String sTms_id = null;
         try {
-            sRbc_id = msgFromRbc.getHeader().rbc_id;
-            uuid = msgFromRbc.getHeader().uuid;
-            sTms_id = msgFromRbc.getHeader().tms_id;
+            sRbc_id = String.valueOf(msgFromRbc.rbc_id);
+            uuid = msgFromRbc.uuid;
+            sTms_id = String.valueOf(msgFromRbc.tms_id);
         } catch(Exception E) {
             E.printStackTrace();
             //throw E;

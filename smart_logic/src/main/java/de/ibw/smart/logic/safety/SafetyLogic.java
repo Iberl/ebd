@@ -12,6 +12,7 @@ import de.ibw.history.data.PositionEnterType;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
+import de.ibw.smart.logic.intf.messages.Converter;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.self.tests.SafetyLogicContinousConnectTest;
@@ -33,6 +34,7 @@ import ebd.TescModul;
 import ebd.internal.util.MA;
 import ebd.internal.util.PositionInfo;
 import ebd.internal.util.TrainInfo;
+import ebd.messageLibrary.packet.trainpackets.PositionPacket;
 import ebd.messageLibrary.util.ETCSVariables;
 import ebd.internal.Message;
 import ebd.internal.payload.Payload_14;
@@ -800,10 +802,13 @@ public class SafetyLogic {
 
     /**
      * Untersucht ob der PositionReport valide ist und speist den Report in das Position-Modul ein
+     *
+     * @param nidTrain
      * @param PositionReport {@link Message} - RBC - PositionReport
+     * @param msgFromRbc
      * @return boolean - ist Positionsangabe valide
      */
-    public synchronized boolean handlePositionReport(Message<Payload_14> PositionReport) {
+    public synchronized boolean handlePositionReport(int nidTrain, PositionPacket PositionReport, ebd.rbc_tms.message.Message msgFromRbc) {
         try {
             int iTrainId;
             int iNidLrbg;
@@ -811,9 +816,10 @@ public class SafetyLogic {
             int iQ_Length;
             int iQ_Scale;
 
-            Payload_14 P = PositionReport.getPayload();
-            iTrainId = P.trainInfo.nid_engine;
-            PositionInfo PosInf = P.positionInfo;
+
+
+            iTrainId = nidTrain;
+            PositionInfo PosInf = Converter.generateByPositionPacke(PositionReport);
             iQ_DirTrain = PosInf.q_dirtrain;
             iQ_Length = PosInf.q_length;
 
@@ -823,7 +829,7 @@ public class SafetyLogic {
 
 
 
-            new Thread(() -> handlePositionHistory(P.trainInfo, PosInf, PositionReport.getHeader())).start();
+            new Thread(() -> handlePositionHistory(iTrainId, PosInf, msgFromRbc.timestamp)).start();
 
             iNidLrbg = PosInf.nid_lrbg;
             iQ_Scale = PosInf.q_scale;
@@ -852,6 +858,7 @@ public class SafetyLogic {
 
 
 
+
     private boolean checkQ_Scale(int iQ_scale) {
         return iQ_scale == ETCSVariables.Q_SCALE_1M || iQ_scale == ETCSVariables.Q_SCALE_10CM ||
                 iQ_scale == ETCSVariables.Q_SCALE_10M;
@@ -861,9 +868,9 @@ public class SafetyLogic {
         return Balise.baliseByNid_bg.getModel(iNidLrbg) != null;
     }
 
-    private void handlePositionHistory(TrainInfo TI, PositionInfo posInf, Message.Header header) {
-        PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                TI, posInf);
+    private void handlePositionHistory(int nid_engine, PositionInfo posInf, long timestamp) {
+        PositionData PD = new PositionData(timestamp, System.currentTimeMillis(),
+                nid_engine, posInf);
         //BigDecimal trainLength = UtilFunction.getTrainLength(posInf);
 
 

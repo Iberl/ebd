@@ -8,7 +8,7 @@ import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.RouteController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.model.TrainModel;
-import ebd.rbc_tms.util.EOA;
+import ebd.internal.util.EOA;
 
 import javax.swing.*;
 import java.awt.*;

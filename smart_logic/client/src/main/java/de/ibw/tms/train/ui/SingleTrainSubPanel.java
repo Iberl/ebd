@@ -15,8 +15,9 @@ import de.ibw.tms.trackplan.controller.RouteController;
 import de.ibw.tms.trackplan.ui.RouteComponent;
 import de.ibw.tms.train.controller.TrainController;
 import de.ibw.tms.train.model.TrainModel;
+import ebd.internal.util.*;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.util.*;
+
 
 import javax.swing.*;
 import java.awt.*;

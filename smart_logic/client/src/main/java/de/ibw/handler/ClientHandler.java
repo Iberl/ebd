@@ -19,11 +19,17 @@ import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ui.PositionReportController;
-import ebd.rbc_tms.Message;
-import ebd.rbc_tms.Payload;
-import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.MA;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+
+import ebd.internal.Payload;
+import ebd.internal.payload.Payload_14;
+import ebd.internal.util.MA;
+import ebd.internal.util.exception.MissingInformationException;
+import ebd.messageLibrary.util.exception.ClassNotSupportedException;
+import ebd.messageLibrary.util.exception.NotDeserializableException;
+import ebd.messageLibrary.util.exception.ValueNotSupportedException;
+import ebd.rbc_tms.Serializer;
+import ebd.rbc_tms.message.Message;
+import ebd.rbc_tms.util.exception.InvalidHashException;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
@@ -141,19 +147,22 @@ public class ClientHandler extends SmartClientHandler {
         new Thread() {
             @Override
             public void run() {
+
+
                 String received = smartServerMessage.toString();
                 System.out.println("TMS received: " + received);
                 if(!smartServerMessage.isbIsFromSL()) {
                     // is from RBC
-                    Message<Payload> Msg = null;
+                    Message Msg = null;
                     try {
-                        Msg = Message.generateFrom(smartServerMessage.getMsg());
-                    } catch (ClassNotFoundException e) {
+                        Msg = Serializer.deserialize(smartServerMessage.getMsg());
+                    } catch (NotDeserializableException | ClassNotSupportedException | ValueNotSupportedException | InvalidHashException e) {
                         e.printStackTrace();
+                        return;
                     }
 
-                    if (Msg.getHeader().type == 14) {
-                        PositionReportController.getInstance().servePositionReport((Payload_14) Msg.getPayload(), Msg.getHeader());
+                    if (Msg.type == 30) {
+                        PositionReportController.getInstance().servePositionReport(Msg);
                         if(!TmsScheduler.started) {
                             try {
                                 MotisManager.sendMotisFiles();
@@ -188,6 +197,7 @@ public class ClientHandler extends SmartClientHandler {
                         }
                     }
                 }
+
             }
         }.start();
 

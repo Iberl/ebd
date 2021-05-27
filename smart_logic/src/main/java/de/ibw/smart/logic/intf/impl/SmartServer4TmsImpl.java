@@ -8,6 +8,7 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.datatypes.QueueUuidMapper;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.*;
+import de.ibw.smart.logic.intf.messages.Converter;
 import de.ibw.smart.logic.intf.messages.MaRequestReturnPayload;
 import de.ibw.smart.logic.intf.messages.SmartServerMessage;
 import de.ibw.smart.logic.safety.SafetyLogic;
@@ -28,6 +29,13 @@ import ebd.internal.message.Message_21;
 import ebd.internal.payload.Payload_21;
 import ebd.internal.util.EOA;
 import ebd.internal.util.MA;
+import ebd.messageLibrary.message.trackmessages.Message_3;
+import ebd.messageLibrary.packet.TrackPacket;
+import ebd.messageLibrary.packet.trackpackets.Packet_15;
+import ebd.messageLibrary.packet.trackpackets.Packet_21;
+import ebd.messageLibrary.packet.trackpackets.Packet_27;
+import ebd.messageLibrary.packet.trackpackets.Packet_80;
+import ebd.rbc_tms.message.tms.ETCSTrackMessage;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -296,7 +304,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
             Payload_21 MaPayload = new Payload_21(iTrainId, MaAdapter.convertToRbcMA());
             Message_21 msg = new Message_21(uuid,tms_id, rbc_id, MaPayload);
-            acknowledge(uuid, 1L, true, msg);
+            acknowledge(uuid, requestedTrackElementList, 1L, true, msg);
                 serveValidMa(uuid, MaReturnPayload, null, iTrainId);
             return;
         }
@@ -541,7 +549,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     }
 
     private void sendAcknowledgementToRBC(int iTrainId, Route R, UUID uuid, Long lPriority, MaRequestReturnPayload MaReturnPayload, Boolean bAcknowledgeMA, ComposedRoute requestedTrackElementList, MA RbcMa, MARequestOccupation MAO, int nid_engine_Id, Message_21 MaMsg) {
-        bAcknowledgeMA = acknowledge(uuid, lPriority, bAcknowledgeMA, MaMsg);
+        bAcknowledgeMA = acknowledge(uuid, requestedTrackElementList, lPriority, bAcknowledgeMA, MaMsg);
         if(bAcknowledgeMA == null) bAcknowledgeMA = false;
         if(bAcknowledgeMA) {
             handleMaAckReceived(iTrainId, R, uuid, MaReturnPayload, requestedTrackElementList, RbcMa, MAO, nid_engine_Id);
@@ -550,8 +558,81 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
     }
 
-    private Boolean acknowledge(UUID uuid, Long lPriority, Boolean bAcknowledgeMA, Message_21 MaMsg) {
-        PriorityMessage priorityMessage = new PriorityMessage(MaMsg, lPriority);
+    private Boolean acknowledge(UUID uuid, ComposedRoute CompRoute, Long lPriority, Boolean bAcknowledgeMA, Message_21 MaMsg)
+                        throws InvalidParameterException {
+        ArrayList<TrackPacket> trackPackets = new ArrayList<>();
+        Payload_21 P = MaMsg.getPayload();
+        Packet_21 GradientProfilePacket = null;
+        Packet_80 ModeProfilePacket = null;
+        Packet_27 SpeedProfile = null;
+
+        GradientProfilePacket = Converter.convertGradientProfile(P.ma.gradientProfile);
+        trackPackets.add(GradientProfilePacket);
+
+        ModeProfilePacket = Converter.convertModeProfile(P.ma.modeProfile);
+        trackPackets.add(ModeProfilePacket);
+
+        SpeedProfile = Converter.convertSpeedProfile(P.ma.speedProfile);
+        trackPackets.add(SpeedProfile);
+
+        int q_dir = P.ma.q_dir;
+        int q_scale = P.ma.q_scale;
+        int v_loa = P.ma.eoa.v_loa;
+        int t_loa = P.ma.eoa.t_loa;
+        boolean q_endtimer = P.ma.eoa.endTimer != null;
+        boolean q_dangerpoint = P.ma.eoa.dangerPoint != null;
+        boolean q_overlap = P.ma.eoa.overlap != null;
+        int t_endtimer = 0;
+        int d_endtimerstartloc = 0;
+        int d_DP = 0;
+        int v_release_DP = 0;
+        int d_startol = 0;
+        int t_ol = 0;
+        int d_ol = 0;
+
+        int v_release_ol = 0;
+
+        if(q_endtimer) {
+            t_endtimer = P.ma.eoa.endTimer.t_endtimer;
+            d_endtimerstartloc = P.ma.eoa.endTimer.d_endtimerstartloc;
+        }
+
+        if(q_dangerpoint) {
+            d_DP = P.ma.eoa.dangerPoint.d_dp;
+            v_release_DP = P.ma.eoa.dangerPoint.v_releasedp;
+        }
+
+        if(q_overlap) {
+            d_startol = P.ma.eoa.overlap.d_startol;
+            t_ol = P.ma.eoa.overlap.t_ol;
+            d_ol = P.ma.eoa.overlap.d_ol;
+            v_release_ol = P.ma.eoa.overlap.v_releaseol;
+        }
+
+        Packet_15.Packet_15_Section endSection = null;
+        try {
+            endSection = new Packet_15.Packet_15_Section(CompRoute.getRouteLength().intValue(),
+                    false,1,1);
+        } catch (SmartLogicException e) {
+            throw new InvalidParameterException("Route Length was not available: " + e.getMessage());
+        }
+        Packet_15 MaPacket = new Packet_15(q_dir, q_scale, v_loa, t_loa, endSection, q_endtimer,
+                    t_endtimer, d_endtimerstartloc, q_dangerpoint, d_DP, v_release_DP,
+                    q_overlap, d_startol, t_ol, d_ol, v_release_ol);
+
+
+
+        long t_train = System.currentTimeMillis();
+        boolean isRequestingAck = true;
+        int nid_lrbg = P.ma.nid_lrbg;
+        ebd.messageLibrary.message.trackmessages.Message_3 MaContent =
+                new Message_3(t_train, isRequestingAck, nid_lrbg, MaPacket);
+        MaContent.packets = trackPackets;
+        ebd.rbc_tms.message.tms.ETCSTrackMessage EtcsMa =
+                new ETCSTrackMessage(Integer.parseInt(MaMsg.header.tms_id), Integer.parseInt(MaMsg.header.rbc_id),
+                        P.nid_engine, MaContent);
+
+        PriorityMessage priorityMessage = new PriorityMessage(EtcsMa, lPriority);
         ackQueues.createQueue(uuid);
 
         this.RbcClient.sendMessage(priorityMessage);

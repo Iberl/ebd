@@ -2,12 +2,11 @@ package de.ibw.schedule.runner;
 
 import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
-import de.ibw.tms.entities.TimeTaskDAO;
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.exception.MissingInformationException;
 
 /**
  * Ein Ausfuhrbarer Befehl, der an die smartLogic gesendet wird

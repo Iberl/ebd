@@ -57,11 +57,11 @@ public class PositionData {
         return received_timestamp;
     }
 
-    public PositionData(long rbc_timestamp, long received_timestamp, TrainInfo TI, PositionInfo pos) {
+    public PositionData(long rbc_timestamp, long received_timestamp, int nid_engine, PositionInfo pos) {
 
         this.rbc_timestamp = rbc_timestamp;
         this.received_timestamp = received_timestamp;
-        this.nid_engine = TI.nid_engine;
+        this.nid_engine = nid_engine;
         Pos = pos;
     }
 

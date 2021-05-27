@@ -100,10 +100,11 @@ public class RbcModul extends Thread {
      * @param TI - Informationen zum Zug
      * @return Message_00 - eine Antwortnachricht
      */
-    public static Message_00 createResponseMessage(int iErrorCode, String rbc_id, UUID uuid, String tms_id, TrainInfo TI) {
+    public static Response createResponseMessage(int iErrorCode, String rbc_id, UUID uuid, String tms_id, TrainInfo TI) {
+            Response R = new Response(uuid, 1, 1, iErrorCode, "Unknown error");
 
-            Payload_00 Error = new Payload_00(iErrorCode,TI);
-            return new Message_00(uuid, tms_id, rbc_id, Error);
+
+            return R;
     }
 
     /**
@@ -193,7 +194,7 @@ public class RbcModul extends Thread {
                     while(isReady) {
 
                         PriorityMessage PM = this.outputQueue.take();
-                        Message M = PM.getMsg();
+
 
 
 

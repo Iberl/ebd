@@ -12,9 +12,8 @@ import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
-import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.exception.MissingInformationException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 

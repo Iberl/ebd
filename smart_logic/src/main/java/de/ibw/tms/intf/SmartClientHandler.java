@@ -228,9 +228,9 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
             Message.Header header = msg.getHeader();
             TrainInfo TI = PositonReport.trainInfo;
             PositionInfo posInf = PositonReport.positionInfo;
-            PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                    TI, posInf);
-            PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
+            //PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
+            //        TI, posInf);
+            //PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
             //PositionReportController.getInstance().servePositionReport(PositonReport, sRbc);
         } catch(Exception E) {
             E.printStackTrace();

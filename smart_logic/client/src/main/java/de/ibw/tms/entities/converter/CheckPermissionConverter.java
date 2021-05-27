@@ -2,7 +2,7 @@ package de.ibw.tms.entities.converter;
 
 import de.ibw.tms.entities.*;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
-import ebd.rbc_tms.util.*;
+import ebd.internal.util.*;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.trackplan.ui.Route;
 

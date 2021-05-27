@@ -7,8 +7,7 @@ import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.SmartClient;
 import de.motis.producer.MotisProducer;
-import ebd.SlConfigHandler;
-import ebd.rbc_tms.util.exception.MissingInformationException;
+import ebd.internal.util.exception.MissingInformationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

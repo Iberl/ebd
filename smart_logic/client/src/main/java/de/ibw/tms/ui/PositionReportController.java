@@ -6,36 +6,32 @@ import de.ibw.feed.Balise;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.data.PositionEnterType;
+import de.ibw.smart.logic.intf.messages.Converter;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.data.store.DataStore;
 import de.ibw.tms.entities.TmsJpaApp;
-import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.controller.Intf.IController;
-import de.ibw.tms.trackplan.ui.MainGraphicPanel;
 import de.ibw.tms.trackplan.ui.ZoomFrame;
 import de.ibw.tms.train.model.TrainDistance;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.DoubleCoord;
-import de.ibw.util.UtilFunction;
-import ebd.rbc_tms.Message;
-import ebd.rbc_tms.payload.Payload_14;
-import ebd.rbc_tms.util.PositionInfo;
-import ebd.rbc_tms.util.TrainInfo;
+import ebd.internal.Message;
+import ebd.internal.payload.Payload_14;
+import ebd.internal.util.PositionInfo;
+import ebd.internal.util.TrainInfo;
+import ebd.messageLibrary.packet.trainpackets.PositionPacket;
+import ebd.rbc_tms.message.rbc.ETCSTrainMessage;
 import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.CGEOKnoten;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CTOPKnoten;
 
-import javax.security.auth.callback.TextInputCallback;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Line2D;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -126,28 +122,36 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
     /**
      * Verwaltet eingehenden PositionReport
-     * @param PositonReport - {@link Payload_14} - Informationen des Position-Reports
      *
      */
-    public synchronized void servePositionReport(Payload_14 PositonReport, Message.Header header) {
+    public synchronized void servePositionReport(ebd.rbc_tms.message.Message M) {
         //oldPositionReportHandler(PositonReport, sRBC);
         new Thread() {
             @Override
             public void run() {
                 try {
-                    TrainInfo TI = PositonReport.trainInfo;
+                    PositionPacket ppMessage = null;
+                    ETCSTrainMessage P_PosWithinTrainMessage = (ETCSTrainMessage) M;
+                    int nidTrain = P_PosWithinTrainMessage.nid_engine;
+                    ebd.messageLibrary.message.Message LibMessage = P_PosWithinTrainMessage.etcsMessage;
+                    try {
+                        ppMessage = Converter.retrievePosPacket(LibMessage);
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        e.printStackTrace();
+                        return;
+                    }
 
-                    PositionInfo posInf = PositonReport.positionInfo;
-                    PositionData PD = new PositionData(header.getTimestamp(), System.currentTimeMillis(),
-                            TI, posInf);
-                    System.out.println("Train " + TI.nid_engine + ": distance " + PD.getPos().d_lrbg + " to " +
+                    PositionInfo posInf = Converter.generateByPositionPacke(ppMessage);
+                    PositionData PD = new PositionData(M.timestamp, System.currentTimeMillis(),
+                            nidTrain, posInf);
+                    System.out.println("Train " + nidTrain + ": distance " + PD.getPos().d_lrbg + " to " +
                             PD.getPos().nid_lrbg + "StartDir: " + PD.getPos().q_dlrbg
 
                     );
                     PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
                     TmsJpaApp.TmsFramer.repaint();
-                    getTrainModel(TI.nid_engine);
-                    logTrain(TI, posInf);
+                    getTrainModel(nidTrain);
+                    logTrain(nidTrain, posInf);
                 } catch(InvalidParameterException IPE) {
                     IPE.printStackTrace();
                     System.err.println("TMS is Shuting down");
@@ -160,8 +164,8 @@ public class PositionReportController extends SubmissionPublisher implements ICo
 
     }
 
-    private void logTrain(TrainInfo ti, PositionInfo posInf) {
-        System.out.println("Train " + ti.nid_engine + " has length: " + posInf.l_trainint);
+    private void logTrain(int nid_train, PositionInfo posInf) {
+        System.out.println("Train " + nid_train + " has length: " + posInf.l_trainint);
 
     }
 
