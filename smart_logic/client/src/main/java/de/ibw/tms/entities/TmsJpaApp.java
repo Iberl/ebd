@@ -137,8 +137,7 @@ public class TmsJpaApp implements ApplicationContextAware {
 
 			log.info("Starting TMS version" + UtilFunction.showVersionString());
 
-			//debug
-			sendTrainTimeTable();
+
 
 			TmsJpaApp.colorsOfEtcsTrains = CP;
 
@@ -150,7 +149,7 @@ public class TmsJpaApp implements ApplicationContextAware {
 
 			log.info("TMS is up");
 			log.info("TMS send planed Train-Timetable");
-			//sendTrainTimeTable();
+			sendTrainTimeTable();
 			log.info("Time-Table send");
 
 			log.info("Finished");
