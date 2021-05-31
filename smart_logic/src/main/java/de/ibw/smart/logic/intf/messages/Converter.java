@@ -121,10 +121,10 @@ public class Converter {
         return ResultSection;
     }
 
-    private static Packet_27.Packet_27_Category convertCategory(SpeedProfile.Section.Category C)
+    private static Packet_27.Packet_27_Section.Packet_27_Category convertCategory(SpeedProfile.Section.Category C)
             throws InvalidParameterException {
         if(C == null) throw  new InvalidParameterException("Category must not be null");
-        return new Packet_27.Packet_27_Category(C.q_diff, C.nc_cddiff, C.nc_diff, C.v_diff);
+        return new Packet_27.Packet_27_Section.Packet_27_Category(C.q_diff, C.nc_cddiff, C.nc_diff, C.v_diff);
     }
 
     private static void checkSpeedProfile(SpeedProfile speedProfile) throws InvalidParameterException {

@@ -73,7 +73,7 @@ class ClientHandlerSpec extends Specification {
                     1, 1, 1, 50, 1,1,1,
                     1, null);
             TrainInfo TI = new TrainInfo(1,1, 1L);
-            PositionData TrainPosition = new PositionData(1L, 1L, TI, Info);
+            PositionData TrainPosition = new PositionData(1L, 1L, 1, Info);
             PositionModul.getInstance().addPositionData(TrainPosition, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>smartlogic</artifactId>
+        <groupId>smartlogic</groupId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>globalUtils</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <name>Global Utilities</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>rbc_tms</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/rbc_tms/1.1-SNAPSHOT/rbc_tms-1.1-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>ebd</groupId>
+            <artifactId>messageLibrary</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+</project>

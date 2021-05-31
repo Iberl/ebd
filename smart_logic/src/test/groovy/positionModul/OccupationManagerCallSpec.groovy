@@ -54,21 +54,20 @@ class OccupationManagerCallSpec extends Specification {
 
         TrainInfo TI = new TrainInfo(inidEngine,1,1L)
 
-        PositionData PosDataInput = new PositionData(1L, 1L , TI, PI);
+        PositionData PosDataInput = new PositionData(1L, 1L , inidEngine, PI);
         PosDataInput.nid_engine = inidEngine;
 
         PositionInfo PreviousPosition = new PositionInfo(1,dummyBaliseId, null, distanceBetweenBaliseAndBeginOfMa,1,1,0,0,1, trainLength,
                 v_train, 1, 0, 0, null);
-        PositionData StartMaPosition = new PositionData(1L, 1L , TI, PreviousPosition);
+        PositionData StartMaPosition = new PositionData(1L, 1L , inidEngine, PreviousPosition);
 
 
 
         ComposedRoute CR = new ComposedRouteDataProvider().generateComposedRoute(lOfElments, trackOrd,
                 startperc as double, endperc as double)
 
-        ComposedRoute SpyRoute = Spy(CR);
-        SpyRoute.getStartPosition() >> StartMaPosition
-
+        ComposedRoute SpyRoute = CR;
+        SpyRoute.setStartPosition(StartMaPosition, null);
         NID_ENGINE nid_engine = new NID_ENGINE(inidEngine);
         MOBPositionClasses positionClasses = new SafeMOBPosition();
         MOBPosition mobPos = new MOBPosition(positionClasses);
@@ -80,10 +79,8 @@ class OccupationManagerCallSpec extends Specification {
 
         PositionModul MUT = Spy(PositionModul.getInstance());
 
+        MUT.updateCurrentRoute(4, SpyRoute);
 
-
-
-        MUT.getRouteOfNidEngine(4) >> SpyRoute
 
         MUT.addPositionData(PosDataInput, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 

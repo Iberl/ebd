@@ -1,7 +1,5 @@
 package de.ibw.tms.ma;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 
@@ -29,13 +27,7 @@ public class RbcMA extends MovementAuthority implements Serializable {
 
     public String sTrainId;
 
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        //mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-
-        return mapper.writeValueAsString(this);
-    }
 
 
 

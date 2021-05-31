@@ -105,8 +105,7 @@ class CalcByOffsetSpec extends Specification {
                 1, null);
 
 
-        PositionData PD = new PositionData(1, 1,
-                new TrainInfo(1, 1, 1), positionInfo);
+        PositionData PD = new PositionData(1, 1,1, positionInfo);
 
         PositionModul.getInstance().addPositionData(PD, PositionEnterType.ENTERED_VIA_POSITION_REPORT)
 

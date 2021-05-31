@@ -76,7 +76,7 @@ class SmartServer4TmsImplSpec extends Specification {
     def "checkMovementAuthority"() {
         given:
         PlanData.getInstance()
-        SmartServer ServerMock = Spy(new SmartServer(null, 33330));
+        SmartServer ServerMock = new SmartServer(null, 33330);
         SlConfigHandler.getInstance().byPassSmartLogicControl = true;
         SmartServer4TmsImpl MUT = Spy(SmartServer4TmsImpl.instance);
         RbcModul RbcClientStub = Stub(RbcModul.class);

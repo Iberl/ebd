@@ -11,11 +11,12 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.ui.MovmentMessengerFrame;
 import de.ibw.tms.ui.TmsFrameUtil;
 import de.ibw.util.UtilFunction;
+import de.motis.config.RabbitMQConfig;
 import de.motis.config.TmsConfig;
 import de.motis.producer.MotisProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -23,6 +24,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -43,8 +46,37 @@ import java.io.IOException;
 
 @SpringBootApplication
 @EnableJpaRepositories()
-@EnableConfigurationProperties(ColorProperties.class)
-public class TmsJpaApp {
+@EnableConfigurationProperties({ColorProperties.class, RabbitMQConfig.class, TmsConfig.class})
+public class TmsJpaApp implements ApplicationContextAware {
+
+
+	private static ApplicationContext CONTEXT;
+
+	/**
+	 * This method is called from within the ApplicationContext once it is
+	 * done starting up, it will stick a reference to itself into this bean.
+	 * @param context a reference to the ApplicationContext.
+	 */
+	public void setApplicationContext(ApplicationContext context) throws BeansException {
+		CONTEXT = context;
+	}
+
+	/**
+	 * This is about the same as context.getBean("beanName"), except it has its
+	 * own static handle to the Spring context, so calling this method statically
+	 * will give access to the beans by name in the Spring application context.
+	 * As in the context.getBean("beanName") call, the caller must cast to the
+	 * appropriate target class. If the bean does not exist, then a Runtime error
+	 * will be thrown.
+	 * @param beanName the name of the bean to get.
+	 * @return an Object reference to the named bean.
+	 */
+	public static Object getBean(String beanName) {
+		return CONTEXT.getBean(beanName);
+	}
+	public static Object getBean(Class<?> beanClass) {
+		return CONTEXT.getBean(beanClass);
+	}
 
 	private static final Logger log = LoggerFactory.getLogger(TmsJpaApp.class);
 
@@ -78,14 +110,6 @@ public class TmsJpaApp {
 	}
 
 
-	/**
-	 * Default Bean zum Erstellen der TMS-Konfiguration
-	 * @return TmsConfig - Default Konfigurations-Modul
-	 */
-	@Bean
-	public TmsConfig getTmsConfig() {
-		return new TmsConfig();
-	}
 
 	/**
 	 * Erstellt eine Senderoutine fuer den Motis-Fahrplan-Service
@@ -113,6 +137,9 @@ public class TmsJpaApp {
 
 			log.info("Starting TMS version" + UtilFunction.showVersionString());
 
+			//debug
+			sendTrainTimeTable();
+
 			TmsJpaApp.colorsOfEtcsTrains = CP;
 
 			TmsJpaApp.Config = C;
@@ -123,7 +150,7 @@ public class TmsJpaApp {
 
 			log.info("TMS is up");
 			log.info("TMS send planed Train-Timetable");
-			sendTrainTimeTable();
+			//sendTrainTimeTable();
 			log.info("Time-Table send");
 
 			log.info("Finished");

@@ -29,7 +29,7 @@ public class SpeedSegmentViewModel {
 
 
     /**
-     * Setzt bezug zu dem Controller
+     * Setzt Bezug zu dem Controller
      * @param ctrl {@link SegmentAddController} - Gesetzter Controller
      */
     public void setCtrl(SegmentAddController ctrl) {

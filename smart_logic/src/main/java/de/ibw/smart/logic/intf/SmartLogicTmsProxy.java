@@ -90,8 +90,10 @@ public class SmartLogicTmsProxy implements TmsIntf {
     private Message handleMessageAsProxy(Message msgFromRbc) {
 
 
+
         try {
         String strMessage = Serializer.serialize(msgFromRbc);
+        System.out.println("Message to TMS: " + strMessage);
             if(EM != null) {
                 EM.log("TMS Output Queue has " + SmartLogic.outputQueue.size() + "Elements", TMS_PROXY);
 

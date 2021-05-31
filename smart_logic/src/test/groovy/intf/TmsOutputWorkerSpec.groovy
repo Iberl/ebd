@@ -6,7 +6,12 @@ import io.netty.channel.ChannelHandlerContext
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.lang.reflect.AccessibleObject
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+import java.security.AccessController
 import java.security.InvalidParameterException
+import java.security.PrivilegedAction
 import java.util.concurrent.SynchronousQueue
 
 
@@ -16,6 +21,8 @@ import java.util.concurrent.SynchronousQueue
  * @since 18.03.2021
  */
 class TmsOutputWorkerSpec extends Specification {
+
+
 
     def "guard check null queue"() {
             given:
@@ -40,7 +47,8 @@ class TmsOutputWorkerSpec extends Specification {
         given:
         SynchronousQueue<SmartServerMessage> queue = new SynchronousQueue<SmartServerMessage>();
         SmartServerMessage SmartMessage = new SmartServerMessage("Test Transmission", 1L);
-        SynchronousQueue<SmartServerMessage> spyQueue = Spy(queue);
+
+        SynchronousQueue<SmartServerMessage> spyQueue = Stub(SynchronousQueue<SmartServerMessage>);
         spyQueue.take() >>> [null, SmartMessage as SmartServerMessage] >> { throw new InterruptedException() }
         spyQueue.isEmpty() >> false
         spyQueue.size() >> 1

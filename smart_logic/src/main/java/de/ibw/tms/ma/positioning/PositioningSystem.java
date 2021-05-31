@@ -2,7 +2,6 @@ package de.ibw.tms.ma.positioning;
 
 import de.ibw.rtm.intf.IRTMPositioningSystem;
 import de.ibw.tms.ma.common.DefaultObject;
-import ebd.globalUtils.position.Position;
 import org.apache.commons.lang3.NotImplementedException;
 import org.railMl.rtm4rail.RTMValidity;
 

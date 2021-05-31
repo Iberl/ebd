@@ -101,6 +101,9 @@ public class RbcModul extends Thread {
      * @return Message_00 - eine Antwortnachricht
      */
     public static Response createResponseMessage(int iErrorCode, String rbc_id, UUID uuid, String tms_id, TrainInfo TI) {
+            if(iErrorCode == 0) {
+                return new Response(uuid,1,1);
+            }
             Response R = new Response(uuid, 1, 1, iErrorCode, "Unknown error");
 
 
@@ -300,7 +303,7 @@ public class RbcModul extends Thread {
 
                 String sSend = null;
                 try {
-                    sSend = Serializer.serialize(M) + "\n";
+                    sSend = Serializer.serialize(M);
                     channelHandlerContext.writeAndFlush(Unpooled.copiedBuffer(sSend, CharsetUtil.UTF_8));
                     EM.log("SL has send message to RBC", SmartLogic.getsModuleId(RBC_MODUL));
                 } catch (NotSerializableException | FieldTypeNotSupportedException | ebd.messageLibrary.util.exception.MissingInformationException e) {

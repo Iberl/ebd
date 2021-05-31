@@ -30,31 +30,20 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>globalUtils</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>logging</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>rbc_tms</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/rbc_tms/1.1-SNAPSHOT/rbc_tms-1.1-SNAPSHOT.jar</systemPath>
+            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/rbc_tms/0.1-SNAPSHOT/rbc_tms-0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>messageLibrary</artifactId>
-            <version>mvp6-SNAPSHOT</version>
+            <version>0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/messageLibrary/mvp6/messageLibrary-mvp6.jar</systemPath>
+            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/messageLibrary/0.1-SNAPSHOT/messageLibrary-0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>

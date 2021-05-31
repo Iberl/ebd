@@ -26,12 +26,12 @@ class AddPositionDataSpec extends Specification {
         int dummyBaliseId = 12778;
 
         PositionModul MUT = PositionModul.getInstance();
-        TrainInfo TestInfo = new TrainInfo(1,1,1L);
+        //TrainInfo TestInfo = new TrainInfo(1,1,1L);
         SlConfigHandler.getInstance().useInfrastructureServer = false;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv;
         PlanData.getInstance();
         PositionInfo TestPosition = new PositionInfo(1,dummyBaliseId,null, 0, 1, 1, 1, 1, 5 , 14, 1 , 1 , 1, 1, null)
-        PositionData TestData = new PositionData(1L,1L,TestInfo, TestPosition)
+        PositionData TestData = new PositionData(1L,1L,1, TestPosition)
         MUT.addPositionData(TestData, PositionEnterType.ENTERED_VIA_POSITION_REPORT);
 
         expect:
