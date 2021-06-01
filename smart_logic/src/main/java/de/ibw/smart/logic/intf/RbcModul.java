@@ -28,14 +28,20 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.logging.Logger;
 
 import ebd.rbc_tms.Serializer;
+
+import static io.netty.handler.codec.AsciiHeadersEncoder.NewlineType.CRLF;
+
 /**
  * Ein RBC Modul sendet mithilfe des Netty-Framweorks an das RBC. Kann Nachrichten aus dem RBC erhalten. Wird deshalb zweimal instanziiert.
  *
@@ -258,11 +264,9 @@ public class RbcModul extends Thread {
 
         @Override
         public void run() {
-            try {
-                startTcpClient(this.sHost, this.iPort, null,M, ExecutingModul);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            //startTcpClient(this.sHost, this.iPort, null,M, ExecutingModul);
+            TmsServerHandler.getInstance().sendMessageToRbc(M);
+
         }
     }
 
@@ -299,6 +303,7 @@ public class RbcModul extends Thread {
         @Override
         public void channelActive(ChannelHandlerContext channelHandlerContext) throws MissingInformationException {
             if(M != null) {
+
                 if(EM != null) EM.log("Successfully connected to RBC", SmartLogic.getsModuleId(RBC_MODUL));
 
                 String sSend = null;
@@ -355,24 +360,96 @@ public class RbcModul extends Thread {
      */
     public class TmsServerHandler extends ChannelInboundHandlerAdapter {
 
+        private static final Logger logger = Logger.getLogger(
+                TmsServerHandler.class.getName());
+
         /**
          * Name in Log, wenn die SL als TMS gegen&uuml;ber des RBC auftritt
          */
         public static final String TMS_HANDLER = "TMS-HANDLER";
+        public static TmsServerHandler instance = null;
+
+        public static TmsServerHandler getInstance() { return instance; }
+
         private final int iSmartLogicId = 1;
         private EventBusManager EBM;
+        private ChannelHandlerContext context;
+        private SynchronousQueue<String> rbcOutputQueue = new SynchronousQueue<String>();
+        private Channel C;
+
+        public void setChannel(Channel Ch) {
+            this.C = Ch;
+        }
+
+
+        public void sendMessageToRbc(Message M) {
+            StringBuilder sMessage = new StringBuilder();
+            try {
+                sMessage.append(Serializer.serialize(M));
+                sMessage.append(System.lineSeparator());
+            } catch (NotSerializableException e) {
+                e.printStackTrace();
+            }
+            try {
+                System.out.println(sMessage.toString());
+                rbcOutputQueue.put(sMessage.toString());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        EventBusManager EBM = null;
+
+
+                        if (EBM == null) {
+                            try {
+                                EBM = EventBusManager.registerOrGetBus(1, false);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (EBM != null) EBM.log("Channel to RBC acitve", "RBC-OUTPUT-MODUL");
+                        while ( true ) {
+                            String rbcMessage = rbcOutputQueue.take();
+
+
+                            System.out.println("SL sends to RBC message");
+                            if (EBM != null) EBM.log("SL sends to RBC message", "RBC-OUTPUT-MODUL");
+
+
+                            if (EBM != null) EBM.log(rbcMessage, "RBC-OUTPUT-MODUL: " + rbcMessage);
+                            ctx.writeAndFlush(rbcMessage);
+                        }
+                        } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        }
 
         /**
          * Instanziieren eines TMS Empf&auml;ngers in der SL gegen&uuml;ber des RBCs
          */
         public TmsServerHandler() {
             super();
+            instance = this;
             try {
                 EBM = EventBusManager.registerOrGetBus(iSmartLogicID, false);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+
+
+
 
         /**
          * Definiert was passiert wenn Netty eine Nachricht vom RBC bekommt
@@ -385,6 +462,7 @@ public class RbcModul extends Thread {
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
 
+
             if(EBM != null) EBM.log("Received Message from RBC", TMS_HANDLER);
             //ctx.write(Unpooled.copiedBuffer("Hello " + received, CharsetUtil.UTF_8));
 
@@ -394,11 +472,15 @@ public class RbcModul extends Thread {
                     try {
                         if(EBM != null) EBM.log("Run TMS Handler Thread", TMS_HANDLER);
                         ByteBuf inBuffer = (ByteBuf) msg;
-
                         String received = inBuffer.toString(CharsetUtil.UTF_8);
                         if(EBM != null) EBM.log("SL received from RBC: " + received, TMS_HANDLER);
+                        if(TmsServerHandler.this.context == null) {
+                            TmsServerHandler.this.context  = ctx;
+                        }
 
-                        serverHandleJson(ctx, received);
+                        for(String singleJsonMsg : received.split(System.lineSeparator())) {
+                            serverHandleJson(ctx, singleJsonMsg);
+                        }
                         inBuffer.release();
                     } catch (ClassNotFoundException | MissingInformationException e) {
                         e.printStackTrace();
@@ -415,8 +497,7 @@ public class RbcModul extends Thread {
 
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-            ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)
-                    .addListener(ChannelFutureListener.CLOSE);
+
         }
 
         /**
@@ -661,18 +742,28 @@ public class RbcModul extends Thread {
             EventBusManager finalEM = EM;
             serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
                 protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    socketChannel.pipeline().addLast(new ObjectEncoder());
+
                     socketChannel.pipeline().addLast(new TmsServerHandler());
+                    TmsServerHandler.getInstance().setChannel(socketChannel);
                     if(finalEM != null) finalEM.log("TMS PROXY on Smart Logic Listening", TMS_PROXY);
                 }
-            });
+            }).childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            channelFuture = serverBootstrap.bind().sync();
+            channelFuture = serverBootstrap.bind(iPort).sync();
+            if(channelFuture.isSuccess()) {
+                if(EM != null) EM.log("Tcp Server (for RBC) started successfully","SMART-RBC-SERVER");
+
+
+            } else {
+                if(EM != null) EM.log("Tcp Server (for RBC) starting failed","SMART-RBC-SERVER");
+            }
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             group.shutdownGracefully().sync();
-            if(EM != null) EM.log("TMS PROXY on Smart Logic ShutDown", TMS_PROXY);
+            if(EM != null) EM.log("RBC Tcp Server on Smart Logic ShutDown", TMS_PROXY);
         }
         /*
         @Override
