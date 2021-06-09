@@ -78,7 +78,9 @@ public class SafeMOBPosition extends MOBPositionClasses {
     public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff, int iScale) throws SmartLogicException {
         ETCS_DISTANCE d_vehicleEndDiff = new ETCS_DISTANCE();
         d_vehicleEndDiff.sDistance = dVehicleEndOffset.setScale(0, RoundingMode.HALF_DOWN).shortValueExact();
+        Route.setExtendable(true);
         SafeMOBPosition NewPosition = (SafeMOBPosition) Route.createSubRoute(distanceDiff, d_vehicleEndDiff, iScale, this);
+        Route.setExtendable(false);
         this.setTrackEdgeSections(NewPosition.getTrackEdgeSections());
         ArrayList<TrackEdgeSection> sections = new ArrayList<>(NewPosition.getTrackEdgeSections());
         TrackEdgeSection StartSection = sections.get(0);

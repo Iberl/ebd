@@ -70,6 +70,12 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
     private BigDecimal dRouteLength = null;
 
+    private boolean isExtendable = false;
+
+    public void setExtendable(boolean extendable) {
+        isExtendable = extendable;
+    }
+
     public void generateFromRoute(Route R, int iTrainId) throws SmartLogicException {
         try{
             PositionData CurrentPos = guard(R, iTrainId);
@@ -1048,8 +1054,13 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         if(dStartMeter == null) throw new InvalidParameterException("Start Meter must not be null");
         if(dEndMeter == null) throw new InvalidParameterException("End Meter must not be null");
         if(dStartMeter.sDistance < 0) throw new InvalidParameterException("Start Meter must not be negative");
-        if(dEndMeter.sDistance < 0) throw new InvalidParameterException("End Meter must not be negative");
-
+        // wenn die Endbegrenzung negativ ist, wird die Route verlängert -> Anwendung bei Zugpositionen,
+        // wenn eine MA ueberfahren wuerde
+        if(dEndMeter.sDistance < 0  && !isExtendable ) throw new InvalidParameterException("End Meter must not be negative");
+        if(dEndMeter.sDistance < 0  && isExtendable ) {
+            System.err.println("MA overpassed by: " + (dEndMeter.sDistance * -1));
+            System.err.println("----Emergency Break necessary----");
+        }
         BigDecimal start_meter = new BigDecimal(dStartMeter.sDistance)
                 .multiply(new BigDecimal(10).pow(i_Exponent, MathContext.DECIMAL32));
 

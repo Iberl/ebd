@@ -33,6 +33,7 @@ import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
@@ -424,9 +425,7 @@ public class RbcModul extends Thread {
                             System.out.println("SL sends to RBC message");
                             if (EBM != null) EBM.log("SL sends to RBC message", "RBC-OUTPUT-MODUL");
 
-
-                            if (EBM != null) EBM.log(rbcMessage, "RBC-OUTPUT-MODUL: " + rbcMessage);
-                            ctx.writeAndFlush(rbcMessage);
+                            ctx.writeAndFlush(Unpooled.wrappedBuffer(rbcMessage.getBytes(StandardCharsets.UTF_8)));
                         }
                         } catch (InterruptedException e) {
                         e.printStackTrace();

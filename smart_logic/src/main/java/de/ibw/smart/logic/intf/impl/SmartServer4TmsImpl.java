@@ -42,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -388,7 +389,20 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
         try {
+            if(EBM != null) EBM.log("Before Route creating occupation length: "
+                            + requestedTrackElementList.getRouteLength(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             MAO = (MARequestOccupation) requestedTrackElementList.createSubRoute(NoDistance, NoDistance, 1, MAO);
+            if(EBM != null) EBM.log("Reserved Occupation Length: " + MAO.getMeterLength().doubleValue(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            if(EBM != null) EBM.log("Route Length: " + requestedTrackElementList.getRouteLength(),
+                    SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            if(
+                    requestedTrackElementList.getRouteLength().subtract(MAO.getMeterLength()).abs().
+                            compareTo(BigDecimal.valueOf(1.0d))
+                    > 0) {
+                System.err.println("ERROR, occupation is not as long as requested");
+            }
         } catch (SmartLogicException e) {
             e.printStackTrace();
             MAO = null;
@@ -621,9 +635,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                     q_overlap, d_startol, t_ol, d_ol, v_release_ol);
 
 
-
-        long t_train = System.currentTimeMillis();
-        boolean isRequestingAck = true;
+        // dnager t_train is functional unknown therefore null
+        long t_train = 0;
+        boolean isRequestingAck = false;
         int nid_lrbg = P.ma.nid_lrbg;
         ebd.messageLibrary.message.trackmessages.Message_3 MaContent =
                 new Message_3(t_train, isRequestingAck, nid_lrbg, MaPacket);
@@ -636,11 +650,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         ackQueues.createQueue(uuid);
 
         this.RbcClient.sendMessage(priorityMessage);
-        try {
-            bAcknowledgeMA = ackQueues.poll(uuid);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        bAcknowledgeMA = true;//ackQueues.poll(uuid);
+
         return bAcknowledgeMA;
     }
 

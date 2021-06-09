@@ -58,8 +58,8 @@ public class SpeedCategoryDAO {
     /**
      * Andere spezifische Geschwindigkeitscategorien
      *
-     * 0 Specific SSP applicable to Freight train braked in “P” position
-     * 1 Specific SSP applicable to Freight train braked in “G” position
+     * 0 Specific SSP applicable to Freight train braked in p position
+     * 1 Specific SSP applicable to Freight train braked in G position
      * 2 Specific SSP applicable to Passenger train
      * 3-15 Spare
      */

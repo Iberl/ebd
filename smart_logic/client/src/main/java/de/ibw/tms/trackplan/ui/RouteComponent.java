@@ -48,7 +48,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
 
 
     /**
-     * @Deprecated
+     * @deprecated
      *
      * Berechnet die Streckenl&auml;nge in Metern des letzten Streckenabschnitts.
      * Wird ben&ouml;tigt um den Nutzer eine Auswahl zu geben, wo der Zug am letzten Streckenabschnitt enden soll.
@@ -109,7 +109,7 @@ public class RouteComponent extends JPanel implements Flow.Subscriber<Route> {
     }
 
     /**
-     * @Waypoint
+     * Waypoint
      */
     private PositioningNetElement TrackEl;
     private Flow.Subscription RouteSubscription = null;

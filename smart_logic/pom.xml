@@ -36,25 +36,19 @@
             <artifactId>rbc_tms</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/rbc_tms/0.1-SNAPSHOT/rbc_tms-0.1-SNAPSHOT.jar</systemPath>
+            <systemPath>C:/Users/iberl.BST-AD/.m2/repository/ebd/rbc_tms/0.1-SNAPSHOT/rbc_tms-0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>messageLibrary</artifactId>
             <version>0.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/messageLibrary/0.1-SNAPSHOT/messageLibrary-0.1-SNAPSHOT.jar</systemPath>
+            <systemPath>C:/Users/iberl.BST-AD/.m2/repository/ebd/messageLibrary/0.1-SNAPSHOT/messageLibrary-0.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>smartlogc_tms_internal</artifactId>
             <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>ebd</groupId>
-            <artifactId>core</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>de.disposim</groupId>
@@ -112,7 +106,11 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.greenrobot</groupId>
+            <artifactId>eventbus</artifactId>
+            <version>3.2.0</version>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -198,11 +196,21 @@
             <version>2.4.4</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.0.0</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
             <version>3.6.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -227,8 +235,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <source>15</source>
-                    <target>15</target>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -283,16 +291,7 @@
 
 
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>16</source>
-                    <target>16</target>
-                </configuration>
-            </plugin>
-        </plugins>
+
     </build>
     <reporting>
         <plugins>

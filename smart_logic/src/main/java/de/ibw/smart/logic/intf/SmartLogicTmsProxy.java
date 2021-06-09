@@ -18,7 +18,6 @@ import ebd.internal.util.TrainInfo;
 import ebd.internal.util.exception.MissingInformationException;
 import ebd.rbc_tms.message.general.Response;
 import ebd.rbc_tms.message.rbc.ETCSTrainMessage;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.lang.reflect.Field;
 import java.util.UUID;
