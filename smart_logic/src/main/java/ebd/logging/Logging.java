@@ -16,10 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 
 public class Logging{
@@ -95,8 +92,9 @@ public class Logging{
         logger = Logger.getLogger(logPrefix);
         //logger.addHandler(fileHandlerAll);
         logger.addHandler(pipeHandler);
-        //Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
-        //logger.addHandler(fileHandler);
+        Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
+        fileHandler.setFormatter(new SimpleFormatter());
+        logger.addHandler(fileHandler);
 
         this.eventBus = eventBus;
         this.eventBus.register(this);

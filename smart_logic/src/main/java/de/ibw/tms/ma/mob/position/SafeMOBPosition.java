@@ -36,13 +36,14 @@ import java.util.List;
  * Sicherheitsraum einer Mobile
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.5
- * @since 2021-04-07
+ * @version 1.1
+ * @since 2021-06-11
  *
  */
 public class SafeMOBPosition extends MOBPositionClasses {
     public static final String CLASS_IDENTIFIER = "Safe_MOB_Position";
 
+    // Wechselseitige Abhängigkeit
     private VehicleOccupation Occupation = null;
 
     public SafeMOBPosition() {

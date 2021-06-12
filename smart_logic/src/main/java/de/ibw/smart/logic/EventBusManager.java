@@ -29,6 +29,9 @@ public class EventBusManager {
     private boolean isTMS = false;
 
 
+    public static EventBusManager RootEventBusManger = null;
+
+
     private static DefaultRepo<Integer, EventBusManager> tmsBusById = new DefaultRepo<>();
     private static DefaultRepo<Integer, EventBusManager> smartLogicBusById = new DefaultRepo<>();
 

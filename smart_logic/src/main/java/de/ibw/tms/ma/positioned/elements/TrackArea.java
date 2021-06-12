@@ -2,6 +2,7 @@ package de.ibw.tms.ma.positioned.elements;
 
 import de.ibw.tms.ma.positioning.IntrinsicCoordinate;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.util.intf.IToLogIntf;
 import org.railMl.rtm4rail.TApplicationDirection;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  *
  */
-public class TrackArea extends LinearElement {
+public class TrackArea extends LinearElement implements IToLogIntf {
     TApplicationDirection applicationDirection;
     List<TrackEdgeSection> trackEdgeSections;
 
@@ -72,4 +73,20 @@ public class TrackArea extends LinearElement {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "TrackArea{" +
+                "applicationDirection=" + applicationDirection +
+                ", trackEdgeSections=" + trackEdgeSections +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return "TrackArea{" +
+                "applicationDirection=" + applicationDirection +
+                ", trackEdgeSections=" + trackEdgeSections +
+                ", meterLength=" + this.getMeterLength() +
+                '}';
+    }
 }

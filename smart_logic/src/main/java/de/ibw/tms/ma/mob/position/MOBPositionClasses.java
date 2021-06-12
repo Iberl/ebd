@@ -2,6 +2,8 @@ package de.ibw.tms.ma.mob.position;
 
 import de.ibw.tms.ma.positioned.elements.LinearContiguousTrackArea;
 import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
+import de.ibw.util.intf.IToLogIntf;
+
 /**
  * Track Area für eine Mobile
  *
@@ -10,11 +12,11 @@ import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
  * @since 2021-03-31
  *
  */
-public class MOBPositionClasses extends LinearContiguousTrackArea {
+public class MOBPositionClasses extends LinearContiguousTrackArea implements IToLogIntf {
     private TrainPositionSpots begin;
     private TrainPositionSpots end;
 
-    // wird im Konstruktor der Mobilen gesetzt;
+    // wird im Konstruktor der Mobilen gesetzt; // wird wechselseitig referenziert
     private MOBPosition linkToMobileObject;
 
 
@@ -44,5 +46,23 @@ public class MOBPositionClasses extends LinearContiguousTrackArea {
 
     public void setEnd(TrainPositionSpots end) {
         this.end = end;
+    }
+
+    @Override
+    public String toString() {
+
+        return "MOBPositionClasses{" +
+                "begin=" + begin +
+                ", end=" + end +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return "MOBPositionClasses{" +
+                "begin=" + begin +
+                ", end=" + end +
+                super.log() +
+                '}';
     }
 }

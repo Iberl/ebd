@@ -15,6 +15,7 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.IWaypoint;
+import de.ibw.util.intf.IToLogIntf;
 import org.apache.commons.lang3.NotImplementedException;
 
 import javax.persistence.Entity;
@@ -31,8 +32,9 @@ import java.util.List;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2021-01-25
+ * @version 1.1
+ * @since 2021-06-11
+ *
  */
 
 public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
@@ -42,6 +44,23 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
     private LinearLocation location = new LinearLocation(null,null,null);
 
     private List<Waypoint> waypointsList = new ArrayList<Waypoint>();
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "routeSectionIDs=" + routeSectionIDs +
+                ", intrinsicCoordOfTargetTrackEdge=" + intrinsicCoordOfTargetTrackEdge +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return "Route{" +
+                "routeSectionIDs=" + routeSectionIDs +
+                ", intrinsicCoordOfTargetTrackEdge=" + intrinsicCoordOfTargetTrackEdge +
+                super.log() +
+                '}';
+    }
 
     public Route(List<RouteSection> sectionList) {
         super(CLASS_IDENTIFIER);

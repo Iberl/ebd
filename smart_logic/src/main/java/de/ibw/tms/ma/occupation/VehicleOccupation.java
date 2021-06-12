@@ -17,6 +17,7 @@ import de.ibw.tms.ma.positioned.elements.train.TrainPositionSpots;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.UtilFunction;
+import de.ibw.util.intf.IToLogIntf;
 import ebd.internal.util.PositionInfo;
 import ebd.internal.util.TrainInfo;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
@@ -207,4 +208,18 @@ public class VehicleOccupation extends Occupation implements IMoveable {
         return (MaxSafeFrontEnd) Position.getEnd();
     }
 
+    @Override
+    public String toString() {
+        return "VehicleOccupation{" +
+                "Position=" + Position +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return "VehicleOccupation{" +
+                "Position=" + Position +
+                super.log() +
+                '}';
+    }
 }

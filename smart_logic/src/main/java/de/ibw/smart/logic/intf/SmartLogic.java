@@ -140,7 +140,7 @@ public class SmartLogic extends NetEntity {
 
     private static RbcModul TmsReceiverProxy;
 
-    private static GUIServer SL_UI_Server;
+    public static GUIServer SL_UI_Server;
 
 
     private static EventBusManager EM = null;
@@ -423,6 +423,13 @@ public class SmartLogic extends NetEntity {
         String version  = SmartLogic.class.getPackage().getImplementationVersion();
         System.out.println("Starting smartLogic version " + UtilFunction.showVersionString());
 
+        try {
+            EventBusManager.RootEventBusManger = EventBusManager.registerOrGetBus(1, false);
+            EventBusManager.RootEventBusManger.log("smartLogic Root Event Bus Manager registered", getsModuleId("Main"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Root Event Bus Manager not able to register for smartLogic " + UtilFunction.showVersionString());
+        }
 
 
         startSmartLogicStd();

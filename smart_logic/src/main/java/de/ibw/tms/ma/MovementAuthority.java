@@ -9,6 +9,7 @@ import de.ibw.tms.etcs.NC_CDDIFF;
 import de.ibw.tms.ma.flanking.FlankArea;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MAOccupation;
+import de.ibw.util.intf.IToLogIntf;
 import ebd.internal.util.SpeedProfile;
 
 import java.io.Serializable;
@@ -24,7 +25,7 @@ import java.util.List;
  * @version 0.5
  * @since 2021-03-04
  */
-public class MovementAuthority implements Serializable {
+public class MovementAuthority implements Serializable, IToLogIntf {
         @Expose
         public EoA endOfAuthority;
         @Expose
@@ -189,4 +190,8 @@ public class MovementAuthority implements Serializable {
         }
 
 
+        @Override
+        public String log() {
+                return toString();
+        }
 }

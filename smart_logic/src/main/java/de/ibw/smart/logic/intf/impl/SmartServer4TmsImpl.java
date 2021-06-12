@@ -553,6 +553,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         for(Pair<String, String> locationBetweenEdges : waypointsBetweentTwoTrackEdges.getKeys()) {
             if(w.equals(waypointsBetweentTwoTrackEdges.getModel(locationBetweenEdges))) {
+                String sError = "Switch Waypoint having wrong status at between: "
+                        + locationBetweenEdges.getLeft() + " and " + locationBetweenEdges.getRight();
+                EventBusManager.RootEventBusManger.log(sError, SMART_SERVER_MA_MODUL);
                 System.err.println("Switch Waypoint having wrong status at between: "
                         + locationBetweenEdges.getLeft() + " and " + locationBetweenEdges.getRight());
                 break;
@@ -660,7 +663,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(iTrainId);
         MovableObject mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
 
-            if(TrainPosition == null || TrainPosition.getPos() == null || mo == null) {
+        if(TrainPosition == null || TrainPosition.getPos() == null || mo == null) {
             if(EBM != null) EBM.log("Train Position Unknown", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
             MaReturnPayload.setErrorState(uuid, false,NO_TRAIN_INFORMATION );
             sendMaResponseToTMS(MaReturnPayload, 2L);
@@ -807,7 +810,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     private ComposedRoute identifyRouteElements(int iTrainId, Route R, ComposedRoute requestedTrackElementList) throws SmartLogicException {
 
             requestedTrackElementList.generateFromRoute(R, iTrainId);
-
+            EventBusManager.RootEventBusManger.log("Composed Route Length after generate from Route: " +
+                    requestedTrackElementList.getRouteLength(), ROUTE_COMPONENTS_IDENTIFY);
             return requestedTrackElementList;
 
 

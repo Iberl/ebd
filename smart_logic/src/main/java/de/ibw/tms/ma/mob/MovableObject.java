@@ -4,6 +4,7 @@ import de.ibw.tms.ma.MovementAuthority;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.mob.position.MOBPosition;
 import de.ibw.util.ThreadedRepo;
+import de.ibw.util.intf.IToLogIntf;
 
 import java.util.Objects;
 
@@ -15,7 +16,7 @@ import java.util.Objects;
  * @since 2021-03-31
  *
  */
-public class MovableObject {
+public class MovableObject implements IToLogIntf {
 
     public static ThreadedRepo<NID_ENGINE, MovableObject> ObjectRepo = new ThreadedRepo<>();
 
@@ -71,5 +72,21 @@ public class MovableObject {
     @Override
     public int hashCode() {
         return Objects.hash(nid_Engine);
+    }
+
+    @Override
+    public String toString() {
+        return "MovableObject{" +
+                "nid_Engine=" + nid_Engine +
+                ", position=" + position +
+                ", MA=" + MA +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return toString();
+
+
     }
 }

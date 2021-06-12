@@ -6,6 +6,7 @@ import de.ibw.history.data.ComposedRoute;
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.schedule.TmsScheduler;
+import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload;
@@ -45,8 +46,8 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.0
- * @since 2021-04-13
+ * @version 1.1
+ * @since 2021-06-09
  */
 public class ClientHandler extends SmartClientHandler {
 
@@ -54,6 +55,10 @@ public class ClientHandler extends SmartClientHandler {
      * Ein Client zur Kommunikation mit dem Server innerhalb des smartLogic-Moduls
      */
     SmartLogicClient Client = null;
+
+    private static String MODULE_NAME = "ClientInTmsToSL";
+
+
 
     /**
      * Konstruktor dieses Client Handlers
@@ -123,6 +128,8 @@ public class ClientHandler extends SmartClientHandler {
         ComposedRoute CR = new ComposedRoute();
         try {
             CR.generateFromRoute(R, iTrainId);
+            EventBusManager.RootEventBusManger.log("Composed Route Length after generate from Route: " +
+                    CR.getRouteLength(), MODULE_NAME);
             PositionModul.getInstance().updateCurrentRoute(iTrainId, CR);
         } catch (SmartLogicException e) {
             e.printStackTrace();

@@ -1,17 +1,19 @@
 package de.ibw.tms.ma.mob.position;
 
 import de.ibw.tms.ma.mob.MovableObject;
+import de.ibw.util.intf.IToLogIntf;
+
 /**
  * Position einer Mobilen
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2021-03-31
+ * @version 1.1
+ * @since 2021-06-11
  *
  */
-public class MOBPosition {
+public class MOBPosition implements IToLogIntf {
 
-    // wird beim Zuweisen gesetzt
+    // wird beim Zuweisen gesetzt // Referenz wechselseitig
     private MovableObject movableObject;
 
 
@@ -38,5 +40,17 @@ public class MOBPosition {
 
     public void setPositionArea(MOBPositionClasses positionArea) {
         this.positionArea = positionArea;
+    }
+
+    @Override
+    public String toString() {
+        return "MOBPosition{" +
+                "positionArea=" + positionArea +
+                '}';
+    }
+
+    @Override
+    public String log() {
+        return toString();
     }
 }

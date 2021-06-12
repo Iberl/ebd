@@ -3,12 +3,16 @@ package de.ibw.history.data;
 import de.ibw.history.PositionData;
 import de.ibw.history.PositionModul;
 import de.ibw.history.TrackAndOccupationManager;
+import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.location.SpotLocation;
+import de.ibw.tms.ma.mob.position.MOBPosition;
+import de.ibw.tms.ma.mob.position.MOBPositionClasses;
+import de.ibw.tms.ma.mob.position.SafeMOBPosition;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.Waypoint;
@@ -53,6 +57,9 @@ import java.util.*;
  */
 public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopological>> {
 
+    private static String MODULE_NAME = "Route Composer";
+
+
     // Waypoints auf einer Kante innerhalb einer DKW
     public DefaultRepo<TrackEdge, Waypoint> dkwWaypointRepo = new DefaultRepo<>();
     // Waypoints zwischen zwei TrackEdges je String id
@@ -78,8 +85,19 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
     public void generateFromRoute(Route R, int iTrainId) throws SmartLogicException {
         try{
+            EventBusManager EBM = EventBusManager.RootEventBusManger;
+            EBM.log(R.log(), "GivenPlainRoute@RouteGen " + iTrainId + ":");
             PositionData CurrentPos = guard(R, iTrainId);
+            EBM.log(CurrentPos.log(), "CurrentPosition@RouteGen " + iTrainId + ":");
             MovableObject MO = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
+            if(MO == null) {
+                SafeMOBPosition SafePos = new SafeMOBPosition();
+
+                MOBPosition Position = new MOBPosition(SafePos);
+                MO = new MovableObject(new NID_ENGINE(iTrainId), Position);
+            }
+            EBM.log(MO.log(), "MoveableObject@RouteGen " + iTrainId + ":");
+
 
             VehicleOccupation VO = null;
 
@@ -87,9 +105,17 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                     TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
             if(VehicleMap.getAll().size() != 0) {
                 VO = (VehicleOccupation) VehicleMap.getAll().iterator().next().get(0);
+
+
+                EBM.log(VO.log(), "VehOcc@RouteGen " + iTrainId + ":");
+
+
+
                 this.setStartPosition(CurrentPos, VO);
             } else {
                 this.setStartPosition(CurrentPos, null);
+                EBM.log("null no occ", "VehOcc@RouteGen " + iTrainId + ":");
+
             }
 
 

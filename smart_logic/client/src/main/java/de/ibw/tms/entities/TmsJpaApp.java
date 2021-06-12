@@ -3,6 +3,8 @@ package de.ibw.tms.entities;
 import de.ibw.main.MotisManager;
 import de.ibw.main.SmartLogicClient;
 
+import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.ColorProperties;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.MovementMessengerIntf;
@@ -136,9 +138,7 @@ public class TmsJpaApp implements ApplicationContextAware {
 
 
 			log.info("Starting TMS version" + UtilFunction.showVersionString());
-
-
-
+			handleLogging();
 			TmsJpaApp.colorsOfEtcsTrains = CP;
 
 			TmsJpaApp.Config = C;
@@ -157,6 +157,20 @@ public class TmsJpaApp implements ApplicationContextAware {
 
 
 		};
+	}
+
+	private void handleLogging() {
+		try {
+			SmartLogic.SL_UI_Server = EventBusManager.startLogGuiServer(true);
+			EventBusManager.RootEventBusManger = EventBusManager.registerOrGetBus(1, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Logging Gui on SL cannot be started.");
+		}
+
+
+		log.info("Root Event Bus Manager registered for TMS");
+		EventBusManager.RootEventBusManger.log("TEST", "TestModul");
 	}
 
 	private void sendTrainTimeTable() {

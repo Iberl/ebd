@@ -1,6 +1,8 @@
 package de.ibw.history;
 
 import de.ibw.history.data.ComposedRoute;
+import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MAOccupation;
@@ -25,12 +27,14 @@ import java.util.UUID;
  * Manager der occupations auf Tracks verwaltet
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.0
- * @since 2021-04-27
+ * @version 1.1
+ * @since 2021-06-09
  *
  */
 public class TrackAndOccupationManager {
 
+
+    public static String MODULE_ID = "TrAndOccupationMgr";
 
     /**
      * reseverd MA of current Ma communicated by tms is written as blocked for all furhter MaRequest
@@ -43,12 +47,20 @@ public class TrackAndOccupationManager {
      */
     public static void transferMaRequestBlockListIntoRealBlockList(int trainId, MARequestOccupation MAO, MA rbcMa, Route r, ComposedRoute requestedTrackElementList) throws InvalidParameterException {
         guardTransfer(MAO, rbcMa,r);
+        EventBusManager EBM = EventBusManager.RootEventBusManger;
         TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) requestedTrackElementList.get(requestedTrackElementList.size() - 1).getRight();
         int q_scale = rbcMa.q_scale;
-
+        if(EBM != null) {
+            EBM.log("MA Request Last Edge: " + LastEdge.sId, SmartLogic.getsModuleId(MODULE_ID));
+        }
+        System.out.println("MA Request Last Edge: " + LastEdge.sId);
         MAOccupation MaoOccup = MAOccupation.generateMaOccupation(trainId, MAO, rbcMa, r, requestedTrackElementList, LastEdge, q_scale);
-
-
+        System.out.println("MA Occupation Length: " + MaoOccup.getMeterLength());
+        System.out.println("MA Request Length: " + MAO.getMeterLength());
+        if(EBM != null) {
+            EBM.log("MA Occupation Length: " + MaoOccup.getMeterLength(), SmartLogic.getsModuleId(MODULE_ID));
+            EBM.log("MA Request Length: " + MAO.getMeterLength(), SmartLogic.getsModuleId(MODULE_ID));
+        }
         TrackAndOccupationManager.startOperation(TrackAndOccupationManager.Operations.StoreOperation,
                 MAOccupation.class,
                 MaoOccup);

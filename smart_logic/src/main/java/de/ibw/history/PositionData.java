@@ -1,6 +1,9 @@
 package de.ibw.history;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.ibw.tms.ma.occupation.VehicleOccupation;
+import de.ibw.util.intf.IToLogIntf;
 import ebd.internal.util.PositionInfo;
 import ebd.internal.util.TrainInfo;
 
@@ -11,10 +14,10 @@ import java.util.Date;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2020-11-06
+ * @version 1.1
+ * @since 2021-06-11
  */
-public class PositionData {
+public class PositionData implements IToLogIntf {
     /** Timestamp Of Message Creation */
     private long rbc_timestamp;
 
@@ -84,5 +87,11 @@ public class PositionData {
 
     public PositionInfo getPos() {
         return Pos;
+    }
+
+    @Override
+    public String log() {
+        Gson gson = new GsonBuilder().serializeNulls().create();
+            return gson.toJson(this);
     }
 }

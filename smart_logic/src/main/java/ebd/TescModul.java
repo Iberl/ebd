@@ -112,7 +112,7 @@ public class TescModul {
             MoveableTrackElement DkwElement = DkwStateByRepo.getModel(sId);
             NodeInformation NI = ISwitchHandler.getNodeInfoBySwitchId(sId);
             if (NI == null) {
-                EventBusManager.registerOrGetBus(1, false).
+                EventBusManager.RootEventBusManger.
                         log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
                 return false;
             }
@@ -125,7 +125,7 @@ public class TescModul {
                 }
             }
             if (CS_Refered == null) {
-                EventBusManager.registerOrGetBus(1, false).
+                EventBusManager.RootEventBusManger.
                         log("Dkw related Nodes for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
 
                 return false;
@@ -162,7 +162,7 @@ public class TescModul {
                 return true;
             } else return false;
         } else {
-            EventBusManager.registerOrGetBus(1,false).
+            EventBusManager.RootEventBusManger.
                     log("Switch for " + sId + " not found", SmartLogic.getsModuleId(MODULE_NAME));
             return false;
         }
@@ -191,12 +191,8 @@ public class TescModul {
      * @return
      */
     public boolean putNewState(String dbdId, int state) {
-        try {
-            EventBusManager.registerOrGetBus(1,false).
-                    log("New State: " + state + "entered for: " + dbdId, SmartLogic.getsModuleId(MODULE_NAME));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        EventBusManager.RootEventBusManger.
+                log("New State: " + state + "entered for: " + dbdId, SmartLogic.getsModuleId(MODULE_NAME));
         guardState(state);
         String idKey = dbdId.replace("I", ""); // interface commits is-Value with I as postfix
         if(ElementStateByIdRepository.containsKey(idKey)) {
@@ -272,13 +268,9 @@ public class TescModul {
 
         MTE.setCurrentStatus(currentStatus);
         DkwStateByRepo.update(idKey, MTE);
-        try {
-            EventBusManager.registerOrGetBus(1,false).
-                    log("Both state unknowwn for ID: " + idKey + " so set unknown.",
-                            SmartLogic.getsModuleId(MODULE_NAME));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        EventBusManager.RootEventBusManger.
+                log("Both state unknowwn for ID: " + idKey + " so set unknown.",
+                        SmartLogic.getsModuleId(MODULE_NAME));
         return true;
     }
 
@@ -291,13 +283,9 @@ public class TescModul {
             MoveableTrackElement MTE = DkwStateByRepo.getModel(idKey);
             MTE.setCurrentStatus(currentStatus);
             DkwStateByRepo.update(idKey, MTE);
-            try {
-                EventBusManager.registerOrGetBus(1,false).
-                        log("DKW: " + idKey + "set to states: " + state + ", " + state2,
-                                SmartLogic.getsModuleId(MODULE_NAME));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            EventBusManager.RootEventBusManger.
+                    log("DKW: " + idKey + "set to states: " + state + ", " + state2,
+                            SmartLogic.getsModuleId(MODULE_NAME));
             return true;
 
         }
@@ -316,12 +304,8 @@ public class TescModul {
             MTE.setCurrentStatus(NewState);
             ElementStateByIdRepository.update(idKey, MTE);
         }
-        try {
-            EventBusManager.registerOrGetBus(1,false).
-                    log("EW: " + idKey + "set to state: " + state ,SmartLogic.getsModuleId(MODULE_NAME));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        EventBusManager.RootEventBusManger.
+                log("EW: " + idKey + "set to state: " + state ,SmartLogic.getsModuleId(MODULE_NAME));
     }
 
     private void handleState(int state, TrackElementStatus newState,int index) {
@@ -357,12 +341,8 @@ public class TescModul {
 
     public void fetchIntialState() throws IOException {
 
-        try {
-            EventBusManager.registerOrGetBus(1,false).
-                    log("Tesc-Module: Fetch Initial State",SmartLogic.getsModuleId(MODULE_NAME));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        EventBusManager.RootEventBusManger.
+                log("Tesc-Module: Fetch Initial State",SmartLogic.getsModuleId(MODULE_NAME));
         ArrayList<String> watchedEbdIds = new ArrayList<>();
         initialiseWithUnknown();
 
