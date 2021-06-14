@@ -78,7 +78,12 @@ public class SafeMOBPosition extends MOBPositionClasses {
      */
     public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff, int iScale) throws SmartLogicException {
         ETCS_DISTANCE d_vehicleEndDiff = new ETCS_DISTANCE();
+        // interpolate comma errors
+        if(dVehicleEndOffset.intValue() == Route.getRouteLength().intValue()) {
+            dVehicleEndOffset = new BigDecimal(Route.getRouteLength().intValue());
+        }
         d_vehicleEndDiff.sDistance = dVehicleEndOffset.setScale(0, RoundingMode.HALF_DOWN).shortValueExact();
+
         Route.setExtendable(true);
         SafeMOBPosition NewPosition = (SafeMOBPosition) Route.createSubRoute(distanceDiff, d_vehicleEndDiff, iScale, this);
         Route.setExtendable(false);

@@ -797,6 +797,7 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                     ETCS_DISTANCE dEndMeter,
                                     int i_QScale, TrackArea result) throws SmartLogicException {
         if(result == null) throw new SmartLogicException("Result is to be filled and must not be null");
+
         guardCreatingSubRoute(dStartMeter, dEndMeter, i_QScale);
         Q_SCALE QS = Q_SCALE.getScale(i_QScale);
         result.setApplicationDirection(TApplicationDirection.BOTH);

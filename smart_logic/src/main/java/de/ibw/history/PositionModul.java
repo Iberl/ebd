@@ -270,7 +270,8 @@ public class PositionModul implements IPositionModul {
         distanceEndDif.sDistance = 0;
         if(trainLengthMeter != null) {
             try {
-                dVehicleEndOffset = Route.getRouteLength().subtract(diff).subtract(trainLengthMeter);
+                //dVehicleEndOffset = Route.getRouteLength().subtract(diff).subtract(trainLengthMeter);
+                dVehicleEndOffset = Route.getRouteLength().subtract(diff);
             } catch (SmartLogicException e) {
                 e.printStackTrace();
                 throw new InvalidParameterException(e.getMessage());
