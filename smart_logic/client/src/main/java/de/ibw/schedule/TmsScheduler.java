@@ -3,6 +3,8 @@ package de.ibw.schedule;
 import de.ibw.main.SmartLogicClient;
 import de.ibw.modules.MaModul;
 import de.ibw.schedule.runner.PermissionRunnable;
+import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.entities.TimeTaskDAO;
 import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.entities.converter.CheckDbdCmdConverter;
@@ -94,6 +96,8 @@ public class TmsScheduler {
             if(started) return;
             started = true;
             Iterator<TimeTaskDAO> it = todoTasks.iterator();
+            EventBusManager.RootEventBusManger.log("Tasks (count: " + todoTasks.size()  + " ) going to be scheduled",
+                    SmartLogic.getsModuleId("TMS Scheduler"));
             while(it.hasNext()) {
                 TimeTaskDAO T = it.next();
                 long lTime = (long) (T.SendTimeSinceStartInSeconds * 1000 + System.currentTimeMillis());

@@ -1,5 +1,6 @@
 package de.ibw.smart.logic.intf;
 
+import com.google.gson.stream.MalformedJsonException;
 import de.ibw.smart.logic.EventBusManager;
 import ebd.SlConfigHandler;
 import ebd.messageLibrary.util.exception.*;
@@ -519,9 +520,9 @@ public class RbcModul extends Thread {
 
         try {
             msgFromRbc = Serializer.deserialize(received);
-        } catch (NotDeserializableException | ClassNotSupportedException | ValueNotSupportedException | InvalidHashException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Response responseError = new Response(null, 1, 1 );
+            Response responseError = new Response(1, 1, 2, "Message not deserialzable");
             SmartLogic.getRbcClient().sendMessage(new PriorityMessage(responseError, 3L));
             return;
         }

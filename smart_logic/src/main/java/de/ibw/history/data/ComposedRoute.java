@@ -1127,8 +1127,15 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         for(Pair<String, String> edgesIdPair : twoEdgeWaypoint.getKeys()) {
             waypointsBetweentTwoTrackEdges.update(edgesIdPair, twoEdgeWaypoint.getModel(edgesIdPair));
         }
-        newFirstSpot.setIntrinsicCoord(1-newFirstSpot.getIntrinsicCoord());
+        //newFirstSpot.setIntrinsicCoord(newFirstSpot.getIntrinsicCoord());
         this.firstSpot = newFirstSpot;
+
+        if(firstSpot.getIntrinsicCoord() > lastSpot.getIntrinsicCoord()) {
+            newFirstSpot = lastSpot;
+            lastSpot = firstSpot;
+            firstSpot = newFirstSpot;
+        }
+
         // index 0 left out it is already set
         for(int i = reverseRoute.size() - 1 ; i != 0; i--) {
             this.add(0, reverseRoute.get(i));

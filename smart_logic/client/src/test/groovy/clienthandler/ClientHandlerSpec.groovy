@@ -50,7 +50,7 @@ class ClientHandlerSpec extends Specification {
         given:
 
             PlanData.getInstance();
-            ClientHandler MUT = Spy(new ClientHandler(null));
+            ClientHandler MUT = Spy(new ClientHandler(null, iRetryTime));
             SynchronousQueue queue = getTmsQueue(MUT);
 
             new Thread() {

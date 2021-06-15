@@ -23,6 +23,8 @@ import ebd.internal.payload.Payload_14;
 import ebd.internal.util.PositionInfo;
 import ebd.internal.util.TrainInfo;
 import ebd.internal.util.exception.MissingInformationException;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -38,14 +40,18 @@ import java.util.concurrent.SynchronousQueue;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
+ * @version 1.1
  * @since 2020-08-10
  */
+@ChannelHandler.Sharable
 public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerMessage> {
 
 
     private static SmartClientHandler instance = null;
     protected static Logger logger = Logger.getLogger( SmartClientHandler.class );
+
+
+    protected int iRetryTime;
 
     /**
      * Singelton um den ClientHandler des TMS widerzugeben
@@ -100,6 +106,20 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         }
     }*/
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        handleNoConnection(ctx);
+    }
+
+    private void handleNoConnection(ChannelHandlerContext ctx) {
+        Channel channel = ctx.channel();
+
+        /* If shutdown is on going, ignore */
+        if (channel.eventLoop().isShuttingDown()) return;
+        if(iRetryTime == 0) iRetryTime = 3;
+        ReconnectionTask reconnect = new ReconnectionTask(channel, iRetryTime);
+        reconnect.run();
+    }
 
     /**
      * Definiert was das TMS unternimmt, solange eine Verbindung zur SL aktiv ist.
@@ -135,7 +155,8 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
     @Override
     public void exceptionCaught(ChannelHandlerContext channelHandlerContext, Throwable cause){
         cause.printStackTrace();
-        channelHandlerContext.close();
+        handleNoConnection(channelHandlerContext);
+        //channelHandlerContext.close();
     }
 
     /**

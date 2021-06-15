@@ -55,7 +55,7 @@ public class TmsFrameUtil {
      * @return JFrame
      */
     public static JFrame createTmsFrame() {
-        JFrame frame = new JFrame("TMS SIM");
+        JFrame frame = new JFrame("TMS SIM connected to smartLogic");
         frame.getContentPane().setLayout(new BorderLayout());
         TmsJpaApp.TmsFramer.tmsFrame = frame;
 

@@ -21,8 +21,6 @@ import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
 import de.ibw.tms.ui.PositionReportController;
 
-import ebd.internal.Payload;
-import ebd.internal.payload.Payload_14;
 import ebd.internal.util.MA;
 import ebd.internal.util.exception.MissingInformationException;
 import ebd.messageLibrary.util.exception.ClassNotSupportedException;
@@ -51,6 +49,7 @@ import java.util.UUID;
  */
 public class ClientHandler extends SmartClientHandler {
 
+
     /**
      * Ein Client zur Kommunikation mit dem Server innerhalb des smartLogic-Moduls
      */
@@ -63,9 +62,11 @@ public class ClientHandler extends SmartClientHandler {
     /**
      * Konstruktor dieses Client Handlers
      * @param smartLogicClient - Modul das den Netzwerkverkehr vermittelt
+     * @param iRetryTime
      */
-    public ClientHandler(SmartLogicClient smartLogicClient) {
+    public ClientHandler(SmartLogicClient smartLogicClient, int iRetryTime) {
         Client = smartLogicClient;
+        this.iRetryTime = iRetryTime;
     }
 
 

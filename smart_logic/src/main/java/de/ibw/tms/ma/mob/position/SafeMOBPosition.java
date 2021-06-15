@@ -251,19 +251,23 @@ public class SafeMOBPosition extends MOBPositionClasses {
         BigDecimal spaceToNextNode = offsetPassed.subtract(newOffset);
 
         BigDecimal PercentOfRouteEndToNextNode = spaceToNextNode.divide(BigDecimal.valueOf(E.dTopLength), MathContext.DECIMAL32);
-        BigDecimal OffsetOfRoute = BigDecimal.valueOf(1.0d).subtract(PercentOfRouteEndToNextNode);
 
-        R.setIntrinsicCoordOfTargetTrackEdge(OffsetOfRoute.doubleValue());
+        if(E.getRefNode().equals(TargetNode)) {
 
+
+            R.setIntrinsicCoordOfTargetTrackEdge(PercentOfRouteEndToNextNode.doubleValue());
+        } else {
+            R.setIntrinsicCoordOfTargetTrackEdge(BigDecimal.valueOf(1.0d).subtract(PercentOfRouteEndToNextNode)
+                    .doubleValue());
+        }
 
         ComposedRoute CR = new ComposedRoute();
         try {
             CR.generateFromRoute(R, nid_engine.getId());
+            return CR;
         } catch (SmartLogicException ignored) {
-
+            return CR;
         }
-        return CR;
-
     }
 
     private TopologyGraph.Edge getNextEdge(TopologyGraph.Edge e, TopologyGraph.Node targetNode,

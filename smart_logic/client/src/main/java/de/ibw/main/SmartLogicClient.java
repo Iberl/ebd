@@ -3,6 +3,8 @@ package de.ibw.main;
 import com.google.gson.Gson;
 import de.ibw.handler.ClientHandler;
 import de.ibw.schedule.TmsScheduler;
+import de.ibw.smart.logic.EventBusManager;
+import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.SmartClient;
@@ -22,13 +24,15 @@ import java.util.stream.Collectors;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-11-11
+ * @version 1.1
+ * @since 2021-06-14
  */
 public class SmartLogicClient extends SmartClient {
 
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
+
+    private static String MODULE_NAME = "Client-To-smartLogic";
 
     /**
      * Motis Anbindung
@@ -77,9 +81,13 @@ public class SmartLogicClient extends SmartClient {
      */
     public SmartLogicClient(TimeTaskRepository timeTaskRepository, String sHost, int iPort) {
         super(sHost, iPort);
+        int iRetryTime = 7; // seconds;
+        if(TmsJpaApp.connectionProperties != null) {
+            iRetryTime = TmsJpaApp.connectionProperties.getRetry_time();
+        }
         this.timeTaskRepository = timeTaskRepository;
         this.RequestScheduler = new TmsScheduler(this, this.timeTaskRepository);
-        this.CH = new ClientHandler(this);
+        this.CH = new ClientHandler(this, iRetryTime);
     }
 
     public String getsTmsId() {
@@ -96,6 +104,13 @@ public class SmartLogicClient extends SmartClient {
 
     public void setsRbcId(String sRbcId) {
         this.sRbcId = sRbcId;
+    }
+
+
+    @Override
+    public void setConnectedTOsmartLogic(boolean connectedTOsmartLogic) {
+        super.setConnectedTOsmartLogic(connectedTOsmartLogic);
+        TmsJpaApp.setConnectedTOsmartLogic(connectedTOsmartLogic);
     }
 
     /**
@@ -121,10 +136,46 @@ public class SmartLogicClient extends SmartClient {
 
     @Override
     public void run() {
-        try {
-            startSmartLogicClient(CH);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        int iRetryTime = 7;
+        if(TmsJpaApp.connectionProperties != null) {
+            iRetryTime = TmsJpaApp.connectionProperties.getRetry_time();
+        }
+
+        while (!isConnectedTOsmartLogic) {
+            int finalIRetryTime = iRetryTime;
+            new Thread() {
+                @Override
+                public void run() {
+
+                    try {
+                        startSmartLogicClient(SmartLogicClient.this.CH);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+          }.start();
+            try {
+                Thread.sleep(iRetryTime * 1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if(isConnectedTOsmartLogic) {
+            EventBusManager.RootEventBusManger.log("TMS-Client sending Train-Timetable", SmartLogic.getsModuleId(
+                    MODULE_NAME
+            ));
+            //log.info("TMS send planed Train-Timetable");
+            TmsJpaApp.sendTrainTimeTable();
+
+            //log.info("Time-Table send");
+
+            EventBusManager.RootEventBusManger.log("Initial Phase Finished", SmartLogic.getsModuleId(
+                    MODULE_NAME
+            ));
+
+            TmsJpaApp.startTmsUI();
+
         }
     }
 
@@ -155,6 +206,21 @@ public class SmartLogicClient extends SmartClient {
     public static void proceedTmsLogic(TimeTaskRepository repository) {
 
 
+        //oldImplementation(repository);
+        String slHostIp = TmsJpaApp.Config.getIpToSmartLogic4TMS();
+        int iPort = Integer.parseInt(TmsJpaApp.Config.getPortOfSmartLogic4TMS());
+        SlClient = new SmartLogicClient(repository, slHostIp, iPort);
+        SlClient.start();
+
+
+
+    }
+
+    /**
+     * deprecated
+     * @param repository
+     */
+    private static void oldImplementation(TimeTaskRepository repository) {
         BufferedReader R = new BufferedReader(new InputStreamReader(System.in));
         String jsonStringOrFileName = "";
         while (true) {
@@ -193,7 +259,6 @@ public class SmartLogicClient extends SmartClient {
 
         }
         //SlClient.evalRepo();
-
     }
 
     /**

@@ -6,6 +6,7 @@ import de.ibw.main.SmartLogicClient;
 import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.ColorProperties;
+import de.ibw.tms.ConnectionProperties;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.MovementMessengerIntf;
 import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
@@ -48,11 +49,19 @@ import java.io.IOException;
 
 @SpringBootApplication
 @EnableJpaRepositories()
-@EnableConfigurationProperties({ColorProperties.class, RabbitMQConfig.class, TmsConfig.class})
+@EnableConfigurationProperties({ConnectionProperties.class, ColorProperties.class, RabbitMQConfig.class, TmsConfig.class})
 public class TmsJpaApp implements ApplicationContextAware {
 
 
 	private static ApplicationContext CONTEXT;
+
+	public static void setConnectedTOsmartLogic(boolean connectedTOsmartLogic) {
+		isConnectedTOsmartLogic = connectedTOsmartLogic;
+		if(TmsFramer.tmsFrame != null) {
+			if (connectedTOsmartLogic) TmsFramer.tmsFrame.setTitle("TMS SIM connected to smartLogic");
+			else TmsFramer.tmsFrame.setTitle("!!TMS SIM offline off smartLogic!!");
+		}
+	}
 
 	/**
 	 * This method is called from within the ApplicationContext once it is
@@ -104,6 +113,14 @@ public class TmsJpaApp implements ApplicationContextAware {
 	public static ColorProperties colorsOfEtcsTrains = null;
 
 	/**
+	 * Special connection settings
+	 */
+	public static ConnectionProperties connectionProperties = null;
+
+	public static boolean isConnectedTOsmartLogic = false;
+
+
+	/**
 	 * main-Entry-Point
 	 * @param args - unused
 	 */
@@ -133,12 +150,13 @@ public class TmsJpaApp implements ApplicationContextAware {
 	 */
 	@Bean
 	public CommandLineRunner TmsRunner(TimeTaskRepository repository, MotisProducer M, TmsConfig C,
-									   ColorProperties CP) {
+									   ColorProperties CP, ConnectionProperties Con) {
 		return (args) -> {
 
 
 			log.info("Starting TMS version" + UtilFunction.showVersionString());
 			handleLogging();
+			TmsJpaApp.connectionProperties = Con;
 			TmsJpaApp.colorsOfEtcsTrains = CP;
 
 			TmsJpaApp.Config = C;
@@ -147,12 +165,7 @@ public class TmsJpaApp implements ApplicationContextAware {
 
 			SmartLogicClient.proceedTmsLogic(repository);
 
-			log.info("TMS is up");
-			log.info("TMS send planed Train-Timetable");
-			sendTrainTimeTable();
-			log.info("Time-Table send");
 
-			log.info("Finished");
 			while (true) ;
 
 
@@ -173,13 +186,15 @@ public class TmsJpaApp implements ApplicationContextAware {
 		EventBusManager.RootEventBusManger.log("TEST", "TestModul");
 	}
 
-	private void sendTrainTimeTable() {
+	public static void sendTrainTimeTable() {
 		try {
 			MotisManager.sendSzenarioToMotis("Scenario_1");
-			log.info("Time-Table send");
+			EventBusManager.RootEventBusManger.log("Time-Table send", SmartLogic.getsModuleId("Motis-Manager"));
+			//log.info("Time-Table send");
 		} catch (IOException e) {
 			e.printStackTrace();
-			log.error("Time-Table Error sending");
+			//log.error("Time-Table Error sending");
+			EventBusManager.RootEventBusManger.log("Time-Table Error sending", SmartLogic.getsModuleId("Motis-Manager"));
 		}
 
 	}
@@ -233,21 +248,24 @@ public class TmsJpaApp implements ApplicationContextAware {
 		public String home() { // <== changed return type, added parameter
 
 
-
-				SwingUtilities.invokeLater(() -> {
-					if(TmsJpaApp.this.TmsFramer.tmsFrame == null) TmsJpaApp.this.TmsFramer.tmsFrame =
-							TmsFrameUtil.createTmsFrame();
-					TmsJpaApp.this.TmsFramer.tmsFrame.setVisible(true);
-
-
-				});
-
+			startTmsUI();
 
 
 			return "Hello world!"; // view name, aka template base name
 		}
 
 
+	}
+
+	public static void startTmsUI() {
+		SwingUtilities.invokeLater(() -> {
+			if(TmsFramer.tmsFrame == null) TmsFramer.tmsFrame =
+					TmsFrameUtil.createTmsFrame();
+			assert TmsFramer.tmsFrame != null;
+			TmsFramer.tmsFrame.setVisible(true);
+
+
+		});
 	}
 
 	/**

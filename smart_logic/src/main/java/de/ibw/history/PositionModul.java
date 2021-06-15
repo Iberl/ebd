@@ -30,6 +30,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.railMl.rtm4rail.TApplicationDirection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -51,12 +53,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class PositionModul implements IPositionModul {
      public static String POSITION_MODUL = "POSITION-MODUL";
-
+     private static final Logger log = LoggerFactory.getLogger(PositionModul.class);
 
      private CopyOnWriteArrayList<PositionData> positionModuls = new CopyOnWriteArrayList<>();
      private ThreadedRepo<Integer, PositionData> CurrentPositionsByNidId = new ThreadedRepo<>();
      private RouteMap routeByNidId = new RouteMap();
      private Boolean isRbcTimeFiltering = null;
+     private EventBusManager EBM = null;
+
 
      long lFrom = 0L;
      long lTo = 0L;
@@ -96,6 +100,7 @@ public class PositionModul implements IPositionModul {
     public static synchronized PositionModul getInstance() {
         if(instance == null) {
             instance = new PositionModul();
+            instance.EBM = EventBusManager.RootEventBusManger;
         }
         return instance;
     }
@@ -147,22 +152,56 @@ public class PositionModul implements IPositionModul {
                     new BigDecimal(Position.d_lrbg).multiply(new BigDecimal(10).pow(iNewPosExponent, MathContext.DECIMAL32));
 
             try {
+                // Position existing
+                if(MovableObject.ObjectRepo.containsKey(nid_engine)) return;
+
+
                 Route = SafePosition.calcByOffset(nid_engine, NewOffset, Position, false);
 
                 ETCS_DISTANCE distanceDiff = new ETCS_DISTANCE();
                 ETCS_DISTANCE distanceEndDif = new ETCS_DISTANCE();
                 distanceEndDif.sDistance = 0;
                 if(Route.getFirstSpot() == null) {
+                    EBM.log("Route not having first spot", SmartLogic.getsModuleId(POSITION_MODUL));
                     try {
                         dVehicleEndOffset = NewOffset.subtract(trainLengthMeter);
                         if (dVehicleEndOffset.compareTo(BigDecimal.valueOf(0.0d)) < 0) {
+
+                            EBM.log("TrainId " + nid_engine.getId() +
+                                            ": Route merged with preceding reverse Route",
+                                    SmartLogic.getsModuleId(POSITION_MODUL));
+
                             ComposedRoute referseRoute = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset.negate(),
                                     Position, true);
+
+//                            EBM.log("Route before merge: " + Route.getRouteLength(),
+//                                    SmartLogic.getsModuleId(POSITION_MODUL));
                             Route.mergeWithPrecedingReverseRoute(referseRoute);
+                            EBM.log("TrainId " + nid_engine.getId() + ": " +
+                                            " Route after merge: " + Route.getRouteLength(),
+                                    SmartLogic.getsModuleId(POSITION_MODUL));
+
+                            if(Route.getRouteLength().subtract(BigDecimal.valueOf(Position.l_trainint).abs())
+                                    .compareTo(BigDecimal.valueOf(1.0d)) > 0) {
+                                String errMsg = "TrainId " + nid_engine.getId() + ": having length: " +
+                                        Route.getRouteLength() + " but shall have length: "  + Position.l_trainint;
+                                   System.err.println(errMsg);
+                                EBM.log("ERROR:" + errMsg, SmartLogic.getsModuleId(POSITION_MODUL));
+                            }
+
+
                         } else {
+                            EBM.log("Route removing nominal from Beginning",
+                                    SmartLogic.getsModuleId(POSITION_MODUL));
                             ComposedRoute nominalRouteToBegin = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset,
                                     Position, false);
+//                            EBM.log("Length (Nominal Route To Begin): " + nominalRouteToBegin.getRouteLength(),
+//                                    SmartLogic.getsModuleId(POSITION_MODUL));
+//                            EBM.log("Route before removing: " + Route.getRouteLength(),
+//                                    SmartLogic.getsModuleId(POSITION_MODUL));
                             Route.removeRouteNominalFromBegin(nominalRouteToBegin);
+                            EBM.log("Route after removing: " + Route.getRouteLength(),
+                                    SmartLogic.getsModuleId(POSITION_MODUL));
                         }
 
 
@@ -170,11 +209,17 @@ public class PositionModul implements IPositionModul {
                         e.printStackTrace();
                         throw new InvalidParameterException(e.getMessage());
                     }
+                } else {
+                    EBM.log("TrainId " + nid_engine.getId() + ": Route having first spot: "
+                                    + Route.getRouteLength(),
+                            SmartLogic.getsModuleId(POSITION_MODUL));
                 }
 
 
                 int iScale = 1;
-
+                EBM.log("TrainId " + nid_engine.getId() + ": " +
+                                " Route at set safe new Vehicle Position merge: " + Route.getRouteLength(),
+                        SmartLogic.getsModuleId(POSITION_MODUL));
                 safeNewVehiclePosition(new BigDecimal(0), Route, nid_engine, SafePosition, distanceDiff, iScale);
             } catch (SmartLogicException e) {
                 e.printStackTrace();
@@ -288,9 +333,10 @@ public class PositionModul implements IPositionModul {
         MovableObject train = MovableObject.ObjectRepo.getModel(nid_engine);
         ETCS_DISTANCE NoEndOffset = new ETCS_DISTANCE();
         NoEndOffset.sDistance = 0;
-        safeNewVehiclePosition(dVehicleEndOffset, Route, nid_engine, NewPosition, distanceDiff, iScale);
-
-
+        if(diff.compareTo(trainLengthMeter) > 0) {
+            distanceDiff.sDistance = (short) (distanceDiff.sDistance - trainLengthMeter.intValueExact());
+            safeNewVehiclePosition(dVehicleEndOffset, Route, nid_engine, NewPosition, distanceDiff, iScale);
+        }
         MaSmalled = new MAOccupation();
 
         MovementAuthority MA = new MovementAuthority();
