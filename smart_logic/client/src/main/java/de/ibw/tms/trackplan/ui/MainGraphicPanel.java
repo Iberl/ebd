@@ -186,6 +186,11 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             if(d1 == null) d1 = 0d;
             if(d2 == null) d2 = 1.0d;
             //isFromA = E.getRefNode() == E.A;
+            if(E.getRefNode() != E.A) {
+                double tempD1 = d1;
+                d1 = 1 - d2;
+                d2 = 1 - tempD1;
+            }
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
             paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
                     BS);
