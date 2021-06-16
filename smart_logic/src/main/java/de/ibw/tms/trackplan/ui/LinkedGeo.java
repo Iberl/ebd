@@ -12,8 +12,8 @@ import java.util.ArrayList;
 /**
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.4
- * @since 2020-08-28
+ * @version 1.1
+ * @since 2021-06-16
  */
 public class LinkedGeo {
     private GeometricCoordinate StartCoordinates;

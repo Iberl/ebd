@@ -19,6 +19,7 @@ import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.controller.TrackController;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
@@ -569,12 +570,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
             if(first && prevDistance + geoEdgeLength >= distanceA1) {
                 first = false;
-                nodeA = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
+                nodeA = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
             }
 
             // Last node
             if(prevDistance + geoEdgeLength > distanceA2) {
-                nodeB = getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
+                nodeB = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
             // Draw Line
@@ -636,7 +637,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             if(distanceA1 <= prevDistance + geoEdgeLength) break;
             prevDistance += geoEdgeLength;
         }
-        return getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
+        return TopologyFactory.getGeoCoordinate(geoEdge, b_fromA, distanceA1 - prevDistance);
     }
 
     /**
@@ -659,13 +660,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
         // Create a new Coordinates instance
-        return createGeoCoordinates(b_fromA, geoEdgeLength, distance, nodeA, nodeB);
+        return TopologyFactory.createGeoCoordinates(b_fromA, geoEdgeLength, distance, nodeA, nodeB);
 
 
     }
 
     /**
-     * @deprecated
+     * deprecated
      * @param b_fromA
      * @param edgeLength
      * @param distance
