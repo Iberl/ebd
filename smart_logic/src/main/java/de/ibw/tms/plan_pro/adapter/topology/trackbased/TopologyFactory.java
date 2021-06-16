@@ -18,7 +18,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
-import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
+import plan_pro.modell.planpro._1_9_0.*;
 import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
@@ -27,6 +27,7 @@ import jakarta.xml.bind.*;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
@@ -152,7 +153,7 @@ public class TopologyFactory implements ITopologyFactory {
             GeometricCoordinate nodeA = edge.A.getGeoCoordinates();
             GeometricCoordinate nodeB = edge.B.getGeoCoordinates();
 
-            if(geoEdgeList.isEmpty()) return null;//createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
+            if(geoEdgeList.isEmpty()) return createGeoCoordinates(b_fromA, edge.dTopLength, distanceA1, nodeA, nodeB);
             else {
                 distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
             }
@@ -178,7 +179,66 @@ public class TopologyFactory implements ITopologyFactory {
 
     private DefaultRepo<String, CSignal> signalRepo = new DefaultRepo<>();
 
-    private CPlanProSchnittstelle PlanProDefinition;
+    private static CPlanProSchnittstelle PlanProDefinition;
+
+    private static CContainer planProContainer = null;
+
+    public static CContainer getContainer() throws IllegalAccessException {
+        if(PlanProDefinition == null) {
+            try {
+                PlanProDefinition = getcPlanProSchnittstelle();
+            } catch (JAXBException | IOException e) {
+                e.printStackTrace();
+                throw new InvalidParameterException(e.getMessage());
+            }
+        }
+        if(PlanProDefinition.getLSTZustand() != null) return PlanProDefinition.getLSTZustand().getContainer();
+        if(PlanProDefinition.getLSTPlanung() != null) {
+            if(planProContainer != null) return planProContainer;
+
+            CFachdaten fachdaten = PlanProDefinition.getLSTPlanung().getFachdaten();
+            if(fachdaten == null) throw new InvalidParameterException("PlanPro-File not valid: fachdaten null");
+            List<CAusgabeFachdaten> dataList = fachdaten.getAusgabeFachdaten();
+            if(dataList == null) throw new InvalidParameterException("PlanPro-File not valid: Ausgabefachdaten list " +
+                    "null");
+            for(CAusgabeFachdaten outputData : dataList) {
+                if(outputData == null) continue;
+                CLSTZustand statusTarget =  outputData.getLSTZustandZiel();
+                if(statusTarget == null) continue;
+                CContainer currentScopedContainer = statusTarget.getContainer();
+                if(currentScopedContainer == null) continue;
+                if(planProContainer == null) planProContainer = currentScopedContainer;
+                else {
+                    mergeContainer(planProContainer, currentScopedContainer);
+                }
+
+            }
+            if(planProContainer == null) throw new InvalidParameterException("PlanPro-File not valid: container not found.");
+            return planProContainer;
+        } else {
+            throw new InvalidParameterException("PlanPro-File Container not reachable.");
+        }
+    }
+
+    private static void mergeContainer(CContainer planProContainer, CContainer currentScopedContainer) throws IllegalAccessException {
+        Class<?> clazz = CContainer.class;
+
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            List<Object> localValue = new ArrayList<>();
+            List<Object> remoteValue = new ArrayList<>();
+            if(field.get(planProContainer) != null) {
+                localValue = new ArrayList<>((Collection<?>) field.get(planProContainer));
+            }
+            if(field.get(currentScopedContainer) != null) {
+                remoteValue = new ArrayList<>((Collection<?>) field.get(currentScopedContainer));
+            }
+            localValue.addAll(remoteValue);
+            field.set(planProContainer, localValue);
+        }
+
+    }
+
 
     /**
      * Diese Getter Methode gibt ein Repository zur&uuml;ck, das die String-Id eine Geo-Knoten als key besitzt.
@@ -221,7 +281,7 @@ public class TopologyFactory implements ITopologyFactory {
      * Construktor das die Factory intialisiert
      * @throws JAXBException - wenn die PlanPro Datei nicht verarbeitet werde konnte
      */
-    public TopologyFactory() throws JAXBException, IOException {
+    public TopologyFactory() throws JAXBException, IOException, IllegalAccessException {
         aCrossingKeys = new Class[]  {
                 CWKrAnlage.class, CWKrGspElement.class, CWKrGspKomponente.class
         };
@@ -660,7 +720,12 @@ public class TopologyFactory implements ITopologyFactory {
      * @throws ParseException - Wenn undefinierte Werte vorhanden sind, diese aber benötigt werden.
      */
     public void handleBranchingPoints() throws ParseException {
-        initBranchingPoints();
+        try {
+            initBranchingPoints();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new ParseException(e.getMessage(), 0);
+        }
         DefaultRepo<String, CBasisObjekt> crossingRepo = crossingBundle.getModel(CWKrAnlage.class);
         DefaultRepo<String, CBasisObjekt> crossingPartsRepo = crossingBundle.getModel(CWKrGspElement.class);
         DefaultRepo<String, CBasisObjekt> crossingKonponentsRepo = crossingBundle.getModel(CWKrGspKomponente.class);
@@ -715,7 +780,12 @@ public class TopologyFactory implements ITopologyFactory {
 
     @Override
     public List<Balise> getBalises() {
-        return BaliseExtractor.getBalises(PlanProDefinition, BaliseExtractor.ExtractorModeEnum.NORMAL);
+        try {
+            return BaliseExtractor.getBalises(BaliseExtractor.ExtractorModeEnum.NORMAL);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
@@ -750,7 +820,7 @@ public class TopologyFactory implements ITopologyFactory {
             TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(TopKante.getIdentitaet().getWert());
 
 
-            GeometricCoordinate geoCoordinate;
+            GeometricCoordinate geoCoordinate = null;
             try {
                 boolean isAMissing;
                 boolean isBMissing;
@@ -765,7 +835,7 @@ public class TopologyFactory implements ITopologyFactory {
                     BigDecimal decResult = null;
                     geoCoordinate = getGeoCoordinate(
                             TopKante.getIdentitaet().getWert(),
-                            !isAMissing,
+                            true,
                             B.getBalisenPositionFromNodeA().doubleValue());
                     
                     /*if(isAMissing) {
@@ -797,7 +867,11 @@ public class TopologyFactory implements ITopologyFactory {
 
             } catch(Exception Ex) {
                 Ex.printStackTrace();
-                geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+
+            } finally {
+                if(geoCoordinate == null) {
+                    geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+                }
             }
 
 
@@ -862,23 +936,24 @@ public class TopologyFactory implements ITopologyFactory {
         System.out.println("Geo_A_x: " + geo_A.getX() + " Geo_A_y: " + geo_A.getY());
         System.out.println("Geo_B_x: " + geo_B.getX() + " Geo_B_y: " + geo_B.getY());
     }
-    private void initFromFile() throws JAXBException, IOException {
-        PlanProDefinition = getcPlanProSchnittstelle();
-        topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
+    private void initFromFile() throws JAXBException, IOException, IllegalAccessException {
+        topLines = getContainer().getTOPKante();
         handleSignals();
         handleGeoData();
 
     }
 
-    private void handleSignals() {
-        List<CSignal> signalList = PlanProDefinition.getLSTZustand().getContainer().getSignal();
-        for(CSignal Signal : PlanProDefinition.getLSTZustand().getContainer().getSignal()) {
+    private void handleSignals() throws IllegalAccessException {
+
+        for(CSignal Signal : getContainer().getSignal()) {
             this.signalRepo.update(Signal.getIdentitaet().getWert(), Signal);
         }
     }
 
-    private void handleGeoData() {
-        List<CGEOPunkt> geoPoints = PlanProDefinition.getLSTZustand().getContainer().getGEOPunkt();
+    private void handleGeoData() throws IllegalAccessException {
+        CContainer C = getContainer();
+
+        List<CGEOPunkt> geoPoints = C.getGEOPunkt();
         geoBundle = new DefaultRepo<>();
 
         // Punkte enthalten dem payload der Coordinaten,
@@ -900,8 +975,8 @@ public class TopologyFactory implements ITopologyFactory {
             PlanData.GeoNodeRepo.update(sGeoKnotenId, GeoCoordTms);
         }
 
-        List<CStreckePunkt> trackingInfos = PlanProDefinition.getLSTZustand().getContainer().getStreckePunkt();
-        List<CStrecke> trackList = PlanProDefinition.getLSTZustand().getContainer().getStrecke();
+        List<CStreckePunkt> trackingInfos = C.getStreckePunkt();
+        List<CStrecke> trackList = C.getStrecke();
         for (CStrecke Track : trackList) {
             this.trackRepo.update(Track.getIdentitaet().getWert(), Track);
         }
@@ -916,14 +991,14 @@ public class TopologyFactory implements ITopologyFactory {
             PlanData.GeoNodeRepo.update(sIdGeoNode, GeoCoordTms);
         }
 
-        List<CGEOKnoten> geoNodes = PlanProDefinition.getLSTZustand().getContainer().getGEOKnoten();
+        List<CGEOKnoten> geoNodes = C.getGEOKnoten();
 
 
-        List<CGEOKante> geoLines = PlanProDefinition.getLSTZustand().getContainer().getGEOKante();
+        List<CGEOKante> geoLines = C.getGEOKante();
 
 
-        List<CTOPKante> topLines = PlanProDefinition.getLSTZustand().getContainer().getTOPKante();
-        List<CTOPKnoten> topNodes = PlanProDefinition.getLSTZustand().getContainer().getTOPKnoten();
+        List<CTOPKante> topLines = C.getTOPKante();
+        List<CTOPKnoten> topNodes = C.getTOPKnoten();
 
 
         Class[] aGeoKeys = new Class[]{CGEOPunkt.class, CGEOKnoten.class, CGEOKante.class,
@@ -931,12 +1006,14 @@ public class TopologyFactory implements ITopologyFactory {
         List[] geoContents = new List[]{geoPoints, geoNodes, geoLines, topLines, topNodes};
         handlePlanProIndexing(aGeoKeys, geoContents, geoBundle);
     }
-    private void initBranchingPoints() {
+    private void initBranchingPoints() throws IllegalAccessException {
+        CContainer C = TopologyFactory.getContainer();
+
         //List<CGleisAbschnitt> listCtrails =  PlanProDefinition.getLSTZustand().getContainer().getGleisAbschnitt();
-        List<CWKrAnlage> listCrossings = PlanProDefinition.getLSTZustand().getContainer().getWKrAnlage();
-        List<CWKrGspElement> listCrossingMovement = PlanProDefinition.getLSTZustand().getContainer().
+        List<CWKrAnlage> listCrossings = C.getWKrAnlage();
+        List<CWKrGspElement> listCrossingMovement = C.
                 getWKrGspElement();
-        List<CWKrGspKomponente> listCrossingComponents = PlanProDefinition.getLSTZustand().getContainer()
+        List<CWKrGspKomponente> listCrossingComponents = C
                 .getWKrGspKomponente();
 
 
@@ -967,7 +1044,7 @@ public class TopologyFactory implements ITopologyFactory {
         }
     }
 
-    private CPlanProSchnittstelle getcPlanProSchnittstelle() throws JAXBException, IOException {
+    private static CPlanProSchnittstelle getcPlanProSchnittstelle() throws JAXBException, IOException {
         JAXBContext jaxbContext = JAXBContext.newInstance(plan_pro.modell.planpro._1_9_0.ObjectFactory.class);
 
         //2. Use JAXBContext instance to create the Unmarshaller.

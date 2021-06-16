@@ -22,8 +22,12 @@ public class TranslationModel {
         private static TrackplanEnvironment P_HausenEnv = new TrackplanEnvironment(PHausen, new ZoomModel(),
                 "customised/test_pHausen_l1.ppxml");
 
-        public static TrackplanEnvironment MartinsteinEnv =
+        public static TrackplanEnvironment MartinsteinEnv2406 =
                 new TrackplanEnvironment(EBD, new ZoomModel(),"customised/EBD_Martinstein_24_06V3.ppxml" );
+
+        public static TrackplanEnvironment MartinsteinEnv210609 =
+                new TrackplanEnvironment(EBD, new ZoomModel(),
+                        "customised/ppj_martin_1806_cad_7-3_planPro_2021-06-09_15-59.ppxml" );
 
         public static TrackplanEnvironment MartinsteinWithoutBalisenEnv = new TrackplanEnvironment(EBD, new ZoomModel(),
                 "customised/EBD_Martinstein_24_06V3_Ohne_Balisen.ppxml" );
@@ -33,7 +37,7 @@ public class TranslationModel {
                 new TrackplanEnvironment(EBD, new ZoomModel(), "customised/GB_Szenario1.ppxml");
 
 
-        private static TrackplanEnvironment EBDEnv = KaefWilhelmstalEnv;
+        private static TrackplanEnvironment EBDEnv = MartinsteinEnv210609;
 
         /**
          * Gerade benutztes Strecken-Setting

@@ -72,7 +72,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private ITopologyFactory topologyFactory;
 
-    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException, IOException {
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException, IOException, IllegalAccessException {
         if(topologyFactory == null) {
             this.topologyFactory = new TopologyFactory();
         }
@@ -313,7 +313,12 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         //createDefaultPlan();
         //Beheim
         //createBeheimPlan();
-        handleDataFromFile();
+        try {
+            handleDataFromFile();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return;
+        }
         if(SmartLogic.IS_STARTED_AS_SL) {
             RealDbdClient.getInstance();
         }
@@ -322,7 +327,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 
-    private void handleDataFromFile() {
+    private void handleDataFromFile() throws IllegalAccessException {
         try {
             topologyFactory = new TopologyFactory();
             topologyFactory.connectTopology();

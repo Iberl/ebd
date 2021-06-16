@@ -1,6 +1,8 @@
 package de.ibw.feed;
 
+import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
@@ -8,6 +10,7 @@ import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektStrecke;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
+import plan_pro.modell.planpro._1_9_0.CContainer;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 
 import jakarta.xml.bind.*;
@@ -18,8 +21,8 @@ import java.util.List;
  * Diese Klasse &uuml;bernimmt das Lesen des PlanProFormates und hinterlegt die dabei verarbeiteten Balisen.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 1.1
+ * @since 2021-06-16
  */
 public class BaliseExtractor {
 
@@ -55,13 +58,13 @@ public class BaliseExtractor {
 
     /**
      * generiert aus PlanPro Model eine Liste von Balisen
-     * @param expenseObj - planpro inhalte
+     *
      * @param datapointOnly - unterscheidung Datenpunkte oder Balisen (noch unbenutzt)
      * @return List
      */
-    public static List<Balise> getBalises(CPlanProSchnittstelle expenseObj, ExtractorModeEnum datapointOnly) {
+    public static List<Balise> getBalises(ExtractorModeEnum datapointOnly) throws IllegalAccessException {
 
-            handleFileData(expenseObj);
+            handleFileData();
             List<Balise> baliseList = extractBaliseData();
             if (baliseList.size() > 0) {
                 Balise B = baliseList.get(0);
@@ -165,14 +168,14 @@ public class BaliseExtractor {
 
     }
 
-    private static void handleFileData(CPlanProSchnittstelle expenseObj) {
+    private static void handleFileData() throws IllegalAccessException {
 
         initRepos();
-
-        List<CBalise> baliseList = expenseObj.getLSTZustand().getContainer().getBalise();
-        List<CDatenpunkt> pointList = expenseObj.getLSTZustand().getContainer().getDatenpunkt();
-        List<CTOPKante> topEdgeList = expenseObj.getLSTZustand().getContainer().getTOPKante();
-        List<CStrecke> trackList = expenseObj.getLSTZustand().getContainer().getStrecke();
+        CContainer C = TopologyFactory.getContainer();
+        List<CBalise> baliseList = C.getBalise();
+        List<CDatenpunkt> pointList = C.getDatenpunkt();
+        List<CTOPKante> topEdgeList = C.getTOPKante();
+        List<CStrecke> trackList = C.getStrecke();
 
         List[] contents = new List[]  {
                 baliseList, pointList, topEdgeList, trackList
