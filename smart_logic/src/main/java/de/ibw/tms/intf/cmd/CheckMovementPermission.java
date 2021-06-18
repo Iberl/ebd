@@ -17,8 +17,8 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-11-25
+ * @version 1.1.10
+ * @since 2020-06-16
  */
 public class CheckMovementPermission extends Commands {
     public static long DEFAULT_PRIO = 3L;
@@ -29,7 +29,6 @@ public class CheckMovementPermission extends Commands {
 
     @Expose
     public int iTrainId;
-
 
 
 
@@ -113,6 +112,47 @@ public class CheckMovementPermission extends Commands {
     @Override
     public int hashCode() {
         return Objects.hash(route, iTrainId, MaAdapter, uuid, tms_id, rbc_id, lPriority);
+    }
+
+
+    public int getiTrainId() {
+        return iTrainId;
+    }
+
+    public void setiTrainId(int iTrainId) {
+        this.iTrainId = iTrainId;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getTms_id() {
+        return tms_id;
+    }
+
+    public void setTms_id(String tms_id) {
+        this.tms_id = tms_id;
+    }
+
+    public String getRbc_id() {
+        return rbc_id;
+    }
+
+    public void setRbc_id(String rbc_id) {
+        this.rbc_id = rbc_id;
+    }
+
+    public Long getlPriority() {
+        return lPriority;
+    }
+
+    public void setlPriority(Long lPriority) {
+        this.lPriority = lPriority;
     }
 
     //testmain

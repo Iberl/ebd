@@ -65,7 +65,7 @@ public class TopologyFactory implements ITopologyFactory {
     }
 
     private DefaultRepo<String, List<CGEOKante>> geoNodeToGeoEdgesRepo = new DefaultRepo<>(); // output
-    private DefaultRepo<String, CTOPKnoten> geoNodeToTopNodeRepo = new DefaultRepo<>(); // output
+    private DefaultRepo<String, ArrayList<CTOPKnoten>> geoNodeToTopNodeRepo = new DefaultRepo<>(); // output
     private DefaultRepo<String, CGEOKnoten> topNodeToGeoNodeRepo = new DefaultRepo<>(); // output
 
     private Class[] aPlattformKeys;
@@ -259,7 +259,7 @@ public class TopologyFactory implements ITopologyFactory {
      * Als Wertebreich werden Topologische Knoten zur&uuml;ckgegeben
      * @return Ein Repository mit Geo-Key und Value eine {@link CTOPKnoten}
      */
-    public DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo() {
+    public DefaultRepo<String, ArrayList<CTOPKnoten>> getGeoNodeToTopNodeRepo() {
         return geoNodeToTopNodeRepo;
     }
     /**
@@ -360,7 +360,7 @@ public class TopologyFactory implements ITopologyFactory {
         for (Object topNodeObj : nodeRepo.getAll()) {
             CTOPKnoten topNode = (CTOPKnoten) topNodeObj;
             CGEOKnoten geoNode = (CGEOKnoten) geoPointRepo.getModel(topNode.getIDGEOKnoten().getWert());
-            geoNodeToTopNodeRepo.update(geoNode.getIdentitaet().getWert(),topNode);
+            addTopNodeToGeoNode(topNode, geoNode);
             topNodeToGeoNodeRepo.update(topNode.getIdentitaet().getWert(), geoNode);
         }
 
@@ -418,6 +418,17 @@ public class TopologyFactory implements ITopologyFactory {
         return TG;
 
 
+    }
+
+    private void addTopNodeToGeoNode(CTOPKnoten topNode, CGEOKnoten geoNode) {
+        ArrayList<CTOPKnoten> linkedTopNodes = geoNodeToTopNodeRepo.getModel(geoNode.getIdentitaet().getWert());
+        if(linkedTopNodes == null) linkedTopNodes = new ArrayList<>();
+        if(!linkedTopNodes.contains(topNode)) {
+            linkedTopNodes.add(topNode);
+        }
+
+
+        geoNodeToTopNodeRepo.update(geoNode.getIdentitaet().getWert(), linkedTopNodes);
     }
 
     private void connectPositionedRelations(TopologyGraph tg) {
@@ -1104,7 +1115,9 @@ public class TopologyFactory implements ITopologyFactory {
         ArrayList<String> visitedGeoNodesIds = new ArrayList<>();
         String sGeoA = CurrentGeo.getIdentitaet().getWert();
         String sGeoB = NextGeoNode.getIdentitaet().getWert();
-        CTOPKnoten LastTopNode = null;
+        boolean b_OutEdgeSet = false;
+
+        ArrayList<CTOPKnoten> filteredTopNodes = new ArrayList<>();
         // all connected Edges
         List<CGEOKante> connectedEdges = geoNodeToGeoEdgesRepo.getModel(CurrentGeo.getIdentitaet().getWert());
 
@@ -1119,10 +1132,11 @@ public class TopologyFactory implements ITopologyFactory {
                 visitedGeoNodesIds.add(sGeoA);
                 visitedGeoNodesIds.add(sGeoB);
                 //check if Geo node is top node also
-                LastTopNode = geoNodeToTopNodeRepo.getModel(sGeoB);
+                 filerLastTopNodes(sGeoB);
+                filteredTopNodes = filerLastTopNodes(sGeoB);
 
                 sGeoCurrent = sGeoB;
-                while(LastTopNode == null) {
+                while(filteredTopNodes.isEmpty()) {
 
                     connectedEdges = geoNodeToGeoEdgesRepo.getModel(sGeoCurrent);
                     for (CGEOKante FolowedGeoEdge : connectedEdges) {
@@ -1131,12 +1145,12 @@ public class TopologyFactory implements ITopologyFactory {
                         if(!visitedGeoNodesIds.contains(strA)) {
                             resultEdges.add(FolowedGeoEdge);
                             visitedGeoNodesIds.add(strA);
-                            LastTopNode = geoNodeToTopNodeRepo.getModel(strA);
+                            filteredTopNodes = filerLastTopNodes(strA);
                             sGeoCurrent = strA;
                         } else if(!visitedGeoNodesIds.contains(strB)) {
                             resultEdges.add(FolowedGeoEdge);
                             visitedGeoNodesIds.add(strB);
-                            LastTopNode = geoNodeToTopNodeRepo.getModel(strB);
+                            filteredTopNodes = filerLastTopNodes(strB);
                             sGeoCurrent = strB;
                         }
                     }
@@ -1149,30 +1163,54 @@ public class TopologyFactory implements ITopologyFactory {
             }
         }
 
-        if(LastTopNode == null) {
+        if(filteredTopNodes.isEmpty()) {
             throw new NullPointerException("Last TopNode may not be null");
         }
-        TopologyGraph.Node B = TopologyGraph.NodeRepo.get(LastTopNode.getIdentitaet().getWert());
-        for(TopologyGraph.Edge OutEdge : StartNode.outEdges) {
-            for(TopologyGraph.Edge InEdge: B.inEdges) {
-                if(OutEdge.equals(InEdge)) {
-                    OutEdge.setPaintListGeo(resultEdges);
+        for(CTOPKnoten LastTopNode : filteredTopNodes) {
 
+            TopologyGraph.Node B = TopologyGraph.NodeRepo.get(LastTopNode.getIdentitaet().getWert());
+
+            if(!checkIfConnectedToStartNode(StartNode, B)) continue;
+
+
+            for(TopologyGraph.Edge OutEdge : StartNode.outEdges) {
+                for(TopologyGraph.Edge InEdge: B.inEdges) {
+                    if(OutEdge.equals(InEdge)) {
+                        OutEdge.setPaintListGeo(resultEdges);
+                        b_OutEdgeSet = true;
+                    }
                 }
             }
-        }
-        for(TopologyGraph.Edge InEdge : StartNode.inEdges) {
-            for(TopologyGraph.Edge OutEdge: B.outEdges) {
-                if(OutEdge.equals(InEdge)) {
-                    OutEdge.setPaintListGeo(resultEdges);
-
+            for(TopologyGraph.Edge InEdge : StartNode.inEdges) {
+                for(TopologyGraph.Edge OutEdge: B.outEdges) {
+                    if(OutEdge.equals(InEdge)) {
+                        OutEdge.setPaintListGeo(resultEdges);
+                        b_OutEdgeSet = true;
+                    }
                 }
             }
+
+        }
+        if(!b_OutEdgeSet) {
+            //throw new InvalidParameterException("For edge no GeoEdges are able to set");
         }
 
+    }
 
+    private boolean checkIfConnectedToStartNode(TopologyGraph.Node startNode, TopologyGraph.Node b) {
+        DefaultRepo<String, TopologyGraph.Edge> connEdge =
+                TopologyGraph.twoTopPointBelongsToEdgeRepo.getModel(startNode.TopNodeId);
+        if(connEdge == null) return false;
+        TopologyGraph.Edge E = connEdge.getModel(b.TopNodeId);
+        // true if Edge found
+        return E != null;
 
+    }
 
+    private ArrayList<CTOPKnoten> filerLastTopNodes(String sGeoB) {
+        ArrayList<CTOPKnoten> lastTopNodeList = geoNodeToTopNodeRepo.getModel(sGeoB);
+        if(lastTopNodeList == null) lastTopNodeList = new ArrayList<>();
+        return lastTopNodeList;
     }
 
     private void relateEdgeToNode(CGEOKante geoEdge, CGEOKnoten geoNodeA) {

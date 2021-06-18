@@ -15,6 +15,8 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.IWaypoint;
+import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import de.ibw.util.intf.IToLogIntf;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -27,7 +29,7 @@ import java.util.List;
 
 
 /**
- *
+ * Eine Route auf einen Streckenabschnitt
  *
  *
  *
@@ -39,6 +41,13 @@ import java.util.List;
 
 public class Route extends LinearContiguousTrackArea implements Cloneable, Serializable {
     public static final String CLASS_IDENTIFIER = "Route";
+
+    /**
+     * Dieses Repository Speichert eine Route unter einem Nutzerdefinierten Namen
+     */
+    public static DefaultRepo<String, Route> routeRepository = new DefaultRepo<>();
+
+
 
     private List<RouteSection> sections;
     private LinearLocation location = new LinearLocation(null,null,null);

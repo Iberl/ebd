@@ -7,6 +7,7 @@ import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ICoord;
+import de.ibw.util.ThreadedRepo;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CBalise;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basistypen._1_9_0.ENUMAusrichtung;
@@ -17,6 +18,7 @@ import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,6 +42,8 @@ public class Balise implements ICoord<Double> {
      */
     public static DefaultRepo<CDatenpunkt, List<Balise>> balisesByBaliseGroup = new DefaultRepo<>();
 
+    public static ThreadedRepo<TopologyGraph.Edge, ArrayList<Balise>> baliseOnEdge = new ThreadedRepo<>();
+
     private CBalise PlanProBalise;
     private CDatenpunkt PlanProDataPoint = null;
     private CTOPKante TopPositionOfDataPoint = null;
@@ -48,6 +52,8 @@ public class Balise implements ICoord<Double> {
 
     private double x;
     private double y;
+
+
 
     /**
      * Die Darstelung als Bild dieser Balise

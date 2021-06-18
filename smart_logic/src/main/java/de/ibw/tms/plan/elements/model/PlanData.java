@@ -39,6 +39,7 @@ import org.w3c.dom.Node;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
+import plan_pro.modell.geodaten._1_9_0.CGEOKante;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
@@ -355,44 +356,72 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
                 equals(TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv)) {
 
 
-            System.out.println("Test");
-
-            System.out.println("13W4S");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
-
-            System.out.println("11W10L");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
-
-            System.out.println("13W1R");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1R").getPlanProId());
-
-            System.out.println("11W5R");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W5R").getPlanProId());
-
-
-            System.out.println("13W3R");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W3R").getPlanProId());
-
-
-            System.out.println("13W2S");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W2S").getPlanProId());
-
-            System.out.println("Print 11W8L");
-
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W8L").getPlanProId());
-
-            System.out.println("Print 11W10L");
-
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
-            System.out.println("Print 13W4S");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
-            System.out.println("Print 13W1S");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1S").getPlanProId());
-            System.out.println("Print 13W4S");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
-            System.out.println("Print 11W10L");
-            System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+            printKaefWilhelmstal();
+        } else if(TranslationModel.TrackplanEnvironment.CurrentEnvironment.
+                equals(TranslationModel.TrackplanEnvironment.MartinsteinEnv210609)) {
+            printMartinstein();
         }
+    }
+
+    private void printMartinstein() {
+        ArrayList<String> debugNames = new ArrayList<>();
+        debugNames.add("12W4S");
+        debugNames.add("12W4L");
+        debugNames.add("12W2ABR"); //TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get("C4E67DEB-D839-43C5-B701-0F38131CBE4D");
+
+        System.out.println("Test Martinstein");
+        for(String sEdgeDesc : debugNames) {
+            System.out.println(sEdgeDesc);
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel(sEdgeDesc).getPlanProId());
+            System.out.println(PlanData.EdgeIdLookupRepo.getModel(sEdgeDesc).dTopLength);
+            System.out.println("#GeoKanten:" + PlanData.EdgeIdLookupRepo.getModel(sEdgeDesc).getPaintListGeo().size());
+            System.out.println(sEdgeDesc + "GeoLength");
+            ArrayList<CGEOKante> geos = PlanData.EdgeIdLookupRepo.getModel(sEdgeDesc).getPaintListGeo();
+            for (CGEOKante gEdge : geos) {
+                System.out.println(gEdge.getGEOKanteAllg().getGEOLaenge().getWert());
+            }
+        }
+
+    }
+
+    private void printKaefWilhelmstal() {
+        System.out.println("Test");
+
+        System.out.println("13W4S");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+
+        System.out.println("11W10L");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+
+        System.out.println("13W1R");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1R").getPlanProId());
+
+        System.out.println("11W5R");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W5R").getPlanProId());
+
+
+        System.out.println("13W3R");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W3R").getPlanProId());
+
+
+        System.out.println("13W2S");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W2S").getPlanProId());
+
+        System.out.println("Print 11W8L");
+
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W8L").getPlanProId());
+
+        System.out.println("Print 11W10L");
+
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
+        System.out.println("Print 13W4S");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+        System.out.println("Print 13W1S");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W1S").getPlanProId());
+        System.out.println("Print 13W4S");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("13W4S").getPlanProId());
+        System.out.println("Print 11W10L");
+        System.out.println(PlanData.EdgeIdLookupRepo.getModel("11W10L").getPlanProId());
     }
 
 

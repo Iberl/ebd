@@ -9,6 +9,7 @@ import de.ibw.tms.ColorProperties;
 import de.ibw.tms.ConnectionProperties;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.intf.MovementMessengerIntf;
+import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.ui.MovmentMessengerFrame;
@@ -33,8 +34,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -220,7 +223,7 @@ public class TmsJpaApp implements ApplicationContextAware {
 	/**
 	 * Modul, das einen Rest-Webservice zur TMS Verwaltung startet
 	 */
-	@RestController
+	@Controller
 	@EnableAutoConfiguration
 	@Order(value=4)
 	@Component
@@ -251,7 +254,26 @@ public class TmsJpaApp implements ApplicationContextAware {
 			startTmsUI();
 
 
-			return "Hello world!"; // view name, aka template base name
+			return "hallo"; // view name, aka template base name
+		}
+
+		@GetMapping("/create-movement-permission")
+		public ModelAndView createProjectForm(Model model) {
+			model.addAttribute("permission", new CheckMovementPermission());
+
+			ModelAndView modelAndView = new ModelAndView();
+			modelAndView.setViewName("create-movement-permission.html");
+			return modelAndView;
+
+
+		}
+
+		@PostMapping("/save-movement-permission")
+		public String saveProjectSubmission(@ModelAttribute CheckMovementPermission permission) {
+
+			// TODO: save project in DB here
+
+			return "save-permission-result";
 		}
 
 

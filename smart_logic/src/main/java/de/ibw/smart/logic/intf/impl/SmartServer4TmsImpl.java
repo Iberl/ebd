@@ -31,10 +31,7 @@ import ebd.internal.util.EOA;
 import ebd.internal.util.MA;
 import ebd.messageLibrary.message.trackmessages.Message_3;
 import ebd.messageLibrary.packet.TrackPacket;
-import ebd.messageLibrary.packet.trackpackets.Packet_15;
-import ebd.messageLibrary.packet.trackpackets.Packet_21;
-import ebd.messageLibrary.packet.trackpackets.Packet_27;
-import ebd.messageLibrary.packet.trackpackets.Packet_80;
+import ebd.messageLibrary.packet.trackpackets.*;
 import ebd.rbc_tms.message.tms.ETCSTrackMessage;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
@@ -53,8 +50,8 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.3
- * @since 2020-08-07
+ * @version 1.1
+ * @since 2021-06-17
  */
 public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServerFromTmsIntf, TmsIntf {
 
@@ -582,6 +579,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         Packet_21 GradientProfilePacket = null;
         Packet_80 ModeProfilePacket = null;
         Packet_27 SpeedProfile = null;
+        Packet_5 LinkingPacket = generateByRoute(CompRoute);
+
 
         GradientProfilePacket = Converter.convertGradientProfile(P.ma.gradientProfile);
         trackPackets.add(GradientProfilePacket);
@@ -591,6 +590,12 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         SpeedProfile = Converter.convertSpeedProfile(P.ma.speedProfile);
         trackPackets.add(SpeedProfile);
+
+        if(LinkingPacket != null) {
+            trackPackets.add(LinkingPacket);
+        }
+
+
 
         int q_dir = P.ma.q_dir;
         int q_scale = P.ma.q_scale;
@@ -656,6 +661,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         bAcknowledgeMA = true;//ackQueues.poll(uuid);
 
         return bAcknowledgeMA;
+    }
+
+    private Packet_5 generateByRoute(ComposedRoute compRoute) {
+        return null;
     }
 
     private void setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {

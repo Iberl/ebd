@@ -52,8 +52,8 @@ import java.util.*;
 /**
  * Routendatenverarbeitung innerhalb der smartLogic
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.0
- * @since 2021-05-11
+ * @version 1.1
+ * @since 2021-06-17
  */
 public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopological>> {
 

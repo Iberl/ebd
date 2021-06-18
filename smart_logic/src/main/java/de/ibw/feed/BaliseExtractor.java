@@ -1,5 +1,7 @@
 package de.ibw.feed;
 
+import de.ibw.tms.plan.elements.model.PlanData;
+import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -85,6 +87,7 @@ public class BaliseExtractor {
         for(CBalise CB : inputBalises) {
             fillBalise(baliseResultList, CB);
         }
+        System.out.println(Balise.baliseOnEdge.getKeys().size());
         return baliseResultList;
     }
 
@@ -100,6 +103,7 @@ public class BaliseExtractor {
             storeBalisesByNid_Bg(ExtractedBalise);
         }
         baliseResultList.add(ExtractedBalise);
+
 
 
     }
@@ -124,6 +128,13 @@ public class BaliseExtractor {
     private static void storeBalisesByNid_Bg(Balise extractedBalise) {
         // sets Hashcode into repository if new;
         extractedBalise.getHashcodeOfBaliseDp();
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get(extractedBalise.getTopPositionOfDataPoint().getIdentitaet().getWert());
+        ArrayList<Balise> balisesOnE = Balise.baliseOnEdge.getModel(E);
+        if(balisesOnE == null) balisesOnE = new ArrayList<>();
+        if(!balisesOnE.contains(extractedBalise)) {
+            balisesOnE.add(extractedBalise);
+        }
+        Balise.baliseOnEdge.update(E, balisesOnE);
     }
 
     private static void handleDataPoint(CDatenpunkt dataPoint, Balise extractedBalise) {

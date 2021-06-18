@@ -7,6 +7,7 @@ import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.geodaten._1_9_0.*;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public interface ITopologyFactory {
 
-    DefaultRepo<String, CTOPKnoten> getGeoNodeToTopNodeRepo();
+    DefaultRepo<String, ArrayList<CTOPKnoten>> getGeoNodeToTopNodeRepo();
 
     DefaultRepo<String, CGEOKnoten> getTopNodeToGeoNodeRepo();
 

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TMS - Movement Permission Request</title>
+    <link th:href="@{/styles/bootstrap.css}" rel="stylesheet" />
+</head>
+<body>
+<div class="p-3">
+<h1>Create Movement Permission</h1>
+<form th:action="@{/save-movement-permission}" th:object="${permission}" method="post">
+  <div class="form-row">
+    <div class="col-md-6 form-group">
+      <label>Train Nid-Engine-Id for Permission</label>
+      <input type="number" class="form-control" th:field="*{iTrainId}">
+    </div>
+  </div>
+</form>
+</div>
+</body>
+</html>
