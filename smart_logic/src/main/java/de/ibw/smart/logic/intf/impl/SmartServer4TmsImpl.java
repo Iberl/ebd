@@ -170,6 +170,22 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     private SmartServer smartServ;
     //private SmartLogicTmsProxy TmsProxy;
 
+    /**
+     * Lokal Var of Linking Module making Module exchangeable e.g. for Testing
+     */
+    private ILinkingIntf etcsLinkingModule = null;
+
+    public synchronized ILinkingIntf getEtcsLinkingModule() {
+        if(etcsLinkingModule == null) {
+            etcsLinkingModule = LinkingModule.getInstance();
+        }
+        return etcsLinkingModule;
+    }
+
+    public void setEtcsLinkingModule(ILinkingIntf etcsLinkingModule) {
+        this.etcsLinkingModule = etcsLinkingModule;
+    }
+
     private EventBusManager EBM = null;
 
     /**
@@ -365,8 +381,6 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         MovementAuthority movementAuthority = new MovementAuthority();
         movementAuthority.setMOB(mo);
         MARequestOccupation MAO = new MARequestOccupation(requestedTrackElementList,movementAuthority, true );
-
-
 
         boolean isRouteNotBlocked = Safety.checkIfRouteIsNonBlocked(MAO);
 
@@ -574,15 +588,16 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
     private Boolean acknowledge(UUID uuid, ComposedRoute CompRoute, Long lPriority, Boolean bAcknowledgeMA, Message_21 MaMsg)
                         throws InvalidParameterException {
+        ILinkingIntf etcsLinkingModule = this.getEtcsLinkingModule();
         ArrayList<TrackPacket> trackPackets = new ArrayList<>();
         Payload_21 P = MaMsg.getPayload();
+        int nid_lrbg = P.ma.nid_lrbg;
         Packet_21 GradientProfilePacket = null;
         Packet_80 ModeProfilePacket = null;
         Packet_27 SpeedProfile = null;
-        Packet_5 LinkingPacket = generateByRoute(CompRoute);
-
-
+        Packet_5 LinkingPacket = etcsLinkingModule.generateLinkingByRoute(CompRoute, nid_lrbg);
         GradientProfilePacket = Converter.convertGradientProfile(P.ma.gradientProfile);
+        
         trackPackets.add(GradientProfilePacket);
 
         ModeProfilePacket = Converter.convertModeProfile(P.ma.modeProfile);
@@ -646,7 +661,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         // dnager t_train is functional unknown therefore null
         long t_train = 0;
         boolean isRequestingAck = false;
-        int nid_lrbg = P.ma.nid_lrbg;
+
         ebd.messageLibrary.message.trackmessages.Message_3 MaContent =
                 new Message_3(t_train, isRequestingAck, nid_lrbg, MaPacket);
         MaContent.packets = trackPackets;
@@ -663,9 +678,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         return bAcknowledgeMA;
     }
 
-    private Packet_5 generateByRoute(ComposedRoute compRoute) {
-        return null;
-    }
+
+
+
+
+
 
     private void setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
         PositionModul.getInstance().resetTimeFilter();

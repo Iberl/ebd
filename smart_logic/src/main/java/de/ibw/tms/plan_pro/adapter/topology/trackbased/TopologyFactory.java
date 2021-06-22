@@ -106,7 +106,7 @@ public class TopologyFactory implements ITopologyFactory {
         // Get TopEdge
         ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = edgeRepo.get(TopKanteId);
-        distanceA1 = edge.dTopLength * distanceA1;
+
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
 
         double lengthOfGeoEdges = 0;
@@ -124,7 +124,8 @@ public class TopologyFactory implements ITopologyFactory {
         double prevDistance = 0;
         double geoEdgeLength = 0;
         CGEOKante geoEdge = null;
-
+        CGEOKante firstGeoEdge = null;
+        CGEOKante previousGeoEdge = null;
 
 
         if (Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
@@ -133,7 +134,11 @@ public class TopologyFactory implements ITopologyFactory {
         int i = b_fromA ? 0 : geoEdgeList.size() - 1;
         boolean first = true;
         for (i = 0; i < linkedGeo.getUsedEdgesSorted().size(); i++) {
+
             geoEdge = linkedGeo.getUsedEdgesSorted().get(i);
+            if(firstGeoEdge == null) {
+                firstGeoEdge = geoEdge;
+            }
             geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
 
 
@@ -141,14 +146,17 @@ public class TopologyFactory implements ITopologyFactory {
             // First node
             if (prevDistance + geoEdgeLength < distanceA1) {
                 prevDistance += geoEdgeLength;
+                previousGeoEdge = geoEdge;
                 continue;
             }
 
             if (prevDistance + geoEdgeLength >= distanceA1) {
-                return TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
+                boolean isFromA = previousGeoEdge != null ? linkedGeo.isNextAccessedFromA(previousGeoEdge) : b_fromA;
+                return TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge),
+                        distanceA1 - prevDistance);
             }
 
-
+            previousGeoEdge = geoEdge;
 
         }
         System.err.println("ERROR:" + edge.getRefId() + "is to short for GeoCoord, last point on edge taken!");

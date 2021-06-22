@@ -369,6 +369,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         debugNames.add("12W4L");
         debugNames.add("12W2ABR"); //TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get("C4E67DEB-D839-43C5-B701-0F38131CBE4D");
 
+        TopologyGraph.Edge E = PlanData.topGraph.edgeRepo.get("F87C984F-4961-4363-BAE8-6D20E1AEF33A");
+
+
         System.out.println("Test Martinstein");
         for(String sEdgeDesc : debugNames) {
             System.out.println(sEdgeDesc);

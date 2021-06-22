@@ -1,5 +1,6 @@
 package ebd.logging;
 
+import ebd.SlConfigHandler;
 import ebd.globalUtils.events.ExceptionEvent;
 import ebd.globalUtils.events.NormalEvent;
 import ebd.globalUtils.events.dmi.ToLogDeepDebugEvent;
@@ -94,6 +95,7 @@ public class Logging{
         logger.addHandler(pipeHandler);
         Handler fileHandler = new FileHandler("log/" + logDateTime + " " + logPrefix + ".log");
         fileHandler.setFormatter(new SimpleFormatter());
+
         logger.addHandler(fileHandler);
 
         this.eventBus = eventBus;
