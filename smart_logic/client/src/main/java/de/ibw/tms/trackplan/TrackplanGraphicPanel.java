@@ -34,7 +34,7 @@ import java.util.concurrent.Flow;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  *
- * @version 0.3
+ * @version 1.1.10
  * @since 2020-08-12
  */
 public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {

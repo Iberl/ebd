@@ -59,7 +59,7 @@ public class LinkDAO {
     public int q_linkreaction;
 
     /**
-     * Spielraum in der sich die Balise befindent kann in Meter
+     * Spielraum in der sich die Balise befinden kann in Meter
      * 0-63 m
      */
     public int q_locacc;
