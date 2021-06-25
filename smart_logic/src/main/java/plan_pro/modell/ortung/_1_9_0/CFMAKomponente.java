@@ -13,10 +13,10 @@ import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
 import plan_pro.modell.verweise._1_9_0.TCIDFMAAnlage;
 import plan_pro.modell.verweise._1_9_0.TCIDMarkanterPunkt;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 

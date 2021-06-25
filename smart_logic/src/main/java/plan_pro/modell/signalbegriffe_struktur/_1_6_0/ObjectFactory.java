@@ -8,7 +8,7 @@
 
 package plan_pro.modell.signalbegriffe_struktur._1_6_0;
 
-import jakarta.xml.bind.annotation.XmlRegistry;
+import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**

@@ -42,7 +42,9 @@ public class SlConfigHandler {
     /*
     Strings
     */
-
+    public String app_name = "Dummy_Name";
+    public String app_version = "Beta";
+    public String app_date = "01.01.2021";
 
     public String ipToInfrastructureServer = "server1.ebd.signallabor.de";
     public int portOfInfrastructureServer = 1436;
@@ -181,6 +183,9 @@ public class SlConfigHandler {
     }
 
     private void initGlobalVar(Properties prop) {
+        this.app_name = prop.getProperty("application.name");
+        this.app_version = prop.getProperty("application.version");
+        this.app_date = prop.getProperty("application.date");
         this.ipToSmartLogic4TMS = prop.getProperty("ipToSmartLogic4TMS");
         this.portOfSmartLogic4TMS = prop.getProperty("portOfSmartLogic4TMS");
 

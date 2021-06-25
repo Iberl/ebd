@@ -31,7 +31,7 @@ import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;
 import ebd.dbd.client.extension.RealDbdClient;
-import jakarta.xml.bind.JAXBException;
+import javax.xml.bind.JAXBException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +73,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     private ITopologyFactory topologyFactory;
 
-    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws jakarta.xml.bind.JAXBException, IOException, IllegalAccessException {
+    public DefaultRepo<Class<?>, DefaultRepo<String, CBasisObjekt>> getGeoBundle() throws javax.xml.bind.JAXBException, IOException, IllegalAccessException {
         if(topologyFactory == null) {
             this.topologyFactory = new TopologyFactory();
         }

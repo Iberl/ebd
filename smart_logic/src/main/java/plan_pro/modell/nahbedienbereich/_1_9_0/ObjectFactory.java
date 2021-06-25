@@ -8,7 +8,7 @@
 
 package plan_pro.modell.nahbedienbereich._1_9_0;
 
-import jakarta.xml.bind.annotation.XmlRegistry;
+import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**

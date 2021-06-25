@@ -16,8 +16,9 @@
         <dependency>
             <groupId>ebd</groupId>
             <artifactId>rbc_tms</artifactId>
-            <version>0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>1.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/LokalIBW/.m2/repository/ebd/rbc_tms/1.1-SNAPSHOT/rbc_tms-1.1-SNAPSHOT.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ebd</groupId>

@@ -4,7 +4,7 @@
 
   <groupId>ebd</groupId>
   <artifactId>etcs</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.1.10</version>
   <packaging>pom</packaging>
 
   <name>ETCS@EBD Project</name>
@@ -12,9 +12,10 @@
   <url>http://www.example.com</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>15</maven.compiler.source>
-    <maven.compiler.target>15</maven.compiler.target>
+    <version.date>16.06.2021</version.date>
+    <project.build.sourceEncoding>UTFf-8</project.build.sourceEncoding>
+    <maven.compiler.source>16</maven.compiler.source>
+    <maven.compiler.target>16</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -38,6 +39,11 @@
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>3.6.3</version>
     </dependency>
 
 
@@ -119,9 +125,9 @@
   <modules>
     <module>globalUtils</module>
     <module>logging</module>
-    <module>messageLibrary</module>
-    <module>rbc_tms</module>
-    <module>etcsCore</module>
+
+
+
 
 
     <!-- <module>baliseTelegramGenerator</module> -->

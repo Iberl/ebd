@@ -14,7 +14,18 @@ public class BrowserCanvas extends Canvas {
 
         private Thread swtThread;
         private Browser swtBrowser;
+        static BrowserCanvas browserCanvas;
 
+
+    public static void showURL(BrowserCanvas browser, JFrame browserFrame, String url) {
+        browserFrame.setVisible(true);
+        browser.getBrowser().getDisplay().asyncExec(new Runnable() {
+            @Override
+            public void run() {
+                browser.getBrowser().setUrl(url);
+            }
+        });
+    }
 
 
     /**
@@ -129,8 +140,26 @@ public class BrowserCanvas extends Canvas {
             browserCanvas.getBrowser().getDisplay().asyncExec(new Runnable() {
                 @Override
                 public void run() {
-                    browserCanvas.getBrowser().setUrl("http://www.google.com");
+                    browserCanvas.getBrowser().setUrl("http://localhost:38573/create-movement-permission");
                 }
             });
         }
+
+
+    public static void initBrowser(BrowserCanvas browser, JFrame frame) {
+        browserCanvas = browser;
+        browserCanvas.setPreferredSize(new Dimension(800, 600));
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(browserCanvas, BorderLayout.CENTER);
+
+        // Add container to Frame
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setContentPane(panel);
+        frame.pack();
+        browserCanvas.connect();
+
+        // This is VERY important: Make the frame visible BEFORE
+        // connecting the SWT Shell and starting the event loop!
+
     }
+}

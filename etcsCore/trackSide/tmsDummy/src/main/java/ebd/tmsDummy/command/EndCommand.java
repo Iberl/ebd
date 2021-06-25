@@ -5,11 +5,11 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.tmsDummy.NextCommandEvent;
 import ebd.globalUtils.events.tmsDummy.SendMessageToRBCEvent;
 import ebd.messageLibrary.util.ETCSVariables;
-import ebd.rbc_tms.message.Message_21;
-import ebd.rbc_tms.payload.Payload_21;
-import ebd.rbc_tms.util.EOA;
-import ebd.rbc_tms.util.MA;
-import ebd.rbc_tms.util.ModeProfile;
+import ebd.internal.message.Message_21;
+import ebd.internal.payload.Payload_21;
+import ebd.internal.util.EOA;
+import ebd.internal.util.MA;
+import ebd.internal.util.ModeProfile;
 import ebd.tmsDummy.util.exception.InvalidSequenceException;
 import org.greenrobot.eventbus.EventBus;
 

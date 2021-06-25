@@ -10,9 +10,9 @@ package plan_pro.modell.signalbegriffe_ril_301._1_9;
 
 import plan_pro.modell.signalbegriffe_struktur._1_6_0.TCSignalbegriffID;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
 
 
 /**

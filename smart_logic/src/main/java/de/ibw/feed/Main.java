@@ -10,7 +10,7 @@ import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 import plan_pro.modell.planpro._1_9_0.CPlanProSchnittstelle;
 
-import jakarta.xml.bind.*;
+import javax.xml.bind.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

@@ -8,7 +8,7 @@
 
 package plan_pro.modell.signalbegriffe_ril_301._1_9;
 
-import jakarta.xml.bind.annotation.XmlRegistry;
+import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**

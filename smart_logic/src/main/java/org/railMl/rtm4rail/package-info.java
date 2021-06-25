@@ -5,5 +5,5 @@
 // Generiert: 2020.10.13 um 12:06:07 PM CEST 
 //
 
-@jakarta.xml.bind.annotation.XmlSchema(namespace = "https://www.railml.org/schemas/3.1", elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@javax.xml.bind.annotation.XmlSchema(namespace = "https://www.railml.org/schemas/3.1", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.railMl.rtm4rail;

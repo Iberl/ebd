@@ -39,29 +39,32 @@ import static ebd.messageLibrary.util.ETCSVariables.Q_LENGTH_CONFIRMED_BY_MONITO
  */
 public class UtilFunction {
 
-
+    /**
+     * @deprecated
+     * @return
+     * @throws IOException
+     * @throws XmlPullParserException
+     */
     public static Model getMavenModel() throws IOException, XmlPullParserException {
         MavenXpp3Reader reader = new MavenXpp3Reader();
         return reader.read(new FileReader("pom.xml"));
     }
     public static String getMavenVersion() throws IOException, XmlPullParserException {
-        return getMavenModel().getVersion();
+        return SlConfigHandler.getInstance().app_version;
     }
 
     public static String getVersionDate() throws XmlPullParserException, IOException {
-        String date = getMavenModel().getProperties().getProperty("version.date");
-        if(date == null) return "";
-        return date;
+       return SlConfigHandler.getInstance().app_date;
     }
 
     public static String showVersionString() {
         String resultString = "";
         try {
-            Model M = getMavenModel();
-            String date = M.getProperties().getProperty("version.date");
+
+            String date = getVersionDate();
             if(date == null) date = "";
             else date = "@" + date;
-            resultString = M.getVersion() + date;
+            resultString = getMavenVersion() + date;
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
         }

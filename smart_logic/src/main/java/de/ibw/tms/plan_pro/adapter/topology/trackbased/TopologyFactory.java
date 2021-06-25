@@ -24,7 +24,7 @@ import plan_pro.modell.signale._1_9_0.CSignal;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrAnlage;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
-import jakarta.xml.bind.*;
+import javax.xml.bind.*;
 
 import java.awt.*;
 import java.awt.geom.Line2D;

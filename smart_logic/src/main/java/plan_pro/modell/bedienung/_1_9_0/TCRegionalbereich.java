@@ -11,7 +11,7 @@ package plan_pro.modell.bedienung._1_9_0;
 import plan_pro.modell.basistypen._1_9_0.CBasisAttribut;
 import plan_pro.modell.basistypen._1_9_0.ENUMRegionalbereich;
 
-import jakarta.xml.bind.annotation.*;
+import javax.xml.bind.annotation.*;
 
 
 /**

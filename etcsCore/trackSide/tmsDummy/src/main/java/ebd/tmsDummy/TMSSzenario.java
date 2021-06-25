@@ -4,8 +4,6 @@ import ebd.globalUtils.configHandler.ConfigHandler;
 import ebd.globalUtils.events.tmsDummy.EndOfMissionEvent;
 import ebd.globalUtils.events.tmsDummy.StopWaitingEvent;
 import ebd.globalUtils.events.tmsDummy.TMSDummyStartEvent;
-import ebd.logging.Logging;
-import ebd.rbc_tms.util.exception.MissingInformationException;
 import ebd.tmsDummy.command.ICommand;
 import ebd.tmsDummy.handler.CommandHandler;
 import ebd.tmsDummy.handler.WaitingHandler;
