@@ -346,7 +346,13 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             }
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
-        setTrainForStartPositionOfRoute(iTrainId, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
+        //method under: sends message to tms if not clear position
+        boolean isClearPosition = setTrainForStartPositionOfRoute(iTrainId, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
+        if(!isClearPosition) {
+            // deny futher checks // response for not accepting is send in setTrainForStartPositionOfRoute
+            return;
+        }
+
         //continous connect
         try {
             requestedTrackElementList = identifyRouteElements(iTrainId , R, requestedTrackElementList);
@@ -684,7 +690,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
-    private void setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
+    private boolean setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
         PositionModul.getInstance().resetTimeFilter();
         PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(iTrainId);
         MovableObject mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
@@ -695,6 +701,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             sendMaResponseToTMS(MaReturnPayload, 2L);
             if(EBM != null) EBM.log("SL Train-Status FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+            return false;
         } else {
             if(MaAdapter.nid_lrbg != TrainPosition.getPos().nid_lrbg) {
                 if(EBM != null) EBM.log("Train Position Unknown (REFERRED BALISE CHANGED)", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
@@ -702,9 +709,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 sendMaResponseToTMS(MaReturnPayload, 2L);
                 if(EBM != null) EBM.log("SL Train-Status (REFERRED BALISE CHANGED) FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                         SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+                return false;
             } else {
                 // TODO ????!!!
-
+                return true;
             }
         }
     }
