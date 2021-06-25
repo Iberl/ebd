@@ -200,12 +200,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         this.smartServ = smartServer;
         instance = this;
 
+        EBM = EventBusManager.RootEventBusManger;
 
-        try {
-            EBM = EventBusManager.registerOrGetBus(1,false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         //this.TmsProxy = new SmartLogicTmsProxy(smartServer);
     }
