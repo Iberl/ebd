@@ -3,7 +3,6 @@ package de.ibw.tms.trackplan.controller;
 import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.repo.MaRepository;
-import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -18,6 +17,8 @@ import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.ui.geometric.GeoEdgePainted;
 
 import de.ibw.tms.entities.TmsJpaApp;
+import de.ibw.tms.ui.route.model.GeoEdgeReference;
+import de.ibw.tms.ui.route.model.TrainEdgeReference;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -176,6 +176,7 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
         ArrayList panels = new ArrayList();
         Iterator shapes= DataModel.getInteractable().iterator();
         ArrayList<TopologyGraph.Edge> edgesHavingMenuItem = new ArrayList<>();
+        ArrayList<Integer> trainsRefered = new ArrayList<>();
         for (int i= 1; shapes.hasNext(); i++) {
             Shape S = (Shape) shapes.next();
             if(S.contains(TranslatedPoint)) {
@@ -185,16 +186,25 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                     panels.add(TrackUtilPanel);
                 }
             }
-            if(S instanceof GeoEdgePainted) {
-                GeoEdgePainted LineRail = (GeoEdgePainted) S;
-                TopologyGraph.Edge TopEdgeOfRail = LineRail.getTopEdge();
+            if(S instanceof GeoEdgeReference) {
+               GeoEdgeReference GeoRef = (GeoEdgeReference) S;
+                TopologyGraph.Edge TopEdgeOfRail = GeoRef.getE();
 
-                if(LineRail.ptSegDist(TranslatedPoint) < GeoEdgePainted.dRailTolerance) {
+                if(GeoRef.ptSegDist(TranslatedPoint) < GeoEdgePainted.dRailTolerance) {
                     if(edgesHavingMenuItem.contains(TopEdgeOfRail)) continue;
                     edgesHavingMenuItem.add(TopEdgeOfRail);
                     de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
                     panels.add(TrackUtilPanel);
                 }
+            } else if (S instanceof TrainEdgeReference) {
+                TrainEdgeReference TrainRef = (TrainEdgeReference) S;
+                if(TrainRef.ptSegDist(TranslatedPoint) < GeoEdgePainted.dRailTolerance) {
+                    if(trainsRefered.contains(TrainRef.getTrainId())) continue;
+                    trainsRefered.add(TrainRef.getTrainId());
+                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
+                    panels.add(TrackUtilPanel);
+                }
+
             }
 
 

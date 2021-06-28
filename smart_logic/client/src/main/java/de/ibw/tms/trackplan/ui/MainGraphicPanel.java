@@ -4,7 +4,6 @@ import de.ibw.feed.Balise;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
-import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
@@ -25,6 +24,8 @@ import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.ui.TmsFrameUtil;
+import de.ibw.tms.ui.route.model.GeoEdgeReference;
+import de.ibw.tms.ui.route.model.TrainEdgeReference;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
 import org.apache.log4j.Logger;
@@ -144,10 +145,14 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         Collection<ArrayList<Occupation>> trainOccList =
                 TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, Mo).getAll();
         if(trainOccList.size() == 0) throw new Exception("No Occupation for trainId: " + TM.iTrainId + " found");
-        paintOccupationList(g2d, BS, TM.RepresentedColor, TM.iTrainId, trainOccList);
+        paintOccupationList(g2d, BS, TM.RepresentedColor, TM.iTrainId, trainOccList, true);
     }
 
-    private static void paintOccupationList(Graphics2D g2d, BasicStroke BS, Color RepresentedColor, int iTrainId, Collection<ArrayList<Occupation>> trainOccList) throws Exception {
+    private static void paintOccupationList(Graphics2D g2d, BasicStroke BS, Color RepresentedColor, int iTrainId,
+                                            Collection<ArrayList<Occupation>> trainOccList,
+                                            boolean isTrainPosition
+
+    ) throws Exception {
         Occupation O = null;
         for(ArrayList<Occupation> occs: trainOccList) {
             if(occs.size() == 0) continue;
@@ -194,7 +199,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             }
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
             paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
-                    BS);
+                    BS, iTrainId, isTrainPosition);
         }
     }
 
@@ -272,10 +277,14 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
                 GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
 
-
+                GeoEdgeReference GeoRef = new GeoEdgeReference();
+                GeoRef.setTopEdge(E);
+                GeoRef.setGeoEdge(geoEdge);
 
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
-                g2d.draw(line);
+
+                GeoRef.setLine(line);
+                g2d.draw(GeoRef);
 //                Ellipse2D.Double circle = new Ellipse2D.Double(nodeA.getX(), nodeA.getY(), 10, 10);
 //                g2d.fill(circle);
                 drawArrowHead(g2d, line);
@@ -322,7 +331,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                         TrackAndOccupationManager.getReadOnly(MAOccupation.class, Mo).getAll();
                 if (trainOccList.size() == 0)
                     throw new InvalidParameterException("No Ma-Occupation for trainId: " + TM.iTrainId + " found");
-                paintOccupationList(g2d, BS, Color.GREEN, TM.iTrainId, trainOccList);
+                paintOccupationList(g2d, BS, Color.GREEN, TM.iTrainId, trainOccList, false);
             } catch (Exception E) {
                 E.printStackTrace();
 
@@ -491,7 +500,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 Collection<ArrayList<Occupation>> trainOccList =
                         TrackAndOccupationManager.getReadOnly(MARequestOccupation.class, Mo).getAll();
                 if(trainOccList.size() == 0) throw new InvalidParameterException("No Occupation for trainId: " + TM.iTrainId + " found");
-                paintOccupationList(g2d, BS, Color.YELLOW, TM.iTrainId, trainOccList);
+                paintOccupationList(g2d, BS, Color.YELLOW, TM.iTrainId, trainOccList, false);
 
 
             } catch(InvalidParameterException E) {
@@ -506,7 +515,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
-    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke) throws Exception {
+    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke, int iTrainId, boolean isTrainPosition) throws Exception {
         // Get TopEdge
         ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = edgeRepo.get(TopKanteId);
@@ -578,9 +587,15 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 nodeB = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
 
+            GeoEdgeReference GeoRef = GeoEdgeReference.ReferenceRepo.getModel(geoEdge);
+            TrainEdgeReference TrainRef = new TrainEdgeReference();
+            TrainRef.setGeoRef(GeoRef);
+            TrainRef.setTrainId(iTrainId);
             // Draw Line
             Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
-            g2d.draw(line);
+            TrainRef.setLine(line);
+
+            g2d.draw(TrainRef);
             /*
                 g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
                 g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
