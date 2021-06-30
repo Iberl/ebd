@@ -9,15 +9,19 @@ import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.MaCreatingFrame;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
+import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.trackplan.ui.RouteViewPort;
 import de.ibw.tms.trackplan.ui.TrackPanel;
-import de.ibw.tms.trackplan.ui.TrackWindow;
+import de.ibw.tms.ui.route.controller.RouteController;
+import de.ibw.tms.ui.route.view.RouteModelUI;
+import de.ibw.tms.ui.route.view.TrackWindow;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.ui.geometric.GeoEdgePainted;
 
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ui.route.model.GeoEdgeReference;
+import de.ibw.tms.ui.route.model.RouteModel;
 import de.ibw.tms.ui.route.model.TrainEdgeReference;
 
 import javax.swing.*;
@@ -26,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -181,12 +186,17 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
             Shape S = (Shape) shapes.next();
             if(S.contains(TranslatedPoint)) {
                 if(S instanceof Iinteractable) {
-                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable)
-                            S, this.RoutePort, isMainWindow);
-                    panels.add(TrackUtilPanel);
+                    if(!RouteModel.isRouteSelected()) {
+                        // es wurde keine Route selektiert => man darf Weichen stellen
+                        de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable)
+                                S, this.RoutePort, isMainWindow);
+                        panels.add(TrackUtilPanel);
+                    }
                 }
             }
             if(S instanceof GeoEdgeReference) {
+                // First you have to select a train; skip way-lines when no train is selected
+                if(!RouteModel.isRouteSelected()) continue;
                GeoEdgeReference GeoRef = (GeoEdgeReference) S;
                 TopologyGraph.Edge TopEdgeOfRail = GeoRef.getE();
 
@@ -197,6 +207,9 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                     panels.add(TrackUtilPanel);
                 }
             } else if (S instanceof TrainEdgeReference) {
+                // trains already selected overjump
+                if(RouteModel.isRouteSelected()) continue;
+
                 TrainEdgeReference TrainRef = (TrainEdgeReference) S;
                 if(TrainRef.ptSegDist(TranslatedPoint) < GeoEdgePainted.dRailTolerance) {
                     if(trainsRefered.contains(TrainRef.getTrainId())) continue;
@@ -209,6 +222,40 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
 
 
 
+
+        }
+        if(RouteModel.isRouteSelected()) {
+            StringBuilder sFailurs = new StringBuilder();
+            RouteModel RM = RouteModel.routeRepository.getModel(RouteModel.FD_ROUTE);
+            if(RM == null) {
+                showDialog("Kein Zug aktiv", "Bitte erst einen Zug auswählen.");
+                return;
+            }
+            Iterator<TopologyGraph.Edge> it = edgesHavingMenuItem.iterator();
+            while(it.hasNext()) {
+                TopologyGraph.Edge E = it.next();
+                try {
+                    RM.checkIfEdgeAddableToRoute(E);
+                } catch (InvalidParameterException IPE) {
+                    it.remove();
+                    if(!sFailurs.toString().contains(IPE.getMessage())) {
+                        sFailurs.append(IPE.getMessage()).append(" ");
+
+                    }
+                }
+            }
+
+
+            if(edgesHavingMenuItem.size() == 1) {
+                TopologyGraph.Edge E = edgesHavingMenuItem.get(0);
+                RouteController.addEdge(E);
+
+
+                return;
+            } else if(edgesHavingMenuItem.size() == 0 && !sFailurs.isEmpty()) {
+                // Fehler bei Kante
+                showDialog("Kantenfehler", sFailurs.toString());
+            }
 
         }
         JFrame jFscopeFrame;
@@ -228,6 +275,17 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                 }
             });
         }
+    }
+
+    private void showDialog(String sFrame, String sMessage) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+
+            @Override
+            public void run() {
+                JOptionPane.showMessageDialog(new JFrame(sFrame), sMessage);
+            }
+        });
     }
 
     /**

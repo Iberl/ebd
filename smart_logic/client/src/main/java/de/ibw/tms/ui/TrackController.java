@@ -2,23 +2,14 @@ package de.ibw.tms.ui;
 
 
 
-import de.ibw.tms.MainTmsSim;
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.ma.MaRequestWrapper;
 import de.ibw.tms.ma.repo.MaRepository;
-import de.ibw.tms.plan.elements.Rail;
-import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan.elements.model.PlanData;
-import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
 import de.ibw.tms.trackplan.MaCreatingFrame;
 import de.ibw.tms.trackplan.TrackplanGraphicPanel;
 import de.ibw.tms.trackplan.controller.Intf.IController;
 import de.ibw.tms.trackplan.ui.RouteViewPort;
-import de.ibw.tms.trackplan.ui.TrackPanel;
-import de.ibw.tms.trackplan.ui.TrackWindow;
-import de.ibw.tms.trackplan.viewmodel.TranslationModel;
-import de.ibw.tms.trackplan.viewmodel.ZoomModel;
-import de.ibw.tms.ui.geometric.GeoEdgePainted;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,10 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;

@@ -252,9 +252,11 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         RbcMaAdapter MaAdapter = (RbcMaAdapter) Ma;
 
         MovementAuthority smartLogicMa;
+        /** unused
         SpotLocationIntrinsic EoaLocation = new SpotLocationIntrinsic();
         EoaLocation.setNetElementRef(R.getLastEdge().getId());
         EoaLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+         **/
         T_EMA tEma = new T_EMA();
         tEma.setTime((short) MaAdapter.eoa.t_loa);
         boolean eoaQEndtimer = MaAdapter.eoa.endTimer != null;

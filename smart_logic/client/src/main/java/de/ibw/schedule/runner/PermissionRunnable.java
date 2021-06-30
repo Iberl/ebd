@@ -41,17 +41,11 @@ public class PermissionRunnable implements Runnable {
     @Override
     public void run() {
 
-        try {
-            client.CH.sendCommand(requestMessage);
-            if(requestMessage instanceof TmsMovementPermissionRequest) {
-                TmsJpaApp.TmsMessenger.log((IMovementMessengerIntf) requestMessage);
-            }
-        } catch (MissingInformationException e) {
-            e.printStackTrace();
-
-        }
+        scheduler.sendMessageTosmartLogic(requestMessage);
 
         scheduler.cancelTask(lTaskId);
 
     }
+
+
 }

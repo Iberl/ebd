@@ -8,6 +8,9 @@ import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.entities.TimeTaskRepository;
 import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.intf.SmartClient;
+import de.ibw.tms.intf.TmsMessage;
+import de.ibw.tms.ui.route.controller.RouteController;
+import de.ibw.tms.ui.route.model.IsmartlocicSender;
 import de.motis.producer.MotisProducer;
 import ebd.internal.util.exception.MissingInformationException;
 import org.slf4j.Logger;
@@ -24,10 +27,10 @@ import java.util.stream.Collectors;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.1
- * @since 2021-06-14
+ * @version 1.1.10
+ * @since 2021-06-30
  */
-public class SmartLogicClient extends SmartClient {
+public class SmartLogicClient extends SmartClient implements IsmartlocicSender {
 
 
     private static final Logger log = LoggerFactory.getLogger(SmartLogicClient.class);
@@ -88,6 +91,7 @@ public class SmartLogicClient extends SmartClient {
         this.timeTaskRepository = timeTaskRepository;
         this.RequestScheduler = new TmsScheduler(this, this.timeTaskRepository);
         this.CH = new ClientHandler(this, iRetryTime);
+        RouteController.setIsender(this);
     }
 
     public String getsTmsId() {
@@ -196,6 +200,7 @@ public class SmartLogicClient extends SmartClient {
     }
 
     private static SmartLogicClient SlClient = null;
+
 
 
     /**
@@ -312,4 +317,10 @@ public class SmartLogicClient extends SmartClient {
     }
 
 
+    @Override
+    public void sendMessageTosmartLogic(TmsMessage requestMessage) {
+        if(SlClient != null){
+            SlClient.RequestScheduler.sendMessageTosmartLogic(requestMessage);
+        }
+    }
 }

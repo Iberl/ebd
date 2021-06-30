@@ -1,32 +1,66 @@
 package de.ibw.tms.ui.route.view;
 
 import de.ibw.tms.trackplan.ui.Route;
+import de.ibw.tms.ui.route.controller.RouteController;
 import de.ibw.tms.ui.route.model.RouteModel;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Oberflaeche die eine Route Verwaltet
+ *
+ *
+ * @author iberl@verkehr.tu-darmstadt.de
+ * @version 1.1.10
+ * @since 2021-06-30
+ *
+ */
 public class RouteModelUI extends JFrame {
     private static RouteModelUI instance = null;
-    public static RouteModelUI getInstance(boolean isVisible) {
-        if (instance == null) {
-            instance = new RouteModelUI();
-        }
-        instance.setMinimumSize(new Dimension(300, 50));
 
-        if(instance.getRM() == null) {
-            instance.setVisible(false);
-        } else {
-            if(isVisible) {
-                instance.updateUI();
-            }
-            instance.setVisible(isVisible);
-        }
-        instance.pack();
+    /**
+     * Singelton der die Dialog aktualisiert, wenn paramter isVisible:= true
+     * @param isVisible - true Dailog wird angezeigt und Steuerelemente aktualisiert
+     *                  - false Dialog wird zuruckgegeben aber nicht angezeigt
+     * @return Singelton des Dialogs
+     */
+    public static RouteModelUI getInstance(boolean isVisible) {
+
+                if(instance ==null)
+
+                {
+                    instance = new RouteModelUI();
+                }
+                instance.setMinimumSize(new
+
+                        Dimension(300,50));
+
+                if(instance.getRM()==null)
+
+                {
+                    instance.setVisible(false);
+                } else
+
+                {
+                    if (isVisible) {
+                        instance.updateUI();
+                    }
+                    instance.setVisible(isVisible);
+                }
+                instance.pack();
+
         return instance;
+    }
+
+    public static boolean isRouteActive() {
+        if(instance == null) return false;
+        else return instance.isVisible();
     }
 
     private void updateUI() {
@@ -36,6 +70,7 @@ public class RouteModelUI extends JFrame {
         }
         this.NameField.setText(sName);
         updateHeading();
+        this.EngineValue.setText(String.valueOf(RM.getNid_engineId()));
         updateEdgeSections();
         updateIntrinsicValue();
         this.validate();
@@ -83,7 +118,8 @@ public class RouteModelUI extends JFrame {
     private RouteModel RM = null;
 
     private JLabel HeadLabel;
-    private JButton BottomSubmitButton;
+    private JPanel ButtonPanel;
+    private JButton SetIntrinsicButton;
     private JPanel CenterPanel;
     private JLabel NameLabel;
     private JTextField NameField;
@@ -111,8 +147,11 @@ public class RouteModelUI extends JFrame {
         this.getContentPane().setLayout(new BorderLayout());
         this.HeadLabel = new JLabel(desc);
         this.initCenterPanel();
-        this.BottomSubmitButton = new JButton("Save Route-Name");
-
+        this.ButtonPanel = new JPanel();
+        this.ButtonPanel.setLayout(new GridLayout(1,1));
+        this.SetIntrinsicButton = new JButton("Definiere Letzten Kantenabschnitt");
+        this.SetIntrinsicButton.addActionListener(handleIntrinsicDialogOpen());
+        ButtonPanel.add(SetIntrinsicButton);
         this.LeftPanel = new JPanel();
         LeftPanel.setMinimumSize(new Dimension(50,50));
         this.RightPanel = new JPanel();
@@ -123,9 +162,14 @@ public class RouteModelUI extends JFrame {
 
         this.getContentPane().add(HeadLabel, BorderLayout.NORTH);
         this.getContentPane().add(CenterPanel, BorderLayout.CENTER);
-        this.getContentPane().add(BottomSubmitButton, BorderLayout.SOUTH);
+        this.getContentPane().add(ButtonPanel, BorderLayout.SOUTH);
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+
+    }
+
+    private ActionListener handleIntrinsicDialogOpen() {
+        return e -> RouteController.openIntrinsicDialog(RouteModelUI.this);
 
     }
 
@@ -157,13 +201,21 @@ public class RouteModelUI extends JFrame {
         CenterPanel.add(this.NameField);
         this.EngineLabel = new JLabel("Nid Engine ID");
         CenterPanel.add(this.EngineLabel);
-        this.EngineValue = new JLabel();
+        if(RM == null) {
+            this.EngineValue = new JLabel();
+
+        } else {
+            this.EngineValue = new JLabel(String.valueOf(RM.getNid_engineId()));
+        }
+
         CenterPanel.add(this.EngineValue);
         this.EdgeLabel = new JLabel("Gleiskantenbezeichner");
         CenterPanel.add(EdgeLabel);
-        this.EdgeListingArea = new JTextArea();
+        this.EdgeListingArea = new JTextArea(4, 20);
         this.EdgeListingArea.setEditable(false);
-        CenterPanel.add(this.EdgeListingArea);
+
+        JScrollPane scroll = new JScrollPane(EdgeListingArea);
+        CenterPanel.add(scroll);
         this.ChangeEdgeListingLabel  = new JLabel("Edit Bezeichnerliste");
         CenterPanel.add(this.ChangeEdgeListingLabel);
         this.EdgeListEditBox = new JCheckBox();

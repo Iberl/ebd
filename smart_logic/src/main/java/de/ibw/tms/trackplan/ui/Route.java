@@ -76,6 +76,11 @@ public class Route extends LinearContiguousTrackArea implements Cloneable, Seria
         this.sections = sectionList;
     }
 
+    public void addEdge(TopologyGraph.Edge e) {
+
+        this.routeSectionIDs.add(e.getRefId());
+    }
+
     public enum TrackElementType {
         RAIL_TYPE, CROSSOVER_TYPE
     }

@@ -7,6 +7,7 @@ import de.ibw.smart.logic.EventBusManager;
 import de.ibw.smart.logic.intf.SmartLogic;
 import de.ibw.tms.entities.TimeTaskDAO;
 import de.ibw.tms.entities.TimeTaskRepository;
+import de.ibw.tms.entities.TmsJpaApp;
 import de.ibw.tms.entities.converter.CheckDbdCmdConverter;
 import de.ibw.tms.entities.converter.CheckPermissionConverter;
 import de.ibw.tms.intf.TmsDbdCommand;
@@ -14,6 +15,7 @@ import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
 import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
+import de.ibw.tms.intf.messenger.IMovementMessengerIntf;
 import de.ibw.util.ThreadedRepo;
 import ebd.internal.util.exception.MissingInformationException;
 import org.springframework.scheduling.TaskScheduler;
@@ -31,8 +33,8 @@ import java.util.concurrent.ScheduledFuture;
  * bezogennen Zeitpunkt in Sekunden die Nachrichten schickt.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 03.12.2020
+ * @version 1.1.10
+ * @since 2021-06-30
  */
 public class TmsScheduler {
 
@@ -54,6 +56,22 @@ public class TmsScheduler {
 
     private String sTmsId;
     private String sRbcId;
+
+    /**
+     * sends Message to smartLogic
+     * @param requestMessage -- Message to be send
+     */
+    public void sendMessageTosmartLogic(TmsMessage requestMessage) {
+        try {
+            Client.CH.sendCommand(requestMessage);
+            if(requestMessage instanceof TmsMovementPermissionRequest) {
+                TmsJpaApp.TmsMessenger.log((IMovementMessengerIntf) requestMessage);
+            }
+        } catch (MissingInformationException e) {
+            e.printStackTrace();
+
+        }
+    }
 
 
     /**

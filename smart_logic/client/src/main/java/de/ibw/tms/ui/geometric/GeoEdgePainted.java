@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class GeoEdgePainted extends Line2D.Double implements Iinteractable {
     TopologyGraph.Edge E = null;
 
-    public static double dRailTolerance = 2.0d;
+    public static double dRailTolerance = 7.0d;
 
     GeoEdgePainted(TopologyGraph.Edge Edge) {
         this.E = Edge;

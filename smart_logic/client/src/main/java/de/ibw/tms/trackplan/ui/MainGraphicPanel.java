@@ -162,6 +162,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         if(O == null) throw new Exception("No Occupation for trainId: " + iTrainId + " found");
         List<TrackEdgeSection> sectionList = O.getTrackEdgeSections();
         g2d.setPaint(RepresentedColor);
+        if(isTrainPosition) TrainEdgeReference.removeAllRef(iTrainId);
         for(TrackEdgeSection TES : sectionList) {
             TopologyGraph.Edge E = (TopologyGraph.Edge) TES.getTrackEdge();
             SpotLocationIntrinsic begin = TES.getBegin();
@@ -594,6 +595,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             // Draw Line
             Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
             TrainRef.setLine(line);
+            DefaultRepo<CGEOKante, TrainEdgeReference> refByGeoRepo =
+                    TrainEdgeReference.TrainRefRepo.getModel(iTrainId);
+            if(refByGeoRepo == null) {
+                refByGeoRepo = new DefaultRepo<>();
+            }
+            refByGeoRepo.update(geoEdge, TrainRef);
+            TrainEdgeReference.TrainRefRepo.update(iTrainId, refByGeoRepo);
 
             g2d.draw(TrainRef);
             /*

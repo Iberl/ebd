@@ -28,6 +28,7 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.tms.trackplan.ui.PlatformEdge;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.ui.route.model.GeoEdgeReference;
+import de.ibw.tms.ui.route.model.TrainEdgeReference;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;
@@ -297,6 +298,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
         List<Iinteractable> InteractionList = new ArrayList<Iinteractable>(branchingSwitchList);
         InteractionList.addAll(railList);
         InteractionList.addAll(GeoEdgeReference.ReferenceRepo.getAll());
+        InteractionList.addAll(TrainEdgeReference.getAllRefs());
         return (ArrayList) InteractionList;
     }
 

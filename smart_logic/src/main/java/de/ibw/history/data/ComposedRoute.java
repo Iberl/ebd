@@ -83,6 +83,12 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         isExtendable = extendable;
     }
 
+    /**
+     * Connects route elements (track edges) to a continous lane
+     * @param R - Input mainly by tms
+     * @param iTrainId - nid_engine_id
+     * @throws SmartLogicException - Route cannot be created;
+     */
     public void generateFromRoute(Route R, int iTrainId) throws SmartLogicException {
         try{
             EventBusManager EBM = EventBusManager.RootEventBusManger;

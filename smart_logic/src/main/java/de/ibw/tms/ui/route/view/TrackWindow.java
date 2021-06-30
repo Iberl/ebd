@@ -1,4 +1,4 @@
-package de.ibw.tms.trackplan.ui;
+package de.ibw.tms.ui.route.view;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,8 +11,8 @@ import java.util.List;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-08-26
+ * @version 1.1.10
+ * @since 2021-06-30
  */
 public class TrackWindow extends JDialog {
     private static int windowWidth = 300;
@@ -56,7 +56,9 @@ public class TrackWindow extends JDialog {
 
         this.pack();
         this.setBounds(P.x, P.y, windowWidth,400);
-
+        if(!instances.contains(this)) {
+            instances.add(this);
+        }
         this.setVisible(true);
 
     }

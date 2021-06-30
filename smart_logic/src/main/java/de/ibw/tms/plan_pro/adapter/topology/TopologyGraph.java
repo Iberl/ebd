@@ -293,7 +293,6 @@ public class TopologyGraph {
 
 
 
-
         /**
          * Diese Methode gibt an ob von Knotea A zum Knoten B dieser Kante in Streckenkilometrierung verl&auml;ft.
          *
