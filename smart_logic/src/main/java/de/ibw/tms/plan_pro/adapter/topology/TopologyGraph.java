@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
+import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
 import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.model.PlanData;
@@ -157,6 +158,9 @@ public class TopologyGraph {
 
         private GeometricCoordinate geoCo = null;
 
+        private BranchingSwitch switchUI = null;
+
+
         @Override
         public GeometricCoordinate getGeoCoordinates() {
             return geoCo;
@@ -239,6 +243,14 @@ public class TopologyGraph {
         @Override
         public int compareTo(@NotNull TopologyGraph.Node o) {
             return this.TopNodeId.compareTo(o.TopNodeId);
+        }
+
+        public void setBranchingUi(BranchingSwitch branchingSwitch) {
+            switchUI = branchingSwitch;
+        }
+
+        public BranchingSwitch getSwitchUI() {
+            return switchUI;
         }
     }
 

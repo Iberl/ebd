@@ -76,6 +76,9 @@ public class RouteController {
         TmsMessage MPR = new TmsMovementPermissionRequest("1", "1", CheckTask);
 
         ISender.sendMessageTosmartLogic(MPR);
+        RouteModelUI.getInstance(false);
+
+
     }
 
     private static RbcMaAdapter generateMA(RouteModel rm) {
@@ -91,7 +94,10 @@ public class RouteController {
         } catch(SmartLogicException SLE) {
 
         }
-        int q_dir = 2; // both direction
+
+
+
+        int q_dir = PosDat.getPos().q_dlrbg; // direction away from balisegroup
         int q_scale = 1; // 1m
         int v_loa = 0; // 50km/h
         int t_loa = 1023; // special value
@@ -99,12 +105,19 @@ public class RouteController {
         EOA.DangerPoint DP = new EOA.DangerPoint(100, 8); // database value CB & WI
         EOA.Overlap O = null;
 
+        EOA.Section Section = new EOA.Section(dRouteMeter.intValue(),false,
+                null, null);
+        ArrayList<EOA.Section> eoaSections = new ArrayList();
+        eoaSections.add(Section);
+
+
         EOA eoa = new EOA(q_dir, q_scale, v_loa, t_loa, T, DP, O );
+        eoa.sections = eoaSections;
         GradientProfile.Gradient Grad = new GradientProfile.Gradient(0, true, 0);
         ArrayList<GradientProfile.Gradient> gradients = new ArrayList<>();
         gradients.add(Grad);
         GradientProfile GP = new GradientProfile(1,1, gradients);
-        SpeedProfile.Section Sec = new SpeedProfile.Section(0, 10, true); // 50 km/h
+        SpeedProfile.Section Sec = new SpeedProfile.Section(0, 10, true, new ArrayList<>()); // 50 km/h
         ArrayList<SpeedProfile.Section> speedSection = new ArrayList<>();
         speedSection.add(Sec);
         SpeedProfile SP = new SpeedProfile(1, 1, speedSection);
@@ -256,6 +269,12 @@ public class RouteController {
     public static void openIntrinsicDialog(RouteModelUI routeModelUI) {
         RouteModel RM = RouteModel.routeRepository.getModel(RouteModel.FD_ROUTE);
         if(RM == null) return;
+        if(RM.getRoute() == null) return;
+        if(RM.getRoute().getLastEdge() == null) {
+            JOptionPane.showMessageDialog(new JFrame("Keine Kante definiert"),
+                    "Bitte eine Kante hinzufügen.");
+            return;
+        }
         EndTrainIntrinsicCoordModel Model = new EndTrainIntrinsicCoordModel(RM);
         IntriniscCoordView ICV = new IntriniscCoordView(routeModelUI, Model);
     }

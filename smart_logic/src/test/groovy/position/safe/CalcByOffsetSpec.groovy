@@ -6,6 +6,7 @@ import de.ibw.history.PositionData
 import de.ibw.history.PositionModul
 import de.ibw.history.TrackAndOccupationManager
 import de.ibw.history.data.PositionEnterType
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.tms.ma.mob.MovableObject
 import de.ibw.tms.ma.mob.common.NID_ENGINE
 import de.ibw.tms.ma.occupation.Occupation
@@ -19,6 +20,8 @@ import de.ibw.util.ThreadedRepo
 import ebd.TescModul
 import ebd.internal.util.PositionInfo
 import ebd.internal.util.TrainInfo
+import org.apache.poi.ss.formula.functions.Even
+import org.greenrobot.eventbus.EventBus
 import spock.lang.Specification
 import trackAndOccupationManager.ManagerSpecification
 
@@ -77,6 +80,7 @@ class CalcByOffsetSpec extends Specification {
 */
     def "integrationTest"() {
         given:
+        EventBusManager.RootEventBusManger =  EventBusManager.registerOrGetBus(77, false);
         PlanData.getInstance();
 
         if(scenarioDataProvider == null) {

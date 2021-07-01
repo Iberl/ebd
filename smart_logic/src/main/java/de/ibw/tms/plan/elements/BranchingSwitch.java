@@ -1,5 +1,7 @@
 package de.ibw.tms.plan.elements;
 
+import de.ibw.tms.intf.TmsDbdCommand;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.common.DefaultObject;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
@@ -14,7 +16,9 @@ import de.ibw.tms.trackplan.EnumModel;
 import de.ibw.tms.trackplan.controller.CrossoverController;
 import de.ibw.tms.trackplan.ui.SingleEnumSelectorComponent;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
+import de.ibw.tms.ui.route.controller.RouteController;
 import ebd.SlConfigHandler;
+import ebd.TescModul;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.railMl.rtm4rail.TElementWithIDref;
@@ -30,6 +34,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
@@ -40,24 +45,18 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.4
- * @since 2020-08-31
+ * @version 1.1.10
+ * @since 2021-07-01
  */
 public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover, ITrack, Flow.Subscriber<CrossoverMainModel> {
 
 
     private static Logger logger = Logger.getLogger( BranchingSwitch.class );
     private Flow.Subscription CrossoverSubscription = null;
-    private Rail PeekRail = null;
+
     private TopologyGraph.Node Node = null;
 
-    /**
-     * Setzt das Gleis an der Weichenspitze
-     * @param PeekRail {@link Rail} - Gleis der Weichenspitze, das gesetzt wird
-     */
-    public void setPeekRail(Rail PeekRail) {
-        this.PeekRail = PeekRail;
-    }
+
 
     /**
      * Setzt Bezug zum Topologischen Knoten-Kanten-Listen-Modell
@@ -65,6 +64,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     public void setNode(TopologyGraph.Node node) {
         Node = node;
+        Node.setBranchingUi(this);
     }
 
     /**
@@ -83,12 +83,14 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private String sBrachName;
 
     public void setsBrachName(String sName) {
-        if(this.sBrachName == null || this.sBrachName.isEmpty() || this.sBrachName.equals("")) {
+        if(this.sBrachName == null || this.sBrachName.isEmpty()) {
+            return;
+        }
             JLabel LabName = new JLabel("<HTML><b><u>".concat(sName).concat("</u></b></HTML>"));
 
 
             uiList.add(0,LabName);
-        }
+
         this.sBrachName = sName;
     }
 
@@ -195,13 +197,16 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     private void initUiList(CrossoverEnumModel Model) {
 
 
+
+
         setBranchingStatesUnit(Model);
-        uiList.add(BrachingStates);
+        //uiList.add(BrachingStates);
 
     }
 
     private void setBranchingStatesUnit(CrossoverEnumModel model) {
-        this.BrachingStates = new SingleEnumSelectorComponent<CrossoverEnumModel>(model, this.controller,false);
+        this.BrachingStates =
+                new SingleEnumSelectorComponent<CrossoverEnumModel>(model, this.controller,false);
         uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
         model.setSingleSelection(model.getEnumMappingList()[0]);
         ActionListener al = new ActionListener() {
@@ -214,7 +219,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
     }
 
     /**
-     * @deprecated
+     * sendet Weichenstellbefehl an die smartLogic
      */
     public void sendDbdCommandToSL() {
         long lPriority = SlConfigHandler.getInstance().lCheckDbdCommand;
@@ -226,15 +231,25 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         }
         String sEbdName = ((CrossingSwitch) this.Node.NodeImpl).getEbdTitle(0, true, true);
         String sId = ISwitchHandler.getNodeId(this.Node);
-        /*
+        TrackElementStatus TES = null;
+
+        SwitchStatus Stat = (SwitchStatus) EF.Item;
+        if(Stat.equals(SwitchStatus.LEFT)) {
+            TES = new TrackElementStatus();
+            TES.statusList.add(TrackElementStatus.Status.LEFT);
+        } else if(Stat.equals(SwitchStatus.RIGHT)) {
+            TES = new TrackElementStatus();
+            TES.statusList.add(TrackElementStatus.Status.RIGHT);
+        }
+
+        if(TES == null) return;
+
         CheckDbdCommand DbdCommandPayload =
-                new CheckDbdCommand(sEbdName,sId, (SwitchStatus) EF.Item, lPriority);
-        TmsDbdCommand DbdCommand = new TmsDbdCommand(MainTmsSim.S_TMS_ID,"NoRbcTarget", DbdCommandPayload);
-        try {
-            SmartClientHandler.getInstance().sendCommand(DbdCommand);
-        } catch (MissingInformationException missingInformationException) {
-            missingInformationException.printStackTrace();
-        }*/
+                new CheckDbdCommand(sEbdName, TES, lPriority);
+        TmsDbdCommand DbdCommand = new TmsDbdCommand("1","NoRbcTarget", DbdCommandPayload);
+
+        RouteController.getIsender().sendMessageTosmartLogic(DbdCommand);
+
     }
 
     private void handleDKW() {
@@ -257,7 +272,16 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      */
     @Override
     public ArrayList<JComponent> getViewElements() {
-        return uiList;
+        ArrayList<JComponent> result = new ArrayList<>();
+
+        JLabel LabName = new JLabel("<HTML><b><u>".concat(Node.name).concat("</u></b></HTML>"));
+        result.add(LabName);
+
+        result.add(0,LabName);
+        result.add(new JSeparator(SwingConstants.HORIZONTAL));
+        result.add(this.BrachingStates);
+
+        return result;
     }
 
     /**
@@ -287,13 +311,7 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     @Override
     public void onNext(CrossoverMainModel item) {
-        if(item.SwitchStatus != Status) {
-            this.LastState = Status;
-            Status = item.SwitchStatus;
-        }
-        this.fLinkageTimeInMs = item.fLinkageTimeInMs;
-
-        this.BrachingStates.update(this.Status);
+        updateBranchingSwitch(item);
         if(this.Status.equals(SwitchStatus.RIGHT)) {
             SingleSlip BranchPoint = (SingleSlip) this.BranchingPoint;
             //BranchPoint.setOutputRelation(BranchPoint.getRemotePoint().getRightPosition());
@@ -308,7 +326,19 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
         }
 
 
-        this.CrossoverSubscription.request(1);
+
+    }
+
+    public void updateBranchingSwitch(CrossoverMainModel item) {
+        if(item.SwitchStatus != Status) {
+            this.LastState = Status;
+            Status = item.SwitchStatus;
+        }
+        this.fLinkageTimeInMs = item.fLinkageTimeInMs;
+
+        this.BrachingStates.update(this.Status);
+
+
     }
 
     /**
@@ -542,15 +572,15 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
      * @param BranchPoint - {@link SingleSlip} - Schlupf der Weiche
      * @param dx double - X-Position auf geographischen Fenstern
      * @param dy double - Y-Position auf geographischen Fenstern
-     * @param sName {@link String} - Name der Weiche
+     * @param N  {@link TopologyGraph.Node} - Name der Weiche
      * @param ViewType {@link ViewType} - Bild der Weiche
      * @return BranchingSwitch - Gibt Weichenmodell mit den Parametern wider.
      */
-    public static BranchingSwitch createCrossover( java.lang.Float fLinkTime, SingleSlip BranchPoint,
-                                                  double dx, double dy, String sName, ViewType ViewType) {
+    public static BranchingSwitch createCrossover(java.lang.Float fLinkTime, SingleSlip BranchPoint,
+                                                  double dx, double dy, TopologyGraph.Node N, ViewType ViewType) {
 
             if(fLinkTime == null) fLinkTime = 1000.0f;
-            return new BranchingSwitch(fLinkTime, BranchPoint, dx, dy, sName, ViewType);
+            return new BranchingSwitch(fLinkTime, BranchPoint, dx, dy, N, ViewType);
 
 
 
@@ -572,12 +602,13 @@ public class BranchingSwitch extends Point2D.Double implements Shape, ICrossover
 
     private float fLinkageTimeInMs = 1000.0f;
 
-    private BranchingSwitch(float fLinkTime, SingleSlip BrachningPoint, double dx, double dy, String sName,
+    private BranchingSwitch(float fLinkTime, SingleSlip BrachningPoint, double dx, double dy, TopologyGraph.Node N,
                            ViewType BranchType) {
         super(dx,dy);
-        this.sBrachName = sName;
+        this.Node = N;
+        this.sBrachName = Node.name;
         this.BranchingPoint = BrachningPoint;
-        this.BranchingPoint.setViewName(sName);
+        this.BranchingPoint.setViewName(sBrachName);
         this.BranchViewTypeCurrent = BranchType;
 
         init(fLinkTime);

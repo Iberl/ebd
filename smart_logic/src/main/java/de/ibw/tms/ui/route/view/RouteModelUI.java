@@ -120,6 +120,7 @@ public class RouteModelUI extends JFrame {
     private JLabel HeadLabel;
     private JPanel ButtonPanel;
     private JButton SetIntrinsicButton;
+    private JButton SubmitMaButton;
     private JPanel CenterPanel;
     private JLabel NameLabel;
     private JTextField NameField;
@@ -148,10 +149,15 @@ public class RouteModelUI extends JFrame {
         this.HeadLabel = new JLabel(desc);
         this.initCenterPanel();
         this.ButtonPanel = new JPanel();
-        this.ButtonPanel.setLayout(new GridLayout(1,1));
+        this.ButtonPanel.setLayout(new GridLayout(2,1));
         this.SetIntrinsicButton = new JButton("Definiere Letzten Kantenabschnitt");
         this.SetIntrinsicButton.addActionListener(handleIntrinsicDialogOpen());
+        this.SubmitMaButton = new JButton("Submit Movement Permission Request");
+        this.SubmitMaButton.addActionListener(handleSubmit());
+
         ButtonPanel.add(SetIntrinsicButton);
+        ButtonPanel.add(SubmitMaButton);
+
         this.LeftPanel = new JPanel();
         LeftPanel.setMinimumSize(new Dimension(50,50));
         this.RightPanel = new JPanel();
@@ -166,6 +172,10 @@ public class RouteModelUI extends JFrame {
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
+    }
+
+    private ActionListener handleSubmit() {
+        return e -> RouteController.sendMovementPermissionRequest();
     }
 
     private ActionListener handleIntrinsicDialogOpen() {

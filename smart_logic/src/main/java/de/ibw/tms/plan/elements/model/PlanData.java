@@ -1,16 +1,12 @@
 package de.ibw.tms.plan.elements.model;
 
-import de.ibw.feed.BaliseExtractor;
 import de.ibw.smart.logic.intf.SmartLogic;
-import de.ibw.tms.etcs.ETCS_GRADIENT;
 import de.ibw.tms.gradient.profile.GradientTrailModel;
 import de.ibw.tms.ma.*;
-import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.net.elements.PositioningNetElement;
 import de.ibw.tms.ma.physical.*;
 import de.ibw.tms.ma.positioned.elements.GradientSegment;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
-import de.ibw.tms.ma.topologie.ApplicationDirection;
 import de.ibw.tms.plan.NodeInformation;
 import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.CrossoverModel;
@@ -18,7 +14,6 @@ import de.ibw.tms.plan.elements.Rail;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
 import de.ibw.tms.plan.elements.interfaces.Iinteractable;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
-import de.ibw.tms.plan_pro.adapter.PlanProTmsAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.DummyChainageSupply;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyConnect;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -37,7 +32,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.w3c.dom.Node;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
 import plan_pro.modell.basisobjekte._1_9_0.CPunktObjektTOPKante;
 import plan_pro.modell.basistypen._1_9_0.CBezeichnungElement;
@@ -47,13 +41,9 @@ import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspElement;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.CWKrGspKomponente;
 import plan_pro.modell.weichen_und_gleissperren._1_9_0.ENUMWKrArt;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.util.*;
@@ -921,30 +911,23 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2, float x1, float y1, float x2, float y2) {
         String sName = "";
         if(connectN2.equals(TopologyConnect.SPITZE)) {
-            try {
-                sName = ((CrossingSwitch)n2.NodeImpl).getEbdTitle(0,false,true);
-            } catch(Exception E) {
-                sName = "";
-            }
+
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN2);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x2,
-                    y2,sName, BranchingSwitch.ViewType.Branch_LRU);
+                    y2,n2, BranchingSwitch.ViewType.Branch_LRU);
 
+            RailwaySwitch.setNode(n2);
 
             CrossoverModel.createCrossoverModel(n2, connectN2, RailWaySwitchSlip, RailwaySwitch);
 
         }
 
         if(connectN.equals(TopologyConnect.SPITZE)) {
-            try {
-                sName = ((CrossingSwitch)n.NodeImpl).getEbdTitle(0,false,true);
-            } catch(Exception E) {
-                sName = "";
-            }
+
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN);
             BranchingSwitch RailwaySwitch = generateCrossover(RailWaySwitchSlip, x1,
-                    y1,sName, BranchingSwitch.ViewType.Branch_LRU);
-
+                    y1,n, BranchingSwitch.ViewType.Branch_LRU);
+            RailwaySwitch.setNode(n);
 
             CrossoverModel.createCrossoverModel(n, connectN, RailWaySwitchSlip, RailwaySwitch);
         }
@@ -1230,7 +1213,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
     }
 */
-    private BranchingSwitch generateCrossover(SingleSlip Point, double x, double y, String sName,
+    private BranchingSwitch generateCrossover(SingleSlip Point, double x, double y, TopologyGraph.Node N,
                                               BranchingSwitch.ViewType ViewType
                                               ) {
 
@@ -1240,7 +1223,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
 
 
-        BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, sName,
+        BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, N,
                 ViewType);
         this.branchingSwitchList.add(C);
 

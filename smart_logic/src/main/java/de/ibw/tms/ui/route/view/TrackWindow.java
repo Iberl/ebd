@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author iberl@verkehr.tu-darmstadt.de
  * @version 1.1.10
- * @since 2021-06-30
+ * @since 2021-07-01
  */
 public class TrackWindow extends JDialog {
     private static int windowWidth = 300;

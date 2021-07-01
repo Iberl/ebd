@@ -3,6 +3,7 @@ package safety
 import data.ComposedRouteDataProvider
 import de.ibw.history.TrackAndOccupationManager
 import de.ibw.history.data.ComposedRoute
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.smart.logic.intf.SmartLogic
 import de.ibw.smart.logic.intf.messages.DbdRequestReturnPayload
 import de.ibw.smart.logic.intf.messages.ITypable
@@ -42,6 +43,7 @@ class SwitchIsNonBlocked extends Specification {
         given:
 
         ManagerSpecification.resetTrackManager();
+        EventBusManager.registerOrGetBus(77, false);
         SlConfigHandler.getInstance().useInfrastructureServer = false;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv;
         PlanData.getInstance();

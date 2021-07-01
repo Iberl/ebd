@@ -8,7 +8,9 @@ import de.ibw.tms.ma.positioned.elements.AllocationSection;
 import de.ibw.tms.ma.positioned.elements.DriveProtectionSection;
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan.NodeInformation;
+import de.ibw.tms.plan.elements.BranchingSwitch;
 import de.ibw.tms.plan.elements.interfaces.ISwitchHandler;
+import de.ibw.tms.plan.elements.model.CrossoverMainModel;
 import de.ibw.tms.plan.elements.model.PlanData;
 import de.ibw.tms.plan_pro.adapter.CrossingSwitch;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -25,6 +27,9 @@ import java.util.List;
 /**
  * @author iberl@verkehr.tu-darmstadt.de
  * Stellbare Elemente wie Weichen
+
+ * @version 1.1.10
+ * @since 2021-07-01
  */
 public class MoveableTrackElement extends ControlledElement {
     public static final String CLASS_IDENTIFIER = "Moveable_Track_Element";
@@ -110,7 +115,7 @@ public class MoveableTrackElement extends ControlledElement {
     private TrackElementStatus requestedStatus;
     private DriveProtectionSection protectionSection;
     private AllocationSection allocationSection;
-
+    private BranchingSwitch EwSwitchUI;
 
 
     private MoveableTrackElement(String sLabel, int operationTime, Chainage ChaBeginn, Chainage ChaEnd,
@@ -128,6 +133,10 @@ public class MoveableTrackElement extends ControlledElement {
         this.setCurrentStatus(Current);
         this.setDriveProtectionSection(Switch);
         this.setAllocationSectionAsDriveProtectionSection();
+    }
+
+    public void setSwitchUI(BranchingSwitch switchUI) {
+        this.EwSwitchUI = switchUI;
     }
 
     private void setAllocationSectionAsDriveProtectionSection() {
@@ -274,6 +283,22 @@ public class MoveableTrackElement extends ControlledElement {
 
     public void setCurrentStatus(TrackElementStatus currentStatus) {
         this.currentStatus = currentStatus;
+        if(this.EwSwitchUI != null) {
+            CrossoverMainModel switchModel = new CrossoverMainModel();
+            TrackElementStatus.Status newState = currentStatus.statusList.get(0);
+            updateUI(switchModel, newState);
+        }
+    }
+
+    private void updateUI(CrossoverMainModel switchModel, TrackElementStatus.Status newState) {
+        if(newState.equals(TrackElementStatus.Status.RIGHT)) {
+                switchModel.SwitchStatus = BranchingSwitch.SwitchStatus.RIGHT;
+        } else if(newState.equals(TrackElementStatus.Status.LEFT)) {
+                switchModel.SwitchStatus = BranchingSwitch.SwitchStatus.LEFT;
+        } else {
+            switchModel.SwitchStatus = BranchingSwitch.SwitchStatus.BUSY;
+        }
+        this.EwSwitchUI.updateBranchingSwitch(switchModel);
     }
 
     public TrackElementStatus getRequestedStatus() {

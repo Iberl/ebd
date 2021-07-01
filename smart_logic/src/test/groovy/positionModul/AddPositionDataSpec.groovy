@@ -4,6 +4,7 @@ package positionModul
 import de.ibw.history.PositionData
 import de.ibw.history.PositionModul
 import de.ibw.history.data.PositionEnterType
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
 import ebd.SlConfigHandler
@@ -23,6 +24,7 @@ class AddPositionDataSpec extends Specification {
     def "defaultAddCheck"() {
         given:
 
+        EventBusManager.RootEventBusManger = EventBusManager.registerOrGetBus(77, false);
         int dummyBaliseId = 12778;
 
         PositionModul MUT = PositionModul.getInstance();

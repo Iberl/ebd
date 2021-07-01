@@ -438,6 +438,14 @@ public class TescModul {
                 MoveableTrackElement MTE = MoveableTrackElement.genmMoveableElementFactory(sLabel, iOperationTime,
                         null, null, null,
                         MoveableTrackElement.getEwPossibleStates(), CurrentStatus, Switch);
+
+                if(ISwitchHandler.getNodeInfoBySwitchId(sLabel) != null) {
+                    TopologyGraph.Node N = ISwitchHandler.getNodeInfoBySwitchId(sLabel).get(0);
+                    if(N.getSwitchUI() != null) {
+                        MTE.setSwitchUI(N.getSwitchUI());
+                    }
+                };
+
                 ElementStateByIdRepository.update(sLabel, MTE);
                 System.out.println("EW_Lable" + sLabel);
             } else if(Switch.isDKW()) {

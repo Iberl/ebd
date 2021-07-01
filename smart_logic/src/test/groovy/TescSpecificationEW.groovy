@@ -1,7 +1,9 @@
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.tms.ma.physical.TrackElementStatus
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
 import ebd.TescModul
+import ebd.globalUtils.events.Event
 import ebd.ibw.sessions.TescSession
 import spock.lang.Shared
 import spock.lang.Specification
@@ -23,7 +25,7 @@ class TescSpecificationEW extends Specification {
 
     def "Invalid check: set State on simulated EBD on non-DKW with invalid status for EW-Weiche"() {
         given:
-
+        EventBusManager.registerOrGetBus(77, false);
         SlConfigHandler.getInstance().useInfrastructureServer = true;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv;
         def TescSession dummySession = Mock(TescSession) {
@@ -53,7 +55,7 @@ class TescSpecificationEW extends Specification {
 
     def "Valid check: set State on simulated EBD on non-DKW with Valid status for EW-Weiche"() {
         given:
-
+        EventBusManager.registerOrGetBus(77, false);
         SlConfigHandler.getInstance().useInfrastructureServer = useInfra;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv;
         def TescSession dummySession = Mock(TescSession) {

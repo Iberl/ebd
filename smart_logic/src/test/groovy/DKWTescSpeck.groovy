@@ -1,3 +1,4 @@
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.tms.ma.physical.TrackElementStatus
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.trackplan.viewmodel.TranslationModel
@@ -28,6 +29,8 @@ class DKWTescSpeck extends Specification {
 
    def "DKW check: set State on simulated EBD on DKW with Valid status for DWK-Weiche"() {
             given:
+
+            EventBusManager.RootEventBusManger =  EventBusManager.registerOrGetBus(77, false);
 
         SlConfigHandler.getInstance().useInfrastructureServer = useInfra;
         TranslationModel.TrackplanEnvironment.CurrentEnvironment =

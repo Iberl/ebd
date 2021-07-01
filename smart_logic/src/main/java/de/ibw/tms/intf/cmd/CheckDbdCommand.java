@@ -50,6 +50,7 @@ public class CheckDbdCommand extends Commands {
         this.TrackElementStatus = Status;
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_DBD_COMMAND;
+        this.uuid = UUID.randomUUID();
     }
 
     @Override

@@ -6,6 +6,7 @@ import de.ibw.history.PositionData
 import de.ibw.history.PositionModul
 import de.ibw.history.TrackAndOccupationManager
 import de.ibw.history.data.PositionEnterType
+import de.ibw.smart.logic.EventBusManager
 import de.ibw.tms.intf.SmartClientHandler
 import de.ibw.tms.ma.MovementAuthority
 import de.ibw.tms.ma.mob.MovableObject
@@ -48,7 +49,7 @@ class ClientHandlerSpec extends Specification {
 
     def "sendMovementPermissionRequest"() {
         given:
-
+            EventBusManager.RootEventBusManger = EventBusManager.registerOrGetBus(77, true);
             PlanData.getInstance();
             ClientHandler MUT = Spy(new ClientHandler(null, iRetryTime));
             SynchronousQueue queue = getTmsQueue(MUT);
