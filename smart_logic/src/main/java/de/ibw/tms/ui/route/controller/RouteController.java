@@ -5,8 +5,10 @@ import de.ibw.history.PositionModul;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.smart.logic.intf.SmartLogic;
+import de.ibw.tms.intf.TmsDbdCommand;
 import de.ibw.tms.intf.TmsMessage;
 import de.ibw.tms.intf.TmsMovementPermissionRequest;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.intf.cmd.CheckMovementPermission;
 import de.ibw.tms.ma.RbcMaAdapter;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
@@ -80,6 +82,22 @@ public class RouteController {
 
 
     }
+
+    /**
+     * Schickt Tesc-Comman an die smartLogic
+     */
+    public static void sendTESC_Request(CheckDbdCommand dbdCmd) {
+
+
+        dbdCmd.uuid = UUID.randomUUID();
+        TmsMessage TescRequest = new TmsDbdCommand("1", "1", dbdCmd);
+
+        ISender.sendMessageTosmartLogic(TescRequest);
+        TrackWindow.closeAllTrackWindows();
+
+
+    }
+
 
     private static RbcMaAdapter generateMA(RouteModel rm) {
         int nid_engine_id = rm.getNid_engineId();

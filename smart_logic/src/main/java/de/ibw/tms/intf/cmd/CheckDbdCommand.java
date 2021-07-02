@@ -3,6 +3,7 @@ package de.ibw.tms.intf.cmd;
 import com.google.gson.annotations.Expose;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 
+import javax.xml.transform.sax.SAXResult;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -51,6 +52,25 @@ public class CheckDbdCommand extends Commands {
         this.lPriority = lPriority;
         this.CommandType = Commands.S_CHECK_DBD_COMMAND;
         this.uuid = UUID.randomUUID();
+    }
+
+
+    public String printStatus() {
+        StringBuilder sResult = new StringBuilder();
+        if(TrackElementStatus == null) return "";
+        if(TrackElementStatus.statusList.isEmpty()) return "";
+        for(de.ibw.tms.ma.physical.TrackElementStatus.Status Stat : TrackElementStatus.statusList) {
+            if(Stat == null) {
+                sResult.append("E");
+            } else if(Stat.equals(de.ibw.tms.ma.physical.TrackElementStatus.Status.LEFT)) {
+                sResult.append("L");
+            } else if(Stat.equals(de.ibw.tms.ma.physical.TrackElementStatus.Status.RIGHT)) {
+                sResult.append("R");
+            } else {
+                sResult.append("U");
+            }
+        }
+        return sResult.toString();
     }
 
     @Override

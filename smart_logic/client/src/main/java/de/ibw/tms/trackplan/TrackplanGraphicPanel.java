@@ -184,6 +184,9 @@ public class TrackplanGraphicPanel extends JPanel implements Flow.Subscriber {
         ConcurrentHashMap edgeRepo = PlanData.topGraph.edgeRepo;
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
+
+
+
             // diese Liste zeichenen
             ArrayList<CGEOKante> geoEdges = E.getPaintListGeo();
             if (geoEdges == null){

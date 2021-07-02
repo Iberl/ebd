@@ -13,6 +13,7 @@ import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.trackplan.ui.RouteViewPort;
 import de.ibw.tms.trackplan.ui.TrackPanel;
 import de.ibw.tms.ui.route.controller.RouteController;
+import de.ibw.tms.ui.route.model.DbdCommandEdgeReference;
 import de.ibw.tms.ui.route.view.RouteModelUI;
 import de.ibw.tms.ui.route.view.TrackWindow;
 import de.ibw.tms.trackplan.viewmodel.TranslationModel;
@@ -206,6 +207,16 @@ public class TrackController extends SubmissionPublisher<String> implements ICon
                     de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
                     panels.add(TrackUtilPanel);
                 }
+            } else if(S instanceof DbdCommandEdgeReference) {
+                DbdCommandEdgeReference DbdRef = (DbdCommandEdgeReference) S;
+                TopologyGraph.Edge TopEdgeOfRail = DbdRef.getE();
+                if(DbdRef.ptSegDist(TranslatedPoint) < DbdRef.dTolerance) {
+                    if(edgesHavingMenuItem.contains(TopEdgeOfRail)) continue;
+                    edgesHavingMenuItem.add(TopEdgeOfRail);
+                    de.ibw.tms.trackplan.ui.TrackPanel TrackUtilPanel = new TrackPanel((Iinteractable) S, this.RoutePort, isMainWindow);
+                    panels.add(TrackUtilPanel);
+                }
+
             } else if (S instanceof TrainEdgeReference) {
                 // trains already selected overjump
                 if(RouteModel.isRouteSelected()) continue;

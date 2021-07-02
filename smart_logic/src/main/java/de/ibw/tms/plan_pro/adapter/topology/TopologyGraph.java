@@ -1,7 +1,9 @@
 package de.ibw.tms.plan_pro.adapter.topology;
 
 import com.google.gson.annotations.Expose;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.net.elements.PositionedRelation;
+import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
 import de.ibw.tms.ma.positioning.GeometricCoordinate;
 import de.ibw.tms.plan.elements.BranchingSwitch;
@@ -34,6 +36,10 @@ import java.util.regex.Pattern;
 public class TopologyGraph {
 
     private static Node LeftmostNode = null;
+
+    public static final ArrayList<String> InnerDkwEndings = new ArrayList<>(Arrays.asList(
+            "LL", "RR", "RL", "LR"));
+
 
     /**
      * Setzen des Startknotens
@@ -297,10 +303,14 @@ public class TopologyGraph {
         public ArrayList<Node> mergedNodes = new ArrayList<>();
 
         private ArrayList<String> planProIds = new ArrayList<>();
+        private boolean innerDkwCheckDone = false;
 
         public ArrayList<String> getPlanProIds() {
             return planProIds;
         }
+
+
+        private CheckDbdCommand Dkw_Ekw_Command = null;
 
 
 
@@ -610,6 +620,73 @@ public class TopologyGraph {
                 } else {
                     throw new InvalidParameterException("Given Node must be part of the Edge");
                 }
+        }
+
+        /**
+         * Wenn sich diese Kante innerhalb einer DKW oder EKW befindet, gibt diese Funktion den
+         * Stellbefehl zu dieser Kante zurueck
+         * @return Den Stellbefehl an die smartLogic
+         */
+        public CheckDbdCommand checkAndHandleDWK_EKW() {
+                if(this.innerDkwCheckDone) {
+                    return Dkw_Ekw_Command;
+                } else {
+                     // sRefId := Gleiskantenbezeichner
+                     String sRefId = this.getRefId();
+                     String sEnding = sRefId.substring(sRefId.length() -2);
+                     if(TopologyGraph.InnerDkwEndings.contains(sEnding)) {
+                         generateDbdCommandsToEnableEdge(sEnding);
+                         this.innerDkwCheckDone = true;
+                         return Dkw_Ekw_Command;
+                     }
+                     this.innerDkwCheckDone = true;
+                     return null;
+
+                }
+        }
+
+        private void generateDbdCommandsToEnableEdge(String sEnding) {
+                String sLower = sEnding.substring(0,1);
+                String sHigher = sEnding.substring(1,2);
+
+
+
+                if(Dkw_Ekw_Command == null) {
+                    TrackElementStatus stat = new TrackElementStatus();
+                    if(sLower.equals("L")) {
+                        stat.statusList.add(TrackElementStatus.Status.LEFT);
+                    } else {
+                        stat.statusList.add(TrackElementStatus.Status.RIGHT);
+                    }
+                    if(sHigher.equals("L")) {
+                        stat.statusList.add(TrackElementStatus.Status.LEFT);
+                    } else {
+                        stat.statusList.add(TrackElementStatus.Status.RIGHT);
+                    }
+                    String sId = getLower(this.A.name,this.B.name);
+                    Dkw_Ekw_Command = new CheckDbdCommand(sId, stat, 4);
+                }
+
+
+
+        }
+
+        private String getLower(String aName, String bName) {
+            String[] aIds = aName.split("W");
+            String[] bIds = bName.split("W");
+            if(Integer.parseInt(aIds[1]) == Integer.parseInt(bIds[1])) {
+                if(Integer.parseInt(aIds[0]) < Integer.parseInt(bIds[0])) {
+                    return aName;
+                } else {
+                    return bName;
+                }
+            } else {
+                if(Integer.parseInt(aIds[1]) < Integer.parseInt(bIds[1])) {
+                    return aName;
+                } else {
+                    return bName;
+                }
+            }
         }
     }
 

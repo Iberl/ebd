@@ -138,8 +138,8 @@ public class TescModul {
             String sHigher;
             for(TopologyGraph.Node N : NI) {
                 CrossingSwitch CS = (CrossingSwitch) N.NodeImpl;
-                // only neighbour local ids are relevant
-                if(Math.abs(LowerSwitch.getLocalElementId() - CS.getLocalElementId()) != 1) continue;
+                // only diff ids are relevant
+                if(Math.abs(LowerSwitch.getLocalElementId() - CS.getLocalElementId()) == 0) continue;
                 // neighbouring ok
                 if(LowerSwitch.getLocalElementId() > CS.getLocalElementId()) {
                     HigherSwitch = LowerSwitch;

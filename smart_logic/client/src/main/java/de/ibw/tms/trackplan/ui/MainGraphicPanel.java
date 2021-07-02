@@ -4,6 +4,7 @@ import de.ibw.feed.Balise;
 import de.ibw.history.TrackAndOccupationManager;
 import de.ibw.tms.GraphicMoveByMouse;
 import de.ibw.tms.MainTmsSim;
+import de.ibw.tms.intf.cmd.CheckDbdCommand;
 import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
@@ -24,6 +25,7 @@ import de.ibw.tms.trackplan.viewmodel.TranslationModel;
 import de.ibw.tms.trackplan.viewmodel.ZoomModel;
 import de.ibw.tms.train.model.TrainModel;
 import de.ibw.tms.ui.TmsFrameUtil;
+import de.ibw.tms.ui.route.model.DbdCommandEdgeReference;
 import de.ibw.tms.ui.route.model.GeoEdgeReference;
 import de.ibw.tms.ui.route.model.TrainEdgeReference;
 import de.ibw.util.DefaultRepo;
@@ -263,13 +265,17 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         g2d.setPaint(Color.gray);
         DefaultRepo<String, GeometricCoordinate> geoPointRepo = PlanData.GeoNodeRepo;
-        //TODO Carolin GeoKanten zeichnen
+        //TODO GeoKanten zeichnen
         ConcurrentHashMap edgeRepo = PlanData.topGraph.edgeRepo;
 
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
+
+
+
             // diese Liste zeichenen
             ArrayList<CGEOKante> geoEdges = E.getPaintListGeo();
+
             if (geoEdges == null) continue;
             for(CGEOKante geoEdge : geoEdges) {
                 if (geoEdge == null) continue;
@@ -277,15 +283,25 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 g2d.setStroke(new BasicStroke((float) (3 / strokeFactor)));
                 GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
                 GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
-
-                GeoEdgeReference GeoRef = new GeoEdgeReference();
-                GeoRef.setTopEdge(E);
-                GeoRef.setGeoEdge(geoEdge);
-
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
 
-                GeoRef.setLine(line);
-                g2d.draw(GeoRef);
+                CheckDbdCommand DbdCmd = E.checkAndHandleDWK_EKW();
+                if(DbdCmd == null) {
+
+                    GeoEdgeReference GeoRef = new GeoEdgeReference();
+                    GeoRef.setTopEdge(E);
+                    GeoRef.setGeoEdge(geoEdge);
+                    GeoRef.setLine(line);
+                    g2d.draw(GeoRef);
+                } else {
+                    DbdCommandEdgeReference DbdRef = new DbdCommandEdgeReference();
+                    DbdRef.setTopEdge(E);
+                    DbdRef.setGeoEdge(geoEdge);
+                    DbdRef.setDbdCommand(DbdCmd);
+                    DbdRef.setLine(line);
+                    g2d.draw(DbdRef);
+                }
+
 //                Ellipse2D.Double circle = new Ellipse2D.Double(nodeA.getX(), nodeA.getY(), 10, 10);
 //                g2d.fill(circle);
                 drawArrowHead(g2d, line);
@@ -317,6 +333,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         // disable zoom for images
 
     }
+
 
     private void paintApprovedMa(Graphics2D g2d) {
         BasicStroke BS = initPainting(g2d);

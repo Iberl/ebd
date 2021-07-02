@@ -358,6 +358,7 @@ public class TopologyFactory implements ITopologyFactory {
 
 
 
+
         }
         connectDigitalEndNodes(TG);
         connectPositionedRelations(TG);
