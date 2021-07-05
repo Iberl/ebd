@@ -30,6 +30,7 @@ import de.ibw.tms.ui.route.model.GeoEdgeReference;
 import de.ibw.tms.ui.route.model.TrainEdgeReference;
 import de.ibw.util.DefaultRepo;
 import ebd.SlConfigHandler;
+import ebd.TescModul;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import plan_pro.modell.geodaten._1_9_0.CGEOKante;
@@ -46,6 +47,7 @@ import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
@@ -148,7 +150,10 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, Mo).getAll();
         if(trainOccList.size() == 0) throw new Exception("No Occupation for trainId: " + TM.iTrainId + " found");
         paintOccupationList(g2d, BS, TM.RepresentedColor, TM.iTrainId, trainOccList, true);
+
+
     }
+
 
     private static void paintOccupationList(Graphics2D g2d, BasicStroke BS, Color RepresentedColor, int iTrainId,
                                             Collection<ArrayList<Occupation>> trainOccList,
@@ -156,6 +161,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
     ) throws Exception {
         Occupation O = null;
+        int iCounter = 0;
         for(ArrayList<Occupation> occs: trainOccList) {
             if(occs.size() == 0) continue;
             O = occs.get(0);
@@ -164,7 +170,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         if(O == null) throw new Exception("No Occupation for trainId: " + iTrainId + " found");
         List<TrackEdgeSection> sectionList = O.getTrackEdgeSections();
         g2d.setPaint(RepresentedColor);
-        if(isTrainPosition) TrainEdgeReference.removeAllRef(iTrainId);
+        if(isTrainPosition) {
+            TrainEdgeReference.removeAllRef(iTrainId);
+
+
+
+
+        }
         for(TrackEdgeSection TES : sectionList) {
             TopologyGraph.Edge E = (TopologyGraph.Edge) TES.getTrackEdge();
             SpotLocationIntrinsic begin = TES.getBegin();
@@ -201,8 +213,17 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 d2 = 1 - tempD1;
             }
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
-            paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
-                    BS, iTrainId, isTrainPosition);
+
+
+            if(isTrainPosition && iCounter + 1 == sectionList.size()) {
+                // letzte Iteration Zugfront
+                paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
+                        BS, iTrainId, isTrainPosition, true);
+            } else {
+                paintGeo(g2d, sID,isFromA, d1, d2, RepresentedColor,
+                        BS, iTrainId, isTrainPosition, false);
+            }
+            iCounter++;
         }
     }
 
@@ -370,12 +391,16 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         
         g2d.setPaint(Color.cyan);
         SlConfigHandler CH = SlConfigHandler.getInstance();
+        Iterator<BranchingSwitch> it = PlanData.getInstance().branchingSwitchList.iterator();
+        while(it.hasNext()) {
+            BranchingSwitch C = it.next();
+            String sName = C.getTrackReference().name;
+            if(TescModul.MoveableTrackElementAccess.isSidDkw(sName)) {
+                it.remove();
 
-        for(Object OCrossover: PlanData.getInstance().branchingSwitchList) {
-            BranchingSwitch C = (BranchingSwitch) OCrossover;
+                continue;
 
-            //debug
-
+            }
 
            // CrossoverModel TargetCrossoverModel = CrossoverModel.BranchToCrossoverModelRepo.getModel();
             String sTopId;
@@ -413,7 +438,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     
                     g2d.drawImage(C.getImage(), null, x, y);
                 }
-                g2d.drawString(C.getViewName() + sTrackKilometers, (float) (x - 5.0f), (float) y);
+                g2d.drawString(C.getTrackReference().name, (x - 5.0f), (float) y);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -533,10 +558,11 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         }
     }
 
-    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke, int iTrainId, boolean isTrainPosition) throws Exception {
+    private static void paintGeo(Graphics2D g2d, String TopKanteId, boolean b_fromA, double distanceA1, Double distanceA2, Color color, Stroke stroke, int iTrainId, boolean isTrainPosition, boolean isHead) throws Exception {
         // Get TopEdge
         ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = edgeRepo.get(TopKanteId);
+        TrainEdgeReference TrainRef = null;
         distanceA1 = edge.dTopLength * distanceA1;
         distanceA2 = edge.dTopLength * distanceA2;
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
@@ -606,7 +632,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             }
 
             GeoEdgeReference GeoRef = GeoEdgeReference.ReferenceRepo.getModel(geoEdge);
-            TrainEdgeReference TrainRef = new TrainEdgeReference();
+            TrainRef = new TrainEdgeReference();
             TrainRef.setGeoRef(GeoRef);
             TrainRef.setTrainId(iTrainId);
             // Draw Line
@@ -621,12 +647,20 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             TrainEdgeReference.TrainRefRepo.update(iTrainId, refByGeoRepo);
 
             g2d.draw(TrainRef);
+
             /*
                 g2d.drawString("Node A: " + i, (float)nodeA.getX(),(float) nodeA.getY());
                 g2d.drawString("Node B: " + i, (float)nodeB.getX(),(float) nodeB.getY());
             */
             prevDistance += geoEdgeLength;
             if(prevDistance > distanceA2) break;
+        }
+        if(TrainRef != null && isHead) {
+            if(isHead) {
+                g2d.setColor(Color.red);
+                drawArrowHead(g2d,TrainRef, 10.0d, 20.0d);
+                g2d.setColor(color);
+            }
         }
 
         g2d.setColor(prevColor);
@@ -747,6 +781,13 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         //   /\
         //ul/__\ ur
 
+        drawArrowHead(g2d, line, w, h);
+    }
+
+    private static void drawArrowHead(Graphics2D g2d, Line2D.Double line, double w, double h) {
+        double dx = line.x2 - line.x1;
+        double dy = line.y2 - line.y1;
+        double angle = -Math.atan2(dx, dy);
         Path2D.Double arrowHead = new Path2D.Double();
         arrowHead.moveTo((line.x2), (line.y2));
 

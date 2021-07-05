@@ -911,7 +911,7 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
     }
 
     private void handleCrossoverInput(TopologyGraph.Node n, TopologyGraph.Node n2, TopologyConnect connectN2, TopologyConnect connectN, Chainage chainageN, Chainage chainageN2, float x1, float y1, float x2, float y2) {
-        String sName = "";
+
         if(connectN2.equals(TopologyConnect.SPITZE)) {
 
             SingleSlip RailWaySwitchSlip = new SingleSlip(chainageN2);
@@ -1227,6 +1227,9 @@ public class PlanData implements Flow.Subscriber<GradientProfile> {
 
         BranchingSwitch C = BranchingSwitch.createCrossover(null, Point, x,y, N,
                 ViewType);
+
+
+
         this.branchingSwitchList.add(C);
 
         return C;

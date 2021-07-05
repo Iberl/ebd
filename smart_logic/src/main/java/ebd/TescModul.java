@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Interaktion mit dem EBD Stellwerk oder sp&auml;ter weiteren Stellelemente
  * @author iberl@verkehr.tu-darmstadt.de
- * @version MVP5
+ * @version 1.1.11
  * @since 2021-03-12
  */
 public class TescModul {
@@ -57,6 +57,13 @@ public class TescModul {
             return DkwStateByRepo.getModel(sLowerDkw);
         }
 
+        static boolean isSidDkw(String sId) {
+            if(DkwStateByRepo.getModel(sId) != null) return true;
+            if(TescModul.getInstance().getParellelLowerEbdId.getModel(sId) != null) return true;
+            return false;
+        }
+
+
     }
 
     /**
@@ -77,7 +84,7 @@ public class TescModul {
     private static ThreadedRepo<String, MoveableTrackElement> ElementStateByIdRepository;
     private static ThreadedRepo<String, MoveableTrackElement> DkwStateByRepo;
     private ThreadedRepo<String, Integer> StateChangesNotFound;
-    private ThreadedRepo<String, String> getParellelLowerEbdId;
+    public ThreadedRepo<String, String> getParellelLowerEbdId;
 
     private TescModul() {
         ElementStateByIdRepository = new ThreadedRepo<>();

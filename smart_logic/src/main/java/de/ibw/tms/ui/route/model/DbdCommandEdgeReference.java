@@ -44,10 +44,10 @@ public class DbdCommandEdgeReference extends Line2D.Double implements Iinteracta
             String bId = E.B.name;
             if(aId.equals(DbdCommand.sId)) {
                 int iBegin = bId.length() - 2;
-                sPostfixName = aId + bId.substring(iBegin);
+                sPostfixName = aId + "-" + bId.substring(iBegin);
             } else {
                 int iBegin = aId.length() -2;
-                sPostfixName = bId + aId.substring(iBegin);
+                sPostfixName = bId + "-" + aId.substring(iBegin);
             }
             return "DKW | EKW " + sPostfixName;
         }
@@ -59,7 +59,7 @@ public class DbdCommandEdgeReference extends Line2D.Double implements Iinteracta
         if(DbdCommand != null) {
             ArrayList<JComponent> uiList = new ArrayList<JComponent>();
             uiList.add(new JLabel("<HTML><b><u>".concat(this.getViewName())
-                    .concat(E.getRefId()).concat("</u></b></HTML>")));
+                    .concat("</u></b></HTML>")));
             uiList.add(new JSeparator(SwingConstants.HORIZONTAL));
             uiList.add(generateSwitchButton());
             return uiList;
