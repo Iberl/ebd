@@ -1045,6 +1045,7 @@ public class SafetyLogic {
 
         DriveProtectionSection protectionSection = MteToCheck.getProtectionSection();
         if(protectionSection == null) {
+            // FailureCode 114
             EBM.log("Element " + cdc.sId + " : Section having not protection Section so the request is denied",
                     SmartLogic.getsModuleId(SMART_SAFETY));
             sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
@@ -1058,6 +1059,7 @@ public class SafetyLogic {
             isCollision = true;
         }
         if(isCollision) {
+            // Fehlercode 111
             sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
             return;
         }
@@ -1070,6 +1072,7 @@ public class SafetyLogic {
             isStatePossible = false;
         }
         if(!isStatePossible) {
+                    // Fehlercode 116
                     EBM.log("DBD request" + cdc.uuid + " failed, State was not possible to set", SmartLogic.getsModuleId(SMART_SAFETY) );
 
                     sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.STATE_FOR_ELEMENT_NOT_POSSIBLE);
