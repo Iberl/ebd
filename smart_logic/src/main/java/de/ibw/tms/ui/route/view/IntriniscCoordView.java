@@ -84,7 +84,7 @@ public class IntriniscCoordView {
         dialog.getContentPane().add(CenterPanel, BorderLayout.CENTER);
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setLocationRelativeTo(parent);
-        dialog.setModal(true);
+        dialog.setModal(false);
         dialog.pack();
         dialog.setVisible(true);
 
@@ -106,6 +106,8 @@ public class IntriniscCoordView {
     private void createNordCenterUi() {
         JPanel NordMainPanel = new JPanel();
         NordMainPanel.setLayout(new GridLayout(4, 1));
+
+        NordMainPanel.setMaximumSize(new Dimension(500, 100));
         this.HeadLabel = new JLabel("End Coordinate on " + ScopedEdge.getRefId());
         TopologyGraph.Node RefNode = this.EndTrainModel.getNodeBasedForIntrinsicCoord();
         TopologyGraph.Node OppositeNode = this.ScopedEdge.A.equals(RefNode) ? this.ScopedEdge.B : this.ScopedEdge.A;
@@ -144,7 +146,8 @@ public class IntriniscCoordView {
             CenterPanel.setLayout(new GridLayout(2,2));
             MeterLabel = new JLabel("Target Meter: ");
             CenterPanel.add(MeterLabel);
-            MeterField = new JTextField(iCurrentMeter);
+            MeterField = new JTextField(50);
+            MeterField.setText(String.valueOf(iCurrentMeter));
             MeterField.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -155,7 +158,9 @@ public class IntriniscCoordView {
             CenterPanel.add(MeterField);
             IntrinsicLabel = new JLabel("Target Intrinisic-Factor: ");
             CenterPanel.add(IntrinsicLabel);
-            IntrinsicField = new JTextField(String.valueOf(EndTrainModel.getIntrinsicCoordSelected()));
+            IntrinsicField = new JTextField(50);
+            IntrinsicField.setText(String.valueOf(EndTrainModel.getIntrinsicCoordSelected()));
+
             IntrinsicField.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -183,6 +188,7 @@ public class IntriniscCoordView {
         this.MeterSlider.setValue(iCurrentMeter);
         this.MeterField.setText(String.valueOf(iCurrentMeter));
         this.IntrinsicField.setText(EndTrainModel.getIntrinsicCoordSelected().toString());
+        dialog.pack();
 
     }
 

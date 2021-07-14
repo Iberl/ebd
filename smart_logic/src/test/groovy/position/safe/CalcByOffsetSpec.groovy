@@ -16,6 +16,7 @@ import de.ibw.tms.ma.positioned.elements.TrackEdge
 import de.ibw.tms.ma.positioned.elements.TrackEdgeSection
 import de.ibw.tms.plan.elements.model.PlanData
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph
+import de.ibw.tms.trackplan.viewmodel.TranslationModel
 import de.ibw.util.ThreadedRepo
 import ebd.TescModul
 import ebd.internal.util.PositionInfo
@@ -81,6 +82,9 @@ class CalcByOffsetSpec extends Specification {
     def "integrationTest"() {
         given:
         EventBusManager.RootEventBusManger =  EventBusManager.registerOrGetBus(77, false);
+
+        TranslationModel.TrackplanEnvironment.CurrentEnvironment = TranslationModel.TrackplanEnvironment.KaefWilhelmstalEnv
+
         PlanData.getInstance();
 
         if(scenarioDataProvider == null) {

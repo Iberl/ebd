@@ -15,6 +15,7 @@ import plan_pro.modell.basistypen._1_9_0.ENUMWirkrichtung;
 import plan_pro.modell.geodaten._1_9_0.CStrecke;
 import plan_pro.modell.geodaten._1_9_0.CTOPKante;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -25,8 +26,8 @@ import java.util.List;
  * Diese Klasse stellt eine Balise mit deren Koordinaten dar.
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 0.51
- * @since 2021-03-11
+ * @version 1.1.12
+ * @since 2021-07-09
  */
 public class Balise implements ICoord<Double> {
     /**
@@ -42,7 +43,14 @@ public class Balise implements ICoord<Double> {
      */
     public static DefaultRepo<CDatenpunkt, List<Balise>> balisesByBaliseGroup = new DefaultRepo<>();
 
+    /**
+     * Definiert alle Balises auf einer Topologieschen Kannte
+     */
     public static ThreadedRepo<TopologyGraph.Edge, ArrayList<Balise>> baliseOnEdge = new ThreadedRepo<>();
+    /**
+     * Balise color auf dem Trackpanel
+     */
+    public static Color DEFAULTCOLOR = Color.CYAN.darker();
 
     private CBalise PlanProBalise;
     private CDatenpunkt PlanProDataPoint = null;
@@ -65,10 +73,19 @@ public class Balise implements ICoord<Double> {
         return UiTools.handleImaging(cl,"images/balise.jpg");
     }
 
+    /**
+     * Gibt Laenge der Kante auf die sich der Datenpunkt befindet zurueck.
+     * @return Laenge der Kante
+     */
     public BigDecimal getLengthOfTopEdge() {
         return this.TopPositionOfDataPoint.getTOPKanteAllg().getTOPLaenge().getWert();
     }
 
+    /**
+     * @deprecated
+     * unused
+     * @return Streckenkilometrierung
+     */
     public BigDecimal getMetersOfTrack() {
         try {
             String sKM = PlanProDataPoint.getPunktObjektStrecke().get(0).getStreckeKm().getWert();
@@ -120,7 +137,7 @@ public class Balise implements ICoord<Double> {
 
 
     /**
-     * Gibt den angefragten Knoten der Balisengruppe wieder. Es wird der Knoten der in angegebenr Richtung angefragt
+     * Gibt den angefragten Knoten der Balisengruppe wieder. Es wird der Knoten der in angegebener Richtung angefragt
      * wiedergegeben.
      * @param q_dlrbg_IsNominal - true bedeutet es wird der Knoten wiedergegeben, der von von Balise 1 &uuml;ber
      *                               Balise 2 an- oder durchfahren wird.

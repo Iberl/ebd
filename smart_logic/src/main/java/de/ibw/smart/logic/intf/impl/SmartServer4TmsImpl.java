@@ -151,7 +151,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
     /**
-     * Die weitergegebene MA wurde vom RBC nicht bes&auml;igt
+     * Die weitergegebene MA wurde vom RBC nicht best&auml;tigt
      */
     public static final String NO_ACK = "025 - Acknowlegement of MA failed";
 
@@ -365,6 +365,9 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         }
         if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
+
         try {
             checkMteStatus(requestedTrackElementList);
         } catch (SmartLogicException | Exception e) {
@@ -535,8 +538,35 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             EBM.log("Search for RBCs", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
 
-        sendAcknowledgementToRBC(iTrainId, R, uuid, lPriority, MaReturnPayload, bAcknowledgeMA, requestedTrackElementList, RbcMa, MAO, nid_engine_Id, MaMsg);
+        if(checkRouteMatchWithRBCInformation(iTrainId, requestedTrackElementList, MaMsg)) {
 
+            sendAcknowledgementToRBC(iTrainId, R, uuid, lPriority, MaReturnPayload, bAcknowledgeMA, requestedTrackElementList, RbcMa, MAO, nid_engine_Id, MaMsg);
+
+        } else {
+            MaReturnPayload.setErrorState(uuid, true, INVALID_REQUEST + " RBC-Travel-Length not long as reserved");
+            sendMaResponseToTMS(MaReturnPayload, 2L);
+
+        }
+    }
+
+    private boolean checkRouteMatchWithRBCInformation(int iTrainId, ComposedRoute CR, Message_21 maMsg) {
+        PositionData PosDat = PositionModul.getInstance().getCurrentPosition(iTrainId);
+        try {
+            BigDecimal dRouteMeter = CR.getRouteLength().add(BigDecimal.valueOf(PosDat.getPos().d_lrbg));
+            if(maMsg.getPayload().ma.eoa.sections.size() != 1) {
+                return false;
+            }
+            return checkIfUnequalLength(maMsg, dRouteMeter);
+
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean checkIfUnequalLength(Message_21 maMsg, BigDecimal dRouteMeter) {
+        return dRouteMeter.subtract(BigDecimal.valueOf(maMsg.getPayload().ma.eoa.sections.get(0).l_section)).abs().
+                compareTo(BigDecimal.valueOf(2.0d)) < 0;
     }
 
     private void checkMteStatus(ComposedRoute requestedTrackElementList) throws SmartLogicException {
@@ -656,14 +686,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             d_ol = P.ma.eoa.overlap.d_ol;
             v_release_ol = P.ma.eoa.overlap.v_releaseol;
         }
-
+        int lSection = MaMsg.getPayload().ma.eoa.sections.get(0).l_section;
         Packet_15.Packet_15_Section endSection = null;
-        try {
-            endSection = new Packet_15.Packet_15_Section(CompRoute.getRouteLength().intValue(),
-                    false,1,1);
-        } catch (SmartLogicException e) {
-            throw new InvalidParameterException("Route Length was not available: " + e.getMessage());
-        }
+        endSection = new Packet_15.Packet_15_Section(lSection,
+                false,1,1);
         Packet_15 MaPacket = new Packet_15(q_dir, q_scale, v_loa, t_loa, endSection, q_endtimer,
                     t_endtimer, d_endtimerstartloc, q_dangerpoint, d_DP, v_release_DP,
                     q_overlap, d_startol, t_ol, d_ol, v_release_ol);

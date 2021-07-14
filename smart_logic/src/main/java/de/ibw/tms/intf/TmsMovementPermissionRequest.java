@@ -28,6 +28,11 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
     // Belegung dieses Requests
     private MARequestOccupation maRequestOccupation = null;
 
+    /**
+     * Zug faehrt rueckwaerts. Das heisst generell in Richtung der Referenzbalise zurueck
+     */
+    private boolean isBackwardMove = false;
+
 
     /**
      * Konstruktur eine TMS-Ma-Nachricht an die SL
@@ -100,7 +105,15 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
 
         } else {
             try {
-                logEntry.append("Message invalid: ").append(this.parseToJson());
+                if(isBackwardMove) {
+                    logEntry.append("\nMP-Request: Route: ");
+                    for(String sRouteId : this.payload.route.getElementListIds()) {
+                        logEntry.append("<--").append(sRouteId);
+                    }
+                    logEntry.append("\n Train must not be moved backward");
+                } else {
+                    logEntry.append("Message invalid: ").append(this.parseToJson());
+                }
             } catch (MissingInformationException MIE) {
                 logEntry.append("Message invalid: ").append(MIE.getMessage());
             }
@@ -114,8 +127,20 @@ public class TmsMovementPermissionRequest extends TmsMessage implements Comparab
         if(header == null) return false;
         if(header.uuid == null) return false;
         if(payload.route == null) return false;
+        if(isBackwardMove) return false;
         return true;
     }
+
+
+    public boolean isBackwardMove() {
+        return isBackwardMove;
+    }
+
+    public void setBackwardMovement(boolean backwardMovement) {
+        this.isBackwardMove = backwardMovement;
+    }
+
+
 }
 
 

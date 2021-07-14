@@ -108,9 +108,15 @@ public class RouteController {
         BigDecimal dRouteMeter = BigDecimal.valueOf(300);
         try {
             CR.generateFromRoute(rm.getRoute(), nid_engine_id);
-            dRouteMeter = CR.getRouteLength();
-        } catch(SmartLogicException SLE) {
 
+
+
+            // der abstand zur Balise muss addiert werden weil die Streckenanweisung relativ zur Balise und nicht
+            // zum Zug angegeben wird
+
+            dRouteMeter = CR.getRouteLength().add(BigDecimal.valueOf(PosDat.getPos().d_lrbg));
+        } catch(SmartLogicException SLE) {
+            SLE.printStackTrace();
         }
 
 
