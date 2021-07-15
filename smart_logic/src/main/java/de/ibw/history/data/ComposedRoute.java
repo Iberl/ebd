@@ -986,10 +986,45 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                     "two Edges are not connected by a node");
                         }
                         if (!CurrentEdge.getRefNode().equals(PrevNode)) {
+
+                            BigDecimal dEdgeLength = BigDecimal.valueOf(CurrentEdge.dTopLength);
+
+                            BigDecimal dStartDiff = BigDecimal.valueOf(0);
+                            BigDecimal dEndDiff = BigDecimal.valueOf(0);
+                            if(d_Start_Meter.compareTo(d_Start) < 0) {
+                                dBeginPercent = BigDecimal.valueOf(1.0d);
+                                dEndDiff = d_Start.subtract(d_Start_Meter);
+                                dEndDiff = d_End_Meter.subtract(d_Start_Meter).subtract(dEndDiff);
+                            } else {
+                                dStartDiff = d_Start_Meter.subtract(d_Start);
+                                dBeginPercent = dEdgeLength.subtract(dStartDiff).
+                                        divide(dEdgeLength, MathContext.DECIMAL32);
+                                dEndDiff = d_End_Meter.subtract(d_Start);
+                            }
+                            if(dEndDiff.compareTo(dEdgeLength) >= 0) {
+                                dEndPercent = BigDecimal.valueOf(0);
+                            } else {
+                                dEndPercent = dEdgeLength.subtract(dEndDiff).
+                                        divide(dEdgeLength, MathContext.DECIMAL32);
+                            }
+                        /*
+                            BigDecimal dBeginSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_Start_Meter);
+
+                            BigDecimal dEndSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_End_Meter);
+                            dBeginPercent =  dBeginSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                            // dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
+                            if(dEndSpot.compareTo(BigDecimal.valueOf(0)) < 0) {
+                                dEndPercent = BigDecimal.valueOf(0);
+                            } else {
+                                dEndPercent = dEndSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                            }
+
+
+
                             // Die Intrinsische Koordinate wird von NextNode aus gemessen. Das enspricht einer Reversed Zugfahrt.
                             if(d_Start.compareTo(d_Start_Meter) <= 0) {
                                 BigDecimal dEndMeterDiff = d_Start_Meter.subtract(d_Start);
-                                // bisherige hatten noch keine Kantenlaenge und unterleigen dStartMeter
+                                // bisherige hatten noch keine Kantenlaenge und unterliegen dStartMeter
                                 dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_End_Meter.subtract(dEndMeterDiff),
                                         CurrentEdge, sections.isEmpty(), false);
 
@@ -998,11 +1033,13 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                         CurrentEdge, sections.isEmpty(), false);
                             }
                             if(BigDecimal.valueOf(CurrentEdge.dTopLength).compareTo(d_End_Meter) < 0) {
-                                dBeginPercent = new BigDecimal("1.0");
+                                dBeginPercent = new BigDecimal("0.0");
                             } else {
                                 dBeginPercent = getReversedStartIntrinsic(d_End_Meter,
                                         d_Start, d_Current, CurrentEdge);
                             }
+
+                             */
                         } else {
                             // Nominale Zugfahrt
                             dBeginPercent = getNominaStartIntrinsic(d_Start_Meter, d_Start,
