@@ -78,9 +78,11 @@ public class SafeMOBPosition extends MOBPositionClasses {
      *               - 1: 1 meter Einheit
      *               - 2: 10 meter Einheit
      * @param nid_engine
+     * @param isInit
      * @throws SmartLogicException - Vehicle Position konnte nicht definiert werden
      */
-    public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff, int iScale, NID_ENGINE nid_engine) throws SmartLogicException {
+    public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff,
+                                         int iScale, NID_ENGINE nid_engine, boolean isInit) throws SmartLogicException {
         ETCS_DISTANCE d_vehicleEndDiff = new ETCS_DISTANCE();
 
         this.iTrainLength = PositionModul.getInstance().getCurrentPosition(nid_engine.getId()).getPos().l_trainint;
@@ -103,7 +105,10 @@ public class SafeMOBPosition extends MOBPositionClasses {
         this.setTrackEdgeSections(NewPosition.getTrackEdgeSections());
         ArrayList<TrackEdgeSection> sections = new ArrayList<>(NewPosition.getTrackEdgeSections());
 
-        /*if(Route.isReverseSightDir()) {
+
+        boolean isReverse = check4Reverse(Route, sections);
+
+        if(isReverse && isInit) {
             TrackEdgeSection EndSection = sections.get(0);
             TrackEdgeSection StartSection = sections.get(sections.size() - 1);
             TrackEdge StartEdge = StartSection.getTrackEdge();
@@ -130,7 +135,7 @@ public class SafeMOBPosition extends MOBPositionClasses {
                 throw new InvalidParameterException("Safety Area not equal trainlength");
             }
         } else {
-*/
+
             TrackEdgeSection StartSection = sections.get(0);
             TrackEdgeSection EndSection = sections.get(sections.size() - 1);
             TrackEdge StartEdge = StartSection.getTrackEdge();
@@ -154,10 +159,39 @@ public class SafeMOBPosition extends MOBPositionClasses {
             if(Math.abs(this.getMeterLength().intValue() - iTrainLength) > 2) {
                 throw new InvalidParameterException("Safety Area not equal trainlength");
             }
-        //}
+        }
 
         this.setApplicationDirection(TApplicationDirection.BOTH);
 
+    }
+
+    private boolean check4Reverse(ComposedRoute route, ArrayList<TrackEdgeSection> sections) {
+        TrackEdgeSection lastSection = sections.get(sections.size() - 1);
+        Double dBegin = lastSection.getBegin().getIntrinsicCoord();
+        Double dEnd = lastSection.getEnd().getIntrinsicCoord();
+        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) lastSection.getTrackEdge();
+        TopologyGraph.Node TargetNode = route.getTargetNode();
+        if(LastEdge.A.equals(TargetNode) || LastEdge.B.equals(TargetNode)) {
+            if(LastEdge.getRefNode().equals(TargetNode)) {
+                // reverse,
+                // wenn der Beginn naeher am Zielknoten als die Zugspitze(End) ist
+                // umdrehen
+                return dBegin < dEnd;
+            } else {
+                // Zug faehrt nominal, aber wenn die Zugspitze(End) naeher als der Beginn ist
+                // muss der Zug umgedreht werden
+                return dEnd < dBegin;
+            }
+        } else {
+            if(TargetNode == null) {
+                //Randkante
+                // Zug faehrt nominal, aber wenn die Zugspitze(End) naeher als der Beginn ist
+                // muss der Zug umgedreht werden
+                return dEnd < dBegin;
+            }
+            // die letze kante hat nicht den Zielknoten => umdrehen
+            return true;
+        }
     }
 
     private void flipEndWithBegin(ArrayList<TrackEdgeSection> sections) {
@@ -318,6 +352,7 @@ public class SafeMOBPosition extends MOBPositionClasses {
 
         BigDecimal PercentOfRouteEndToNextNode = spaceToNextNode.divide(BigDecimal.valueOf(E.dTopLength), MathContext.DECIMAL32);
         ComposedRoute CR = new ComposedRoute();
+        CR.setTargetNode(TargetNode);
         if(E.getRefNode().equals(TargetNode)) {
 
 

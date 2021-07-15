@@ -176,21 +176,22 @@ public class PositionModul implements IPositionModul {
                                             ": Route merged with preceding reverse Route",
                                     SmartLogic.getsModuleId(POSITION_MODUL));
 
-                            ComposedRoute referseRoute = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset.negate(),
+                            ComposedRoute reverseRoute = SafePosition.calcByOffset(nid_engine, dVehicleEndOffset.negate(),
                                     Position, true);
+
 
 
                             if(!Route.isReverseSightDir()) {
 
 //                            EBM.log("Route before merge: " + Route.getRouteLength(),
 //                                    SmartLogic.getsModuleId(POSITION_MODUL));
-                                Route.mergeWithPrecedingReverseRoute(referseRoute);
+                                Route.mergeWithPrecedingReverseRoute(reverseRoute);
                                 EBM.log("TrainId " + nid_engine.getId() + ": " +
                                                 " Route after merge: " + Route.getRouteLength(),
                                         SmartLogic.getsModuleId(POSITION_MODUL));
                             } else {
-                                referseRoute.mergeWithPrecedingReverseRoute(Route);
-                                Route = referseRoute;
+                                reverseRoute.mergeWithPrecedingReverseRoute(Route);
+                                Route = reverseRoute;
                                 Route.setReverseSightDir(true);
                             }
                             if(Route.getRouteLength().subtract(BigDecimal.valueOf(Position.l_trainint).abs())
@@ -222,7 +223,7 @@ public class PositionModul implements IPositionModul {
                 EBM.log("TrainId " + nid_engine.getId() + ": " +
                                 " Route at set safe new Vehicle Position merge: " + Route.getRouteLength(),
                         SmartLogic.getsModuleId(POSITION_MODUL));
-                safeNewVehiclePosition(new BigDecimal(0), Route, nid_engine, SafePosition, distanceDiff, iScale);
+                safeNewVehiclePosition(new BigDecimal(0), Route, nid_engine, SafePosition, distanceDiff, iScale, true);
             } catch (SmartLogicException e) {
                 e.printStackTrace();
             }
@@ -299,13 +300,13 @@ public class PositionModul implements IPositionModul {
     }
 
     private void safeNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, NID_ENGINE nid_engine,
-                                        SafeMOBPosition NewPosition, ETCS_DISTANCE distanceDiff, int iScale) {
+                                        SafeMOBPosition NewPosition, ETCS_DISTANCE distanceDiff, int iScale, boolean isInit) {
         SpotLocationIntrinsic beginSpot = null;
         SpotLocationIntrinsic endSpot = null;
         try {
 
             System.out.println("Vehicle End Offset " + dVehicleEndOffset);
-            NewPosition.defineNewVehiclePosition(dVehicleEndOffset, Route, distanceDiff, iScale, nid_engine);
+            NewPosition.defineNewVehiclePosition(dVehicleEndOffset, Route, distanceDiff, iScale, nid_engine, isInit);
             beginSpot = (SpotLocationIntrinsic) NewPosition.getBegin().getLocation();
             endSpot = (SpotLocationIntrinsic) NewPosition.getEnd().getLocation();
 
@@ -369,7 +370,7 @@ public class PositionModul implements IPositionModul {
         NoEndOffset.sDistance = 0;
         if(diff.compareTo(trainLengthMeter) > 0) {
             distanceDiff.sDistance = (short) (distanceDiff.sDistance - trainLengthMeter.intValueExact());
-            safeNewVehiclePosition(dVehicleEndOffset, Route, nid_engine, NewPosition, distanceDiff, iScale);
+            safeNewVehiclePosition(dVehicleEndOffset, Route, nid_engine, NewPosition, distanceDiff, iScale, false);
         }
         MaSmalled = new MAOccupation();
 

@@ -35,6 +35,7 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;
+import ebd.internal.util.PositionInfo;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +82,11 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
      * true bedeutet das der Zug auf den Referenzknoten der Startkante sieht
      */
     private boolean reverseSightDir = false;
+
+    /**
+     * Node Train is running to
+     */
+    private TopologyGraph.Node TargetNode;
 
 
     public boolean isBackwardMovement() {
@@ -1335,5 +1341,17 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
 
     public boolean isReverseSightDir() {
         return reverseSightDir;
+    }
+
+    public void checkReverse(ComposedRoute reverseRoute, PositionInfo position) {
+
+    }
+
+    public TopologyGraph.Node getTargetNode() {
+        return TargetNode;
+    }
+
+    public void setTargetNode(TopologyGraph.Node targetNode) {
+        TargetNode = targetNode;
     }
 }
