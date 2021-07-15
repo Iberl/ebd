@@ -18,12 +18,17 @@ import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import ebd.SlConfigHandler;
 import ebd.internal.message.Message_21;
 import ebd.internal.payload.Payload_21;
@@ -346,7 +351,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         //method under: sends message to tms if not clear position
-        boolean isClearPosition = setTrainForStartPositionOfRoute(iTrainId, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
+        boolean isClearPosition = setTrainForStartPositionOfRoute(iTrainId, R, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
         if(!isClearPosition) {
             // deny futher checks // response for not accepting is send in setTrainForStartPositionOfRoute
             return;
@@ -721,7 +726,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
-    private boolean setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
+    private boolean setTrainForStartPositionOfRoute(int iTrainId, Route r, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
         PositionModul.getInstance().resetTimeFilter();
         PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(iTrainId);
         MovableObject mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
@@ -742,10 +747,36 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                         SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
                 return false;
             } else {
-                // TODO ????!!!
-                return true;
+                NID_ENGINE nid_engine = new NID_ENGINE(TrainPosition.getNid_engine());
+                MovableObject MO = MovableObject.ObjectRepo.getModel(nid_engine);
+                try {
+                    ThreadedRepo<TrackEdge, ArrayList<Occupation>> occs
+                            = TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
+                    if(occs.getKeys().size() == 0) return false;
+                    TrackEdge TE = occs.getKeys().get(0);
+                    ArrayList<Occupation> occupationList = occs.getModel(TE);
+                    if(occupationList.size() != 1) return false;
+                    VehicleOccupation VO = (VehicleOccupation) occupationList.get(0);
+                    ArrayList<TrackEdgeSection> sections = (ArrayList<TrackEdgeSection>) VO.getTrackEdgeSections();
+                    if(sections == null) return false;
+                    TopologyGraph.Edge TrainFrontEdge = (TopologyGraph.Edge) sections.get(sections.size() - 1).getTrackEdge();
+                    ArrayList<String> ids = (ArrayList<String>) r.getElementListIds();
+                    if(ids == null || ids.size() == 0) return false;
+                    String firstId = ids.get(0);
+                    if(!TrainFrontEdge.getRefId().equals(firstId)){
+                        // Startkante des Zuges nicht auf der Kante der Anfrage
+                        MaReturnPayload.setErrorState(uuid, false, START_POINT_NOT_ON_ROUTE );
+                        sendMaResponseToTMS(MaReturnPayload, 2L);
+                        return false;
+                    }
+
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
         }
+        return true;
     }
 
     private void handleMaAckReceived(int iTrainId, Route R, UUID uuid, MaRequestReturnPayload MaReturnPayload,  ComposedRoute requestedTrackElementList, MA RbcMa, MARequestOccupation MAO, int nid_engine_Id) {

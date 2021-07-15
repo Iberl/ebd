@@ -190,8 +190,8 @@ public class PositionModul implements IPositionModul {
                                                 " Route after merge: " + Route.getRouteLength(),
                                         SmartLogic.getsModuleId(POSITION_MODUL));
                             } else {
-                                reverseRoute.mergeWithPrecedingReverseRoute(Route);
-                                Route = reverseRoute;
+                                Route.mergeWithPrecedingReverseRoute(reverseRoute);
+
                                 Route.setReverseSightDir(true);
                             }
                             if(Route.getRouteLength().subtract(BigDecimal.valueOf(Position.l_trainint).abs())
