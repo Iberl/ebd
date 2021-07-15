@@ -210,9 +210,9 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             if(d2 == null) d2 = 1.0d;
             //isFromA = E.getRefNode() == E.A;
             if(E.getRefNode() != E.A) {
-                double tempD1 = d1;
-                d1 = 1 - d2;
-                d2 = 1 - tempD1;
+                //double tempD1 = d1;
+                d1 = 1 - d1;
+                d2 = 1 - d2;
             }
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
 
