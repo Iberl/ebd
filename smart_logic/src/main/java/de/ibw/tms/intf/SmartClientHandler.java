@@ -267,16 +267,24 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
      * @param TmsCmd {@link TmsMessage} - Nachricht die an die SL gesendet werden soll
      * @throws MissingInformationException - Fehler
      */
-    public void sendCommand(TmsMessage TmsCmd) throws MissingInformationException {
+    public void sendCommand(TmsMessage TmsCmd) {
         try {
             guardCommandSender(TmsCmd);
             if(TmsCmd.type == Commands.I_CHECK_MOVEMENT_PERMISSION) {
                 markOccupationForBeeingRequested((TmsMovementPermissionRequest) TmsCmd);
+                if(((TmsMovementPermissionRequest) TmsCmd).isBackwardMove()) {
+
+                    return;
+                }
             }
 
-            this.tmsCommandQueue.put(TmsCmd.parseToJson());
+        } catch (InvalidParameterException | MissingInformationException | SmartLogicException e) {
+            e.printStackTrace();
+        }
+        try {
 
-        } catch (InterruptedException | InvalidParameterException e) {
+            this.tmsCommandQueue.put(TmsCmd.parseToJson());
+        } catch (InterruptedException | MissingInformationException e) {
             e.printStackTrace();
         }
     }
@@ -287,7 +295,8 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         if(tmsCmd.header.uuid == null) throw new InvalidParameterException("UUID of Command-Message must not be null");
     }
 
-    private void markOccupationForBeeingRequested(TmsMovementPermissionRequest TmsCmd) throws MissingInformationException {
+    private void markOccupationForBeeingRequested(TmsMovementPermissionRequest TmsCmd) throws MissingInformationException
+            , SmartLogicException {
         TmsMovementPermissionRequest tmpr = TmsCmd;
         NID_ENGINE nid_engine = new NID_ENGINE(tmpr.getTrainId());
         MovableObject mo = MovableObject.ObjectRepo.getModel(nid_engine);
@@ -308,22 +317,26 @@ public class SmartClientHandler extends SimpleChannelInboundHandler<SmartServerM
         movementAuthority.setMOB(mo);
         ComposedRoute CR = new ComposedRoute();
         try {
-            CR.generateFromRoute(tmpr.payload.route, tmpr.getTrainId());
-            PositionData Current = PositionModul.getInstance().getCurrentPosition(tmpr.getTrainId());
-            if(Current == null) {
-                throw new MissingInformationException("Zug #" + tmpr.getTrainId() + " cannot be located.");
-            }
+            checkBackwardMovementAndCurrentPosition(tmpr, CR);
         } catch (SmartLogicException e) {
             e.printStackTrace();
             throw new MissingInformationException("Route cannot be created: " + e.getMessage());
         }
+        if(tmpr.isBackwardMove()) return;
         TmsCmd.setMaRequestOccupation(new MARequestOccupation(CR, movementAuthority, true));
         // speichere request nach ACHTUNG! UUID der Kommunikation nicht nach UUID als Element der Occupation
         TrackAndOccupationManager.RequestManager.update(TmsCmd.header.uuid, TmsCmd);
     }
 
+    private void checkBackwardMovementAndCurrentPosition(TmsMovementPermissionRequest tmpr, ComposedRoute CR) throws SmartLogicException, MissingInformationException {
+        CR.generateFromRoute(tmpr.payload.route, tmpr.getTrainId());
+        tmpr.setBackwardMovement(CR.isBackwardMovement());
 
-
+        PositionData Current = PositionModul.getInstance().getCurrentPosition(tmpr.getTrainId());
+        if(Current == null) {
+            throw new MissingInformationException("Zug #" + tmpr.getTrainId() + " cannot be located.");
+        }
+    }
 
 
 }

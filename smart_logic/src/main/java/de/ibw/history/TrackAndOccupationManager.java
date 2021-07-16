@@ -280,6 +280,15 @@ public class TrackAndOccupationManager {
     private static synchronized void storeVehicleOccupation(Class<?> occupationType, VehicleStorageItem StoreItem, Occupation VO)
             throws InvalidParameterException {
         MovableObject MO = ((IMoveable)VO).getTargetMoveableObject();
+        PositionData Pos = PositionModul.getInstance().getCurrentPosition(MO.getNid_Engine().getId());
+        int iTrainLength = Pos.getPos().l_trainint;
+        if(occupationType.equals(VehicleOccupation.class)) {
+            if(Math.abs(VO.getMeterLength().intValue() - iTrainLength) > 2) {
+                throw new InvalidParameterException("Train Length not equal to Vehicle occupation");
+            }
+        }
+
+
         ThreadedRepo mainStorage = Storage.getModel(occupationType);
         if(mainStorage == null) mainStorage = new ThreadedRepo();
         if(MO == null) throw new InvalidParameterException("Vehicle Occupation must have a link to a movable Object");

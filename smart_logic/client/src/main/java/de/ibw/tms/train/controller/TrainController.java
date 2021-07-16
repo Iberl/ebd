@@ -274,15 +274,8 @@ public class TrainController extends SubmissionPublisher implements IController 
             //CheckMoveAuthCommand.MaRequest.Tm.unsetPassedElements();
 
             TmsMovementPermissionRequest Msg = new TmsMovementPermissionRequest(sTmsId, sRbcId,CheckMoveAuthCommand);
+            SmartClientHandler.getInstance().sendCommand(Msg);
 
-
-
-            try {
-
-                SmartClientHandler.getInstance().sendCommand(Msg);
-            } catch (MissingInformationException e) {
-                e.printStackTrace();
-            }
 
         }
     }

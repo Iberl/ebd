@@ -9,10 +9,9 @@ import de.ibw.smart.logic.intf.impl.SmartServer4TmsImpl;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
 import de.ibw.tms.etcs.Q_SCALE;
 import de.ibw.tms.ma.common.DefaultObject;
-import de.ibw.tms.ma.location.SpotLocation;
 import de.ibw.tms.ma.mob.position.MOBPosition;
-import de.ibw.tms.ma.mob.position.MOBPositionClasses;
 import de.ibw.tms.ma.mob.position.SafeMOBPosition;
+import de.ibw.tms.ma.positioned.elements.train.MaxSafeFrontEnd;
 import de.ibw.tms.ma.positioned.elements.train.MinSafeRearEnd;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.tms.ma.Waypoint;
@@ -36,7 +35,7 @@ import de.ibw.tms.plan_pro.adapter.topology.trackbased.TopologyFactory;
 import de.ibw.util.DefaultRepo;
 import de.ibw.util.ThreadedRepo;
 import ebd.TescModul;
-import org.apache.commons.lang3.ArrayUtils;
+import ebd.internal.util.PositionInfo;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -78,6 +77,22 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
     private BigDecimal dRouteLength = null;
 
     private boolean isExtendable = false;
+    private boolean isBackwardMovement = false;
+    /**
+     * true bedeutet das der Zug auf den Referenzknoten der Startkante sieht
+     */
+    private boolean reverseSightDir = false;
+
+    /**
+     * Node Train is running to
+     */
+    private TopologyGraph.Node TargetNode;
+
+
+    public boolean isBackwardMovement() {
+        return isBackwardMovement;
+    }
+
 
     public void setExtendable(boolean extendable) {
         isExtendable = extendable;
@@ -154,7 +169,14 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                 if(E.TopConnectFromB.equals(TopologyConnect.ENDE_BESTDIG) || E.TopConnectFromA.equals(TopologyConnect.ENDE_BESTDIG)) {
                     TopologyGraph.Node NextNode = null;
                     ArrayList<TopologyGraph.Edge> edgeCandidates = new ArrayList<>();
-                    TopologyGraph.Node LastNode = TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge);
+                    if(LastEdge == null) {
+                        LastEdge = E;
+                        TePair = new ImmutablePair<>(Route.TrackElementType.RAIL_TYPE, E);
+                        this.add(TePair);
+                        if(R.getElementListIds().size() > 1) continue;
+                        break;
+                    }
+                    TopologyGraph.Node LastNode = TopologyGraph.getNodeBetweenTwoEdges(LastEdge, E);
                     // geo opposite node
                     NextNode = LastEdge.A.equals(LastNode) ? LastEdge.B : LastEdge.A;
                     edgeCandidates.addAll(NextNode.outEdges);
@@ -186,6 +208,8 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                 LastEdge = E;
 
             }
+            if(LastEdge == null) throw new SmartLogicException("Route must consist of one edge at least");
+
             if(PreviousEdge != null) {
                 try {
                     if (!TopologyGraph.getNodeBetweenTwoEdges(PreviousEdge, LastEdge).equals(LastEdge.getRefNode())) {
@@ -196,8 +220,10 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                 } catch(InvalidParameterException IPE) {
                     LastLocation.setIntrinsicCoord(1 - R.getIntrinsicCoordOfTargetTrackEdge());
                 }
-            } else LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
-            if(LastEdge == null) throw new SmartLogicException("Route must consist of one edge at least");
+            } else {
+                LastLocation.setIntrinsicCoord(R.getIntrinsicCoordOfTargetTrackEdge());
+                check4BackwardMove(LastEdge, VO, LastLocation);
+            }
             LastLocation.setNetElementRef(LastEdge.getId());
             this.setLastSpot(LastLocation);
 
@@ -242,6 +268,29 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
         }
     }
 
+    private void check4BackwardMove(TopologyGraph.Edge lastEdge, VehicleOccupation vo, SpotLocationIntrinsic lastLocation) {
+        if(vo == null) return;
+        for(TrackEdgeSection TES : vo.getTrackEdgeSections()) {
+            TrackEdge TE = TES.getTrackEdge();
+            if(TE.equals(lastEdge)) {
+                handleTargetTrackEdge(lastLocation, TES);
+                return;
+            }
+        }
+    }
+
+    private void handleTargetTrackEdge(SpotLocationIntrinsic lastLocation, TrackEdgeSection TES) {
+        if(TES.getBegin().getIntrinsicCoord() < TES.getEnd().getIntrinsicCoord()) {
+            if (TES.getEnd().getIntrinsicCoord() > lastLocation.getIntrinsicCoord()) {
+                isBackwardMovement = true;
+            }
+        } else if(TES.getBegin().getIntrinsicCoord() > TES.getEnd().getIntrinsicCoord()) {
+            if(TES.getEnd().getIntrinsicCoord() < lastLocation.getIntrinsicCoord()) {
+                isBackwardMovement = true;
+            }
+        }
+
+    }
 
 
     private PositionData guard(Route r, int iTrainId) {
@@ -883,10 +932,20 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                             dEndPercent = getNominalEndIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
                         } else {
                             // Zug fährt reverse
+                            BigDecimal dEdgeLength = BigDecimal.valueOf(CurrentEdge.dTopLength);
+                            BigDecimal dFirstSpot = BigDecimal.valueOf(firstSpot.getIntrinsicCoord());
 
-                            dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
-                            dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_Start,
-                                    CurrentEdge, sections.isEmpty(), is_StartEdge);
+                            dBeginPercent = dFirstSpot.multiply(dEdgeLength).subtract(d_Start_Meter)
+                                    .divide(dEdgeLength,  MathContext.DECIMAL32);
+                            //dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
+
+
+
+
+                            dEndPercent = dFirstSpot.multiply(dEdgeLength).subtract(d_End_Meter).divide(dEdgeLength,  MathContext.DECIMAL32);
+
+                            //dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_Start,
+                            //        CurrentEdge, sections.isEmpty(), is_StartEdge);
                         }
                     } else if (StartEdge == CurrentEdge && PrevEdge == null) {
 
@@ -901,9 +960,20 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                         }
                         if (StartEdge.getRefNode().equals(NextNode)) {
                             // Die Intrinsische Koordinate wird von NextNode aus gemessen. Das enspricht einer Reversed Zugfahrt.
-                            dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
-                            dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_Start,
-                                    CurrentEdge, sections.isEmpty(), is_StartEdge);
+                            BigDecimal dEdgeLength = BigDecimal.valueOf(StartEdge.dTopLength);
+                            BigDecimal dFirstEdgeFactor = BigDecimal.valueOf(this.firstSpot.getIntrinsicCoord());
+                            BigDecimal dBeginSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_Start_Meter);
+
+                            BigDecimal dEndSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_End_Meter);
+                            dBeginPercent =  dBeginSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                               // dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
+                            if(dEndSpot.compareTo(BigDecimal.valueOf(0)) < 0) {
+                                dEndPercent = BigDecimal.valueOf(0);
+                            } else {
+                                dEndPercent = dEndSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                            }
+
+
                         } else {
                             // Nominale Zugfahrt
                             dBeginPercent = getNominaStartIntrinsic(d_Start_Meter, d_Start,
@@ -922,10 +992,45 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                     "two Edges are not connected by a node");
                         }
                         if (!CurrentEdge.getRefNode().equals(PrevNode)) {
+
+                            BigDecimal dEdgeLength = BigDecimal.valueOf(CurrentEdge.dTopLength);
+
+                            BigDecimal dStartDiff = BigDecimal.valueOf(0);
+                            BigDecimal dEndDiff = BigDecimal.valueOf(0);
+                            if(d_Start_Meter.compareTo(d_Start) < 0) {
+                                dBeginPercent = BigDecimal.valueOf(1.0d);
+                                dEndDiff = d_Start.subtract(d_Start_Meter);
+                                dEndDiff = d_End_Meter.subtract(d_Start_Meter).subtract(dEndDiff);
+                            } else {
+                                dStartDiff = d_Start_Meter.subtract(d_Start);
+                                dBeginPercent = dEdgeLength.subtract(dStartDiff).
+                                        divide(dEdgeLength, MathContext.DECIMAL32);
+                                dEndDiff = d_End_Meter.subtract(d_Start);
+                            }
+                            if(dEndDiff.compareTo(dEdgeLength) >= 0) {
+                                dEndPercent = BigDecimal.valueOf(0);
+                            } else {
+                                dEndPercent = dEdgeLength.subtract(dEndDiff).
+                                        divide(dEdgeLength, MathContext.DECIMAL32);
+                            }
+                        /*
+                            BigDecimal dBeginSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_Start_Meter);
+
+                            BigDecimal dEndSpot = dEdgeLength.multiply(dFirstEdgeFactor).subtract(d_End_Meter);
+                            dBeginPercent =  dBeginSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                            // dBeginPercent = getReversedStartIntrinsic(d_End_Meter, d_Start, d_Current, CurrentEdge);
+                            if(dEndSpot.compareTo(BigDecimal.valueOf(0)) < 0) {
+                                dEndPercent = BigDecimal.valueOf(0);
+                            } else {
+                                dEndPercent = dEndSpot.divide(dEdgeLength, MathContext.DECIMAL32);
+                            }
+
+
+
                             // Die Intrinsische Koordinate wird von NextNode aus gemessen. Das enspricht einer Reversed Zugfahrt.
                             if(d_Start.compareTo(d_Start_Meter) <= 0) {
                                 BigDecimal dEndMeterDiff = d_Start_Meter.subtract(d_Start);
-                                // bisherige hatten noch keine Kantenlaenge und unterleigen dStartMeter
+                                // bisherige hatten noch keine Kantenlaenge und unterliegen dStartMeter
                                 dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_End_Meter.subtract(dEndMeterDiff),
                                         CurrentEdge, sections.isEmpty(), false);
 
@@ -933,9 +1038,14 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
                                 dEndPercent = getReversedEndIntrinsic(d_Start_Meter, d_End_Meter.subtract(d_Start),
                                         CurrentEdge, sections.isEmpty(), false);
                             }
-                            dBeginPercent = getReversedStartIntrinsic(d_End_Meter,
-                                    d_Start, d_Current, CurrentEdge);
+                            if(BigDecimal.valueOf(CurrentEdge.dTopLength).compareTo(d_End_Meter) < 0) {
+                                dBeginPercent = new BigDecimal("0.0");
+                            } else {
+                                dBeginPercent = getReversedStartIntrinsic(d_End_Meter,
+                                        d_Start, d_Current, CurrentEdge);
+                            }
 
+                             */
                         } else {
                             // Nominale Zugfahrt
                             dBeginPercent = getNominaStartIntrinsic(d_Start_Meter, d_Start,
@@ -965,6 +1075,12 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
             PrevEdge = (TopologyGraph.Edge) Current.getRight();
         }
         result.setTrackEdgeSections(sections);
+        if(result instanceof SafeMOBPosition) {
+            if(Math.abs(result.getMeterLength().intValue() - ((SafeMOBPosition) result).iTrainLength) > 2) {
+                throw new InvalidParameterException("Safety Area not equal trainlength");
+            }
+        }
+
         return result;
 
     }
@@ -1216,5 +1332,26 @@ public class ComposedRoute extends ArrayList<Pair<Route.TrackElementType, ITopol
             }
         }
         it.remove();
+    }
+
+
+    public void setReverseSightDir(boolean b) {
+        this.reverseSightDir = b;
+    }
+
+    public boolean isReverseSightDir() {
+        return reverseSightDir;
+    }
+
+    public void checkReverse(ComposedRoute reverseRoute, PositionInfo position) {
+
+    }
+
+    public TopologyGraph.Node getTargetNode() {
+        return TargetNode;
+    }
+
+    public void setTargetNode(TopologyGraph.Node targetNode) {
+        TargetNode = targetNode;
     }
 }

@@ -18,12 +18,17 @@ import de.ibw.tms.ma.location.SpotLocationIntrinsic;
 import de.ibw.tms.ma.mob.MovableObject;
 import de.ibw.tms.ma.mob.common.NID_ENGINE;
 import de.ibw.tms.ma.occupation.MARequestOccupation;
+import de.ibw.tms.ma.occupation.Occupation;
+import de.ibw.tms.ma.occupation.VehicleOccupation;
 import de.ibw.tms.ma.physical.MoveableTrackElement;
 import de.ibw.tms.ma.physical.TrackElementStatus;
 import de.ibw.tms.ma.positioned.elements.TrackEdge;
+import de.ibw.tms.ma.positioned.elements.TrackEdgeSection;
 import de.ibw.tms.plan_pro.adapter.topology.TopologyGraph;
+import de.ibw.tms.plan_pro.adapter.topology.intf.ITopological;
 import de.ibw.tms.trackplan.ui.Route;
 import de.ibw.util.DefaultRepo;
+import de.ibw.util.ThreadedRepo;
 import ebd.SlConfigHandler;
 import ebd.internal.message.Message_21;
 import ebd.internal.payload.Payload_21;
@@ -50,8 +55,8 @@ import java.util.UUID;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.1
- * @since 2021-06-17
+ * @version 1.1.12
+ * @since 2021-07-07
  */
 public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServerFromTmsIntf, TmsIntf {
 
@@ -88,18 +93,15 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      * Zug-Id konnte nicht verifiziert werden
      */
     public static final String TRAIN_ID_NOT_VERIFIED_ERROR = "003";
-    /**
-     * Einige Routen-Elemente f&uuml;r das Freigaben einer MA durch die SmartLogic sind belegt
-     */
-    public static final String ELEMENT_RESERVATION_ERROR = "004";
+
     /**
      * Die Liste der Routen Elemente ist nicht durchg&auml;nig definiert. Im Pfad fehlt ein anzugebendes Element
      */
-    public static final String NOT_ALL_ELEMENTS_GIVEN_FOR_RESERVATION_ERROR = "009";
+    public static final String NOT_ALL_ROUTE_ELEMENTS_GIVEN_ERROR = "009 - Not all necessary route elements are part of the MARequest";
     /**
      * Ein Element hat einen Status, sodass die Route nicht von der SL freigegeben werden kann
      */
-    public static final String STATUS_OF_ELEMENT_IS_WRONG_ERROR = "010";
+    public static final String STATUS_OF_ELEMENT_IS_WRONG_ERROR = "010 - There is no route that corresponds with the MARequest";
     /**
      * Gefahrzonen konnten nicht abgerufen werden
      */
@@ -120,7 +122,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
     /**
      * Der Startpunkt muss auf der Startkante der Route liegen, der Code wird im Negativfall wiedergegeben
      */
-    public static final String START_POINT_NOT_ON_ROUTE = "031";
+    public static final String START_POINT_NOT_ON_ROUTE = "031 - Start point not on route";
 
     /**
      * Der Endpunkt muss auf der letzten Kante der Route liegen, der Code wird im Negativfall wiedergegeben
@@ -137,22 +139,26 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
      */
     public static final String TRACK_EDGE_CONNECTION_IS_NOT_TRAFFICALLY = "034";
 
-    /**
-     * To Define by FD
-     * Das Moveable Track Element weist nicht den angeforderten Status auf
-     */
-    public static final String MTE_HAS_NOT_REQUIERED_STATUS = "134";
 
 
     /**
      * Die Route muss auch von den Verbindungsstatus richtig sein. Wenn nicht wird der Fehlerocde wiedergegeben.
      */
-    public static final String ROUTE_ELEMENT_HAS_WRONG_STATUS = "035";
+    public static final String ROUTE_ELEMENT_HAS_WRONG_STATUS = "035 - route element # has not the required status";
 
     /**
-     * Die weitergegebene MA wurde vom RBC nicht bes&auml;igt
+     * Einige Routen-Elemente f&uuml;r das Freigaben einer MA durch die SmartLogic sind belegt
      */
-    public static final String NO_ACK = "NO_ACK";
+    public static final String ELEMENT_RESERVATION_ERROR = "064";
+
+
+
+
+
+    /**
+     * Die weitergegebene MA wurde vom RBC nicht best&auml;tigt
+     */
+    public static final String NO_ACK = "025 - Acknowlegement of MA failed";
 
     public static final String INVALID_REQUEST = "INVALID_REQUEST";
 
@@ -345,7 +351,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         }
         if(EBM != null) EBM.log("Check Route", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         //method under: sends message to tms if not clear position
-        boolean isClearPosition = setTrainForStartPositionOfRoute(iTrainId, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
+        boolean isClearPosition = setTrainForStartPositionOfRoute(iTrainId, R, uuid, MaReturnPayload, MaAdapter, requestedTrackElementList);
         if(!isClearPosition) {
             // deny futher checks // response for not accepting is send in setTrainForStartPositionOfRoute
             return;
@@ -356,7 +362,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             requestedTrackElementList = identifyRouteElements(iTrainId , R, requestedTrackElementList);
         } catch (SmartLogicException | Exception e) {
             if(EBM != null) EBM.log("Route not existing", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
-            MaReturnPayload.setErrorState(uuid, false,e.getMessage() );
+            MaReturnPayload.setErrorState(uuid, false, TRACK_EDGE_NOT_CONNECTED_WITH_NEXT_TRACK_EDGE);
             sendMaResponseToTMS(MaReturnPayload, 2L);
             if(EBM != null) EBM.log("SL ELement-Reservation FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
@@ -364,9 +370,13 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         }
         if(EBM != null) EBM.log("Route exists", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
+
+
+
         try {
             checkMteStatus(requestedTrackElementList);
         } catch (SmartLogicException | Exception e) {
+            // Fehlercode 35
         if(EBM != null) EBM.log("MTE having not right status", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
         MaReturnPayload.setErrorState(uuid, false,e.getMessage() );
         sendMaResponseToTMS(MaReturnPayload, 2L);
@@ -390,8 +400,8 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
         if(!isRouteNotBlocked) {
             if(EBM != null) EBM.log("Route is not drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
-
-            MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
+                // 64 Fehlercodes
+            MaReturnPayload.setErrorState(uuid, false, ELEMENT_RESERVATION_ERROR);
             sendMaResponseToTMS(MaReturnPayload, 2L);
             if(EBM != null) EBM.log("SL ELement-Reservation FAIL - Route is blocked; TrainId: " + iTrainId +
                             "UUID: " + uuid.toString(),
@@ -445,6 +455,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
         if(!bIsOccupatonFree) {
+
+            // Fehlercode entwerfen tms länge Route
+            // TMS anders lange Abschnitte
+
             if(EBM != null) EBM.log("Route is not drivable", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
             MaReturnPayload.setErrorState(uuid, false,ELEMENT_RESERVATION_ERROR );
@@ -529,8 +543,35 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             EBM.log("Search for RBCs", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
 
 
-        sendAcknowledgementToRBC(iTrainId, R, uuid, lPriority, MaReturnPayload, bAcknowledgeMA, requestedTrackElementList, RbcMa, MAO, nid_engine_Id, MaMsg);
+        if(checkRouteMatchWithRBCInformation(iTrainId, requestedTrackElementList, MaMsg)) {
 
+            sendAcknowledgementToRBC(iTrainId, R, uuid, lPriority, MaReturnPayload, bAcknowledgeMA, requestedTrackElementList, RbcMa, MAO, nid_engine_Id, MaMsg);
+
+        } else {
+            MaReturnPayload.setErrorState(uuid, true, INVALID_REQUEST + " RBC-Travel-Length not long as reserved");
+            sendMaResponseToTMS(MaReturnPayload, 2L);
+
+        }
+    }
+
+    private boolean checkRouteMatchWithRBCInformation(int iTrainId, ComposedRoute CR, Message_21 maMsg) {
+        PositionData PosDat = PositionModul.getInstance().getCurrentPosition(iTrainId);
+        try {
+            BigDecimal dRouteMeter = CR.getRouteLength().add(BigDecimal.valueOf(PosDat.getPos().d_lrbg));
+            if(maMsg.getPayload().ma.eoa.sections.size() != 1) {
+                return false;
+            }
+            return checkIfUnequalLength(maMsg, dRouteMeter);
+
+        } catch (SmartLogicException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean checkIfUnequalLength(Message_21 maMsg, BigDecimal dRouteMeter) {
+        return dRouteMeter.subtract(BigDecimal.valueOf(maMsg.getPayload().ma.eoa.sections.get(0).l_section)).abs().
+                compareTo(BigDecimal.valueOf(2.0d)) < 0;
     }
 
     private void checkMteStatus(ComposedRoute requestedTrackElementList) throws SmartLogicException {
@@ -543,7 +584,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                 MoveableTrackElement MTE = w.getTrackElement();
 
                 if (neededStatus.statusList.size() > MTE.getCurrentStatus().statusList.size()) {
-                    throw new SmartLogicException(SmartServer4TmsImpl.MTE_HAS_NOT_REQUIERED_STATUS);
+                    throw new SmartLogicException(SmartServer4TmsImpl.ROUTE_ELEMENT_HAS_WRONG_STATUS);
                 }
 
                 for (int i = 0; i < neededStatus.statusList.size(); i++) {
@@ -552,7 +593,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                         printError(requestedTrackElementList.waypointsBetweentTwoTrackEdges, w);
 
 
-                        throw new SmartLogicException(SmartServer4TmsImpl.MTE_HAS_NOT_REQUIERED_STATUS);
+                        throw new SmartLogicException(SmartServer4TmsImpl.ROUTE_ELEMENT_HAS_WRONG_STATUS);
                     }
                 }
 
@@ -586,6 +627,7 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
         if(bAcknowledgeMA) {
             handleMaAckReceived(iTrainId, R, uuid, MaReturnPayload, requestedTrackElementList, RbcMa, MAO, nid_engine_Id);
         } else {
+            // Fehlercode neu entwerfen
             handleInvalidRequest(uuid, MaReturnPayload, NO_ACK);
         }
     }
@@ -649,14 +691,10 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
             d_ol = P.ma.eoa.overlap.d_ol;
             v_release_ol = P.ma.eoa.overlap.v_releaseol;
         }
-
+        int lSection = MaMsg.getPayload().ma.eoa.sections.get(0).l_section;
         Packet_15.Packet_15_Section endSection = null;
-        try {
-            endSection = new Packet_15.Packet_15_Section(CompRoute.getRouteLength().intValue(),
-                    false,1,1);
-        } catch (SmartLogicException e) {
-            throw new InvalidParameterException("Route Length was not available: " + e.getMessage());
-        }
+        endSection = new Packet_15.Packet_15_Section(lSection,
+                false,1,1);
         Packet_15 MaPacket = new Packet_15(q_dir, q_scale, v_loa, t_loa, endSection, q_endtimer,
                     t_endtimer, d_endtimerstartloc, q_dangerpoint, d_DP, v_release_DP,
                     q_overlap, d_startol, t_ol, d_ol, v_release_ol);
@@ -688,14 +726,14 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
 
 
 
-    private boolean setTrainForStartPositionOfRoute(int iTrainId, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
+    private boolean setTrainForStartPositionOfRoute(int iTrainId, Route r, UUID uuid, MaRequestReturnPayload MaReturnPayload, RbcMaAdapter MaAdapter, ComposedRoute requestedTrackElementList) {
         PositionModul.getInstance().resetTimeFilter();
         PositionData TrainPosition = PositionModul.getInstance().getCurrentPosition(iTrainId);
         MovableObject mo = MovableObject.ObjectRepo.getModel(new NID_ENGINE(iTrainId));
 
         if(TrainPosition == null || TrainPosition.getPos() == null || mo == null) {
             if(EBM != null) EBM.log("Train Position Unknown", SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
-            MaReturnPayload.setErrorState(uuid, false,NO_TRAIN_INFORMATION );
+            MaReturnPayload.setErrorState(uuid, false, START_POINT_NOT_ON_ROUTE );
             sendMaResponseToTMS(MaReturnPayload, 2L);
             if(EBM != null) EBM.log("SL Train-Status FAIL; TrainId: " + iTrainId + "UUID: " + uuid.toString(),
                     SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
@@ -709,10 +747,36 @@ public class SmartServer4TmsImpl extends SmartLogicTmsProxy implements SmartServ
                         SmartLogic.getsModuleId(SMART_SERVER_MA_MODUL));
                 return false;
             } else {
-                // TODO ????!!!
-                return true;
+                NID_ENGINE nid_engine = new NID_ENGINE(TrainPosition.getNid_engine());
+                MovableObject MO = MovableObject.ObjectRepo.getModel(nid_engine);
+                try {
+                    ThreadedRepo<TrackEdge, ArrayList<Occupation>> occs
+                            = TrackAndOccupationManager.getReadOnly(VehicleOccupation.class, MO);
+                    if(occs.getKeys().size() == 0) return false;
+                    TrackEdge TE = occs.getKeys().get(0);
+                    ArrayList<Occupation> occupationList = occs.getModel(TE);
+                    if(occupationList.size() != 1) return false;
+                    VehicleOccupation VO = (VehicleOccupation) occupationList.get(0);
+                    ArrayList<TrackEdgeSection> sections = (ArrayList<TrackEdgeSection>) VO.getTrackEdgeSections();
+                    if(sections == null) return false;
+                    TopologyGraph.Edge TrainFrontEdge = (TopologyGraph.Edge) sections.get(sections.size() - 1).getTrackEdge();
+                    ArrayList<String> ids = (ArrayList<String>) r.getElementListIds();
+                    if(ids == null || ids.size() == 0) return false;
+                    String firstId = ids.get(0);
+                    if(!TrainFrontEdge.getRefId().equals(firstId)){
+                        // Startkante des Zuges nicht auf der Kante der Anfrage
+                        MaReturnPayload.setErrorState(uuid, false, START_POINT_NOT_ON_ROUTE );
+                        sendMaResponseToTMS(MaReturnPayload, 2L);
+                        return false;
+                    }
+
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
         }
+        return true;
     }
 
     private void handleMaAckReceived(int iTrainId, Route R, UUID uuid, MaRequestReturnPayload MaReturnPayload,  ComposedRoute requestedTrackElementList, MA RbcMa, MARequestOccupation MAO, int nid_engine_Id) {

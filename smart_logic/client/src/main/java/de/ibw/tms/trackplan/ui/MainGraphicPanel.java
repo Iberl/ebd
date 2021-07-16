@@ -40,6 +40,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.io.IOException;
@@ -57,8 +58,8 @@ import java.util.concurrent.Flow;
  *
  *
  * @author iberl@verkehr.tu-darmstadt.de
- * @version 1.0
- * @since 2021-05-26
+ * @version 1.1.12
+ * @since 2021-07.09
  */
 public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private static Logger logger = Logger.getLogger( MainGraphicPanel.class );
@@ -67,6 +68,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
     private TrackController TrackControl = null;
 
     private Flow.Subscription subscription = null;
+    private int factor = 0;
 
 
     /**
@@ -208,11 +210,12 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             if(d2 == null) d2 = 1.0d;
             //isFromA = E.getRefNode() == E.A;
             if(E.getRefNode() != E.A) {
-                double tempD1 = d1;
-                d1 = 1 - d2;
-                d2 = 1 - tempD1;
+                //double tempD1 = d1;
+                d1 = 1 - d1;
+                d2 = 1 - d2;
             }
             System.out.println(sID + " - D1: " + d1 + " - D2" + d2);
+
 
 
             if(isTrainPosition && iCounter + 1 == sectionList.size()) {
@@ -255,9 +258,9 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         g2d.setFont(new Font("Century Schoolbook", Font.PLAIN, 12));
 
+        AffineTransform startTransformState = g2d.getTransform();
 
 
-        paintCrossroad(T_Model, Zoom, g2d);
         paintBalises(T_Model,Zoom,g2d);
 
         g2d.scale(Zoom.getdZoomX(), Zoom.getdZoomY());
@@ -291,7 +294,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         ArrayList<TopologyGraph.Edge> edgeList = new ArrayList<>(edgeRepo.values());
         for(TopologyGraph.Edge E : edgeList) {
-
+            int geoEdgeCounter = 0;
 
 
             // diese Liste zeichenen
@@ -305,22 +308,15 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                 GeometricCoordinate nodeA = geoPointRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
                 GeometricCoordinate nodeB = geoPointRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
                 Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
-
+                if(geoEdgeCounter % 3 == 0) {
+                    geoEdgeCounter = paintTopEdgeName(g2d, E, geoEdgeCounter, nodeA, nodeB);
+                }
                 CheckDbdCommand DbdCmd = E.checkAndHandleDWK_EKW();
                 if(DbdCmd == null) {
 
-                    GeoEdgeReference GeoRef = new GeoEdgeReference();
-                    GeoRef.setTopEdge(E);
-                    GeoRef.setGeoEdge(geoEdge);
-                    GeoRef.setLine(line);
-                    g2d.draw(GeoRef);
+                    makeTopEdge4GeoEdgeInteractable(g2d, E, geoEdge, line);
                 } else {
-                    DbdCommandEdgeReference DbdRef = new DbdCommandEdgeReference();
-                    DbdRef.setTopEdge(E);
-                    DbdRef.setGeoEdge(geoEdge);
-                    DbdRef.setDbdCommand(DbdCmd);
-                    DbdRef.setLine(line);
-                    g2d.draw(DbdRef);
+                    introduceDbdCommandOnEdge(g2d, E, geoEdge, line, DbdCmd);
                 }
 
 //                Ellipse2D.Double circle = new Ellipse2D.Double(nodeA.getX(), nodeA.getY(), 10, 10);
@@ -349,9 +345,136 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
 
         paintTrains(g2d);
 
+        try {
+            paintBaliseDirection(g2d);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         paintConnectors(g2d);
+        g2d.setTransform(startTransformState);
+        paintCrossroad(T_Model, Zoom, g2d);
+
 
         // disable zoom for images
+
+    }
+
+    private int paintTopEdgeName(Graphics2D g2d, TopologyGraph.Edge E, int geoEdgeCounter, GeometricCoordinate nodeA, GeometricCoordinate nodeB) {
+        AffineTransform Normal = g2d.getTransform();
+        g2d.scale(1.0, -1.0);
+        factor++;
+        g2d.setColor(Color.ORANGE.darker().darker());
+
+        int ishift = factor % 5 -2;
+
+
+        g2d.drawString(E.getRefId(), (float) ((nodeA.getX() + nodeB.getX()) / 2.0f - 5.0f),
+                (float) -(nodeA.getY() + nodeB.getY()) / 2.0f + 5.0f * ishift);
+        geoEdgeCounter++;
+        g2d.setTransform(Normal);
+        g2d.setColor(Color.GRAY);
+        return geoEdgeCounter;
+    }
+
+    private void makeTopEdge4GeoEdgeInteractable(Graphics2D g2d, TopologyGraph.Edge E, CGEOKante geoEdge, Line2D.Double line) {
+        GeoEdgeReference GeoRef = new GeoEdgeReference();
+        GeoRef.setTopEdge(E);
+        GeoRef.setGeoEdge(geoEdge);
+        GeoRef.setLine(line);
+        g2d.draw(GeoRef);
+    }
+
+    private void introduceDbdCommandOnEdge(Graphics2D g2d, TopologyGraph.Edge E, CGEOKante geoEdge, Line2D.Double line, CheckDbdCommand DbdCmd) {
+        DbdCommandEdgeReference DbdRef = new DbdCommandEdgeReference();
+        DbdRef.setTopEdge(E);
+        DbdRef.setGeoEdge(geoEdge);
+        DbdRef.setDbdCommand(DbdCmd);
+        DbdRef.setLine(line);
+        g2d.draw(DbdRef);
+    }
+
+    private void paintBaliseDirection(Graphics2D g2d) throws Exception {
+        g2d.setColor(Balise.DEFAULTCOLOR);
+        ArrayList<TopologyGraph.Edge> edgeHavingBalises = Balise.baliseOnEdge.getKeys();
+        for(TopologyGraph.Edge E : edgeHavingBalises) {
+            ArrayList<Balise> balisesOnEdge = Balise.baliseOnEdge.getModel(E);
+            for(Balise B : balisesOnEdge) {
+
+                BigDecimal dBaliseFromA = B.getBalisenPositionFromNodeA();
+                ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
+                TopologyGraph.Edge edge = E;
+
+                double distanceA1 = dBaliseFromA.subtract(BigDecimal.valueOf(0.1d)).doubleValue();
+                double distanceA2 = dBaliseFromA.add(BigDecimal.valueOf(0.1d)).doubleValue();
+
+
+                ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
+
+                double lengthOfGeoEdges = 0;
+                for(CGEOKante geoEdge : geoEdgeList) {
+                    lengthOfGeoEdges += geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+                }
+                LinkedGeo linkedGeo = null;
+                try {
+                    linkedGeo = new LinkedGeo(geoEdgeList,true, edge);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+
+                double prevDistance = 0;
+                double geoEdgeLength = 0;
+                CGEOKante geoEdge = null;
+
+
+
+
+                if(Math.abs(edge.dTopLength - lengthOfGeoEdges) > 1) {
+                    distanceA1 = distanceA1 * lengthOfGeoEdges / edge.dTopLength;
+                    distanceA2 = distanceA2 * lengthOfGeoEdges / edge.dTopLength;
+                }
+
+                int i = 0;
+                boolean first = true;
+                for(i = 0; i < linkedGeo.getUsedEdgesSorted().size(); i++) {
+                    geoEdge = linkedGeo.getUsedEdgesSorted().get(i);
+                    geoEdgeLength = geoEdge.getGEOKanteAllg().getGEOLaenge().getWert().doubleValue();
+                    GeometricCoordinate nodeA = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenA().getWert());
+                    GeometricCoordinate nodeB = PlanData.GeoNodeRepo.getModel(geoEdge.getIDGEOKnotenB().getWert());
+
+
+
+                    // First node
+                    if(prevDistance + geoEdgeLength < distanceA1) {
+                        prevDistance += geoEdgeLength;
+                        continue;
+                    }
+
+                    if(first && prevDistance + geoEdgeLength >= distanceA1) {
+                        first = false;
+                        nodeA = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA1 - prevDistance);
+                    }
+
+                    // Last node
+                    if(prevDistance + geoEdgeLength > distanceA2) {
+                        nodeB = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
+                        Line2D.Double line = null;
+                        if(B.isNominalTriggeredToNodeB()) {
+                            line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
+                        } else {
+                            line = new Line2D.Double(nodeB.getX(), nodeB.getY(), nodeA.getX(), nodeA.getY());
+                        }
+                        drawArrowHead(g2d, line, 7.0d, 10.0d);
+                        break;
+                    }
+                    // Draw Line
+
+                }
+            }
+        }
+
 
     }
 
@@ -423,7 +546,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             int y = (int) ((int) (C.y * -1 + t_Model.getdMoveY()) * zoom.getdZoomY());
             Paint prevPaint = g2d.getPaint();
             switch(C.getStatus()) {
-                case BUSY: g2d.setPaint(Color.GREEN);
+                case BUSY: g2d.setPaint(Color.GREEN.darker());
                      break;
                 case RIGHT: g2d.setPaint(Color.RED);
                      break;
@@ -431,7 +554,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                      break;
             }
 
-            g2d.setStroke(new BasicStroke(1));
+            g2d.setStroke(new BasicStroke(2));
 
             try {
                 if (null != C.getImage()) {
@@ -496,6 +619,7 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
                     String sBaliseDesc = "B" + B.getHashcodeOfBaliseDp();
                     double sTopLang = B.getTopPositionOfDataPoint().getTOPKanteAllg().getTOPLaenge().getWert().doubleValue();
                     g2d.drawImage(B.getImage(), null, x, y);
+                    g2d.setColor(Balise.DEFAULTCOLOR);
                     g2d.drawString(sBaliseDesc, (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f);
                     g2d.drawString(sBaliseDesc + " " + String.valueOf(B.getPlanProDataPoint().getPunktObjektTOPKante().get(0).getAbstand().getWert()), (float) (x + 5.0f), (float) y + (iStepper % 7) * 5.0f + 10);
 
@@ -563,8 +687,17 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
         ConcurrentHashMap<String, TopologyGraph.Edge> edgeRepo = PlanData.topGraph.edgeRepo;
         TopologyGraph.Edge edge = edgeRepo.get(TopKanteId);
         TrainEdgeReference TrainRef = null;
+        boolean isFlipped = distanceA1 > distanceA2;
+        if(isFlipped) {
+            double temp = distanceA1;
+            distanceA1 = distanceA2;
+            distanceA2 = temp;
+        }
         distanceA1 = edge.dTopLength * distanceA1;
         distanceA2 = edge.dTopLength * distanceA2;
+
+
+
         ArrayList<CGEOKante> geoEdgeList = edge.getPaintListGeo();
 
         double lengthOfGeoEdges = 0;
@@ -630,14 +763,22 @@ public class MainGraphicPanel extends JPanel implements Flow.Subscriber {
             if(prevDistance + geoEdgeLength > distanceA2) {
                 nodeB = TopologyFactory.getGeoCoordinate(geoEdge, linkedGeo.isNextAccessedFromA(geoEdge), distanceA2 - prevDistance);
             }
+            // Draw Line
+
+            if(isFlipped) {
+                GeometricCoordinate geoCoordTemp = nodeB;
+                nodeB = nodeA;
+                nodeA = geoCoordTemp;
+            }
+
+
+            Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
 
             GeoEdgeReference GeoRef = GeoEdgeReference.ReferenceRepo.getModel(geoEdge);
             TrainRef = new TrainEdgeReference();
             TrainRef.setGeoRef(GeoRef);
             TrainRef.setTrainId(iTrainId);
-            // Draw Line
-            Line2D.Double line = new Line2D.Double(nodeA.getX(), nodeA.getY(), nodeB.getX(), nodeB.getY());
-            TrainRef.setLine(line);
+           TrainRef.setLine(line);
             DefaultRepo<CGEOKante, TrainEdgeReference> refByGeoRepo =
                     TrainEdgeReference.TrainRefRepo.getModel(iTrainId);
             if(refByGeoRepo == null) {

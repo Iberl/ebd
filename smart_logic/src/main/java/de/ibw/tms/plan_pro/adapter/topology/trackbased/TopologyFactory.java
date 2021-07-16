@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import plan_pro.modell.balisentechnik_etcs._1_9_0.CDatenpunkt;
 import plan_pro.modell.basisobjekte._1_9_0.CBasisObjekt;
+import plan_pro.modell.basistypen._1_9_0.ENUMAusrichtung;
 import plan_pro.modell.geodaten._1_9_0.*;
 import plan_pro.modell.planpro._1_9_0.*;
 import plan_pro.modell.signale._1_9_0.CSignal;
@@ -834,6 +835,9 @@ public class TopologyFactory implements ITopologyFactory {
         DefaultRepo<String, CBasisObjekt> topNodeRepo = geoBundle.getModel(CTOPKnoten.class);
         DefaultRepo<String, CBasisObjekt> geoPointRepo = geoBundle.getModel(CGEOKnoten.class);
 
+        boolean isDebug = !SlConfigHandler.getInstance().useInfrastructureServer;
+
+
         SlConfigHandler CH = SlConfigHandler.getInstance();
 
         ArrayList<Balise> invalidBalises = new ArrayList<>();
@@ -904,17 +908,32 @@ public class TopologyFactory implements ITopologyFactory {
                 Ex.printStackTrace();
 
             } finally {
-                if(geoCoordinate == null) {
-                    try {
-                        geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        invalidBalises.add(B);
+                try {
+
+                    if(DP.getDatenpunktAllg().getAusrichtung().getWert() == null) {
                         System.err.println("ERROR: Balise with Id: " + B.getPlanProBalise().getIdentitaet().getWert() +
-                                " is not suported");
+                                " is not suported -- Datenpunkt-Ausrichtung null");
+                        if(!isDebug) System.exit(72);
                         continue;
                     }
+                    ENUMAusrichtung DP_Ausrichtung = DP.getDatenpunktAllg().getAusrichtung().getWert();
+                    if(!DP_Ausrichtung.equals(ENUMAusrichtung.IN) && !DP_Ausrichtung.equals(ENUMAusrichtung.GEGEN)) {
+                        System.err.println("ERROR: Balise with Id: " + B.getPlanProBalise().getIdentitaet().getWert() +
+                                " is not suported -- Datenpunkt-Ausrichtung muss in oder gegen sein, ist aber ein anderer Wert");
+                        if(!isDebug) System.exit(72);
+                        continue;
+                    }
+                    if(geoCoordinate == null) {
+                        geoCoordinate = getGeoCoordinate(TopKante.getIdentitaet().getWert(), true, dA);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    invalidBalises.add(B);
+                    System.err.println("ERROR: Balise with Id: " + B.getPlanProBalise().getIdentitaet().getWert() +
+                            " is not suported");
+                    continue;
                 }
+
             }
 
 

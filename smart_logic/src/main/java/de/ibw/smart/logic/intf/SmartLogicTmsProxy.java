@@ -164,20 +164,20 @@ public class SmartLogicTmsProxy implements TmsIntf {
 
 
             if(iCode == 0) {
-                try {
-                    SmartServer4TmsImpl.ackQueues.offer(uuid, true);
+               // try {
+                   //SmartServer4TmsImpl.ackQueues.offer(uuid, true);
                     //SmartServer4TmsImpl.AckRepo.update(header.uuid,MaAckQueue);
-                } catch (InterruptedException e) {
+                //} catch (InterruptedException e) {
 
-                    e.printStackTrace();
-                }
+                //    e.printStackTrace();
+                //}
 
             } else {
-                try {
-                    SmartServer4TmsImpl.ackQueues.offer(uuid, false);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+               // try {
+                    //SmartServer4TmsImpl.ackQueues.offer(uuid, false);
+               // } catch (InterruptedException e) {
+               //     e.printStackTrace();
+               // }
 
             }
 

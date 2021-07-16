@@ -1045,6 +1045,7 @@ public class SafetyLogic {
 
         DriveProtectionSection protectionSection = MteToCheck.getProtectionSection();
         if(protectionSection == null) {
+            // FailureCode 114
             EBM.log("Element " + cdc.sId + " : Section having not protection Section so the request is denied",
                     SmartLogic.getsModuleId(SMART_SAFETY));
             sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
@@ -1058,6 +1059,7 @@ public class SafetyLogic {
             isCollision = true;
         }
         if(isCollision) {
+            // Fehlercode 111
             sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.BLOCK_FAIL_REASON);
             return;
         }
@@ -1070,6 +1072,7 @@ public class SafetyLogic {
             isStatePossible = false;
         }
         if(!isStatePossible) {
+                    // Fehlercode 116
                     EBM.log("DBD request" + cdc.uuid + " failed, State was not possible to set", SmartLogic.getsModuleId(SMART_SAFETY) );
 
                     sendResponseDbdCommandToTms(false,cdc.sId, DbdRequestReturnPayload.STATE_FOR_ELEMENT_NOT_POSSIBLE);
@@ -1196,16 +1199,27 @@ public class SafetyLogic {
             for(TrackEdgeSection thisSection: mao.getTrackEdgeSections()) {
                 TrackEdge thisTE = thisSection.getTrackEdge();
                 if(TargetTE.equals(thisTE)) {
+                    Double temp = 0.0d;
+                    Double thisBegin = thisSection.getBegin().getIntrinsicCoord();
+                    Double thisEnd = thisSection.getEnd().getIntrinsicCoord();
+                    Double targetBegin = targetSection.getBegin().getIntrinsicCoord();
+                    Double targetEnd = targetSection.getEnd().getIntrinsicCoord();
+
+                    if(thisEnd < thisBegin) {
+                        temp = thisBegin;
+                        thisBegin = thisEnd;
+                        thisEnd = temp;
+                    }
+                    if(targetEnd < targetBegin) {
+                        temp = targetBegin;
+                        targetBegin = targetEnd;
+                        targetEnd = temp;
+                    }
+
                     // Zwischen Start und ende eines Bereichs liegt der begin eines anderen Bereichs
-                    if(thisSection.getBegin().getIntrinsicCoord() <=
-                            targetSection.getBegin().getIntrinsicCoord() &&
-                        targetSection.getBegin().getIntrinsicCoord() <=
-                                thisSection.getEnd().getIntrinsicCoord()) return true;
+                    if(thisBegin <= targetBegin && targetBegin <= thisEnd) return true;
                     // Inverse der andere Bereich hat zwischen start und ende einen Fremdbeginn
-                    if(targetSection.getBegin().getIntrinsicCoord() <=
-                            thisSection.getBegin().getIntrinsicCoord() &&
-                            thisSection.getBegin().getIntrinsicCoord() <=
-                                    targetSection.getEnd().getIntrinsicCoord()) return true;
+                    if(targetBegin <= thisBegin && thisBegin <= targetEnd) return true;
 
 
                 }

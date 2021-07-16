@@ -1,6 +1,7 @@
 package de.ibw.tms.ma.mob.position;
 
 import de.ibw.feed.Balise;
+import de.ibw.history.PositionModul;
 import de.ibw.history.data.ComposedRoute;
 import de.ibw.smart.logic.exceptions.SmartLogicException;
 import de.ibw.tms.etcs.ETCS_DISTANCE;
@@ -30,6 +31,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,6 +47,7 @@ public class SafeMOBPosition extends MOBPositionClasses {
 
     // Wechselseitige Abhängigkeit
     private VehicleOccupation Occupation = null;
+    public Integer iTrainLength; // meter
 
     public SafeMOBPosition() {
         super(CLASS_IDENTIFIER);
@@ -64,7 +67,7 @@ public class SafeMOBPosition extends MOBPositionClasses {
 
     /**
      * Generiert aus der Route ein Sub-Bereich wo sich das Vehicle aufhalten muss, die SafeMobPosition
-     * @param dVehicleEndOffset- offset des Routenende den das Vehicle noch nicht befahren hat
+     * @param dVehicleEndOffset - offset des Routenende den das Vehicle noch nicht befahren hat
      * @param Route - Die Route die diesem Vehicle zugesprochen wurde
      * @param distanceDiff - space the vehicle has trespassed the route since initial position report
      *                          the initial position report is part of the composed route and refered as start location
@@ -74,10 +77,16 @@ public class SafeMOBPosition extends MOBPositionClasses {
      * @param iScale - 0: 0,1 meter Skalenma&szlig;
      *               - 1: 1 meter Einheit
      *               - 2: 10 meter Einheit
+     * @param nid_engine
+     * @param isInit
      * @throws SmartLogicException - Vehicle Position konnte nicht definiert werden
      */
-    public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff, int iScale) throws SmartLogicException {
+    public void defineNewVehiclePosition(BigDecimal dVehicleEndOffset, ComposedRoute Route, ETCS_DISTANCE distanceDiff,
+                                         int iScale, NID_ENGINE nid_engine, boolean isInit) throws SmartLogicException {
         ETCS_DISTANCE d_vehicleEndDiff = new ETCS_DISTANCE();
+
+        this.iTrainLength = PositionModul.getInstance().getCurrentPosition(nid_engine.getId()).getPos().l_trainint;
+
         // interpolate comma errors
         if(dVehicleEndOffset.intValue() == Route.getRouteLength().intValue()) {
             dVehicleEndOffset = new BigDecimal(Route.getRouteLength().intValue());
@@ -85,30 +94,112 @@ public class SafeMOBPosition extends MOBPositionClasses {
         d_vehicleEndDiff.sDistance = dVehicleEndOffset.setScale(0, RoundingMode.HALF_DOWN).shortValueExact();
 
         Route.setExtendable(true);
+//        if(Route.getRouteLength().subtract(BigDecimal.valueOf(distanceDiff.sDistance)).
+//                subtract(BigDecimal.valueOf(d_vehicleEndDiff.sDistance)).subtract(BigDecimal.valueOf(iTrainLength))
+//                .abs().compareTo(new BigDecimal("2.0")) > 0) {
+//
+//            throw new InvalidParameterException("Subroute not equal trainlength");
+//        }
         SafeMOBPosition NewPosition = (SafeMOBPosition) Route.createSubRoute(distanceDiff, d_vehicleEndDiff, iScale, this);
         Route.setExtendable(false);
         this.setTrackEdgeSections(NewPosition.getTrackEdgeSections());
         ArrayList<TrackEdgeSection> sections = new ArrayList<>(NewPosition.getTrackEdgeSections());
-        TrackEdgeSection StartSection = sections.get(0);
-        TrackEdgeSection EndSection = sections.get(sections.size() - 1);
-        TrackEdge StartEdge = StartSection.getTrackEdge();
-        TrackEdge EndEdge = EndSection.getTrackEdge();
-        SpotLocationIntrinsic beginLocation = new SpotLocationIntrinsic();
-        beginLocation.setNetElementRef(StartEdge.getId());
-        beginLocation.setIntrinsicCoord(StartSection.getBegin().getIntrinsicCoord());
-        SpotLocationIntrinsic endLocation = new SpotLocationIntrinsic();
-        endLocation.setNetElementRef(EndEdge.getId());
 
-        endLocation.setIntrinsicCoord(EndSection.getEnd().getIntrinsicCoord());
-        MinSafeRearEnd begin = new MinSafeRearEnd();
-        MaxSafeFrontEnd end = new MaxSafeFrontEnd();
-        begin.setLocation(beginLocation);
-        end.setLocation(endLocation);
-        this.setBegin(begin);
-        this.setEnd(end);
-        this.setTrackEdgeSections(sections);
+
+        boolean isReverse = check4Reverse(Route, sections);
+
+        if(isReverse && isInit) {
+            TrackEdgeSection EndSection = sections.get(0);
+            TrackEdgeSection StartSection = sections.get(sections.size() - 1);
+            TrackEdge StartEdge = StartSection.getTrackEdge();
+            TrackEdge EndEdge = EndSection.getTrackEdge();
+            SpotLocationIntrinsic beginLocation = new SpotLocationIntrinsic();
+            beginLocation.setNetElementRef(StartEdge.getId());
+            beginLocation.setIntrinsicCoord(StartSection.getEnd().getIntrinsicCoord());
+            SpotLocationIntrinsic endLocation = new SpotLocationIntrinsic();
+            endLocation.setNetElementRef(EndEdge.getId());
+
+            endLocation.setIntrinsicCoord(EndSection.getBegin().getIntrinsicCoord());
+            MinSafeRearEnd begin = new MinSafeRearEnd();
+            MaxSafeFrontEnd end = new MaxSafeFrontEnd();
+            begin.setLocation(beginLocation);
+            end.setLocation(endLocation);
+            this.setBegin(begin);
+            this.setEnd(end);
+            Collections.reverse(sections);
+            flipEndWithBegin(sections);
+            this.setTrackEdgeSections(sections);
+            // debug
+            int iTrainLength = PositionModul.getInstance().getCurrentPosition(nid_engine.getId()).getPos().l_trainint;
+            if(Math.abs(this.getMeterLength().intValue() - iTrainLength) > 2) {
+                throw new InvalidParameterException("Safety Area not equal trainlength");
+            }
+        } else {
+
+            TrackEdgeSection StartSection = sections.get(0);
+            TrackEdgeSection EndSection = sections.get(sections.size() - 1);
+            TrackEdge StartEdge = StartSection.getTrackEdge();
+            TrackEdge EndEdge = EndSection.getTrackEdge();
+            SpotLocationIntrinsic beginLocation = new SpotLocationIntrinsic();
+            beginLocation.setNetElementRef(StartEdge.getId());
+            beginLocation.setIntrinsicCoord(StartSection.getBegin().getIntrinsicCoord());
+            SpotLocationIntrinsic endLocation = new SpotLocationIntrinsic();
+            endLocation.setNetElementRef(EndEdge.getId());
+
+            endLocation.setIntrinsicCoord(EndSection.getEnd().getIntrinsicCoord());
+            MinSafeRearEnd begin = new MinSafeRearEnd();
+            MaxSafeFrontEnd end = new MaxSafeFrontEnd();
+            begin.setLocation(beginLocation);
+            end.setLocation(endLocation);
+            this.setBegin(begin);
+            this.setEnd(end);
+            this.setTrackEdgeSections(sections);
+            // debug
+
+            if(Math.abs(this.getMeterLength().intValue() - iTrainLength) > 2) {
+                throw new InvalidParameterException("Safety Area not equal trainlength");
+            }
+        }
+
         this.setApplicationDirection(TApplicationDirection.BOTH);
 
+    }
+
+    private boolean check4Reverse(ComposedRoute route, ArrayList<TrackEdgeSection> sections) {
+        TrackEdgeSection lastSection = sections.get(sections.size() - 1);
+        Double dBegin = lastSection.getBegin().getIntrinsicCoord();
+        Double dEnd = lastSection.getEnd().getIntrinsicCoord();
+        TopologyGraph.Edge LastEdge = (TopologyGraph.Edge) lastSection.getTrackEdge();
+        TopologyGraph.Node TargetNode = route.getTargetNode();
+        if(LastEdge.A.equals(TargetNode) || LastEdge.B.equals(TargetNode)) {
+            if(LastEdge.getRefNode().equals(TargetNode)) {
+                // reverse,
+                // wenn der Beginn naeher am Zielknoten als die Zugspitze(End) ist
+                // umdrehen
+                return dBegin < dEnd;
+            } else {
+                // Zug faehrt nominal, aber wenn die Zugspitze(End) naeher als der Beginn ist
+                // muss der Zug umgedreht werden
+                return dEnd < dBegin;
+            }
+        } else {
+            if(TargetNode == null) {
+                //Randkante
+                // Zug faehrt nominal, aber wenn die Zugspitze(End) naeher als der Beginn ist
+                // muss der Zug umgedreht werden
+                return dEnd < dBegin;
+            }
+            // die letze kante hat nicht den Zielknoten => umdrehen
+            return true;
+        }
+    }
+
+    private void flipEndWithBegin(ArrayList<TrackEdgeSection> sections) {
+        for(TrackEdgeSection TES : sections) {
+            SpotLocationIntrinsic temp = TES.getEnd();
+            TES.setEnd(TES.getBegin());
+            TES.setBegin(temp);
+        }
     }
 
 
@@ -167,7 +258,16 @@ public class SafeMOBPosition extends MOBPositionClasses {
         while(offsetPassed.compareTo(newOffset) < 0 ) {
             if(TargetNode == null) throw new InvalidParameterException("Node in Route must not be null");
             TopologyConnect connectionOnTargetNode = E.getConnectionOnNode(TargetNode);
-            checkIfConnectionIsValid(connectionOnTargetNode);
+            try {
+                checkIfConnectionIsValid(connectionOnTargetNode);
+            } catch ( InvalidParameterException IPE) {
+                TargetNode = E.A.equals(TargetNode) ? E.B : E.A;
+                offsetPassed = offsetPassed.add(BigDecimal.valueOf(E.dTopLength));
+                sEdgeElementId = E.getRefId();
+                if(sEdgeElementId == null) throw new InvalidParameterException("Edges element-ID must not be null");
+                edgesElementIds.add(sEdgeElementId);
+                continue;
+            }
             String sSwitchId = ISwitchHandler.getNodeId(TargetNode);
             if(sSwitchId == null) throw new InvalidParameterException("Node Id of Target Node in Route must not be null");
             MoveableTrackElement SwitchElement = TescModul.MoveableTrackElementAccess.getElementById(sSwitchId);
@@ -251,23 +351,36 @@ public class SafeMOBPosition extends MOBPositionClasses {
         BigDecimal spaceToNextNode = offsetPassed.subtract(newOffset);
 
         BigDecimal PercentOfRouteEndToNextNode = spaceToNextNode.divide(BigDecimal.valueOf(E.dTopLength), MathContext.DECIMAL32);
-
+        ComposedRoute CR = new ComposedRoute();
+        CR.setTargetNode(TargetNode);
         if(E.getRefNode().equals(TargetNode)) {
 
 
             R.setIntrinsicCoordOfTargetTrackEdge(PercentOfRouteEndToNextNode.doubleValue());
+            CR.setReverseSightDir(true);
+            try {
+                CR.generateFromRoute(R, nid_engine.getId());
+
+                return CR;
+            } catch (SmartLogicException ignored) {
+                return CR;
+            }
+
+
+
         } else {
             R.setIntrinsicCoordOfTargetTrackEdge(BigDecimal.valueOf(1.0d).subtract(PercentOfRouteEndToNextNode)
                     .doubleValue());
+            try {
+                CR.generateFromRoute(R, nid_engine.getId());
+                return CR;
+            } catch (SmartLogicException ignored) {
+                return CR;
+            }
         }
 
-        ComposedRoute CR = new ComposedRoute();
-        try {
-            CR.generateFromRoute(R, nid_engine.getId());
-            return CR;
-        } catch (SmartLogicException ignored) {
-            return CR;
-        }
+
+
     }
 
     private TopologyGraph.Edge getNextEdge(TopologyGraph.Edge e, TopologyGraph.Node targetNode,
@@ -313,7 +426,7 @@ public class SafeMOBPosition extends MOBPositionClasses {
         return EndOfCalculation;
     }
 
-    private void checkIfConnectionIsValid(TopologyConnect connectionOnTargetNode) {
+    private void checkIfConnectionIsValid(TopologyConnect connectionOnTargetNode) throws InvalidParameterException {
         ArrayList<TopologyConnect> validConnection = new ArrayList<>();
         validConnection.add(TopologyConnect.SPITZE);
         validConnection.add(TopologyConnect.LINKS);

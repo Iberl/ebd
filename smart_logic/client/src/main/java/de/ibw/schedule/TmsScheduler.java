@@ -62,14 +62,9 @@ public class TmsScheduler {
      * @param requestMessage -- Message to be send
      */
     public void sendMessageTosmartLogic(TmsMessage requestMessage) {
-        try {
-            Client.CH.sendCommand(requestMessage);
-            if(requestMessage instanceof TmsMovementPermissionRequest) {
-                TmsJpaApp.TmsMessenger.log((IMovementMessengerIntf) requestMessage);
-            }
-        } catch (MissingInformationException e) {
-            e.printStackTrace();
-
+        Client.CH.sendCommand(requestMessage);
+        if(requestMessage instanceof TmsMovementPermissionRequest) {
+            TmsJpaApp.TmsMessenger.log((IMovementMessengerIntf) requestMessage);
         }
     }
 
